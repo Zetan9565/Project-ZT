@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1daedce21944fe64f95c5f9988e0ae33, type: 3}
+  m_Name: npc info
+  m_EditorClassIdentifier: Assembly-CSharp::NPCInfomation
+  _ID: NPC001
+  _Name: "\u739B\u4E3D\u4E9A"
+  favoriteItems:
+  - {fileID: 11400000, guid: 3be704b7f65170443ad9de4ad93ede92, type: 2}
+  hateItems: []

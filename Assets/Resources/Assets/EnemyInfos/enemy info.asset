@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06b3145ff13de3c459f1e49af281df4a, type: 3}
+  m_Name: enemy info
+  m_EditorClassIdentifier: 
+  _ID: ENMY001
+  _Name: "\u9AB7\u9AC5"
+  dropItems:
+  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+    amount: 1
+    dropRate: 75
+    onlyDropForQuest: 1
+    bindedQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
+  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+    amount: 1
+    dropRate: 75
+    onlyDropForQuest: 1
+    bindedQuest: {fileID: 11400000, guid: 75021802295611e4bb73ffff88713358, type: 2}

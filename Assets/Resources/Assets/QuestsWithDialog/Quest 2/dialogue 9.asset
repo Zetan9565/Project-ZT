@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7acdddb4b8bb2e43b8726f03388fea8, type: 3}
+  m_Name: dialogue 9
+  m_EditorClassIdentifier: 
+  words:
+  - talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+    words: "\u6211\u89C9\u5F97\u8FD9\u4E0D\u8DB3\u4EE5\u8BA9\u739B\u4E3D\u4E9A\u653E\u5FC3\uFF0C\u8FD8\u662F\u62FF\u70B9\u8BC1\u636E\u7ED9\u5979\u770B\u6700\u597D\u3002"
+  - talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+    words: "\u6240\u4EE5\u4F60\u6700\u540E\u53BB\u6536\u96C6\u70B9\u602A\u7269\u7684\u6B66\u5668\u62FF\u7ED9\u5979\u770B\u5427\uFF01"

@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57f84ec2431847b449d9671b23dddbf7, type: 3}
+  m_Name: quest 1
+  m_EditorClassIdentifier: 
+  _ID: QEST002
+  title: "\u6E05\u7406\u602A\u7269#2"
+  description: "\u518D\u6740\u51E0\u53EA\u602A\u7269\uFF0C\u7136\u540E\u53BB\u5B89\u6170\u739B\u4E3D\u4E9A\u3002"
+  abandonable: 1
+  group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
+  acceptConditions:
+  - acceptCondition: 4
+    level: 0
+    completeQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
+    ownedItem: {fileID: 0}
+  beginDialogue: {fileID: 11400000, guid: 860a800ebd1f57e409389453a7b350e1, type: 2}
+  ongoingDialogue: {fileID: 11400000, guid: c9bd66b12bc670d48895c486a701c376, type: 2}
+  completeDialogue: {fileID: 11400000, guid: 216422843cfd8d041970f69c4cccd4b4, type: 2}
+  rewardMoney: 50
+  rewardEXP: 0
+  rewardItems:
+  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+    amount: 1
+  sbmtOnOriginalNPC: 1
+  _NPCToSubmit: {fileID: 0}
+  cmpltObjctvInOrder: 1
+  collectObjectives: []
+  killObjectives:
+  - displayName: "\u6E05\u7406\u9AB7\u9AC5"
+    amount: 5
+    inOrder: 1
+    orderIndex: 1
+    runtimeID: 
+    runtimeParent: {fileID: 0}
+    enemy: {fileID: 11400000, guid: 1f8636ab8a7c2a443b85d27f63bd2394, type: 2}
+  talkObjectives:
+  - displayName: "\u53BB\u5B89\u6170\u739B\u4E3D\u4E9A"
+    amount: 1
+    inOrder: 1
+    orderIndex: 2
+    runtimeID: 
+    runtimeParent: {fileID: 0}
+    talker: {fileID: 11400000, guid: d249fad079fcaa443a590dd1f8d4e1bc, type: 2}
+    dialogue: {fileID: 11400000, guid: 00931f27c4db01e44a9ff7817efe8119, type: 2}
+  moveObjectives: []
+  OriginalQuestGiver: {fileID: 0}
+  CurrentQuestGiver: {fileID: 0}
+  IsOngoing: 0

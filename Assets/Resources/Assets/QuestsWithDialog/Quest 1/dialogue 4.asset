@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7acdddb4b8bb2e43b8726f03388fea8, type: 3}
+  m_Name: dialogue 4
+  m_EditorClassIdentifier: 
+  words:
+  - talkerInfo: {fileID: 11400000, guid: d249fad079fcaa443a590dd1f8d4e1bc, type: 2}
+    words: "\u6211\u5DF2\u7ECF\u628A\u90A3\u4E9B\u602A\u7269\u6559\u8BAD\u4E86\uFF0C\u73B0\u5728\u4F60\u53EF\u4EE5\u653E\u5FC3\u5927\u80C6\u5730\u5916\u51FA\u4E86\u3002"
+  - talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+    words: "\u771F\u7684\u54A9\uFF0C\u592A\u8C22\u8C22\u4F60\u4E86\uFF01"
+  - talkerInfo: {fileID: 11400000, guid: d249fad079fcaa443a590dd1f8d4e1bc, type: 2}
+    words: "My pleasure\u3002"

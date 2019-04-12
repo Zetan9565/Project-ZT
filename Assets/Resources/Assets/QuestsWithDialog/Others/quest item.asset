@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e78b4014cdea93940b7b338dbf3343d6, type: 3}
+  m_Name: quest item
+  m_EditorClassIdentifier: 
+  _ID: QSTI001
+  _Name: "\u6D4B\u8BD5\u9053\u5177"
+  itemType: 10
+  quality: 0
+  weight: 0
+  sellAble: 0
+  sellPrice: 0
+  buyPrice: 0
+  icon: {fileID: 21300000, guid: f588d850485d0ae479d73cf3bd0b7b00, type: 3}
+  description: 
+  discardAble: 0
+  inexhaustible: 0
+  processMethod: 0
+  materials: []
