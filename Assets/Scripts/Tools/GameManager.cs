@@ -2,7 +2,8 @@
 using UnityEngine;
 using System;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : MonoBehaviour
+{
 
     private static GameManager instance;
     public static GameManager Instance
@@ -83,7 +84,7 @@ public class GameManager : MonoBehaviour {
     public void Init()
     {
         foreach (KeyValuePair<string, Talker> kvp in AllTalker)
-            if(kvp.Value is QuestGiver) (kvp.Value as QuestGiver).Init();
+            if (kvp.Value is QuestGiver) (kvp.Value as QuestGiver).Init();
     }
 
     private void Awake()
@@ -91,16 +92,8 @@ public class GameManager : MonoBehaviour {
         Init();
     }
 
-    public ItemBase GetItemInstanceByID(string id)
+    public ItemBase GetItemByID(string id)
     {
-        ItemBase itemInstance = Instantiate(Array.Find(Resources.LoadAll<ItemBase>(""), x => x.ID == id));
-        if (itemInstance != null)
-            switch (itemInstance.ItemType)
-            {
-                case ItemType.Weapon: return itemInstance as WeaponItem;
-                case ItemType.Box: return itemInstance as ItemBox;
-                default: return itemInstance;
-            }
-        return itemInstance;
+        return Array.Find(Resources.LoadAll<ItemBase>(""), x => x.ID == id);
     }
 }

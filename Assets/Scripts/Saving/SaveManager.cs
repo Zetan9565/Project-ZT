@@ -61,9 +61,10 @@ public class SaveManager : MonoBehaviour
 
     void SaveBag(SaveData data)
     {
-        foreach (KeyValuePair<string, List<ItemBase>> itemList in BagManager.Instance.Items)
+        foreach (ItemInfo info in BackpackManager.Instance.Items)
         {
-            data.itemDatas.Add(new ItemData(itemList.Key, itemList.Value.Count));
+            data.itemDatas.Add(new ItemData(info.ItemID, info.Amount, 
+                BackpackManager.Instance.itemAgents.IndexOf(BackpackManager.Instance.GetItemAgentByInfo(info))));
         }
     }
 
@@ -119,7 +120,7 @@ public class SaveManager : MonoBehaviour
     {
         foreach (ItemData itemData in data.itemDatas)
         {
-            BagManager.Instance.GetItem(GameManager.Instance.GetItemInstanceByID(itemData.itemID), itemData.itemAmount);
+            BackpackManager.Instance.GetItem(GameManager.Instance.GetItemByID(itemData.itemID), itemData.itemAmount);
         }
     }
 
@@ -128,7 +129,7 @@ public class SaveManager : MonoBehaviour
         foreach (QuestData questData in data.ongoingQuestDatas)
         {
             HandlingQuestData(questData);
-            QuestManager.Instance.UpdateObjectivesUI();
+            QuestManager.Instance.UpdateUI();
         }
 
         foreach (QuestData questData in data.completeQuestDatas)

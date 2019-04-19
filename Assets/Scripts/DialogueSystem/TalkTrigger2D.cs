@@ -10,19 +10,19 @@ public class TalkTrigger2D : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Player")
+        if (collision.tag == "Player" && talker)
             DialogueManager.Instance.CanTalk(this);
     }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.tag == "Player")
+        if (collision.tag == "Player" && talker)
             DialogueManager.Instance.CanTalk(this);
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.tag == "Player")
+        if (collision.tag == "Player" && talker)
             DialogueManager.Instance.CannotTalk();
     }
 }

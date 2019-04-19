@@ -7,19 +7,31 @@ public class QuestBoardAgent : MonoBehaviour
     [HideInInspector]
     public QuestAgent questAgent;
 
-    [SerializeField, DisplayName("标题文字")]
+    [SerializeField]
+#if UNITY_EDITOR
+    [DisplayName("标题文字")]
+#endif
     private Text TitleText;
 
-    [SerializeField, DisplayName("目标文字")]
+    [SerializeField]
+#if UNITY_EDITOR
+    [DisplayName("目标文字")]
+#endif
     private Text ObjectiveText;
 
-    [SerializeField, DisplayName("已完成目标的颜色")]
+    [SerializeField]
+#if UNITY_EDITOR
+    [DisplayName("已完成目标的颜色")]
+#endif
     private Color cmpltObjectv = Color.grey;
 
-    [SerializeField, DisplayName("目标全部完成时的颜色")]
+    [SerializeField]
+#if UNITY_EDITOR
+    [DisplayName("目标全部完成时的颜色")]
+#endif
     private Color cmpltAllObj = Color.yellow;
 
-    public void UpdateQuestStatus()
+    public void UpdateStatus()
     {
         if (questAgent.MQuest) TitleText.text = questAgent.MQuest.Title + (questAgent.MQuest.IsComplete ? "(完成)" : string.Empty);
         string objectives = string.Empty;
@@ -44,13 +56,13 @@ public class QuestBoardAgent : MonoBehaviour
 
     public void OnClick()
     {
-        QuestManager.Instance.OpenQuestWindow();
+        QuestManager.Instance.OpenUI();
         questAgent.OnClick();
     }
 
     public void Init(QuestAgent qa)
     {
         questAgent = qa;
-        UpdateQuestStatus();
+        UpdateStatus();
     }
 }

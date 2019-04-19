@@ -29,22 +29,16 @@ public class QuestInspector : Editor
     SerializedProperty moveObjectives;
 
     ReorderableList acceptConditionList;
-    bool showAcceptConditionList;
 
     ReorderableList rewardItemList;
-    bool showRewardItemList;
 
     ReorderableList collectObjectiveList;
-    bool showCollectObjectiveList;
 
     ReorderableList killObjectiveList;
-    bool showKillObjectiveList;
 
     ReorderableList talkObjectiveList;
-    bool showTalkObjectiveList;
 
     ReorderableList moveObjectiveList;
-    bool showMoveObjectiveList;
 
     float lineHeight;
     float lineHeightSpace;
@@ -128,9 +122,8 @@ public class QuestInspector : Editor
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();//这一步一定要在DoLayoutList()之前做！否则无法修改DO之前的数据
                 EditorGUILayout.Space();
-                //EditorGUILayout.PropertyField(acceptConditions, new GUIContent("接取条件"), true);
-                showAcceptConditionList = EditorGUILayout.Toggle("显示任务接取条件", showAcceptConditionList);
-                if (showAcceptConditionList)
+                EditorGUILayout.PropertyField(acceptConditions, new GUIContent("接取条件\t\t" + (acceptConditions.arraySize > 0 ? "数量：" + acceptConditions.arraySize : "无")));
+                if (acceptConditions.isExpanded)
                 {
                     serializedObject.Update();
                     acceptConditionList.DoLayoutList();
@@ -144,15 +137,14 @@ public class QuestInspector : Editor
                 if (rewardEXP.intValue < 0) rewardEXP.intValue = 0;
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
-                //EditorGUILayout.PropertyField(rewardItems, new GUIContent("道具奖励"), true);
-                showRewardItemList = EditorGUILayout.Toggle("显示道具奖励", showRewardItemList);
-                if (showRewardItemList)
+                EditorGUILayout.PropertyField(rewardItems, new GUIContent("道具奖励\t\t" + (rewardItems.arraySize > 0 ? "数量：" + rewardItems.arraySize : "无")));
+                if (rewardItems.isExpanded)
                 {
-                    EditorGUILayout.HelpBox("目前只设计8个道具奖励。", MessageType.Info);
+                    EditorGUILayout.HelpBox("目前只设计10个道具奖励。", MessageType.Info);
                     serializedObject.Update();
                     rewardItemList.DoLayoutList();
                     serializedObject.ApplyModifiedProperties();
-                    if (quest.RewardItems.Count >= 8)
+                    if (quest.RewardItems.Count >= 10)
                         rewardItemList.displayAdd = false;
                     else rewardItemList.displayAdd = true;
                 }
@@ -210,21 +202,17 @@ public class QuestInspector : Editor
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
 
-                //EditorGUILayout.PropertyField(collectObjectives, new GUIContent("收集类目标"), true);
-                showCollectObjectiveList = EditorGUILayout.Toggle("显示收集类目标", showCollectObjectiveList);
-                if (showCollectObjectiveList) collectObjectiveList.DoLayoutList();
+                EditorGUILayout.PropertyField(collectObjectives, new GUIContent("收集类目标\t\t" + (collectObjectives.arraySize > 0 ? "数量：" + collectObjectives.arraySize : "无")));
+                if (collectObjectives.isExpanded) collectObjectiveList.DoLayoutList();
 
-                //EditorGUILayout.PropertyField(killObjectives, new GUIContent("杀敌类目标"), true);
-                showKillObjectiveList = EditorGUILayout.Toggle("显示杀敌类目标", showKillObjectiveList);
-                if (showKillObjectiveList) killObjectiveList.DoLayoutList();
+                EditorGUILayout.PropertyField(killObjectives, new GUIContent("杀敌类目标\t\t" + (killObjectives.arraySize > 0 ? "数量：" + killObjectives.arraySize : "无")));
+                if (killObjectives.isExpanded) killObjectiveList.DoLayoutList();
 
-                //EditorGUILayout.PropertyField(talkObjectives, new GUIContent("谈话类目标"), true);
-                showTalkObjectiveList = EditorGUILayout.Toggle("显示谈话类目标", showTalkObjectiveList);
-                if (showTalkObjectiveList) talkObjectiveList.DoLayoutList();
+                EditorGUILayout.PropertyField(talkObjectives, new GUIContent("谈话类目标\t\t" + (talkObjectives.arraySize > 0 ? "数量：" + talkObjectives.arraySize : "无")));
+                if (talkObjectives.isExpanded) talkObjectiveList.DoLayoutList();
 
-                //EditorGUILayout.PropertyField(moveObjectives, new GUIContent("移动到点类目标"), true);
-                showMoveObjectiveList = EditorGUILayout.Toggle("显示移动到点类目标", showMoveObjectiveList);
-                if (showMoveObjectiveList) moveObjectiveList.DoLayoutList();
+                EditorGUILayout.PropertyField(moveObjectives, new GUIContent("移动到点类目标\t" + (moveObjectives.arraySize > 0 ? "数量：" + moveObjectives.arraySize : "无")));
+                if (moveObjectives.isExpanded) moveObjectiveList.DoLayoutList();
                 break;
         }
     }
@@ -232,7 +220,6 @@ public class QuestInspector : Editor
     void HandlingAcceptConditionList()
     {
         acceptConditionList = new ReorderableList(serializedObject, acceptConditions, true, true, true, true);
-        showAcceptConditionList = true;
         acceptConditionList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
@@ -362,8 +349,7 @@ public class QuestInspector : Editor
                     default: return false;
                 }
             }).Count;
-            EditorGUI.LabelField(rect, "接取条件列表", "数量：" + quest.AcceptConditions.Count.ToString() + 
-                (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+            EditorGUI.LabelField(rect, "接取条件列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
         };
 
         acceptConditionList.drawNoneElementCallback = (rect) =>
@@ -375,7 +361,6 @@ public class QuestInspector : Editor
     void HandlingQuestRewardItemList()
     {
         rewardItemList = new ReorderableList(serializedObject, rewardItems, true, true, true, true);
-        showRewardItemList = true;
         rewardItemList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
@@ -405,7 +390,7 @@ public class QuestInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            quest.RewardItems.Add(new ItemInfo() { Amount = 1 });
+            quest.RewardItems.Add(new ItemInfo());
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };
@@ -425,8 +410,7 @@ public class QuestInspector : Editor
         rewardItemList.drawHeaderCallback = (rect) =>
         {
             int notCmpltCount = quest.RewardItems.FindAll(x => !x.Item).Count;
-            EditorGUI.LabelField(rect, "道具奖励列表", "数量：" + quest.RewardItems.Count.ToString() + 
-                (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+            EditorGUI.LabelField(rect, "道具奖励列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
         };
 
         rewardItemList.drawNoneElementCallback = (rect) =>
@@ -438,7 +422,6 @@ public class QuestInspector : Editor
     void HandlingCollectObjectiveList()
     {
         collectObjectiveList = new ReorderableList(serializedObject, collectObjectives, true, true, true, true);
-        showCollectObjectiveList = true;
         collectObjectiveList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
@@ -538,8 +521,7 @@ public class QuestInspector : Editor
         collectObjectiveList.drawHeaderCallback = (rect) =>
         {
             int notCmpltCount = quest.CollectObjectives.FindAll(x => string.IsNullOrEmpty(x.DisplayName) || !x.Item).Count;
-            EditorGUI.LabelField(rect, "收集类目标列表", "数量：" + quest.CollectObjectives.Count +
-                 (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+            EditorGUI.LabelField(rect, "收集类目标列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
         };
 
         collectObjectiveList.drawNoneElementCallback = (rect) =>
@@ -551,7 +533,6 @@ public class QuestInspector : Editor
     void HandlingKillObjectiveList()
     {
         killObjectiveList = new ReorderableList(serializedObject, killObjectives, true, true, true, true);
-        showKillObjectiveList = true;
         killObjectiveList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
@@ -643,8 +624,7 @@ public class QuestInspector : Editor
         killObjectiveList.drawHeaderCallback = (rect) =>
         {
             int notCmpltCount = quest.KillObjectives.FindAll(x => string.IsNullOrEmpty(x.DisplayName) || !x.Enemy).Count;
-            EditorGUI.LabelField(rect, "杀敌类目标列表", "数量：" + quest.KillObjectives.Count + 
-                (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+            EditorGUI.LabelField(rect, "杀敌类目标列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
         };
 
         killObjectiveList.drawNoneElementCallback = (rect) =>
@@ -656,7 +636,6 @@ public class QuestInspector : Editor
     void HandlingTalkObjectiveList()
     {
         talkObjectiveList = new ReorderableList(serializedObject, talkObjectives, true, true, true, true);
-        showTalkObjectiveList = true;
         talkObjectiveList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
@@ -761,8 +740,7 @@ public class QuestInspector : Editor
         talkObjectiveList.drawHeaderCallback = (rect) =>
         {
             int notCmpltCount = quest.TalkObjectives.FindAll(x => string.IsNullOrEmpty(x.DisplayName) || !x.Talker || !x.Dialogue).Count;
-            EditorGUI.LabelField(rect, "谈话类目标列表", "数量：" + quest.TalkObjectives.Count + 
-                (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+            EditorGUI.LabelField(rect, "谈话类目标列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
         };
 
         talkObjectiveList.drawNoneElementCallback = (rect) =>
@@ -774,7 +752,6 @@ public class QuestInspector : Editor
     void HandlingMoveObjectiveList()
     {
         moveObjectiveList = new ReorderableList(serializedObject, moveObjectives, true, true, true, true);
-        showMoveObjectiveList = true;
         moveObjectiveList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
@@ -852,8 +829,7 @@ public class QuestInspector : Editor
         moveObjectiveList.drawHeaderCallback = (rect) =>
         {
             int notCmpltCount = quest.MoveObjectives.FindAll(x => string.IsNullOrEmpty(x.DisplayName) || string.IsNullOrEmpty(x.PointID)).Count;
-            EditorGUI.LabelField(rect, "移动到点类目标列表", "数量：" + quest.MoveObjectives.Count + 
-                (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+            EditorGUI.LabelField(rect, "移动到点类目标列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
         };
 
         moveObjectiveList.drawNoneElementCallback = (rect) =>
@@ -877,16 +853,12 @@ public class QuestInspector : Editor
 
     bool ExistsID()
     {
-        List<Quest> quests = new List<Quest>();
-        foreach (Quest quest in Resources.LoadAll<Quest>(""))
-        {
-            quests.Add(quest);
-        }
+        Quest[] quests = Resources.LoadAll<Quest>("");
 
-        Quest find = quests.Find(x => x.ID == _ID.stringValue);
+        Quest find = Array.Find(quests, x => x.ID == _ID.stringValue);
         if (!find) return false;//若没有找到，则ID可用
         //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
-        return find != quest || (find == quest && quests.FindAll(x => x.ID == _ID.stringValue).Count > 1);
+        return find != quest || (find == quest && Array.FindAll(quests, x => x.ID == _ID.stringValue).Length > 1);
     }
 
     bool CheckEditComplete()

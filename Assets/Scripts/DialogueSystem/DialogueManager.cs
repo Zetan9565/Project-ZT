@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -21,11 +22,7 @@ public class DialogueManager : MonoBehaviour
     [SerializeField]
     private DialogueUI UI;
 
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("语句类型", true)]
-#endif
-    private DialogueType dialogueType = DialogueType.Normal;
+    public DialogueType DialogueType { get; private set; } = DialogueType.Normal;
 
     private Queue<DialogueWords> Words = new Queue<DialogueWords>();
 
@@ -53,6 +50,16 @@ public class DialogueManager : MonoBehaviour
     private Talker MTalker;
     private TalkObjective talkObjective;
     private Quest MQuest;
+
+    public bool HasNotAcptQuests
+    {
+        get
+        {
+            QuestGiver questGiver = MTalker as QuestGiver;
+            if (!questGiver || !questGiver.QuestInstances.Exists(x => !x.IsOngoing) || questGiver.QuestInstances.Exists(x => x.IsComplete)) return false;
+            return true;
+        }
+    }
 
     public bool IsTalking { get; private set; }
     public bool TalkAble { get; private set; }
@@ -100,7 +107,7 @@ public class DialogueManager : MonoBehaviour
         if (!UI) return;
         MyTools.SetActive(UI.talkButton.gameObject, false);
         MTalker = talker;
-        dialogueType = DialogueType.Normal;
+        DialogueType = DialogueType.Normal;
         if (talker is QuestGiver && (talker as QuestGiver).QuestInstances.Count > 0)
         {
             MyTools.SetActive(UI.questButton.gameObject, true);
@@ -110,14 +117,15 @@ public class DialogueManager : MonoBehaviour
             MyTools.SetActive(UI.questButton.gameObject, false);
         }
         CloseQuestDescriptionWindow();
-        StartDialogue(talker.DefaultDialogue);
+        StartDialogue(talker.Info.DefaultDialogue);
         talker.OnTalkBegin();
     }
 
     public void StartQuestDialogue(Quest quest)
     {
         MQuest = quest;
-        dialogueType = DialogueType.Quest;
+        DialogueType = DialogueType.Quest;
+        MyTools.SetActive(UI.questButton.gameObject, false);
         if (!MQuest.IsComplete && !MQuest.IsOngoing) StartDialogue(quest.BeginDialogue);
         else if (!MQuest.IsComplete && MQuest.IsOngoing) StartDialogue(quest.OngoingDialogue);
         else StartDialogue(quest.CompleteDialogue);
@@ -126,7 +134,7 @@ public class DialogueManager : MonoBehaviour
     public void StartObjectiveDialogue(TalkObjective talkObjective)
     {
         this.talkObjective = talkObjective;
-        dialogueType = DialogueType.Objective;
+        DialogueType = DialogueType.Objective;
         StartDialogue(talkObjective.Dialogue);
     }
     #endregion
@@ -192,13 +200,13 @@ public class DialogueManager : MonoBehaviour
         {
             OptionAgent oa = OptionAgents[i];
             //若当前选项关联的任务在进行中
-            if(oa.MQuest.IsOngoing && !oa.MQuest.IsComplete)
+            if (oa.MQuest.IsOngoing && !oa.MQuest.IsComplete)
             {
                 //则从后向前找一个新位置以放置该选项
                 for (int j = OptionAgents.Count - 1; j > i; j--)
                 {
                     //若找到了合适的位置
-                    if(!OptionAgents[j].MQuest.IsOngoing && !OptionAgents[j].MQuest.IsComplete)
+                    if (!OptionAgents[j].MQuest.IsOngoing && !OptionAgents[j].MQuest.IsComplete)
                     {
                         //则从该位置开始到选项的原位置，逐个前移一位，填补(覆盖)选项的原位置并空出新位置
                         for (int k = i; k < j; k++)
@@ -221,27 +229,51 @@ public class DialogueManager : MonoBehaviour
         }
         CheckPages();
     }
+
+    /// <summary>
+    /// 生成已完成任务选项
+    /// </summary>
+    private void MakeTalkerCmpltQuestOption()
+    {
+        if (!(MTalker is QuestGiver)) return;
+        ClearOptions();
+        foreach (Quest quest in (MTalker as QuestGiver).QuestInstances)
+        {
+            if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.AcceptAble && quest.IsComplete)
+            {
+                OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
+                oa.optionType = OptionType.Quest;
+                oa.MQuest = quest;
+                oa.TitleText.text = quest.Title + "(完成)";
+                OptionAgents.Add(oa);
+            }
+        }
+        //把第一页以外的选项隐藏
+        for (int i = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight); i < OptionAgents.Count; i++)
+        {
+            MyTools.SetActive(OptionAgents[i].gameObject, false);
+        }
+        CheckPages();
+    }
+
     /// <summary>
     /// 生成对话目标列表的选项
     /// </summary>
     private void MakeTalkerObjectiveOption()
     {
         int index = 1;
-        if (MTalker.talkToThisObjectives != null && MTalker.talkToThisObjectives.Count > 0)
+        ClearOptionsExceptCmlptQuest();
+        foreach (TalkObjective to in MTalker.talkToThisObjectives)
         {
-            ClearOptions();
-            foreach (TalkObjective to in MTalker.talkToThisObjectives)
+            if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
             {
-                if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
-                {
-                    OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
-                    oa.optionType = OptionType.Objective;
-                    oa.TitleText.text = to.runtimeParent.Title;
-                    oa.talkObjective = to;
-                    OptionAgents.Add(oa);
-                    if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) MyTools.SetActive(oa.gameObject, false);//第一页以外隐藏
-                    index++;
-                }
+                OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
+                oa.optionType = OptionType.Objective;
+                oa.TitleText.text = to.runtimeParent.Title;
+                oa.talkObjective = to;
+                OptionAgents.Add(oa);
+                if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) MyTools.SetActive(oa.gameObject, false);//第一页以外隐藏
+                index++;
             }
         }
         CheckPages();
@@ -249,6 +281,7 @@ public class DialogueManager : MonoBehaviour
 
     public void OptionPageUp()
     {
+        if (Page <= 1) return;
         int leftLineCount = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight);
         if (page > 0)
         {
@@ -268,6 +301,7 @@ public class DialogueManager : MonoBehaviour
 
     public void OptionPageDown()
     {
+        if (Page >= MaxPage) return;
         int leftLineCount = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight);
         if (page < Mathf.CeilToInt(OptionAgents.Count * 1.0f / (leftLineCount * 1.0f)))
         {
@@ -300,7 +334,10 @@ public class DialogueManager : MonoBehaviour
         }
         if (Words.Count > 0)
         {
-            UI.nameText.text = Words.Peek().TalkerName;
+            string talkerName = Words.Peek().TalkerName;
+            if (Words.Peek().TalkerType == TalkerType.Player && PlayerInfoManager.Instance.PlayerInfo)
+                talkerName = PlayerInfoManager.Instance.PlayerInfo.Name;
+            UI.nameText.text = talkerName;
             UI.wordsText.text = Words.Dequeue().Words;
         }
     }
@@ -310,17 +347,20 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     private void HandlingLastWords()
     {
-        if (dialogueType == DialogueType.Normal && MTalker)
+        if (DialogueType == DialogueType.Normal && MTalker)
         {
             MTalker.OnTalkFinished();
-            MakeTalkerObjectiveOption();
-            QuestManager.Instance.UpdateObjectivesUI();
+            MakeTalkerCmpltQuestOption();
+            if (MTalker.talkToThisObjectives != null && MTalker.talkToThisObjectives.Count > 0)
+                MakeTalkerObjectiveOption();
+            else ClearOptionsExceptCmlptQuest();
+            QuestManager.Instance.UpdateUI();
         }
-        else if (dialogueType == DialogueType.Objective && talkObjective != null)
+        else if (DialogueType == DialogueType.Objective && talkObjective != null)
         {
             HandlingLastObjectiveWords();
         }
-        else if (dialogueType == DialogueType.Quest && MQuest)
+        else if (DialogueType == DialogueType.Quest && MQuest)
         {
             HandlingLastQuestWords();
         }
@@ -345,7 +385,7 @@ public class DialogueManager : MonoBehaviour
             MTalker.talkToThisObjectives.RemoveAll(x => x == talkObjective);
         }
         talkObjective = null;//重置管理器的对话目标以防出错
-        QuestManager.Instance.UpdateObjectivesUI();
+        QuestManager.Instance.UpdateUI();
     }
     /// <summary>
     /// 处理最后一句任务的对话
@@ -380,17 +420,19 @@ public class DialogueManager : MonoBehaviour
         if (!TalkAble) return;
         UI.dialogueWindow.alpha = 1;
         UI.dialogueWindow.blocksRaycasts = true;
+        WindowsManager.Instance.PauseAllWindows(true);
     }
     public void CloseDialogueWindow()
     {
         UI.dialogueWindow.alpha = 0;
         UI.dialogueWindow.blocksRaycasts = false;
-        dialogueType = DialogueType.Normal;
+        DialogueType = DialogueType.Normal;
         MTalker = null;
         MQuest = null;
         ClearOptions();
         CloseQuestDescriptionWindow();
         IsTalking = false;
+        WindowsManager.Instance.PauseAllWindows(false);
     }
 
     public void OpenOptionArea()
@@ -420,25 +462,20 @@ public class DialogueManager : MonoBehaviour
     {
         if (quest == null) return;
         MQuest = quest;
-        UI.descriptionText.text = string.Format("<size=16><b>{0}</b></size>\n[委托人: {1}]\n{2}", 
-            MQuest.Title, 
-            MQuest.OriginalQuestGiver.Info.Name, 
+        UI.descriptionText.text = string.Format("<size=16><b>{0}</b></size>\n[委托人: {1}]\n{2}",
+            MQuest.Title,
+            MQuest.OriginalQuestGiver.Info.Name,
             MQuest.Description);
-        UI.money_EXPText.text = string.Format("[奖励]\n<size=14>经验:\n{0}\n金币:\n{1}</size>",
-            MQuest.RewardEXP > 0 ? MQuest.RewardEXP.ToString() : "无",
-            MQuest.RewardMoney > 0 ? MQuest.RewardMoney.ToString() : "无");
+        UI.moneyText.text = MQuest.RewardMoney > 0 ? MQuest.RewardMoney.ToString() : "无";
+        UI.EXPText.text = MQuest.RewardEXP > 0 ? MQuest.RewardEXP.ToString() : "无";
         foreach (ItemAgent rwc in UI.rewardCells)
-        {
-            rwc.Item = null;
-            rwc.Icon.overrideSprite = null;
-        }
+            rwc.Clear();
         foreach (ItemInfo info in quest.RewardItems)
             foreach (ItemAgent rw in UI.rewardCells)
             {
-                if (rw.Item == null)
+                if (rw.itemInfo == null)
                 {
-                    rw.Item = info.Item;
-                    rw.Icon.overrideSprite = info.Item.Icon;
+                    rw.Init(info);
                     break;
                 }
             }
@@ -460,9 +497,20 @@ public class DialogueManager : MonoBehaviour
         MyTools.SetActive(UI.talkButton.gameObject, false);
         CloseDialogueWindow();
     }
+
+    private void OpenGiftWindow()
+    {
+        //TODO 把玩家背包道具读出并展示
+    }
     #endregion
 
     #region 其它
+    public void SendTalkerGifts()
+    {
+        if (!MTalker || !MTalker.Info.CanDEV_RLAT) return;
+        OpenGiftWindow();
+    }
+
     public void LoadTalkerQuest()
     {
         if (MTalker == null) return;
@@ -508,6 +556,20 @@ public class DialogueManager : MonoBehaviour
         SetPageArea(false, false, false);
     }
 
+    private void ClearOptionsExceptCmlptQuest()
+    {
+        for (int i = 0; i < OptionAgents.Count; i++)
+        {
+            if (OptionAgents[i] && (OptionAgents[i].optionType != OptionType.Quest || (OptionAgents[i].optionType == OptionType.Quest && !OptionAgents[i].MQuest.IsComplete)))
+            {
+                RecycleOption(OptionAgents[i]);
+            }
+        }
+        OptionAgents.RemoveAll(x => !x.gameObject.activeSelf);
+        Page = 1;
+        SetPageArea(false, false, false);
+    }
+
     private void ClearOptionExceptContinue()
     {
         for (int i = 0; i < OptionAgents.Count; i++)
@@ -549,11 +611,10 @@ public class DialogueManager : MonoBehaviour
         this.UI = UI;
     }
     #endregion
-
-    private enum DialogueType
-    {
-        Normal,
-        Quest,
-        Objective
-    }
+}
+public enum DialogueType
+{
+    Normal,
+    Quest,
+    Objective
 }

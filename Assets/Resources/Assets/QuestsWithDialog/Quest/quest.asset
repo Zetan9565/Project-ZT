@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ID: QEST001
   title: "\u6E05\u7406\u602A\u7269#1"
-  description: "\u53BB\u95EE\u739B\u4E3D\u4E9A\u602A\u7269\u4F1A\u5728\u54EA\u513F\u51FA\u73B0\uFF0C\u7136\u540E\u53BB\u8C03\u67E5\u4E00\u4E0B\uFF0C\u5982\u679C\u771F\u7684\u6709\u602A\u7269\uFF0C\u5C31\u72E0\u72E0\u6559\u8BAD\u5B83\u4EEC\uFF0C\u987A\u4FBF\u56DE\u6536\u70B9\u5B83\u4EEC\u7684\u6B66\u5668\u56DE\u53BB\u7ED9\u6069\u683C\u65AF\u3002"
+  description: "\u53BB\u95EE\u739B\u4E3D\u4E9A\u602A\u7269\u4F1A\u5728\u54EA\u513F\u51FA\u73B0\uFF0C\u7136\u540E\u53BB\u8C03\u67E5\u4E00\u4E0B\uFF0C\u5982\u679C\u771F\u7684\u6709\u602A\u7269\uFF0C\u5C31\u72E0\u72E0\u6559\u8BAD\u5B83\u4EEC\uFF0C\u987A\u4FBF\u56DE\u6536\u70B9\u5B83\u4EEC\u7684\u6B66\u5668\u56DE\u53BB\u7ED9\u5927\u80E1\u5B50\u3002"
   abandonable: 1
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptConditions: []
@@ -25,9 +25,9 @@ MonoBehaviour:
   rewardEXP: 0
   rewardItems:
   - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    amount: 1
+    amount: 3
   - item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
-    amount: 1
+    amount: 3
   sbmtOnOriginalNPC: 1
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 1

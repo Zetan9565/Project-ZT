@@ -21,8 +21,11 @@ MonoBehaviour:
   sellPrice: 0
   buyPrice: 0
   icon: {fileID: 21300000, guid: f588d850485d0ae479d73cf3bd0b7b00, type: 3}
-  description: 
+  description: "\u4EFB\u52A1\u9053\u5177\u3002"
+  stackAble: 1
   discardAble: 0
+  useable: 1
   inexhaustible: 0
+  maxDurability: 1
   processMethod: 0
   materials: []

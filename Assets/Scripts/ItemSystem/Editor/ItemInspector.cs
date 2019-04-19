@@ -3,13 +3,14 @@ using UnityEditor;
 using System.Collections.Generic;
 using System;
 using UnityEditorInternal;
+using System.Text.RegularExpressions;
 
 [CustomEditor(typeof(ItemBase), true)]
 [CanEditMultipleObjects]
 public class ItemInspector : Editor
 {
     protected ItemBase item;
-    ItemBox box;
+    BoxItem box;
     MaterialItem material;
 
     ReorderableList boxItemList;
@@ -17,9 +18,6 @@ public class ItemInspector : Editor
 
     float lineHeight;
     float lineHeightSpace;
-
-    bool showBoxItemList = true;
-    bool showMaterialList = true;
 
     SerializedProperty _ID;
     SerializedProperty _Name;
@@ -31,8 +29,11 @@ public class ItemInspector : Editor
     SerializedProperty buyPrice;
     SerializedProperty icon;
     SerializedProperty description;
+    SerializedProperty stackAble;
     SerializedProperty discardAble;
+    SerializedProperty useable;
     SerializedProperty inexhaustible;
+    SerializedProperty maxDurability;
     SerializedProperty processMethod;
     SerializedProperty materials;
 
@@ -56,38 +57,53 @@ public class ItemInspector : Editor
         buyPrice = serializedObject.FindProperty("buyPrice");
         icon = serializedObject.FindProperty("icon");
         description = serializedObject.FindProperty("description");
+        stackAble = serializedObject.FindProperty("stackAble");
         discardAble = serializedObject.FindProperty("discardAble");
+        useable = serializedObject.FindProperty("useable");
         inexhaustible = serializedObject.FindProperty("inexhaustible");
-
+        maxDurability = serializedObject.FindProperty("maxDurability");
         materials = serializedObject.FindProperty("materials");
         processMethod = serializedObject.FindProperty("processMethod");
         HandlingMaterialItemList();
 
-        box = target as ItemBox;
+        box = target as BoxItem;
         if (box)
         {
-            boxItems = serializedObject.FindProperty("items");
-            HandlingItemList();
+            boxItems = serializedObject.FindProperty("itemsInBox");
+            HandlingBoxItemList();
         }
 
         material = target as MaterialItem;
         if (material)
             materialType = serializedObject.FindProperty("materialType");
+
+        FixType();
     }
 
     public override void OnInspectorGUI()
     {
-        if (!CheckEditComplete())
+        if (item.Materials.Exists(x => (x.ProcessType == ProcessType.SingleItem && item.Materials.FindAll(y => y.ProcessType == ProcessType.SingleItem && y.Item == x.Item).Count > 1) ||
+                                       (x.ProcessType == ProcessType.SameType && item.Materials.FindAll(y => y.ProcessType == ProcessType.SameType && y.MaterialType == x.MaterialType).Count > 1)))
+        {
+            EditorGUILayout.HelpBox("制作材料存在重复。", MessageType.Warning);
+        }
+        else if (!CheckEditComplete())
             EditorGUILayout.HelpBox("该道具存在未补全信息。", MessageType.Warning);
-        else 
+        else
+        {
             EditorGUILayout.HelpBox("该道具信息已完整。", MessageType.Info);
+        }
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
-        if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID())
+        if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID() || string.IsNullOrEmpty(Regex.Replace(_ID.stringValue, @"[^0-9]+", "")) || !Regex.IsMatch(_ID.stringValue, @"(\d+)$"))
         {
             if (ExistsID())
                 EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
+            else if (!string.IsNullOrEmpty(_ID.stringValue) && (string.IsNullOrEmpty(Regex.Replace(_ID.stringValue, @"[^0-9]+", "")) || !Regex.IsMatch(_ID.stringValue, @"(\d+)$")))
+            {
+                EditorGUILayout.HelpBox("此识别码非法！", MessageType.Error);
+            }
             if (GUILayout.Button("自动生成识别码"))
             {
                 _ID.stringValue = GetAutoID();
@@ -118,52 +134,56 @@ public class ItemInspector : Editor
             EditorGUILayout.ObjectField(new GUIContent(string.Empty), item.Icon, typeof(Texture2D), false);
             GUI.enabled = true;
         }
-        if (item.ItemType != ItemType.Quest) EditorGUILayout.PropertyField(discardAble, new GUIContent("可丢弃"));
-        if (item.ItemType != ItemType.Box) EditorGUILayout.PropertyField(inexhaustible, new GUIContent("可无限使用"));
+        if (!item.IsWeapon && item.ItemType != ItemType.Armor && item.ItemType != ItemType.Jewelry) EditorGUILayout.PropertyField(stackAble, new GUIContent("可叠加"));
+        if (!item.IsForQuest) EditorGUILayout.PropertyField(discardAble, new GUIContent("可丢弃"));
+        if (item.IsForQuest) EditorGUILayout.PropertyField(useable, new GUIContent("可使用"));
+        if (item.IsForQuest && item.Useable) EditorGUILayout.PropertyField(inexhaustible, new GUIContent("可无限使用"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
-        EditorGUILayout.Space();
-        serializedObject.Update();
-        EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(processMethod, new GUIContent("制作方法"));
-        if (EditorGUI.EndChangeCheck())
-            serializedObject.ApplyModifiedProperties();
-        if (processMethod.enumValueIndex != 0)
+        if (!box)
         {
-            showMaterialList = EditorGUILayout.Toggle("显示制作材料列表", showMaterialList);
-            if (showMaterialList)
-            {
-                serializedObject.Update();
-                materialList.DoLayoutList();
+            EditorGUILayout.Space();
+            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(processMethod, new GUIContent("制作方法"));
+            if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
+            if (processMethod.enumValueIndex != 0)
+            {
+                EditorGUILayout.PropertyField(materials, new GUIContent("制作材料\t\t" + (materials.arraySize > 0 ? "数量：" + materials.arraySize : "无")));
+                if (materials.isExpanded)
+                {
+                    serializedObject.Update();
+                    materialList.DoLayoutList();
+                    serializedObject.ApplyModifiedProperties();
+                }
             }
         }
         EditorGUILayout.Space();
         if (box)
         {
-            showBoxItemList = EditorGUILayout.Toggle("显示盒内道具列表", showBoxItemList);
-            if (showBoxItemList)
+            EditorGUILayout.PropertyField(boxItems, new GUIContent("盒内道具\t\t" + (boxItems.arraySize > 0 ? "数量：" + boxItems.arraySize : "无")));
+            if (boxItems.isExpanded)
             {
                 EditorGUILayout.HelpBox("目前只设计8个容量。", MessageType.Info);
                 serializedObject.Update();
                 boxItemList.DoLayoutList();
                 serializedObject.ApplyModifiedProperties();
-                if (box.Items.Count >= 8)
+                if (box.ItemsInBox.Count >= 8)
                     boxItemList.displayAdd = false;
                 else boxItemList.displayAdd = true;
             }
         }
     }
 
-    void HandlingItemList()
+    void HandlingBoxItemList()
     {
         boxItemList = new ReorderableList(serializedObject, boxItems, true, true, true, true);
-        showBoxItemList = true;
         boxItemList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
-            if (box.Items[index] != null && box.Items[index].Item != null)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), box.Items[index].Item.Name);
+            if (box.ItemsInBox[index] != null && box.ItemsInBox[index].Item != null)
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), box.ItemsInBox[index].Item.Name);
             else
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             EditorGUI.BeginChangeCheck();
@@ -188,7 +208,7 @@ public class ItemInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            box.Items.Add(new ItemInfo() { Amount = 1 });
+            box.ItemsInBox.Add(new ItemInfo());
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };
@@ -199,7 +219,7 @@ public class ItemInspector : Editor
             EditorGUI.BeginChangeCheck();
             if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
             {
-                box.Items.RemoveAt(list.index);
+                box.ItemsInBox.RemoveAt(list.index);
             }
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
@@ -207,9 +227,8 @@ public class ItemInspector : Editor
 
         boxItemList.drawHeaderCallback = (rect) =>
         {
-            int notCmpltCount = box.Items.FindAll(x => !x.Item).Count;
-            EditorGUI.LabelField(rect, "盒内道具列表", "数量：" + box.Items.Count.ToString() +
-                (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+            int notCmpltCount = box.ItemsInBox.FindAll(x => !x.Item).Count;
+            EditorGUI.LabelField(rect, "盒内道具列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
         };
 
         boxItemList.drawNoneElementCallback = (rect) =>
@@ -221,24 +240,23 @@ public class ItemInspector : Editor
     void HandlingMaterialItemList()
     {
         materialList = new ReorderableList(serializedObject, materials, true, true, true, true);
-        showBoxItemList = true;
         materialList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
             if (this.item.Materials[index] != null && this.item.Materials[index].Item != null && this.item.Materials[index].ProcessType == ProcessType.SingleItem)
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), this.item.Materials[index].Item.Name);
-            else if(this.item.Materials[index]!=null && this.item.Materials[index].ProcessType == ProcessType.SameType)
+            else if (this.item.Materials[index] != null && this.item.Materials[index].ProcessType == ProcessType.SameType)
             {
-                switch(this.item.Materials[index].MaterialType)
+                switch (this.item.Materials[index].MaterialType)
                 {
-                    case MaterialType.Cloth: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "布料");break;
-                    case MaterialType.Fruit: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "水果");break;
-                    case MaterialType.Fur: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "皮毛");break;
-                    case MaterialType.Meat: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "肉类");break;
-                    case MaterialType.Metal: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "金属");break;
-                    case MaterialType.Ore: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "矿石");break;
-                    case MaterialType.Plant: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "植物");break;
-                    default: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "未定义");break;
+                    case MaterialType.Cloth: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "布料"); break;
+                    case MaterialType.Fruit: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "水果"); break;
+                    case MaterialType.Fur: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "皮毛"); break;
+                    case MaterialType.Meat: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "肉类"); break;
+                    case MaterialType.Metal: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "金属"); break;
+                    case MaterialType.Ore: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "矿石"); break;
+                    case MaterialType.Plant: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "植物"); break;
+                    default: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "未定义"); break;
                 }
             }
             else
@@ -290,8 +308,7 @@ public class ItemInspector : Editor
         materialList.drawHeaderCallback = (rect) =>
         {
             int notCmpltCount = item.Materials.FindAll(x => !x.Item).Count;
-            EditorGUI.LabelField(rect, "制作材料列表", "数量：" + item.Materials.Count.ToString() +
-                (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+            EditorGUI.LabelField(rect, "制作材料列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
         };
 
         materialList.drawNoneElementCallback = (rect) =>
@@ -303,37 +320,64 @@ public class ItemInspector : Editor
     void HandlingItemType()
     {
         string typeName = "未定义";
-        if (item is WeaponItem)
+        switch (item.ItemType)
         {
-            itemType.enumValueIndex = (int)ItemType.Weapon;
-            typeName = "武器";
-        }
-        else if (item is ItemBox)
-        {
-            itemType.enumValueIndex = (int)ItemType.Box;
-            typeName = "箱子";
-        }
-        else if(item is MaterialItem)
-        {
-            itemType.enumValueIndex = (int)ItemType.Material;
-            typeName = "制作材料";
-        }
-        else if(item is QuestItem)
-        {
-            itemType.enumValueIndex = (int)ItemType.Quest;
-            typeName = "任务道具";
+            case ItemType.Weapon: typeName = "武器"; break;
+            case ItemType.Box: typeName = "箱子"; break;
+            case ItemType.Material: typeName = "制作材料"; break;
+            case ItemType.Quest: typeName = "任务道具"; break;
+            case ItemType.Gemstone: typeName = "宝石"; break;
+            default: break;
         }
         EditorGUILayout.LabelField("道具类型", typeName);
+        switch (item.ItemType)
+        {
+            case ItemType.Weapon:
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("_ATK"), new GUIContent("攻击力"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("_DEF"), new GUIContent("防御力"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("hit"), new GUIContent("命中力"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("gemSlotAmount"), new GUIContent("默认宝石槽数"));
+                goto case ItemType.Gemstone;
+            case ItemType.Gemstone:
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("powerup"), new GUIContent("附加效果"), true);
+                break;
+            default: break;
+        }
+        if (item.IsWeapon || item.ItemType == ItemType.Armor || item.ItemType == ItemType.Jewelry)
+            EditorGUILayout.PropertyField(maxDurability, new GUIContent("最大耐久度"));
+    }
+
+    void FixType()
+    {
+        if (item.IsWeapon && item.ItemType != ItemType.Weapon)
+        {
+            itemType.enumValueIndex = (int)ItemType.Weapon;
+        }
+        else if (item.IsBox && item.ItemType != ItemType.Box)
+        {
+            itemType.enumValueIndex = (int)ItemType.Box;
+        }
+        else if (item.IsMaterial && item.ItemType != ItemType.Material)
+        {
+            itemType.enumValueIndex = (int)ItemType.Material;
+        }
+        else if (item.IsForQuest && item.ItemType != ItemType.Quest)
+        {
+            itemType.enumValueIndex = (int)ItemType.Quest;
+        }
     }
 
     bool CheckEditComplete()
     {
         bool editComplete = true;
 
-        editComplete &= !(string.IsNullOrEmpty(item.ID) || string.IsNullOrEmpty(item.Name) || item.Icon == null);
+        editComplete &= !(string.IsNullOrEmpty(item.ID) || string.IsNullOrEmpty(item.Name) ||
+            string.IsNullOrEmpty(item.Description) || item.Icon == null ||
+            ExistsID() || string.IsNullOrEmpty(Regex.Replace(item.ID, @"[^0-9]+", "")) || !Regex.IsMatch(item.ID, @"(\d+)$")
+            );
 
         if (box)
-            editComplete &= !box.Items.Exists(x => x.Item == null);
+            editComplete &= !box.ItemsInBox.Exists(x => x.Item == null);
 
         if (item.ProcessMethod != ProcessMethod.None)
             editComplete &= !item.Materials.Exists(x => x.ProcessType == ProcessType.SingleItem && x.Item == null);
@@ -360,6 +404,9 @@ public class ItemInspector : Editor
                     break;
                 case ItemType.Quest:
                     newID = "QSTI" + i.ToString().PadLeft(3, '0');
+                    break;
+                case ItemType.Gemstone:
+                    newID = "GEMS" + i.ToString().PadLeft(3, '0');
                     break;
                 default:
                     newID = "ITEM" + i.ToString().PadLeft(3, '0');

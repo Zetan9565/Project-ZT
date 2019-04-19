@@ -41,7 +41,7 @@ public class QuestPoint : MonoBehaviour {
     private void OnTriggerEnter2D(Collider2D collision)
     {
         OnMoveIntoEvent?.Invoke(this);
-        QuestManager.Instance.UpdateObjectivesUI();
+        QuestManager.Instance.UpdateUI();
     }
 
     private void OnTriggerStay2D(Collider2D collision)

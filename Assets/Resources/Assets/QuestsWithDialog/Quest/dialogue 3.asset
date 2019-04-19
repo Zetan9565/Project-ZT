@@ -13,9 +13,12 @@ MonoBehaviour:
   m_Name: dialogue 3
   m_EditorClassIdentifier: 
   words:
-  - talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+  - talkerType: 0
+    talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     words: "\u54DF\uFF0C\u4F60\u56DE\u6765\u4E86\u3002"
-  - talkerInfo: {fileID: 11400000, guid: d249fad079fcaa443a590dd1f8d4e1bc, type: 2}
+  - talkerType: 1
+    talkerInfo: {fileID: 0}
     words: "\u4F60\u62DC\u6258\u7684\u4E8B\u529E\u59A5\u4E86\u3002"
-  - talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+  - talkerType: 0
+    talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     words: "\u662F\u5417\uFF1F"

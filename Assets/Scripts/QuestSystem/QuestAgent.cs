@@ -35,12 +35,12 @@ public class QuestAgent : MonoBehaviour
         MQuest = quest;
         belongToCmplt = isFinished;
         Deselect();
-        UpdateQuestStatus();
+        UpdateStatus();
     }
     /// <summary>
     /// 回收
     /// </summary>
-    public void Recycle()
+    public void OnRecycle()
     {
         MQuest = null;
         TitleText.text = string.Empty;
@@ -49,7 +49,7 @@ public class QuestAgent : MonoBehaviour
         ObjectPool.Instance.Put(gameObject);
     }
 
-    public void UpdateQuestStatus()
+    public void UpdateStatus()
     {
         if (MQuest)
         {

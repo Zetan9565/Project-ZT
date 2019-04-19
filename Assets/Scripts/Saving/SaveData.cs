@@ -30,10 +30,13 @@ public class ItemData
 
     public int itemAmount;
 
-    public ItemData(string ID, int amount)
+    public int indexInBP;
+
+    public ItemData(string ID, int amount, int index)
     {
         itemID = ID;
         itemAmount = amount;
+        indexInBP = index;
     }
 }
 

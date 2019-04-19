@@ -16,14 +16,17 @@ MonoBehaviour:
   _Name: "\u94C1\u539F\u77F3"
   itemType: 8
   quality: 0
-  weight: 0
+  weight: 0.1
   sellAble: 1
   sellPrice: 0
   buyPrice: 0
   icon: {fileID: 21300000, guid: 49b611e658efbf443b686a4036f74fe3, type: 3}
-  description: 
+  description: "\u53EF\u4EE5\u51B6\u70BC\u6210\u94C1\u91D1\u5C5E\u3002"
+  stackAble: 1
   discardAble: 1
+  useable: 0
   inexhaustible: 0
+  maxDurability: 100
   processMethod: 0
   materials: []
   materialType: 1

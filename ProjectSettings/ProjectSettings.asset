@@ -601,7 +601,8 @@ PlayerSettings:
     7: CROSS_PLATFORM_INPUT
     14: 
   platformArchitecture: {}
-  scriptingBackend: {}
+  scriptingBackend:
+    Android: 0
   il2cppCompilerConfiguration: {}
   managedStrippingLevel: {}
   incrementalIl2cppBuild: {}

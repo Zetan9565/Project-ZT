@@ -7,24 +7,15 @@ public delegate void DialogueListener();
 public class Talker : MonoBehaviour
 {
     [SerializeField]
-    private NPCInfomation info;
-    public NPCInfomation Info
+    private TalkerInfomation info;
+    public TalkerInfomation Info
     {
         get
         {
             return info;
         }
     }
-
-    [SerializeField]
-    private Dialogue defaultDialogue;
-    public Dialogue DefaultDialogue
-    {
-        get
-        {
-            return defaultDialogue;
-        }
-    }
+    public Relationship Relationship { get; private set; }
 
     /// <summary>
     /// 存储对象身上的对话型目标
@@ -43,5 +34,23 @@ public class Talker : MonoBehaviour
     public virtual void OnTalkFinished()
     {
         OnTalkFinishedEvent?.Invoke();
+    }
+
+    public void OnGetGift(ItemBase gift)
+    {
+        if(info.FavoriteItems.Exists(x=>x.Item.ID == gift.ID))
+        {
+            FavoriteItemInfo find = info.FavoriteItems.Find(x => x.Item.ID == gift.ID);
+            Relationship.RelationshipValue += (int)find.FavoriteLevel;
+        }
+        else if (info.HateItems.Exists(x => x.Item.ID == gift.ID))
+        {
+            HateItemInfo find = info.HateItems.Find(x => x.Item.ID == gift.ID);
+            Relationship.RelationshipValue -= (int)find.HateLevel;
+        }
+        else
+        {
+            Relationship.RelationshipValue += 5;
+        }
     }
 }

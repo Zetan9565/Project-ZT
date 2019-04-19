@@ -15,19 +15,28 @@ MonoBehaviour:
   _ID: IBOX002
   _Name: "\u666E\u901A\u7684\u7BB1\u5B50"
   itemType: 7
-  quality: 1
-  weight: 0
-  sellAble: 1
+  quality: 0
+  weight: 10
+  sellAble: 0
   sellPrice: 0
   buyPrice: 0
-  icon: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
-  description: 
+  icon: {fileID: 21300000, guid: 5485e2f56028a3c4cb54f5caa167377e, type: 3}
+  description: "\u5916\u8868\u5F88\u666E\u901A\u7684\u7BB1\u5B50\u3002"
+  stackAble: 0
   discardAble: 1
+  useable: 1
   inexhaustible: 0
+  maxDurability: 100
   processMethod: 0
   materials: []
-  items:
-  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    amount: 1
+  itemsInBox:
+  - item: {fileID: 11400000, guid: eb68c8a7b1bbeb8408eed1d2af6b8ad6, type: 2}
+    amount: 3
+    durability:
+      min: 0
+      max: 1
   - item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
     amount: 1
+    durability:
+      min: 0
+      max: 1

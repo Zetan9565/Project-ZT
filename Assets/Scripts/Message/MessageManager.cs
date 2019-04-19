@@ -25,10 +25,10 @@ public class MessageManager : MonoBehaviour
 #endif
     private GameObject messagePrefab;
 
-    public void NewMessage(string message, float liveTime = 2.0f)
+    public void NewMessage(string message, float lifeTime = 2.0f)
     {
         MessageAgent ma = ObjectPool.Instance.Get(messagePrefab, messageRoot).GetComponent<MessageAgent>();
         ma.messageText.text = message;
-        ObjectPool.Instance.Put(ma.gameObject, liveTime);
+        ObjectPool.Instance.Put(ma.gameObject, lifeTime);
     }
 }

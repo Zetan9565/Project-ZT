@@ -28,10 +28,15 @@ public class OptionAgent : MonoBehaviour
                 DialogueManager.Instance.StartObjectiveDialogue(talkObjective);
                 break;
             case OptionType.Confirm:
-                if (!MQuest.IsComplete) QuestManager.Instance.AcceptQuest(MQuest);
-                else QuestManager.Instance.CompleteQuest(MQuest);
-                DialogueManager.Instance.CloseQuestDescriptionWindow();
-                DialogueManager.Instance.GotoDefault();
+                if (DialogueManager.Instance.DialogueType == DialogueType.Quest)
+                    if (!MQuest.IsComplete && QuestManager.Instance.AcceptQuest(MQuest))
+                    {
+                        DialogueManager.Instance.GotoDefault();
+                    }
+                    else if (QuestManager.Instance.CompleteQuest(MQuest))
+                    {
+                        DialogueManager.Instance.GotoDefault();
+                    }
                 break;
             case OptionType.Back:
                 DialogueManager.Instance.CloseQuestDescriptionWindow();

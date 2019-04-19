@@ -3,8 +3,8 @@
 public delegate void EnermyDeathListener();
 
 [DisallowMultipleComponent]
-public class Enemy : MonoBehaviour {
-
+public class Enemy : MonoBehaviour
+{
     [SerializeField]
     private EnemyInfomation info;
     public EnemyInfomation Info
@@ -19,7 +19,8 @@ public class Enemy : MonoBehaviour {
 
     public void Death()
     {
+        Debug.Log("One" + info.Name + "was killed");
         OnDeathEvent?.Invoke();
-        QuestManager.Instance.UpdateObjectivesUI();
+        QuestManager.Instance.UpdateUI();
     }
 }

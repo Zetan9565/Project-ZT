@@ -1,50 +1,55 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class DialogueUI : MonoBehaviour
 {
-    [SerializeField, Header("对话框相关")]
+    [Header("对话框相关")]
     public CanvasGroup dialogueWindow;
-    [SerializeField]
+
     public Text nameText;
-    [SerializeField]
+
     public Text wordsText;
-    [SerializeField]
+
     public Button talkButton;
-    [SerializeField]
+
     public Button backButton;
-    [SerializeField]
+
     public Button finishButton;
 
     [Header("选项相关")]
-    [SerializeField]
+
     public GameObject optionPrefab;
-    [SerializeField]
+
     public Transform optionsParent;
-    [SerializeField]
+
     public Button pageUpButton;
-    [SerializeField]
+
     public Button pageDownButton;
-    [SerializeField]
+
     public Text pageText;
 
-    [SerializeField]
+
     public float textLineHeight = 22.35832f;
-    [SerializeField]
+
     public int lineAmount = 5;
 
     [Header("任务详情相关")]
-    [SerializeField]
+
     public Button questButton;
-    [SerializeField]
+
     public CanvasGroup descriptionWindow;
-    [SerializeField]
+
     public Text descriptionText;
-    [SerializeField]
-    public Text money_EXPText;
-    [SerializeField]
-    public ItemAgent[] rewardCells;
+
+    public Text moneyText;
+    public Text EXPText;
+
+    public GameObject rewardCellPrefab;
+    public Transform rewardCellsParent;
+
+    public List<ItemAgent> rewardCells = new List<ItemAgent>();
 
     private void Awake()
     {
@@ -52,5 +57,18 @@ public class DialogueUI : MonoBehaviour
         backButton.onClick.AddListener(DialogueManager.Instance.GotoDefault);
         finishButton.onClick.AddListener(DialogueManager.Instance.CloseDialogueWindow);
         questButton.onClick.AddListener(DialogueManager.Instance.LoadTalkerQuest);
+        pageUpButton.onClick.AddListener(DialogueManager.Instance.OptionPageUp);
+        pageDownButton.onClick.AddListener(DialogueManager.Instance.OptionPageDown);
+        foreach (ItemAgent rwc in rewardCells)
+        {
+            if (rwc) rwc.Clear(false, true);
+        }
+        rewardCells.Clear();
+        for (int i = 0; i < 10; i++)
+        {
+            ItemAgent rwc = ObjectPool.Instance.Get(rewardCellPrefab, rewardCellsParent).GetComponent<ItemAgent>();
+            rwc.Clear();
+            rewardCells.Add(rwc);
+        }
     }
 }

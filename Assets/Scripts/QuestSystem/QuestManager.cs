@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class QuestManager : MonoBehaviour
+public class QuestManager : MonoBehaviour, IOpenCloseable
 {
     private static QuestManager instance;
     public static QuestManager Instance
@@ -71,7 +72,7 @@ public class QuestManager : MonoBehaviour
             {
                 qa = ObjectPool.Instance.Get(UI.questPrefab, qga.questListParent).GetComponent<QuestAgent>();
                 qga.questAgents.Add(qa);
-                qga.UpdateGroupStatus();
+                qga.UpdateStatus();
             }
             else
             {
@@ -82,7 +83,7 @@ public class QuestManager : MonoBehaviour
 
                 qa = ObjectPool.Instance.Get(UI.questPrefab, qga.questListParent).GetComponent<QuestAgent>();
                 qga.questAgents.Add(qa);
-                qga.UpdateGroupStatus();
+                qga.UpdateStatus();
             }
         }
         else qa = ObjectPool.Instance.Get(UI.questPrefab, UI.questListParent).GetComponent<QuestAgent>();
@@ -98,14 +99,14 @@ public class QuestManager : MonoBehaviour
                 CollectObjective co = o as CollectObjective;
                 try
                 {
-                    BagManager.Instance.OnGetItemEvent += co.UpdateCollectAmountUp;
-                    BagManager.Instance.OnLoseItemEvent += co.UpdateCollectAmountDown;
-                    if (co.CheckBagAtAcpt && !loadMode) co.UpdateCollectAmountUp(co.Item.ID, BagManager.Instance.GetItemAmountByID(co.Item.ID));
+                    BackpackManager.Instance.OnGetItemEvent += co.UpdateCollectAmountUp;
+                    BackpackManager.Instance.OnLoseItemEvent += co.UpdateCollectAmountDown;
+                    if (co.CheckBagAtAcpt && !loadMode) co.UpdateCollectAmountUp(co.Item, BackpackManager.Instance.GetItemAmountByID(co.Item.ID));
                 }
                 catch
                 {
-                    BagManager.Instance.OnGetItemEvent -= co.UpdateCollectAmountUp;
-                    BagManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
+                    BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmountUp;
+                    BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
                     Debug.LogWarning("[尝试使用null道具] 任务名称：" + quest.Title);
                     continue;
                 }
@@ -182,8 +183,8 @@ public class QuestManager : MonoBehaviour
                 {
                     CollectObjective co = o as CollectObjective;
                     co.CurrentAmount = 0;
-                    BagManager.Instance.OnGetItemEvent -= co.UpdateCollectAmountUp;
-                    BagManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
+                    BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmountUp;
+                    BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
                 }
                 if (o is KillObjective)
                 {
@@ -236,6 +237,31 @@ public class QuestManager : MonoBehaviour
     public bool CompleteQuest(Quest quest, bool loadMode = false)
     {
         if (!quest) return false;
+        if (!loadMode)
+        {
+            foreach (ItemInfo rwi in quest.RewardItems)
+                if (!BackpackManager.Instance.TryGetItem_Boolean(rwi))
+                    return false;
+            List<Quest> questsReqThisQuestItem = new List<Quest>();
+            foreach (Objective o in quest.Objectives)
+            {
+                if (o is CollectObjective)
+                {
+                    CollectObjective co = o as CollectObjective;
+                    questsReqThisQuestItem = BackpackManager.Instance.QuestsRequiredItem(co.Item,
+                        BackpackManager.Instance.GetItemAmountByItem(co.Item) - o.Amount).ToList();
+                }
+                if (questsReqThisQuestItem.Contains(quest))
+                {
+                    questsReqThisQuestItem.Remove(quest);
+                    if (questsReqThisQuestItem.Count > 0)
+                    {
+                        MessageManager.Instance.NewMessage("其他任务对该任务需提交物品有需求");
+                        return false;
+                    }
+                }
+            }
+        }
         if (HasQuest(quest) && quest.IsComplete)
         {
             quest.IsOngoing = false;
@@ -251,7 +277,7 @@ public class QuestManager : MonoBehaviour
                 {
                     cqa = ObjectPool.Instance.Get(UI.questPrefab, cqga.questListParent).GetComponent<QuestAgent>();
                     cqga.questAgents.Add(cqa);
-                    cqga.UpdateGroupStatus();
+                    cqga.UpdateStatus();
                 }
                 else
                 {
@@ -262,7 +288,7 @@ public class QuestManager : MonoBehaviour
 
                     cqa = ObjectPool.Instance.Get(UI.questPrefab, cqga.questListParent).GetComponent<QuestAgent>();
                     cqga.questAgents.Add(cqa);
-                    cqga.UpdateGroupStatus();
+                    cqga.UpdateStatus();
                 }
             }
             else cqa = ObjectPool.Instance.Get(UI.questPrefab, UI.cmpltQuestListParent).GetComponent<QuestAgent>();
@@ -273,9 +299,9 @@ public class QuestManager : MonoBehaviour
                 if (o is CollectObjective)
                 {
                     CollectObjective co = o as CollectObjective;
-                    BagManager.Instance.OnGetItemEvent -= co.UpdateCollectAmountUp;
-                    BagManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
-                    if (!loadMode && co.LoseItemAtSbmt) BagManager.Instance.LoseItemByID(co.Item.ID, o.Amount);
+                    BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmountUp;
+                    BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
+                    if (!loadMode && co.LoseItemAtSbmt) BackpackManager.Instance.LoseItem(co.Item, o.Amount);
                 }
                 if (o is KillObjective)
                 {
@@ -297,7 +323,7 @@ public class QuestManager : MonoBehaviour
             if (!loadMode)
                 foreach (ItemInfo info in quest.RewardItems)
                 {
-                    BagManager.Instance.GetItem(info.Item);
+                    BackpackManager.Instance.GetItem(info);
                 }
             //TODO 经验和金钱的处理
             CloseDescriptionWindow();
@@ -323,36 +349,31 @@ public class QuestManager : MonoBehaviour
         }
         questAgent.Select();
         SelectedQuest = questAgent.MQuest;
-        UpdateObjectivesUI();
-        UI.money_EXPText.text = string.Format("[奖励]\n<size=14>经验:\n{0}\n金币:\n{1}</size>",
-            questAgent.MQuest.RewardEXP > 0 ? questAgent.MQuest.RewardEXP.ToString() : "无",
-            questAgent.MQuest.RewardMoney > 0 ? questAgent.MQuest.RewardMoney.ToString() : "无");
+        UpdateUI();
+        UI.moneyText.text = SelectedQuest.RewardMoney > 0 ? SelectedQuest.RewardMoney.ToString() : "无";
+        UI.EXPText.text = SelectedQuest.RewardEXP > 0 ? SelectedQuest.RewardEXP.ToString() : "无";
         foreach (ItemAgent rwc in UI.rewardCells)
-        {
-            rwc.Item = null;
-            rwc.Icon.overrideSprite = null;
-        }
-        foreach (ItemInfo info in questAgent.MQuest.RewardItems)
+            rwc.Clear();
+        foreach (ItemInfo info in SelectedQuest.RewardItems)
             foreach (ItemAgent rwc in UI.rewardCells)
             {
-                if (rwc.Item == null)
+                if (rwc.itemInfo == null)
                 {
-                    rwc.Item = info.Item;
-                    rwc.Icon.overrideSprite = info.Item.Icon;
+                    rwc.Init(info);
                     break;
                 }
             }
         MyTools.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
     }
 
-    public void UpdateObjectivesUI()
+    public void UpdateUI()
     {
         foreach (QuestAgent qa in questAgents)
-            qa.UpdateQuestStatus();
+            qa.UpdateStatus();
         foreach (QuestBoardAgent qba in questBoardAgents)
-            qba.UpdateQuestStatus();
+            qba.UpdateStatus();
         foreach (QuestGroupAgent qga in questGroupAgents)
-            qga.UpdateGroupStatus();
+            qga.UpdateStatus();
         if (SelectedQuest == null) return;
         string objectives = string.Empty;
         QuestAgent cqa = completeQuestAgents.Find(x => x.MQuest == SelectedQuest);
@@ -408,24 +429,53 @@ public class QuestManager : MonoBehaviour
         UI.descriptionWindow.blocksRaycasts = true;
     }
 
-    public void CloseQuestWindow()
+    public void CloseUI()
     {
+        if (IsPausing) return;
         UI.questsWindow.alpha = 0;
         UI.questsWindow.blocksRaycasts = false;
         CloseDescriptionWindow();
+        IsUIOpen = false;
     }
-    public void OpenQuestWindow()
+    public void OpenUI()
     {
+        if (IsPausing) return;
         UI.questsWindow.alpha = 1;
         UI.questsWindow.blocksRaycasts = true;
         DialogueManager.Instance.CloseQuestDescriptionWindow();
+        WindowsManager.Instance.PushWindow(this);
+        IsUIOpen = true;
     }
-    public void SwitchQuestWindow()
+    public void OpenCloseUI()
     {
         if (UI.questsWindow.alpha == 0)
-            OpenQuestWindow();
-        else CloseQuestWindow();
+            OpenUI();
+        else CloseUI();
     }
+
+    public void PauseDisplay(bool state)
+    {
+        if (!IsUIOpen) return;
+        if (!state)
+        {
+            UI.questsWindow.alpha = 1;
+            UI.questsWindow.blocksRaycasts = true;
+            UI.descriptionWindow.alpha = 1;
+            UI.descriptionWindow.blocksRaycasts = true;
+        }
+        else
+        {
+            UI.questsWindow.alpha = 0;
+            UI.questsWindow.blocksRaycasts = false;
+            UI.descriptionWindow.alpha = 0;
+            UI.descriptionWindow.blocksRaycasts = false;
+        }
+        IsPausing = state;
+    }
+
+    public bool IsPausing { get; private set; }
+    public bool IsUIOpen { get; private set; }
+
     #endregion
 
     #region 其它
@@ -464,7 +514,7 @@ public class QuestManager : MonoBehaviour
                 }
             }
             questAgents.Remove(qa);
-            qa.Recycle();
+            qa.OnRecycle();
         }
     }
 

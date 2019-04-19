@@ -33,10 +33,10 @@ public class QuestGroupAgent : MonoBehaviour
             MyTools.SetActive(questListParent.gameObject, true);
             isExpanded = true;
         }
-        UpdateGroupStatus();
+        UpdateStatus();
     }
 
-    public void UpdateGroupStatus()
+    public void UpdateStatus()
     {
         if (questGroup)
             nameText.text = questGroup.Name + (isExpanded ? "<" : ">");

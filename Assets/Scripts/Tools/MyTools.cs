@@ -230,27 +230,29 @@ public class MyTools
 }
 
 [Serializable]
-public class ScopeMumber
+public class ScopeInt
 {
+    [SerializeField]
     private int min;
     public int Min
     {
         get { return min; }
         set
         {
-            if (value < 0) min = 0;
+            if (max < value) min = max;
             else min = value;
         }
     }
 
+    [SerializeField]
     private int max;
     public int Max
     {
-        get{ return max; }
+        get { return max; }
         set
         {
             if (value < 0) max = 0;
-            else if (value < min) max = min;
+            else if (value < min) max = min + 1;
             else max = value;
         }
     }
@@ -271,19 +273,19 @@ public class ScopeMumber
         }
     }
 
-    public ScopeMumber()
+    public ScopeInt()
     {
         Min = 0;
         Max = 1;
     }
 
-    public ScopeMumber(int min, int max)
+    public ScopeInt(int min, int max)
     {
         Min = min;
         Max = max;
     }
 
-    public ScopeMumber(int max)
+    public ScopeInt(int max)
     {
         Min = 0;
         Max = max;
@@ -303,5 +305,604 @@ public class ScopeMumber
         {
             return current == Min;
         }
+    }
+
+    public void ToMin()
+    {
+        Current = Min;
+    }
+
+    public void ToMax()
+    {
+        Current = Max;
+    }
+
+    public int Rest { get { return Max - Current; } }
+    /// <summary>
+    /// 四分之一
+    /// </summary>
+    public int Quarter { get { return Max / 4; } }
+
+    public int Half { get { return Max / 2; } }
+
+    public int Three_Fourth { get { return (int)(Max * 0.75f); } }
+
+    public int One_Third { get { return Max / 3; } }
+
+    #region 运算符重载
+    #region 加减乘除
+    public static ScopeInt operator +(ScopeInt left, int right)
+    {
+        return new ScopeInt(left.Min, left.Max) { Current = left.Current + right };
+    }
+    public static ScopeInt operator -(ScopeInt left, int right)
+    {
+        return new ScopeInt(left.Min, left.Max) { Current = left.Current - right };
+    }
+    public static ScopeInt operator +(ScopeInt left, float right)
+    {
+        return new ScopeInt(left.Min, left.Max) { Current = (int)(left.Current + right) };
+    }
+    public static ScopeInt operator -(ScopeInt left, float right)
+    {
+        return new ScopeInt(left.Min, left.Max) { Current = (int)(left.Current - right) };
+    }
+    public static int operator +(int left, ScopeInt right)
+    {
+        return left + right.Current;
+    }
+    public static int operator -(int left, ScopeInt right)
+    {
+        return left - right.Current;
+    }
+    public static float operator +(float left, ScopeInt right)
+    {
+        return left + right.Current;
+    }
+    public static float operator -(float left, ScopeInt right)
+    {
+        return left - right.Current;
+    }
+
+
+    public static ScopeInt operator *(ScopeInt left, int right)
+    {
+        return new ScopeInt(left.Min, left.Max) { Current = left.Current * right };
+    }
+    public static ScopeInt operator /(ScopeInt left, int right)
+    {
+        return new ScopeInt(left.Min, left.Max) { Current = left.Current * right };
+    }
+    public static ScopeInt operator *(ScopeInt left, float right)
+    {
+        return new ScopeInt(left.Min, left.Max) { Current = (int)(left.Current * right) };
+    }
+    public static ScopeInt operator /(ScopeInt left, float right)
+    {
+        return new ScopeInt(left.Min, left.Max) { Current = (int)(left.Current / right) };
+    }
+    public static int operator *(int left, ScopeInt right)
+    {
+        return left * right.Current;
+    }
+    public static int operator /(int left, ScopeInt right)
+    {
+        return left / right.Current;
+    }
+    public static float operator *(float left, ScopeInt right)
+    {
+        return left * right.Current;
+    }
+    public static float operator /(float left, ScopeInt right)
+    {
+        return left / right.Current;
+    }
+
+
+    public static ScopeInt operator ++(ScopeInt original)
+    {
+        original.Current++;
+        return original;
+    }
+    public static ScopeInt operator --(ScopeInt original)
+    {
+        original.Current--;
+        return original;
+    }
+    #endregion
+
+    #region 大于、小于
+    public static bool operator >(ScopeInt left, int right)
+    {
+        return left.Current > right;
+    }
+    public static bool operator <(ScopeInt left, int right)
+    {
+        return left.Current < right;
+    }
+    public static bool operator >(ScopeInt left, float right)
+    {
+        return left.Current > right;
+    }
+    public static bool operator <(ScopeInt left, float right)
+    {
+        return left.Current < right;
+    }
+    public static bool operator >(int left, ScopeInt right)
+    {
+        return left > right.Current;
+    }
+    public static bool operator <(int left, ScopeInt right)
+    {
+        return left < right.Current;
+    }
+    public static bool operator >(float left, ScopeInt right)
+    {
+        return left > right.Current;
+    }
+    public static bool operator <(float left, ScopeInt right)
+    {
+        return left < right.Current;
+    }
+    #endregion
+
+    #region 大于等于、小于等于
+    public static bool operator >=(ScopeInt left, int right)
+    {
+        return left.Current >= right;
+    }
+    public static bool operator <=(ScopeInt left, int right)
+    {
+        return left.Current <= right;
+    }
+    public static bool operator >=(ScopeInt left, float right)
+    {
+        return left.Current >= right;
+    }
+    public static bool operator <=(ScopeInt left, float right)
+    {
+        return left.Current <= right;
+    }
+    public static bool operator >=(int left, ScopeInt right)
+    {
+        return left >= right.Current;
+    }
+    public static bool operator <=(int left, ScopeInt right)
+    {
+        return left <= right.Current;
+    }
+    public static bool operator >=(float left, ScopeInt right)
+    {
+        return left >= right.Current;
+    }
+    public static bool operator <=(float left, ScopeInt right)
+    {
+        return left <= right.Current;
+    }
+    #endregion
+
+    #region 等于、不等于
+    public static bool operator ==(ScopeInt left, int right)
+    {
+        return left.Current == right;
+    }
+    public static bool operator !=(ScopeInt left, int right)
+    {
+        return left.Current != right;
+    }
+    public static bool operator ==(ScopeInt left, float right)
+    {
+        return left.Current == right;
+    }
+    public static bool operator !=(ScopeInt left, float right)
+    {
+        return left.Current != right;
+    }
+    public static bool operator ==(int left, ScopeInt right)
+    {
+        return left == right.Current;
+    }
+    public static bool operator !=(int left, ScopeInt right)
+    {
+        return left != right.Current;
+    }
+    public static bool operator ==(float left, ScopeInt right)
+    {
+        return left == right.Current;
+    }
+    public static bool operator !=(float left, ScopeInt right)
+    {
+        return left != right.Current;
+    }
+    #endregion
+
+    public static explicit operator float(ScopeInt original)
+    {
+        return original.Current;
+    }
+    public static explicit operator int(ScopeInt original)
+    {
+        return original.Current;
+    }
+    public override bool Equals(object obj)
+    {
+        return base.Equals(obj);
+    }
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
+    #endregion
+
+    public override string ToString()
+    {
+        return Current + "/" + Max;
+    }
+
+    public string ToString(string format)
+    {
+        if (format == "//") return Min + "/" + Current + "/" + Max;
+        else if (format == "[/]") return "[" + Current + "/" + Max + "]";
+        else if (format == "[//]") return "[" + Min + "/" + Current + "/" + Max + "]";
+        else if (format == "(/)") return "(" + Current + "/" + Max + ")";
+        else if (format == "(//)") return "(" + Min + "/" + Current + "/" + Max + ")";
+        else return ToString();
+    }
+
+    public string ToString(string star, string split, string end, bool showMin = false)
+    {
+        if (showMin)
+        {
+            return star + Min + split + Current + split + Max + end;
+        }
+        return star + Min + split + Current + split + Max + end;
+    }
+}
+
+[Serializable]
+public class ScopeFloat
+{
+    [SerializeField]
+    private float min;
+    public float Min
+    {
+        get { return min; }
+        set
+        {
+            if (max < value) min = max;
+            else min = value;
+        }
+    }
+
+    [SerializeField]
+    private float max;
+    public float Max
+    {
+        get { return max; }
+        set
+        {
+            if (value < 0) max = 0;
+            else if (value < min) max = min + 1;
+            else max = value;
+        }
+    }
+
+    private float current;
+    public float Current
+    {
+        get
+        {
+            return current;
+        }
+
+        set
+        {
+            if (value > Max) current = Max;
+            else if (value < Min) current = Min;
+            else current = value;
+        }
+    }
+
+    public ScopeFloat()
+    {
+        Min = 0;
+        Max = 1;
+    }
+
+    public ScopeFloat(float min, float max)
+    {
+        Min = min;
+        Max = max;
+    }
+
+    public ScopeFloat(float max)
+    {
+        Min = 0;
+        Max = max;
+    }
+
+    public bool IsMax
+    {
+        get
+        {
+            return current == Max;
+        }
+    }
+
+    public bool IsMin
+    {
+        get
+        {
+            return current == Min;
+        }
+    }
+
+    /// <summary>
+    /// 余下部分
+    /// </summary>
+    public float Rest { get { return Max - Current; } }
+
+    public void ToMin()
+    {
+        Current = Min;
+    }
+
+    public void ToMax()
+    {
+        Current = Max;
+    }
+
+    /// <summary>
+    /// 四分之一
+    /// </summary>
+    public float Quarter { get { return Max * 0.25f; } }
+
+    public float Half { get { return Max * 0.5f; } }
+
+    public float Three_Fourth { get { return Max * 0.75f; } }
+
+    public float One_Third { get { return Max / 3; } }
+
+    #region 运算符重载
+    #region 加减乘除
+    public static ScopeFloat operator +(ScopeFloat left, int right)
+    {
+        return new ScopeFloat(left.Min, left.Max) { Current = left.Current + right };
+    }
+    public static ScopeFloat operator -(ScopeFloat left, int right)
+    {
+        return new ScopeFloat(left.Min, left.Max) { Current = left.Current - right };
+    }
+    public static ScopeFloat operator +(ScopeFloat left, float right)
+    {
+        return new ScopeFloat(left.Min, left.Max) { Current = left.Current + right };
+    }
+    public static ScopeFloat operator -(ScopeFloat left, float right)
+    {
+        return new ScopeFloat(left.Min, left.Max) { Current = left.Current - right };
+    }
+    public static int operator +(int left, ScopeFloat right)
+    {
+        return (int)(left + right.Current);
+    }
+    public static int operator -(int left, ScopeFloat right)
+    {
+        return (int)(left - right.Current);
+    }
+    public static float operator +(float left, ScopeFloat right)
+    {
+        return left + right.Current;
+    }
+    public static float operator -(float left, ScopeFloat right)
+    {
+        return left - right.Current;
+    }
+
+    public static ScopeFloat operator *(ScopeFloat left, int right)
+    {
+        return new ScopeFloat(left.Min, left.Max) { Current = left.Current * right };
+    }
+    public static ScopeFloat operator /(ScopeFloat left, int right)
+    {
+        return new ScopeFloat(left.Min, left.Max) { Current = left.Current / right };
+    }
+    public static ScopeFloat operator *(ScopeFloat left, float right)
+    {
+        return new ScopeFloat(left.Min, left.Max) { Current = left.Current * right };
+    }
+    public static ScopeFloat operator /(ScopeFloat left, float right)
+    {
+        return new ScopeFloat(left.Min, left.Max) { Current = left.Current / right };
+    }
+    public static int operator *(int left, ScopeFloat right)
+    {
+        return (int)(left * right.Current);
+    }
+    public static int operator /(int left, ScopeFloat right)
+    {
+        return (int)(left / right.Current);
+    }
+    public static float operator *(float left, ScopeFloat right)
+    {
+        return left * right.Current;
+    }
+    public static float operator /(float left, ScopeFloat right)
+    {
+        return left / right.Current;
+    }
+
+    public static ScopeFloat operator ++(ScopeFloat original)
+    {
+        original.Current++;
+        return original;
+    }
+    public static ScopeFloat operator --(ScopeFloat original)
+    {
+        original.Current--;
+        return original;
+    }
+    #endregion
+
+    #region 大于、小于
+    public static bool operator >(ScopeFloat left, int right)
+    {
+        return left.Current > right;
+    }
+    public static bool operator <(ScopeFloat left, int right)
+    {
+        return left.Current < right;
+    }
+    public static bool operator >(ScopeFloat left, float right)
+    {
+        return left.Current > right;
+    }
+    public static bool operator <(ScopeFloat left, float right)
+    {
+        return left.Current < right;
+    }
+    public static bool operator >(int left, ScopeFloat right)
+    {
+        return left > right.Current;
+    }
+    public static bool operator <(int left, ScopeFloat right)
+    {
+        return left < right.Current;
+    }
+    public static bool operator >(float left, ScopeFloat right)
+    {
+        return left > right.Current;
+    }
+    public static bool operator <(float left, ScopeFloat right)
+    {
+        return left < right.Current;
+    }
+    #endregion
+
+    #region 大于等于、小于等于
+    public static bool operator >=(ScopeFloat left, int right)
+    {
+        return left.Current >= right;
+    }
+    public static bool operator <=(ScopeFloat left, int right)
+    {
+        return left.Current <= right;
+    }
+    public static bool operator >=(ScopeFloat left, float right)
+    {
+        return left.Current >= right;
+    }
+    public static bool operator <=(ScopeFloat left, float right)
+    {
+        return left.Current <= right;
+    }
+    public static bool operator >=(int left, ScopeFloat right)
+    {
+        return left >= right.Current;
+    }
+    public static bool operator <=(int left, ScopeFloat right)
+    {
+        return left <= right.Current;
+    }
+    public static bool operator >=(float left, ScopeFloat right)
+    {
+        return left >= right.Current;
+    }
+    public static bool operator <=(float left, ScopeFloat right)
+    {
+        return left <= right.Current;
+    }
+    #endregion
+
+    #region 等于、不等于
+    public static bool operator ==(ScopeFloat left, int right)
+    {
+        return left.Current == right;
+    }
+    public static bool operator !=(ScopeFloat left, int right)
+    {
+        return left.Current != right;
+    }
+    public static bool operator ==(ScopeFloat left, float right)
+    {
+        return left.Current == right;
+    }
+    public static bool operator !=(ScopeFloat left, float right)
+    {
+        return left.Current != right;
+    }
+    public static bool operator ==(int left, ScopeFloat right)
+    {
+        return left == right.Current;
+    }
+    public static bool operator !=(int left, ScopeFloat right)
+    {
+        return left != right.Current;
+    }
+    public static bool operator ==(float left, ScopeFloat right)
+    {
+        return left == right.Current;
+    }
+    public static bool operator !=(float left, ScopeFloat right)
+    {
+        return left != right.Current;
+    }
+    #endregion
+    public static explicit operator float(ScopeFloat original)
+    {
+        return original.Current;
+    }
+    public static explicit operator int(ScopeFloat original)
+    {
+        return (int)original.Current;
+    }
+    public override bool Equals(object obj)
+    {
+        return base.Equals(obj);
+    }
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
+    #endregion
+
+    public override string ToString()
+    {
+        return Current.ToString() + "/" + Max.ToString();
+    }
+
+    public string ToString(string format)
+    {
+        string amount = Regex.Replace(format, @"[^F^0-9]+", "");
+        if (format.Contains("//"))
+        {
+            return Min.ToString(amount) + "/" + Current.ToString(amount) + "/" + Max.ToString(amount);
+        }
+        else if (format == "[/]")
+        {
+            return "[" + Current.ToString(amount) + "/" + Max.ToString(amount) + "]";
+        }
+        else if (format == "[//]")
+        {
+            return "[" + Min.ToString(amount) + "/" + Current.ToString(amount) + "/" + Max.ToString(amount) + "]";
+        }
+        else if (format == "(/)")
+        {
+            return "(" + Current.ToString(amount) + "/" + Max.ToString(amount) + ")";
+        }
+        else if (format == "(//)")
+        {
+            return "(" + Min.ToString(amount) + "/" + Current.ToString(amount) + "/" + Max.ToString(amount) + ")";
+        }
+        else if (!string.IsNullOrEmpty(amount)) return Current.ToString(amount) + "/" + Max.ToString(amount);
+        else return ToString();
+    }
+
+    public string ToString(string star, string split, string end, int decimalDigit, bool showMin = false)
+    {
+        if (showMin)
+        {
+            return star + Min.ToString("F" + decimalDigit) + split + Current.ToString("F" + decimalDigit) + split + Max.ToString("F" + decimalDigit) + end;
+        }
+        return star + Min.ToString("F" + decimalDigit) + split + Current.ToString("F" + decimalDigit) + split + Max.ToString("F" + decimalDigit) + end;
     }
 }

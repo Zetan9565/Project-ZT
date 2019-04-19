@@ -17,8 +17,10 @@ public class QuestUIInspector : Editor
     SerializedProperty descriptionText;
     SerializedProperty abandonButton;
     SerializedProperty closeDescription;
-    SerializedProperty money_EXPText;
-    SerializedProperty rewardCells;
+    SerializedProperty moneyText;
+    SerializedProperty EXPText;
+    SerializedProperty rewardCellPrefab;
+    SerializedProperty rewardCellsParent;
     SerializedProperty boardQuestPrefab;
     SerializedProperty questBoardArea;
 
@@ -37,8 +39,10 @@ public class QuestUIInspector : Editor
         descriptionText = serializedObject.FindProperty("descriptionText");
         abandonButton = serializedObject.FindProperty("abandonButton");
         closeDescription = serializedObject.FindProperty("closeDescription");
-        money_EXPText = serializedObject.FindProperty("money_EXPText");
-        rewardCells = serializedObject.FindProperty("rewardCells");
+        moneyText = serializedObject.FindProperty("moneyText");
+        EXPText = serializedObject.FindProperty("EXPText");
+        rewardCellPrefab = serializedObject.FindProperty("rewardCellPrefab");
+        rewardCellsParent = serializedObject.FindProperty("rewardCellsParent");
         boardQuestPrefab = serializedObject.FindProperty("boardQuestPrefab");
         questBoardArea = serializedObject.FindProperty("questBoardArea");
     }
@@ -62,8 +66,10 @@ public class QuestUIInspector : Editor
         EditorGUILayout.PropertyField(descriptionText, new GUIContent("任务描述文字"));
         EditorGUILayout.PropertyField(abandonButton, new GUIContent("放弃按钮"));
         EditorGUILayout.PropertyField(closeDescription, new GUIContent("关闭详情窗口"));
-        EditorGUILayout.PropertyField(money_EXPText, new GUIContent("金钱和经验奖励文本"));
-        EditorGUILayout.PropertyField(rewardCells, new GUIContent("道具奖励展示槽"), true);
+        EditorGUILayout.PropertyField(moneyText, new GUIContent("金钱奖励文本"));
+        EditorGUILayout.PropertyField(EXPText, new GUIContent("经验奖励文本"));
+        EditorGUILayout.PropertyField(rewardCellPrefab, new GUIContent("道具奖励格预制体"), true);
+        EditorGUILayout.PropertyField(rewardCellsParent, new GUIContent("道具奖励放置根"), true);
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");

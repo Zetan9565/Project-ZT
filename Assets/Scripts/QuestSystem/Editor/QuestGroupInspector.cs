@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 [CustomEditor(typeof(QuestGroup))]
 public class QuestGroupInspector : Editor
@@ -57,31 +58,24 @@ public class QuestGroupInspector : Editor
 
     private bool ExistsID()
     {
-        List<QuestGroup> groups = new List<QuestGroup>();
-        foreach (QuestGroup item in Resources.LoadAll<QuestGroup>(""))
-        {
-            groups.Add(item);
-        }
+        QuestGroup[] groups = Resources.LoadAll<QuestGroup>("");
 
-        QuestGroup find = groups.Find(x => x.ID == _ID.stringValue);
+        QuestGroup find = Array.Find(groups, x => x.ID == _ID.stringValue);
         if (!find) return false;//若没有找到，则ID可用
         //找到的对象不是原对象 或者 找到的对象虽是原对象但同ID超过一个 时为true
-        return find != group || (find == group && groups.FindAll(x => x.ID == _ID.stringValue).Count > 1);
+        return find != group || (find == group && Array.FindAll(groups, x => x.ID == _ID.stringValue).Length > 1);
     }
 
     private void ShowGroupQuests()
     {
-        List<Quest> quests = new List<Quest>();
-        foreach (Quest quest in Resources.LoadAll<Quest>(""))
-        {
-            if (quest.Group == group)
-                quests.Add(quest);
-        }
+        Quest[] quests = Resources.LoadAll<Quest>("").Where(x=>x.Group == group).ToArray();
 
-        if (quests.Count > 0)
+        if (quests.Length > 0)
         {
-            EditorGUILayout.BeginVertical("Box");
+            Array.Sort(quests, (x, y) => string.Compare(x.ID, y.ID));
+
             EditorGUILayout.LabelField("组内任务");
+            EditorGUILayout.BeginVertical("Box");
             foreach (Quest quest in quests)
             {
                 EditorGUILayout.LabelField(quest.Title);

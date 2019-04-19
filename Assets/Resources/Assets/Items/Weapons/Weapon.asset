@@ -20,14 +20,36 @@ MonoBehaviour:
   sellAble: 1
   sellPrice: 0
   buyPrice: 0
-  icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  description: 
+  icon: {fileID: 21300000, guid: eb5f6e2757c821940b69cf1456f7865a, type: 3}
+  description: "\u7834\u7684\u4E00\u5339\u7684\u5251\u72B6\u7269\u3002"
+  stackAble: 0
   discardAble: 1
+  useable: 1
   inexhaustible: 0
+  maxDurability: 100
   processMethod: 2
   materials:
   - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
     amount: 1
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
     currentAmount: 0
     processType: 0
     materialType: 1
+  _ATK: 10
+  _DEF: 0
+  hit: 5
+  gemSlotAmount: 0
+  powerup:
+    _ATK_Add: 0
+    _DEF_Add: 0
+    hit_Add: 0
+    dodge_Add: 0
+    crit_Add: 0
+    _HP_Add: 0
+    _MP_Add: 10
+    weightLoadAdd: 0
+    _EXP_AddPer: 10
+    liveEXP_AddPer: 5

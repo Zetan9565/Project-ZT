@@ -133,8 +133,8 @@ public class Quest : ScriptableObject
         }
     }
     [SerializeField]
-    private NPCInfomation _NPCToSubmit;
-    public NPCInfomation NPCToSubmit
+    private TalkerInfomation _NPCToSubmit;
+    public TalkerInfomation NPCToSubmit
     {
         get
         {
@@ -244,17 +244,17 @@ public class Quest : ScriptableObject
     /// <summary>
     /// 判断该任务是否需要某个道具，用于丢弃某个道具时，判断能不能丢
     /// </summary>
-    /// <param name="itemID">所需判定的道具</param>
+    /// <param name="item">所需判定的道具</param>
     /// <param name="leftAmount">所需判定的数量</param>
     /// <returns>是否需要</returns>
-    public bool RequiredItem(string itemID, int leftAmount)
+    public bool RequiredItem(ItemBase item, int leftAmount)
     {
         if (CmpltObjctvInOrder)
         {
             foreach (Objective o in Objectives)
             {
                 //当目标是收集类目标时才进行判断
-                if (o is CollectObjective && itemID == (o as CollectObjective).Item.ID)
+                if (o is CollectObjective && item == (o as CollectObjective).Item)
                 {
                     if (o.IsComplete && o.InOrder)
                     {
@@ -355,7 +355,7 @@ public class QuestAcceptCondition
             switch (AcceptCondition)
             {
                 case QuestCondition.ComplexQuest: return QuestManager.Instance.HasCmpltQuestWithID(CompleteQuest.ID);
-                case QuestCondition.HasItem: return BagManager.Instance.HasItemWithID(OwnedItem.ID);
+                case QuestCondition.HasItem: return BackpackManager.Instance.HasItemWithID(OwnedItem.ID);
                 default: return true;
             }
         }
@@ -462,11 +462,11 @@ public abstract class Objective
     [HideInInspector]
     public Quest runtimeParent;
 
-    protected virtual void UpdateAmountUp()
+    protected virtual void UpdateAmountUp(int amount = 1)
     {
         if (IsComplete) return;
-        if (!InOrder) CurrentAmount++;
-        else if (AllPrevObjCmplt) CurrentAmount++;
+        if (!InOrder) CurrentAmount += amount;
+        else if (AllPrevObjCmplt) CurrentAmount += amount;
         if (CurrentAmount > 0)
         {
             string message = DisplayName + (IsComplete ? "(完成)" : "[" + currentAmount + "/" + Amount + "]");
@@ -521,7 +521,7 @@ public abstract class Objective
             if (tempObj is CollectObjective)
             {
                 co = tempObj as CollectObjective;
-                co.CurrentAmount = BagManager.Instance.GetItemAmountByID(co.Item.ID);
+                co.CurrentAmount = BackpackManager.Instance.GetItemAmountByID(co.Item.ID);
             }
             tempObj = tempObj.NextObjective;
             co = null;
@@ -563,20 +563,17 @@ public class CollectObjective : Objective
         }
     }
 
-    public void UpdateCollectAmountUp(string itemID, int leftAmount)//得道具时用到
+    public void UpdateCollectAmountUp(ItemBase item, int leftAmount)//得道具时用到
     {
-        if (itemID == Item.ID)
+        if (item == Item)
         {
-            for (int i = 0; i < leftAmount; i++)
-            {
-                UpdateAmountUp();
-            }
+            UpdateAmountUp(leftAmount);
         }
     }
 
-    public void UpdateCollectAmountDown(string itemID, int leftAmount)//丢道具时用到
+    public void UpdateCollectAmountDown(ItemBase item, int leftAmount)//丢道具时用到
     {
-        if (itemID == Item.ID)
+        if (item == Item)
         {
             //前置目标都完成且没有后置目标在进行时，才允许更新
             if (AllPrevObjCmplt && !HasNextObjOngoing) CurrentAmount = leftAmount;
@@ -621,8 +618,8 @@ public class KillObjective : Objective
 public class TalkObjective : Objective
 {
     [SerializeField]
-    private NPCInfomation talker;
-    public NPCInfomation Talker
+    private TalkerInfomation talker;
+    public TalkerInfomation Talker
     {
         get
         {

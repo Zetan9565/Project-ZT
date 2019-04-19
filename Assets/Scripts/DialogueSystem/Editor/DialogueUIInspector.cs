@@ -22,8 +22,10 @@ public class DialogueUIInspector : Editor
     SerializedProperty questButton;
     SerializedProperty descriptionWindow;
     SerializedProperty descriptionText;
-    SerializedProperty money_EXPText;
-    SerializedProperty rewardCells;
+    SerializedProperty moneyText;
+    SerializedProperty EXPText;
+    SerializedProperty rewardCellPrefab;
+    SerializedProperty rewardCellsParent;
 
     private void OnEnable()
     {
@@ -45,8 +47,10 @@ public class DialogueUIInspector : Editor
         questButton = serializedObject.FindProperty("questButton");
         descriptionWindow = serializedObject.FindProperty("descriptionWindow");
         descriptionText = serializedObject.FindProperty("descriptionText");
-        money_EXPText = serializedObject.FindProperty("money_EXPText");
-        rewardCells = serializedObject.FindProperty("rewardCells");
+        moneyText = serializedObject.FindProperty("moneyText");
+        EXPText = serializedObject.FindProperty("EXPText");
+        rewardCellPrefab = serializedObject.FindProperty("rewardCellPrefab");
+        rewardCellsParent = serializedObject.FindProperty("rewardCellsParent");
     }
 
     public override void OnInspectorGUI()
@@ -76,8 +80,10 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.PropertyField(questButton, new GUIContent("任务按钮"));
         EditorGUILayout.PropertyField(descriptionWindow, new GUIContent("任务描述窗口"));
         EditorGUILayout.PropertyField(descriptionText, new GUIContent("任务描述文字"));
-        EditorGUILayout.PropertyField(money_EXPText, new GUIContent("金钱及经验奖励文字"));
-        EditorGUILayout.PropertyField(rewardCells, new GUIContent("道具奖励展示槽"), true);
+        EditorGUILayout.PropertyField(moneyText, new GUIContent("金钱奖励文字"));
+        EditorGUILayout.PropertyField(EXPText, new GUIContent("经验奖励文字"));
+        EditorGUILayout.PropertyField(rewardCellPrefab, new GUIContent("道具奖励格预制体"), true);
+        EditorGUILayout.PropertyField(rewardCellsParent, new GUIContent("道具奖励放置根"), true);
         EditorGUILayout.EndVertical();
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();

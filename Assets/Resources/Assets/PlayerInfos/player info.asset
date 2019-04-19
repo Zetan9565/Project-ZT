@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e0a1f3f2f4c5ec47a308df4438d8644, type: 3}
+  m_Name: player info
+  m_EditorClassIdentifier: 
+  _ID: PLAY001
+  _Name: "\u674E\u9A81"
+  sex: 1
+  backpack:
+    backpackSize:
+      min: 0
+      max: 48
+    weightLoad:
+      min: 0
+      max: 100

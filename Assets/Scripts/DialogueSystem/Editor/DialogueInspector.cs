@@ -14,7 +14,7 @@ public class DialogueInspector : Editor
     float lineHeight;
     float lineHeightSpace;
 
-    NPCInfomation[] npcs;
+    TalkerInfomation[] npcs;
     string[] npcNames;
 
     //bool showOriginal = false;
@@ -23,7 +23,7 @@ public class DialogueInspector : Editor
 
     private void OnEnable()
     {
-        npcs = Resources.LoadAll<NPCInfomation>("");
+        npcs = Resources.LoadAll<TalkerInfomation>("");
         npcNames = npcs.Select(x => x.Name).ToArray();//Linq分离出NPC名字
 
         lineHeight = EditorGUIUtility.singleLineHeight;
@@ -38,7 +38,7 @@ public class DialogueInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        if (dialogue.Words.Exists(x => !x.TalkerInfo || string.IsNullOrEmpty(x.Words)))
+        if (dialogue.Words.Exists(x => x.TalkerType == TalkerType.NPC && (!x.TalkerInfo || string.IsNullOrEmpty(x.Words))))
             EditorGUILayout.HelpBox("该对话存在未补全语句。", MessageType.Warning);
         else
             EditorGUILayout.HelpBox("该对话已完整。", MessageType.Info);
@@ -65,25 +65,34 @@ public class DialogueInspector : Editor
         {
             serializedObject.Update();
             SerializedProperty wordsSP = this.words.GetArrayElementAtIndex(index);
+            SerializedProperty talkerType = wordsSP.FindPropertyRelative("talkerType");
             SerializedProperty talkerInfo = wordsSP.FindPropertyRelative("talkerInfo");
             SerializedProperty words = wordsSP.FindPropertyRelative("words");
 
             EditorGUI.BeginChangeCheck();
-            string talkerName = dialogue.Words[index] == null ? "(空)" : !dialogue.Words[index].TalkerInfo ? "(空谈话人)" : dialogue.Words[index].TalkerName + "说：";
+            string talkerName;
+            if (talkerType.enumValueIndex == (int)TalkerType.NPC)
+                talkerName = dialogue.Words[index] == null ? "(空)" : !dialogue.Words[index].TalkerInfo ? "(空谈话人)" : dialogue.Words[index].TalkerName;
+            else talkerName = "玩家";
             EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talkerName);
 
-            if (dialogue.Words[index].TalkerInfo) talkerInfo.objectReferenceValue =
-                npcs[EditorGUI.Popup(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight), GetNPCIndex(dialogue.Words[index].TalkerInfo), this.npcNames)];
-            else if (npcs.Length > 0) talkerInfo.objectReferenceValue =
-                 npcs[EditorGUI.Popup(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight), 0, this.npcNames)];
-            else EditorGUI.Popup(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight), 0, new string[] { "无可用谈话人" });
-
-            GUI.enabled = false;
-            EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y + lineHeight + 3, rect.width / 2f, lineHeight),
-                talkerInfo, new GUIContent(string.Empty));
-            GUI.enabled = true;
-
-            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeight + 10, rect.width, lineHeight * 4),
+            EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, lineHeight), talkerType, new GUIContent(string.Empty));
+            int lineCount = 1;
+            if (talkerType.enumValueIndex == (int)TalkerType.NPC)
+            {
+                if (dialogue.Words[index].TalkerInfo) talkerInfo.objectReferenceValue =
+                    npcs[EditorGUI.Popup(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "谈话人", GetNPCIndex(dialogue.Words[index].TalkerInfo), npcNames)];
+                else if (npcs.Length > 0) talkerInfo.objectReferenceValue =
+                     npcs[EditorGUI.Popup(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "谈话人", 0, npcNames)];
+                else EditorGUI.Popup(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight), "谈话人", 0, new string[] { "无可用谈话人" });
+                lineCount++;
+                GUI.enabled = false;
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    talkerInfo, new GUIContent("引用资源"));
+                GUI.enabled = true;
+                lineCount++;
+            }
+            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount - lineHeight, rect.width, lineHeight * 4),
                 words, new GUIContent(string.Empty));
 
             if (EditorGUI.EndChangeCheck())
@@ -92,7 +101,13 @@ public class DialogueInspector : Editor
 
         wordsList.elementHeightCallback = (int index) =>
         {
-            return 4.7f * lineHeightSpace;
+            int lineCount = 1;
+            if (dialogue.Words[index].TalkerType == TalkerType.NPC)
+            {
+                lineCount += 2;
+            }
+            lineCount += 3;
+            return lineCount * 0.95f * lineHeightSpace;
         };
 
         wordsList.onAddCallback = (list) =>
@@ -129,7 +144,7 @@ public class DialogueInspector : Editor
         };
     }
 
-    int GetNPCIndex(NPCInfomation npc)
+    int GetNPCIndex(TalkerInfomation npc)
     {
         if (npcs.Contains(npc))
             return Array.IndexOf(npcs, npc);

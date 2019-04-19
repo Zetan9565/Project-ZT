@@ -5,9 +5,6 @@ using UnityEngine;
 public class Dialogue : ScriptableObject
 {
     [SerializeField]
-#if UNITY_EDITOR
-    [ReadOnly]
-#endif
     private List<DialogueWords> words = new List<DialogueWords>();
     public List<DialogueWords> Words
     {
@@ -24,15 +21,27 @@ public class DialogueWords
     {
         get
         {
-            if (TalkerInfo)
-                return TalkerInfo.Name;
-            else return string.Empty;
+            if (TalkerType == TalkerType.NPC)
+                if (TalkerInfo)
+                    return TalkerInfo.Name;
+                else return string.Empty;
+            else return "玩家角色";
         }
     }
 
     [SerializeField]
-    private NPCInfomation talkerInfo;
-    public NPCInfomation TalkerInfo
+    private TalkerType talkerType;
+    public TalkerType TalkerType
+    {
+        get
+        {
+            return talkerType;
+        }
+    }
+
+    [SerializeField]
+    private TalkerInfomation talkerInfo;
+    public TalkerInfomation TalkerInfo
     {
         get
         {
@@ -49,5 +58,54 @@ public class DialogueWords
             return words;
         }
     }
+}
 
+public enum TalkerType
+{
+    NPC,
+    Player
+}
+
+[System.Serializable]
+public class AffectiveDialogue
+{
+    [SerializeField]
+    private Dialogue level_1;
+    public Dialogue Level_1
+    {
+        get
+        {
+            return level_1;
+        }
+    }
+
+    [SerializeField]
+    private Dialogue level_2;
+    public Dialogue Level_2
+    {
+        get
+        {
+            return level_2;
+        }
+    }
+
+    [SerializeField]
+    private Dialogue level_3;
+    public Dialogue Level_3
+    {
+        get
+        {
+            return level_3;
+        }
+    }
+
+    [SerializeField]
+    private Dialogue level_4;
+    public Dialogue Level_4
+    {
+        get
+        {
+            return level_1;
+        }
+    }
 }

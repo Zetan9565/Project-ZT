@@ -29,7 +29,7 @@ MonoBehaviour:
   rewardEXP: 0
   rewardItems:
   - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    amount: 1
+    amount: 2
   sbmtOnOriginalNPC: 1
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 1
@@ -49,7 +49,7 @@ MonoBehaviour:
     orderIndex: 2
     runtimeID: 
     runtimeParent: {fileID: 0}
-    talker: {fileID: 11400000, guid: d249fad079fcaa443a590dd1f8d4e1bc, type: 2}
+    talker: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
     dialogue: {fileID: 11400000, guid: 00931f27c4db01e44a9ff7817efe8119, type: 2}
   moveObjectives: []
   OriginalQuestGiver: {fileID: 0}
