@@ -145,8 +145,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     public void OnDiscard()
     {
-        //TODO
-        BackpackManager.Instance.LoseItem(itemInfo);
+        BackpackManager.Instance.DiscardItem(itemInfo);
     }
 
     private float touchTime;

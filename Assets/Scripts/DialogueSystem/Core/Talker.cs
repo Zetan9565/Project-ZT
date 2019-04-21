@@ -15,13 +15,32 @@ public class Talker : MonoBehaviour
             return info;
         }
     }
+
+    public string TalkerID
+    {
+        get
+        {
+            if (info) return info.ID;
+            return string.Empty;
+        }
+    }
+
+    public string TalkerName
+    {
+        get
+        {
+            if (info) return info.Name;
+            return string.Empty;
+        }
+    }
+
     public Relationship Relationship { get; private set; }
 
     /// <summary>
     /// 存储对象身上的对话型目标
     /// </summary>
     [HideInInspector]
-    public List<TalkObjective> talkToThisObjectives = new List<TalkObjective>();
+    public List<TalkObjective> objectivesTalkToThis = new List<TalkObjective>();
 
     public event DialogueListener OnTalkBeginEvent;
     public event DialogueListener OnTalkFinishedEvent;
@@ -38,7 +57,7 @@ public class Talker : MonoBehaviour
 
     public void OnGetGift(ItemBase gift)
     {
-        if(info.FavoriteItems.Exists(x=>x.Item.ID == gift.ID))
+        if (info.FavoriteItems.Exists(x => x.Item.ID == gift.ID))
         {
             FavoriteItemInfo find = info.FavoriteItems.Find(x => x.Item.ID == gift.ID);
             Relationship.RelationshipValue += (int)find.FavoriteLevel;

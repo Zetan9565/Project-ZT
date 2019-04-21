@@ -325,8 +325,14 @@ public class ScopeInt
 
     public int Half { get { return Max / 2; } }
 
+    /// <summary>
+    /// 四分之三
+    /// </summary>
     public int Three_Fourth { get { return (int)(Max * 0.75f); } }
 
+    /// <summary>
+    /// 三分之一
+    /// </summary>
     public int One_Third { get { return Max / 3; } }
 
     #region 运算符重载
@@ -397,7 +403,6 @@ public class ScopeInt
     {
         return left / right.Current;
     }
-
 
     public static ScopeInt operator ++(ScopeInt original)
     {
@@ -659,8 +664,14 @@ public class ScopeFloat
 
     public float Half { get { return Max * 0.5f; } }
 
+    /// <summary>
+    /// 四分之三
+    /// </summary>
     public float Three_Fourth { get { return Max * 0.75f; } }
 
+    /// <summary>
+    /// 三分之一
+    /// </summary>
     public float One_Third { get { return Max / 3; } }
 
     #region 运算符重载
@@ -897,6 +908,15 @@ public class ScopeFloat
         else return ToString();
     }
 
+    /// <summary>
+    /// 转成字符串
+    /// </summary>
+    /// <param name="star">字符串开头</param>
+    /// <param name="split">数字分隔符</param>
+    /// <param name="end">字符串结尾</param>
+    /// <param name="decimalDigit">小数保留个数</param>
+    /// <param name="showMin">是否显示最小值</param>
+    /// <returns>目标字符串</returns>
     public string ToString(string star, string split, string end, int decimalDigit, bool showMin = false)
     {
         if (showMin)

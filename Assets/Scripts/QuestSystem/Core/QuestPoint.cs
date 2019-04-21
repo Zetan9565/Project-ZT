@@ -29,7 +29,7 @@ public class QuestPoint : MonoBehaviour {
 
     private void OnTriggerStay(Collider other)
     {
-        //TODO
+        //TODO 滞留于任务点的操作
     }
 
     private void OnTriggerExit(Collider other)
@@ -46,7 +46,7 @@ public class QuestPoint : MonoBehaviour {
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        //TODO
+        //TODO 滞留于任务点的操作
     }
 
     private void OnTriggerExit2D(Collider2D collision)

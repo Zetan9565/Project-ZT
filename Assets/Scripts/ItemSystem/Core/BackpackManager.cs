@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
+using System;
 
 public delegate void ItemAmountListener(ItemBase item, int amount);
 
@@ -45,7 +46,7 @@ public class BackpackManager : MonoBehaviour, IOpenCloseable
 
     public Dictionary<string, List<ItemBase>> MItems { get; } = new Dictionary<string, List<ItemBase>>();
 
-    public List<ItemInfo> Items { get; } = new List<ItemInfo>();
+    //public List<ItemInfo> Items { get; } = new List<ItemInfo>();
     public List<ItemAgent> itemAgents { get; } = new List<ItemAgent>();
 
     public Backpack MBackpack
@@ -117,6 +118,7 @@ public class BackpackManager : MonoBehaviour, IOpenCloseable
             }
         return finalGet;
     }
+
     public int TryGetItem_Integer(ItemInfo info)
     {
         return TryGetItem_Integer(info.Item, info.Amount);
@@ -331,17 +333,13 @@ public class BackpackManager : MonoBehaviour, IOpenCloseable
 
     public int GetItemAmountByID(string id)
     {
-        var items = MBackpack.Items.FindAll(x => x.ItemID == id);
-        if (items.Count < 1) return 0;
-        if (items[0].Item.StackAble) return items[0].Amount;
-        return items.Count;
+        if (MBackpack == null) return 0;
+        return MBackpack.GetItemAmountByID(id);
     }
     public int GetItemAmountByItem(ItemBase item)
     {
-        var items = MBackpack.Items.FindAll(x => x.Item == item);
-        if (items.Count < 1) return 0;
-        if (items[0].Item.StackAble) return items[0].Amount;
-        return items.Count;
+        if (MBackpack == null) return 0;
+        return MBackpack.GetItemAmountByItem(item);
     }
 
     public bool HasItemWithID(string id)
@@ -446,6 +444,7 @@ public class BackpackManager : MonoBehaviour, IOpenCloseable
         this.UI = UI;
     }
 
+    #region 道具页相关
     public void SetPage(int index)
     {
         currentPage = index;
@@ -473,6 +472,7 @@ public class BackpackManager : MonoBehaviour, IOpenCloseable
         {
             if (!ia.IsEmpty && !ia.itemInfo.Item.IsEquipment)
                 MyTools.SetActive(ia.gameObject, false);
+            else if (ia.IsEmpty) MyTools.SetActive(ia.gameObject, false);
         }
     }
 
@@ -483,6 +483,7 @@ public class BackpackManager : MonoBehaviour, IOpenCloseable
         {
             if (!ia.IsEmpty && !ia.itemInfo.Item.IsConsumable)
                 MyTools.SetActive(ia.gameObject, false);
+            else if (ia.IsEmpty) MyTools.SetActive(ia.gameObject, false);
         }
     }
 
@@ -493,6 +494,30 @@ public class BackpackManager : MonoBehaviour, IOpenCloseable
         {
             if (!ia.IsEmpty && !ia.itemInfo.Item.IsMaterial)
                 MyTools.SetActive(ia.gameObject, false);
+            else if (ia.IsEmpty) MyTools.SetActive(ia.gameObject, false);
         }
     }
+    #endregion
+
+    public void LoadData(BackpackData backpackData)
+    {
+        if (MBackpack == null) return;
+        foreach (ItemData id in backpackData.itemDatas)
+            if (!GameManager.Instance.GetItemByID(id.itemID)) return;
+        MBackpack.LoseMoneySimple(MBackpack.Money);
+        MBackpack.GetMoneySimple(backpackData.money);
+        MBackpack.backpackSize = new ScopeInt(backpackData.maxSize) { Current = backpackData.currentSize };
+        MBackpack.weightLoad = new ScopeFloat(backpackData.maxWeightLoad) { Current = backpackData.currentSize };
+        MBackpack.Items.Clear();
+        Init();
+        foreach (ItemData id in backpackData.itemDatas)
+        {
+            ItemInfo newInfo = new ItemInfo(GameManager.Instance.GetItemByID(id.itemID), id.amount);
+            MBackpack.Items.Add(newInfo);
+            if (id.indexInBP > -1 && id.indexInBP < itemAgents.Count)
+                itemAgents[id.indexInBP].Init(newInfo, ItemAgentType.Backpack);
+        }
+        UpdateUI();
+    }
+
 }

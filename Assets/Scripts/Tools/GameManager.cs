@@ -16,6 +16,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public static bool dontDestroyOnLoadOnce;
+
+    private void Awake()
+    {
+        if (!dontDestroyOnLoadOnce)
+        {
+            DontDestroyOnLoad(this);
+            dontDestroyOnLoadOnce = true;
+            Init();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+
     private Dictionary<string, List<Enemy>> allEnermy = new Dictionary<string, List<Enemy>>();
     public Dictionary<string, List<Enemy>> AllEnermy
     {
@@ -44,14 +61,13 @@ public class GameManager : MonoBehaviour
             Talker[] normalTalkers = FindObjectsOfType<Talker>();
             foreach (Talker talker in normalTalkers)
             {
-                try
+                if (!allTalker.ContainsKey(talker.TalkerID))
                 {
-                    allTalker.Add(talker.Info.ID, talker);
+                    allTalker.Add(talker.TalkerID, talker);
                 }
-                catch
+                else
                 {
-                    Debug.LogWarningFormat("[处理NPC出错] ID: {0}  Name: {1}", talker.Info.ID, talker.Info.Name);
-                    continue;
+                    Debug.LogWarningFormat("[处理重复NPC] ID: {0}  Name: {1}", talker.TalkerID, talker.TalkerName);
                 }
             }
             return allTalker;
@@ -87,13 +103,12 @@ public class GameManager : MonoBehaviour
             if (kvp.Value is QuestGiver) (kvp.Value as QuestGiver).Init();
     }
 
-    private void Awake()
-    {
-        Init();
-    }
-
     public ItemBase GetItemByID(string id)
     {
-        return Array.Find(Resources.LoadAll<ItemBase>(""), x => x.ID == id);
+        ItemBase[] items = Resources.LoadAll<ItemBase>("");
+        if (items.Length < 1) return null;
+        if (Array.Exists(items, x => x.ID == id))
+            return Array.Find(items, x => x.ID == id);
+        return null;
     }
 }

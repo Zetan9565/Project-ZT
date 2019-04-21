@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 [DisallowMultipleComponent]
 public class DialogueManager : MonoBehaviour
@@ -16,15 +18,19 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
-    public event DialogueListener OnBeginDialogueEvent;
-    public event DialogueListener OnFinishDialogueEvent;
-
     [SerializeField]
     private DialogueUI UI;
 
+    public UnityEvent OnBeginDialogueEvent;
+    public UnityEvent OnFinishDialogueEvent;
+
     public DialogueType DialogueType { get; private set; } = DialogueType.Normal;
 
+    public Dictionary<string, DialogueData> DialogueDatas { get; private set; } = new Dictionary<string, DialogueData>();
+
     private Queue<DialogueWords> Words = new Queue<DialogueWords>();
+
+    //public Dictionary<string, DialogueInfo> loadedDatas = new Dictionary<string, DialogueInfo>();
 
     private int page = 1;
     public int Page
@@ -41,15 +47,16 @@ public class DialogueManager : MonoBehaviour
     }
 
     private int MaxPage = 1;
-    [Space]
-#if UNITY_EDITOR
-    [ReadOnly]
-#endif
-    public List<OptionAgent> OptionAgents;
+    public List<OptionAgent> OptionAgents { get; private set; } = new List<OptionAgent>();
 
     private Talker MTalker;
     private TalkObjective talkObjective;
     private Quest MQuest;
+    private Dialogue dialogToSay;
+    private DialogueWords lastWords;
+    private BranchDialogue branchDialog;
+    private BranchDialogue branchDialogInstance;
+    private List<BranchDialogue> branchesComplete = new List<BranchDialogue>();
 
     public bool HasNotAcptQuests
     {
@@ -64,43 +71,49 @@ public class DialogueManager : MonoBehaviour
     public bool IsTalking { get; private set; }
     public bool TalkAble { get; private set; }
 
+    public int IndexToGoBack { get; private set; } = -1;
+
     #region 开始新对话
     public void BeginNewDialogue()
     {
         if (!MTalker || !TalkAble || IsTalking) return;
-        else StartNormalDialogue(MTalker);
+        StartNormalDialogue(MTalker);
         OnBeginDialogueEvent?.Invoke();
     }
 
-    public void StartDialogue(Dialogue dialogue)
+    public void StartDialogue(Dialogue dialogue, int startIndex = 0, bool sayImmediately = true)
     {
         if (!UI) return;
         if (dialogue.Words.Count < 1 || !dialogue) return;
+        dialogToSay = dialogue;
+        if (!DialogueDatas.ContainsKey(dialogue.ID)) DialogueDatas.Add(dialogue.ID, new DialogueData(dialogue));
         IsTalking = true;
         Words.Clear();
-        foreach (DialogueWords saying in dialogue.Words)
-        {
-            Words.Enqueue(saying);
-        }
-        SayNextWords();
+        if (startIndex < 0) startIndex = 0;
+        else if (startIndex > dialogue.Words.Count - 1) startIndex = dialogue.Words.Count - 1;
+        for (int i = startIndex; i < dialogue.Words.Count; i++)
+            Words.Enqueue(dialogue.Words[i]);
+        if (sayImmediately) SayNextWords();
+        else MakeContinueOption(true);
         if (OptionAgents.Count < 1) MyTools.SetActive(UI.optionsParent.gameObject, false);
         MyTools.SetActive(UI.wordsText.gameObject, true);
         SetPageArea(false, false, false);
         OpenDialogueWindow();
     }
-    public void StartDialogue(DialogueWords words)
-    {
-        if (!UI) return;
-        if (words == null) return;
-        IsTalking = true;
-        Words.Clear();
-        Words.Enqueue(words);
-        SayNextWords();
-        if (OptionAgents.Count < 1) MyTools.SetActive(UI.optionsParent.gameObject, false);
-        MyTools.SetActive(UI.wordsText.gameObject, true);
-        SetPageArea(false, false, false);
-        OpenDialogueWindow();
-    }
+    //public void StartDialogue(DialogueWords words, bool sayImmediately = true)
+    //{
+    //    if (!UI) return;
+    //    if (words == null) return;
+    //    IsTalking = true;
+    //    Words.Clear();
+    //    Words.Enqueue(words);
+    //    if (sayImmediately) SayNextWords();
+    //    else MakeContinueOption(true);
+    //    if (OptionAgents.Count < 1) MyTools.SetActive(UI.optionsParent.gameObject, false);
+    //    MyTools.SetActive(UI.wordsText.gameObject, true);
+    //    SetPageArea(false, false, false);
+    //    OpenDialogueWindow();
+    //}
 
     public void StartNormalDialogue(Talker talker)
     {
@@ -109,13 +122,8 @@ public class DialogueManager : MonoBehaviour
         MTalker = talker;
         DialogueType = DialogueType.Normal;
         if (talker is QuestGiver && (talker as QuestGiver).QuestInstances.Count > 0)
-        {
             MyTools.SetActive(UI.questButton.gameObject, true);
-        }
-        else
-        {
-            MyTools.SetActive(UI.questButton.gameObject, false);
-        }
+        else MyTools.SetActive(UI.questButton.gameObject, false);
         CloseQuestDescriptionWindow();
         StartDialogue(talker.Info.DefaultDialogue);
         talker.OnTalkBegin();
@@ -123,6 +131,7 @@ public class DialogueManager : MonoBehaviour
 
     public void StartQuestDialogue(Quest quest)
     {
+        if (!quest) return;
         MQuest = quest;
         DialogueType = DialogueType.Quest;
         MyTools.SetActive(UI.questButton.gameObject, false);
@@ -133,9 +142,34 @@ public class DialogueManager : MonoBehaviour
 
     public void StartObjectiveDialogue(TalkObjective talkObjective)
     {
+        if (talkObjective == null) return;
         this.talkObjective = talkObjective;
         DialogueType = DialogueType.Objective;
         StartDialogue(talkObjective.Dialogue);
+    }
+
+    public void StartBranchDialogue(BranchDialogue branch)
+    {
+        if (branch == null || !branch.Dialogue) return;
+        if (lastWords.NeedToChusRightBranch)
+        {
+            branchDialogInstance = branch.Clone() as BranchDialogue;
+            branchDialogInstance.runtimeParent = dialogToSay;
+            if (lastWords.IndexOfRightBranch == lastWords.Branches.IndexOf(branch))
+            {
+                branchDialogInstance.runtimeIndexToGoBack = dialogToSay.Words.IndexOf(lastWords) + 1;
+            }
+            else branchDialogInstance.runtimeIndexToGoBack = dialogToSay.Words.IndexOf(lastWords);
+        }
+        else if (branch.GoBack)
+        {
+            branchDialogInstance = branch.Clone() as BranchDialogue;
+            branchDialogInstance.runtimeParent = dialogToSay;
+            branchDialogInstance.runtimeIndexToGoBack = branch.IndexToGo;
+        }
+        else branchDialogInstance = branch;
+        this.branchDialog = branch;
+        StartDialogue(branchDialogInstance.Dialogue, branchDialogInstance.SpecifyIndex);
     }
     #endregion
 
@@ -143,12 +177,11 @@ public class DialogueManager : MonoBehaviour
     /// <summary>
     /// 生成继续按钮选项
     /// </summary>
-    private void MakeContinueOption()
+    private void MakeContinueOption(bool force = false)
     {
         ClearOptionExceptContinue();
         OptionAgent oa = OptionAgents.Find(x => x.optionType == OptionType.Continue);
-        if (oa) OpenOptionArea();
-        if (Words.Count > 1)
+        if (Words.Count > 1 || force)
         {
             //如果还有话没说完，弹出一个“继续”按钮
             if (!oa)
@@ -165,7 +198,7 @@ public class DialogueManager : MonoBehaviour
         }
         else if (oa)
         {
-            //如果话说完了，把“继续”按钮去掉
+            //如果话说完了，这是最后一句，则把“继续”按钮去掉
             OptionAgents.Remove(oa);
             ObjectPool.Instance.Put(oa.gameObject);
         }
@@ -263,7 +296,7 @@ public class DialogueManager : MonoBehaviour
     {
         int index = 1;
         ClearOptionsExceptCmlptQuest();
-        foreach (TalkObjective to in MTalker.talkToThisObjectives)
+        foreach (TalkObjective to in MTalker.objectivesTalkToThis)
         {
             if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
             {
@@ -275,6 +308,45 @@ public class DialogueManager : MonoBehaviour
                 if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) MyTools.SetActive(oa.gameObject, false);//第一页以外隐藏
                 index++;
             }
+        }
+        CheckPages();
+    }
+
+    /// <summary>
+    /// 生成分支对话选项
+    /// </summary>
+    private void MakeBranchDialogueOption()
+    {
+        if (dialogToSay.Words.IndexOf(Words.Peek()) >= dialogToSay.Words.Count - 1) return;//最后一句话不支持分支
+        if (Words.Peek().Branches.Count < 1) return;
+        DialogueWords current = Words.Peek();
+        DialogueData find = null;
+        if (DialogueDatas.ContainsKey(dialogToSay.ID))
+            find = DialogueDatas[dialogToSay.ID];
+        ClearOptions();
+        foreach (BranchDialogue branch in current.Branches)
+        {
+            if (find != null)
+            {
+                DialogueWordsData _find = find.wordsInfos.Find(x => x.wordsIndex == dialogToSay.Words.IndexOf(current));
+                //这个分支是否完成了
+                if (_find != null && _find.IsCmpltBranchWithIndex(current.Branches.IndexOf(branch)))
+                    continue;//完成则跳过创建
+            }
+            if (!branchesComplete.Contains(branch) && branch.Dialogue)
+            {
+                OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
+                oa.optionType = OptionType.Branch;
+                oa.branchDialogue = branch;
+                oa.TitleText.text = branch.Title;
+                OptionAgents.Add(oa);
+            }
+
+        }
+        //把第一页以外的选项隐藏
+        for (int i = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight); i < OptionAgents.Count; i++)
+        {
+            MyTools.SetActive(OptionAgents[i].gameObject, false);
         }
         CheckPages();
     }
@@ -327,19 +399,40 @@ public class DialogueManager : MonoBehaviour
     public void SayNextWords()
     {
         MakeContinueOption();
-        if (Words.Count == 1)
-        {
-            HandlingLastWords();
-            //因为Dequeue之后，话就没了，Words.Count就不是1了，而是0，所以要在此之前做这一步
-        }
+        MakeBranchDialogueOption();
+        if (Words.Count == 1) HandlingLastWords();//因为Dequeue之后，话就没了，Words.Count就不是1了，而是0，所以要在此之前做这一步，意思是倒数第二句做这一步
         if (Words.Count > 0)
         {
             string talkerName = Words.Peek().TalkerName;
             if (Words.Peek().TalkerType == TalkerType.Player && PlayerInfoManager.Instance.PlayerInfo)
                 talkerName = PlayerInfoManager.Instance.PlayerInfo.Name;
             UI.nameText.text = talkerName;
+            lastWords = Words.Peek();
             UI.wordsText.text = Words.Dequeue().Words;
         }
+        if (Words.Count <= 0)
+        {
+            OnFinishDialogueEvent?.Invoke();
+            if (branchDialogInstance != null)
+                HandlingLastBranchWords();//分支处理比较特殊，放到Dequque之后，否则分支最后一句不会讲
+            //TryGoBack();
+        }
+    }
+
+    public void SayTempWords(TalkerInfomation talkerInfo, string words, TalkerType talkerType, Dialogue dialogToGoBack, int indexToGoBack)
+    {
+        if (!UI) return;
+        if (!talkerInfo || string.IsNullOrEmpty(words)) return;
+        dialogToSay = dialogToGoBack;
+        IndexToGoBack = indexToGoBack;
+        IsTalking = true;
+        Words.Clear();
+        Words.Enqueue(new DialogueWords(talkerInfo, words, talkerType));
+        MakeContinueOption(true);
+        if (OptionAgents.Count < 1) MyTools.SetActive(UI.optionsParent.gameObject, false);
+        MyTools.SetActive(UI.wordsText.gameObject, true);
+        SetPageArea(false, false, false);
+        StartCoroutine(WaitToGoBack());
     }
 
     /// <summary>
@@ -351,20 +444,12 @@ public class DialogueManager : MonoBehaviour
         {
             MTalker.OnTalkFinished();
             MakeTalkerCmpltQuestOption();
-            if (MTalker.talkToThisObjectives != null && MTalker.talkToThisObjectives.Count > 0)
-                MakeTalkerObjectiveOption();
+            if (MTalker.objectivesTalkToThis != null && MTalker.objectivesTalkToThis.Count > 0) MakeTalkerObjectiveOption();
             else ClearOptionsExceptCmlptQuest();
             QuestManager.Instance.UpdateUI();
         }
-        else if (DialogueType == DialogueType.Objective && talkObjective != null)
-        {
-            HandlingLastObjectiveWords();
-        }
-        else if (DialogueType == DialogueType.Quest && MQuest)
-        {
-            HandlingLastQuestWords();
-        }
-        OnFinishDialogueEvent?.Invoke();
+        else if (DialogueType == DialogueType.Objective && talkObjective != null) HandlingLastObjectiveWords();
+        else if (DialogueType == DialogueType.Quest && MQuest) HandlingLastQuestWords();
     }
     /// <summary>
     /// 处理最后一句对话型目标的对话
@@ -382,7 +467,7 @@ public class DialogueManager : MonoBehaviour
                 RecycleOption(oa);
             }
             //目标已经完成，不再需要保留在对话人的目标列表里，从对话人的对话型目标里删掉相应信息
-            MTalker.talkToThisObjectives.RemoveAll(x => x == talkObjective);
+            MTalker.objectivesTalkToThis.RemoveAll(x => x == talkObjective);
         }
         talkObjective = null;//重置管理器的对话目标以防出错
         QuestManager.Instance.UpdateUI();
@@ -412,6 +497,87 @@ public class DialogueManager : MonoBehaviour
         }
         MQuest = null;
     }
+
+    private void HandlingLastBranchWords()
+    {
+        DialogueWords find = branchDialogInstance.runtimeParent.Words.Find(x => x.Branches.Contains(branchDialog));
+        if (find != null && find.IsRightBranch(branchDialog))
+        {
+            StartDialogue(branchDialogInstance.runtimeParent, branchDialogInstance.runtimeIndexToGoBack, false);
+            int indexOfFind = branchDialogInstance.runtimeParent.Words.IndexOf(find);
+            foreach (BranchDialogue branch in find.Branches)
+            {
+                branchesComplete.Add(branch);
+                string parentID = branchDialogInstance.runtimeParent.ID;
+                if (DialogueDatas.ContainsKey(parentID))
+                {
+                    DialogueWordsData _find = DialogueDatas[parentID].wordsInfos.Find(x => x.wordsIndex == indexOfFind);
+                    if (find != null)
+                    {
+                        int indexOfBranch = find.Branches.IndexOf(branch);
+                        _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
+                    }
+                }
+            }
+            branchDialogInstance = null;
+            branchDialog = null;
+        }
+        else if (find != null && find.NeedToChusRightBranch && !find.IsRightBranch(branchDialog))
+        {
+            //Debug.Log("Runtime" + branchInstance.runtimeIndexToGoBack);
+            SayTempWords(find.TalkerInfo, find.WordsWhenChusWB, find.TalkerType, branchDialogInstance.runtimeParent, branchDialogInstance.runtimeIndexToGoBack);
+            branchDialogInstance = null;
+            branchDialog = null;
+        }
+        else if (branchDialogInstance.GoBack)//处理普通的带返回的分支
+        {
+            StartDialogue(branchDialogInstance.runtimeParent, branchDialogInstance.runtimeIndexToGoBack, false);
+            int indexOfFind = branchDialogInstance.runtimeParent.Words.IndexOf(find);
+            if (branchDialogInstance.DeleteWhenCmplt)
+            {
+                branchesComplete.Add(branchDialog);
+                //TODO 保存分支完成信息
+                string parentID = branchDialogInstance.runtimeParent.ID;
+                if (DialogueDatas.ContainsKey(parentID))
+                {
+                    DialogueWordsData _find = DialogueDatas[parentID].wordsInfos.Find(x => x.wordsIndex == indexOfFind);
+                    if (find != null)
+                    {
+                        int indexOfBranch = find.Branches.IndexOf(branchDialogInstance);
+                        _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
+                    }
+                }
+            }
+            branchDialogInstance = null;
+            branchDialog = null;
+        }
+    }
+
+    //private void TryGoBack()
+    //{
+    //    if (IndexToGoBack > -1)
+    //    {
+    //        //Debug.Log("GoBack");
+    //        StartDialogue(dialogToSay, IndexToGoBack, false);
+    //        IndexToGoBack = -1;
+    //    }
+    //}
+
+    IEnumerator WaitToGoBack()
+    {
+        yield return new WaitUntil(() => Words.Count <= 0);
+        //Debug.Log("Back");
+        try
+        {
+            StartDialogue(dialogToSay, IndexToGoBack, false);
+            IndexToGoBack = -1;
+            StopCoroutine(WaitToGoBack());
+        }
+        catch
+        {
+            StopCoroutine(WaitToGoBack());
+        }
+    }
     #endregion
 
     #region UI相关
@@ -429,6 +595,9 @@ public class DialogueManager : MonoBehaviour
         DialogueType = DialogueType.Normal;
         MTalker = null;
         MQuest = null;
+        dialogToSay = null;
+        branchDialog = null;
+        branchDialogInstance = null;
         ClearOptions();
         CloseQuestDescriptionWindow();
         IsTalking = false;
@@ -464,7 +633,7 @@ public class DialogueManager : MonoBehaviour
         MQuest = quest;
         UI.descriptionText.text = string.Format("<size=16><b>{0}</b></size>\n[委托人: {1}]\n{2}",
             MQuest.Title,
-            MQuest.OriginalQuestGiver.Info.Name,
+            MQuest.OriginalQuestGiver.TalkerName,
             MQuest.Description);
         UI.moneyText.text = MQuest.RewardMoney > 0 ? MQuest.RewardMoney.ToString() : "无";
         UI.EXPText.text = MQuest.RewardEXP > 0 ? MQuest.RewardEXP.ToString() : "无";

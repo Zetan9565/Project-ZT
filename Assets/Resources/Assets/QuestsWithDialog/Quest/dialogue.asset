@@ -12,19 +12,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7acdddb4b8bb2e43b8726f03388fea8, type: 3}
   m_Name: dialogue
   m_EditorClassIdentifier: 
+  _ID: DIALG000004
   words:
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
     words: "\u5C0F\u5E05\u54E5\uFF0C\u6709\u4EC0\u4E48\u4E8B\u5417\uFF1F"
+    indexOfRrightBranch: -1
+    wordsWhenChusWB: 
+    branches: []
   - talkerType: 1
-    talkerInfo: {fileID: 11400000, guid: d249fad079fcaa443a590dd1f8d4e1bc, type: 2}
+    talkerInfo: {fileID: 0}
     words: "\u542C\u8BF4\u4F60\u9047\u5230\u4E86\u602A\u7269\uFF0C\u662F\u5728\u54EA\u513F\u9047\u5230\u7684\uFF1F"
+    indexOfRrightBranch: -1
+    wordsWhenChusWB: 
+    branches: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
     words: "\u5662\uFF0C\u8FD9\u4E2A\u4E8B\u513F\u554A~\u602A\u7269\u5728\u6751\u5B50\u5317\u8FB9\u90A3\u6761\u8DEF\u7684\u51FA\u53E3\u90A3\u513F\u5F98\u5F8A\u7740\u5462\u3002"
+    indexOfRrightBranch: -1
+    wordsWhenChusWB: 
+    branches: []
   - talkerType: 1
-    talkerInfo: {fileID: 11400000, guid: d249fad079fcaa443a590dd1f8d4e1bc, type: 2}
+    talkerInfo: {fileID: 0}
     words: "O98K\uFF0C\u6211\u53BB\u770B\u770B\u3002"
+    indexOfRrightBranch: -1
+    wordsWhenChusWB: 
+    branches: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
     words: "\u8BF7\u5C0F\u5FC3\uFF01"
+    indexOfRrightBranch: -1
+    wordsWhenChusWB: 
+    branches: []

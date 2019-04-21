@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "item box", menuName = "ZetanStudio/道具/箱子")]
+[System.Serializable]
 public class BoxItem : ItemBase
 {
     [SerializeField]

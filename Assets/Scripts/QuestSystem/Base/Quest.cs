@@ -390,6 +390,18 @@ public abstract class Objective
     }
 
     [SerializeField]
+    private bool display = true;
+    public bool Display
+    {
+        get
+        {
+            if (runtimeParent && !runtimeParent.CmpltObjctvInOrder)
+                return true;
+            return display;
+        }
+    }
+
+    [SerializeField]
     private int amount = 1;
     public int Amount
     {
@@ -524,7 +536,6 @@ public abstract class Objective
                 co.CurrentAmount = BackpackManager.Instance.GetItemAmountByID(co.Item.ID);
             }
             tempObj = tempObj.NextObjective;
-            co = null;
         }
     }
 }
@@ -565,19 +576,14 @@ public class CollectObjective : Objective
 
     public void UpdateCollectAmountUp(ItemBase item, int leftAmount)//得道具时用到
     {
-        if (item == Item)
-        {
-            UpdateAmountUp(leftAmount);
-        }
+        if (item == Item) UpdateAmountUp(leftAmount);
     }
 
     public void UpdateCollectAmountDown(ItemBase item, int leftAmount)//丢道具时用到
     {
-        if (item == Item)
-        {
+        if (item == Item && AllPrevObjCmplt && !HasNextObjOngoing)
             //前置目标都完成且没有后置目标在进行时，才允许更新
-            if (AllPrevObjCmplt && !HasNextObjOngoing) CurrentAmount = leftAmount;
-        }
+            CurrentAmount = leftAmount;
     }
 }
 /// <summary>
@@ -660,8 +666,7 @@ public class MoveObjective : Objective
 
     public void UpdateMoveStatus(QuestPoint point)
     {
-        if (point.ID == PointID)
-            UpdateAmountUp();
+        if (point.ID == PointID) UpdateAmountUp();
     }
 }
 #endregion

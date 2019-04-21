@@ -12,6 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7acdddb4b8bb2e43b8726f03388fea8, type: 3}
   m_Name: dialogue 6
   m_EditorClassIdentifier: 
+  _ID: DIALG000007
   words:
-  - talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+  - talkerType: 0
+    talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     words: "\u739B\u4E3D\u4E9A\u5728\u6751\u5B50\u5357\u9762\u7684\u78E8\u574A\u65C1\u8FB9\u3002"
+    indexOfRrightBranch: -1
+    wordsWhenChusWB: 
+    branches: []

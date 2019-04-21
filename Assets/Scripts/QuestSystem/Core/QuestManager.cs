@@ -130,7 +130,7 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 TalkObjective to = o as TalkObjective;
                 try
                 {
-                    if (!o.IsComplete) GameManager.Instance.AllTalker[to.Talker.ID].talkToThisObjectives.Add(to);
+                    if (!o.IsComplete) GameManager.Instance.AllTalker[to.Talker.ID].objectivesTalkToThis.Add(to);
                 }
                 catch
                 {
@@ -165,6 +165,8 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 Debug.LogWarningFormat("[找不到NPC] ID: {0}", quest.NPCToSubmit);
             }
         }
+        if(!loadMode)
+            MessageManager.Instance.NewMessage("接取了任务 [" + quest.Title + "]");
         return true;
     }
     /// <summary>
@@ -199,7 +201,7 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 {
                     TalkObjective to = o as TalkObjective;
                     to.CurrentAmount = 0;
-                    GameManager.Instance.AllTalker[to.Talker.ID].talkToThisObjectives.RemoveAll(x => x == to);
+                    GameManager.Instance.AllTalker[to.Talker.ID].objectivesTalkToThis.RemoveAll(x => x == to);
                 }
                 if (o is MoveObjective)
                 {
@@ -251,14 +253,10 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                     questsReqThisQuestItem = BackpackManager.Instance.QuestsRequiredItem(co.Item,
                         BackpackManager.Instance.GetItemAmountByItem(co.Item) - o.Amount).ToList();
                 }
-                if (questsReqThisQuestItem.Contains(quest))
+                if (questsReqThisQuestItem.Contains(quest) && questsReqThisQuestItem.Count > 1)
                 {
-                    questsReqThisQuestItem.Remove(quest);
-                    if (questsReqThisQuestItem.Count > 0)
-                    {
-                        MessageManager.Instance.NewMessage("其他任务对该任务需提交物品有需求");
-                        return false;
-                    }
+                    MessageManager.Instance.NewMessage("其他任务对该任务需提交物品有需求");
+                    return false;
                 }
             }
         }
@@ -312,7 +310,7 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 }
                 if (o is TalkObjective)
                 {
-                    GameManager.Instance.AllTalker[(o as TalkObjective).Talker.ID].talkToThisObjectives.RemoveAll(x => x == (o as TalkObjective));
+                    GameManager.Instance.AllTalker[(o as TalkObjective).Talker.ID].objectivesTalkToThis.RemoveAll(x => x == (o as TalkObjective));
                 }
                 if (o is MoveObjective)
                 {
@@ -321,11 +319,14 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 }
             }
             if (!loadMode)
+            {
+                //TODO 经验和金钱的处理
                 foreach (ItemInfo info in quest.RewardItems)
                 {
                     BackpackManager.Instance.GetItem(info);
                 }
-            //TODO 经验和金钱的处理
+                MessageManager.Instance.NewMessage("提交了任务 [" + quest.Title + "]");
+            }
             CloseDescriptionWindow();
             return true;
         }
@@ -379,29 +380,37 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
         QuestAgent cqa = completeQuestAgents.Find(x => x.MQuest == SelectedQuest);
         if (cqa)
         {
+            int lineCount = SelectedQuest.Objectives.FindAll(x => x.Display).Count - 1;
             for (int i = 0; i < SelectedQuest.Objectives.Count; i++)
             {
-                string endLine = i == SelectedQuest.Objectives.Count - 1 ? string.Empty : "\n";
-                objectives += SelectedQuest.Objectives[i].DisplayName + endLine;
+                if (SelectedQuest.Objectives[i].Display)
+                {
+                    string endLine = i == lineCount ? string.Empty : "\n";
+                    objectives += SelectedQuest.Objectives[i].DisplayName + endLine;
+                }
             }
             UI.descriptionText.text = string.Format("<size=16><b>{0}</b></size>\n[委托人: {1}]\n{2}\n\n<size=16><b>任务目标</b></size>\n{3}",
                                    SelectedQuest.Title,
-                                   SelectedQuest.OriginalQuestGiver.Info.Name,
+                                   SelectedQuest.OriginalQuestGiver.TalkerName,
                                    SelectedQuest.Description,
                                    objectives);
         }
         else
         {
+            int lineCount = SelectedQuest.Objectives.FindAll(x => x.Display).Count - 1;
             for (int i = 0; i < SelectedQuest.Objectives.Count; i++)
             {
-                string endLine = i == SelectedQuest.Objectives.Count - 1 ? string.Empty : "\n";
-                objectives += SelectedQuest.Objectives[i].DisplayName +
-                              "[" + SelectedQuest.Objectives[i].CurrentAmount + "/" + SelectedQuest.Objectives[i].Amount + "]" +
-                              (SelectedQuest.Objectives[i].IsComplete ? "(达成)" + endLine : endLine);
+                if (SelectedQuest.Objectives[i].Display)
+                {
+                    string endLine = i == lineCount ? string.Empty : "\n";
+                    objectives += SelectedQuest.Objectives[i].DisplayName +
+                                  "[" + SelectedQuest.Objectives[i].CurrentAmount + "/" + SelectedQuest.Objectives[i].Amount + "]" +
+                                  (SelectedQuest.Objectives[i].IsComplete ? "(达成)" + endLine : endLine);
+                }
             }
             UI.descriptionText.text = string.Format("<size=16><b>{0}</b></size>\n[委托人: {1}]\n{2}\n\n<size=16><b>任务目标{3}</b></size>\n{4}",
                                    SelectedQuest.Title,
-                                   SelectedQuest.OriginalQuestGiver.Info.Name,
+                                   SelectedQuest.OriginalQuestGiver.TalkerName,
                                    SelectedQuest.Description,
                                    SelectedQuest.IsComplete ? "(完成)" : SelectedQuest.IsOngoing ? "(进行中)" : string.Empty,
                                    objectives);

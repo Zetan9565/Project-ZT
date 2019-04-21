@@ -17,17 +17,12 @@ public class TalkerInspector : Editor
     float lineHeight;
     float lineHeightSpace;
 
-    bool showQuestList;
-
     private void OnEnable()
     {
         talker = target as Talker;
-        showQuestList = false;
         info = serializedObject.FindProperty("info");
         if (talker is QuestGiver)
         {
-            showQuestList = true;
-
             questsStored = serializedObject.FindProperty("questsStored");
             questInstances = serializedObject.FindProperty("questInstances");
 
@@ -46,20 +41,20 @@ public class TalkerInspector : Editor
         if (talker.Info)
         {
             EditorGUILayout.BeginVertical("Box");
-            EditorGUILayout.LabelField("NPC名字：" + talker.Info.Name);
-            EditorGUILayout.LabelField("NPC识别码：" + talker.Info.ID);
+            EditorGUILayout.LabelField("NPC名字：" + talker.TalkerName);
+            EditorGUILayout.LabelField("NPC识别码：" + talker.TalkerID);
             EditorGUILayout.EndVertical();
         }
         else
         {
-            EditorGUILayout.HelpBox("NPC信息为空！", MessageType.Warning);
+            EditorGUILayout.HelpBox("NPC信息为空！", MessageType.Error);
         }
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(info, new GUIContent("信息"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
-        if (questGiver)
+        if (questGiver && talker.Info)
         {
             EditorGUILayout.PropertyField(questsStored, new GUIContent("持有任务\t\t" + (questsStored.arraySize > 0 ? "数量：" + questsStored.arraySize : "无")));
             if (questsStored.isExpanded)
@@ -73,12 +68,8 @@ public class TalkerInspector : Editor
                 EditorGUILayout.PropertyField(questInstances, new GUIContent("任务实例\t\t数量：" + questInstances.arraySize));
                 GUI.enabled = false;
                 if (questInstances.isExpanded)
-                {
                     for (int i = 0; i < questGiver.QuestInstances.Count; i++)
-                    {
                         EditorGUILayout.LabelField(questGiver.QuestInstances[i].Title);
-                    }
-                }
                 GUI.enabled = true;
             }
         }
@@ -121,9 +112,7 @@ public class TalkerInspector : Editor
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
             if (EditorUtility.DisplayDialog("删除", "确定删除这个任务吗？", "确定", "取消"))
-            {
                 questGiver.QuestsStored.RemoveAt(list.index);
-            }
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };

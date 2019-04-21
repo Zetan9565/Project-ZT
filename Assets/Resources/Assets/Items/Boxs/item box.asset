@@ -35,13 +35,16 @@ MonoBehaviour:
     durability:
       min: 0
       max: 1
+    gemSlotAmount: 0
   - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
     amount: 5
     durability:
       min: 0
       max: 1
+    gemSlotAmount: 0
   - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
     amount: 1
     durability:
       min: 0
       max: 1
+    gemSlotAmount: 0

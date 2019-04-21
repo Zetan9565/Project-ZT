@@ -19,7 +19,7 @@ public class Enemy : MonoBehaviour
 
     public void Death()
     {
-        Debug.Log("One" + info.Name + "was killed");
+        Debug.Log("One [" + info.Name + "] was killed");
         OnDeathEvent?.Invoke();
         QuestManager.Instance.UpdateUI();
     }

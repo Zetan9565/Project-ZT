@@ -101,7 +101,7 @@ public class CharacterInfoInspector : Editor
         EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
         if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID())
         {
-            if (ExistsID())
+            if (!string.IsNullOrEmpty(_ID.stringValue) && ExistsID())
                 EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
             if (GUILayout.Button("自动生成识别码"))
             {

@@ -16,7 +16,7 @@ MonoBehaviour:
   _Name: "\u739B\u4E3D\u4E9A"
   sex: 2
   defaultDialogue: {fileID: 11400000, guid: 1bef8915bbd85cb439b7959447c8995e, type: 2}
-  canDEV_RLAT: 1
+  canDEV_RLAT: 0
   normalItemDialogue: {fileID: 11400000, guid: c761d5a3c1f0b214395f27054fb51f08, type: 2}
   favoriteItemDialogue:
     level_1: {fileID: 0}

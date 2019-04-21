@@ -29,6 +29,21 @@ public class SaveManager : MonoBehaviour
     [DisplayName("16或32字符密钥")]
     public string encrptKey = "zetangamedatezetangamdatezetanga";
 #endif
+
+    private void Awake()
+    {
+        if (!dontDestroyOnLoadOnce)
+        {
+            DontDestroyOnLoad(this);
+            dontDestroyOnLoadOnce = true;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+
     #region 存档相关
     public bool Save()
     {
@@ -38,22 +53,24 @@ public class SaveManager : MonoBehaviour
             {
                 BinaryFormatter bf = new BinaryFormatter();
 
-                SaveData data = new SaveData(SceneManager.GetActiveScene().name);
+                SaveData data = new SaveData();
 
                 SaveBag(data);
-                SavePlayerQuest(data);
+                SaveQuest(data);
+                SaveDialogue(data);
 
                 bf.Serialize(fs, data);
                 MyTools.Encrypt(fs, encrptKey);
 
                 fs.Close();
 
+                MessageManager.Instance.NewMessage("保存成功！");
                 return true;
             }
             catch (System.Exception ex)
             {
-                if (fs != null) fs.Close();
                 Debug.LogWarning(ex.Message);
+                if (fs != null) fs.Close();
                 return false;
             }
         }
@@ -61,14 +78,21 @@ public class SaveManager : MonoBehaviour
 
     void SaveBag(SaveData data)
     {
-        foreach (ItemInfo info in BackpackManager.Instance.Items)
+        if (BackpackManager.Instance.MBackpack != null)
         {
-            data.itemDatas.Add(new ItemData(info.ItemID, info.Amount, 
-                BackpackManager.Instance.itemAgents.IndexOf(BackpackManager.Instance.GetItemAgentByInfo(info))));
+            data.backpackData.currentSize = (int)BackpackManager.Instance.MBackpack.backpackSize;
+            data.backpackData.maxSize = BackpackManager.Instance.MBackpack.backpackSize.Max;
+            data.backpackData.currentWeight = (float)BackpackManager.Instance.MBackpack.weightLoad;
+            data.backpackData.maxWeightLoad = BackpackManager.Instance.MBackpack.weightLoad.Max;
+            data.backpackData.money = BackpackManager.Instance.MBackpack.Money;
+            foreach (ItemInfo info in BackpackManager.Instance.MBackpack.Items)
+            {
+                data.backpackData.itemDatas.Add(new ItemData(info, BackpackManager.Instance.GetItemAgentByInfo(info).index));
+            }
         }
     }
 
-    void SavePlayerQuest(SaveData data)
+    void SaveQuest(SaveData data)
     {
         foreach (Quest quest in QuestManager.Instance.QuestsOngoing)
         {
@@ -77,6 +101,14 @@ public class SaveManager : MonoBehaviour
         foreach (Quest quest in QuestManager.Instance.QuestsComplete)
         {
             data.completeQuestDatas.Add(new QuestData(quest));
+        }
+    }
+
+    void SaveDialogue(SaveData data)
+    {
+        foreach (KeyValuePair<string, DialogueData> kvpDialog in DialogueManager.Instance.DialogueDatas)
+        {
+            data.dialogueDatas.Add(kvpDialog.Value);
         }
     }
     #endregion
@@ -112,16 +144,22 @@ public class SaveManager : MonoBehaviour
         ao.allowSceneActivation = true;
         yield return new WaitUntil(() => { return ao.isDone; });
         GameManager.Instance.Init();
+        LoadPlayer(data);
+        yield return new WaitUntil(() => { return BackpackManager.Instance.MBackpack != null; });
         LoadBag(data);
         LoadQuest(data);
+        LoadDialogue(data);
+    }
+
+    void LoadPlayer(SaveData data)
+    {
+        //PlayerInfoManager.Instance.SetPlayerInfo(new PlayerInfomation());
+        //TODO 读取玩家信息
     }
 
     void LoadBag(SaveData data)
     {
-        foreach (ItemData itemData in data.itemDatas)
-        {
-            BackpackManager.Instance.GetItem(GameManager.Instance.GetItemByID(itemData.itemID), itemData.itemAmount);
-        }
+        BackpackManager.Instance.LoadData(data.backpackData);
     }
 
     void LoadQuest(SaveData data)
@@ -146,7 +184,7 @@ public class SaveManager : MonoBehaviour
         {
             foreach (Objective o in quest.Objectives)
             {
-                if (o.runtimeID == od.runtimeID)
+                if (o.runtimeID == od.objectiveID)
                 {
                     o.CurrentAmount = od.currentAmount;
                     break;
@@ -156,20 +194,16 @@ public class SaveManager : MonoBehaviour
         QuestManager.Instance.AcceptQuest(quest, true);
         return quest;
     }
-    #endregion
 
-    private void Awake()
+    void LoadDialogue(SaveData data)
     {
-        if (!dontDestroyOnLoadOnce)
+        DialogueManager.Instance.DialogueDatas.Clear();
+        foreach (DialogueData dd in data.dialogueDatas)
         {
-            DontDestroyOnLoad(this);
-            dontDestroyOnLoadOnce = true;
-        }
-        else
-        {
-            Destroy(gameObject);
+            DialogueManager.Instance.DialogueDatas.Add(dd.dialogID, dd);
         }
     }
+    #endregion
 
     FileStream OpenFile(string path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite)
     {

@@ -109,6 +109,22 @@ public class Backpack
         return Items.Find(x => x.Item.StackAble && x.Item == notStkAblItem);
     }
 
+    public int GetItemAmountByID(string id)
+    {
+        var items = Items.FindAll(x => x.ItemID == id);
+        if (items.Count < 1) return 0;
+        if (items[0].Item.StackAble) return items[0].Amount;
+        return items.Count;
+    }
+
+    public int GetItemAmountByItem(ItemBase item)
+    {
+        var items = Items.FindAll(x => x.Item == item);
+        if (items.Count < 1) return 0;
+        if (items[0].Item.StackAble) return items[0].Amount;
+        return items.Count;
+    }
+
     public void Sort()
     {
         Items.Sort((x, y) =>

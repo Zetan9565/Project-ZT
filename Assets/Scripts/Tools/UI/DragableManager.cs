@@ -27,13 +27,14 @@ public class DragableManager : MonoBehaviour
 
     public UnityEvent onCancelDrag;
 
+    [SerializeField]
     private Image icon;
 
     // Start is called before the first frame update
-    void Start()
+    /*void Start()
     {
         icon = GetComponent<Image>();
-    }
+    }*/
 
     public void Update()
     {

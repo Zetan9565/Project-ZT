@@ -98,7 +98,7 @@ public class ItemInspector : Editor
         EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
         if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID() || string.IsNullOrEmpty(Regex.Replace(_ID.stringValue, @"[^0-9]+", "")) || !Regex.IsMatch(_ID.stringValue, @"(\d+)$"))
         {
-            if (ExistsID())
+            if (!string.IsNullOrEmpty(_ID.stringValue) && ExistsID())
                 EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
             else if (!string.IsNullOrEmpty(_ID.stringValue) && (string.IsNullOrEmpty(Regex.Replace(_ID.stringValue, @"[^0-9]+", "")) || !Regex.IsMatch(_ID.stringValue, @"(\d+)$")))
             {

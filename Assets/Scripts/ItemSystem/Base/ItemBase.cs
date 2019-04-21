@@ -455,6 +455,14 @@ public class ItemInfo : ICloneable//在这个类进行拓展，如强化、词�
         amount = info.Amount;
     }
 
+    public ItemInfo CloneInfo
+    {
+        get
+        {
+            return Clone() as ItemInfo;
+        }
+    }
+
     public object Clone()
     {
         return MemberwiseClone();

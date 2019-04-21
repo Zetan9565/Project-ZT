@@ -44,4 +44,10 @@ public class PlayerInfoManager : MonoBehaviour
             BackpackManager.Instance.Init();
         }
     }
+
+    public void SetPlayerInfo(PlayerInfomation playerInfo)
+    {
+        this.playerInfo = playerInfo;
+        Init();
+    }
 }

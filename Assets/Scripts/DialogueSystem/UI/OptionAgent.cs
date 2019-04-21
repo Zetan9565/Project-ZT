@@ -17,6 +17,10 @@ public class OptionAgent : MonoBehaviour
     [HideInInspector]
     public TalkObjective talkObjective;
 
+    [HideInInspector]
+    public BranchDialogue branchDialogue;
+
+    public Dialogue branchParent;
     public void OnClick()
     {
         switch (optionType)
@@ -30,13 +34,9 @@ public class OptionAgent : MonoBehaviour
             case OptionType.Confirm:
                 if (DialogueManager.Instance.DialogueType == DialogueType.Quest)
                     if (!MQuest.IsComplete && QuestManager.Instance.AcceptQuest(MQuest))
-                    {
                         DialogueManager.Instance.GotoDefault();
-                    }
                     else if (QuestManager.Instance.CompleteQuest(MQuest))
-                    {
                         DialogueManager.Instance.GotoDefault();
-                    }
                 break;
             case OptionType.Back:
                 DialogueManager.Instance.CloseQuestDescriptionWindow();
@@ -44,6 +44,9 @@ public class OptionAgent : MonoBehaviour
                 break;
             case OptionType.Continue:
                 DialogueManager.Instance.SayNextWords();
+                break;
+            case OptionType.Branch:
+                DialogueManager.Instance.StartBranchDialogue(branchDialogue);
                 break;
             default:
                 break;
@@ -57,5 +60,6 @@ public enum OptionType
     Objective,
     Confirm,
     Back,
-    Continue
+    Continue,
+    Branch
 }

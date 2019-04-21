@@ -30,12 +30,17 @@ MonoBehaviour:
   rewardItems:
   - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
     amount: 2
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
   sbmtOnOriginalNPC: 1
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 1
   collectObjectives: []
   killObjectives:
   - displayName: "\u6E05\u7406\u9AB7\u9AC5"
+    display: 1
     amount: 5
     inOrder: 1
     orderIndex: 1
@@ -44,6 +49,7 @@ MonoBehaviour:
     enemy: {fileID: 11400000, guid: 1f8636ab8a7c2a443b85d27f63bd2394, type: 2}
   talkObjectives:
   - displayName: "\u53BB\u5B89\u6170\u739B\u4E3D\u4E9A"
+    display: 1
     amount: 1
     inOrder: 1
     orderIndex: 2
@@ -51,6 +57,9 @@ MonoBehaviour:
     runtimeParent: {fileID: 0}
     talker: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
     dialogue: {fileID: 11400000, guid: 00931f27c4db01e44a9ff7817efe8119, type: 2}
+    cmpltOnlyWhenCRB: 0
+    indexOfRightBranch: 0
+    cmpltOnlyWhenABDC: 0
   moveObjectives: []
   OriginalQuestGiver: {fileID: 0}
   CurrentQuestGiver: {fileID: 0}
