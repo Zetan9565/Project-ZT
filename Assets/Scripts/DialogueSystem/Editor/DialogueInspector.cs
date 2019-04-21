@@ -43,7 +43,7 @@ public class DialogueInspector : Editor
     public override void OnInspectorGUI()
     {
         if (dialogue.Words.Exists(x => x.TalkerType == TalkerType.NPC && (!x.TalkerInfo || string.IsNullOrEmpty(x.Words)) ||
-            dialogue.Words.IndexOf(x) < dialogue.Words.Count - 1 && x.Branches.Exists(y => y != null && (!y.Dialogue || string.IsNullOrEmpty(y.Title)))))
+            x.Branches.Exists(y => y != null && (!y.Dialogue || string.IsNullOrEmpty(y.Title)))))
             EditorGUILayout.HelpBox("该对话存在未补全语句。", MessageType.Warning);
         else
             EditorGUILayout.HelpBox("该对话已完整。", MessageType.Info);

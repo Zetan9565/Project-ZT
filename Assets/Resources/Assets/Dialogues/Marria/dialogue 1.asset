@@ -41,12 +41,4 @@ MonoBehaviour:
     words: "\u6BCF\u5929\u90FD\u5FD9\u5F97\u4E0D\u53EF\u5F00\u4EA4\u3002"
     indexOfRrightBranch: -1
     wordsWhenChusWB: 
-    branches:
-    - title: 
-      specifyIndex: -1
-      dialogue: {fileID: 0}
-      goBack: 0
-      indexToGo: -1
-      deleteWhenCmplt: 1
-      runtimeParent: {fileID: 0}
-      runtimeIndexToGoBack: 0
+    branches: []
