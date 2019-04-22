@@ -20,17 +20,17 @@ MonoBehaviour:
     indexOfRrightBranch: 0
     wordsWhenChusWB: "\u8FD9\u90FD\u80FD\u9009\u9519\uFF0C\u592A\u83DC\u4E86"
     branches:
-    - title: "\u5206\u652F\u6D4B\u8BD5"
+    - title: "\u5206\u652F\u6D4B\u8BD5#1"
       specifyIndex: -1
-      dialogue: {fileID: 11400000, guid: 00931f27c4db01e44a9ff7817efe8119, type: 2}
+      dialogue: {fileID: 11400000, guid: e6ac29e35c65fda4a9cc0756740de01f, type: 2}
       goBack: 1
       indexToGo: -1
       deleteWhenCmplt: 1
       runtimeParent: {fileID: 0}
       runtimeIndexToGoBack: 0
-    - title: 
+    - title: "\u5206\u652F\u6D4B\u8BD5#2"
       specifyIndex: -1
-      dialogue: {fileID: 11400000, guid: e6ac29e35c65fda4a9cc0756740de01f, type: 2}
+      dialogue: {fileID: 11400000, guid: 00931f27c4db01e44a9ff7817efe8119, type: 2}
       goBack: 1
       indexToGo: -1
       deleteWhenCmplt: 1

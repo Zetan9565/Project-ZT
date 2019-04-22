@@ -25,7 +25,23 @@ MonoBehaviour:
     words: "\u771F\u7684\u54A9\uFF0C\u592A\u8C22\u8C22\u4F60\u4E86\uFF01"
     indexOfRrightBranch: -1
     wordsWhenChusWB: 
-    branches: []
+    branches:
+    - title: "\u5206\u652F\u6D4B\u8BD5#21"
+      specifyIndex: -1
+      dialogue: {fileID: 11400000, guid: 4d22d898b3b93fd4a9f8b4e6fbf2bf6b, type: 2}
+      goBack: 1
+      indexToGo: 2
+      deleteWhenCmplt: 1
+      runtimeParent: {fileID: 0}
+      runtimeIndexToGoBack: 0
+    - title: "\u5206\u652F\u6D4B\u8BD5#22"
+      specifyIndex: -1
+      dialogue: {fileID: 11400000, guid: 860a800ebd1f57e409389453a7b350e1, type: 2}
+      goBack: 1
+      indexToGo: 2
+      deleteWhenCmplt: 1
+      runtimeParent: {fileID: 0}
+      runtimeIndexToGoBack: 0
   - talkerType: 1
     talkerInfo: {fileID: 0}
     words: "My pleasure\u3002"

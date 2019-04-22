@@ -55,7 +55,7 @@ public class DialogueManager : MonoBehaviour
     private Dialogue dialogToSay;
     private DialogueWords lastWords;
     private BranchDialogue branchDialog;
-    private BranchDialogue branchDialogInstance;
+    private Stack<BranchDialogue> branchDialogInstance = new Stack<BranchDialogue>();
     private List<BranchDialogue> branchesComplete = new List<BranchDialogue>();
 
     public bool HasNotAcptQuests
@@ -153,23 +153,23 @@ public class DialogueManager : MonoBehaviour
         if (branch == null || !branch.Dialogue) return;
         if (lastWords.NeedToChusRightBranch)
         {
-            branchDialogInstance = branch.Clone() as BranchDialogue;
-            branchDialogInstance.runtimeParent = dialogToSay;
+            branchDialogInstance.Push(branch.Clone() as BranchDialogue);
+            branchDialogInstance.Peek().runtimeParent = dialogToSay;
             if (lastWords.IndexOfRightBranch == lastWords.Branches.IndexOf(branch))
             {
-                branchDialogInstance.runtimeIndexToGoBack = dialogToSay.Words.IndexOf(lastWords) + 1;
+                branchDialogInstance.Peek().runtimeIndexToGoBack = dialogToSay.Words.IndexOf(lastWords) + 1;
             }
-            else branchDialogInstance.runtimeIndexToGoBack = dialogToSay.Words.IndexOf(lastWords);
+            else branchDialogInstance.Peek().runtimeIndexToGoBack = dialogToSay.Words.IndexOf(lastWords);
         }
         else if (branch.GoBack)
         {
-            branchDialogInstance = branch.Clone() as BranchDialogue;
-            branchDialogInstance.runtimeParent = dialogToSay;
-            branchDialogInstance.runtimeIndexToGoBack = branch.IndexToGo;
+            branchDialogInstance.Push(branch.Clone() as BranchDialogue);
+            branchDialogInstance.Peek().runtimeParent = dialogToSay;
+            branchDialogInstance.Peek().runtimeIndexToGoBack = branch.IndexToGo;
         }
-        else branchDialogInstance = branch;
-        this.branchDialog = branch;
-        StartDialogue(branchDialogInstance.Dialogue, branchDialogInstance.SpecifyIndex);
+        else branchDialogInstance.Push(branch.Clone() as BranchDialogue);
+        branchDialog = branch;
+        StartDialogue(branchDialogInstance.Peek().Dialogue, branchDialogInstance.Peek().SpecifyIndex);
     }
     #endregion
 
@@ -413,7 +413,7 @@ public class DialogueManager : MonoBehaviour
         if (Words.Count <= 0)
         {
             OnFinishDialogueEvent?.Invoke();
-            if (branchDialogInstance != null)
+            if (branchDialogInstance.Count > 0)
                 HandlingLastBranchWords();//分支处理比较特殊，放到Dequque之后，否则分支最后一句不会讲
             //TryGoBack();
         }
@@ -500,15 +500,16 @@ public class DialogueManager : MonoBehaviour
 
     private void HandlingLastBranchWords()
     {
-        DialogueWords find = branchDialogInstance.runtimeParent.Words.Find(x => x.Branches.Contains(branchDialog));
+        BranchDialogue top = branchDialogInstance.Pop();
+        DialogueWords find = top.runtimeParent.Words.Find(x => x.Branches.Contains(branchDialog));
         if (find != null && find.IsRightBranch(branchDialog))
         {
-            StartDialogue(branchDialogInstance.runtimeParent, branchDialogInstance.runtimeIndexToGoBack, false);
-            int indexOfFind = branchDialogInstance.runtimeParent.Words.IndexOf(find);
+            StartDialogue(top.runtimeParent, top.runtimeIndexToGoBack, false);
+            int indexOfFind = top.runtimeParent.Words.IndexOf(find);
             foreach (BranchDialogue branch in find.Branches)
             {
                 branchesComplete.Add(branch);
-                string parentID = branchDialogInstance.runtimeParent.ID;
+                string parentID = top.runtimeParent.ID;
                 if (DialogueDatas.ContainsKey(parentID))
                 {
                     DialogueWordsData _find = DialogueDatas[parentID].wordsInfos.Find(x => x.wordsIndex == indexOfFind);
@@ -519,38 +520,33 @@ public class DialogueManager : MonoBehaviour
                     }
                 }
             }
-            branchDialogInstance = null;
-            branchDialog = null;
         }
         else if (find != null && find.NeedToChusRightBranch && !find.IsRightBranch(branchDialog))
         {
             //Debug.Log("Runtime" + branchInstance.runtimeIndexToGoBack);
-            SayTempWords(find.TalkerInfo, find.WordsWhenChusWB, find.TalkerType, branchDialogInstance.runtimeParent, branchDialogInstance.runtimeIndexToGoBack);
-            branchDialogInstance = null;
-            branchDialog = null;
+            SayTempWords(find.TalkerInfo, find.WordsWhenChusWB, find.TalkerType, top.runtimeParent, top.runtimeIndexToGoBack);
         }
-        else if (branchDialogInstance.GoBack)//处理普通的带返回的分支
+        else if (top.GoBack)//处理普通的带返回的分支
         {
-            StartDialogue(branchDialogInstance.runtimeParent, branchDialogInstance.runtimeIndexToGoBack, false);
-            int indexOfFind = branchDialogInstance.runtimeParent.Words.IndexOf(find);
-            if (branchDialogInstance.DeleteWhenCmplt)
+            StartDialogue(top.runtimeParent, top.runtimeIndexToGoBack, false);
+            int indexOfFind = top.runtimeParent.Words.IndexOf(find);
+            if (top.DeleteWhenCmplt)
             {
                 branchesComplete.Add(branchDialog);
                 //TODO 保存分支完成信息
-                string parentID = branchDialogInstance.runtimeParent.ID;
+                string parentID = top.runtimeParent.ID;
                 if (DialogueDatas.ContainsKey(parentID))
                 {
                     DialogueWordsData _find = DialogueDatas[parentID].wordsInfos.Find(x => x.wordsIndex == indexOfFind);
                     if (find != null)
                     {
-                        int indexOfBranch = find.Branches.IndexOf(branchDialogInstance);
+                        int indexOfBranch = find.Branches.IndexOf(top);
                         _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
                     }
                 }
             }
-            branchDialogInstance = null;
-            branchDialog = null;
         }
+        branchDialog = null;
     }
 
     //private void TryGoBack()
