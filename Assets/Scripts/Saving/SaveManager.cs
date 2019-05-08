@@ -1,10 +1,13 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+[DisallowMultipleComponent]
 public class SaveManager : MonoBehaviour
 {
     private static SaveManager instance;
@@ -18,17 +21,19 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-    public static bool dontDestroyOnLoadOnce;
+    static bool dontDestroyOnLoadOnce;
 
+    [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("存档文件名")]
 #endif
-    public string dataName = "SaveData.zdat";
+    private string dataName = "SaveData.zdat";
 
+    [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("16或32字符密钥")]
-    public string encrptKey = "zetangamedatezetangamdatezetanga";
 #endif
+    private string encryptKey = "zetangamedatezetangamdatezetanga";
 
     private void Awake()
     {
@@ -56,11 +61,13 @@ public class SaveManager : MonoBehaviour
                 SaveData data = new SaveData();
 
                 SaveBag(data);
+                SaveBuilding(data);
+                SaveWarehouse(data);
                 SaveQuest(data);
                 SaveDialogue(data);
 
                 bf.Serialize(fs, data);
-                MyTools.Encrypt(fs, encrptKey);
+                MyTools.Encrypt(fs, encryptKey);
 
                 fs.Close();
 
@@ -87,8 +94,32 @@ public class SaveManager : MonoBehaviour
             data.backpackData.money = BackpackManager.Instance.MBackpack.Money;
             foreach (ItemInfo info in BackpackManager.Instance.MBackpack.Items)
             {
-                data.backpackData.itemDatas.Add(new ItemData(info, BackpackManager.Instance.GetItemAgentByInfo(info).index));
+                data.backpackData.itemDatas.Add(new ItemData(info, BackpackManager.Instance.GetItemAgentByInfo(info).indexInGrid));
             }
+        }
+    }
+
+    void SaveBuilding(SaveData data)
+    {
+        data.buildingSystemData.learneds = BuildingManager.Instance.BuildingInfos.Select(x => x.IDStarter).ToArray();
+        foreach (Building b in FindObjectsOfType<Building>())
+        {
+            data.buildingSystemData.buildingDatas.Add(new BuildingData(b));
+        }
+    }
+
+    void SaveWarehouse(SaveData data)
+    {
+        foreach (KeyValuePair<string, Talker> kvp in GameManager.Talkers)
+        {
+            if (kvp.Value.IsWarehouseAgent)
+            {
+                data.warehouseDatas.Add(new WarehouseData(kvp.Value.TalkerID, kvp.Value.warehouse));
+            }
+        }
+        foreach (var kvp in FindObjectsOfType<WarehouseAgent>())
+        {
+            data.warehouseDatas.Add(new WarehouseData(kvp.ID, kvp.MWarehouse));
         }
     }
 
@@ -122,13 +153,13 @@ public class SaveManager : MonoBehaviour
             {
                 BinaryFormatter bf = new BinaryFormatter();
 
-                SaveData data = bf.Deserialize(MyTools.Decrypt(fs, encrptKey)) as SaveData;
+                SaveData data = bf.Deserialize(MyTools.Decrypt(fs, encryptKey)) as SaveData;
 
                 fs.Close();
 
                 StartCoroutine(LoadAsync(data));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 if (fs != null) fs.Close();
                 Debug.LogWarning(ex.Message);
@@ -143,10 +174,13 @@ public class SaveManager : MonoBehaviour
         yield return new WaitUntil(() => { return ao.progress >= 0.9f; });
         ao.allowSceneActivation = true;
         yield return new WaitUntil(() => { return ao.isDone; });
-        GameManager.Instance.Init();
+        GameManager.Init();
         LoadPlayer(data);
         yield return new WaitUntil(() => { return BackpackManager.Instance.MBackpack != null; });
         LoadBag(data);
+        BuildingManager.Instance.Init();
+        LoadBuilding(data);
+        LoadWarehouse(data);
         LoadQuest(data);
         LoadDialogue(data);
     }
@@ -160,6 +194,45 @@ public class SaveManager : MonoBehaviour
     void LoadBag(SaveData data)
     {
         BackpackManager.Instance.LoadData(data.backpackData);
+    }
+
+    void LoadBuilding(SaveData data)
+    {
+        BuildingManager.Instance.LoadData(data.buildingSystemData);
+    }
+
+    void LoadWarehouse(SaveData data)
+    {
+        WarehouseAgent[] warehouseAgents = FindObjectsOfType<WarehouseAgent>();
+        foreach (WarehouseData wd in data.warehouseDatas)
+        {
+            Warehouse warehouse = null;
+            if (GameManager.Talkers.ContainsKey(wd.handlerID))
+            {
+                Talker handler = GameManager.Talkers[wd.handlerID];
+                warehouse = handler.warehouse;
+            }
+            else
+            {
+                WarehouseAgent handler = Array.Find(warehouseAgents, x => x.ID == wd.handlerID);
+                if (handler)
+                {
+                    warehouse = handler.MWarehouse;
+                }
+            }
+            if (warehouse != null)
+            {
+                warehouse.warehouseSize = new ScopeInt(wd.maxSize) { Current = wd.currentSize };
+                warehouse.Items.Clear();
+                foreach (ItemData id in wd.itemDatas)
+                {
+                    ItemInfo newInfo = new ItemInfo(GameManager.GetItemByID(id.itemID), id.amount);
+                    newInfo.indexInGrid = id.indexInGrid;
+                    //TODO 把newInfo的耐久度等信息处理
+                    warehouse.Items.Add(newInfo);
+                }
+            }
+        }
     }
 
     void LoadQuest(SaveData data)
@@ -178,7 +251,7 @@ public class SaveManager : MonoBehaviour
     }
     Quest HandlingQuestData(QuestData questData)
     {
-        QuestGiver questGiver = GameManager.Instance.AllTalker[questData.originalGiverID] as QuestGiver;
+        QuestGiver questGiver = GameManager.Talkers[questData.originalGiverID] as QuestGiver;
         Quest quest = questGiver.QuestInstances.Find(x => x.ID == questData.questID);
         foreach (ObjectiveData od in questData.objectiveDatas)
         {

@@ -40,7 +40,13 @@ MonoBehaviour:
     branches: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-    words: "\u4F60\u53BB\u95EE\u95EE\u739B\u4E3D\u4E9A\u5177\u4F53\u4F4D\u7F6E\uFF0C\u53BB\u8C03\u67E5\u4E00\u4E0B\uFF0C\u5982\u679C\u771F\u7684\u6709\uFF0C\u5C31\u72E0\u72E0\u6559\u8BAD\u5B83\u4EEC\uFF0C\u5E76\u56DE\u6536\u4E00\u70B9\u6B66\u5668\u56DE\u6765\uFF01"
+    words: "\u4F60\u53BB\u95EE\u95EE\u739B\u4E3D\u4E9A\u5177\u4F53\u4F4D\u7F6E\uFF0C\u7136\u540E\u53BB\u8C03\u67E5\u4E00\u4E0B\u3002"
+    indexOfRrightBranch: -1
+    wordsWhenChusWB: 
+    branches: []
+  - talkerType: 0
+    talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+    words: "\u5982\u679C\u771F\u7684\u6709\uFF0C\u5C31\u72E0\u72E0\u6559\u8BAD\u5B83\u4EEC\uFF0C\u5E76\u56DE\u6536\u4E00\u70B9\u6B66\u5668\u56DE\u6765\uFF01"
     indexOfRrightBranch: -1
     wordsWhenChusWB: 
     branches: []

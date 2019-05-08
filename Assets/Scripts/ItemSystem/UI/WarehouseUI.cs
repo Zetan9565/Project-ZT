@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
 public class WarehouseUI : MonoBehaviour
 {
     public CanvasGroup warehouseWindow;
+
+    [HideInInspector]
+    public Canvas windowCanvas;
 
     public GameObject itemCellPrefab;
     public Transform itemCellsParent;
@@ -12,7 +14,7 @@ public class WarehouseUI : MonoBehaviour
     public Text money;
     public Text size;
 
-    public Button openButton;
+    //public Button warehouseButton;
     public Button closeButton;
     public Button sortButton;
 
@@ -20,8 +22,16 @@ public class WarehouseUI : MonoBehaviour
 
     private void Awake()
     {
-        openButton.onClick.AddListener(WarehouseManager.Instance.OpenWarehouseWindow);
-        closeButton.onClick.AddListener(WarehouseManager.Instance.CloseWarehouseWindow);
+        if (!warehouseWindow.gameObject.GetComponent<GraphicRaycaster>()) warehouseWindow.gameObject.AddComponent<GraphicRaycaster>();
+        windowCanvas = warehouseWindow.GetComponent<Canvas>();
+        windowCanvas.overrideSorting = true;
+        closeButton.onClick.AddListener(WarehouseManager.Instance.CloseWindow);
         sortButton.onClick.AddListener(WarehouseManager.Instance.Sort);
+        //warehouseButton.onClick.AddListener(WarehouseManager.Instance.OpenWindow);
+    }
+
+    private void OnDestroy()
+    {
+        if (WarehouseManager.Instance) WarehouseManager.Instance.ResetUI();
     }
 }

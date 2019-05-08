@@ -134,13 +134,14 @@ public class ItemInspector : Editor
             EditorGUILayout.ObjectField(new GUIContent(string.Empty), item.Icon, typeof(Texture2D), false);
             GUI.enabled = true;
         }
-        if (!item.IsWeapon && item.ItemType != ItemType.Armor && item.ItemType != ItemType.Jewelry) EditorGUILayout.PropertyField(stackAble, new GUIContent("可叠加"));
+        if (!item.IsEquipment && !item.IsBag)
+            EditorGUILayout.PropertyField(stackAble, new GUIContent("可叠加"));
         if (!item.IsForQuest) EditorGUILayout.PropertyField(discardAble, new GUIContent("可丢弃"));
         if (item.IsForQuest) EditorGUILayout.PropertyField(useable, new GUIContent("可使用"));
         if (item.IsForQuest && item.Useable) EditorGUILayout.PropertyField(inexhaustible, new GUIContent("可无限使用"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
-        if (!box)
+        if (!(item is BoxItem) && !(item is BookItem))
         {
             EditorGUILayout.Space();
             serializedObject.Update();
@@ -288,7 +289,7 @@ public class ItemInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            item.Materials.Add(new ProcessItemInfo() { Amount = 1 });
+            item.Materials.Add(new MatertialInfo() { Amount = 1 });
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };
@@ -323,10 +324,13 @@ public class ItemInspector : Editor
         switch (item.ItemType)
         {
             case ItemType.Weapon: typeName = "武器"; break;
+            case ItemType.Armor: typeName = "防具"; break;
             case ItemType.Box: typeName = "箱子"; break;
             case ItemType.Material: typeName = "制作材料"; break;
             case ItemType.Quest: typeName = "任务道具"; break;
             case ItemType.Gemstone: typeName = "宝石"; break;
+            case ItemType.Book: typeName = "书籍/图纸"; break;
+            case ItemType.Bag: typeName = "扩张用袋子"; break;
             default: break;
         }
         EditorGUILayout.LabelField("道具类型", typeName);
@@ -334,17 +338,57 @@ public class ItemInspector : Editor
         {
             case ItemType.Weapon:
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("_ATK"), new GUIContent("攻击力"));
+                if (serializedObject.FindProperty("_ATK").intValue < 0) serializedObject.FindProperty("_ATK").intValue = 0;
+
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("_DEF"), new GUIContent("防御力"));
+                if (serializedObject.FindProperty("_DEF").intValue < 0) serializedObject.FindProperty("_DEF").intValue = 0;
+
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("hit"), new GUIContent("命中力"));
+                if (serializedObject.FindProperty("hit").intValue < 0) serializedObject.FindProperty("hit").intValue = 0;
+
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("gemSlotAmount"), new GUIContent("默认宝石槽数"));
+                goto case ItemType.Gemstone;
+            case ItemType.Armor:
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("armorType"), new GUIContent("防具类型"));
+
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("_DEF"), new GUIContent("防御力"));
+                if (serializedObject.FindProperty("_DEF").intValue < 0) serializedObject.FindProperty("_DEF").intValue = 0;
+
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("hit"), new GUIContent("命中力"));
+                if (serializedObject.FindProperty("hit").intValue < 0) serializedObject.FindProperty("hit").intValue = 0;
+
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("dodge"), new GUIContent("闪避力"));
+                if (serializedObject.FindProperty("dodge").intValue < 0) serializedObject.FindProperty("dodge").intValue = 0;
+
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("gemSlotAmount"), new GUIContent("默认宝石槽数"));
                 goto case ItemType.Gemstone;
             case ItemType.Gemstone:
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("powerup"), new GUIContent("附加效果"), true);
                 break;
+            case ItemType.Book:
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("bookType"), new GUIContent("书籍/图纸类型"), true);
+                switch ((item as BookItem).BookType)
+                {
+                    case BookType.Building:
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("buildingInfo"), new GUIContent("可学设施"), true);
+                        if (serializedObject.FindProperty("buildingInfo").objectReferenceValue)
+                        {
+                            EditorGUILayout.LabelField("设施名称", (item as BookItem).BuildingInfo.Name);
+                        }
+                        break;
+                    default: break;
+                }
+                break;
+            case ItemType.Bag:
+                serializedObject.FindProperty("expandSize").intValue = EditorGUILayout.IntSlider(new GUIContent("背包扩张数量"), serializedObject.FindProperty("expandSize").intValue, 1, 192);
+                break;
             default: break;
         }
-        if (item.IsWeapon || item.ItemType == ItemType.Armor || item.ItemType == ItemType.Jewelry)
+        if (item.IsEquipment)
+        {
             EditorGUILayout.PropertyField(maxDurability, new GUIContent("最大耐久度"));
+            if (maxDurability.intValue < 1) maxDurability.intValue = 1;
+        }
     }
 
     void FixType()
@@ -356,6 +400,14 @@ public class ItemInspector : Editor
         else if (item.IsBox && item.ItemType != ItemType.Box)
         {
             itemType.enumValueIndex = (int)ItemType.Box;
+        }
+        else if (item.IsBag && item.ItemType != ItemType.Bag)
+        {
+            itemType.enumValueIndex = (int)ItemType.Bag;
+        }
+        else if (item.IsBook && item.ItemType != ItemType.Book)
+        {
+            itemType.enumValueIndex = (int)ItemType.Book;
         }
         else if (item.IsMaterial && item.ItemType != ItemType.Material)
         {
@@ -396,6 +448,9 @@ public class ItemInspector : Editor
                 case ItemType.Weapon:
                     newID = "WEPN" + i.ToString().PadLeft(3, '0');
                     break;
+                case ItemType.Armor:
+                    newID = "ARMR" + i.ToString().PadLeft(3, '0');
+                    break;
                 case ItemType.Box:
                     newID = "IBOX" + i.ToString().PadLeft(3, '0');
                     break;
@@ -407,6 +462,12 @@ public class ItemInspector : Editor
                     break;
                 case ItemType.Gemstone:
                     newID = "GEMS" + i.ToString().PadLeft(3, '0');
+                    break;
+                case ItemType.Book:
+                    newID = "BOOK" + i.ToString().PadLeft(3, '0');
+                    break;
+                case ItemType.Bag:
+                    newID = "IBAG" + i.ToString().PadLeft(3, '0');
                     break;
                 default:
                     newID = "ITEM" + i.ToString().PadLeft(3, '0');

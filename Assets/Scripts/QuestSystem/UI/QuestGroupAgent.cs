@@ -12,34 +12,40 @@ public class QuestGroupAgent : MonoBehaviour
 
     public Transform questListParent;
 
-    bool isExpanded;
+    private bool isExpanded;
+    public bool IsExpanded
+    {
+        get
+        {
+            return isExpanded;
+        }
+        set
+        {
+            if (!value)
+            {
+                MyTools.SetActive(questListParent.gameObject, false);
+                isExpanded = false;
+            }
+            else
+            {
+                MyTools.SetActive(questListParent.gameObject, true);
+                isExpanded = true;
+            }
+            UpdateStatus();
+        }
+    }
 
     public List<QuestAgent> questAgents = new List<QuestAgent>();
 
     public void OnClick()
     {
-        Expand(!isExpanded);
-    }
-
-    public void Expand(bool state)
-    {
-        if (!state)
-        {
-            MyTools.SetActive(questListParent.gameObject, false);
-            isExpanded = false;
-        }
-        else
-        {
-            MyTools.SetActive(questListParent.gameObject, true);
-            isExpanded = true;
-        }
-        UpdateStatus();
+        IsExpanded = !IsExpanded;
     }
 
     public void UpdateStatus()
     {
         if (questGroup)
-            nameText.text = questGroup.Name + (isExpanded ? "<" : ">");
+            nameText.text = questGroup.Name + (IsExpanded ? "<" : ">");
     }
 
     public void Recycle()

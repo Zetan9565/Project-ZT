@@ -310,8 +310,8 @@ InputManager:
     axis: 0
     joyNum: 0
   - serializedVersion: 3
-    m_Name: Talk
-    descriptiveName: "\u6253\u5F00\u8C08\u8BDD\u7A97\u53E3"
+    m_Name: Interactive
+    descriptiveName: "\u4E92\u52A8"
     descriptiveNegativeName: 
     negativeButton: 
     positiveButton: r

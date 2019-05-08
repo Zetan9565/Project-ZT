@@ -15,7 +15,7 @@ TagManager:
   - UI
   - 
   - 
-  - 
+  - Building Preview
   - 
   - 
   - 
@@ -45,4 +45,7 @@ TagManager:
     locked: 0
   - name: Character
     uniqueID: 2050152057
+    locked: 0
+  - name: UI
+    uniqueID: 2139484537
     locked: 0

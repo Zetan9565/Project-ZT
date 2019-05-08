@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class QuestManager : MonoBehaviour, IOpenCloseable
+public class QuestManager : MonoBehaviour, IWindow
 {
     private static QuestManager instance;
     public static QuestManager Instance
@@ -62,8 +62,16 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
     /// <param name="loadMode">是否读档模式</param>
     public bool AcceptQuest(Quest quest, bool loadMode = false)
     {
-        if (!quest) return false;
-        if (HasQuest(quest)) return false;
+        if (!quest)
+        {
+            MessageManager.Instance.NewMessage("空任务");
+            return false;
+        }
+        if (HasQuest(quest))
+        {
+            MessageManager.Instance.NewMessage("已经在执行");
+            return false;
+        }
         QuestAgent qa;
         if (quest.Group)
         {
@@ -71,6 +79,7 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
             if (qga)
             {
                 qa = ObjectPool.Instance.Get(UI.questPrefab, qga.questListParent).GetComponent<QuestAgent>();
+                qa.parent = qga;
                 qga.questAgents.Add(qa);
                 qga.UpdateStatus();
             }
@@ -78,10 +87,11 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
             {
                 qga = ObjectPool.Instance.Get(UI.questGroupPrefab, UI.questListParent).GetComponent<QuestGroupAgent>();
                 qga.questGroup = quest.Group;
-                qga.Expand(true);
+                qga.IsExpanded = true;
                 questGroupAgents.Add(qga);
 
                 qa = ObjectPool.Instance.Get(UI.questPrefab, qga.questListParent).GetComponent<QuestAgent>();
+                qa.parent = qga;
                 qga.questAgents.Add(qa);
                 qga.UpdateStatus();
             }
@@ -101,13 +111,13 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 {
                     BackpackManager.Instance.OnGetItemEvent += co.UpdateCollectAmountUp;
                     BackpackManager.Instance.OnLoseItemEvent += co.UpdateCollectAmountDown;
-                    if (co.CheckBagAtAcpt && !loadMode) co.UpdateCollectAmountUp(co.Item, BackpackManager.Instance.GetItemAmountByID(co.Item.ID));
+                    if (co.CheckBagAtAcpt && !loadMode) co.UpdateCollectAmountUp(co.Item, BackpackManager.Instance.GetItemAmount(co.Item.ID));
                 }
                 catch
                 {
                     BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmountUp;
                     BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
-                    Debug.LogWarning("[尝试使用null道具] 任务名称：" + quest.Title);
+                    MessageManager.Instance.NewMessage(string.Format("[尝试使用null道具] 任务名称：" + quest.Title));
                     continue;
                 }
             }
@@ -116,12 +126,12 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 KillObjective ko = o as KillObjective;
                 try
                 {
-                    foreach (Enemy enemy in GameManager.Instance.AllEnermy[ko.Enemy.ID])
+                    foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
                         enemy.OnDeathEvent += ko.UpdateKillAmount;
                 }
                 catch
                 {
-                    Debug.LogWarningFormat("[找不到敌人] ID: {0}", ko.Enemy.ID);
+                    MessageManager.Instance.NewMessage(string.Format("[找不到敌人] ID: {0}", ko.Enemy.ID));
                     continue;
                 }
             }
@@ -130,11 +140,11 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 TalkObjective to = o as TalkObjective;
                 try
                 {
-                    if (!o.IsComplete) GameManager.Instance.AllTalker[to.Talker.ID].objectivesTalkToThis.Add(to);
+                    if (!o.IsComplete) GameManager.Talkers[to.Talker.ID].objectivesTalkToThis.Add(to);
                 }
                 catch
                 {
-                    Debug.LogWarningFormat("[找不到NPC] ID: {0}", to.Talker.ID);
+                    MessageManager.Instance.NewMessage(string.Format("[找不到NPC] ID: {0}", to.Talker.ID));
                     continue;
                 }
             }
@@ -143,11 +153,11 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 MoveObjective mo = o as MoveObjective;
                 try
                 {
-                    GameManager.Instance.AllQuestPoint[mo.PointID].OnMoveIntoEvent += mo.UpdateMoveStatus;
+                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent += mo.UpdateMoveStatus;
                 }
                 catch
                 {
-                    Debug.LogWarningFormat("[找不到任务点] ID: {0}", mo.PointID);
+                    MessageManager.Instance.NewMessage(string.Format("[找不到任务点] ID: {0}", mo.PointID));
                     continue;
                 }
             }
@@ -158,15 +168,20 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
         {
             try
             {
-                (GameManager.Instance.AllTalker[quest.NPCToSubmit.ID] as QuestGiver).TransferQuestToThis(quest);
+                (GameManager.Talkers[quest.NPCToSubmit.ID] as QuestGiver).TransferQuestToThis(quest);
             }
             catch
             {
-                Debug.LogWarningFormat("[找不到NPC] ID: {0}", quest.NPCToSubmit);
+                MessageManager.Instance.NewMessage(string.Format("[找不到NPC] ID: {0}", quest.NPCToSubmit));
             }
         }
-        if(!loadMode)
+        if (!loadMode)
             MessageManager.Instance.NewMessage("接取了任务 [" + quest.Title + "]");
+        if (QuestsOngoing.Count > 0)
+        {
+            UI.questBoard.alpha = 1;
+            UI.questBoard.blocksRaycasts = true;
+        }
         return true;
     }
     /// <summary>
@@ -192,7 +207,7 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 {
                     KillObjective ko = o as KillObjective;
                     ko.CurrentAmount = 0;
-                    foreach (Enemy enemy in GameManager.Instance.AllEnermy[ko.Enemy.ID])
+                    foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
                     {
                         enemy.OnDeathEvent -= ko.UpdateKillAmount;
                     }
@@ -201,18 +216,23 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 {
                     TalkObjective to = o as TalkObjective;
                     to.CurrentAmount = 0;
-                    GameManager.Instance.AllTalker[to.Talker.ID].objectivesTalkToThis.RemoveAll(x => x == to);
+                    GameManager.Talkers[to.Talker.ID].objectivesTalkToThis.RemoveAll(x => x == to);
                 }
                 if (o is MoveObjective)
                 {
                     MoveObjective mo = o as MoveObjective;
                     mo.CurrentAmount = 0;
-                    GameManager.Instance.AllQuestPoint[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveStatus;
+                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveStatus;
                 }
             }
             if (!quest.SbmtOnOriginalNPC)
             {
                 quest.OriginalQuestGiver.TransferQuestToThis(quest);
+            }
+            if (QuestsOngoing.Count < 1)
+            {
+                UI.questBoard.alpha = 0;
+                UI.questBoard.blocksRaycasts = false;
             }
             return true;
         }
@@ -224,11 +244,14 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
     public void AbandonSelectedQuest()
     {
         if (!SelectedQuest) return;
-        if (AbandonQuest(SelectedQuest))
+        ConfirmHandler.Instance.NewConfirm("已消耗的道具不会退回，确定放弃此任务吗？", delegate
         {
-            RemoveQuestAgentByQuest(SelectedQuest);
-            CloseDescriptionWindow();
-        }
+            if (AbandonQuest(SelectedQuest))
+            {
+                RemoveQuestAgentByQuest(SelectedQuest);
+                CloseDescriptionWindow();
+            }
+        });
     }
     /// <summary>
     /// 完成任务
@@ -251,7 +274,7 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 {
                     CollectObjective co = o as CollectObjective;
                     questsReqThisQuestItem = BackpackManager.Instance.QuestsRequiredItem(co.Item,
-                        BackpackManager.Instance.GetItemAmountByItem(co.Item) - o.Amount).ToList();
+                        BackpackManager.Instance.GetItemAmount(co.Item) - o.Amount).ToList();
                 }
                 if (questsReqThisQuestItem.Contains(quest) && questsReqThisQuestItem.Count > 1)
                 {
@@ -274,6 +297,7 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 if (cqga)
                 {
                     cqa = ObjectPool.Instance.Get(UI.questPrefab, cqga.questListParent).GetComponent<QuestAgent>();
+                    cqa.parent = cqga;
                     cqga.questAgents.Add(cqa);
                     cqga.UpdateStatus();
                 }
@@ -281,10 +305,11 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 {
                     cqga = ObjectPool.Instance.Get(UI.questGroupPrefab, UI.cmpltQuestListParent).GetComponent<QuestGroupAgent>();
                     cqga.questGroup = quest.Group;
-                    cqga.Expand(true);
+                    cqga.IsExpanded = true;
                     cmpltQuestGroupAgents.Add(cqga);
 
                     cqa = ObjectPool.Instance.Get(UI.questPrefab, cqga.questListParent).GetComponent<QuestAgent>();
+                    cqa.parent = cqga;
                     cqga.questAgents.Add(cqa);
                     cqga.UpdateStatus();
                 }
@@ -303,24 +328,25 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 }
                 if (o is KillObjective)
                 {
-                    foreach (Enemy enermy in GameManager.Instance.AllEnermy[(o as KillObjective).Enemy.ID])
+                    foreach (Enemy enermy in GameManager.Enermies[(o as KillObjective).Enemy.ID])
                     {
                         enermy.OnDeathEvent -= (o as KillObjective).UpdateKillAmount;
                     }
                 }
                 if (o is TalkObjective)
                 {
-                    GameManager.Instance.AllTalker[(o as TalkObjective).Talker.ID].objectivesTalkToThis.RemoveAll(x => x == (o as TalkObjective));
+                    GameManager.Talkers[(o as TalkObjective).Talker.ID].objectivesTalkToThis.RemoveAll(x => x == (o as TalkObjective));
                 }
                 if (o is MoveObjective)
                 {
                     MoveObjective mo = o as MoveObjective;
-                    GameManager.Instance.AllQuestPoint[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveStatus;
+                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveStatus;
                 }
             }
             if (!loadMode)
             {
-                //TODO 经验和金钱的处理
+                //TODO 经验的处理
+                BackpackManager.Instance.GetMoney(quest.RewardMoney);
                 foreach (ItemInfo info in quest.RewardItems)
                 {
                     BackpackManager.Instance.GetItem(info);
@@ -328,6 +354,11 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                 MessageManager.Instance.NewMessage("提交了任务 [" + quest.Title + "]");
             }
             CloseDescriptionWindow();
+            if (QuestsOngoing.Count < 1)
+            {
+                UI.questBoard.alpha = 0;
+                UI.questBoard.blocksRaycasts = false;
+            }
             return true;
         }
         return false;
@@ -358,9 +389,9 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
         foreach (ItemInfo info in SelectedQuest.RewardItems)
             foreach (ItemAgent rwc in UI.rewardCells)
             {
-                if (rwc.itemInfo == null)
+                if (rwc.MItemInfo == null)
                 {
-                    rwc.Init(info);
+                    rwc.InitItem(info);
                     break;
                 }
             }
@@ -389,7 +420,7 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                     objectives += SelectedQuest.Objectives[i].DisplayName + endLine;
                 }
             }
-            UI.descriptionText.text = string.Format("<size=16><b>{0}</b></size>\n[委托人: {1}]\n{2}\n\n<size=16><b>任务目标</b></size>\n{3}",
+            UI.descriptionText.text = string.Format("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标</b>\n{3}",
                                    SelectedQuest.Title,
                                    SelectedQuest.OriginalQuestGiver.TalkerName,
                                    SelectedQuest.Description,
@@ -408,7 +439,7 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
                                   (SelectedQuest.Objectives[i].IsComplete ? "(达成)" + endLine : endLine);
                 }
             }
-            UI.descriptionText.text = string.Format("<size=16><b>{0}</b></size>\n[委托人: {1}]\n{2}\n\n<size=16><b>任务目标{3}</b></size>\n{4}",
+            UI.descriptionText.text = string.Format("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标{3}</b>\n{4}",
                                    SelectedQuest.Title,
                                    SelectedQuest.OriginalQuestGiver.TalkerName,
                                    SelectedQuest.Description,
@@ -437,54 +468,72 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = true;
     }
-
-    public void CloseUI()
+    public void OpenWindow()
     {
+        if (!UI || !UI.gameObject) return;
+        if (IsUIOpen) return;
+        if (IsPausing) return;
+        if (DialogueManager.Instance.IsTalking) return;
+        UI.questsWindow.alpha = 1;
+        UI.questsWindow.blocksRaycasts = true;
+        DialogueManager.Instance.CloseQuestDescriptionWindow();
+        WindowsManager.Instance.Push(this);
+        IsUIOpen = true;
+        UIManager.Instance.EnableJoyStick(false);
+    }
+
+    public void CloseWindow()
+    {
+        if (!UI || !UI.gameObject) return;
+        if (!IsUIOpen) return;
         if (IsPausing) return;
         UI.questsWindow.alpha = 0;
         UI.questsWindow.blocksRaycasts = false;
         CloseDescriptionWindow();
+        WindowsManager.Instance.Remove(this);
         IsUIOpen = false;
+        IsPausing = false;
+        UIManager.Instance.EnableJoyStick(true);
     }
-    public void OpenUI()
+    public void OpenCloseWindow()
     {
-        if (IsPausing) return;
-        UI.questsWindow.alpha = 1;
-        UI.questsWindow.blocksRaycasts = true;
-        DialogueManager.Instance.CloseQuestDescriptionWindow();
-        WindowsManager.Instance.PushWindow(this);
-        IsUIOpen = true;
-    }
-    public void OpenCloseUI()
-    {
-        if (UI.questsWindow.alpha == 0)
-            OpenUI();
-        else CloseUI();
+        if (!UI || !UI.gameObject) return;
+        if (!IsUIOpen)
+            OpenWindow();
+        else CloseWindow();
     }
 
-    public void PauseDisplay(bool state)
+    public void PauseDisplay(bool pause)
     {
+        if (!UI | !UI.gameObject) return;
         if (!IsUIOpen) return;
-        if (!state)
+        if (IsPausing && !pause)
         {
             UI.questsWindow.alpha = 1;
             UI.questsWindow.blocksRaycasts = true;
             UI.descriptionWindow.alpha = 1;
             UI.descriptionWindow.blocksRaycasts = true;
         }
-        else
+        else if (!IsPausing && pause)
         {
             UI.questsWindow.alpha = 0;
             UI.questsWindow.blocksRaycasts = false;
             UI.descriptionWindow.alpha = 0;
             UI.descriptionWindow.blocksRaycasts = false;
         }
-        IsPausing = state;
+        IsPausing = pause;
     }
 
     public bool IsPausing { get; private set; }
     public bool IsUIOpen { get; private set; }
 
+    public Canvas SortCanvas
+    {
+        get
+        {
+            return UI.windowCanvas;
+        }
+    }
     #endregion
 
     #region 其它
@@ -531,6 +580,13 @@ public class QuestManager : MonoBehaviour, IOpenCloseable
     {
         if (!UI) return;
         this.UI = UI;
+    }
+
+    public void ResetUI()
+    {
+        questAgents.Clear();
+        IsUIOpen = false;
+        IsPausing = false;
     }
     #endregion
 }

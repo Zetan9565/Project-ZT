@@ -11,6 +11,10 @@ public class SaveData
 
     public BackpackData backpackData;
 
+    public BuildingSystemData buildingSystemData;
+
+    public List<WarehouseData> warehouseDatas;
+
     public List<QuestData> ongoingQuestDatas;
     public List<QuestData> completeQuestDatas;
 
@@ -21,12 +25,15 @@ public class SaveData
         sceneName = SceneManager.GetActiveScene().name;
         saveDate = DateTime.Now;
         backpackData = new BackpackData();
+        buildingSystemData = new BuildingSystemData();
+        warehouseDatas = new List<WarehouseData>();
         ongoingQuestDatas = new List<QuestData>();
         completeQuestDatas = new List<QuestData>();
         dialogueDatas = new List<DialogueData>();
     }
 }
 
+#region 道具相关
 [Serializable]
 public class BackpackData
 {
@@ -42,22 +49,86 @@ public class BackpackData
 }
 
 [Serializable]
+public class WarehouseData
+{
+    public string handlerID;
+
+    public long money;
+
+    public int currentSize;
+    public int maxSize;
+
+    public List<ItemData> itemDatas = new List<ItemData>();
+
+    public WarehouseData(string id, Warehouse warehouse)
+    {
+        handlerID = id;
+        money = warehouse.Money;
+        currentSize = (int)warehouse.warehouseSize;
+        maxSize = warehouse.warehouseSize.Max;
+        foreach (ItemInfo info in warehouse.Items)
+        {
+            itemDatas.Add(new ItemData(info));
+        }
+    }
+}
+
+[Serializable]
 public class ItemData
 {
     public string itemID;
 
     public int amount;
 
-    public int indexInBP;
+    public int indexInGrid;
 
-    public ItemData(ItemInfo itemInfo, int index)
+    public ItemData(ItemInfo itemInfo, int index = -1)
     {
         itemID = itemInfo.ItemID;
         amount = itemInfo.Amount;
-        //this.itemInfo = itemInfo;
-        indexInBP = index;
+        indexInGrid = index;
     }
 }
+#endregion
+
+#region 建筑相关
+[Serializable]
+public class BuildingSystemData
+{
+    public string[] learneds;
+
+    public List<BuildingData> buildingDatas;
+
+    public BuildingSystemData()
+    {
+        buildingDatas = new List<BuildingData>();
+    }
+}
+
+[Serializable]
+public class BuildingData
+{
+    public string IDStarter;
+
+    public string IDTail;
+
+    public float posX;
+    public float posY;
+    public float posZ;
+
+    public float leftBuildTime;
+
+    public BuildingData(Building building)
+    {
+        IDStarter = building.IDStarter;
+        IDTail = building.IDTail;
+        posX = building.transform.position.x;
+        posY = building.transform.position.y;
+        posZ = building.transform.position.z;
+        leftBuildTime = building.leftBuildTime;
+    }
+}
+#endregion
 
 #region 任务相关
 [Serializable]
@@ -100,19 +171,19 @@ public class DialogueData
 {
     public string dialogID { get; private set; }
 
-    public List<DialogueWordsData> wordsInfos;
+    public List<DialogueWordsData> wordsDatas;
 
     public DialogueData()
     {
-        wordsInfos = new List<DialogueWordsData>();
+        wordsDatas = new List<DialogueWordsData>();
     }
 
     public DialogueData(Dialogue dialogue)
     {
         dialogID = dialogue.ID;
-        wordsInfos = new List<DialogueWordsData>();
+        wordsDatas = new List<DialogueWordsData>();
         foreach (DialogueWords words in dialogue.Words)
-            wordsInfos.Add(new DialogueWordsData() { wordsIndex = dialogue.Words.IndexOf(words) });
+            wordsDatas.Add(new DialogueWordsData() { wordsIndex = dialogue.Words.IndexOf(words) });
     }
 }
 

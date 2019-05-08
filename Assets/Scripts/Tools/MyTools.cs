@@ -31,6 +31,32 @@ public class MyTools
         return Regex.Replace(chineseNum, ".", m => "负 空零一二三四五六七八九空空空空空空空分角十百千万亿兆京垓秭穰"[m.Value[0] - '-'].ToString());
     }
 
+    public static Vector3 MoveByGrid(Vector3 originalPos, float gridSize, float offset = 1.0f)
+    {
+        Vector3 newPos = originalPos;
+        newPos -= Vector3.one * offset;
+        newPos /= gridSize;
+        newPos = new Vector3(Mathf.Round(newPos.x), Mathf.Round(newPos.y), 0);
+        newPos *= gridSize;
+        newPos += Vector3.one * offset;
+        return newPos;
+    }
+    public static Vector2 MoveByGrid(Vector2 originalPos, float gridSize, float offset = 1.0f)
+    {
+        Vector2 newPos = originalPos;
+        newPos -= Vector2.one * offset;
+        newPos /= gridSize;
+        newPos = new Vector3(Mathf.Round(newPos.x), Mathf.Round(newPos.y), 0);
+        newPos *= gridSize;
+        newPos += Vector2.one * offset;
+        return newPos;
+    }
+
+    public static bool IsMouseInsideScreen()
+    {
+        return Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height;
+    }
+
     #region 文件安全相关
     /// <summary>
     /// 加密字符串，多用于JSON
@@ -241,6 +267,7 @@ public class ScopeInt
         {
             if (max < value) min = max;
             else min = value;
+            if (min > current) current = min;
         }
     }
 
@@ -254,6 +281,7 @@ public class ScopeInt
             if (value < 0) max = 0;
             else if (value < min) max = min + 1;
             else max = value;
+            if (max < current) current = max;
         }
     }
 

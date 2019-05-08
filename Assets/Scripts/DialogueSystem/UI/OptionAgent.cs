@@ -4,38 +4,76 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class OptionAgent : MonoBehaviour
 {
-    public Text TitleText;
+    private Text titleText;
 
-#if UNITY_EDITOR
-    [ReadOnly]
-#endif
-    public OptionType optionType;
+    public OptionType OptionType { get; private set; }
 
-    [HideInInspector]
-    public Quest MQuest;
+    public Quest MQuest { get; private set; }
 
-    [HideInInspector]
-    public TalkObjective talkObjective;
+    public TalkObjective TalkObjective { get; private set; }
 
-    [HideInInspector]
-    public BranchDialogue branchDialogue;
+    public BranchDialogue BranchDialogue { get; private set; }
 
-    public Dialogue branchParent;
+    private void Awake()
+    {
+        titleText = GetComponentInChildren<Text>();
+        GetComponent<Button>().onClick.AddListener(OnClick);
+    }
+
+    public void InitContinue(string text)
+    {
+        titleText.text = text;
+        OptionType = OptionType.Continue;
+    }
+
+    public void InitBack(string text)
+    {
+        titleText.text = text;
+        OptionType = OptionType.Back;
+    }
+
+    public void InitConfirm(string text)
+    {
+        titleText.text = text;
+        OptionType = OptionType.Confirm;
+    }
+
+    public void Init(string text, Quest quest)
+    {
+        titleText.text = text;
+        OptionType = OptionType.Quest;
+        MQuest = quest;
+    }
+
+    public void Init(string text, TalkObjective objective)
+    {
+        titleText.text = text;
+        OptionType = OptionType.Objective;
+        TalkObjective = objective;
+    }
+
+    public void Init(string text, BranchDialogue branch)
+    {
+        titleText.text = text;
+        OptionType = OptionType.Branch;
+        BranchDialogue = branch;
+    }
+
     public void OnClick()
     {
-        switch (optionType)
+        switch (OptionType)
         {
             case OptionType.Quest:
                 DialogueManager.Instance.StartQuestDialogue(MQuest);
                 break;
             case OptionType.Objective:
-                DialogueManager.Instance.StartObjectiveDialogue(talkObjective);
+                DialogueManager.Instance.StartObjectiveDialogue(TalkObjective);
                 break;
             case OptionType.Confirm:
                 if (DialogueManager.Instance.DialogueType == DialogueType.Quest)
-                    if (!MQuest.IsComplete && QuestManager.Instance.AcceptQuest(MQuest))
+                    if (!DialogueManager.Instance.CurrentQuest.IsComplete && QuestManager.Instance.AcceptQuest(DialogueManager.Instance.CurrentQuest))
                         DialogueManager.Instance.GotoDefault();
-                    else if (QuestManager.Instance.CompleteQuest(MQuest))
+                    else if (QuestManager.Instance.CompleteQuest(DialogueManager.Instance.CurrentQuest))
                         DialogueManager.Instance.GotoDefault();
                 break;
             case OptionType.Back:
@@ -46,11 +84,21 @@ public class OptionAgent : MonoBehaviour
                 DialogueManager.Instance.SayNextWords();
                 break;
             case OptionType.Branch:
-                DialogueManager.Instance.StartBranchDialogue(branchDialogue);
+                DialogueManager.Instance.StartBranchDialogue(BranchDialogue);
                 break;
             default:
                 break;
         }
+    }
+
+    public void Recycle()
+    {
+        titleText.text = string.Empty;
+        TalkObjective = null;
+        MQuest = null;
+        BranchDialogue = null;
+        OptionType = OptionType.None;
+        ObjectPool.Instance.Put(gameObject);
     }
 }
 public enum OptionType

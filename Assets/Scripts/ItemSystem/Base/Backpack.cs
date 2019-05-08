@@ -52,9 +52,9 @@ public class Backpack
     {
         if (item.StackAble)
         {
-            if (Items.Exists(x => x.Item == item))
+            if (Items.Exists(x => x.Item != null && (x.Item == item || x.ItemID == item.ID)))
             {
-                Items.Find(x => x.Item == item).Amount += amount;
+                Items.Find(x => x.Item == item || x.ItemID == item.ID).Amount += amount;
                 weightLoad += item.Weight * amount;
             }
             else
@@ -71,6 +71,37 @@ public class Backpack
                 Items.Add(new ItemInfo(item));
                 backpackSize++;
                 weightLoad += item.Weight;
+            }
+        }
+    }
+
+    public void GetItemSimple(ItemInfo info, int amount = 1)
+    {
+        if (info.Item.StackAble)
+        {
+            if (Items.Exists(x => x.Item != null && (x.Item == info.Item || x.ItemID == info.ItemID)))
+            {
+                Items.Find(x => x.Item == info.Item || x.ItemID == info.ItemID).Amount += amount;
+                weightLoad += info.Item.Weight;
+            }
+            else
+            {
+                ItemInfo newInfo = info.Cloned;
+                newInfo.Amount = amount;
+                Items.Add(newInfo);
+                backpackSize++;
+                weightLoad += info.Item.Weight * amount;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < amount; i++)
+            {
+                ItemInfo newInfo = info.Cloned;
+                newInfo.Amount = 1;
+                Items.Add(newInfo);
+                backpackSize++;
+                weightLoad += info.Item.Weight;
             }
         }
     }
@@ -109,7 +140,7 @@ public class Backpack
         return Items.Find(x => x.Item.StackAble && x.Item == notStkAblItem);
     }
 
-    public int GetItemAmountByID(string id)
+    public int GetItemAmount(string id)
     {
         var items = Items.FindAll(x => x.ItemID == id);
         if (items.Count < 1) return 0;
@@ -117,7 +148,7 @@ public class Backpack
         return items.Count;
     }
 
-    public int GetItemAmountByItem(ItemBase item)
+    public int GetItemAmount(ItemBase item)
     {
         var items = Items.FindAll(x => x.Item == item);
         if (items.Count < 1) return 0;

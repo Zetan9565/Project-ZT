@@ -21,6 +21,12 @@ public class InputCustomInfo : ScriptableObject
 #endif
     private KeyCode backpackButton = KeyCode.I;
 
+    [SerializeField]
+#if UNITY_EDITOR
+    [DisplayName("建筑按钮")]
+#endif
+    private KeyCode buildingButton = KeyCode.B;
+
     public KeyCode QuestWindowButton
     {
         get
@@ -42,6 +48,14 @@ public class InputCustomInfo : ScriptableObject
         get
         {
             return backpackButton;
+        }
+    }
+
+    public KeyCode BuildingButton
+    {
+        get
+        {
+            return buildingButton;
         }
     }
 }

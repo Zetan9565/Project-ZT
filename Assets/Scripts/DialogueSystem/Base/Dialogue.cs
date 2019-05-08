@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 [CreateAssetMenu(fileName = "dialogue", menuName = "ZetanStudio/剧情/对话")]
 public class Dialogue : ScriptableObject
@@ -142,7 +141,7 @@ public class DialogueWords
     }
 }
 
-[System.Serializable]
+[Serializable]
 public class BranchDialogue : ICloneable
 {
     [SerializeField]
@@ -163,6 +162,16 @@ public class BranchDialogue : ICloneable
         get
         {
             return specifyIndex;
+        }
+    }
+
+    [SerializeField]
+    private string words;
+    public string Words
+    {
+        get
+        {
+            return words;
         }
     }
 
@@ -206,11 +215,20 @@ public class BranchDialogue : ICloneable
         }
     }
 
+    public bool IsInvalid
+    {
+        get
+        {
+            return !dialogue && string.IsNullOrEmpty(words);
+        }
+    }
+
     [HideInInspector]
     public Dialogue runtimeParent;
 
     [HideInInspector]
     public int runtimeIndexToGoBack;
+
     public object Clone()
     {
         return MemberwiseClone();
@@ -223,7 +241,7 @@ public enum TalkerType
     Player
 }
 
-[System.Serializable]
+[Serializable]
 public class AffectiveDialogue
 {
     [SerializeField]

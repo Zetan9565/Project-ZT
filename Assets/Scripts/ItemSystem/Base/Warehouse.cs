@@ -1,15 +1,28 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
 public class Warehouse
 {
-    [HideInInspector]
-    public ScopeInt backpackSize = new ScopeInt(300);
+    private long money;
+    public long Money
+    {
+        get
+        {
+            return money;
+        }
+        private set
+        {
+            if (value < 0) value = money;
+            money = value;
+        }
+    }
 
-    public bool IsFull { get { return backpackSize.IsMax; } }
+    [HideInInspector]
+    public ScopeInt warehouseSize = new ScopeInt(300);
+
+    public bool IsFull { get { return warehouseSize.IsMax; } }
 
     public ItemInfo Latest
     {
@@ -32,17 +45,17 @@ public class Warehouse
             }
             else
             {
-                Items.Add(info.Clone() as ItemInfo);
+                Items.Add(info.Cloned);
                 Latest.Amount = amount;
-                backpackSize++;
+                warehouseSize++;
             }
         }
         else
         {
             for (int i = 0; i < amount; i++)
             {
-                Items.Add(info.Clone() as ItemInfo);
-                backpackSize++;
+                Items.Add(info.Cloned);
+                warehouseSize++;
             }
         }
     }
@@ -53,7 +66,7 @@ public class Warehouse
         if (info.Amount <= 0)
         {
             Items.Remove(info);
-            backpackSize--;
+            warehouseSize--;
         }
     }
 

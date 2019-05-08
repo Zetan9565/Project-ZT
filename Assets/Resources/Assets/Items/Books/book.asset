@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b01cb0711d04a7c4cbb54fc7429a8f4b, type: 3}
+  m_Name: book
+  m_EditorClassIdentifier: 
+  _ID: BOOK001
+  _Name: "\u4ED3\u5E93\u8BBE\u8BA1\u56FE\u7EB8"
+  itemType: 13
+  quality: 4
+  weight: 0
+  sellAble: 1
+  sellPrice: 0
+  buyPrice: 0
+  icon: {fileID: 21300000, guid: 6f360e21e16247442a84447fba24df77, type: 3}
+  description: "\u8BB0\u8F7D\u7740\u4ED3\u5E93\u5236\u9020\u65B9\u6CD5\u7684\u56FE\u7EB8\u3002"
+  stackAble: 1
+  discardAble: 1
+  useable: 1
+  inexhaustible: 0
+  maxDurability: 100
+  processMethod: 0
+  materials: []
+  bookType: 1
+  buildingInfo: {fileID: 11400000, guid: 7874646e9bc32c04ea7ec82e1ae6fd42, type: 2}

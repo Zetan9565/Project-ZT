@@ -19,7 +19,7 @@ MonoBehaviour:
       dialogue: {fileID: 11400000, guid: 1bef8915bbd85cb439b7959447c8995e, type: 2}
       forPlayer: 0
       animaActionType: 0
-      character: {fileID: 11400000, guid: d249fad079fcaa443a590dd1f8d4e1bc, type: 2}
+      character: {fileID: 0}
       paramName: 
       intValue: 0
       boolValue: 0

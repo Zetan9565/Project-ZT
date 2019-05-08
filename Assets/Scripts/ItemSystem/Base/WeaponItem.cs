@@ -5,6 +5,16 @@
 public class WeaponItem : ItemBase
 {
     [SerializeField]
+    private WeaponType weaponType;
+    public WeaponType WeaponType
+    {
+        get
+        {
+            return weaponType;
+        }
+    }
+
+    [SerializeField]
     private int _ATK;
     public int ATK
     {
@@ -55,9 +65,27 @@ public class WeaponItem : ItemBase
         }
     }
 
+    public bool IsPrimary
+    {
+        get
+        {
+            return weaponType != WeaponType.SortBow;
+        }
+    }
+
+
     public WeaponItem()
     {
         itemType = ItemType.Weapon;
         stackAble = false;
     }
+
+}
+
+public enum WeaponType
+{
+    Sword,
+    Blade,
+    Spear,
+    SortBow
 }

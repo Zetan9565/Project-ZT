@@ -36,6 +36,31 @@ public class Talker : MonoBehaviour
 
     public Relationship Relationship { get; private set; }
 
+    [SerializeField]
+    private bool isWarehouseAgent;
+    public bool IsWarehouseAgent
+    {
+        get
+        {
+            return isWarehouseAgent && !isVendor;
+        }
+    }
+
+    public Warehouse warehouse = new Warehouse();
+
+    [SerializeField]
+    private bool isVendor;
+    public bool IsVendor
+    {
+        get
+        {
+            return isVendor && !isWarehouseAgent;
+        }
+    }
+
+    public Shop shop = new Shop();
+
+
     /// <summary>
     /// 存储对象身上的对话型目标
     /// </summary>
@@ -44,6 +69,18 @@ public class Talker : MonoBehaviour
 
     public event DialogueListener OnTalkBeginEvent;
     public event DialogueListener OnTalkFinishedEvent;
+
+    private void Awake()
+    {
+        if (IsVendor && !ShopManager.Vendors.Contains(this)) ShopManager.Vendors.Add(this);
+        if (!GameManager.Talkers.ContainsKey(TalkerID)) GameManager.Talkers.Add(TalkerID, this);
+        else if (!GameManager.Talkers[TalkerID] ||!GameManager.Talkers[TalkerID].gameObject)
+        {
+            GameManager.Talkers.Remove(TalkerID);
+            GameManager.Talkers.Add(TalkerID, this);
+        }
+        if (IsVendor) shop.Init();
+    }
 
     public virtual void OnTalkBegin()
     {

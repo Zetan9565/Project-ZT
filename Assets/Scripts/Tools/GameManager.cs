@@ -16,7 +16,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public static bool dontDestroyOnLoadOnce;
+    [SerializeField]
+    private string backpackName = "行囊";
+    public string BackpackName
+    {
+        get
+        {
+            return backpackName;
+        }
+    }
+
+    [SerializeField]
+    private string coinName = "文";
+    public string CoinName
+    {
+        get
+        {
+            return coinName;
+        }
+    }
+
+    [SerializeField]
+    private List<Color> qualityColors = new List<Color>();
+    public List<Color> QualityColors
+    {
+        get
+        {
+            return qualityColors;
+        }
+    }
+
+    private static bool dontDestroyOnLoadOnce;
 
     private void Awake()
     {
@@ -24,7 +54,6 @@ public class GameManager : MonoBehaviour
         {
             DontDestroyOnLoad(this);
             dontDestroyOnLoadOnce = true;
-            Init();
         }
         else
         {
@@ -32,83 +61,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
-    private Dictionary<string, List<Enemy>> allEnermy = new Dictionary<string, List<Enemy>>();
-    public Dictionary<string, List<Enemy>> AllEnermy
+    private void Start()
     {
-        get
-        {
-            allEnermy.Clear();
-            Enemy[] enemies = FindObjectsOfType<Enemy>();
-            foreach (Enemy enemy in enemies)
-            {
-                if (!allEnermy.ContainsKey(enemy.Info.ID))
-                {
-                    allEnermy.Add(enemy.Info.ID, new List<Enemy>());
-                }
-                allEnermy[enemy.Info.ID].Add(enemy);
-            }
-            return allEnermy;
-        }
+        Init();
     }
 
-    private Dictionary<string, Talker> allTalker = new Dictionary<string, Talker>();
-    public Dictionary<string, Talker> AllTalker
-    {
-        get
-        {
-            allTalker.Clear();
-            Talker[] normalTalkers = FindObjectsOfType<Talker>();
-            foreach (Talker talker in normalTalkers)
-            {
-                if (!allTalker.ContainsKey(talker.TalkerID))
-                {
-                    allTalker.Add(talker.TalkerID, talker);
-                }
-                else
-                {
-                    Debug.LogWarningFormat("[处理重复NPC] ID: {0}  Name: {1}", talker.TalkerID, talker.TalkerName);
-                }
-            }
-            return allTalker;
-        }
-    }
+    public static Dictionary<string, List<Enemy>> Enermies { get; } = new Dictionary<string, List<Enemy>>();
 
-    private Dictionary<string, QuestPoint> allQuestPoint = new Dictionary<string, QuestPoint>();
-    public Dictionary<string, QuestPoint> AllQuestPoint
-    {
-        get
-        {
-            allQuestPoint.Clear();
-            QuestPoint[] questPoints = FindObjectsOfType<QuestPoint>();
-            foreach (QuestPoint point in questPoints)
-            {
-                try
-                {
-                    allQuestPoint.Add(point.ID, point);
-                }
-                catch
-                {
-                    Debug.LogWarningFormat("[处理任务点出错] ID: {0}", point.ID);
-                    continue;
-                }
-            }
-            return allQuestPoint;
-        }
-    }
+    public static Dictionary<string, Talker> Talkers { get; } = new Dictionary<string, Talker>();
 
-    public void Init()
+    public static Dictionary<string, QuestPoint> QuestPoints { get; } = new Dictionary<string, QuestPoint>();
+
+    public static void Init()
     {
-        foreach (KeyValuePair<string, Talker> kvp in AllTalker)
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+        QuestManager.Instance.SetUI(FindObjectOfType<QuestUI>());
+        BackpackManager.Instance.SetUI(FindObjectOfType<BackpackUI>());
+        WarehouseManager.Instance.SetUI(FindObjectOfType<WarehouseUI>());
+        DialogueManager.Instance.SetUI(FindObjectOfType<DialogueUI>());
+        BuildingManager.Instance.SetUI(FindObjectOfType<BuildingUI>());
+        ShopManager.Instance.SetUI(FindObjectOfType<ShopUI>());
+        EscapeMenuManager.Instance.SetUI(FindObjectOfType<EscapeUI>());
+        foreach (KeyValuePair<string, Talker> kvp in Talkers)
             if (kvp.Value is QuestGiver) (kvp.Value as QuestGiver).Init();
+        PlayerInfoManager.Instance.Init();
+        WindowsManager.Instance.Clear();
     }
 
-    public ItemBase GetItemByID(string id)
+    public static ItemBase GetItemByID(string id)
     {
         ItemBase[] items = Resources.LoadAll<ItemBase>("");
         if (items.Length < 1) return null;
-        if (Array.Exists(items, x => x.ID == id))
-            return Array.Find(items, x => x.ID == id);
-        return null;
+        return Array.Find(items, x => x.ID == id);
     }
 }

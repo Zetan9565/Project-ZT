@@ -43,7 +43,7 @@ public class DialogueInspector : Editor
     public override void OnInspectorGUI()
     {
         if (dialogue.Words.Exists(x => x.TalkerType == TalkerType.NPC && (!x.TalkerInfo || string.IsNullOrEmpty(x.Words)) ||
-            x.Branches.Exists(y => y != null && (!y.Dialogue || string.IsNullOrEmpty(y.Title)))))
+            x.Branches.Exists(y => y != null && y.IsInvalid)))
             EditorGUILayout.HelpBox("该对话存在未补全语句。", MessageType.Warning);
         else
             EditorGUILayout.HelpBox("该对话已完整。", MessageType.Info);
@@ -155,6 +155,7 @@ public class DialogueInspector : Editor
                             EditorGUI.BeginChangeCheck();
                             SerializedProperty branch = branches.GetArrayElementAtIndex(_index);
                             SerializedProperty title = branch.FindPropertyRelative("title");
+                            SerializedProperty b_words = branch.FindPropertyRelative("words");
                             SerializedProperty dialogue = branch.FindPropertyRelative("dialogue");
                             SerializedProperty specifyIndex = branch.FindPropertyRelative("specifyIndex");
                             SerializedProperty goBack = branch.FindPropertyRelative("goBack");
@@ -169,35 +170,48 @@ public class DialogueInspector : Editor
                                 EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                     title, new GUIContent("分支标题"));
                                 _lineCount++;
-                                EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                    dialogue, new GUIContent("分支对话"));
-                                _lineCount++;
-                                if (this.dialogue.Words[index].Branches[_index].Dialogue)
+                                if (!dialogue.objectReferenceValue)
                                 {
-                                    BranchDialogue dialog = this.dialogue.Words[index].Branches[_index];
-                                    specifyIndex.intValue = EditorGUI.IntSlider(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                        "指定句子序号", specifyIndex.intValue, -1, dialog.Dialogue.Words.Count - 1);
+                                    EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                        "分支语句");
                                     _lineCount++;
-                                    GUI.enabled = false;
-                                    EditorGUI.TextField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                        dialog.Dialogue.Words[specifyIndex.intValue < 0 ? 0 : specifyIndex.intValue].ToString());
-                                    GUI.enabled = true;
+                                    b_words.stringValue = EditorGUI.TextField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                        b_words.stringValue);
                                     _lineCount++;
-                                    if (indexOfRrightBranch.intValue < 0)
-                                    {
-                                        EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                            goBack, new GUIContent("返回至原对话"));
-                                        _lineCount++;
-                                        if (goBack.boolValue)
-                                        {
-                                            indexToGo.intValue = EditorGUI.IntSlider(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                                "返回至的对话序号", indexToGo.intValue, -1, dialogWords.arraySize - 1);
-                                            _lineCount++;
-                                        }
-                                    }
-                                    EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                        deleteWhenCmplt, new GUIContent("对话完成时删除"));
                                 }
+                                if (string.IsNullOrEmpty(b_words.stringValue))
+                                {
+                                    EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                        dialogue, new GUIContent("分支对话"));
+                                    _lineCount++;
+                                    if (this.dialogue.Words[index].Branches[_index].Dialogue)
+                                    {
+                                        BranchDialogue dialog = this.dialogue.Words[index].Branches[_index];
+                                        specifyIndex.intValue = EditorGUI.IntSlider(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                            "指定句子序号", specifyIndex.intValue, -1, dialog.Dialogue.Words.Count - 1);
+                                        _lineCount++;
+                                        GUI.enabled = false;
+                                        EditorGUI.TextField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                            dialog.Dialogue.Words[specifyIndex.intValue < 0 ? 0 : specifyIndex.intValue].ToString());
+                                        GUI.enabled = true;
+                                        _lineCount++;
+                                    }
+                                }
+                                if (indexOfRrightBranch.intValue < 0)
+                                {
+                                    EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                        goBack, new GUIContent("返回至原对话"));
+                                    _lineCount++;
+                                    if (goBack.boolValue)
+                                    {
+                                        indexToGo.intValue = EditorGUI.IntSlider(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                            "返回至的对话序号", indexToGo.intValue, -1, dialogWords.arraySize - 1);
+                                        _lineCount++;
+                                    }
+                                }
+                                EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                    deleteWhenCmplt, new GUIContent("对话完成时删除"));
+                                _lineCount++;
                             }
                             if (EditorGUI.EndChangeCheck())
                                 wordsSP.serializedObject.ApplyModifiedProperties();
@@ -207,21 +221,27 @@ public class DialogueInspector : Editor
                         {
                             int _lineCount = 1;
                             SerializedProperty branch = branches.GetArrayElementAtIndex(_index);
+                            SerializedProperty b_words = branch.FindPropertyRelative("words");
                             SerializedProperty dialogue = branch.FindPropertyRelative("dialogue");
                             if (branch.isExpanded)
                             {
-                                _lineCount += 2;
-                                if (this.dialogue.Words[index].Branches[_index].Dialogue)
+                                _lineCount += 1;//分支标题
+                                if (!dialogue.objectReferenceValue) _lineCount += 2;//分支语句、语句填写
+                                if (string.IsNullOrEmpty(b_words.stringValue))
                                 {
-                                    _lineCount += 2;
-                                    if (indexOfRrightBranch.intValue < 0)
+                                    _lineCount += 1;//对话
+                                    if (this.dialogue.Words[index].Branches[_index].Dialogue)
                                     {
-                                        _lineCount++;
-                                        if (branch.FindPropertyRelative("goBack").boolValue)
-                                            _lineCount++;
+                                        _lineCount += 2;//序号、对应句子
                                     }
-                                    _lineCount++;
                                 }
+                                if (indexOfRrightBranch.intValue < 0)
+                                {
+                                    _lineCount++;//返回
+                                    if (branch.FindPropertyRelative("goBack").boolValue)
+                                        _lineCount++;//返回序号
+                                }
+                                _lineCount++;//完成时删除
                             }
                             return _lineCount * lineHeightSpace;
                         };
@@ -264,7 +284,8 @@ public class DialogueInspector : Editor
                     branchesList.DoList(new Rect(rect.x, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width, lineHeight * (branches.arraySize + 1)));
                     wordsSP.serializedObject.ApplyModifiedProperties();
                 }
-                else EditorGUI.LabelField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight), "最后一句不支持分支");
+                else EditorGUI.LabelField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
+                    "最后一句不支持分支");
             }
         };
 
@@ -282,14 +303,14 @@ public class DialogueInspector : Editor
                 {
                     if (branches.arraySize > 0)
                     {
-                        lineCount++;
+                        lineCount++;//正确分支
                         if (indexOfRrightBranch.intValue > -1)
-                            lineCount += 2;
+                            lineCount += 2;//说的话、说的话填写
                     }
                     if (wordsBranchesLists.ContainsKey(dialogue.Words[index]))
                         totalListHeight += wordsBranchesLists[dialogue.Words[index]].GetHeight();
                 }
-                else lineCount++;
+                else lineCount++;//最后一击
             return lineCount * lineHeightSpace + totalListHeight - 8;
         };
 
@@ -345,11 +366,11 @@ public class DialogueInspector : Editor
 
     bool ExistsID()
     {
-        Dialogue[] quests = Resources.LoadAll<Dialogue>("");
+        Dialogue[] dialogues = Resources.LoadAll<Dialogue>("");
 
-        Dialogue find = Array.Find(quests, x => x.ID == _ID.stringValue);
+        Dialogue find = Array.Find(dialogues, x => x.ID == _ID.stringValue);
         if (!find) return false;//若没有找到，则ID可用
         //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
-        return find != dialogue || (find == dialogue && Array.FindAll(quests, x => x.ID == _ID.stringValue).Length > 1);
+        return find != dialogue || (find == dialogue && Array.FindAll(dialogues, x => x.ID == _ID.stringValue).Length > 1);
     }
 }

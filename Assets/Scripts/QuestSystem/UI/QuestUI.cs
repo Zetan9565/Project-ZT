@@ -5,10 +5,10 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class QuestUI : MonoBehaviour
 {
-    [Header("任务窗口相关")]
     public CanvasGroup questsWindow;
 
-    public Button openWindow;
+    [HideInInspector]
+    public Canvas windowCanvas;
 
     public Button closeWindow;
 
@@ -19,7 +19,6 @@ public class QuestUI : MonoBehaviour
     public Transform questListParent;
     public Transform cmpltQuestListParent;
 
-    [Header("任务详情相关")]
     public CanvasGroup descriptionWindow;
 
     public Text descriptionText;
@@ -37,27 +36,36 @@ public class QuestUI : MonoBehaviour
 
     public List<ItemAgent> rewardCells = new List<ItemAgent>();
 
-    [Header("任务栏相关")]
+    public CanvasGroup questBoard;
+
     public GameObject boardQuestPrefab;
 
     public Transform questBoardArea;
 
     private void Awake()
     {
-        openWindow.onClick.AddListener(QuestManager.Instance.OpenUI);
-        closeWindow.onClick.AddListener(QuestManager.Instance.CloseUI);
+        if (!questsWindow.gameObject.GetComponent<GraphicRaycaster>()) questsWindow.gameObject.AddComponent<GraphicRaycaster>();
+        windowCanvas = questsWindow.GetComponent<Canvas>();
+        windowCanvas.overrideSorting = true;
+        closeWindow.onClick.AddListener(QuestManager.Instance.CloseWindow);
         abandonButton.onClick.AddListener(QuestManager.Instance.AbandonSelectedQuest);
         closeDescription.onClick.AddListener(QuestManager.Instance.CloseDescriptionWindow);
         foreach (ItemAgent rwc in rewardCells)
         {
-            if (rwc) rwc.Clear(false, true);
+            if (rwc) rwc.Clear(true);
         }
         rewardCells.Clear();
         for (int i = 0; i < 10; i++)
         {
             ItemAgent rwc = ObjectPool.Instance.Get(rewardCellPrefab, rewardCellsParent).GetComponent<ItemAgent>();
             rwc.Clear();
+            rwc.Init();
             rewardCells.Add(rwc);
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (QuestManager.Instance) QuestManager.Instance.ResetUI();
     }
 }

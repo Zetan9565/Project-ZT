@@ -1,10 +1,12 @@
-﻿using System.Text.RegularExpressions;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class AmountUI : MonoBehaviour
 {
     public CanvasGroup amountWindow;
+
+    [HideInInspector]
+    public Canvas windowCanvas;
 
     public InputField amount;
 
@@ -20,7 +22,9 @@ public class AmountUI : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        //amount.onValueChanged.AddListener(delegate {  });
+        if (!amountWindow.GetComponent<GraphicRaycaster>()) amountWindow.gameObject.AddComponent<GraphicRaycaster>();
+        windowCanvas = amountWindow.GetComponent<Canvas>();
+        windowCanvas.overrideSorting = true;
         amount.onValueChanged.AddListener(delegate { AmountHandler.Instance.FixAmount(); });
         max.onClick.AddListener(AmountHandler.Instance.Max);
         clear.onClick.AddListener(AmountHandler.Instance.Clear);

@@ -5,12 +5,12 @@ public class DiscardArea : MonoBehaviour, IPointerClickHandler
 {
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (DragableManager.Instance.IsDraging && eventData.button == PointerEventData.InputButton.Left)
+        if (DragableHandler.Instance.IsDraging && eventData.button == PointerEventData.InputButton.Left)
         {
-            ItemAgent source = DragableManager.Instance.Current as ItemAgent;
+            ItemAgent source = DragableHandler.Instance.Current as ItemAgent;
             if (source)
             {
-                BackpackManager.Instance.DiscardItem(source.itemInfo);
+                BackpackManager.Instance.DiscardItem(source.MItemInfo);
                 AmountHandler.Instance.SetPosition(eventData.position);
                 source.FinishDrag();
             }

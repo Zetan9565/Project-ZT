@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 [Serializable]
 public abstract class ItemBase : ScriptableObject
@@ -161,7 +160,7 @@ public abstract class ItemBase : ScriptableObject
 
     [SerializeField]
 #if UNITY_EDITOR
-    [EnumMemberNames("不可制作", "冶炼", "锻造", "裁缝", "烹饪", "炼丹", "制药", "晾晒")]
+    [EnumMemberNames("不可制作", "冶炼", "锻造", "裁缝", "烹饪", "炼丹", "制药", "晾晒", "研磨")]
 #endif
     protected ProcessMethod processMethod;
     public virtual ProcessMethod ProcessMethod
@@ -173,13 +172,37 @@ public abstract class ItemBase : ScriptableObject
     }
 
     [SerializeField]
-    protected List<ProcessItemInfo> materials = new List<ProcessItemInfo>();
-    public virtual List<ProcessItemInfo> Materials
+    protected List<MatertialInfo> materials = new List<MatertialInfo>();
+    public virtual List<MatertialInfo> Materials
     {
         get
         {
             return materials;
         }
+    }
+
+    public bool CheckMaterialsEnough(Backpack backpack, ref List<string> info)
+    {
+        var processInfo = materials.GetEnumerator();
+        bool result = true;
+        if (info == null) info = new List<string>();
+        while (processInfo.MoveNext())
+        {
+            info.Add(string.Format("{0}\t[{1}/{2}]", processInfo.Current.ItemName, backpack.GetItemAmount(processInfo.Current.Item), processInfo.Current.Amount));
+            if (backpack.GetItemAmount(processInfo.Current.Item) < processInfo.Current.Amount)
+                result &= false;
+        }
+        return result;
+    }
+    public bool CheckMaterialsEnough(Backpack backpack)
+    {
+        var processInfo = materials.GetEnumerator();
+        while (processInfo.MoveNext())
+        {
+            if (backpack.GetItemAmount(processInfo.Current.Item) < processInfo.Current.Amount)
+                return false;
+        }
+        return true;
     }
 
     public bool IsWeapon
@@ -195,6 +218,14 @@ public abstract class ItemBase : ScriptableObject
         get
         {
             return this is BoxItem;
+        }
+    }
+
+    public bool IsBag
+    {
+        get
+        {
+            return this is BagItem;
         }
     }
 
@@ -222,19 +253,27 @@ public abstract class ItemBase : ScriptableObject
         }
     }
 
+    public bool IsBook
+    {
+        get
+        {
+            return this is BookItem;
+        }
+    }
+
     public bool IsEquipment
     {
         get
         {
-            return this is WeaponItem;
+            return this is WeaponItem || this is ArmorItem;
         }
     }
 
-    public bool IsConsumable
+    public bool IsConsumable//是消耗品
     {
         get
         {
-            return this is BoxItem;
+            return this is BoxItem || this is BagItem;
         }
     }
 }
@@ -306,6 +345,16 @@ public enum ItemType
     /// 宝石
     /// </summary>
     Gemstone,
+
+    /// <summary>
+    /// 书籍
+    /// </summary>
+    Book,
+
+    /// <summary>
+    /// 袋子
+    /// </summary>
+    Bag
 }
 
 public enum ItemQuality
@@ -376,7 +425,12 @@ public enum ProcessMethod
     /// <summary>
     /// 晾晒：材料、恢复剂
     /// </summary>
-    Season
+    Season,
+
+    /// <summary>
+    /// 研磨：材料、恢复剂
+    /// </summary>
+    Grinding
 }
 public enum ProcessType
 {
@@ -387,7 +441,7 @@ public enum ProcessType
 
 #region 道具信息相关
 [Serializable]
-public class ItemInfo : ICloneable//在这个类进行拓展，如强化、词缀、附魔
+public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
 {
     public string ItemID
     {
@@ -443,59 +497,20 @@ public class ItemInfo : ICloneable//在这个类进行拓展，如强化、词�
         }
     }
 
+    [HideInInspector]
+    public int indexInGrid;
+
     public ItemInfo(ItemBase item, int amount = 1)
     {
         this.item = item;
         this.amount = amount;
     }
 
-    public ItemInfo(ItemInfo info)
-    {
-        item = info.Item;
-        amount = info.Amount;
-    }
-
-    public ItemInfo CloneInfo
+    public ItemInfo Cloned
     {
         get
         {
-            return Clone() as ItemInfo;
-        }
-    }
-
-    public object Clone()
-    {
-        return MemberwiseClone();
-    }
-
-    public void UseItem()
-    {
-        if (!item) return;
-        if (!item.Useable)
-        {
-            MessageManager.Instance.NewMessage("该物品不可使用");
-            return;
-        }
-        if (item.IsBox) UseBox();
-    }
-
-    void UseBox()
-    {
-        BoxItem box = item as BoxItem;
-        if (BackpackManager.Instance.LoseItem(this))
-        {
-            foreach (ItemInfo info in box.ItemsInBox)
-            {
-                if (!BackpackManager.Instance.TryGetItem_Boolean(info))
-                {
-                    BackpackManager.Instance.GetItem(this);
-                    return;
-                }
-            }
-            foreach (ItemInfo info in box.ItemsInBox)
-            {
-                BackpackManager.Instance.GetItem(info);
-            }
+            return MemberwiseClone() as ItemInfo;
         }
     }
 
@@ -504,12 +519,65 @@ public class ItemInfo : ICloneable//在这个类进行拓展，如强化、词�
     public ScopeInt durability;//耐久度
 
     public int gemSlotAmount;
+
+    public GemItem gemstone1;
+
+    public GemItem gemstone2;
     #endregion
 }
 
 [Serializable]
-public class DropItemInfo : ItemInfo
+public class DropItemInfo
 {
+    public string ItemID
+    {
+        get
+        {
+            if (Item) return Item.ID;
+            else return string.Empty;
+        }
+    }
+
+    public string ItemName
+    {
+        get
+        {
+            if (Item) return Item.Name;
+            else return string.Empty;
+        }
+    }
+
+    [SerializeField]
+    private ItemBase item;
+    public ItemBase Item
+    {
+        get
+        {
+            return item;
+        }
+
+        set
+        {
+            item = value;
+        }
+    }
+
+    [SerializeField]
+    private int amount;
+    public int Amount
+    {
+        get
+        {
+            return amount;
+        }
+
+        set
+        {
+            if (value < 0) amount = 0;
+            else amount = value;
+        }
+    }
+
     [SerializeField]
     private float dropRate;
     public float DropRate
@@ -547,21 +615,54 @@ public class DropItemInfo : ItemInfo
 }
 
 [Serializable]
-public class ProcessItemInfo : ItemInfo
+public class MatertialInfo
 {
-    [SerializeField]
-    private int currentAmount;
-    public int CurrentAmount
+    public string ItemID
     {
         get
         {
-            return currentAmount;
+            if (Item) return Item.ID;
+            else return string.Empty;
+        }
+    }
+
+    public string ItemName
+    {
+        get
+        {
+            if (Item) return Item.Name;
+            else return string.Empty;
+        }
+    }
+
+    [SerializeField]
+    private ItemBase item;
+    public ItemBase Item
+    {
+        get
+        {
+            return item;
         }
 
         set
         {
-            if (value < 0) currentAmount = 0;
-            currentAmount = value;
+            item = value;
+        }
+    }
+
+    [SerializeField]
+    private int amount;
+    public int Amount
+    {
+        get
+        {
+            return amount;
+        }
+
+        set
+        {
+            if (value < 0) amount = 0;
+            else amount = value;
         }
     }
 

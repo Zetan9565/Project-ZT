@@ -25,10 +25,20 @@ public class MessageManager : MonoBehaviour
 #endif
     private GameObject messagePrefab;
 
+    private Canvas rootCanvas;
+
     public void NewMessage(string message, float lifeTime = 2.0f)
     {
         MessageAgent ma = ObjectPool.Instance.Get(messagePrefab, messageRoot).GetComponent<MessageAgent>();
         ma.messageText.text = message;
         ObjectPool.Instance.Put(ma.gameObject, lifeTime);
+    }
+
+    private void Awake()
+    {
+        if (!messageRoot.GetComponent<Canvas>()) messageRoot.gameObject.AddComponent<Canvas>();
+        rootCanvas = messageRoot.GetComponent<Canvas>();
+        rootCanvas.overrideSorting = true;
+        rootCanvas.sortingOrder = 999;
     }
 }

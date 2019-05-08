@@ -28,12 +28,11 @@ public class QuestGiver : Talker {
         }
     }
 
-    private List<QuestGroup> questGroupInstances = new List<QuestGroup>();
-
     public void Init()
     {
         InitQuest(questsStored);
     }
+
     /// <summary>
     /// 使用任务信息创建任务实例
     /// </summary>
@@ -46,61 +45,61 @@ public class QuestGiver : Talker {
         {
             if (quest)
             {
-                Quest tempq = Instantiate(quest);
-                foreach (CollectObjective co in tempq.CollectObjectives)
-                    tempq.Objectives.Add(co);
-                foreach (KillObjective ko in tempq.KillObjectives)
-                    tempq.Objectives.Add(ko);
-                foreach (TalkObjective to in tempq.TalkObjectives)
-                    tempq.Objectives.Add(to);
-                foreach (MoveObjective mo in tempq.MoveObjectives)
-                    tempq.Objectives.Add(mo);
-                if (tempq.CmpltObjctvInOrder)
+                Quest qstinstns = Instantiate(quest);
+                foreach (CollectObjective co in qstinstns.CollectObjectives)
+                    qstinstns.Objectives.Add(co);
+                foreach (KillObjective ko in qstinstns.KillObjectives)
+                    qstinstns.Objectives.Add(ko);
+                foreach (TalkObjective to in qstinstns.TalkObjectives)
+                    qstinstns.Objectives.Add(to);
+                foreach (MoveObjective mo in qstinstns.MoveObjectives)
+                    qstinstns.Objectives.Add(mo);
+                if (qstinstns.CmpltObjctvInOrder)
                 {
-                    tempq.Objectives.Sort((x, y) =>
+                    qstinstns.Objectives.Sort((x, y) =>
                     {
                         if (x.OrderIndex > y.OrderIndex) return 1;
                         else if (x.OrderIndex < y.OrderIndex) return -1;
                         else return 0;
                     });
-                    for (int i = 1; i < tempq.Objectives.Count; i++)
+                    for (int i = 1; i < qstinstns.Objectives.Count; i++)
                     {
-                        if (tempq.Objectives[i].OrderIndex >= tempq.Objectives[i - 1].OrderIndex)
+                        if (qstinstns.Objectives[i].OrderIndex >= qstinstns.Objectives[i - 1].OrderIndex)
                         {
-                            tempq.Objectives[i].PrevObjective = tempq.Objectives[i - 1];
-                            tempq.Objectives[i - 1].NextObjective = tempq.Objectives[i];
+                            qstinstns.Objectives[i].PrevObjective = qstinstns.Objectives[i - 1];
+                            qstinstns.Objectives[i - 1].NextObjective = qstinstns.Objectives[i];
                         }
                     }
                 }
                 int i1, i2, i3, i4;
                 i1 = i2 = i3 = i4 = 0;
-                foreach(Objective o in tempq.Objectives)
+                foreach(Objective o in qstinstns.Objectives)
                 {
                     if (o is CollectObjective)
                     {
-                        o.runtimeID = tempq.ID + "_CO" + i1;
+                        o.runtimeID = qstinstns.ID + "_CO" + i1;
                         i1++;
                     }
                     if (o is KillObjective)
                     {
-                        o.runtimeID = tempq.ID + "_KO" + i2;
+                        o.runtimeID = qstinstns.ID + "_KO" + i2;
                         i2++;
                     }
                     if (o is TalkObjective)
                     {
-                        o.runtimeID = tempq.ID + "_TO" + i3;
+                        o.runtimeID = qstinstns.ID + "_TO" + i3;
                         i3++;
                     }
                     if (o is MoveObjective)
                     {
-                        o.runtimeID = tempq.ID + "_MO" + i4;
+                        o.runtimeID = qstinstns.ID + "_MO" + i4;
                         i4++;
                     }
-                    o.runtimeParent = tempq;
+                    o.runtimeParent = qstinstns;
                 }
-                tempq.OriginalQuestGiver = this;
-                tempq.CurrentQuestGiver = this;
-                QuestInstances.Add(tempq);
+                qstinstns.OriginalQuestGiver = this;
+                qstinstns.CurrentQuestGiver = this;
+                QuestInstances.Add(qstinstns);
             }
         }
     }

@@ -56,7 +56,8 @@ public class QuestBoardAgent : MonoBehaviour
 
     public void OnClick()
     {
-        QuestManager.Instance.OpenUI();
+        QuestManager.Instance.OpenWindow();
+        if (!questAgent.parent.IsExpanded) questAgent.parent.IsExpanded = true;
         questAgent.OnClick();
     }
 

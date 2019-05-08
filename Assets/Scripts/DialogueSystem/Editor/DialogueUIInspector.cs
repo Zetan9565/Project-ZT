@@ -9,7 +9,8 @@ public class DialogueUIInspector : Editor
     SerializedProperty dialogueWindow;
     SerializedProperty nameText;
     SerializedProperty wordsText;
-    SerializedProperty talkButton;
+    SerializedProperty warehouseButton;
+    SerializedProperty shopButton;
     SerializedProperty backButton;
     SerializedProperty finishButton;
     SerializedProperty optionsParent;
@@ -34,7 +35,8 @@ public class DialogueUIInspector : Editor
         dialogueWindow = serializedObject.FindProperty("dialogueWindow");
         nameText = serializedObject.FindProperty("nameText");
         wordsText = serializedObject.FindProperty("nameText");
-        talkButton = serializedObject.FindProperty("talkButton");
+        warehouseButton = serializedObject.FindProperty("warehouseButton");
+        shopButton = serializedObject.FindProperty("shopButton");
         backButton = serializedObject.FindProperty("backButton");
         finishButton = serializedObject.FindProperty("finishButton");
         optionsParent = serializedObject.FindProperty("optionsParent");
@@ -58,10 +60,12 @@ public class DialogueUIInspector : Editor
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginVertical("Box");
+        EditorGUILayout.LabelField("对话框相关");
         EditorGUILayout.PropertyField(dialogueWindow, new GUIContent("对话框"));
         EditorGUILayout.PropertyField(nameText, new GUIContent("说话者名字"));
         EditorGUILayout.PropertyField(wordsText, new GUIContent("语句文字"));
-        EditorGUILayout.PropertyField(talkButton, new GUIContent("对话按钮"));
+        EditorGUILayout.PropertyField(warehouseButton, new GUIContent("仓库按钮"));
+        EditorGUILayout.PropertyField(shopButton, new GUIContent("商店按钮"));
         EditorGUILayout.PropertyField(backButton, new GUIContent("返回按钮"));
         EditorGUILayout.PropertyField(finishButton, new GUIContent("结束按钮"));
         EditorGUILayout.PropertyField(textLineHeight, new GUIContent("每行高度"));
@@ -69,6 +73,7 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");
+        EditorGUILayout.LabelField("选项相关");
         EditorGUILayout.PropertyField(optionPrefab, new GUIContent("选项预制体"));
         EditorGUILayout.PropertyField(optionsParent, new GUIContent("选项放置根"));
         EditorGUILayout.PropertyField(pageUpButton, new GUIContent("上翻页按钮"));
@@ -77,6 +82,7 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");
+        EditorGUILayout.LabelField("任务相关");
         EditorGUILayout.PropertyField(questButton, new GUIContent("任务按钮"));
         EditorGUILayout.PropertyField(descriptionWindow, new GUIContent("任务描述窗口"));
         EditorGUILayout.PropertyField(descriptionText, new GUIContent("任务描述文字"));

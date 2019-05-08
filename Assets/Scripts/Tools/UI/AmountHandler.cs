@@ -16,6 +16,9 @@ public class AmountHandler : MonoBehaviour
 
     public AmountUI UI;
 
+    [SerializeField]
+    private Vector2 defaultOffset = new Vector2(-100, 100);
+
     public long Amount { get; private set; }
 
     public Button Confirm { get { return UI.confirm; } }
@@ -23,22 +26,22 @@ public class AmountHandler : MonoBehaviour
     private long min;
     private long max;
 
-    public void Init(UnityEngine.Events.UnityAction confirmAction, int max, int min = 0)
+    public void Init(UnityEngine.Events.UnityAction confirmAction, long max, long min = 0)
     {
         this.max = max;
         this.min = min;
         Amount = max >= 1 ? 1 : min;
         UI.amount.text = Amount.ToString();
         UI.confirm.onClick.RemoveAllListeners();
-        UI.confirm.onClick.AddListener(confirmAction);
+        if (confirmAction != null) UI.confirm.onClick.AddListener(confirmAction);
         UI.confirm.onClick.AddListener(CloseAmountWindow);
-        UI.amount.MoveTextEnd(false);
-        UI.amount.Select();
+        UI.amount.ActivateInputField();
         OpenAmountWindow();
     }
 
     public void OpenAmountWindow()
     {
+        UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         UI.amountWindow.alpha = 1;
         UI.amountWindow.blocksRaycasts = true;
     }
@@ -106,9 +109,9 @@ public class AmountHandler : MonoBehaviour
         CloseAmountWindow();
     }
 
-    public void SetPosition(Vector3 target)
+    public void SetPosition(Vector3 target, Vector3 offset = default)
     {
-        if (UI.amountWindow.alpha > 0) UI.amountWindow.GetComponent<RectTransform>().position = target + new Vector3(-50, 55);
+        UI.amountWindow.GetComponent<RectTransform>().position = target + (offset == default ? new Vector3(defaultOffset.x, defaultOffset.y) : offset);
     }
 
     public void FixAmount()
@@ -122,5 +125,7 @@ public class AmountHandler : MonoBehaviour
         Amount = current;
         UI.amount.text = Amount.ToString();
         UI.amount.MoveTextEnd(false);
+        if (Amount < 1) Confirm.interactable = false;
+        else Confirm.interactable = true;
     }
 }

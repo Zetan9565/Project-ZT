@@ -7,7 +7,6 @@ public class QuestUIInspector : Editor
     //QuestUI UI;
 
     SerializedProperty questsWindow;
-    SerializedProperty openWindow;
     SerializedProperty closeWindow;
     SerializedProperty questPrefab;
     SerializedProperty questGroupPrefab;
@@ -21,6 +20,7 @@ public class QuestUIInspector : Editor
     SerializedProperty EXPText;
     SerializedProperty rewardCellPrefab;
     SerializedProperty rewardCellsParent;
+    SerializedProperty questBoard;
     SerializedProperty boardQuestPrefab;
     SerializedProperty questBoardArea;
 
@@ -29,7 +29,6 @@ public class QuestUIInspector : Editor
         //UI = target as QuestUI;
 
         questsWindow = serializedObject.FindProperty("questsWindow");
-        openWindow = serializedObject.FindProperty("openWindow");
         closeWindow = serializedObject.FindProperty("closeWindow");
         questPrefab = serializedObject.FindProperty("questPrefab");
         questGroupPrefab = serializedObject.FindProperty("questGroupPrefab");
@@ -43,6 +42,7 @@ public class QuestUIInspector : Editor
         EXPText = serializedObject.FindProperty("EXPText");
         rewardCellPrefab = serializedObject.FindProperty("rewardCellPrefab");
         rewardCellsParent = serializedObject.FindProperty("rewardCellsParent");
+        questBoard = serializedObject.FindProperty("questBoard");
         boardQuestPrefab = serializedObject.FindProperty("boardQuestPrefab");
         questBoardArea = serializedObject.FindProperty("questBoardArea");
     }
@@ -52,8 +52,8 @@ public class QuestUIInspector : Editor
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginVertical("Box");
+        EditorGUILayout.LabelField("任务窗口相关");
         EditorGUILayout.PropertyField(questsWindow, new GUIContent("任务窗口"));
-        EditorGUILayout.PropertyField(openWindow, new GUIContent("打开任务窗口"));
         EditorGUILayout.PropertyField(closeWindow, new GUIContent("关闭任务窗口"));
         EditorGUILayout.PropertyField(questPrefab, new GUIContent("任务载体预制体"));
         EditorGUILayout.PropertyField(questGroupPrefab, new GUIContent("任务组载体预制体"));
@@ -62,6 +62,7 @@ public class QuestUIInspector : Editor
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");
+        EditorGUILayout.LabelField("任务详情相关");
         EditorGUILayout.PropertyField(descriptionWindow, new GUIContent("任务详情窗口"));
         EditorGUILayout.PropertyField(descriptionText, new GUIContent("任务描述文字"));
         EditorGUILayout.PropertyField(abandonButton, new GUIContent("放弃按钮"));
@@ -73,6 +74,8 @@ public class QuestUIInspector : Editor
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");
+        EditorGUILayout.LabelField("任务栏相关");
+        EditorGUILayout.PropertyField(questBoard, new GUIContent("任务栏"));
         EditorGUILayout.PropertyField(boardQuestPrefab, new GUIContent("栏任务载体预制体"));
         EditorGUILayout.PropertyField(questBoardArea, new GUIContent("任务栏放置根"), true);
         EditorGUILayout.EndVertical();

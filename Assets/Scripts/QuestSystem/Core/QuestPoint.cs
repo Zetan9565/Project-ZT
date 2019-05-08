@@ -3,7 +3,8 @@
 public delegate void MoveToPointListener(QuestPoint point);
 
 [DisallowMultipleComponent]
-public class QuestPoint : MonoBehaviour {
+public class QuestPoint : MonoBehaviour
+{
 
     [SerializeField]
 #if UNITY_EDITOR
@@ -21,36 +22,60 @@ public class QuestPoint : MonoBehaviour {
     public event MoveToPointListener OnMoveIntoEvent;
     public event MoveToPointListener OnMoveAwayEvent;
 
-    /*private void OnTriggerEnter(Collider other)
+    private void Awake()
     {
-        OnMoveIntoEvent?.Invoke(this);
-        QuestManager.Instance.UpdateObjectivesUI();
+        if (!GameManager.QuestPoints.ContainsKey(ID)) GameManager.QuestPoints.Add(ID, this);
+        else if (!GameManager.QuestPoints[ID] || !GameManager.QuestPoints[ID].gameObject)
+        {
+            GameManager.QuestPoints.Remove(ID);
+            GameManager.QuestPoints.Add(ID, this);
+        }
     }
 
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        //TODO 滞留于任务点的操作
+        if (other.tag == "Player")
+        {
+            OnMoveIntoEvent?.Invoke(this);
+            QuestManager.Instance.UpdateUI();
+        }
     }
+
+    /*private void OnTriggerStay(Collider other)
+    {
+        //TODO 滞留于任务点时的操作
+    }*/
 
     private void OnTriggerExit(Collider other)
     {
-        OnMoveAwayEvent?.Invoke(this);
-    }*/
+        if (other.tag == "Player")
+        {
+            OnMoveAwayEvent?.Invoke(this);
+            QuestManager.Instance.UpdateUI();
+        }
+    }
 
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        OnMoveIntoEvent?.Invoke(this);
-        QuestManager.Instance.UpdateUI();
+        if (collision.tag == "Player")
+        {
+            OnMoveIntoEvent?.Invoke(this);
+            QuestManager.Instance.UpdateUI();
+        }
     }
 
-    private void OnTriggerStay2D(Collider2D collision)
+    /*private void OnTriggerStay2D(Collider2D collision)
     {
-        //TODO 滞留于任务点的操作
-    }
+        //TODO 滞留于任务点时的操作
+    }*/
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        OnMoveAwayEvent?.Invoke(this);
+        if (collision.tag == "Player")
+        {
+            OnMoveAwayEvent?.Invoke(this);
+            QuestManager.Instance.UpdateUI();
+        }
     }
 }

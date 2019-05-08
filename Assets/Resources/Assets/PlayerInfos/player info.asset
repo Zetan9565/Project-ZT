@@ -18,7 +18,107 @@ MonoBehaviour:
   backpack:
     backpackSize:
       min: 0
-      max: 48
+      max: 50
     weightLoad:
       min: 0
       max: 100
+  primaryWeapon:
+    item: {fileID: 0}
+    amount: 1
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  secondaryWeapon:
+    item: {fileID: 0}
+    amount: 1
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  armor:
+    item: {fileID: 0}
+    amount: 1
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  helmet:
+    item: {fileID: 0}
+    amount: 1
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  boots:
+    item: {fileID: 0}
+    amount: 1
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  gloves:
+    item: {fileID: 0}
+    amount: 1
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  clothes:
+    item: {fileID: 0}
+    amount: 1
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  ring1:
+    item: {fileID: 0}
+    amount: 1
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  ring2:
+    item: {fileID: 0}
+    amount: 1
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  _HP:
+    min: 0
+    max: 150
+  _MP:
+    min: 0
+    max: 50
+  _ATK: 0
+  _DEF: 0
+  hit: 0
+  dodge: 0

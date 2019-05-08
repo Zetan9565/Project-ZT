@@ -533,7 +533,7 @@ public abstract class Objective
             if (tempObj is CollectObjective)
             {
                 co = tempObj as CollectObjective;
-                co.CurrentAmount = BackpackManager.Instance.GetItemAmountByID(co.Item.ID);
+                co.CurrentAmount = BackpackManager.Instance.GetItemAmount(co.Item.ID);
             }
             tempObj = tempObj.NextObjective;
         }

@@ -5,25 +5,28 @@ using UnityEngine.UI;
 public class QuestAgent : MonoBehaviour
 {
     [HideInInspector]
-    public Quest MQuest;
+    public Quest MQuest { get; private set; }
+    [SerializeField]
 #if UNITY_EDITOR
-    [SerializeField, DisplayName("标题文字")]
+    [DisplayName("标题文字")]
 #endif
     private Text TitleText;
+
+    [SerializeField]
 #if UNITY_EDITOR
-    [SerializeField, DisplayName("隶属于完成列表", true)]
+    [DisplayName("隶属于完成列表", true)]
 #endif
     private bool belongToCmplt;
+
     [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("选中特效")]
-#endif
     private Outline selectedOutline;
+
     [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("选中颜色")]
-#endif
     private Color selectedColor = Color.yellow;
+
+    [HideInInspector]
+    public QuestGroupAgent parent;
+
     /// <summary>
     /// 使用前的初始化
     /// </summary>
