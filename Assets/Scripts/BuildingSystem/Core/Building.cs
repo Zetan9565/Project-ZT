@@ -28,7 +28,7 @@ public class Building : MonoBehaviour
 
     private bool custumDestroy;
 
-    public void StarBuild(BuildingInfo buildingInfo, Vector3 position)
+    public void StarBuild(BuildingInfomation buildingInfo, Vector3 position)
     {
         transform.position = position;
         IDStarter = buildingInfo.IDStarter;
@@ -96,19 +96,6 @@ public class Building : MonoBehaviour
 
     public float leftBuildTime;
 
-    private void Update()
-    {
-        if (IsUnderBuilding)
-        {
-            leftBuildTime -= Time.deltaTime;
-            buildingFlag.text = "建造中[" + leftBuildTime.ToString("F2") + "s]";
-            if (leftBuildTime <= 0)
-            {
-                BuildComplete();
-            }
-        }
-    }
-
     IEnumerator WaitToUnshowFlag()
     {
         yield return new WaitForSeconds(2);
@@ -124,14 +111,28 @@ public class Building : MonoBehaviour
     void GetIDTail()
     {
         Building[] buildings = FindObjectsOfType<Building>();
+        IDTail = string.Empty;
         for (int i = 1; i < 100000; i++)
         {
             IDTail = i.ToString().PadLeft(5, '0');
             string newID = IDStarter + IDTail;
             if (!Array.Exists(buildings, x => x.ID == newID && x != this))
-                return;
+                break;
         }
-        IDTail = string.Empty;
+    }
+
+    #region MonoBehaviour
+    private void Update()
+    {
+        if (IsUnderBuilding)
+        {
+            leftBuildTime -= Time.deltaTime;
+            buildingFlag.text = "建造中[" + leftBuildTime.ToString("F2") + "s]";
+            if (leftBuildTime <= 0)
+            {
+                BuildComplete();
+            }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -181,4 +182,5 @@ public class Building : MonoBehaviour
             BuildingManager.Instance.CannotDestroy();
         }
     }
+    #endregion
 }

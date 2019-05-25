@@ -6,6 +6,7 @@ TagManager:
   tags:
   - DiscardArea
   - ItamCellBP
+  - NPC
   layers:
   - Default
   - TransparentFX
@@ -15,9 +16,9 @@ TagManager:
   - UI
   - 
   - 
-  - Building Preview
-  - 
-  - 
+  - BuildingPreview
+  - Ground
+  - Unwalkable
   - 
   - 
   - 
@@ -43,9 +44,15 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Map
+    uniqueID: 1338742293
+    locked: 0
   - name: Character
     uniqueID: 2050152057
     locked: 0
   - name: UI
     uniqueID: 2139484537
+    locked: 0
+  - name: BuildingPreview
+    uniqueID: 31474743
     locked: 0

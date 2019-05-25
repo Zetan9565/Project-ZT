@@ -56,36 +56,35 @@ public class Shop
 
     public void Refresh(float time)
     {
-        var commodityEnum = Commodities.GetEnumerator();
-        while (commodityEnum.MoveNext())
-        {
-            MerchandiseInfo commodity = commodityEnum.Current;
-            if (commodity.SOorENAble && commodity.RefreshTime > 0)
+        using (var commodityEnum = Commodities.GetEnumerator())
+            while (commodityEnum.MoveNext())
             {
-                commodity.leftRefreshTime -= time;
-                if (commodity.leftRefreshTime <= 0)
+                MerchandiseInfo commodity = commodityEnum.Current;
+                if (commodity.SOorENAble && commodity.RefreshTime > 0)
                 {
-                    commodity.leftRefreshTime = commodity.RefreshTime;
-                    commodity.LeftAmount += Random.Range(commodity.MinRefreshAmount, commodity.MaxRefreshAmount);
+                    commodity.leftRefreshTime -= time;
+                    if (commodity.leftRefreshTime <= 0)
+                    {
+                        commodity.leftRefreshTime = commodity.RefreshTime;
+                        commodity.LeftAmount += Random.Range(commodity.MinRefreshAmount, commodity.MaxRefreshAmount);
+                    }
                 }
             }
-        }
-        commodityEnum.Dispose();
-        var acquisitionEnum = Acquisitions.GetEnumerator();
-        while (acquisitionEnum.MoveNext())
-        {
-            MerchandiseInfo acquisiton = acquisitionEnum.Current;
-            if (acquisiton.SOorENAble && acquisiton.RefreshTime > 0)
+
+        using (var acquisitionEnum = Acquisitions.GetEnumerator())
+            while (acquisitionEnum.MoveNext())
             {
-                acquisiton.leftRefreshTime -= time;
-                if (acquisiton.leftRefreshTime <= 0)
+                MerchandiseInfo acquisiton = acquisitionEnum.Current;
+                if (acquisiton.SOorENAble && acquisiton.RefreshTime > 0)
                 {
-                    acquisiton.leftRefreshTime = acquisiton.RefreshTime;
-                    acquisiton.LeftAmount += Random.Range(acquisiton.MinRefreshAmount, acquisiton.MaxRefreshAmount);
+                    acquisiton.leftRefreshTime -= time;
+                    if (acquisiton.leftRefreshTime <= 0)
+                    {
+                        acquisiton.leftRefreshTime = acquisiton.RefreshTime;
+                        acquisiton.LeftAmount += Random.Range(acquisiton.MinRefreshAmount, acquisiton.MaxRefreshAmount);
+                    }
                 }
             }
-        }
-        acquisitionEnum.Dispose();
     }
 }
 

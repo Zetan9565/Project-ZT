@@ -60,7 +60,6 @@ public class Talker : MonoBehaviour
 
     public Shop shop = new Shop();
 
-
     /// <summary>
     /// 存储对象身上的对话型目标
     /// </summary>
@@ -74,7 +73,7 @@ public class Talker : MonoBehaviour
     {
         if (IsVendor && !ShopManager.Vendors.Contains(this)) ShopManager.Vendors.Add(this);
         if (!GameManager.Talkers.ContainsKey(TalkerID)) GameManager.Talkers.Add(TalkerID, this);
-        else if (!GameManager.Talkers[TalkerID] ||!GameManager.Talkers[TalkerID].gameObject)
+        else if (!GameManager.Talkers[TalkerID] || !GameManager.Talkers[TalkerID].gameObject)
         {
             GameManager.Talkers.Remove(TalkerID);
             GameManager.Talkers.Add(TalkerID, this);
@@ -108,5 +107,41 @@ public class Talker : MonoBehaviour
         {
             Relationship.RelationshipValue += 5;
         }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == "Player")
+            DialogueManager.Instance.CanTalk(this);
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.tag == "Player" && !DialogueManager.Instance.IsTalking)
+            DialogueManager.Instance.CanTalk(this);
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.tag == "Player" && DialogueManager.Instance.CurrentTalker == this)
+            DialogueManager.Instance.CannotTalk();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player")
+            DialogueManager.Instance.CanTalk(this);
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.tag == "Player" && !DialogueManager.Instance.IsTalking)
+            DialogueManager.Instance.CanTalk(this);
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Player" && DialogueManager.Instance.CurrentTalker == this)
+            DialogueManager.Instance.CannotTalk();
     }
 }

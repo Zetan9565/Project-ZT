@@ -3,7 +3,9 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 [DisallowMultipleComponent]
-public class BuildingAgent : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler,
+public class BuildingAgent : MonoBehaviour, 
+    IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, 
+    IPointerEnterHandler, IPointerExitHandler,
     IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [SerializeField]
@@ -11,9 +13,9 @@ public class BuildingAgent : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 
     private ScrollRect parentRect;
 
-    public BuildingInfo MBuildingInfo { get; private set; }
+    public BuildingInfomation MBuildingInfo { get; private set; }
 
-    public void Init(BuildingInfo buildingInfo, ScrollRect parentRect = null)
+    public void Init(BuildingInfomation buildingInfo, ScrollRect parentRect = null)
     {
         MBuildingInfo = buildingInfo;
         nameText.text = buildingInfo.Name;
@@ -27,7 +29,7 @@ public class BuildingAgent : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         if (recycle) ObjectPool.Instance.Put(gameObject);
     }
 
-    public void OnClick()
+    public void OnPointerClick(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
         TryBuild();

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
 
 [CreateAssetMenu(fileName = "bag", menuName = "ZetanStudio/道具/袋子")]
 public class BagItem : ItemBase

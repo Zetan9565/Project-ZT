@@ -39,14 +39,14 @@ public class AmountHandler : MonoBehaviour
         OpenAmountWindow();
     }
 
-    public void OpenAmountWindow()
+    private void OpenAmountWindow()
     {
         UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         UI.amountWindow.alpha = 1;
         UI.amountWindow.blocksRaycasts = true;
     }
 
-    public void CloseAmountWindow()
+    private void CloseAmountWindow()
     {
         UI.amountWindow.alpha = 0;
         UI.amountWindow.blocksRaycasts = false;
@@ -109,9 +109,9 @@ public class AmountHandler : MonoBehaviour
         CloseAmountWindow();
     }
 
-    public void SetPosition(Vector3 target, Vector3 offset = default)
+    public void SetPosition(Vector2 target, Vector3 offset = default)
     {
-        UI.amountWindow.GetComponent<RectTransform>().position = target + (offset == default ? new Vector3(defaultOffset.x, defaultOffset.y) : offset);
+        UI.amountWindow.GetComponent<RectTransform>().position = new Vector3(target.x, target.y) + (offset == default ? new Vector3(defaultOffset.x, defaultOffset.y) : offset);
     }
 
     public void FixAmount()

@@ -142,6 +142,7 @@ public class Backpack
 
     public int GetItemAmount(string id)
     {
+        if (string.IsNullOrEmpty(id)) return 0;
         var items = Items.FindAll(x => x.ItemID == id);
         if (items.Count < 1) return 0;
         if (items[0].Item.StackAble) return items[0].Amount;
@@ -150,6 +151,7 @@ public class Backpack
 
     public int GetItemAmount(ItemBase item)
     {
+        if (!item) return 0;
         var items = Items.FindAll(x => x.Item == item);
         if (items.Count < 1) return 0;
         if (items[0].Item.StackAble) return items[0].Amount;
@@ -182,8 +184,8 @@ public class Backpack
                 else if (y.Item.ItemType == ItemType.Cuisine) return 1;
                 else if (x.Item.ItemType == ItemType.Medicine) return -1;
                 else if (y.Item.ItemType == ItemType.Medicine) return 1;
-                else if (x.Item.ItemType == ItemType.DanMedicine) return -1;
-                else if (y.Item.ItemType == ItemType.DanMedicine) return 1;
+                else if (x.Item.ItemType == ItemType.Elixir) return -1;
+                else if (y.Item.ItemType == ItemType.Elixir) return 1;
                 else if (x.Item.ItemType == ItemType.Box) return -1;
                 else if (y.Item.ItemType == ItemType.Box) return 1;
                 else if (x.Item.ItemType == ItemType.Valuables) return -1;

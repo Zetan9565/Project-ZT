@@ -17,7 +17,7 @@ MonoBehaviour:
   itemType: 13
   quality: 4
   weight: 0
-  sellAble: 1
+  sellAble: 0
   sellPrice: 0
   buyPrice: 0
   icon: {fileID: 21300000, guid: 6f360e21e16247442a84447fba24df77, type: 3}
@@ -27,7 +27,8 @@ MonoBehaviour:
   useable: 1
   inexhaustible: 0
   maxDurability: 100
-  processMethod: 0
+  makingMethod: 0
   materials: []
   bookType: 1
-  buildingInfo: {fileID: 11400000, guid: 7874646e9bc32c04ea7ec82e1ae6fd42, type: 2}
+  buildingToLearn: {fileID: 11400000, guid: 7874646e9bc32c04ea7ec82e1ae6fd42, type: 2}
+  itemToLearn: {fileID: 0}

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 [DisallowMultipleComponent]
 public class BuildingManager : MonoBehaviour, IWindow
@@ -24,6 +25,7 @@ public class BuildingManager : MonoBehaviour, IWindow
     {
         get
         {
+            if (!UI) return null;
             return UI.windowCanvas;
         }
     }
@@ -32,19 +34,15 @@ public class BuildingManager : MonoBehaviour, IWindow
     private BuildingUI UI;
 
     [HideInInspector]
-    public BuildingInfo currentInfo;
+    public BuildingInfomation currentInfo;
 
     [HideInInspector]
     public BuildingPreview preview;
 
-    //public Vector3 currentPos;
-
     [Range(1, 2)]
     public int gridSize = 1;
 
-    //public LayerMask previewLayer;
-
-    public List<BuildingInfo> BuildingInfos { get; private set; } = new List<BuildingInfo>();
+    public List<BuildingInfomation> BuildingsLearned { get; private set; } = new List<BuildingInfomation>();
 
     private List<BuildingAgent> buildingAgents = new List<BuildingAgent>();
 
@@ -68,7 +66,7 @@ public class BuildingManager : MonoBehaviour, IWindow
             if (ba) ba.Clear(true);
         }
         buildingAgents.RemoveAll(x => !x || !x.gameObject.activeSelf || !x.gameObject);
-        foreach (BuildingInfo bi in BuildingInfos)
+        foreach (BuildingInfomation bi in BuildingsLearned)
         {
             BuildingAgent ba = ObjectPool.Instance.Get(UI.buildingCellPrefab, UI.buildingCellsParent).GetComponent<BuildingAgent>();
             ba.Init(bi, UI.cellsRect);
@@ -76,23 +74,23 @@ public class BuildingManager : MonoBehaviour, IWindow
         }
     }
 
-    public bool Learn(BuildingInfo buildingInfo)
+    public bool Learn(BuildingInfomation buildingInfo)
     {
         if (!buildingInfo) return false;
-        if (BuildingInfos.Contains(buildingInfo))
+        if (BuildingsLearned.Contains(buildingInfo))
         {
             MessageManager.Instance.NewMessage("这种设施已经学会建造");
             return false;
         }
-        BuildingInfos.Add(buildingInfo);
+        BuildingsLearned.Add(buildingInfo);
         MessageManager.Instance.NewMessage(string.Format("学会了 [{0}] 的建造方法!", buildingInfo.Name));
         return true;
     }
 
-    public void CreatPreview(BuildingInfo info)
+    public void CreatPreview(BuildingInfomation info)
     {
         if (info == null) return;
-        UnshowDescription();
+        HideDescription();
         currentInfo = info;
         preview = Instantiate(currentInfo.Preview).GetComponent<BuildingPreview>();
         //currentPos = preview.transform.position;
@@ -119,7 +117,7 @@ public class BuildingManager : MonoBehaviour, IWindow
     public void ShowAndMovePreview()
     {
         if (!preview) return;
-        preview.transform.position = MyTools.MoveByGrid(GetMovePosition(), gridSize);
+        preview.transform.position = MyTools.PositionToGrid(GetMovePosition(), gridSize);
         if (preview.ColliderCount > 0)
         {
             if (preview.SpriteRenderer) preview.SpriteRenderer.color = Color.red;
@@ -128,7 +126,7 @@ public class BuildingManager : MonoBehaviour, IWindow
         {
             if (preview.SpriteRenderer) preview.SpriteRenderer.color = Color.white;
         }
-        if (MyTools.IsMouseInsideScreen())
+        if (MyTools.IsMouseInsideScreen)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -182,6 +180,13 @@ public class BuildingManager : MonoBehaviour, IWindow
                     {
                         BackpackManager.Instance.LoseItem(m.Item, m.Amount);
                     }
+                    if ((building.GetComponentsInChildren<Collider>().Length > 1 || building.GetComponentsInChildren<Collider2D>().Length > 1)
+                        && AStarManager.Instance && Camera.main)
+                    {
+                        //刷新屏幕范围内的寻路网格
+                        AStarManager.Instance.UpdateAStars(Camera.main.ScreenToWorldPoint(Vector2.zero),
+                            Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, Screen.height)));
+                    }
                 }
             }
             else MessageManager.Instance.NewMessage("耗材不足");
@@ -198,16 +203,16 @@ public class BuildingManager : MonoBehaviour, IWindow
 
     public void LoadData(BuildingSystemData buildingSystemData)
     {
-        BuildingInfos.Clear();
-        BuildingInfo[] buildingInfos = Resources.LoadAll<BuildingInfo>("");
+        BuildingsLearned.Clear();
+        BuildingInfomation[] buildingInfos = Resources.LoadAll<BuildingInfomation>("");
         foreach (string learned in buildingSystemData.learneds)
         {
-            BuildingInfo find = Array.Find(buildingInfos, x => x.IDStarter == learned);
-            if (find) BuildingInfos.Add(find);
+            BuildingInfomation find = Array.Find(buildingInfos, x => x.IDStarter == learned);
+            if (find) BuildingsLearned.Add(find);
         }
         foreach (BuildingData buildingData in buildingSystemData.buildingDatas)
         {
-            BuildingInfo find = Array.Find(buildingInfos, x => x.IDStarter == buildingData.IDStarter);
+            BuildingInfomation find = Array.Find(buildingInfos, x => x.IDStarter == buildingData.IDStarter);
             if (find)
             {
                 Building building = Instantiate(find.Prefab);
@@ -219,7 +224,7 @@ public class BuildingManager : MonoBehaviour, IWindow
 
     Vector2 GetMovePosition()
     {
-        if (MyTools.IsMouseInsideScreen())
+        if (MyTools.IsMouseInsideScreen)
             return Camera.main.ScreenToWorldPoint(Input.mousePosition);
         else return preview.transform.position;
     }
@@ -243,6 +248,13 @@ public class BuildingManager : MonoBehaviour, IWindow
     {
         yield return new WaitUntil(() => { return confirmDestroy; });
         if (building && building.gameObject) Destroy(building.gameObject);
+        if ((building.GetComponentsInChildren<Collider>().Length > 1 || building.GetComponentsInChildren<Collider2D>().Length > 1)
+            && AStarManager.Instance && Camera.main)
+        {
+            //刷新屏幕范围内的寻路网格
+            AStarManager.Instance.UpdateAStars(Camera.main.ScreenToWorldPoint(Vector2.zero),
+                Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, Screen.height)));
+        }
         confirmDestroy = false;
     }
 
@@ -270,7 +282,7 @@ public class BuildingManager : MonoBehaviour, IWindow
         WindowsManager.Instance.Remove(this);
         IsUIOpen = false;
         FinishPreview();
-        UnshowDescription();
+        HideDescription();
         MyTools.SetActive(UI.destroyButton.gameObject, false);
     }
 
@@ -298,12 +310,11 @@ public class BuildingManager : MonoBehaviour, IWindow
         IsPausing = pause;
     }
 
-    public void ShowDescription(BuildingInfo buildingInfo)
+    public void ShowDescription(BuildingInfomation buildingInfo)
     {
         if (buildingInfo == null) return;
         currentInfo = buildingInfo;
-        List<string> materialsInfo = new List<string>();
-        buildingInfo.CheckMaterialsEnough(BackpackManager.Instance.MBackpack, ref materialsInfo);
+        List<string> materialsInfo = buildingInfo.GetMaterialsInfo(BackpackManager.Instance.MBackpack).ToList();
         string materials = string.Empty;
         int lineCount = materialsInfo.Count;
         for (int i = 0; i < materialsInfo.Count; i++)
@@ -321,7 +332,7 @@ public class BuildingManager : MonoBehaviour, IWindow
         UI.descriptionWindow.blocksRaycasts = false;
     }
 
-    public void UnshowDescription()
+    public void HideDescription()
     {
         UI.descriptionWindow.alpha = 0;
         UI.descriptionWindow.blocksRaycasts = false;
@@ -329,8 +340,10 @@ public class BuildingManager : MonoBehaviour, IWindow
         UI.desciptionText.text = string.Empty;
     }
 
-    public void UpdateDescription()
+    public void UpdateUI()
     {
+        if (!IsUIOpen) return;
+        Init();
         if (UI.descriptionWindow.alpha > 0) ShowDescription(currentInfo);
     }
 

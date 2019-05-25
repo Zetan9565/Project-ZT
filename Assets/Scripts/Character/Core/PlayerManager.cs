@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 
-public class PlayerInfoManager : MonoBehaviour
+public class PlayerManager : MonoBehaviour
 {
-    private static PlayerInfoManager instance;
-    public static PlayerInfoManager Instance
+    private static PlayerManager instance;
+    public static PlayerManager Instance
     {
         get
         {
             if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<PlayerInfoManager>();
+                instance = FindObjectOfType<PlayerManager>();
             return instance;
         }
     }
@@ -28,7 +28,20 @@ public class PlayerInfoManager : MonoBehaviour
         }
     }
 
+
+    [SerializeField]
+    private PlayerController2D playerController;
+    public PlayerController2D PlayerController
+    {
+        get
+        {
+            return playerController;
+        }
+        private set { playerController = value; }
+    }
+
     public Backpack Backpack { get { return PlayerInfo.backpack; } }
+
 
     public void Init()
     {

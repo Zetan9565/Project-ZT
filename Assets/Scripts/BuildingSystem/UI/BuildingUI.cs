@@ -28,6 +28,7 @@ public class BuildingUI : MonoBehaviour
         if (!buildingWindow.GetComponent<GraphicRaycaster>()) buildingWindow.gameObject.AddComponent<GraphicRaycaster>();
         windowCanvas = buildingWindow.GetComponent<Canvas>();
         windowCanvas.overrideSorting = true;
+        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         closeButton.onClick.AddListener(BuildingManager.Instance.CloseWindow);
         destroyButton.onClick.AddListener(BuildingManager.Instance.DestroyTouchedBuilding);
     }

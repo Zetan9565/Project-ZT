@@ -6,7 +6,7 @@ public class ShopUI : MonoBehaviour
     public CanvasGroup shopWindow;
 
     [HideInInspector]
-    public Canvas windowCancas;
+    public Canvas windowCanvas;
 
     public Text shopName;
 
@@ -21,11 +21,12 @@ public class ShopUI : MonoBehaviour
     private void Awake()
     {
         if (!shopWindow.GetComponent<GraphicRaycaster>()) shopWindow.gameObject.AddComponent<GraphicRaycaster>();
-        windowCancas = shopWindow.GetComponent<Canvas>();
-        windowCancas.overrideSorting = true;
+        windowCanvas = shopWindow.GetComponent<Canvas>();
+        windowCanvas.overrideSorting = true;
+        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         closeButton.onClick.AddListener(ShopManager.Instance.CloseWindow);
-        commodityTab.onValueChanged.AddListener(delegate { ShopManager.Instance.SetPage(0); });
-        acquisitionTab.onValueChanged.AddListener(delegate { ShopManager.Instance.SetPage(1); });
+        commodityTab.onValueChanged.AddListener(delegate { if (ShopManager.Instance) ShopManager.Instance.SetPage(0); });
+        acquisitionTab.onValueChanged.AddListener(delegate { if (ShopManager.Instance) ShopManager.Instance.SetPage(1); });
     }
 
     private void OnDestroy()

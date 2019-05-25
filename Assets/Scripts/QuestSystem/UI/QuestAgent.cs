@@ -64,7 +64,7 @@ public class QuestAgent : MonoBehaviour
     public void OnClick()
     {
         if (!MQuest) return;
-        QuestManager.Instance.OpenDescriptionWindow(this);
+        QuestManager.Instance.ShowDescription(this);
     }
 
     public void Select()

@@ -36,6 +36,7 @@ public class EscapeMenuManager : MonoBehaviour, IWindow
         UI.escapeMenu.blocksRaycasts = true;
         WindowsManager.Instance.Push(this);
         IsUIOpen = true;
+        WindowsManager.Instance.PauseAll(true, this);
     }
 
     public void CloseWindow()
@@ -47,6 +48,7 @@ public class EscapeMenuManager : MonoBehaviour, IWindow
         UI.escapeMenu.blocksRaycasts = false;
         WindowsManager.Instance.Remove(this);
         IsUIOpen = false;
+        WindowsManager.Instance.PauseAll(false);
     }
 
     public void OpenCloseWindow()

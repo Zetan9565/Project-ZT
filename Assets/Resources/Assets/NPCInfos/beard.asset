@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1daedce21944fe64f95c5f9988e0ae33, type: 3}
-  m_Name: big hair
+  m_Name: beard
   m_EditorClassIdentifier: Assembly-CSharp::NPCInfomation
   _ID: NPC002
   _Name: "\u5927\u80E1\u5B50"

@@ -95,7 +95,7 @@ public class WarehouseManager : MonoBehaviour, IWindow
                 MessageManager.Instance.NewMessage(string.Format("存入了1个 [{0}]", info.ItemName));
             else
             {
-                AmountHandler.Instance.SetPosition(new Vector3(Screen.width / 2, Screen.height / 2), Vector3.zero);
+                AmountHandler.Instance.SetPosition(MyTools.ScreenCenter);
                 AmountHandler.Instance.Init(delegate
                 {
                     if (OnStore(info, (int)AmountHandler.Instance.Amount))
@@ -172,7 +172,7 @@ public class WarehouseManager : MonoBehaviour, IWindow
                 MessageManager.Instance.NewMessage(string.Format("取出了1个 [{0}]", info.ItemName));
             else
             {
-                AmountHandler.Instance.SetPosition(new Vector3(Screen.width / 2, Screen.height / 2), Vector3.zero);
+                AmountHandler.Instance.SetPosition(MyTools.ScreenCenter);
                 AmountHandler.Instance.Init(delegate
                 {
                     if (OnTakeOut(info, (int)AmountHandler.Instance.Amount))
@@ -234,8 +234,8 @@ public class WarehouseManager : MonoBehaviour, IWindow
         Init(MWarehouse);
         UI.warehouseWindow.alpha = 1;
         UI.warehouseWindow.blocksRaycasts = true;
-        WindowsManager.Instance.Push(this);
         IsUIOpen = true;
+        WindowsManager.Instance.Push(this);
         BackpackManager.Instance.OpenWindow();
         //MyTools.SetActive(UI.warehouseButton.gameObject, false);
         UIManager.Instance.EnableJoyStick(false);

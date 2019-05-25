@@ -19,6 +19,7 @@ public class ItemWindowUI : ItemWindowBaseUI
         if (!itemWindow.GetComponent<GraphicRaycaster>()) itemWindow.gameObject.AddComponent<GraphicRaycaster>();
         windowCanvas = itemWindow.GetComponent<Canvas>();
         windowCanvas.overrideSorting = true;
+        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         windowsRect = itemWindow.GetComponent<RectTransform>();
         MyTools.SetActive(closeButton.gameObject, false);
 #if UNITY_STANDALONE

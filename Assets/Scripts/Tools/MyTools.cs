@@ -1,12 +1,20 @@
 ﻿using System;
 using System.IO;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
+using System.Linq;
 using UnityEngine;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 public class MyTools
 {
+    public static bool IsMouseInsideScreen => Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height;
+
+    public static Vector2 ScreenCenter => new Vector2(Screen.width / 2, Screen.height / 2);
+
+    public static Vector3 MousePositionAsWorld => Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
     /// <summary>
     /// 概率计算
     /// </summary>
@@ -24,14 +32,7 @@ public class MyTools
         if (gameObject.activeSelf != value) gameObject.SetActive(value);
     }
 
-    public static string GetChineseNumber(double value)
-    {
-        string originalNum = value.ToString("#L#E#D#C#K#E#D#C#J#E#D#C#I#E#D#C#H#E#D#C#G#E#D#C#F#E#D#C#.0B0A");
-        string chineseNum = Regex.Replace(originalNum, @"((?<=-|^)[^1-9]*)|((?'z'0)[0A-E]*((?=[1-9])|(?'-z'(?=[F-L\.]|$))))|((?'b'[F-L])(?'z'0)[0A-L]*((?=[1-9])|(?'-z'(?=[\.]|$))))", "${b}${z}");
-        return Regex.Replace(chineseNum, ".", m => "负 空零一二三四五六七八九空空空空空空空分角十百千万亿兆京垓秭穰"[m.Value[0] - '-'].ToString());
-    }
-
-    public static Vector3 MoveByGrid(Vector3 originalPos, float gridSize, float offset = 1.0f)
+    public static Vector3 PositionToGrid(Vector3 originalPos, float gridSize = 1, float offset = 1.0f)
     {
         Vector3 newPos = originalPos;
         newPos -= Vector3.one * offset;
@@ -41,7 +42,7 @@ public class MyTools
         newPos += Vector3.one * offset;
         return newPos;
     }
-    public static Vector2 MoveByGrid(Vector2 originalPos, float gridSize, float offset = 1.0f)
+    public static Vector2 PositionToGrid(Vector2 originalPos, float gridSize = 1, float offset = 1.0f)
     {
         Vector2 newPos = originalPos;
         newPos -= Vector2.one * offset;
@@ -52,9 +53,11 @@ public class MyTools
         return newPos;
     }
 
-    public static bool IsMouseInsideScreen()
+    public static float Slope(Vector3 from, Vector3 to)
     {
-        return Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height;
+        float height = from.y - to.y;
+        float length = Vector2.Distance(new Vector2(from.x, to.x), new Vector2(from.z, to.z));
+        return Mathf.Atan(height / length);
     }
 
     #region 文件安全相关
@@ -356,7 +359,7 @@ public class ScopeInt
     /// <summary>
     /// 四分之三
     /// </summary>
-    public int Three_Fourth { get { return (int)(Max * 0.75f); } }
+    public int Three_Fourths { get { return (int)(Max * 0.75f); } }
 
     /// <summary>
     /// 三分之一
@@ -557,14 +560,6 @@ public class ScopeInt
     {
         return original.Current;
     }
-    public override bool Equals(object obj)
-    {
-        return base.Equals(obj);
-    }
-    public override int GetHashCode()
-    {
-        return base.GetHashCode();
-    }
     #endregion
 
     public override string ToString()
@@ -582,13 +577,40 @@ public class ScopeInt
         else return ToString();
     }
 
-    public string ToString(string star, string split, string end, bool showMin = false)
+    public string ToString(string start, string split, string end, bool showMin = false)
     {
         if (showMin)
         {
-            return star + Min + split + Current + split + Max + end;
+            return start + Min + split + Current + split + Max + end;
         }
-        return star + Min + split + Current + split + Max + end;
+        return start + Current + split + Max + end;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is ScopeInt @int &&
+               min == @int.min &&
+               max == @int.max &&
+               current == @int.current;
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = 1173473123;
+        hashCode = hashCode * -1521134295 + min.GetHashCode();
+        hashCode = hashCode * -1521134295 + Min.GetHashCode();
+        hashCode = hashCode * -1521134295 + max.GetHashCode();
+        hashCode = hashCode * -1521134295 + Max.GetHashCode();
+        hashCode = hashCode * -1521134295 + current.GetHashCode();
+        hashCode = hashCode * -1521134295 + Current.GetHashCode();
+        hashCode = hashCode * -1521134295 + IsMax.GetHashCode();
+        hashCode = hashCode * -1521134295 + IsMin.GetHashCode();
+        hashCode = hashCode * -1521134295 + Rest.GetHashCode();
+        hashCode = hashCode * -1521134295 + Quarter.GetHashCode();
+        hashCode = hashCode * -1521134295 + Half.GetHashCode();
+        hashCode = hashCode * -1521134295 + Three_Fourths.GetHashCode();
+        hashCode = hashCode * -1521134295 + One_Third.GetHashCode();
+        return hashCode;
     }
 }
 
@@ -695,7 +717,7 @@ public class ScopeFloat
     /// <summary>
     /// 四分之三
     /// </summary>
-    public float Three_Fourth { get { return Max * 0.75f; } }
+    public float Three_Fourths { get { return Max * 0.75f; } }
 
     /// <summary>
     /// 三分之一
@@ -894,14 +916,6 @@ public class ScopeFloat
     {
         return (int)original.Current;
     }
-    public override bool Equals(object obj)
-    {
-        return base.Equals(obj);
-    }
-    public override int GetHashCode()
-    {
-        return base.GetHashCode();
-    }
     #endregion
 
     public override string ToString()
@@ -939,18 +953,166 @@ public class ScopeFloat
     /// <summary>
     /// 转成字符串
     /// </summary>
-    /// <param name="star">字符串开头</param>
+    /// <param name="start">字符串开头</param>
     /// <param name="split">数字分隔符</param>
     /// <param name="end">字符串结尾</param>
     /// <param name="decimalDigit">小数保留个数</param>
     /// <param name="showMin">是否显示最小值</param>
     /// <returns>目标字符串</returns>
-    public string ToString(string star, string split, string end, int decimalDigit, bool showMin = false)
+    public string ToString(string start, string split, string end, int decimalDigit, bool showMin = false)
     {
         if (showMin)
         {
-            return star + Min.ToString("F" + decimalDigit) + split + Current.ToString("F" + decimalDigit) + split + Max.ToString("F" + decimalDigit) + end;
+            return start + Min.ToString("F" + decimalDigit) + split + Current.ToString("F" + decimalDigit) + split + Max.ToString("F" + decimalDigit) + end;
         }
-        return star + Min.ToString("F" + decimalDigit) + split + Current.ToString("F" + decimalDigit) + split + Max.ToString("F" + decimalDigit) + end;
+        return start + Current.ToString("F" + decimalDigit) + split + Max.ToString("F" + decimalDigit) + end;
     }
+
+    public override bool Equals(object obj)
+    {
+        return obj is ScopeFloat @float &&
+               min == @float.min &&
+               max == @float.max &&
+               current == @float.current;
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = 1173473123;
+        hashCode = hashCode * -1521134295 + min.GetHashCode();
+        hashCode = hashCode * -1521134295 + Min.GetHashCode();
+        hashCode = hashCode * -1521134295 + max.GetHashCode();
+        hashCode = hashCode * -1521134295 + Max.GetHashCode();
+        hashCode = hashCode * -1521134295 + current.GetHashCode();
+        hashCode = hashCode * -1521134295 + Current.GetHashCode();
+        hashCode = hashCode * -1521134295 + IsMax.GetHashCode();
+        hashCode = hashCode * -1521134295 + IsMin.GetHashCode();
+        hashCode = hashCode * -1521134295 + Rest.GetHashCode();
+        hashCode = hashCode * -1521134295 + Quarter.GetHashCode();
+        hashCode = hashCode * -1521134295 + Half.GetHashCode();
+        hashCode = hashCode * -1521134295 + Three_Fourths.GetHashCode();
+        hashCode = hashCode * -1521134295 + One_Third.GetHashCode();
+        return hashCode;
+    }
+}
+
+public class Heap<T> where T : IHeapItem<T>
+{
+    private T[] items;
+    private int currentCount;
+    private int maxSize;
+    private HeapType heapType;
+
+    public int Count => currentCount;
+
+    public Heap(int size, HeapType heapType = HeapType.MinHeap)
+    {
+        items = new T[size];
+        maxSize = size;
+        this.heapType = heapType;
+    }
+
+    public void Add(T item)
+    {
+        if (currentCount >= maxSize) return;
+        item.HeapIndex = currentCount;
+        items[currentCount] = item;
+        SortUp(item);
+        currentCount++;
+    }
+
+    public T RemoveRoot()
+    {
+        if (currentCount < 1) return default;
+        T root = items[0];
+        root.HeapIndex = -1;
+        currentCount--;
+        items[0] = items[currentCount];
+        items[0].HeapIndex = 0;
+        SortDown(items[0]);
+        return root;
+    }
+
+    public bool Contains(T item)
+    {
+        if (item == default || item.HeapIndex < 0 || item.HeapIndex > items.Length - 1) return false;
+        return Equals(items[item.HeapIndex], item);//用items.Contains()就等着哭吧
+    }
+
+    public bool Exists(Predicate<T> predicate)
+    {
+        return Array.Exists(items, predicate);
+    }
+
+    public T[] ToArray()
+    {
+        return items;
+    }
+
+    public List<T> ToList()
+    {
+        return items.ToList();
+    }
+
+    private void SortUp(T item)
+    {
+        int parentIndex = (item.HeapIndex - 1) / 2;
+        if (parentIndex < 0) return;
+        while (true)
+        {
+            T parent = items[parentIndex];
+            if (heapType == HeapType.MinHeap ? item.CompareTo(parent) < 0 : item.CompareTo(parent) > 0)
+            {
+                Swap(item, parent);
+            }
+            else break;
+            parentIndex = (item.HeapIndex - 1) / 2;
+            if (parentIndex < 0) return;
+        }
+    }
+
+    private void SortDown(T item)
+    {
+        while (true)
+        {
+            int leftChildIndex = item.HeapIndex * 2 + 1;
+            int rightChildIndex = item.HeapIndex * 2 + 2;
+            if (leftChildIndex < currentCount)
+            {
+                int swapIndex = leftChildIndex;
+                if (rightChildIndex < currentCount && items[leftChildIndex].CompareTo(items[rightChildIndex]) > 0)
+                    swapIndex = rightChildIndex;
+                if (heapType == HeapType.MinHeap ? item.CompareTo(items[swapIndex]) > 0 : item.CompareTo(items[swapIndex]) < 0)
+                    Swap(item, items[swapIndex]);
+                else return;
+            }
+            else return;
+        }
+    }
+
+    private void Swap(T item1, T item2)
+    {
+        if (!Contains(item1) || !Contains(item2)) return;
+        items[item1.HeapIndex] = item2;
+        items[item2.HeapIndex] = item1;
+        int item1Index = item1.HeapIndex;
+        item1.HeapIndex = item2.HeapIndex;
+        item2.HeapIndex = item1Index;
+    }
+
+    public static implicit operator bool(Heap<T> self)
+    {
+        return self != null;
+    }
+
+    public enum HeapType
+    {
+        MinHeap,
+        MaxHeap
+    }
+}
+
+public interface IHeapItem<T> : IComparable<T>
+{
+    int HeapIndex { get; set; }
 }

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [Serializable]
 public abstract class ItemBase : ScriptableObject
 {
+    #region 基本信息
     [SerializeField]
     protected string _ID;
     public virtual string ID
@@ -17,7 +19,7 @@ public abstract class ItemBase : ScriptableObject
 
     [SerializeField]
     protected string _Name;
-    public virtual string Name
+    public new virtual string name
     {
         get
         {
@@ -157,17 +159,19 @@ public abstract class ItemBase : ScriptableObject
             return maxDurability;
         }
     }
+    #endregion
 
+    #region 制作相关
     [SerializeField]
 #if UNITY_EDITOR
-    [EnumMemberNames("不可制作", "冶炼", "锻造", "裁缝", "烹饪", "炼丹", "制药", "晾晒", "研磨")]
+    [EnumMemberNames("不可制作", "手工", "冶炼", "锻造", "织布", "裁缝", "烹饪", "炼丹", "制药", "晾晒", "研磨")]
 #endif
-    protected ProcessMethod processMethod;
-    public virtual ProcessMethod ProcessMethod
+    protected MakingMethod makingMethod;
+    public virtual MakingMethod MakingMethod
     {
         get
         {
-            return processMethod;
+            return makingMethod;
         }
     }
 
@@ -181,30 +185,56 @@ public abstract class ItemBase : ScriptableObject
         }
     }
 
-    public bool CheckMaterialsEnough(Backpack backpack, ref List<string> info)
+    public MakingToolType MakingTool
     {
-        var processInfo = materials.GetEnumerator();
-        bool result = true;
-        if (info == null) info = new List<string>();
-        while (processInfo.MoveNext())
+        get
         {
-            info.Add(string.Format("{0}\t[{1}/{2}]", processInfo.Current.ItemName, backpack.GetItemAmount(processInfo.Current.Item), processInfo.Current.Amount));
-            if (backpack.GetItemAmount(processInfo.Current.Item) < processInfo.Current.Amount)
-                result &= false;
+            switch (MakingMethod)
+            {
+                case MakingMethod.Smelt:
+                case MakingMethod.Forging:
+                    return MakingToolType.Forging;
+                case MakingMethod.Weaving:
+                    return MakingToolType.Loom;
+                case MakingMethod.Tailor:
+                    return MakingToolType.SewingTable;
+                case MakingMethod.Cooking:
+                    return MakingToolType.Kitchen;
+                case MakingMethod.Alchemy:
+                    return MakingToolType.AlchemyFurnace;
+                case MakingMethod.Pharmaceutical:
+                    return MakingToolType.PharmaceuticalTable;
+                case MakingMethod.Season:
+                    return MakingToolType.DryingTable;
+                case MakingMethod.Triturate:
+                    return MakingToolType.PestleAndMortar;
+                case MakingMethod.Handmade:
+                    return MakingToolType.Handwork;
+                default: return MakingToolType.None;
+            }
         }
-        return result;
     }
-    public bool CheckMaterialsEnough(Backpack backpack)
+    public IEnumerable<string> GetMaterialsInfo(Backpack backpack)
     {
-        var processInfo = materials.GetEnumerator();
-        while (processInfo.MoveNext())
-        {
-            if (backpack.GetItemAmount(processInfo.Current.Item) < processInfo.Current.Amount)
-                return false;
-        }
-        return true;
+        List<string> info = new List<string>();
+        using (var makingInfo = materials.GetEnumerator())
+            while (makingInfo.MoveNext())
+                info.Add(string.Format("{0}\t[{1}/{2}]", makingInfo.Current.ItemName, backpack.GetItemAmount(makingInfo.Current.Item), makingInfo.Current.Amount));
+        return info.AsEnumerable();
     }
+    public int GetMakeAmount(Backpack backpack)
+    {
+        if (backpack == null) return 0;
+        if (Materials.Count < 1) return 0;
+        List<int> amounts = new List<int>();
+        using (var makingInfo = materials.GetEnumerator())
+            while (makingInfo.MoveNext())
+                amounts.Add(backpack.GetItemAmount(makingInfo.Current.Item) / makingInfo.Current.Amount);
+        return amounts.Min();
+    }
+    #endregion
 
+    #region 类型判断相关
     public bool IsWeapon
     {
         get
@@ -261,6 +291,14 @@ public abstract class ItemBase : ScriptableObject
         }
     }
 
+    public bool IsMedicine
+    {
+        get
+        {
+            return this is MedicineItem;
+        }
+    }
+
     public bool IsEquipment
     {
         get
@@ -273,9 +311,10 @@ public abstract class ItemBase : ScriptableObject
     {
         get
         {
-            return this is BoxItem || this is BagItem;
+            return this is BoxItem || this is BagItem || this is MedicineItem;
         }
     }
+    #endregion
 }
 
 #region 道具种类相关
@@ -294,7 +333,7 @@ public enum ItemType
     /// <summary>
     /// 丹药
     /// </summary>
-    DanMedicine,
+    Elixir,
 
     /// <summary>
     /// 菜肴
@@ -385,12 +424,17 @@ public enum ItemQuality
     Peerless,
 }
 
-public enum ProcessMethod
+public enum MakingMethod
 {
     /// <summary>
     /// 不可制作
     /// </summary>
     None,
+
+    /// <summary>
+    /// 手工：所有类型
+    /// </summary>
+    Handmade,
 
     /// <summary>
     /// 冶炼：材料
@@ -401,6 +445,11 @@ public enum ProcessMethod
     /// 锻造：装备、工具
     /// </summary>
     Forging,
+
+    /// <summary>
+    /// 织布：材料
+    /// </summary>
+    Weaving,
 
     /// <summary>
     /// 裁缝：装备
@@ -430,9 +479,10 @@ public enum ProcessMethod
     /// <summary>
     /// 研磨：材料、恢复剂
     /// </summary>
-    Grinding
+    Triturate
 }
-public enum ProcessType
+
+public enum MakingType
 {
     SingleItem,//单种道具
     SameType//同类道具
@@ -456,7 +506,7 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
     {
         get
         {
-            if (Item) return Item.Name;
+            if (Item) return Item.name;
             else return string.Empty;
         }
     }
@@ -524,6 +574,11 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
 
     public GemItem gemstone2;
     #endregion
+
+    public static implicit operator bool(ItemInfo self)
+    {
+        return self != null;
+    }
 }
 
 [Serializable]
@@ -542,7 +597,7 @@ public class DropItemInfo
     {
         get
         {
-            if (Item) return Item.Name;
+            if (Item) return Item.name;
             else return string.Empty;
         }
     }
@@ -612,6 +667,11 @@ public class DropItemInfo
             return bindedQuest;
         }
     }
+
+    public static implicit operator bool(DropItemInfo self)
+    {
+        return self != null;
+    }
 }
 
 [Serializable]
@@ -630,7 +690,7 @@ public class MatertialInfo
     {
         get
         {
-            if (Item) return Item.Name;
+            if (Item) return Item.name;
             else return string.Empty;
         }
     }
@@ -670,12 +730,12 @@ public class MatertialInfo
 #if UNITY_EDITOR
     [EnumMemberNames("单种材料", "同类材料")]
 #endif
-    private ProcessType processType;
-    public ProcessType ProcessType
+    private MakingType makingType;
+    public MakingType MakingType
     {
         get
         {
-            return processType;
+            return makingType;
         }
     }
 
@@ -690,6 +750,19 @@ public class MatertialInfo
         {
             return materialType;
         }
+    }
+
+    public bool IsInvalid
+    {
+        get
+        {
+            return !(makingType == MakingType.SingleItem && item || makingType == MakingType.SameType);
+        }
+    }
+
+    public static implicit operator bool(MatertialInfo self)
+    {
+        return self != null;
     }
 }
 
@@ -873,6 +946,11 @@ public class PowerUp
             ;
         return result.Substring(0, result.Length - 1);
     }
+
+    public static implicit operator bool(PowerUp self)
+    {
+        return self != null;
+    }
 }
 
 public class BUFF
@@ -893,6 +971,11 @@ public class BUFF
         {
             return duration;
         }
+    }
+
+    public static implicit operator bool(BUFF self)
+    {
+        return self != null;
     }
 }
 #endregion
@@ -922,6 +1005,11 @@ public class FavoriteItemInfo
         {
             return favoriteLevel;
         }
+    }
+
+    public static implicit operator bool(FavoriteItemInfo self)
+    {
+        return self != null;
     }
 }
 
@@ -957,6 +1045,11 @@ public class HateItemInfo
         {
             return hateLevel;
         }
+    }
+
+    public static implicit operator bool(HateItemInfo self)
+    {
+        return self != null;
     }
 }
 

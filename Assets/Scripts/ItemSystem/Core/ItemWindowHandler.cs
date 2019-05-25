@@ -72,10 +72,10 @@ public class ItemWindowHandler : MonoBehaviour
                 else
                     MyTools.SetActive(UI.gemstone_2.gameObject, false);
                 MyTools.SetActive(UI.durability.gameObject, true);
-                if (PlayerInfoManager.Instance.PlayerInfo.HasPrimaryWeapon)
-                    OpenSubItemWindow(PlayerInfoManager.Instance.PlayerInfo.primaryWeapon);
-                else if (PlayerInfoManager.Instance.PlayerInfo.HasSecondaryWeapon)
-                    OpenSubItemWindow(PlayerInfoManager.Instance.PlayerInfo.secondaryWeapon);
+                if (PlayerManager.Instance.PlayerInfo.HasPrimaryWeapon)
+                    OpenSubItemWindow(PlayerManager.Instance.PlayerInfo.primaryWeapon);
+                else if (PlayerManager.Instance.PlayerInfo.HasSecondaryWeapon)
+                    OpenSubItemWindow(PlayerManager.Instance.PlayerInfo.secondaryWeapon);
                 break;
             case ItemType.Bag:
                 UI.effectText.text = GameManager.Instance.BackpackName + "容量+" + (MItemInfo.Item as BagItem).ExpandSize;
@@ -110,22 +110,32 @@ public class ItemWindowHandler : MonoBehaviour
 #if UNITY_ANDROID
                 MyTools.SetActive(UI.buttonsArea, true);
                 MyTools.SetActive(UI.discardButton.gameObject, MItemInfo.Item.DiscardAble);
-                MyTools.SetActive(UI.mulFunButton.gameObject, MItemInfo.Item.Useable);
+                MyTools.SetActive(UI.mulFunButton.gameObject, false);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 if (!WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen)
                 {
-                    UI.mulFunButton.GetComponentInChildren<Text>().text = MItemInfo.Item.IsEquipment ? "装备" : "使用";
-                    UI.mulFunButton.onClick.AddListener(UseCurrenItem);
+                    if (MItemInfo.Item.Useable)
+                    {
+                        MyTools.SetActive(UI.mulFunButton.gameObject, true);
+                        UI.mulFunButton.GetComponentInChildren<Text>().text = MItemInfo.Item.IsEquipment ? "装备" : "使用";
+                        UI.mulFunButton.onClick.AddListener(UseCurrenItem);
+                    }
                 }
                 else if (WarehouseManager.Instance.IsUIOpen)
                 {
+                    MyTools.SetActive(UI.mulFunButton.gameObject, true);
                     UI.mulFunButton.GetComponentInChildren<Text>().text = "存入";
                     UI.mulFunButton.onClick.AddListener(StoreCurrentItem);
                 }
                 else if (ShopManager.Instance.IsUIOpen)
                 {
-                    UI.mulFunButton.GetComponentInChildren<Text>().text = "出售";
-                    UI.mulFunButton.onClick.AddListener(SellOrPurchaseCurrentItem);
+                    if (MItemInfo.Item.SellAble)
+                    {
+                        MyTools.SetActive(UI.mulFunButton.gameObject, true);
+                        UI.mulFunButton.GetComponentInChildren<Text>().text = "出售";
+                        UI.mulFunButton.onClick.AddListener(SellOrPurchaseCurrentItem);
+                    }
+                    MyTools.SetActive(UI.discardButton.gameObject, false);
                 }
 #endif
                 break;
@@ -140,12 +150,12 @@ public class ItemWindowHandler : MonoBehaviour
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "取出";
 #endif
                 break;
-            case ItemAgentType.Process:
+            case ItemAgentType.Making:
                 UI.priceTitle.text = "贩卖价格";
 #if UNITY_ANDROID
                 MyTools.SetActive(UI.buttonsArea, true);
                 MyTools.SetActive(UI.discardButton.gameObject, false);
-                MyTools.SetActive(UI.mulFunButton.gameObject, true);
+                MyTools.SetActive(UI.mulFunButton.gameObject, MItemInfo.Amount > 0);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(MakeCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "制作";
@@ -265,7 +275,7 @@ public class ItemWindowHandler : MonoBehaviour
             case ItemType.Box:
             case ItemType.Bag:
             case ItemType.Medicine:
-            case ItemType.DanMedicine:
+            case ItemType.Elixir:
             case ItemType.Cuisine:
                 return "消耗品";
             default: return "普通";
@@ -334,9 +344,9 @@ public class ItemWindowHandler : MonoBehaviour
         CloseItemWindow();
     }
 
-    public void MakeCurrentItem()//制作使用
+    public void MakeCurrentItem()
     {
-        //TODO 制作当前道具
+        MakingManager.Instance.MakeCurrent();
         CloseItemWindow();
     }
 

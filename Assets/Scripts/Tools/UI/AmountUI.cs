@@ -25,6 +25,7 @@ public class AmountUI : MonoBehaviour
         if (!amountWindow.GetComponent<GraphicRaycaster>()) amountWindow.gameObject.AddComponent<GraphicRaycaster>();
         windowCanvas = amountWindow.GetComponent<Canvas>();
         windowCanvas.overrideSorting = true;
+        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         amount.onValueChanged.AddListener(delegate { AmountHandler.Instance.FixAmount(); });
         max.onClick.AddListener(AmountHandler.Instance.Max);
         clear.onClick.AddListener(AmountHandler.Instance.Clear);

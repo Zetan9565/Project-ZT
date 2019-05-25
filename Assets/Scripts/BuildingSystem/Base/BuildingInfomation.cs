@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "building info", menuName = "ZetanStudio/建筑/建筑物")]
-public class BuildingInfo : ScriptableObject
+public class BuildingInfomation : ScriptableObject
 {
     [SerializeField]
     private string _IDStarter;
@@ -76,25 +77,20 @@ public class BuildingInfo : ScriptableObject
     }
 
 
-    public bool CheckMaterialsEnough(Backpack backpack, ref List<string> info)
+    public IEnumerable<string> GetMaterialsInfo(Backpack backpack)
     {
-        var processInfo = materials.GetEnumerator();
-        bool result = true;
-        if (info == null) info = new List<string>();
-        while (processInfo.MoveNext())
-        {
-            info.Add(string.Format("{0}\t[{1}/{2}]", processInfo.Current.ItemName, backpack.GetItemAmount(processInfo.Current.Item), processInfo.Current.Amount));
-            if (backpack.GetItemAmount(processInfo.Current.Item) < processInfo.Current.Amount)
-                result &= false;
-        }
-        return result;
+        List<string> info = new List<string>();
+        using (var makingInfo = materials.GetEnumerator())
+            while (makingInfo.MoveNext())
+                info.Add(string.Format("{0}\t[{1}/{2}]", makingInfo.Current.ItemName, backpack.GetItemAmount(makingInfo.Current.Item), makingInfo.Current.Amount));
+        return info.AsEnumerable();
     }
     public bool CheckMaterialsEnough(Backpack backpack)
     {
-        var processInfo = materials.GetEnumerator();
-        while (processInfo.MoveNext())
+        var materialEnum = materials.GetEnumerator();
+        while (materialEnum.MoveNext())
         {
-            if (backpack.GetItemAmount(processInfo.Current.Item) < processInfo.Current.Amount)
+            if (backpack.GetItemAmount(materialEnum.Current.Item) < materialEnum.Current.Amount)
                 return false;
         }
         return true;

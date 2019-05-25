@@ -33,7 +33,7 @@ public class BackpackManager : MonoBehaviour, IWindow
 
     public Image GridMask { get { return UI.gridMask; } }
 
-    public int currentPage;
+    private int currentPage;
 
     public event ItemAmountListener OnGetItemEvent;
     public event ItemAmountListener OnLoseItemEvent;
@@ -44,7 +44,7 @@ public class BackpackManager : MonoBehaviour, IWindow
     {
         get
         {
-            if (PlayerInfoManager.Instance) return PlayerInfoManager.Instance.Backpack;
+            if (PlayerManager.Instance) return PlayerManager.Instance.Backpack;
             else return null;
         }
     }
@@ -173,7 +173,6 @@ public class BackpackManager : MonoBehaviour, IWindow
                     }
             }
         OnGetItemEvent?.Invoke(item, amount);
-        QuestManager.Instance.UpdateUI();
         UpdateUI();
         return true;
     }
@@ -209,7 +208,6 @@ public class BackpackManager : MonoBehaviour, IWindow
                     }
             }
         OnGetItemEvent?.Invoke(info.Item, amount);
-        QuestManager.Instance.UpdateUI();
         UpdateUI();
         return true;
     }
@@ -249,7 +247,7 @@ public class BackpackManager : MonoBehaviour, IWindow
     {
         if (MBackpack == null || info == null || !info.Item || amount < 1) return false;
         int finalLose = info.Amount < amount ? info.Amount : amount;
-        if (QuestRequiredItem(info.Item, info.Amount - finalLose))
+        if (QuestManager.Instance.HasQuestRequiredItem(info.Item, info.Amount - finalLose))
         {
             MessageManager.Instance.NewMessage("该物品为任务所需");
             return false;
@@ -262,12 +260,12 @@ public class BackpackManager : MonoBehaviour, IWindow
         if (MBackpack == null || !item || amount < 1) return false;
         if (GetItemAmount(item) < amount)
         {
-            MessageManager.Instance.NewMessage(GameManager.Instance.BackpackName + "中没有这么多的这种物品");
+            MessageManager.Instance.NewMessage(GameManager.Instance.BackpackName + "中没有这么多的 [" + item.name + "]");
             return false;
         }
-        if (QuestRequiredItem(item, GetItemAmount(item) - amount))
+        if (QuestManager.Instance.HasQuestRequiredItem(item, GetItemAmount(item) - amount))
         {
-            MessageManager.Instance.NewMessage("该物品为任务所需");
+            MessageManager.Instance.NewMessage(string.Format("[{0}] 为任务所需", item.name));
             return false;
         }
         return true;
@@ -277,21 +275,30 @@ public class BackpackManager : MonoBehaviour, IWindow
         return TryLoseItem_Boolean(info.Item, amount);
     }
 
-
     public bool LoseItem(ItemInfo info, int amount = 1)
     {
         if (MBackpack == null || info == null || !info.Item || amount < 1) return false;
         if (!TryLoseItem_Boolean(info, amount)) return false;
+        int amountBef = info.Amount;
         int finalLose = info.Amount < amount ? info.Amount : amount;
         MBackpack.LoseItemSimple(info, finalLose);
         ItemAgent ia = GetItemAgentByInfo(info);
         if (ia) ia.UpdateInfo();
         OnLoseItemEvent?.Invoke(info.Item, finalLose);
         if (ItemWindowHandler.Instance.MItemInfo == info && info.Amount < 1) ItemWindowHandler.Instance.CloseItemWindow();
-        QuestManager.Instance.UpdateUI();
         UpdateUI();
         return true;
     }
+
+    /*private void Awake()
+    {
+        OnLoseItemEvent += DebugLose;
+    }
+
+    public void DebugLose(ItemBase item, int amount)
+    {
+        Debug.LogFormat("失去[{0}]{1}个。", item.Name, amount);
+    }*/
 
     public bool LoseItem(ItemBase item, int amount = 1)
     {
@@ -351,21 +358,6 @@ public class BackpackManager : MonoBehaviour, IWindow
     public bool HasItemWithID(string id)
     {
         return GetItemAmount(id) > 0;
-    }
-
-    /// <summary>
-    /// 判定是否有某个任务需要某数量的某个道具
-    /// </summary>
-    /// <param name="item">要判定的道具ID</param>
-    /// <param name="leftAmount">要判定的数量</param>
-    /// <returns>是否需要该道具</returns>
-    private bool QuestRequiredItem(ItemBase item, int leftAmount)
-    {
-        return QuestsRequiredItem(item, leftAmount).Count() > 0;
-    }
-    public IEnumerable<Quest> QuestsRequiredItem(ItemBase item, int leftAmount)
-    {
-        return QuestManager.Instance.QuestsOngoing.FindAll(x => x.RequiredItem(item, leftAmount)).AsEnumerable();
     }
 
     public ItemAgent GetItemAgentByInfo(ItemInfo info)
@@ -478,6 +470,7 @@ public class BackpackManager : MonoBehaviour, IWindow
     {
         get
         {
+            if (!UI) return null;
             return UI.windowCanvas;
         }
     }
@@ -508,7 +501,9 @@ public class BackpackManager : MonoBehaviour, IWindow
         UI.weight.text = MBackpack.weightLoad.ToString("F2") + "WL";
         UI.size.text = MBackpack.backpackSize.ToString();
         SetPage(currentPage);
-        BuildingManager.Instance.UpdateDescription();
+        QuestManager.Instance.UpdateUI();
+        BuildingManager.Instance.UpdateUI();
+        MakingManager.Instance.UpdateUI();
     }
 
     public void SetUI(BackpackUI UI)

@@ -30,4 +30,4 @@ MonoBehaviour:
     level_4: {fileID: 0}
   favoriteItems: []
   hateItems: []
-  canMarry: 1
+  canMarry: 0

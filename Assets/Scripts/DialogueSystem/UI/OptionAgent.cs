@@ -77,7 +77,7 @@ public class OptionAgent : MonoBehaviour
                         DialogueManager.Instance.GotoDefault();
                 break;
             case OptionType.Back:
-                DialogueManager.Instance.CloseQuestDescriptionWindow();
+                DialogueManager.Instance.HideQuestDescription();
                 DialogueManager.Instance.GotoDefault();
                 break;
             case OptionType.Continue:

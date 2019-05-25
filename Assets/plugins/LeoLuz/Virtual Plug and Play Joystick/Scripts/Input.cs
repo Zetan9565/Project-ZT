@@ -123,7 +123,7 @@ public class Input : MonoBehaviour
     }
     public static bool GetKey(KeyCode key)
     {
-        return UnityEngine.Input.GetKeyUp(key);
+        return UnityEngine.Input.GetKey(key);
     }
     public static bool GetKeyDown(string key)
     {

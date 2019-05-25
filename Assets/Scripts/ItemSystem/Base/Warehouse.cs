@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
@@ -70,29 +69,6 @@ public class Warehouse
         }
     }
 
-    public ItemInfo Find(string itemID)
-    {
-        return Items.Find(x => x.ItemID == itemID);
-    }
-    public ItemInfo Find(ItemBase item)
-    {
-        return Items.Find(x => x.Item == item);
-    }
-
-    public IEnumerable<ItemInfo> FindAll(string itemID)
-    {
-        return Items.FindAll(x => x.ItemID == itemID).AsEnumerable();
-    }
-    public IEnumerable<ItemInfo> FindAll(ItemBase item)
-    {
-        return Items.FindAll(x => x.Item == item).AsEnumerable();
-    }
-
-    public ItemInfo FirstNotStackAble(ItemBase notStkAblItem)
-    {
-        return Items.Find(x => x.Item.StackAble && x.Item == notStkAblItem);
-    }
-
     public void Sort()
     {
         Items.Sort((i1, i2) =>
@@ -115,8 +91,8 @@ public class Warehouse
                 else if (i2.Item.ItemType == ItemType.Cuisine) return 1;
                 else if (i1.Item.ItemType == ItemType.Medicine) return -1;
                 else if (i2.Item.ItemType == ItemType.Medicine) return 1;
-                else if (i1.Item.ItemType == ItemType.DanMedicine) return -1;
-                else if (i2.Item.ItemType == ItemType.DanMedicine) return 1;
+                else if (i1.Item.ItemType == ItemType.Elixir) return -1;
+                else if (i2.Item.ItemType == ItemType.Elixir) return 1;
                 else if (i1.Item.ItemType == ItemType.Box) return -1;
                 else if (i2.Item.ItemType == ItemType.Box) return 1;
                 else if (i1.Item.ItemType == ItemType.Valuables) return -1;

@@ -17,6 +17,7 @@ public class EscapeUI : MonoBehaviour
         if (!escapeMenu.GetComponent<GraphicRaycaster>()) escapeMenu.gameObject.AddComponent<GraphicRaycaster>();
         menuCanvas = escapeMenu.GetComponent<Canvas>();
         menuCanvas.overrideSorting = true;
+        menuCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         closeButton.onClick.AddListener(EscapeMenuManager.Instance.CloseWindow);
         exitButton.onClick.AddListener(EscapeMenuManager.Instance.Exit);
     }

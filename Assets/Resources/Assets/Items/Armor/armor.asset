@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: armor
   m_EditorClassIdentifier: 
   _ID: ARMR001
-  _Name: "\u7AF9\u7247\u7532"
+  _Name: "\u94C1\u7247\u7532"
   itemType: 5
   quality: 0
   weight: 0
@@ -27,8 +27,12 @@ MonoBehaviour:
   useable: 1
   inexhaustible: 0
   maxDurability: 100
-  processMethod: 0
-  materials: []
+  makingMethod: 3
+  materials:
+  - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
+    amount: 5
+    makingType: 0
+    materialType: 0
   armorType: 0
   _DEF: 0
   hit: 0

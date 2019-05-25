@@ -84,7 +84,7 @@ public class GameManager : MonoBehaviour
         EscapeMenuManager.Instance.SetUI(FindObjectOfType<EscapeUI>());
         foreach (KeyValuePair<string, Talker> kvp in Talkers)
             if (kvp.Value is QuestGiver) (kvp.Value as QuestGiver).Init();
-        PlayerInfoManager.Instance.Init();
+        PlayerManager.Instance.Init();
         WindowsManager.Instance.Clear();
     }
 

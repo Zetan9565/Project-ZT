@@ -24,6 +24,7 @@ public class QuestUI : MonoBehaviour
     public Text descriptionText;
 
     public Button abandonButton;
+    public Button traceButton;
 
     public Button closeDescription;
 
@@ -47,9 +48,11 @@ public class QuestUI : MonoBehaviour
         if (!questsWindow.gameObject.GetComponent<GraphicRaycaster>()) questsWindow.gameObject.AddComponent<GraphicRaycaster>();
         windowCanvas = questsWindow.GetComponent<Canvas>();
         windowCanvas.overrideSorting = true;
+        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         closeWindow.onClick.AddListener(QuestManager.Instance.CloseWindow);
         abandonButton.onClick.AddListener(QuestManager.Instance.AbandonSelectedQuest);
-        closeDescription.onClick.AddListener(QuestManager.Instance.CloseDescriptionWindow);
+        traceButton.onClick.AddListener(QuestManager.Instance.TraceSelectedQuest);
+        closeDescription.onClick.AddListener(QuestManager.Instance.HideDescription);
         foreach (ItemAgent rwc in rewardCells)
         {
             if (rwc) rwc.Clear(true);

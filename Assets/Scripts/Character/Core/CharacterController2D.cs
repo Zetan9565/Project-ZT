@@ -4,15 +4,14 @@ public class CharacterController2D : MonoBehaviour
 {
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("刚体")]
+    [DisplayName("2D 刚体")]
 #endif
     private Rigidbody2D rigidbd;
 
-    [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("移动速度")]
 #endif
-    private float moveSpeed = 5.0f;
+    public float moveSpeed = 5.0f;
 
     [SerializeField]
 #if UNITY_EDITOR
@@ -35,19 +34,20 @@ public class CharacterController2D : MonoBehaviour
 #endif
     private string animaMagnitude = "Move";
 
-    public void Move(Vector2 dir)
+    public void Move(Vector2 input)
     {
-        rigidbd.velocity = new Vector2(dir.x * moveSpeed, dir.y * moveSpeed);
-        SetAnima(dir);
+        if (moveSpeed < 0) return;
+        rigidbd.velocity = new Vector2(input.x * moveSpeed, input.y * moveSpeed);
+        SetAnima(input);
     }
 
-    void SetAnima(Vector2 dir)
+    public void SetAnima(Vector2 input)
     {
-        animator.SetFloat(animaMagnitude, dir.magnitude);
-        if (dir != Vector2.zero)
+        animator.SetFloat(animaMagnitude, input.magnitude);
+        if (input != Vector2.zero)
         {
-            animator.SetFloat(animHorizontal, dir.x);
-            animator.SetFloat(animaVertical, dir.y);
+            animator.SetFloat(animHorizontal, input.x);
+            animator.SetFloat(animaVertical, input.y);
         }
     }
 }

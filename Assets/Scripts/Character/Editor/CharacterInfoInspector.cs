@@ -115,6 +115,14 @@ public class CharacterInfoInspector : Editor
             serializedObject.ApplyModifiedProperties();
         if (enemy)
         {
+            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
+            SerializedProperty race = serializedObject.FindProperty("race");
+            EditorGUILayout.PropertyField(race, new GUIContent("种族"));
+            if (serializedObject.FindProperty("race").objectReferenceValue)
+                EditorGUILayout.LabelField((race.objectReferenceValue as EnemyRace).name);
+            if (EditorGUI.EndChangeCheck())
+                serializedObject.ApplyModifiedProperties();
             EditorGUILayout.PropertyField(dropItems, new GUIContent("掉落道具\t\t" + (dropItems.arraySize > 0 ? "数量：" + dropItems.arraySize : "无")));
             if (dropItems.isExpanded)
             {
@@ -329,7 +337,7 @@ public class CharacterInfoInspector : Editor
         {
             serializedObject.Update();
             if (talker.FavoriteItems[index].Item != null)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.FavoriteItems[index].Item.Name);
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.FavoriteItems[index].Item.name);
             else
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             EditorGUI.BeginChangeCheck();
@@ -389,7 +397,7 @@ public class CharacterInfoInspector : Editor
         {
             serializedObject.Update();
             if (talker.HateItems[index].Item != null)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.HateItems[index].Item.Name);
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.HateItems[index].Item.name);
             else
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             EditorGUI.BeginChangeCheck();

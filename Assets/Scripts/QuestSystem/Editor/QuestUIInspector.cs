@@ -15,6 +15,7 @@ public class QuestUIInspector : Editor
     SerializedProperty descriptionWindow;
     SerializedProperty descriptionText;
     SerializedProperty abandonButton;
+    SerializedProperty traceButton;
     SerializedProperty closeDescription;
     SerializedProperty moneyText;
     SerializedProperty EXPText;
@@ -37,6 +38,7 @@ public class QuestUIInspector : Editor
         descriptionWindow = serializedObject.FindProperty("descriptionWindow");
         descriptionText = serializedObject.FindProperty("descriptionText");
         abandonButton = serializedObject.FindProperty("abandonButton");
+        traceButton = serializedObject.FindProperty("traceButton");
         closeDescription = serializedObject.FindProperty("closeDescription");
         moneyText = serializedObject.FindProperty("moneyText");
         EXPText = serializedObject.FindProperty("EXPText");
@@ -52,7 +54,7 @@ public class QuestUIInspector : Editor
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginVertical("Box");
-        EditorGUILayout.LabelField("任务窗口相关");
+        EditorGUILayout.LabelField("任务窗口相关", new GUIStyle() { fontStyle = FontStyle.Bold });
         EditorGUILayout.PropertyField(questsWindow, new GUIContent("任务窗口"));
         EditorGUILayout.PropertyField(closeWindow, new GUIContent("关闭任务窗口"));
         EditorGUILayout.PropertyField(questPrefab, new GUIContent("任务载体预制体"));
@@ -62,10 +64,11 @@ public class QuestUIInspector : Editor
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");
-        EditorGUILayout.LabelField("任务详情相关");
+        EditorGUILayout.LabelField("任务详情相关", new GUIStyle() { fontStyle = FontStyle.Bold });
         EditorGUILayout.PropertyField(descriptionWindow, new GUIContent("任务详情窗口"));
         EditorGUILayout.PropertyField(descriptionText, new GUIContent("任务描述文字"));
         EditorGUILayout.PropertyField(abandonButton, new GUIContent("放弃按钮"));
+        EditorGUILayout.PropertyField(traceButton, new GUIContent("追踪按钮"));
         EditorGUILayout.PropertyField(closeDescription, new GUIContent("关闭详情窗口"));
         EditorGUILayout.PropertyField(moneyText, new GUIContent("金钱奖励文本"));
         EditorGUILayout.PropertyField(EXPText, new GUIContent("经验奖励文本"));
@@ -74,7 +77,7 @@ public class QuestUIInspector : Editor
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");
-        EditorGUILayout.LabelField("任务栏相关");
+        EditorGUILayout.LabelField("任务栏相关", new GUIStyle() { fontStyle = FontStyle.Bold });
         EditorGUILayout.PropertyField(questBoard, new GUIContent("任务栏"));
         EditorGUILayout.PropertyField(boardQuestPrefab, new GUIContent("栏任务载体预制体"));
         EditorGUILayout.PropertyField(questBoardArea, new GUIContent("任务栏放置根"), true);

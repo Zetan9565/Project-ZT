@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 [CreateAssetMenu(fileName = "armor", menuName = "ZetanStudio/道具/防具")]
 public class ArmorItem : ItemBase

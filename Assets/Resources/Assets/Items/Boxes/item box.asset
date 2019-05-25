@@ -27,7 +27,7 @@ MonoBehaviour:
   useable: 1
   inexhaustible: 0
   maxDurability: 100
-  processMethod: 0
+  makingMethod: 0
   materials: []
   itemsInBox:
   - item: {fileID: 11400000, guid: 3be704b7f65170443ad9de4ad93ede92, type: 2}
@@ -49,7 +49,7 @@ MonoBehaviour:
     gemstone1: {fileID: 0}
     gemstone2: {fileID: 0}
   - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    amount: 1
+    amount: 3
     indexInGrid: 0
     durability:
       min: 0
@@ -58,6 +58,15 @@ MonoBehaviour:
     gemstone1: {fileID: 0}
     gemstone2: {fileID: 0}
   - item: {fileID: 11400000, guid: 06c927b132ffd0441bcb3d69ca5fc379, type: 2}
+    amount: 1
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  - item: {fileID: 11400000, guid: 3cf5b059f05932e4ba141ef2283b445a, type: 2}
     amount: 1
     indexInGrid: 0
     durability:

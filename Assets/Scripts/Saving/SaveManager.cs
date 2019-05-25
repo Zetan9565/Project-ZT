@@ -21,8 +21,6 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-    static bool dontDestroyOnLoadOnce;
-
     [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("存档文件名")]
@@ -34,20 +32,6 @@ public class SaveManager : MonoBehaviour
     [DisplayName("16或32字符密钥")]
 #endif
     private string encryptKey = "zetangamedatezetangamdatezetanga";
-
-    private void Awake()
-    {
-        if (!dontDestroyOnLoadOnce)
-        {
-            DontDestroyOnLoad(this);
-            dontDestroyOnLoadOnce = true;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-
 
     #region 存档相关
     public bool Save()
@@ -101,7 +85,7 @@ public class SaveManager : MonoBehaviour
 
     void SaveBuilding(SaveData data)
     {
-        data.buildingSystemData.learneds = BuildingManager.Instance.BuildingInfos.Select(x => x.IDStarter).ToArray();
+        data.buildingSystemData.learneds = BuildingManager.Instance.BuildingsLearned.Select(x => x.IDStarter).ToArray();
         foreach (Building b in FindObjectsOfType<Building>())
         {
             data.buildingSystemData.buildingDatas.Add(new BuildingData(b));

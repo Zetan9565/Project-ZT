@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -70,6 +69,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
         else if (MItemInfo.Item.IsEquipment) UseEuipment();
         else if (MItemInfo.Item.IsBook) UseBook();
         else if (MItemInfo.Item.IsBag) UseBag();
+        if (ItemWindowHandler.Instance.MItemInfo == MItemInfo) ItemWindowHandler.Instance.CloseItemWindow();
     }
 
     void UseBox()
@@ -100,7 +100,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     void UseEuipment()
     {
-        PlayerInfoManager.Instance.Equip(MItemInfo);
+        PlayerManager.Instance.Equip(MItemInfo);
     }
 
     void UseBook()
@@ -109,10 +109,17 @@ public class ItemAgent : MonoBehaviour, IDragable,
         switch (book.BookType)
         {
             case BookType.Building:
-                if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo) && BuildingManager.Instance.Learn(book.BuildingInfo))
+                if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo) && BuildingManager.Instance.Learn(book.BuildingToLearn))
                 {
                     BackpackManager.Instance.LoseItem(MItemInfo);
                     BuildingManager.Instance.Init();
+                }
+                break;
+            case BookType.Making:
+                if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo) && MakingManager.Instance.Learn(book.ItemToLearn))
+                {
+                    BackpackManager.Instance.LoseItem(MItemInfo);
+                    MakingManager.Instance.Init();
                 }
                 break;
             case BookType.Skill:
@@ -156,7 +163,8 @@ public class ItemAgent : MonoBehaviour, IDragable,
     {
         if (MItemInfo == null || !MItemInfo.Item) return;
         if (MItemInfo.Item.Icon) icon.overrideSprite = MItemInfo.Item.Icon;
-        if (agentType != ItemAgentType.ShopSelling && agentType != ItemAgentType.ShopBuying) amount.text = MItemInfo.Amount > 1 ? MItemInfo.Amount.ToString() : string.Empty;
+        if (agentType != ItemAgentType.ShopSelling && agentType != ItemAgentType.ShopBuying)
+            amount.text = MItemInfo.Amount > 1 || (agentType == ItemAgentType.Making && MItemInfo.Amount > 0) ? MItemInfo.Amount.ToString() : string.Empty;
         else amount.text = string.Empty;
         if (MItemInfo.Amount <= 0 && (agentType == ItemAgentType.Backpack || agentType == ItemAgentType.Warehouse)) Empty();
     }
@@ -164,10 +172,10 @@ public class ItemAgent : MonoBehaviour, IDragable,
     public void OnRightClick()
     {
         if (!DragableHandler.Instance.IsDraging)
-            if (agentType == ItemAgentType.Backpack && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen)
-                OnUse();
+            if (agentType == ItemAgentType.Backpack && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen) OnUse();
             else if (WarehouseManager.Instance.IsUIOpen)
             {
+                if (ItemWindowHandler.Instance.MItemInfo == MItemInfo) ItemWindowHandler.Instance.CloseItemWindow();
                 if (agentType == ItemAgentType.Warehouse)
                     WarehouseManager.Instance.TakeOutItem(MItemInfo, true);
                 else if (agentType == ItemAgentType.Backpack)
@@ -175,9 +183,10 @@ public class ItemAgent : MonoBehaviour, IDragable,
             }
             else if (ShopManager.Instance.IsUIOpen)
             {
+                if (ItemWindowHandler.Instance.MItemInfo == MItemInfo) ItemWindowHandler.Instance.CloseItemWindow();
                 if (agentType == ItemAgentType.ShopSelling && ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo))
                     ShopManager.Instance.SellItem(ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo);
-                if (agentType == ItemAgentType.Backpack)
+                else if (agentType == ItemAgentType.Backpack)
                     ShopManager.Instance.PurchaseItem(MItemInfo);
             }
     }
@@ -253,7 +262,6 @@ public class ItemAgent : MonoBehaviour, IDragable,
     }
 #endif
 
-
     /// <summary>
     /// 交换单元格内容
     /// </summary>
@@ -301,6 +309,11 @@ public class ItemAgent : MonoBehaviour, IDragable,
     #region 事件相关
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (eventData.button == PointerEventData.InputButton.Left && agentType == ItemAgentType.Making)
+        {
+            ItemWindowHandler.Instance.OpenItemWindow(this);
+            return;
+        }
 #if UNITY_STANDALONE
         if (eventData.button == PointerEventData.InputButton.Left)
             if (DragableHandler.Instance.IsDraging)
@@ -436,7 +449,7 @@ public enum ItemAgentType
     None,//只带关闭按钮
     Backpack,//带使用按钮、丢弃按钮、存储按钮
     Warehouse,//带取出按钮
-    Process,//带制作按钮
+    Making,//带制作按钮
     ShopSelling,//带购买按钮
     ShopBuying//带出售按钮
 }

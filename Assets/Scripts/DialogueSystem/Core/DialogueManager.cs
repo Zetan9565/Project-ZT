@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -22,14 +21,15 @@ public class DialogueManager : MonoBehaviour, IWindow
     [SerializeField]
     private DialogueUI UI;
 
+    [HideInInspector]
     public UnityEvent OnBeginDialogueEvent;
+    [HideInInspector]
     public UnityEvent OnFinishDialogueEvent;
 
     public DialogueType DialogueType { get; private set; } = DialogueType.Normal;
 
-    public Dictionary<string, DialogueData> DialogueDatas { get; private set; } = new Dictionary<string, DialogueData>();
-
     private Queue<DialogueWords> Words = new Queue<DialogueWords>();
+    public Dictionary<string, DialogueData> DialogueDatas { get; private set; } = new Dictionary<string, DialogueData>();
 
     private int page = 1;
     public int Page
@@ -38,7 +38,7 @@ public class DialogueManager : MonoBehaviour, IWindow
         {
             return page;
         }
-        set
+        private set
         {
             if (value > 1) page = value;
             else page = 1;
@@ -65,18 +65,19 @@ public class DialogueManager : MonoBehaviour, IWindow
         }
     }
 
-    public Talker MTalker;
+    public Talker CurrentTalker { get; private set; }
     private TalkObjective talkObjective;
     public Quest CurrentQuest { get; private set; }
+
     private Dialogue currentDialog;
-    private DialogueWords latestWords;
+    private DialogueWords currentWords;
     private BranchDialogue currentBranch;
     private Stack<BranchDialogue> branchDialogInstances = new Stack<BranchDialogue>();
-    public bool HasNotAcptQuests
+    public bool NPCHasNotAcptQuests
     {
         get
         {
-            QuestGiver questGiver = MTalker as QuestGiver;
+            QuestGiver questGiver = CurrentTalker as QuestGiver;
             if (!questGiver || !questGiver.QuestInstances.Exists(x => !x.IsOngoing) || questGiver.QuestInstances.Exists(x => x.IsComplete)) return false;
             return true;
         }
@@ -95,6 +96,7 @@ public class DialogueManager : MonoBehaviour, IWindow
     {
         get
         {
+            if (!UI) return null;
             return UI.windowCanvas;
         }
     }
@@ -102,8 +104,8 @@ public class DialogueManager : MonoBehaviour, IWindow
     #region 开始新对话
     public void BeginNewDialogue()
     {
-        if (!MTalker || !TalkAble || IsTalking) return;
-        StartNormalDialogue(MTalker);
+        if (!CurrentTalker || !TalkAble || IsTalking) return;
+        StartNormalDialogue(CurrentTalker);
         OnBeginDialogueEvent?.Invoke();
     }
 
@@ -145,14 +147,14 @@ public class DialogueManager : MonoBehaviour, IWindow
     public void StartNormalDialogue(Talker talker)
     {
         if (!UI) return;
-        MTalker = talker;
+        CurrentTalker = talker;
         DialogueType = DialogueType.Normal;
         if (talker is QuestGiver && (talker as QuestGiver).QuestInstances.Count > 0)
             MyTools.SetActive(UI.questButton.gameObject, true);
         else MyTools.SetActive(UI.questButton.gameObject, false);
         MyTools.SetActive(UI.warehouseButton.gameObject, talker.IsWarehouseAgent);
         MyTools.SetActive(UI.shopButton.gameObject, talker.IsVendor);
-        CloseQuestDescriptionWindow();
+        HideQuestDescription();
         StartDialogue(talker.Info.DefaultDialogue);
         talker.OnTalkBegin();
     }
@@ -173,21 +175,22 @@ public class DialogueManager : MonoBehaviour, IWindow
         if (talkObjective == null) return;
         this.talkObjective = talkObjective;
         DialogueType = DialogueType.TObjective;
+        ShowButtons(false, false, false);
         StartDialogue(talkObjective.Dialogue);
     }
 
     public void StartBranchDialogue(BranchDialogue branch)
     {
         if (branch == null || branch.IsInvalid) return;
-        if (latestWords.NeedToChusRightBranch)
+        if (currentWords.NeedToChusRightBranch)
         {
             branchDialogInstances.Push(branch.Clone() as BranchDialogue);
             branchDialogInstances.Peek().runtimeParent = currentDialog;
-            if (latestWords.IndexOfRightBranch == latestWords.Branches.IndexOf(branch))
+            if (currentWords.IndexOfRightBranch == currentWords.Branches.IndexOf(branch))
             {
-                branchDialogInstances.Peek().runtimeIndexToGoBack = currentDialog.Words.IndexOf(latestWords) + 1;
+                branchDialogInstances.Peek().runtimeIndexToGoBack = currentDialog.Words.IndexOf(currentWords) + 1;
             }
-            else branchDialogInstances.Peek().runtimeIndexToGoBack = currentDialog.Words.IndexOf(latestWords);
+            else branchDialogInstances.Peek().runtimeIndexToGoBack = currentDialog.Words.IndexOf(currentWords);
         }
         else if (branch.GoBack)
         {
@@ -201,7 +204,7 @@ public class DialogueManager : MonoBehaviour, IWindow
             StartDialogue(branchDialogInstances.Peek().Dialogue, branchDialogInstances.Peek().SpecifyIndex);
         else if (!string.IsNullOrEmpty(branch.Words))
         {
-            StartOneWords(latestWords.TalkerInfo, branchDialogInstances.Peek().Words, latestWords.TalkerType, currentDialog,
+            StartOneWords(currentWords.TalkerInfo, branchDialogInstances.Peek().Words, currentWords.TalkerType, currentDialog,
                          branchDialogInstances.Peek().IndexToGo);
             SayNextWords();
         }
@@ -260,9 +263,9 @@ public class DialogueManager : MonoBehaviour, IWindow
     /// </summary>
     private void MakeTalkerQuestOption()
     {
-        if (!(MTalker is QuestGiver)) return;
+        if (!(CurrentTalker is QuestGiver)) return;
         ClearOptions();
-        foreach (Quest quest in (MTalker as QuestGiver).QuestInstances)
+        foreach (Quest quest in (CurrentTalker as QuestGiver).QuestInstances)
         {
             if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.AcceptAble)
             {
@@ -317,9 +320,9 @@ public class DialogueManager : MonoBehaviour, IWindow
     /// </summary>
     private void MakeTalkerCmpltQuestOption()
     {
-        if (!(MTalker is QuestGiver)) return;
+        if (!(CurrentTalker is QuestGiver)) return;
         ClearOptions();
-        foreach (Quest quest in (MTalker as QuestGiver).QuestInstances)
+        foreach (Quest quest in (CurrentTalker as QuestGiver).QuestInstances)
         {
             if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.AcceptAble && quest.IsComplete)
             {
@@ -343,7 +346,7 @@ public class DialogueManager : MonoBehaviour, IWindow
     {
         int index = 1;
         ClearOptionsExceptCmlptQuest();
-        foreach (TalkObjective to in MTalker.objectivesTalkToThis)
+        foreach (TalkObjective to in CurrentTalker.objectivesTalkToThis)
         {
             if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
             {
@@ -396,7 +399,7 @@ public class DialogueManager : MonoBehaviour, IWindow
 
     public void OptionPageUp()
     {
-        if (Page <= 1) return;
+        if (Page <= 1 || !IsUIOpen || IsPausing) return;
         int leftLineCount = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight);
         if (page > 0)
         {
@@ -416,7 +419,7 @@ public class DialogueManager : MonoBehaviour, IWindow
 
     public void OptionPageDown()
     {
-        if (Page >= MaxPage) return;
+        if (Page >= MaxPage || !IsUIOpen || IsPausing) return;
         int leftLineCount = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight);
         if (page < Mathf.CeilToInt(optionAgents.Count * 1.0f / (leftLineCount * 1.0f)))
         {
@@ -522,18 +525,17 @@ public class DialogueManager : MonoBehaviour, IWindow
         if (Words.Count > 0)
         {
             string talkerName = Words.Peek().TalkerName;
-            if (Words.Peek().TalkerType == TalkerType.Player && PlayerInfoManager.Instance.PlayerInfo)
-                talkerName = PlayerInfoManager.Instance.PlayerInfo.Name;
+            if (Words.Peek().TalkerType == TalkerType.Player && PlayerManager.Instance.PlayerInfo)
+                talkerName = PlayerManager.Instance.PlayerInfo.Name;
             UI.nameText.text = talkerName;
             UI.wordsText.text = Words.Peek().Words;
-            latestWords = Words.Dequeue();
+            currentWords = Words.Dequeue();
         }
         if (Words.Count <= 0)
         {
-            OnFinishDialogueEvent?.Invoke();
             if (branchDialogInstances.Count > 0)
                 HandlingLastBranchWords();//分支处理比较特殊，放到Dequque之后，否则分支最后一句不会讲
-            //TryGoBack();
+            OnFinishDialogueEvent?.Invoke();
         }
     }
 
@@ -542,11 +544,11 @@ public class DialogueManager : MonoBehaviour, IWindow
     /// </summary>
     private void HandlingLastWords()
     {
-        if (DialogueType == DialogueType.Normal && MTalker)
+        if (DialogueType == DialogueType.Normal && CurrentTalker)
         {
-            MTalker.OnTalkFinished();
+            CurrentTalker.OnTalkFinished();
             MakeTalkerCmpltQuestOption();
-            if (MTalker.objectivesTalkToThis != null && MTalker.objectivesTalkToThis.Count > 0) MakeTalkerObjectiveOption();
+            if (CurrentTalker.objectivesTalkToThis != null && CurrentTalker.objectivesTalkToThis.Count > 0) MakeTalkerObjectiveOption();
             else ClearOptionsExceptCmlptQuest();
             QuestManager.Instance.UpdateUI();
         }
@@ -569,7 +571,7 @@ public class DialogueManager : MonoBehaviour, IWindow
                 oa.Recycle();
             }
             //目标已经完成，不再需要保留在对话人的目标列表里，从对话人的对话型目标里删掉相应信息
-            MTalker.objectivesTalkToThis.RemoveAll(x => x == talkObjective);
+            CurrentTalker.objectivesTalkToThis.RemoveAll(x => x == talkObjective);
         }
         talkObjective = null;//重置管理器的对话目标以防出错
         QuestManager.Instance.UpdateUI();
@@ -592,7 +594,7 @@ public class DialogueManager : MonoBehaviour, IWindow
                 no.InitBack("拒绝");
                 optionAgents.Add(no);
             }
-            OpenQuestDescriptionWindow(CurrentQuest);
+            ShowQuestDescription(CurrentQuest);
         }
     }
 
@@ -670,6 +672,7 @@ public class DialogueManager : MonoBehaviour, IWindow
         WindowsManager.Instance.PauseAll(true, this, WarehouseManager.Instance);
         WindowsManager.Instance.Push(this);
         IsUIOpen = true;
+        UIManager.Instance.EnableJoyStick(false);
         UIManager.Instance.EnableInteractive(false);
     }
     public void CloseWindow()
@@ -679,13 +682,13 @@ public class DialogueManager : MonoBehaviour, IWindow
         IsUIOpen = false;
         IsPausing = false;
         DialogueType = DialogueType.Normal;
-        MTalker = null;
+        CurrentTalker = null;
         CurrentQuest = null;
         currentDialog = null;
         currentBranch = null;
         branchDialogInstances.Clear();
         ClearOptions();
-        CloseQuestDescriptionWindow();
+        HideQuestDescription();
         IsTalking = false;
         if (!BuildingManager.Instance.IsPreviewing) WindowsManager.Instance.PauseAll(false);
         WindowsManager.Instance.Remove(this);
@@ -693,13 +696,12 @@ public class DialogueManager : MonoBehaviour, IWindow
         WarehouseManager.Instance.CloseWindow();
         if (ShopManager.Instance.IsPausing) ShopManager.Instance.PauseDisplay(false);
         ShopManager.Instance.CloseWindow();
+        UIManager.Instance.EnableJoyStick(true);
     }
-
     public void OpenCloseWindow()
     {
 
     }
-
     public void PauseDisplay(bool pause)
     {
         if (!UI || !UI.gameObject) return;
@@ -717,19 +719,7 @@ public class DialogueManager : MonoBehaviour, IWindow
         IsPausing = pause;
     }
 
-    public void OpenQuestDescriptionWindow(Quest quest)
-    {
-        InitDescription(quest);
-        UI.descriptionWindow.alpha = 1;
-        UI.descriptionWindow.blocksRaycasts = true;
-    }
-    public void CloseQuestDescriptionWindow()
-    {
-        CurrentQuest = null;
-        UI.descriptionWindow.alpha = 0;
-        UI.descriptionWindow.blocksRaycasts = false;
-    }
-    private void InitDescription(Quest quest)
+    public void ShowQuestDescription(Quest quest)
     {
         if (quest == null) return;
         CurrentQuest = quest;
@@ -750,31 +740,43 @@ public class DialogueManager : MonoBehaviour, IWindow
                     break;
                 }
             }
+        UI.descriptionWindow.alpha = 1;
+        UI.descriptionWindow.blocksRaycasts = true;
+    }
+    public void HideQuestDescription()
+    {
+        CurrentQuest = null;
+        UI.descriptionWindow.alpha = 0;
+        UI.descriptionWindow.blocksRaycasts = false;
+        ItemWindowHandler.Instance.CloseItemWindow();
     }
 
     public void OpenTalkerWarehouse()
     {
-        if (!MTalker || !MTalker.IsWarehouseAgent) return;
+        if (!CurrentTalker || !CurrentTalker.IsWarehouseAgent) return;
         PauseDisplay(true);
         BackpackManager.Instance.PauseDisplay(false);
-        WarehouseManager.Instance.Init(MTalker.warehouse);
+        WarehouseManager.Instance.Init(CurrentTalker.warehouse);
         WarehouseManager.Instance.OpenWindow();
     }
-
     public void OpenTalkerShop()
     {
-        if (!MTalker || !MTalker.IsVendor) return;
-        ShopManager.Instance.Init(MTalker.shop);
+        if (!CurrentTalker || !CurrentTalker.IsVendor) return;
+        ShopManager.Instance.Init(CurrentTalker.shop);
         ShopManager.Instance.OpenWindow();
         PauseDisplay(true);
         BackpackManager.Instance.PauseDisplay(false);
         BackpackManager.Instance.OpenWindow();
     }
+    public void OpenGiftWindow()
+    {
+        //TODO 把玩家背包道具读出并展示
+    }
 
     public void CanTalk(Talker talker)
     {
         if (IsTalking || !talker) return;
-        MTalker = talker;
+        CurrentTalker = talker;
         TalkAble = true;
         UIManager.Instance.EnableInteractive(true, talker.TalkerName);
     }
@@ -783,11 +785,6 @@ public class DialogueManager : MonoBehaviour, IWindow
         TalkAble = false;
         CloseWindow();
         UIManager.Instance.EnableInteractive(false);
-    }
-
-    private void OpenGiftWindow()
-    {
-        //TODO 把玩家背包道具读出并展示
     }
 
     private void ShowButtons(bool shop, bool warehouse, bool quest)
@@ -802,7 +799,6 @@ public class DialogueManager : MonoBehaviour, IWindow
         if (!UI) return;
         this.UI = UI;
     }
-
     public void ResetUI()
     {
         optionAgents.Clear();
@@ -815,13 +811,13 @@ public class DialogueManager : MonoBehaviour, IWindow
     #region 其它
     public void SendTalkerGifts()
     {
-        if (!MTalker || !MTalker.Info.CanDEV_RLAT) return;
+        if (!CurrentTalker || !CurrentTalker.Info.CanDEV_RLAT) return;
         OpenGiftWindow();
     }
 
     public void LoadTalkerQuest()
     {
-        if (MTalker == null) return;
+        if (CurrentTalker == null) return;
         MyTools.SetActive(UI.questButton.gameObject, false);
         MyTools.SetActive(UI.warehouseButton.gameObject, false);
         MyTools.SetActive(UI.shopButton.gameObject, false);
@@ -849,8 +845,8 @@ public class DialogueManager : MonoBehaviour, IWindow
         currentBranch = null;
         branchDialogInstances.Clear();
         ClearOptions();
-        CloseQuestDescriptionWindow();
-        StartNormalDialogue(MTalker);
+        HideQuestDescription();
+        StartNormalDialogue(CurrentTalker);
     }
     #endregion
 }

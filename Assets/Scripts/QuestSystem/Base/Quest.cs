@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [System.Serializable]
-[CreateAssetMenu(fileName = "quest", menuName = "ZetanStudio/任务/任务")]
+[CreateAssetMenu(fileName = "quest", menuName = "ZetanStudio/任务/任务", order = 1)]
 public class Quest : ScriptableObject
 {
     [SerializeField]
@@ -521,6 +521,17 @@ public abstract class Objective
         }
     }
 
+    public bool Concurrent
+    {
+        get
+        {
+            if (!InOrder) return true;//不按顺序，说明可以并发执行
+            if (PrevObjective && PrevObjective.OrderIndex == OrderIndex) return true;//有前置目标，而且顺序码与前置目标相同，说明可以并发执行
+            if (NextObjective && NextObjective.OrderIndex == OrderIndex) return true;//有后置目标，而且顺序码与后置目标相同，说明可以并发执行
+            return false;
+        }
+    }
+
     /// <summary>
     /// 更新某个收集类任务目标，用于在其他前置目标完成时，更新后置收集类目标
     /// </summary>
@@ -530,6 +541,11 @@ public abstract class Objective
         CollectObjective co;
         while (tempObj != null)
         {
+            if (!(tempObj is CollectObjective) && tempObj.InOrder && tempObj.NextObjective != null && tempObj.NextObjective.InOrder && tempObj.OrderIndex < tempObj.NextObjective.OrderIndex)
+            {
+                //若相邻后置目标不是收集类目标，该后置目标按顺序执行，其相邻后置也按顺序执行，且两者不可同时执行，则说明无法继续更新后置的收集类目标
+                return;
+            }
             if (tempObj is CollectObjective)
             {
                 co = tempObj as CollectObjective;
@@ -537,6 +553,11 @@ public abstract class Objective
             }
             tempObj = tempObj.NextObjective;
         }
+    }
+
+    public static implicit operator bool(Objective self)
+    {
+        return self != null;
     }
 }
 /// <summary>
@@ -574,16 +595,18 @@ public class CollectObjective : Objective
         }
     }
 
-    public void UpdateCollectAmountUp(ItemBase item, int leftAmount)//得道具时用到
+    public void UpdateCollectAmountUp(ItemBase item, int amount)//得道具时用到
     {
-        if (item == Item) UpdateAmountUp(leftAmount);
+        if (item == Item) UpdateAmountUp(amount);
     }
 
-    public void UpdateCollectAmountDown(ItemBase item, int leftAmount)//丢道具时用到
+    public void UpdateCollectAmountDown(ItemBase item, int amount)//丢道具时用到
     {
+        /*Debug.Log("AllPrevObjCmplt: " + AllPrevObjCmplt);
+        Debug.Log("!HasNextObjOngoing: " + !HasNextObjOngoing);*/
         if (item == Item && AllPrevObjCmplt && !HasNextObjOngoing)
             //前置目标都完成且没有后置目标在进行时，才允许更新
-            CurrentAmount = leftAmount;
+            CurrentAmount -= amount;
     }
 }
 /// <summary>
@@ -603,6 +626,19 @@ public class KillObjective : Objective
     //}
 
     [SerializeField]
+#if UNITY_EDITOR
+    [EnumMemberNames("特定敌人", "特定种群", "任意敌人")]
+#endif
+    private KillObjectiveType objectiveType;
+    public KillObjectiveType ObjectiveType
+    {
+        get
+        {
+            return objectiveType;
+        }
+    }
+
+    [SerializeField]
     private EnemyInfomation enemy;
     public EnemyInfomation Enemy
     {
@@ -612,11 +648,40 @@ public class KillObjective : Objective
         }
     }
 
+    [SerializeField]
+    private EnemyRace race;
+    public EnemyRace Race
+    {
+        get
+        {
+            return race;
+        }
+    }
+
     public void UpdateKillAmount()
     {
         UpdateAmountUp();
     }
 }
+
+public enum KillObjectiveType
+{
+    /// <summary>
+    /// 特定敌人
+    /// </summary>
+    Specific,
+
+    /// <summary>
+    /// 特定种族
+    /// </summary>
+    Race,
+
+    /// <summary>
+    /// 任意
+    /// </summary>
+    Any
+}
+
 /// <summary>
 /// 谈话类目标
 /// </summary>

@@ -47,7 +47,7 @@ public class MerchandiseAgent : MonoBehaviour, IPointerClickHandler
     public void UpdateInfo()
     {
         if (merchandiseInfo == null || !merchandiseInfo.Item) return;
-        nameText.text = merchandiseInfo.Item.Name;
+        nameText.text = merchandiseInfo.Item.name;
         if (merchandiseType == MerchandiseType.SellToPlayer) priceText.text = (merchandiseInfo.Item.BuyPrice * merchandiseInfo.PriceMultiple).ToString("F0") + "文";
         else priceText.text = (merchandiseInfo.Item.SellPrice * merchandiseInfo.PriceMultiple).ToString("F0") + "文";
         if (merchandiseInfo.SOorENAble)

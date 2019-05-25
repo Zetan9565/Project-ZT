@@ -29,4 +29,4 @@ MonoBehaviour:
   maxDurability: 100
   processMethod: 0
   materials: []
-  expandSize: 1
+  expandSize: 5

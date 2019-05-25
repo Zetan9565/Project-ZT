@@ -5,6 +5,16 @@ using System.Collections.Generic;
 public class EnemyInfomation : CharacterInfomation
 {
     [SerializeField]
+    private EnemyRace race;
+    public EnemyRace Race
+    {
+        get
+        {
+            return race;
+        }
+    }
+
+    [SerializeField]
     private List<DropItemInfo> dropItems = new List<DropItemInfo>();
     public List<DropItemInfo> DropItems
     {
@@ -13,4 +23,5 @@ public class EnemyInfomation : CharacterInfomation
             return dropItems;
         }
     }
+
 }

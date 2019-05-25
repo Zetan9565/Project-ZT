@@ -275,7 +275,7 @@ public class QuestInspector : Editor
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), ownedItem, new GUIContent("需拥有的道具"));
                     if (quest.AcceptConditions[index].OwnedItem)
                     {
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "道具名称", quest.AcceptConditions[index].OwnedItem.Name);
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "道具名称", quest.AcceptConditions[index].OwnedItem.name);
                     }
                     break;
                 case QuestCondition.LevelLargeOrEqualsThen:
@@ -365,7 +365,7 @@ public class QuestInspector : Editor
         {
             serializedObject.Update();
             if (quest.RewardItems[index] != null && quest.RewardItems[index].Item != null)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), quest.RewardItems[index].Item.Name);
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), quest.RewardItems[index].Item.name);
             else
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             EditorGUI.BeginChangeCheck();
@@ -482,7 +482,7 @@ public class QuestInspector : Editor
                 if (quest.CollectObjectives[index].Item)
                 {
                     EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                        "道具名称", quest.CollectObjectives[index].Item.Name);
+                        "道具名称", quest.CollectObjectives[index].Item.name);
                     lineCount++;
                 }
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
@@ -562,7 +562,9 @@ public class QuestInspector : Editor
             SerializedProperty amount = objective.FindPropertyRelative("amount");
             SerializedProperty inOrder = objective.FindPropertyRelative("inOrder");
             SerializedProperty orderIndex = objective.FindPropertyRelative("orderIndex");
+            SerializedProperty objectiveType = objective.FindPropertyRelative("objectiveType");
             SerializedProperty enemy = objective.FindPropertyRelative("enemy");
+            SerializedProperty race = objective.FindPropertyRelative("race");
 
             if (quest.KillObjectives[index] != null)
             {
@@ -604,13 +606,32 @@ public class QuestInspector : Editor
                     lineCount++;
                 }
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                    enemy, new GUIContent("目标敌人"));
+                    objectiveType, new GUIContent("目标类型"));
                 lineCount++;
-                if (quest.KillObjectives[index].Enemy)
+                switch (objectiveType.enumValueIndex)
                 {
-                    EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                        "敌人名称", quest.KillObjectives[index].Enemy.Name);
-                    lineCount++;
+                    case (int)KillObjectiveType.Specific:
+                        EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                            enemy, new GUIContent("目标敌人"));
+                        lineCount++;
+                        if (quest.KillObjectives[index].Enemy)
+                        {
+                            EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                                "敌人名称", quest.KillObjectives[index].Enemy.Name);
+                            lineCount++;
+                        }
+                        break;
+                    case (int)KillObjectiveType.Race:
+                        EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                            race, new GUIContent("目标种族"));
+                        lineCount++;
+                        if (quest.KillObjectives[index].Race)
+                        {
+                            EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                                "种族名称", quest.KillObjectives[index].Race.name);
+                            lineCount++;
+                        }
+                        break;
                 }
             }
             if (EditorGUI.EndChangeCheck())
@@ -625,14 +646,25 @@ public class QuestInspector : Editor
             {
                 if (quest.CmpltObjctvInOrder) lineCount += 1;//显示
                 lineCount += 2;//目标数量、按顺序
-                if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
-                lineCount += 1;//目标敌人
                 if (quest.KillObjectives[index].InOrder)
                 {
                     lineCount += 1;//顺序码
                 }
-                if (quest.KillObjectives[index].Enemy)
-                    lineCount += 1;//敌人名称
+                if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
+                lineCount += 1;//目标类型
+                switch (objective.FindPropertyRelative("objectiveType").enumValueIndex)
+                {
+                    case (int)KillObjectiveType.Specific:
+                        lineCount += 1;//目标敌人
+                        if (objective.FindPropertyRelative("enemy").objectReferenceValue)
+                            lineCount += 1;//敌人名称
+                        break;
+                    case (int)KillObjectiveType.Race:
+                        lineCount += 1;//目标种族
+                        if (objective.FindPropertyRelative("race").objectReferenceValue)
+                            lineCount += 1;//种族名称
+                        break;
+                }
             }
             return lineCount * lineHeightSpace;
         };

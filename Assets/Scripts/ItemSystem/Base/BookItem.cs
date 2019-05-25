@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "book", menuName = "ZetanStudio/道具/书籍")]
 public class BookItem : ItemBase
 {
     [SerializeField]
 #if UNITY_EDITOR
-    [EnumMemberNames("技能书", "建造图纸")]
+    [EnumMemberNames("技能书", "建造图纸", "制作指南")]
 #endif
     private BookType bookType;
     public BookType BookType
@@ -19,14 +17,25 @@ public class BookItem : ItemBase
     }
 
     [SerializeField]
-    private BuildingInfo buildingInfo;
-    public BuildingInfo BuildingInfo
+    private BuildingInfomation buildingToLearn;
+    public BuildingInfomation BuildingToLearn
     {
         get
         {
-            return buildingInfo;
+            return buildingToLearn;
         }
     }
+
+    [SerializeField]
+    private ItemBase itemToLearn;
+    public ItemBase ItemToLearn
+    {
+        get
+        {
+            return itemToLearn;
+        }
+    }
+
 
     public BookItem()
     {
@@ -37,5 +46,6 @@ public class BookItem : ItemBase
 public enum BookType
 {
     Skill,
-    Building
+    Building,
+    Making
 }

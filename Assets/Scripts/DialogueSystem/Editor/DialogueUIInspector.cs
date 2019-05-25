@@ -60,7 +60,7 @@ public class DialogueUIInspector : Editor
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginVertical("Box");
-        EditorGUILayout.LabelField("对话框相关");
+        EditorGUILayout.LabelField("对话框相关", new GUIStyle() { fontStyle = FontStyle.Bold });
         EditorGUILayout.PropertyField(dialogueWindow, new GUIContent("对话框"));
         EditorGUILayout.PropertyField(nameText, new GUIContent("说话者名字"));
         EditorGUILayout.PropertyField(wordsText, new GUIContent("语句文字"));
@@ -73,7 +73,7 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");
-        EditorGUILayout.LabelField("选项相关");
+        EditorGUILayout.LabelField("选项相关", new GUIStyle() { fontStyle = FontStyle.Bold });
         EditorGUILayout.PropertyField(optionPrefab, new GUIContent("选项预制体"));
         EditorGUILayout.PropertyField(optionsParent, new GUIContent("选项放置根"));
         EditorGUILayout.PropertyField(pageUpButton, new GUIContent("上翻页按钮"));
@@ -82,7 +82,7 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");
-        EditorGUILayout.LabelField("任务相关");
+        EditorGUILayout.LabelField("任务相关", new GUIStyle() { fontStyle = FontStyle.Bold });
         EditorGUILayout.PropertyField(questButton, new GUIContent("任务按钮"));
         EditorGUILayout.PropertyField(descriptionWindow, new GUIContent("任务描述窗口"));
         EditorGUILayout.PropertyField(descriptionText, new GUIContent("任务描述文字"));

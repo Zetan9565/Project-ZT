@@ -27,10 +27,10 @@ MonoBehaviour:
   useable: 0
   inexhaustible: 0
   maxDurability: 100
-  processMethod: 1
+  makingMethod: 1
   materials:
   - item: {fileID: 11400000, guid: eb68c8a7b1bbeb8408eed1d2af6b8ad6, type: 2}
     amount: 1
-    processType: 0
+    makingType: 0
     materialType: 0
   materialType: 2

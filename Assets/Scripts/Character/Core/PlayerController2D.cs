@@ -10,31 +10,75 @@ public class PlayerController2D : MonoBehaviour
 
     [SerializeField]
 #if UNITY_EDITOR
+    [DisplayName("寻路代理")]
+#endif
+    private AStarUnit unit;
+    public AStarUnit Unit
+    {
+        get
+        {
+            return unit;
+        }
+    }
+
+    [SerializeField]
+#if UNITY_EDITOR
     [DisplayName("更新方式")]
 #endif
     private UpdateType updateType;
 
+    private void Awake()
+    {
+        if (Unit) Unit.moveSpeed = characterController.moveSpeed;
+    }
+
+    //只用于调试
+    private bool isTrace;
+
     void Update()
     {
-        if (updateType == UpdateType.Update)
+        if (updateType == UpdateType.Update) Control();
+        //以下只用于Debug
+        if (Input.GetKey(KeyCode.LeftControl) && Unit)
         {
-            float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
-            Vector2 dir = new Vector2(horizontal, vertical);
-            dir.Normalize();
-            characterController.Move(dir);
+            if (Input.GetMouseButtonDown(1) && Camera.main)
+            {
+                Unit.IsFollowingTarget = false;
+                Unit.ShowPath(true);
+                Unit.SetDestination(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+            }
         }
+        if (Input.GetKeyDown(KeyCode.T)) isTrace = Unit ? !isTrace : false;
     }
 
     private void FixedUpdate()
     {
-        if(updateType == UpdateType.FixedUpdate)
+        if (updateType == UpdateType.FixedUpdate) Control();
+    }
+
+    private void Control()
+    {
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        Vector2 input = new Vector2(horizontal, vertical);
+        input.Normalize();
+        characterController.Move(input);
+        if (Unit)
         {
-            float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
-            Vector2 dir = new Vector2(horizontal, vertical);
-            dir.Normalize();
-            characterController.Move(dir);
+            if (input.magnitude > 0 || Unit.IsStop)
+            {
+                Unit.IsFollowingPath = false;
+                Unit.IsFollowingTarget = false;
+                isTrace = false;
+            }
+            if (characterController)
+            {
+                if (input.magnitude == 0 && isTrace)
+                    characterController.Move(Unit.DesiredVelocity.normalized);
+                else if (Unit.IsFollowingPath || Unit.IsFollowingTarget)
+                    characterController.SetAnima(Unit.DesiredVelocity.normalized);
+                Unit.moveSpeed = characterController.moveSpeed;
+            }
         }
     }
 

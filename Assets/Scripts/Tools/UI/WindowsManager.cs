@@ -15,7 +15,6 @@ public class WindowsManager : MonoBehaviour
         }
     }
 
-    [SerializeField]
     private int topOrder = 0;
     public int TopOrder
     {
@@ -23,7 +22,7 @@ public class WindowsManager : MonoBehaviour
         {
             return topOrder;
         }
-        set
+        private set
         {
             if (value < 1) topOrder = 1;
             else topOrder = value;
@@ -70,6 +69,9 @@ public class WindowsManager : MonoBehaviour
             if (!exceptions.Contains(window))
                 window.PauseDisplay(pause);
         }
+        if (pause)
+            UIManager.Instance.HideAll();
+        else UIManager.Instance.ShowAll();
     }
 
     public void Push(IWindow window)
@@ -98,5 +100,6 @@ public class WindowsManager : MonoBehaviour
     {
         Windows.Clear();
         topOrder = 0;
+        Physics2D.BoxCast(Vector2.one, Vector2.one, 90, Vector2.zero);
     }
 }

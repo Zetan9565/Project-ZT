@@ -19,6 +19,17 @@ public class QuestManager : MonoBehaviour, IWindow
     [SerializeField]
     private QuestUI UI;
 
+    public bool IsPausing { get; private set; }
+    public bool IsUIOpen { get; private set; }
+
+    public Canvas SortCanvas
+    {
+        get
+        {
+            return UI.windowCanvas;
+        }
+    }
+
     private List<QuestAgent> questAgents = new List<QuestAgent>();
     private List<QuestAgent> completeQuestAgents = new List<QuestAgent>();
     private List<QuestGroupAgent> questGroupAgents = new List<QuestGroupAgent>();
@@ -81,7 +92,6 @@ public class QuestManager : MonoBehaviour, IWindow
                 qa = ObjectPool.Instance.Get(UI.questPrefab, qga.questListParent).GetComponent<QuestAgent>();
                 qa.parent = qga;
                 qga.questAgents.Add(qa);
-                qga.UpdateStatus();
             }
             else
             {
@@ -93,7 +103,6 @@ public class QuestManager : MonoBehaviour, IWindow
                 qa = ObjectPool.Instance.Get(UI.questPrefab, qga.questListParent).GetComponent<QuestAgent>();
                 qa.parent = qga;
                 qga.questAgents.Add(qa);
-                qga.UpdateStatus();
             }
         }
         else qa = ObjectPool.Instance.Get(UI.questPrefab, UI.questListParent).GetComponent<QuestAgent>();
@@ -126,8 +135,24 @@ public class QuestManager : MonoBehaviour, IWindow
                 KillObjective ko = o as KillObjective;
                 try
                 {
-                    foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
-                        enemy.OnDeathEvent += ko.UpdateKillAmount;
+                    switch (ko.ObjectiveType)
+                    {
+                        case KillObjectiveType.Specific:
+                            foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
+                                enemy.OnDeathEvent += ko.UpdateKillAmount;
+                            break;
+                        case KillObjectiveType.Race:
+                            foreach (List<Enemy> enemies in
+                                GameManager.Enermies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
+                                foreach (Enemy enemy in enemies)
+                                    enemy.OnDeathEvent += ko.UpdateKillAmount;
+                            break;
+                        case KillObjectiveType.Any:
+                            foreach (List<Enemy> enemies in GameManager.Enermies.Select(x => x.Value))
+                                foreach (Enemy enemy in enemies)
+                                    enemy.OnDeathEvent += ko.UpdateKillAmount;
+                            break;
+                    }
                 }
                 catch
                 {
@@ -182,6 +207,7 @@ public class QuestManager : MonoBehaviour, IWindow
             UI.questBoard.alpha = 1;
             UI.questBoard.blocksRaycasts = true;
         }
+        UpdateUI();
         return true;
     }
     /// <summary>
@@ -207,9 +233,23 @@ public class QuestManager : MonoBehaviour, IWindow
                 {
                     KillObjective ko = o as KillObjective;
                     ko.CurrentAmount = 0;
-                    foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
+                    switch (ko.ObjectiveType)
                     {
-                        enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                        case KillObjectiveType.Specific:
+                            foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
+                                enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                            break;
+                        case KillObjectiveType.Race:
+                            foreach (List<Enemy> enemies in
+                                GameManager.Enermies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
+                                foreach (Enemy enemy in enemies)
+                                    enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                            break;
+                        case KillObjectiveType.Any:
+                            foreach (List<Enemy> enemies in GameManager.Enermies.Select(x => x.Value))
+                                foreach (Enemy enemy in enemies)
+                                    enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                            break;
                     }
                 }
                 if (o is TalkObjective)
@@ -249,7 +289,7 @@ public class QuestManager : MonoBehaviour, IWindow
             if (AbandonQuest(SelectedQuest))
             {
                 RemoveQuestAgentByQuest(SelectedQuest);
-                CloseDescriptionWindow();
+                HideDescription();
             }
         });
     }
@@ -262,29 +302,30 @@ public class QuestManager : MonoBehaviour, IWindow
     public bool CompleteQuest(Quest quest, bool loadMode = false)
     {
         if (!quest) return false;
-        if (!loadMode)
-        {
-            foreach (ItemInfo rwi in quest.RewardItems)
-                if (!BackpackManager.Instance.TryGetItem_Boolean(rwi))
-                    return false;
-            List<Quest> questsReqThisQuestItem = new List<Quest>();
-            foreach (Objective o in quest.Objectives)
-            {
-                if (o is CollectObjective)
-                {
-                    CollectObjective co = o as CollectObjective;
-                    questsReqThisQuestItem = BackpackManager.Instance.QuestsRequiredItem(co.Item,
-                        BackpackManager.Instance.GetItemAmount(co.Item) - o.Amount).ToList();
-                }
-                if (questsReqThisQuestItem.Contains(quest) && questsReqThisQuestItem.Count > 1)
-                {
-                    MessageManager.Instance.NewMessage("其他任务对该任务需提交物品有需求");
-                    return false;
-                }
-            }
-        }
         if (HasQuest(quest) && quest.IsComplete)
         {
+            if (!loadMode)
+            {
+                foreach (ItemInfo rwi in quest.RewardItems)
+                    if (!BackpackManager.Instance.TryGetItem_Boolean(rwi))
+                        return false;
+                List<Quest> questsReqThisQuestItem = new List<Quest>();
+                foreach (Objective o in quest.Objectives)
+                {
+                    if (o is CollectObjective)
+                    {
+                        CollectObjective co = o as CollectObjective;
+                        questsReqThisQuestItem = QuestsRequiredItem(co.Item,
+                            BackpackManager.Instance.GetItemAmount(co.Item) - o.Amount).ToList();
+                    }
+                    if (questsReqThisQuestItem.Contains(quest) && questsReqThisQuestItem.Count > 1)
+                    //需要道具的任务群包含该任务且数量多于一个，说明有其他任务对该任务需提交的道具存在依赖
+                    {
+                        MessageManager.Instance.NewMessage("提交失败！其他任务对该任务需提交物品有需求");
+                        return false;
+                    }
+                }
+            }
             quest.IsOngoing = false;
             QuestsOngoing.Remove(quest);
             RemoveQuestAgentByQuest(quest);
@@ -328,9 +369,24 @@ public class QuestManager : MonoBehaviour, IWindow
                 }
                 if (o is KillObjective)
                 {
-                    foreach (Enemy enermy in GameManager.Enermies[(o as KillObjective).Enemy.ID])
+                    KillObjective ko = o as KillObjective;
+                    switch (ko.ObjectiveType)
                     {
-                        enermy.OnDeathEvent -= (o as KillObjective).UpdateKillAmount;
+                        case KillObjectiveType.Specific:
+                            foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
+                                enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                            break;
+                        case KillObjectiveType.Race:
+                            foreach (List<Enemy> enemies in
+                                GameManager.Enermies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
+                                foreach (Enemy enemy in enemies)
+                                    enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                            break;
+                        case KillObjectiveType.Any:
+                            foreach (List<Enemy> enemies in GameManager.Enermies.Select(x => x.Value))
+                                foreach (Enemy enemy in enemies)
+                                    enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                            break;
                     }
                 }
                 if (o is TalkObjective)
@@ -353,7 +409,7 @@ public class QuestManager : MonoBehaviour, IWindow
                 }
                 MessageManager.Instance.NewMessage("提交了任务 [" + quest.Title + "]");
             }
-            CloseDescriptionWindow();
+            HideDescription();
             if (QuestsOngoing.Count < 1)
             {
                 UI.questBoard.alpha = 0;
@@ -363,49 +419,84 @@ public class QuestManager : MonoBehaviour, IWindow
         }
         return false;
     }
+
+    public void TraceSelectedQuest()
+    {
+        if (!SelectedQuest) return;
+        if (SelectedQuest.IsComplete && SelectedQuest.CurrentQuestGiver)
+        {
+            PlayerManager.Instance.PlayerController.Unit.IsFollowingTarget = false;
+            PlayerManager.Instance.PlayerController.Unit.ShowPath(true);
+            PlayerManager.Instance.PlayerController.Unit.SetDestination(SelectedQuest.CurrentQuestGiver.transform.position, false);
+            return;
+        }
+        if (SelectedQuest.Objectives.Count > 0)
+            using (var objectiveEnum = SelectedQuest.Objectives.GetEnumerator())
+            {
+                Vector3 destination = default;
+                Objective currentObj = null;
+                List<Objective> concurrentObj = new List<Objective>();
+                while (objectiveEnum.MoveNext())
+                {
+                    currentObj = objectiveEnum.Current;
+                    if (!currentObj.IsComplete)
+                    {
+                        if (currentObj.Concurrent && currentObj.AllPrevObjCmplt)
+                            concurrentObj.Add(currentObj);
+                        else break;
+                    }
+                }
+                if (concurrentObj.Count > 0)
+                {
+                    int index = Random.Range(0, concurrentObj.Count);
+                    currentObj = concurrentObj[index];
+                }
+                if (currentObj is TalkObjective)
+                {
+                    TalkObjective to = currentObj as TalkObjective;
+                    if (GameManager.Talkers.ContainsKey(to.Talker.ID))
+                        destination = GameManager.Talkers[to.Talker.ID].transform.position;
+                }
+                else if (currentObj is KillObjective)
+                {
+                    KillObjective ko = currentObj as KillObjective;
+                    if (GameManager.Enermies.ContainsKey(ko.Enemy.ID))
+                    {
+                        Enemy enemy = GameManager.Enermies[ko.Enemy.ID].FirstOrDefault();
+                        if (enemy) destination = enemy.transform.position;
+                    }
+                }
+                else if (currentObj is MoveObjective)
+                {
+                    MoveObjective mo = currentObj as MoveObjective;
+                    if (GameManager.QuestPoints[mo.PointID])
+                        destination = GameManager.QuestPoints[mo.PointID].transform.position;
+                }
+                if (destination != default)
+                {
+                    PlayerManager.Instance.PlayerController.Unit.IsFollowingTarget = false;
+                    PlayerManager.Instance.PlayerController.Unit.ShowPath(true);
+                }
+                PlayerManager.Instance.PlayerController.Unit.SetDestination(destination, false);
+            }
+    }
     #endregion
 
     #region UI相关
-    public void InitDescription(QuestAgent questAgent)
-    {
-        if (!questAgent.MQuest) return;
-        if (SelectedQuest && SelectedQuest != questAgent.MQuest)
-        {
-            QuestAgent qa = questAgents.Find(x => x.MQuest == SelectedQuest);
-            if (qa) qa.Deselect();
-            else
-            {
-                qa = completeQuestAgents.Find(x => x.MQuest == SelectedQuest);
-                if (qa) qa.Deselect();
-            }
-        }
-        questAgent.Select();
-        SelectedQuest = questAgent.MQuest;
-        UpdateUI();
-        UI.moneyText.text = SelectedQuest.RewardMoney > 0 ? SelectedQuest.RewardMoney.ToString() : "无";
-        UI.EXPText.text = SelectedQuest.RewardEXP > 0 ? SelectedQuest.RewardEXP.ToString() : "无";
-        foreach (ItemAgent rwc in UI.rewardCells)
-            rwc.Clear();
-        foreach (ItemInfo info in SelectedQuest.RewardItems)
-            foreach (ItemAgent rwc in UI.rewardCells)
-            {
-                if (rwc.MItemInfo == null)
-                {
-                    rwc.InitItem(info);
-                    break;
-                }
-            }
-        MyTools.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
-    }
-
     public void UpdateUI()
     {
-        foreach (QuestAgent qa in questAgents)
-            qa.UpdateStatus();
-        foreach (QuestBoardAgent qba in questBoardAgents)
-            qba.UpdateStatus();
-        foreach (QuestGroupAgent qga in questGroupAgents)
-            qga.UpdateStatus();
+        using (var qaEnum = questAgents.GetEnumerator())
+            while (qaEnum.MoveNext())
+                qaEnum.Current.UpdateStatus();
+
+        using (var qbaEnum = questBoardAgents.GetEnumerator())
+            while (qbaEnum.MoveNext())
+                qbaEnum.Current.UpdateStatus();
+
+        using (var qgaEnum = questGroupAgents.GetEnumerator())
+            while (qgaEnum.MoveNext())
+                qgaEnum.Current.UpdateStatus();
+
         if (SelectedQuest == null) return;
         string objectives = string.Empty;
         QuestAgent cqa = completeQuestAgents.Find(x => x.MQuest == SelectedQuest);
@@ -448,7 +539,42 @@ public class QuestManager : MonoBehaviour, IWindow
         }
     }
 
-    public void CloseDescriptionWindow()
+    public void ShowDescription(QuestAgent questAgent)
+    {
+        if (!questAgent.MQuest) return;
+        DialogueManager.Instance.HideQuestDescription();
+        if (SelectedQuest && SelectedQuest != questAgent.MQuest)
+        {
+            QuestAgent qa = questAgents.Find(x => x.MQuest == SelectedQuest);
+            if (qa) qa.Deselect();
+            else
+            {
+                qa = completeQuestAgents.Find(x => x.MQuest == SelectedQuest);
+                if (qa) qa.Deselect();
+            }
+        }
+        questAgent.Select();
+        SelectedQuest = questAgent.MQuest;
+        UpdateUI();
+        UI.moneyText.text = SelectedQuest.RewardMoney > 0 ? SelectedQuest.RewardMoney.ToString() : "无";
+        UI.EXPText.text = SelectedQuest.RewardEXP > 0 ? SelectedQuest.RewardEXP.ToString() : "无";
+        foreach (ItemAgent rwc in UI.rewardCells)
+            rwc.Clear();
+        foreach (ItemInfo info in SelectedQuest.RewardItems)
+            foreach (ItemAgent rwc in UI.rewardCells)
+            {
+                if (rwc.MItemInfo == null)
+                {
+                    rwc.InitItem(info);
+                    break;
+                }
+            }
+        MyTools.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
+        UI.descriptionWindow.alpha = 1;
+        UI.descriptionWindow.blocksRaycasts = true;
+        ItemWindowHandler.Instance.CloseItemWindow();
+    }
+    public void HideDescription()
     {
         QuestAgent qa = questAgents.Find(x => x.MQuest == SelectedQuest);
         if (qa) qa.Deselect();
@@ -461,13 +587,7 @@ public class QuestManager : MonoBehaviour, IWindow
         UI.descriptionWindow.alpha = 0;
         UI.descriptionWindow.blocksRaycasts = false;
     }
-    public void OpenDescriptionWindow(QuestAgent questAgent)
-    {
-        DialogueManager.Instance.CloseQuestDescriptionWindow();
-        InitDescription(questAgent);
-        UI.descriptionWindow.alpha = 1;
-        UI.descriptionWindow.blocksRaycasts = true;
-    }
+
     public void OpenWindow()
     {
         if (!UI || !UI.gameObject) return;
@@ -476,12 +596,11 @@ public class QuestManager : MonoBehaviour, IWindow
         if (DialogueManager.Instance.IsTalking) return;
         UI.questsWindow.alpha = 1;
         UI.questsWindow.blocksRaycasts = true;
-        DialogueManager.Instance.CloseQuestDescriptionWindow();
+        DialogueManager.Instance.HideQuestDescription();
         WindowsManager.Instance.Push(this);
         IsUIOpen = true;
         UIManager.Instance.EnableJoyStick(false);
     }
-
     public void CloseWindow()
     {
         if (!UI || !UI.gameObject) return;
@@ -489,7 +608,7 @@ public class QuestManager : MonoBehaviour, IWindow
         if (IsPausing) return;
         UI.questsWindow.alpha = 0;
         UI.questsWindow.blocksRaycasts = false;
-        CloseDescriptionWindow();
+        HideDescription();
         WindowsManager.Instance.Remove(this);
         IsUIOpen = false;
         IsPausing = false;
@@ -502,7 +621,6 @@ public class QuestManager : MonoBehaviour, IWindow
             OpenWindow();
         else CloseWindow();
     }
-
     public void PauseDisplay(bool pause)
     {
         if (!UI | !UI.gameObject) return;
@@ -511,28 +629,14 @@ public class QuestManager : MonoBehaviour, IWindow
         {
             UI.questsWindow.alpha = 1;
             UI.questsWindow.blocksRaycasts = true;
-            UI.descriptionWindow.alpha = 1;
-            UI.descriptionWindow.blocksRaycasts = true;
         }
         else if (!IsPausing && pause)
         {
             UI.questsWindow.alpha = 0;
             UI.questsWindow.blocksRaycasts = false;
-            UI.descriptionWindow.alpha = 0;
-            UI.descriptionWindow.blocksRaycasts = false;
+            HideDescription();
         }
         IsPausing = pause;
-    }
-
-    public bool IsPausing { get; private set; }
-    public bool IsUIOpen { get; private set; }
-
-    public Canvas SortCanvas
-    {
-        get
-        {
-            return UI.windowCanvas;
-        }
     }
     #endregion
 
@@ -574,6 +678,21 @@ public class QuestManager : MonoBehaviour, IWindow
             questAgents.Remove(qa);
             qa.OnRecycle();
         }
+    }
+
+    /// <summary>
+    /// 判定是否有某个任务需要某数量的某个道具
+    /// </summary>
+    /// <param name="item">要判定的道具ID</param>
+    /// <param name="leftAmount">要判定的数量</param>
+    /// <returns>是否需要该道具</returns>
+    public bool HasQuestRequiredItem(ItemBase item, int leftAmount)
+    {
+        return QuestsRequiredItem(item, leftAmount).Count() > 0;
+    }
+    public IEnumerable<Quest> QuestsRequiredItem(ItemBase item, int leftAmount)
+    {
+        return QuestsOngoing.FindAll(x => x.RequiredItem(item, leftAmount)).AsEnumerable();
     }
 
     public void SetUI(QuestUI UI)

@@ -34,7 +34,7 @@ public class ItemInspector : Editor
     SerializedProperty useable;
     SerializedProperty inexhaustible;
     SerializedProperty maxDurability;
-    SerializedProperty processMethod;
+    SerializedProperty makingMethod;
     SerializedProperty materials;
 
     SerializedProperty boxItems;
@@ -63,7 +63,7 @@ public class ItemInspector : Editor
         inexhaustible = serializedObject.FindProperty("inexhaustible");
         maxDurability = serializedObject.FindProperty("maxDurability");
         materials = serializedObject.FindProperty("materials");
-        processMethod = serializedObject.FindProperty("processMethod");
+        makingMethod = serializedObject.FindProperty("makingMethod");
         HandlingMaterialItemList();
 
         box = target as BoxItem;
@@ -82,8 +82,8 @@ public class ItemInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        if (item.Materials.Exists(x => (x.ProcessType == ProcessType.SingleItem && item.Materials.FindAll(y => y.ProcessType == ProcessType.SingleItem && y.Item == x.Item).Count > 1) ||
-                                       (x.ProcessType == ProcessType.SameType && item.Materials.FindAll(y => y.ProcessType == ProcessType.SameType && y.MaterialType == x.MaterialType).Count > 1)))
+        if (item.Materials.Exists(x => (x.MakingType == MakingType.SingleItem && item.Materials.FindAll(y => y.MakingType == MakingType.SingleItem && y.Item == x.Item).Count > 1) ||
+                                       (x.MakingType == MakingType.SameType && item.Materials.FindAll(y => y.MakingType == MakingType.SameType && y.MaterialType == x.MaterialType).Count > 1)))
         {
             EditorGUILayout.HelpBox("制作材料存在重复。", MessageType.Warning);
         }
@@ -146,10 +146,10 @@ public class ItemInspector : Editor
             EditorGUILayout.Space();
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(processMethod, new GUIContent("制作方法"));
+            EditorGUILayout.PropertyField(makingMethod, new GUIContent("制作方法"));
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
-            if (processMethod.enumValueIndex != 0)
+            if (makingMethod.enumValueIndex != 0)
             {
                 EditorGUILayout.PropertyField(materials, new GUIContent("制作材料\t\t" + (materials.arraySize > 0 ? "数量：" + materials.arraySize : "无")));
                 if (materials.isExpanded)
@@ -184,7 +184,7 @@ public class ItemInspector : Editor
         {
             serializedObject.Update();
             if (box.ItemsInBox[index] != null && box.ItemsInBox[index].Item != null)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), box.ItemsInBox[index].Item.Name);
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), box.ItemsInBox[index].Item.name);
             else
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             EditorGUI.BeginChangeCheck();
@@ -244,9 +244,9 @@ public class ItemInspector : Editor
         materialList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
-            if (this.item.Materials[index] != null && this.item.Materials[index].Item != null && this.item.Materials[index].ProcessType == ProcessType.SingleItem)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), this.item.Materials[index].Item.Name);
-            else if (this.item.Materials[index] != null && this.item.Materials[index].ProcessType == ProcessType.SameType)
+            if (this.item.Materials[index] != null && this.item.Materials[index].Item != null && this.item.Materials[index].MakingType == MakingType.SingleItem)
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), this.item.Materials[index].Item.name);
+            else if (this.item.Materials[index] != null && this.item.Materials[index].MakingType == MakingType.SameType)
             {
                 switch (this.item.Materials[index].MaterialType)
                 {
@@ -264,12 +264,12 @@ public class ItemInspector : Editor
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             EditorGUI.BeginChangeCheck();
             SerializedProperty itemInfo = materials.GetArrayElementAtIndex(index);
-            SerializedProperty processType = itemInfo.FindPropertyRelative("processType");
+            SerializedProperty makingType = itemInfo.FindPropertyRelative("makingType");
             SerializedProperty item = itemInfo.FindPropertyRelative("item");
             SerializedProperty materialType = itemInfo.FindPropertyRelative("materialType");
             SerializedProperty amount = itemInfo.FindPropertyRelative("amount");
-            EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight), processType, new GUIContent(string.Empty));
-            if (processType.enumValueIndex == (int)ProcessType.SameType)
+            EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight), makingType, new GUIContent(string.Empty));
+            if (makingType.enumValueIndex == (int)MakingType.SameType)
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), materialType, new GUIContent("所需种类"));
             else
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), item, new GUIContent("所需材料"));
@@ -331,11 +331,15 @@ public class ItemInspector : Editor
             case ItemType.Gemstone: typeName = "宝石"; break;
             case ItemType.Book: typeName = "书籍/图纸"; break;
             case ItemType.Bag: typeName = "扩张用袋子"; break;
+            case ItemType.Medicine: typeName = "药物"; break;
             default: break;
         }
         EditorGUILayout.LabelField("道具类型", typeName);
         switch (item.ItemType)
         {
+            case ItemType.Medicine:
+
+                break;
             case ItemType.Weapon:
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("_ATK"), new GUIContent("攻击力"));
                 if (serializedObject.FindProperty("_ATK").intValue < 0) serializedObject.FindProperty("_ATK").intValue = 0;
@@ -370,10 +374,23 @@ public class ItemInspector : Editor
                 switch ((item as BookItem).BookType)
                 {
                     case BookType.Building:
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("buildingInfo"), new GUIContent("可学设施"), true);
-                        if (serializedObject.FindProperty("buildingInfo").objectReferenceValue)
+                        SerializedProperty building = serializedObject.FindProperty("buildingToLearn");
+                        EditorGUILayout.PropertyField(building, new GUIContent("可学设施"), true);
+                        if (building.objectReferenceValue)
                         {
-                            EditorGUILayout.LabelField("设施名称", (item as BookItem).BuildingInfo.Name);
+                            EditorGUILayout.LabelField("设施名称", (building.objectReferenceValue as BuildingInfomation).Name);
+                        }
+                        break;
+                    case BookType.Making:
+                        SerializedProperty item = serializedObject.FindProperty("itemToLearn");
+                        EditorGUILayout.PropertyField(item, new GUIContent("可学道具"), true);
+                        if (item.objectReferenceValue)
+                        {
+                            if ((item.objectReferenceValue as ItemBase).MakingMethod == MakingMethod.None)
+                            {
+                                EditorGUILayout.HelpBox("不可制作的道具！", MessageType.Error);
+                            }
+                            else EditorGUILayout.LabelField("道具名称", (item.objectReferenceValue as ItemBase).name);
                         }
                         break;
                     default: break;
@@ -417,22 +434,29 @@ public class ItemInspector : Editor
         {
             itemType.enumValueIndex = (int)ItemType.Quest;
         }
+        else if(item.IsMedicine && item.ItemType != ItemType.Medicine)
+        {
+            itemType.enumValueIndex = (int)ItemType.Medicine;
+        }
     }
 
     bool CheckEditComplete()
     {
         bool editComplete = true;
 
-        editComplete &= !(string.IsNullOrEmpty(item.ID) || string.IsNullOrEmpty(item.Name) ||
+        editComplete &= !(string.IsNullOrEmpty(item.ID) || string.IsNullOrEmpty(item.name) ||
             string.IsNullOrEmpty(item.Description) || item.Icon == null ||
-            ExistsID() || string.IsNullOrEmpty(Regex.Replace(item.ID, @"[^0-9]+", "")) || !Regex.IsMatch(item.ID, @"(\d+)$")
+            ExistsID() || string.IsNullOrEmpty(Regex.Replace(item.ID, @"[^0-9]+", "")) || !Regex.IsMatch(item.ID, @"(\d+)$") ||
+            (item.IsBook && (item as BookItem).BookType == BookType.Building && !(item as BookItem).BuildingToLearn) ||
+            (item.IsBook && (item as BookItem).BookType == BookType.Making && (!(item as BookItem).ItemToLearn || 
+            (item as BookItem).ItemToLearn.MakingMethod == MakingMethod.None))
             );
 
         if (box)
             editComplete &= !box.ItemsInBox.Exists(x => x.Item == null);
 
-        if (item.ProcessMethod != ProcessMethod.None)
-            editComplete &= !item.Materials.Exists(x => x.ProcessType == ProcessType.SingleItem && x.Item == null);
+        if (item.MakingMethod != MakingMethod.None)
+            editComplete &= !item.Materials.Exists(x => x.MakingType == MakingType.SingleItem && x.Item == null);
 
         return editComplete;
     }
@@ -468,6 +492,9 @@ public class ItemInspector : Editor
                     break;
                 case ItemType.Bag:
                     newID = "IBAG" + i.ToString().PadLeft(3, '0');
+                    break;
+                case ItemType.Medicine:
+                    newID = "MADC" + i.ToString().PadLeft(3, '0');
                     break;
                 default:
                     newID = "ITEM" + i.ToString().PadLeft(3, '0');
