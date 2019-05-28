@@ -25,19 +25,18 @@ public class PlayerController2D : MonoBehaviour
 #if UNITY_EDITOR
     [DisplayName("更新方式")]
 #endif
-    private UpdateType updateType;
+    private UpdateMode updateMode;
 
     private void Awake()
     {
         if (Unit) Unit.moveSpeed = characterController.moveSpeed;
     }
 
-    //只用于调试
     private bool isTrace;
 
     void Update()
     {
-        if (updateType == UpdateType.Update) Control();
+        if (updateMode == UpdateMode.Update) Control();
         //以下只用于Debug
         if (Input.GetKey(KeyCode.LeftControl) && Unit)
         {
@@ -48,12 +47,21 @@ public class PlayerController2D : MonoBehaviour
                 Unit.SetDestination(Camera.main.ScreenToWorldPoint(Input.mousePosition));
             }
         }
-        if (Input.GetKeyDown(KeyCode.T)) isTrace = Unit ? !isTrace : false;
+    }
+
+    public void Trace()
+    {
+        isTrace = Unit ? (Unit.HasPath ? !isTrace : false) : false;
+    }
+
+    public void ResetPath()
+    {
+        if (Unit) Unit.ResetPath();
     }
 
     private void FixedUpdate()
     {
-        if (updateType == UpdateType.FixedUpdate) Control();
+        if (updateMode == UpdateMode.FixedUpdate) Control();
     }
 
     private void Control()
@@ -87,7 +95,7 @@ public class PlayerController2D : MonoBehaviour
         this.characterController = characterController;
     }
 }
-public enum UpdateType
+public enum UpdateMode
 {
     Update,
     FixedUpdate

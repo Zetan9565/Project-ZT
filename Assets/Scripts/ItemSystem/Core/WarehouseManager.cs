@@ -95,7 +95,7 @@ public class WarehouseManager : MonoBehaviour, IWindow
                 MessageManager.Instance.NewMessage(string.Format("存入了1个 [{0}]", info.ItemName));
             else
             {
-                AmountHandler.Instance.SetPosition(MyTools.ScreenCenter);
+                AmountHandler.Instance.SetPosition(MyTools.ScreenCenter, Vector2.zero);
                 AmountHandler.Instance.Init(delegate
                 {
                     if (OnStore(info, (int)AmountHandler.Instance.Amount))
@@ -172,7 +172,7 @@ public class WarehouseManager : MonoBehaviour, IWindow
                 MessageManager.Instance.NewMessage(string.Format("取出了1个 [{0}]", info.ItemName));
             else
             {
-                AmountHandler.Instance.SetPosition(MyTools.ScreenCenter);
+                AmountHandler.Instance.SetPosition(MyTools.ScreenCenter, Vector2.zero);
                 AmountHandler.Instance.Init(delegate
                 {
                     if (OnTakeOut(info, (int)AmountHandler.Instance.Amount))

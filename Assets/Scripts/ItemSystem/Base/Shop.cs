@@ -86,6 +86,11 @@ public class Shop
                 }
             }
     }
+
+    public static implicit operator bool(Shop self)
+    {
+        return self != null;
+    }
 }
 
 [System.Serializable]
@@ -218,5 +223,10 @@ public class MerchandiseInfo
         {
             return SOorENAble && leftAmount <= 0;
         }
+    }
+
+    public static implicit operator bool(MerchandiseInfo self)
+    {
+        return self != null;
     }
 }

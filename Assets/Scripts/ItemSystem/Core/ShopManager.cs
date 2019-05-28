@@ -98,7 +98,7 @@ public class ShopManager : MonoBehaviour, IWindow
         }
         else
         {
-            AmountHandler.Instance.SetPosition(MyTools.ScreenCenter);
+            AmountHandler.Instance.SetPosition(MyTools.ScreenCenter, Vector2.zero);
             AmountHandler.Instance.Init(delegate
             {
                 ConfirmHandler.Instance.NewConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)AmountHandler.Instance.Amount, info.Item.name), delegate
@@ -154,7 +154,7 @@ public class ShopManager : MonoBehaviour, IWindow
         }
         else
         {
-            AmountHandler.Instance.SetPosition(MyTools.ScreenCenter);
+            AmountHandler.Instance.SetPosition(MyTools.ScreenCenter, Vector2.zero);
             AmountHandler.Instance.Init(delegate
             {
                 ConfirmHandler.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountHandler.Instance.Amount, info.Item.name), delegate
@@ -196,7 +196,7 @@ public class ShopManager : MonoBehaviour, IWindow
         }
         else
         {
-            AmountHandler.Instance.SetPosition(MyTools.ScreenCenter);
+            AmountHandler.Instance.SetPosition(MyTools.ScreenCenter, Vector2.zero);
             AmountHandler.Instance.Init(delegate
             {
                 ConfirmHandler.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountHandler.Instance.Amount, info.Item.name), delegate
@@ -315,7 +315,7 @@ public class ShopManager : MonoBehaviour, IWindow
 
     public void SetPage(int page)
     {
-        if (!IsUIOpen) return;
+        if (!UI || !UI.gameObject || !MShop) return;
         switch (page)
         {
             case 0:

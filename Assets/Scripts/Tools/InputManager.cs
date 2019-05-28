@@ -38,6 +38,10 @@ public class InputManager : MonoBehaviour
         {
             BackpackManager.Instance.OpenCloseWindow();
         }
+        if(Input.GetKeyDown(customInfo.TraceButton))
+        {
+            PlayerManager.Instance.PlayerController.Trace();
+        }
 #endif
         if (Input.GetKeyDown(customInfo.InteractiveButton) || Input.GetButtonDownMobile("Interactive"))
         {

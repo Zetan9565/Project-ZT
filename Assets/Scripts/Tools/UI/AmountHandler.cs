@@ -35,7 +35,6 @@ public class AmountHandler : MonoBehaviour
         UI.confirm.onClick.RemoveAllListeners();
         if (confirmAction != null) UI.confirm.onClick.AddListener(confirmAction);
         UI.confirm.onClick.AddListener(CloseAmountWindow);
-        UI.amount.ActivateInputField();
         OpenAmountWindow();
     }
 
@@ -109,9 +108,14 @@ public class AmountHandler : MonoBehaviour
         CloseAmountWindow();
     }
 
-    public void SetPosition(Vector2 target, Vector3 offset = default)
+    public void SetPosition(Vector2 target, Vector2 offset)
     {
-        UI.amountWindow.GetComponent<RectTransform>().position = new Vector3(target.x, target.y) + (offset == default ? new Vector3(defaultOffset.x, defaultOffset.y) : offset);
+        UI.amountWindow.GetComponent<RectTransform>().position = target + offset;
+    }
+
+    public void SetPosition(Vector2 target)
+    {
+        UI.amountWindow.GetComponent<RectTransform>().position = target + defaultOffset;
     }
 
     public void FixAmount()

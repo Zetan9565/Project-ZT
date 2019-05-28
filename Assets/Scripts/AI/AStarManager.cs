@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,6 +19,7 @@ public class AStarManager : MonoBehaviour
         }
     }
 
+    #region Gizmos相关
     [SerializeField]
     private bool gizmosEdge = true;
     [SerializeField]
@@ -34,17 +34,18 @@ public class AStarManager : MonoBehaviour
     private bool gizmosCast = true;
     [SerializeField]
     private Color castColor = new Color(Color.white.r, Color.white.g, Color.white.b, 0.1f);
-
-    [SerializeField]
-    private LayerMask unwalkableLayer = ~0;
+    #endregion
 
     [SerializeField, Tooltip("长和宽都推荐使用2的幂数")]
     private Vector2 worldSize = new Vector2(48, 48);
-    public Vector2 WorldSize
+
+    [SerializeField]
+    private bool threeD;
+    public bool ThreeD
     {
         get
         {
-            return worldSize;
+            return threeD;
         }
     }
 
@@ -55,16 +56,6 @@ public class AStarManager : MonoBehaviour
         get
         {
             return baseCellSize;
-        }
-    }
-
-    [SerializeField]
-    private bool threeD;
-    public bool ThreeD
-    {
-        get
-        {
-            return threeD;
         }
     }
 
@@ -80,6 +71,16 @@ public class AStarManager : MonoBehaviour
     [SerializeField, Tooltip("以单元格倍数为单位，至少是 1 倍")]
     private int[] unitSizes;
 
+    [SerializeField]
+    private LayerMask unwalkableLayer = ~0;
+    public LayerMask UnwalkableLayer
+    {
+        get
+        {
+            return unwalkableLayer;
+        }
+    }
+
     [SerializeField, Tooltip("以单元格倍数为单位"), Range(0.25f, 0.5f)]
     private float castRadiusMultiple = 0.5f;
 
@@ -90,12 +91,7 @@ public class AStarManager : MonoBehaviour
     private CastCheckType castCheckType = CastCheckType.Box;
 
     #region 实时变量
-    private PathRequest currentRequest;
-    private bool isHandling;
-
     private readonly Dictionary<int, AStar> AStars = new Dictionary<int, AStar>();
-
-    private readonly Queue<PathRequest> requests = new Queue<PathRequest>();
 
     private readonly Queue<PathResult> results = new Queue<PathResult>();
     #endregion
@@ -116,15 +112,15 @@ public class AStarManager : MonoBehaviour
         Vector3 axisOrigin;
         if (!ThreeD)
             axisOrigin = new Vector3(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y), 0)
-                - Vector3.right * (WorldSize.x / 2) - Vector3.up * (WorldSize.y / 2);
+                - Vector3.right * (worldSize.x / 2) - Vector3.up * (worldSize.y / 2);
         else
             axisOrigin = new Vector3Int(Mathf.RoundToInt(transform.position.x), 0, Mathf.RoundToInt(transform.position.z))
-                - Vector3.right * (WorldSize.x / 2) - Vector3.forward * (WorldSize.y / 2);
+                - Vector3.right * (worldSize.x / 2) - Vector3.forward * (worldSize.y / 2);
 
-        AStar grid = new AStar(WorldSize, BaseCellSize * unitSize, castCheckType, castRadiusMultiple, unwalkableLayer, groundLayer,
+        AStar AStar = new AStar(worldSize, BaseCellSize * unitSize, castCheckType, castRadiusMultiple, UnwalkableLayer, groundLayer,
                                ThreeD, worldHeight, maxUnitHeight);
-        grid.CreateGrid(axisOrigin);
-        AStars.Add(unitSize, grid);
+        AStar.CreateGrid(axisOrigin);
+        AStars.Add(unitSize, AStar);
 
         //stopwatch.Stop();
         //Debug.Log("为规格为 " + unitSize + " 的单位建立寻路基础，耗时 " + stopwatch.ElapsedMilliseconds + "ms");
@@ -260,7 +256,7 @@ public class AStarManager : MonoBehaviour
                     for (int y = 0; y < AStars[1].GridSize.y; y++)
                     {
                         Gizmos.color = gridColor;
-                        if (!Grid[x, y].Walkable)
+                        if (!Grid[x, y].walkable)
                         {
                             Gizmos.color = new Color(Color.red.r, Color.red.g, Color.red.b, gridColor.a);
                             Gizmos.DrawCube(Grid[x, y], ThreeD ? Vector3.one : new Vector3(1, 1, 0) * BaseCellSize * 0.95f);
@@ -277,15 +273,15 @@ public class AStarManager : MonoBehaviour
             }
             else
             {
-                Vector2Int gridSize = Vector2Int.RoundToInt(WorldSize / BaseCellSize);
+                Vector2Int gridSize = Vector2Int.RoundToInt(worldSize / BaseCellSize);
                 Vector3 nodeWorldPos;
                 Vector3 axisOrigin;
                 if (!ThreeD)
                     axisOrigin = new Vector3(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y), 0)
-                        - Vector3.right * (WorldSize.x / 2) - Vector3.up * (WorldSize.y / 2);
+                        - Vector3.right * (worldSize.x / 2) - Vector3.up * (worldSize.y / 2);
                 else
                     axisOrigin = new Vector3Int(Mathf.RoundToInt(transform.position.x), 0, Mathf.RoundToInt(transform.position.z))
-                        - Vector3.right * (WorldSize.x / 2) - Vector3.forward * (WorldSize.y / 2);
+                        - Vector3.right * (worldSize.x / 2) - Vector3.forward * (worldSize.y / 2);
 
                 for (int x = 0; x < gridSize.x; x++)
                     for (int y = 0; y < gridSize.y; y++)
@@ -319,8 +315,8 @@ public class AStarManager : MonoBehaviour
         if (gizmosEdge)
         {
             Gizmos.color = edgeColor;
-            if (ThreeD) Gizmos.DrawWireCube(transform.position + Vector3.up * worldHeight / 2, new Vector3(WorldSize.x, worldHeight, WorldSize.y));
-            else Gizmos.DrawWireCube(transform.position, new Vector3(WorldSize.x, WorldSize.y, 0));
+            if (ThreeD) Gizmos.DrawWireCube(transform.position + Vector3.up * worldHeight / 2, new Vector3(worldSize.x, worldHeight, worldSize.y));
+            else Gizmos.DrawWireCube(transform.position, new Vector3(worldSize.x, worldSize.y, 0));
         }
     }
     #endregion
@@ -329,38 +325,35 @@ public class AStar
 {
     public AStar(Vector2 worldSize, float cellSize, CastCheckType castCheckType, float castRadiusMultiple, LayerMask unwalkableLayer, LayerMask groundLayer, bool threeD, float worldHeight, float maxUnitHeight)
     {
-        WorldSize = worldSize;
-        CellSize = cellSize;
-        CastCheckType = castCheckType;
-        CastRadiusMultiple = castRadiusMultiple;
-        UnwalkableLayer = unwalkableLayer;
-        GroundLayer = groundLayer;
-        ThreeD = threeD;
-        WorldHeight = worldHeight;
-        MaxUnitHeight = maxUnitHeight;
+        this.worldSize = worldSize;
+        this.cellSize = cellSize;
+        this.castCheckType = castCheckType;
+        this.castRadiusMultiple = castRadiusMultiple;
+        this.unwalkableLayer = unwalkableLayer;
+        this.groundLayer = groundLayer;
+        this.threeD = threeD;
+        this.worldHeight = worldHeight;
+        this.maxUnitHeight = maxUnitHeight;
     }
 
-    public bool ThreeD { get; private set; }
-    public Vector2 WorldSize { get; private set; }
-    public float WorldHeight { get; private set; }
-    public LayerMask GroundLayer { get; private set; }
+    private readonly bool threeD;
+    private readonly Vector2 worldSize;
+    private readonly float worldHeight;
+    private readonly LayerMask groundLayer;
+    private readonly float maxUnitHeight;
 
+    private readonly float cellSize;
     public Vector2Int GridSize { get; private set; }
-
-    public float CellSize { get; private set; }
-
-    public float MaxUnitHeight { get; private set; }
-
     public AStarNode[,] Grid { get; private set; }
 
-    public LayerMask UnwalkableLayer { get; private set; }
-    public CastCheckType CastCheckType { get; private set; }
-    public float CastRadiusMultiple { get; private set; }
+    private readonly LayerMask unwalkableLayer;
+    private readonly CastCheckType castCheckType;
+    private readonly float castRadiusMultiple;
 
     #region 网格相关
     public void CreateGrid(Vector3 axisOrigin)
     {
-        GridSize = Vector2Int.RoundToInt(WorldSize / CellSize);
+        GridSize = Vector2Int.RoundToInt(worldSize / cellSize);
         Grid = new AStarNode[Mathf.RoundToInt(GridSize.x), Mathf.RoundToInt(GridSize.y)];
         int row = Mathf.Min(GridSize.x, GridSize.y);//量小的做行，貌似稍微提升遍历性能
         int col = Mathf.Max(GridSize.x, GridSize.y);
@@ -373,20 +366,20 @@ public class AStar
     private void CreateNode(Vector3 axisOrigin, int gridX, int gridY)
     {
         Vector3 nodeWorldPos;
-        if (!ThreeD)
+        if (!threeD)
         {
-            nodeWorldPos = axisOrigin + Vector3.right * (gridX + 0.5f) * CellSize + Vector3.up * (gridY + 0.5f) * CellSize;
+            nodeWorldPos = axisOrigin + Vector3.right * (gridX + 0.5f) * cellSize + Vector3.up * (gridY + 0.5f) * cellSize;
         }
         else
         {
-            nodeWorldPos = axisOrigin + Vector3.right * (gridX + 0.5f) * CellSize + Vector3.forward * (gridY + 0.5f) * CellSize;
+            nodeWorldPos = axisOrigin + Vector3.right * (gridX + 0.5f) * cellSize + Vector3.forward * (gridY + 0.5f) * cellSize;
             float height;
-            if (Physics.Raycast(nodeWorldPos + Vector3.up * (WorldHeight + 0.01f), Vector3.down, out RaycastHit hit, WorldHeight + 0.01f, GroundLayer))
+            if (Physics.Raycast(nodeWorldPos + Vector3.up * (worldHeight + 0.01f), Vector3.down, out RaycastHit hit, worldHeight + 0.01f, groundLayer))
                 height = hit.point.y;
-            else height = WorldHeight + 0.01f;
+            else height = worldHeight + 0.01f;
             nodeWorldPos += Vector3.up * height;
         }
-        Grid[gridX, gridY] = new AStarNode(nodeWorldPos, gridX, gridY, ThreeD ? nodeWorldPos.y : 0);
+        Grid[gridX, gridY] = new AStarNode(nodeWorldPos, gridX, gridY, threeD ? nodeWorldPos.y : 0);
     }
 
     public void RefreshGrid()
@@ -410,67 +403,74 @@ public class AStar
             CheckNodeWalkable(fromNode);
             return;
         }
-        AStarNode min = fromNode.GridPosition.x <= toNode.GridPosition.x && fromNode.GridPosition.y <= toNode.GridPosition.y ? fromNode : toNode;
-        AStarNode max = fromNode.GridPosition.x > toNode.GridPosition.x && fromNode.GridPosition.y > toNode.GridPosition.y ? fromNode : toNode;
+        AStarNode min = fromNode.gridPosition.x <= toNode.gridPosition.x && fromNode.gridPosition.y <= toNode.gridPosition.y ? fromNode : toNode;
+        AStarNode max = fromNode.gridPosition.x > toNode.gridPosition.x && fromNode.gridPosition.y > toNode.gridPosition.y ? fromNode : toNode;
         fromNode = min;
         toNode = max;
         //Debug.Log(string.Format("From {0} to {1}", fromNode.GridPosition, toNode.GridPosition));
-        if (toNode.GridPosition.x - fromNode.GridPosition.x <= toNode.GridPosition.y - fromNode.GridPosition.y)
-            for (int i = fromNode.GridPosition.x; i <= toNode.GridPosition.x; i++)
-                for (int j = fromNode.GridPosition.y; j <= toNode.GridPosition.y; j++)
+        if (toNode.gridPosition.x - fromNode.gridPosition.x <= toNode.gridPosition.y - fromNode.gridPosition.y)
+            for (int i = fromNode.gridPosition.x; i <= toNode.gridPosition.x; i++)
+                for (int j = fromNode.gridPosition.y; j <= toNode.gridPosition.y; j++)
                     CheckNodeWalkable(Grid[i, j]);
-        else for (int i = fromNode.GridPosition.y; i <= toNode.GridPosition.y; i++)
-                for (int j = fromNode.GridPosition.x; j <= toNode.GridPosition.x; j++)
+        else for (int i = fromNode.gridPosition.y; i <= toNode.gridPosition.y; i++)
+                for (int j = fromNode.gridPosition.x; j <= toNode.gridPosition.x; j++)
                     CheckNodeWalkable(Grid[i, j]);
         CalculateConnections();
     }
 
     public AStarNode WorldPointToNode(Vector3 position)
     {
-        if (Grid == null || (ThreeD && position.y > WorldHeight)) return null;
-        int gX = Mathf.RoundToInt((GridSize.x - 1) * Mathf.Clamp01((position.x + WorldSize.x / 2) / WorldSize.x));
+        if (Grid == null || (threeD && position.y > worldHeight)) return null;
+        int gX = Mathf.RoundToInt((GridSize.x - 1) * Mathf.Clamp01((position.x + worldSize.x / 2) / worldSize.x));
+        //gX怎么算：首先利用坐标系原点的 x 坐标来修正该点的 x 轴坐标，然后除以世界宽度，获得该点的 x 坐标在网格坐标系上所处的区域，用不大于 1 分数来表示，
+        //然后获得相同区域的网格的 x 坐标即 gX，举个例子：
+        //假设 x 坐标为 -2，而世界起点的 x 坐标为 -24 即实际坐标原点 x 坐标 0 减去世界宽度的一半，则修正 x 坐标为 x + 24 = 22，这就是它在A*坐标系上虚拟的修正了的位置 x'， 
+        //以上得知世界宽度为48，那么 22 / 48 = 11/24，说明 x' 在世界宽度轴 11/24 的位置上，所以，该位置相应的格子的 x 坐标也是网格宽度轴的11/24，
+        //假设网格宽度为也为48，则 gX = 48 * 11/24 = 22，看似正确，其实，假设上面算得的 x' 是48，那么 48 * 48/48 = 48，而网格坐标最多到47，因为数组从0开始，
+        //所以这时就会发生越界错误，反而用 gX = (48 - 1) * 48/48 = 47 * 1 = 47 来代替就对了，回过头来，x' 是 22，则 47 * 11/24 = 21.54 ≈ 22，位于 x' 轴数起第 23 个格子上，
+        //假设算出的 x' 是 30，则 gX = 47 * 15/24 = 29.38 ≈ 29，完全符合逻辑，为什么不用 48 算完再减去 1 ？如果 x' 是 0， 48 * 0/48 - 1 = -1，又越界了
         int gY;
-        if (!ThreeD) gY = Mathf.RoundToInt((GridSize.y - 1) * Mathf.Clamp01((position.y + WorldSize.y / 2) / WorldSize.y));
-        else gY = Mathf.RoundToInt((GridSize.y - 1) * Mathf.Clamp01((position.z + WorldSize.y / 2) / WorldSize.y));
+        if (!threeD) gY = Mathf.RoundToInt((GridSize.y - 1) * Mathf.Clamp01((position.y + worldSize.y / 2) / worldSize.y));
+        else gY = Mathf.RoundToInt((GridSize.y - 1) * Mathf.Clamp01((position.z + worldSize.y / 2) / worldSize.y));
         return Grid[gX, gY];
     }
 
     private bool CheckNodeWalkable(AStarNode node)
     {
         if (!node) return false;
-        if (!ThreeD)
+        if (!threeD)
         {
             RaycastHit2D[] hit2Ds = new RaycastHit2D[0];
-            switch (CastCheckType)
+            switch (castCheckType)
             {
                 case CastCheckType.Box:
-                    hit2Ds = Physics2D.BoxCastAll(node.WorldPosition,
-                        Vector2.one * CellSize * CastRadiusMultiple * 2, 0, Vector2.zero, Mathf.Infinity, UnwalkableLayer);
+                    hit2Ds = Physics2D.BoxCastAll(node.worldPosition,
+                        Vector2.one * cellSize * castRadiusMultiple * 2, 0, Vector2.zero, Mathf.Infinity, unwalkableLayer);
                     break;
                 case CastCheckType.Sphere:
-                    hit2Ds = Physics2D.CircleCastAll(node.WorldPosition,
-                        CellSize * CastRadiusMultiple, Vector2.zero, Mathf.Infinity, UnwalkableLayer);
+                    hit2Ds = Physics2D.CircleCastAll(node.worldPosition,
+                        cellSize * castRadiusMultiple, Vector2.zero, Mathf.Infinity, unwalkableLayer);
                     break;
             }
-            node.Walkable = hit2Ds.Length < 1 || hit2Ds.Where(h => !h.collider.isTrigger && h.collider.tag != "Player").Count() < 1;
-            return node.Walkable;
+            node.walkable = hit2Ds.Length < 1 || hit2Ds.Where(h => !h.collider.isTrigger && h.collider.tag != "Player").Count() < 1;
+            return node.walkable;
         }
         else
         {
             RaycastHit[] hits = new RaycastHit[0];
-            switch (CastCheckType)
+            switch (castCheckType)
             {
                 case CastCheckType.Box:
-                    hits = Physics.BoxCastAll(node.WorldPosition, Vector3.one * CellSize * CastRadiusMultiple,
-                        Vector3.up, Quaternion.identity, (MaxUnitHeight - 1) * CellSize, UnwalkableLayer, QueryTriggerInteraction.Ignore);
+                    hits = Physics.BoxCastAll(node.worldPosition, Vector3.one * cellSize * castRadiusMultiple,
+                        Vector3.up, Quaternion.identity, (maxUnitHeight - 1) * cellSize, unwalkableLayer, QueryTriggerInteraction.Ignore);
                     break;
                 case CastCheckType.Sphere:
-                    hits = Physics.SphereCastAll(node.WorldPosition, CellSize * CastRadiusMultiple,
-                        Vector3.up, (MaxUnitHeight - 1) * CellSize, UnwalkableLayer, QueryTriggerInteraction.Ignore);
+                    hits = Physics.SphereCastAll(node.worldPosition, cellSize * castRadiusMultiple,
+                        Vector3.up, (maxUnitHeight - 1) * cellSize, unwalkableLayer, QueryTriggerInteraction.Ignore);
                     break;
             }
-            node.Walkable = node.Height < WorldHeight && (hits.Length < 1 || hits.Where(h => h.collider.tag != "Player").Count() < 1);
-            return node.Walkable;
+            node.walkable = node.Height < worldHeight && (hits.Length < 1 || hits.Where(h => h.collider.tag != "Player").Count() < 1);
+            return node.walkable;
         }
     }
 
@@ -482,8 +482,8 @@ public class AStar
     private AStarNode GetClosestSurroundingNode(AStarNode node, AStarNode closestTo, int ringCount = 1)
     {
         var neighbours = GetSurroundingNodes(node, ringCount);
-        if (neighbours.Count() < 1) return null;//突破递归
-        AStarNode closest = neighbours.FirstOrDefault(x => x.Walkable);
+        if (ringCount >= Mathf.Max(GridSize.x, GridSize.y)) return null;//突破递归
+        AStarNode closest = neighbours.FirstOrDefault(x => x.walkable);
         if (closest)
             using (var neighbourEnum = neighbours.GetEnumerator())
             {
@@ -492,8 +492,8 @@ public class AStar
                 while (neighbourEnum.MoveNext())
                 {
                     AStarNode neighbour = neighbourEnum.Current;
-                    if (Vector3.Distance(closestTo.WorldPosition, neighbour.WorldPosition) < Vector3.Distance(closestTo.WorldPosition, closest.WorldPosition))
-                        if (CheckNodeWalkable(neighbour)) closest = neighbour;
+                    if (Vector3.Distance(closestTo.worldPosition, neighbour.worldPosition) < Vector3.Distance(closestTo.worldPosition, closest.worldPosition))
+                        if (neighbour.walkable) closest = neighbour;
                 }
             }
         if (!closest) return GetClosestSurroundingNode(node, closestTo, ringCount + 1);
@@ -512,8 +512,8 @@ public class AStar
                 {
                     if (Mathf.Abs(x) < ringCount && Mathf.Abs(y) < ringCount) continue;//对于圈内的结点，总有其x和y都小于圈数，所以依此跳过
 
-                    neiborX = node.GridPosition.x + x;
-                    neiborY = node.GridPosition.y + y;
+                    neiborX = node.gridPosition.x + x;
+                    neiborY = node.gridPosition.y + y;
 
                     if (neiborX >= 0 && neiborX < GridSize.x && neiborY >= 0 && neiborY < GridSize.y)
                         neighbours.Add(Grid[neiborX, neiborY]);
@@ -534,8 +534,8 @@ public class AStar
                 {
                     if (x == 0 && y == 0) continue;
 
-                    neiborX = node.GridPosition.x + x;
-                    neiborY = node.GridPosition.y + y;
+                    neiborX = node.gridPosition.x + x;
+                    neiborY = node.gridPosition.y + y;
 
                     if (neiborX >= 0 && neiborX < GridSize.x && neiborY >= 0 && neiborY < GridSize.y)
                         if (Reachable(Grid[neiborX, neiborY]))
@@ -553,7 +553,7 @@ public class AStar
                     walkableCheckExceptions.Add(neighbour);
             }
 #if true
-            if (neighbour.GridPosition.x == node.GridPosition.x || neighbour.GridPosition.y == node.GridPosition.y) return neighbour.Walkable;
+            if (neighbour.gridPosition.x == node.gridPosition.x || neighbour.gridPosition.y == node.gridPosition.y) return neighbour.walkable;
             else return CanGoStraight(node, neighbour);
 #endif
 #if false
@@ -676,16 +676,16 @@ public class AStar
     {
         Vector3 dir = to - from;
         float dis = Vector3.Distance(from, to);
-        if (!ThreeD)
+        if (!threeD)
         {
             RaycastHit2D[] hit2Ds = new RaycastHit2D[0];
-            switch (CastCheckType)
+            switch (castCheckType)
             {
                 case CastCheckType.Box:
-                    hit2Ds = Physics2D.BoxCastAll(from, Vector2.one * CellSize * CastRadiusMultiple * 2, 0, dir, dis, UnwalkableLayer);
+                    hit2Ds = Physics2D.BoxCastAll(from, Vector2.one * cellSize * castRadiusMultiple * 2, 0, dir, dis, unwalkableLayer);
                     break;
                 case CastCheckType.Sphere:
-                    hit2Ds = Physics2D.CircleCastAll(from, CellSize * CastRadiusMultiple, dir, dis, UnwalkableLayer);
+                    hit2Ds = Physics2D.CircleCastAll(from, cellSize * castRadiusMultiple, dir, dis, unwalkableLayer);
                     break;
             }
             return hit2Ds.Where(h => h.collider && !h.collider.isTrigger && h.collider.tag != "Player").Count() < 1;
@@ -693,21 +693,96 @@ public class AStar
         else
         {
             RaycastHit[] hits = new RaycastHit[0];
-            switch (CastCheckType)
+            switch (castCheckType)
             {
                 case CastCheckType.Box:
-                    hits = Physics.BoxCastAll(from, Vector3.one * CellSize * CastRadiusMultiple + Vector3.up * (MaxUnitHeight - 1) * CellSize * CastRadiusMultiple,
-                                              dir, Quaternion.identity, dis, UnwalkableLayer, QueryTriggerInteraction.Ignore);
+                    hits = Physics.BoxCastAll(from, Vector3.one * cellSize * castRadiusMultiple + Vector3.up * (maxUnitHeight - 1) * cellSize * castRadiusMultiple,
+                                              dir, Quaternion.identity, dis, unwalkableLayer, QueryTriggerInteraction.Ignore);
                     break;
                 case CastCheckType.Sphere:
-                    if (MaxUnitHeight == 1)
-                        hits = Physics.SphereCastAll(from, CellSize * CastRadiusMultiple, dir, dis, UnwalkableLayer, QueryTriggerInteraction.Ignore);
-                    else hits = Physics.CapsuleCastAll(from, from + Vector3.up * (MaxUnitHeight - 1) * CellSize, CellSize * CastRadiusMultiple,
-                                                       dir, dis, UnwalkableLayer, QueryTriggerInteraction.Ignore);
+                    if (maxUnitHeight == 1)
+                        hits = Physics.SphereCastAll(from, cellSize * castRadiusMultiple, dir, dis, unwalkableLayer, QueryTriggerInteraction.Ignore);
+                    else hits = Physics.CapsuleCastAll(from, from + Vector3.up * (maxUnitHeight - 1) * cellSize, cellSize * castRadiusMultiple,
+                                                       dir, dis, unwalkableLayer, QueryTriggerInteraction.Ignore);
                     break;
             }
             return hits.Where(h => h.collider && h.collider.tag != "Player").Count() < 1;
         }
+    }
+
+    private AStarNode GetEffectiveGoalByDiagonal(AStarNode startNode, AStarNode goalNode)
+    {
+        AStarNode newGoalNode = null;
+        int startNodeNodeX = startNode.gridPosition.x, startNodeY = startNode.gridPosition.y;
+        int goalNodeX = goalNode.gridPosition.x, goalNodeY = goalNode.gridPosition.y;
+        int xDistn = Mathf.Abs(goalNode.gridPosition.x - startNode.gridPosition.x);
+        int yDistn = Mathf.Abs(goalNode.gridPosition.y - startNode.gridPosition.y);
+        float deltaX, deltaY;
+        if (xDistn >= yDistn)
+        {
+            deltaX = 1;
+            deltaY = yDistn / (xDistn * 1.0f);
+        }
+        else
+        {
+            deltaY = 1;
+            deltaX = xDistn / (yDistn * 1.0f);
+        }
+
+        bool CheckNodeReachable(float fX, float fY)
+        {
+            int gX = Mathf.RoundToInt(fX);
+            int gY = Mathf.RoundToInt(fY);
+            if (Grid[gX, gY].CanReachTo(startNode))
+            {
+                newGoalNode = Grid[gX, gY];
+                return true;
+            }
+            else return false;
+        }
+
+        if (startNodeNodeX >= goalNodeX && startNodeY >= goalNodeY)//起点位于终点右上角
+            for (float x = goalNodeX + deltaX, y = goalNodeY + deltaY; x <= startNodeNodeX && y <= startNodeY; x += deltaX, y += deltaY)
+            {
+                if (CheckNodeReachable(x, y)) break;
+            }
+        else if (startNodeNodeX >= goalNodeX && startNodeY <= goalNodeY)//起点位于终点右下角
+            for (float x = goalNodeX + deltaX, y = goalNodeY - deltaY; x <= startNodeNodeX && y >= startNodeY; x += deltaX, y -= deltaY)
+            {
+                if (CheckNodeReachable(x, y)) break;
+            }
+        else if (startNodeNodeX <= goalNodeX && startNodeY >= goalNodeY)//起点位于终点左上角
+            for (float x = goalNodeX - deltaX, y = goalNodeY + deltaY; x >= startNodeNodeX && y <= startNodeY; x -= deltaX, y += deltaY)
+            {
+                if (CheckNodeReachable(x, y)) break;
+            }
+        else if (startNodeNodeX <= goalNodeX && startNodeY <= goalNodeY)//起点位于终点左下角
+            for (float x = goalNodeX - deltaX, y = goalNodeY - deltaY; x >= startNodeNodeX && y >= startNodeY; x -= deltaX, y -= deltaY)
+            {
+                if (CheckNodeReachable(x, y)) break;
+            }
+        return newGoalNode;
+    }
+
+    private AStarNode GetEffectiveGoalByRing(AStarNode startNode, AStarNode goalNode, int ringCount = 1)
+    {
+        var neighbours = GetSurroundingNodes(goalNode, ringCount);
+        if (ringCount >= Mathf.Max(GridSize.x, GridSize.y)) return null;//突破递归
+        AStarNode newGoalNode = neighbours.FirstOrDefault(x => x.CanReachTo(startNode));
+        if (newGoalNode)
+            using (var neighbourEnum = neighbours.GetEnumerator())
+            {
+                while (neighbourEnum.MoveNext())
+                    if (neighbourEnum.Current == newGoalNode) break;
+                while (neighbourEnum.MoveNext())
+                {
+                    AStarNode neighbour = neighbourEnum.Current;
+                    if (Vector3.Distance(goalNode.worldPosition, neighbour.worldPosition) < Vector3.Distance(goalNode.worldPosition, newGoalNode.worldPosition))
+                        if (neighbour.CanReachTo(startNode)) newGoalNode = neighbour;
+                }
+            }
+        if (!newGoalNode) return GetEffectiveGoalByRing(startNode, goalNode, ringCount + 1);
+        else return newGoalNode;
     }
     #endregion
 
@@ -720,6 +795,7 @@ public class AStar
         AStarNode goalNode = WorldPointToNode(request.goal);
         if (startNode == null || goalNode == null)
         {
+            stopwatch.Stop();
             callback(new PathResult(null, false, request.callback));
             return;
         }
@@ -727,21 +803,23 @@ public class AStar
         IEnumerable<Vector3> pathResult = null;
         bool findSuccessfully = false;
 
-        if (!goalNode.Walkable)
+        if (!goalNode.walkable)
         {
             goalNode = GetClosestSurroundingNode(goalNode, startNode);
             if (goalNode == default)
             {
+                stopwatch.Stop();
                 callback(new PathResult(null, false, request.callback));
                 //Debug.Log("找不到合适的终点" + request.goal);
                 return;
             }
         }
-        if (!startNode.Walkable)
+        if (!startNode.walkable)
         {
             startNode = GetClosestSurroundingNode(startNode, goalNode);
             if (startNode == default)
             {
+                stopwatch.Stop();
                 callback(new PathResult(null, false, request.callback));
                 //Debug.Log("找不到合适的起点" + request.start);
                 return;
@@ -749,21 +827,25 @@ public class AStar
         }
         if (startNode == goalNode)
         {
+            stopwatch.Stop();
             callback(new PathResult(null, false, request.callback));
             //Debug.Log("起始相同");
             return;
         }
-        if (goalNode.Walkable && !startNode.CanReachTo(goalNode))
+        if (!startNode.CanReachTo(goalNode))
         {
-            pathResult = new Vector3[] { goalNode };
-            stopwatch.Stop();
-            //Debug.Log("检测到目的地不可到达");
-            callback(new PathResult(pathResult, true, request.callback));
-            return;
+            goalNode = GetEffectiveGoalByRing(startNode, goalNode);
+            if (!goalNode)
+            {
+                stopwatch.Stop();
+                //Debug.Log("检测到目的地不可到达");
+                callback(new PathResult(pathResult, false, request.callback));
+                return;
+            }
         }
 
-        //Debug.Log("起点网格" + startNode.GridPosition);
-        //Debug.Log("终点网格" + goalNode.GridPosition);
+        //Debug.Log("起点网格: " + startNode.GridPosition);
+        //Debug.Log("终点网格: " + goalNode.GridPosition);
 
         if (CanGoStraight(startNode, goalNode))
         {
@@ -801,13 +883,13 @@ public class AStar
                     while (nodeEnum.MoveNext())
                     {
                         AStarNode neighbour = nodeEnum.Current;
-                        if (!neighbour.Walkable || closedList.Contains(neighbour)) continue;
+                        if (!neighbour.walkable || closedList.Contains(neighbour)) continue;
                         int costStartToNeighbour = current.GCost + current.CalculateHCostTo(neighbour);
                         if (costStartToNeighbour < neighbour.GCost || !openList.Contains(neighbour))
                         {
                             neighbour.GCost = costStartToNeighbour;
                             neighbour.HCost = neighbour.CalculateHCostTo(goalNode);
-                            neighbour.Parent = current;
+                            neighbour.parent = current;
                             if (!openList.Contains(neighbour))
                                 openList.Add(neighbour);
                         }
@@ -829,8 +911,8 @@ public class AStar
                 {
                     path.Add(pathNode);
                     AStarNode temp = pathNode;
-                    pathNode = pathNode.Parent;
-                    temp.Parent = null;
+                    pathNode = pathNode.parent;
+                    temp.parent = null;
                     temp.HeapIndex = -1;
                 }
                 pathResult = GetWaypoints(path);
@@ -848,26 +930,29 @@ public class AStar
         AStarNode goalNode = WorldPointToNode(goal);
         if (startNode == null || goalNode == null) return false;
 
-        bool findSuccessfully = false;
-
-        if (!goalNode.Walkable)
+        if (!goalNode.walkable)
         {
             goalNode = GetClosestSurroundingNode(goalNode, startNode);
             if (!goalNode) return false;
         }
-        if (!startNode.Walkable)
+        if (!startNode.walkable)
         {
             startNode = GetClosestSurroundingNode(startNode, goalNode);
             if (!startNode) return false;
         }
         if (startNode == goalNode) return false;
-        if (goalNode.Walkable && !startNode.CanReachTo(goalNode)) return false;
+        if (!startNode.CanReachTo(goalNode))
+        {
+            goalNode = GetEffectiveGoalByRing(startNode, goalNode);
+            if (!goalNode) return false;
+        }
         if (CanGoStraight(startNode, goalNode))
         {
             pathResult = new Vector3[] { goalNode };
             return true;
         }
 
+        bool findSuccessfully = false;
         Heap<AStarNode> openList = new Heap<AStarNode>(GridSize.x * GridSize.y);
         HashSet<AStarNode> closedList = new HashSet<AStarNode>();
         HashSet<AStarNode> checkedNodes = new HashSet<AStarNode>();
@@ -889,13 +974,13 @@ public class AStar
                 while (nodeEnum.MoveNext())
                 {
                     AStarNode neighbour = nodeEnum.Current;
-                    if (!neighbour.Walkable || closedList.Contains(neighbour)) continue;
+                    if (!neighbour.walkable || closedList.Contains(neighbour)) continue;
                     int disToNeighbour = current.GCost + current.CalculateHCostTo(neighbour);
                     if (disToNeighbour < neighbour.GCost || !openList.Contains(neighbour))
                     {
                         neighbour.GCost = disToNeighbour;
                         neighbour.HCost = neighbour.CalculateHCostTo(goalNode);
-                        neighbour.Parent = current;
+                        neighbour.parent = current;
                         if (!openList.Contains(neighbour)) openList.Add(neighbour);
                     }
                 }
@@ -910,8 +995,8 @@ public class AStar
             {
                 path.Add(pathNode);
                 AStarNode temp = pathNode;
-                pathNode = pathNode.Parent;
-                temp.Parent = null;
+                pathNode = pathNode.parent;
+                temp.parent = null;
                 temp.HeapIndex = -1;
             }
             pathResult = GetWaypoints(path);
@@ -925,25 +1010,28 @@ public class AStar
         AStarNode goalNode = WorldPointToNode(goal);
         if (startNode == null || goalNode == null) return false;
 
-        bool findSuccessfully = false;
-
-        if (!goalNode.Walkable)
+        if (!goalNode.walkable)
         {
             goalNode = GetClosestSurroundingNode(goalNode, startNode);
             if (!goalNode) return false;
         }
-        if (!startNode.Walkable)
+        if (!startNode.walkable)
         {
             startNode = GetClosestSurroundingNode(startNode, goalNode);
             if (!startNode) return false;
         }
         if (startNode == goalNode) return false;
-        if (goalNode.Walkable && !startNode.CanReachTo(goalNode)) return false;
+        if (!startNode.CanReachTo(goalNode))
+        {
+            goalNode = GetEffectiveGoalByRing(startNode, goalNode);
+            if (!goalNode) return false;
+        }
         if (CanGoStraight(startNode, goalNode))
         {
             return true;
         }
 
+        bool findSuccessfully = false;
         Heap<AStarNode> openList = new Heap<AStarNode>(GridSize.x * GridSize.y);
         HashSet<AStarNode> closedList = new HashSet<AStarNode>();
         HashSet<AStarNode> checkedNodes = new HashSet<AStarNode>();
@@ -965,13 +1053,13 @@ public class AStar
                 while (nodeEnum.MoveNext())
                 {
                     AStarNode neighbour = nodeEnum.Current;
-                    if (!neighbour.Walkable || closedList.Contains(neighbour)) continue;
+                    if (!neighbour.walkable || closedList.Contains(neighbour)) continue;
                     int disToNeighbour = current.GCost + current.CalculateHCostTo(neighbour);
                     if (disToNeighbour < neighbour.GCost || !openList.Contains(neighbour))
                     {
                         neighbour.GCost = disToNeighbour;
                         neighbour.HCost = neighbour.CalculateHCostTo(goalNode);
-                        neighbour.Parent = current;
+                        neighbour.parent = current;
                         if (!openList.Contains(neighbour)) openList.Add(neighbour);
                     }
                 }
@@ -986,8 +1074,8 @@ public class AStar
             {
                 path.Add(pathNode);
                 AStarNode temp = pathNode;
-                pathNode = pathNode.Parent;
-                temp.Parent = null;
+                pathNode = pathNode.parent;
+                temp.parent = null;
                 temp.HeapIndex = -1;
             }
         }
@@ -1010,7 +1098,7 @@ public class AStar
                 Vector2 oldDir = Vector3.zero;
                 for (int i = 1; i < path.Count; i++)
                 {
-                    Vector2 newDir = path[i - 1].GridPosition - path[i].GridPosition;
+                    Vector2 newDir = path[i - 1].gridPosition - path[i].gridPosition;
                     if (newDir != oldDir)//方向不一样时才使用前面的点
                         waypoints.Add(path[i - 1]);
                     else if (i == path.Count - 1) waypoints.Add(path[i]);//即使方向一样，也强制把起点也加进去
@@ -1051,7 +1139,7 @@ public class AStar
 
         for (int x = 0; x < GridSize.x; x++)
             for (int y = 0; y < GridSize.y; y++)
-                if (Grid[x, y].Walkable) gridData[x, y] = 1;//大于0表示可行走
+                if (Grid[x, y].walkable) gridData[x, y] = 1;//大于0表示可行走
                 else gridData[x, y] = 0;//0表示有障碍
 
         int label = 1;
@@ -1104,16 +1192,16 @@ public class AStar
                     if (!Connections.ContainsKey(gridData[x, y])) Connections.Add(gridData[x, y], new HashSet<AStarNode>());
                     Connections[gridData[x, y]].Add(Grid[x, y]);
                     //将对应网格结点的连通域标记标为当前标记，操作可选，若不操作，则在寻路检测可达性时使用下面的ACanReachB()
-                    Grid[x, y].ConnectionLabel = gridData[x, y];
+                    Grid[x, y].connectionLabel = gridData[x, y];
 
                     //如果有需要更改的标记，且其与当前标记不同
                     if (labelNeedToChange > 0 && labelNeedToChange != gridData[x, y])
                     {
                         foreach (AStarNode node in Connections[labelNeedToChange])//把对应连通域合并到当前连通域
                         {
-                            gridData[node.GridPosition.x, node.GridPosition.y] = gridData[x, y];
+                            gridData[node.gridPosition.x, node.gridPosition.y] = gridData[x, y];
                             Connections[gridData[x, y]].Add(node);
-                            node.ConnectionLabel = gridData[x, y];//操作可选
+                            node.connectionLabel = gridData[x, y];//操作可选
                         }
                         Connections[labelNeedToChange].Clear();
                         Connections.Remove(labelNeedToChange);
@@ -1140,38 +1228,36 @@ public class AStar
     }
 }
 
-public class AStarNode: IHeapItem<AStarNode>
+public class AStarNode : IHeapItem<AStarNode>
 {
-    public Vector3 WorldPosition { get; private set; }
-
-    public Vector2Int GridPosition { get; private set; }
-
-    public bool Walkable { get; set; }
+    public readonly Vector3 worldPosition;
+    public readonly Vector2Int gridPosition;
+    public bool walkable;
 
     public int GCost { get; set; }
     public int HCost { get; set; }
     public int FCost { get { return GCost + HCost; } }
     public float Height { get; private set; }
 
-    public AStarNode Parent { get; set; }
+    public AStarNode parent;
+
+    public int connectionLabel;
 
     public int HeapIndex { get; set; }
 
-    public int ConnectionLabel { get; set; }
-
     public AStarNode(Vector3 position, int gridX, int gridY, float height)
     {
-        WorldPosition = position;
-        GridPosition = new Vector2Int(gridX, gridY);
+        worldPosition = position;
+        gridPosition = new Vector2Int(gridX, gridY);
         Height = height;
-        Walkable = true;
+        walkable = true;
     }
 
     public int CalculateHCostTo(AStarNode other)
     {
         //使用曼哈顿距离
-        int disX = Mathf.Abs(GridPosition.x - other.GridPosition.x);
-        int disY = Mathf.Abs(GridPosition.y - other.GridPosition.y);
+        int disX = Mathf.Abs(gridPosition.x - other.gridPosition.x);
+        int disY = Mathf.Abs(gridPosition.y - other.gridPosition.y);
 
         if (disX > disY)
             return 14 * disY + 10 * (disX - disY) + Mathf.RoundToInt(Mathf.Abs(Height - other.Height));
@@ -1180,7 +1266,7 @@ public class AStarNode: IHeapItem<AStarNode>
 
     public bool CanReachTo(AStarNode other)
     {
-        return ConnectionLabel == other.ConnectionLabel;
+        return connectionLabel > 0 && connectionLabel == other.connectionLabel;
     }
 
     public int CompareTo(AStarNode other)
@@ -1193,12 +1279,12 @@ public class AStarNode: IHeapItem<AStarNode>
 
     public static implicit operator Vector3(AStarNode self)
     {
-        return self.WorldPosition;
+        return self.worldPosition;
     }
 
     public static implicit operator Vector2(AStarNode self)
     {
-        return self.WorldPosition;
+        return self.worldPosition;
     }
 
     public static implicit operator bool(AStarNode self)
@@ -1207,26 +1293,12 @@ public class AStarNode: IHeapItem<AStarNode>
     }
 }
 
-public struct PathResult
-{
-    public IEnumerable<Vector3> waypoints;
-    public bool findSuccessfully;
-    public Action<IEnumerable<Vector3>, bool> callback;
-
-    public PathResult(IEnumerable<Vector3> waypoints, bool findSuccessfully, Action<IEnumerable<Vector3>, bool> callback)
-    {
-        this.waypoints = waypoints;
-        this.findSuccessfully = findSuccessfully;
-        this.callback = callback;
-    }
-}
-
 public struct PathRequest
 {
-    public Vector3 start;
-    public Vector3 goal;
-    public int unitSize;
-    public Action<IEnumerable<Vector3>, bool> callback;
+    public readonly Vector3 start;
+    public readonly Vector3 goal;
+    public readonly int unitSize;
+    public readonly Action<IEnumerable<Vector3>, bool> callback;
 
     public PathRequest(Vector3 start, Vector3 goal, int unitSize, Action<IEnumerable<Vector3>, bool> callback)
     {
@@ -1236,6 +1308,22 @@ public struct PathRequest
         this.callback = callback;
     }
 }
+
+public struct PathResult
+{
+    public readonly IEnumerable<Vector3> waypoints;
+    public readonly bool findSuccessfully;
+    public readonly Action<IEnumerable<Vector3>, bool> callback;
+
+    public PathResult(IEnumerable<Vector3> waypoints, bool findSuccessfully, Action<IEnumerable<Vector3>, bool> callback)
+    {
+        this.waypoints = waypoints;
+        this.findSuccessfully = findSuccessfully;
+        this.callback = callback;
+    }
+}
+
+public delegate void PathFoundListner(IEnumerable<Vector3> waypoints, bool findSuccessfully);
 
 public enum CastCheckType
 {

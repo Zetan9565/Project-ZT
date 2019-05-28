@@ -126,7 +126,7 @@ public class DialogueInspector : Editor
             {
                 if (index != dialogWords.arraySize - 1)
                 {
-                    serializedObject.Update();
+                    branches.serializedObject.Update();
                     EditorGUI.BeginChangeCheck();
                     if (branches.arraySize > 1)
                     {
@@ -143,7 +143,7 @@ public class DialogueInspector : Editor
                         }
                     }
                     if (EditorGUI.EndChangeCheck())
-                        serializedObject.ApplyModifiedProperties();
+                        branches.serializedObject.ApplyModifiedProperties();
                     ReorderableList branchesList;
                     if (!wordsBranchesLists.ContainsKey(dialogue.Words[index]))
                     {
@@ -248,23 +248,29 @@ public class DialogueInspector : Editor
 
                         branchesList.onAddCallback = (_list) =>
                         {
-                            serializedObject.Update();
+                            branches.serializedObject.Update();
                             EditorGUI.BeginChangeCheck();
-                            dialogue.Words[index].Branches.Add(null);
+                            if (_list.index > -1 && _list.index < dialogue.Words[index].Branches.Count)
+                                dialogue.Words[index].Branches.Insert(_list.index, null);
+                            else dialogue.Words[index].Branches.Add(null);
                             if (EditorGUI.EndChangeCheck())
-                                serializedObject.ApplyModifiedProperties();
+                                branches.serializedObject.ApplyModifiedProperties();
                         };
 
                         branchesList.onRemoveCallback = (_list) =>
                         {
-                            serializedObject.Update();
+                            branches.serializedObject.Update();
                             EditorGUI.BeginChangeCheck();
                             if (EditorUtility.DisplayDialog("删除", "确定删除这个分支吗？", "确定", "取消"))
                             {
-                                dialogue.Words[index].Branches.RemoveAt(_list.index);
+                                if (_list.index >= 0 && _list.index < dialogue.Words[index].Branches.Count)
+                                {
+                                    branches.DeleteArrayElementAtIndex(_list.index);
+                                }
+                                else dialogue.Words[index].Branches.Clear();
                             }
                             if (EditorGUI.EndChangeCheck())
-                                serializedObject.ApplyModifiedProperties();
+                                branches.serializedObject.ApplyModifiedProperties();
                         };
 
                         branchesList.drawHeaderCallback = (rect2) =>
@@ -310,7 +316,7 @@ public class DialogueInspector : Editor
                     if (wordsBranchesLists.ContainsKey(dialogue.Words[index]))
                         totalListHeight += wordsBranchesLists[dialogue.Words[index]].GetHeight();
                 }
-                else lineCount++;//最后一击
+                else lineCount++;//最后一句
             return lineCount * lineHeightSpace + totalListHeight - 8;
         };
 
@@ -318,7 +324,9 @@ public class DialogueInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            dialogue.Words.Add(new DialogueWords());
+            if (list.index >= 0 && list.index < dialogue.Words.Count)
+                dialogue.Words.Insert(list.index, new DialogueWords());
+            else dialogue.Words.Add(new DialogueWords());
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };
@@ -327,7 +335,7 @@ public class DialogueInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            if (EditorUtility.DisplayDialog("删除", "确定删除这句话吗？", "确定", "取消")) dialogue.Words.RemoveAt(list.index);
+            if (EditorUtility.DisplayDialog("删除", "确定删除这句话吗？", "确定", "取消")) dialogWords.DeleteArrayElementAtIndex(list.index);
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         };
 

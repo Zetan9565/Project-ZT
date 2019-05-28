@@ -43,9 +43,9 @@ public class AStarUnit : MonoBehaviour
 
     [SerializeField]
 #if UNITY_EDITOR
-    [EnumMemberNames("无条件位移(推荐)[物理模拟差]", "刚体位移[性能消耗高]", "控制器位移[未使用]")]
+    [EnumMemberNames("普通位移(推荐)[物理效果差]", "刚体位移[性能消耗高]", "控制器位移")]
 #endif
-    private MoveType moveType = MoveType.MovePosition;
+    private UnitMoveMode moveMode = UnitMoveMode.MovePosition;
 
     [SerializeField]
     private new Rigidbody rigidbody;
@@ -61,10 +61,16 @@ public class AStarUnit : MonoBehaviour
     public float turnSpeed = 10f;
 
     [SerializeField]
-    private float maxMoveSlope = 45.0f;
+    private float slopeLimit = 45.0f;
 
     [SerializeField]
     public float stopDistance = 1;
+
+    [SerializeField]
+    public bool autoRepath = true;
+
+    [SerializeField]
+    private LineRenderer pathRenderer;
 
     #region 实时变量成员
     private Vector3[] path;
@@ -110,7 +116,15 @@ public class AStarUnit : MonoBehaviour
 
     private Coroutine targetFollowCoroutine;
 
-    public bool IsStop { get; private set; }
+    public bool HasPath
+    {
+        get
+        {
+            return path != null && path.Length > 0;
+        }
+    }
+
+    public bool IsStop => DesiredVelocity.magnitude == 0;
 
     public Vector3 DesiredVelocity//类似于NavMeshAgent.desiredVelocity
     {
@@ -122,7 +136,6 @@ public class AStarUnit : MonoBehaviour
             }
             if (targetWaypointIndex >= 0 && targetWaypointIndex < path.Length)
             {
-                IsStop = false;
                 Vector3 targetWaypoint = path[targetWaypointIndex];
                 if (!IsFollowingPath && OffsetPosition.x >= targetWaypoint.x - fixedOffset && OffsetPosition.x <= targetWaypoint.x + fixedOffset
                     && (AStarManager.Instance.ThreeD ? true : OffsetPosition.y >= targetWaypoint.y - fixedOffset && OffsetPosition.y <= targetWaypoint.y + fixedOffset)
@@ -131,12 +144,13 @@ public class AStarUnit : MonoBehaviour
                 {
                     targetWaypointIndex++;
                     if (targetWaypointIndex >= path.Length) return Vector3.zero;
-                    if (!AStarManager.Instance.WorldPointWalkable(path[targetWaypointIndex], unitSize))
-                        RequestPath(Destination);
+                    if (autoRepath)
+                        if (!AStarManager.Instance.WorldPointWalkable(path[targetWaypointIndex], unitSize))
+                            RequestPath(Destination);
                 }
                 if (targetWaypointIndex < path.Length)
                 {
-                    if (AStarManager.Instance.ThreeD && MyTools.Slope(transform.position, path[targetWaypointIndex]) > maxMoveSlope)
+                    if (AStarManager.Instance.ThreeD && MyTools.Slope(transform.position, path[targetWaypointIndex]) > slopeLimit)
                         return Vector3.zero;
                     if (Vector3.Distance(OffsetPosition, Destination) <= stopDistance)
                     {
@@ -162,17 +176,14 @@ public class AStarUnit : MonoBehaviour
     }
     #endregion
 
-    [SerializeField]
-    private LineRenderer pathRenderer;
-
     #region MonoBehaviour
-
     [SerializeField]
     private bool drawGizmos;
     private Vector3 gizmosTargetPos = default;
 
     private void Awake()
     {
+        if (controller && moveMode == UnitMoveMode.MoveController) controller.slopeLimit = slopeLimit;
         ShowPath(false);
     }
 
@@ -196,13 +207,7 @@ public class AStarUnit : MonoBehaviour
     private void LateUpdate()
     {
         oldPosition = OffsetPosition;
-        if (Vector3.Distance(OffsetPosition, Destination) <= stopDistance)
-        {
-            IsStop = true;
-            ResetPath();
-            ShowPath(false);
-        }
-        else IsStop = false;
+        if (IsStop) ShowPath(false);
     }
 
     private void OnEnable()
@@ -251,7 +256,7 @@ public class AStarUnit : MonoBehaviour
         pathFollowCoroutine = null;
         targetWaypointIndex = 0;
         isFollowingPath = false;
-        //ShowPath(false);
+        ShowPath(false);
         gizmosTargetPos = default;
     }
 
@@ -274,7 +279,10 @@ public class AStarUnit : MonoBehaviour
                 pathRenderer.SetPositions(path.ToArray());
             }
             targetWaypointIndex = 0;
-            if (IsFollowingPath) StartFollowingPath();
+            if (IsFollowingPath || IsFollowingTarget)
+            {
+                StartFollowingPath();
+            }
         }
     }
 
@@ -286,11 +294,14 @@ public class AStarUnit : MonoBehaviour
 
     private IEnumerator FollowPath()
     {
-        if (path == null || path.Length < 1 || !IsFollowingPath) yield break; //yield break相当于普通函数空return
+        yield return new WaitForEndOfFrame();
+        if (path == null || path.Length < 1 || !IsFollowingPath)
+        {
+            yield break; //yield break相当于普通函数空return
+        }
         Vector3 targetWaypoint = path[0];
         while (IsFollowingPath)//模拟更新函数
         {
-            IsStop = false;
             if (path.Length < 1)//如果在追踪过程中，路线没了，直接退出追踪
             {
                 ResetPath();
@@ -303,14 +314,15 @@ public class AStarUnit : MonoBehaviour
                 targetWaypointIndex++;//标至下一个航点
                 if (targetWaypointIndex >= path.Length) yield break;
                 targetWaypoint = path[targetWaypointIndex];
-                if (!AStarManager.Instance.WorldPointWalkable(targetWaypoint, unitSize))//自动修复路线
-                {
-                    Debug.Log("Auto fix path");
-                    RequestPath(Destination);
-                    yield break;
-                }
+                if (autoRepath)
+                    if (!AStarManager.Instance.WorldPointWalkable(targetWaypoint, unitSize))//自动修复路线
+                    {
+                        Debug.Log("Auto fix path");
+                        RequestPath(Destination);
+                        yield break;
+                    }
             }
-            if (AStarManager.Instance.ThreeD && MyTools.Slope(OffsetPosition, targetWaypoint) > maxMoveSlope) yield break;
+            if (AStarManager.Instance.ThreeD && MyTools.Slope(OffsetPosition, targetWaypoint) > slopeLimit) yield break;
             if (Vector3.Distance(OffsetPosition, Destination) <= stopDistance)
             {
                 ResetPath();
@@ -318,26 +330,33 @@ public class AStarUnit : MonoBehaviour
                 ShowPath(false);
                 yield break;
             }
-            if (moveType == MoveType.MovePosition)
+            if (moveMode == UnitMoveMode.MovePosition)
             {
-                OffsetPosition = Vector3.MoveTowards(OffsetPosition, targetWaypoint, Time.deltaTime * moveSpeed);
                 if (AStarManager.Instance.ThreeD)
                 {
-                    Vector3 targetDir = new Vector3(DesiredVelocity.x, 0, DesiredVelocity.z);//获取平面上的朝向
-                    Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);//计算绕Vector3.up使transform.forward对齐targetDir所需的旋转量
-                    Quaternion newQuaternion = Quaternion.Lerp(rigidbody.rotation, targetRotation, turnSpeed * Time.deltaTime);
-                    transform.Rotate(newQuaternion.eulerAngles);
+                    Vector3 targetDir = new Vector3(DesiredVelocity.x, 0, DesiredVelocity.z).normalized;//获取平面上的朝向
+                    if (!targetDir.Equals(Vector3.zero))
+                    {
+                        Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);//计算绕Vector3.up使transform.forward对齐targetDir所需的旋转量
+                        Quaternion lerpRotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);//平滑旋转
+                        transform.rotation = lerpRotation;
+                    }
                 }
+                Vector3 newPosition = Vector3.MoveTowards(OffsetPosition, targetWaypoint, Time.deltaTime * moveSpeed);
+                OffsetPosition = newPosition;
                 yield return null;//相当于以上步骤在Update()里执行，至于为什么不直接放在Update()里，一句两句说不清楚，感兴趣的自己试一试有什么区别
             }
-            else
+            else if (moveMode == UnitMoveMode.MoveRigidbody)
             {
                 if (AStarManager.Instance.ThreeD && rigidbody)
                 {
-                    Vector3 targetDir = new Vector3(DesiredVelocity.x, 0, DesiredVelocity.z);
-                    Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);
-                    Quaternion newQuaternion = Quaternion.Lerp(rigidbody.rotation, targetRotation, turnSpeed * Time.deltaTime);
-                    rigidbody.MoveRotation(newQuaternion);
+                    Vector3 targetDir = new Vector3(DesiredVelocity.x, 0, DesiredVelocity.z).normalized;
+                    if (!targetDir.Equals(Vector3.zero))
+                    {
+                        Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);
+                        Quaternion lerpRotation = Quaternion.Lerp(rigidbody.rotation, targetRotation, turnSpeed * Time.deltaTime);
+                        rigidbody.MoveRotation(lerpRotation);
+                    }
                     rigidbody.MovePosition(rigidbody.position + DesiredVelocity * Time.deltaTime);
                 }
                 else if (!AStarManager.Instance.ThreeD && rigidbody2D)
@@ -345,6 +364,21 @@ public class AStarUnit : MonoBehaviour
                     rigidbody2D.MovePosition((Vector3)rigidbody2D.position + DesiredVelocity * Time.deltaTime);
                 }
                 yield return new WaitForFixedUpdate();//相当于以上步骤在FiexdUpdate()里执行
+            }
+            else
+            {
+                if (AStarManager.Instance.ThreeD)
+                {
+                    Vector3 targetDir = new Vector3(DesiredVelocity.x, 0, DesiredVelocity.z).normalized;
+                    if (!targetDir.Equals(Vector3.zero))
+                    {
+                        Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);
+                        Quaternion lerpRotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+                        transform.rotation = lerpRotation;
+                    }
+                    controller.SimpleMove(DesiredVelocity);
+                }
+                yield return new WaitForFixedUpdate();
             }
         }
     }
@@ -361,7 +395,7 @@ public class AStarUnit : MonoBehaviour
     public void SetDestination(Vector3 destination, bool gotoImmediately = true, bool force = true)//类似NavMeshAgent.SetDestination()，但不建议逐帧使用
     {
         if (drawGizmos) gizmosTargetPos = destination;
-        if (!AStarManager.Instance || destination == default) return;
+        if (!AStarManager.Instance) return;
         if (drawGizmos)
         {
             AStarNode goal = AStarManager.Instance.WorldPointToNode(destination, unitSize);
@@ -372,8 +406,8 @@ public class AStarUnit : MonoBehaviour
             ResetPath();
             return;
         }
-        RequestPath(destination);
         IsFollowingPath = gotoImmediately;
+        RequestPath(destination);
     }
 
     public void SetTarget(Transform target, Vector3 footOffset = default, bool followImmediately = false)
@@ -382,7 +416,11 @@ public class AStarUnit : MonoBehaviour
         this.target = target;
         if (footOffset == default) targetFootOffset = Vector3.zero;
         if (!followImmediately) SetDestination(TargetPosition, false);
-        else IsFollowingTarget = true;
+        else
+        {
+            isFollowingTarget = followImmediately;
+            StartFollowingTarget();
+        }
     }
 
     public void ResetTarget()
@@ -406,17 +444,17 @@ public class AStarUnit : MonoBehaviour
         SetDestination(TargetPosition);
         while (target)
         {
-            yield return new WaitForSeconds(0.15f);
+            yield return new WaitForSeconds(0.1f);
             if (Vector3.Distance(oldTargetPosition, TargetPosition) > targetFollowStartDistance)
             {
-                SetDestination(TargetPosition);
                 oldTargetPosition = TargetPosition;
+                SetDestination(TargetPosition);
             }
         }
     }
     #endregion
 
-    private enum MoveType
+    private enum UnitMoveMode
     {
         MovePosition,
         MoveRigidbody,

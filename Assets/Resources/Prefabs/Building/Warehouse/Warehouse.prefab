@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 1361377691869460024}
   - component: {fileID: 8733002829509734158}
   - component: {fileID: 8761270117585121961}
-  - component: {fileID: -7974516036113751902}
   m_Layer: 10
   m_Name: Warehouse
   m_TagString: Untagged
@@ -71,8 +70,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 2050152057
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 98257547e249f5b4c9219ef5f1bee434, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -160,22 +159,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2, y: 1}
   m_EdgeRadius: 0
---- !u!208 &-7974516036113751902
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1361377691869460025}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 1, y: 0.5, z: 0.00001}
-  m_MoveThreshold: 0.1
-  m_Carve: 0
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: -0.5, z: 0}
-  m_TimeToStationary: 0.5
 --- !u!1 &1722366801990457662
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,6 +259,6 @@ SortingGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1722366801990457662}
   m_Enabled: 1
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 2050152057
+  m_SortingLayer: 2
   m_SortingOrder: 1

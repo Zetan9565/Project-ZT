@@ -27,6 +27,7 @@ public class ShopUI : MonoBehaviour
         closeButton.onClick.AddListener(ShopManager.Instance.CloseWindow);
         commodityTab.onValueChanged.AddListener(delegate { if (ShopManager.Instance) ShopManager.Instance.SetPage(0); });
         acquisitionTab.onValueChanged.AddListener(delegate { if (ShopManager.Instance) ShopManager.Instance.SetPage(1); });
+        commodityTab.isOn = true;
     }
 
     private void OnDestroy()

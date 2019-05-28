@@ -27,6 +27,12 @@ public class InputCustomInfo : ScriptableObject
 #endif
     private KeyCode buildingButton = KeyCode.B;
 
+    [SerializeField]
+#if UNITY_EDITOR
+    [DisplayName("沿路行进按钮")]
+#endif
+    private KeyCode traceButton = KeyCode.T;
+
     public KeyCode QuestWindowButton
     {
         get
@@ -56,6 +62,14 @@ public class InputCustomInfo : ScriptableObject
         get
         {
             return buildingButton;
+        }
+    }
+
+    public KeyCode TraceButton
+    {
+        get
+        {
+            return traceButton;
         }
     }
 }

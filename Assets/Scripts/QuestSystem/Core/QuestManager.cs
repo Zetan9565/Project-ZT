@@ -34,7 +34,6 @@ public class QuestManager : MonoBehaviour, IWindow
     private List<QuestAgent> completeQuestAgents = new List<QuestAgent>();
     private List<QuestGroupAgent> questGroupAgents = new List<QuestGroupAgent>();
     private List<QuestGroupAgent> cmpltQuestGroupAgents = new List<QuestGroupAgent>();
-
     private List<QuestBoardAgent> questBoardAgents = new List<QuestBoardAgent>();
 
     [SerializeField, Header("任务列表")]
@@ -63,7 +62,7 @@ public class QuestManager : MonoBehaviour, IWindow
         }
     }
 
-    private Quest SelectedQuest;
+    private Quest selectedQuest;
 
     #region 任务处理相关
     /// <summary>
@@ -283,12 +282,12 @@ public class QuestManager : MonoBehaviour, IWindow
     /// </summary>
     public void AbandonSelectedQuest()
     {
-        if (!SelectedQuest) return;
+        if (!selectedQuest) return;
         ConfirmHandler.Instance.NewConfirm("已消耗的道具不会退回，确定放弃此任务吗？", delegate
         {
-            if (AbandonQuest(SelectedQuest))
+            if (AbandonQuest(selectedQuest))
             {
-                RemoveQuestAgentByQuest(SelectedQuest);
+                RemoveQuestAgentByQuest(selectedQuest);
                 HideDescription();
             }
         });
@@ -420,18 +419,20 @@ public class QuestManager : MonoBehaviour, IWindow
         return false;
     }
 
+    /// <summary>
+    /// 追踪当前展示任务进行中的目标
+    /// </summary>
     public void TraceSelectedQuest()
     {
-        if (!SelectedQuest) return;
-        if (SelectedQuest.IsComplete && SelectedQuest.CurrentQuestGiver)
+        if (!selectedQuest || !AStarManager.Instance || !PlayerManager.Instance.PlayerController.Unit) return;
+        if (selectedQuest.IsComplete && selectedQuest.CurrentQuestGiver)
         {
             PlayerManager.Instance.PlayerController.Unit.IsFollowingTarget = false;
             PlayerManager.Instance.PlayerController.Unit.ShowPath(true);
-            PlayerManager.Instance.PlayerController.Unit.SetDestination(SelectedQuest.CurrentQuestGiver.transform.position, false);
-            return;
+            PlayerManager.Instance.PlayerController.Unit.SetDestination(selectedQuest.CurrentQuestGiver.transform.position, false);
         }
-        if (SelectedQuest.Objectives.Count > 0)
-            using (var objectiveEnum = SelectedQuest.Objectives.GetEnumerator())
+        else if (selectedQuest.Objectives.Count > 0)
+            using (var objectiveEnum = selectedQuest.Objectives.GetEnumerator())
             {
                 Vector3 destination = default;
                 Objective currentObj = null;
@@ -442,13 +443,16 @@ public class QuestManager : MonoBehaviour, IWindow
                     if (!currentObj.IsComplete)
                     {
                         if (currentObj.Concurrent && currentObj.AllPrevObjCmplt)
-                            concurrentObj.Add(currentObj);
+                        {
+                            if (!(currentObj is CollectObjective))
+                                concurrentObj.Add(currentObj);
+                        }
                         else break;
                     }
                 }
                 if (concurrentObj.Count > 0)
                 {
-                    int index = Random.Range(0, concurrentObj.Count);
+                    int index = Random.Range(0, concurrentObj.Count);//如果目标可以同时进行，则随机选一个
                     currentObj = concurrentObj[index];
                 }
                 if (currentObj is TalkObjective)
@@ -497,44 +501,44 @@ public class QuestManager : MonoBehaviour, IWindow
             while (qgaEnum.MoveNext())
                 qgaEnum.Current.UpdateStatus();
 
-        if (SelectedQuest == null) return;
+        if (selectedQuest == null) return;
         string objectives = string.Empty;
-        QuestAgent cqa = completeQuestAgents.Find(x => x.MQuest == SelectedQuest);
+        QuestAgent cqa = completeQuestAgents.Find(x => x.MQuest == selectedQuest);
         if (cqa)
         {
-            int lineCount = SelectedQuest.Objectives.FindAll(x => x.Display).Count - 1;
-            for (int i = 0; i < SelectedQuest.Objectives.Count; i++)
+            int lineCount = selectedQuest.Objectives.FindAll(x => x.Display).Count - 1;
+            for (int i = 0; i < selectedQuest.Objectives.Count; i++)
             {
-                if (SelectedQuest.Objectives[i].Display)
+                if (selectedQuest.Objectives[i].Display)
                 {
                     string endLine = i == lineCount ? string.Empty : "\n";
-                    objectives += SelectedQuest.Objectives[i].DisplayName + endLine;
+                    objectives += selectedQuest.Objectives[i].DisplayName + endLine;
                 }
             }
             UI.descriptionText.text = string.Format("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标</b>\n{3}",
-                                   SelectedQuest.Title,
-                                   SelectedQuest.OriginalQuestGiver.TalkerName,
-                                   SelectedQuest.Description,
+                                   selectedQuest.Title,
+                                   selectedQuest.OriginalQuestGiver.TalkerName,
+                                   selectedQuest.Description,
                                    objectives);
         }
         else
         {
-            int lineCount = SelectedQuest.Objectives.FindAll(x => x.Display).Count - 1;
-            for (int i = 0; i < SelectedQuest.Objectives.Count; i++)
+            int lineCount = selectedQuest.Objectives.FindAll(x => x.Display).Count - 1;
+            for (int i = 0; i < selectedQuest.Objectives.Count; i++)
             {
-                if (SelectedQuest.Objectives[i].Display)
+                if (selectedQuest.Objectives[i].Display)
                 {
                     string endLine = i == lineCount ? string.Empty : "\n";
-                    objectives += SelectedQuest.Objectives[i].DisplayName +
-                                  "[" + SelectedQuest.Objectives[i].CurrentAmount + "/" + SelectedQuest.Objectives[i].Amount + "]" +
-                                  (SelectedQuest.Objectives[i].IsComplete ? "(达成)" + endLine : endLine);
+                    objectives += selectedQuest.Objectives[i].DisplayName +
+                                  "[" + selectedQuest.Objectives[i].CurrentAmount + "/" + selectedQuest.Objectives[i].Amount + "]" +
+                                  (selectedQuest.Objectives[i].IsComplete ? "(达成)" + endLine : endLine);
                 }
             }
             UI.descriptionText.text = string.Format("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标{3}</b>\n{4}",
-                                   SelectedQuest.Title,
-                                   SelectedQuest.OriginalQuestGiver.TalkerName,
-                                   SelectedQuest.Description,
-                                   SelectedQuest.IsComplete ? "(完成)" : SelectedQuest.IsOngoing ? "(进行中)" : string.Empty,
+                                   selectedQuest.Title,
+                                   selectedQuest.OriginalQuestGiver.TalkerName,
+                                   selectedQuest.Description,
+                                   selectedQuest.IsComplete ? "(完成)" : selectedQuest.IsOngoing ? "(进行中)" : string.Empty,
                                    objectives);
         }
     }
@@ -543,24 +547,24 @@ public class QuestManager : MonoBehaviour, IWindow
     {
         if (!questAgent.MQuest) return;
         DialogueManager.Instance.HideQuestDescription();
-        if (SelectedQuest && SelectedQuest != questAgent.MQuest)
+        if (selectedQuest && selectedQuest != questAgent.MQuest)
         {
-            QuestAgent qa = questAgents.Find(x => x.MQuest == SelectedQuest);
+            QuestAgent qa = questAgents.Find(x => x.MQuest == selectedQuest);
             if (qa) qa.Deselect();
             else
             {
-                qa = completeQuestAgents.Find(x => x.MQuest == SelectedQuest);
+                qa = completeQuestAgents.Find(x => x.MQuest == selectedQuest);
                 if (qa) qa.Deselect();
             }
         }
         questAgent.Select();
-        SelectedQuest = questAgent.MQuest;
+        selectedQuest = questAgent.MQuest;
         UpdateUI();
-        UI.moneyText.text = SelectedQuest.RewardMoney > 0 ? SelectedQuest.RewardMoney.ToString() : "无";
-        UI.EXPText.text = SelectedQuest.RewardEXP > 0 ? SelectedQuest.RewardEXP.ToString() : "无";
+        UI.moneyText.text = selectedQuest.RewardMoney > 0 ? selectedQuest.RewardMoney.ToString() : "无";
+        UI.EXPText.text = selectedQuest.RewardEXP > 0 ? selectedQuest.RewardEXP.ToString() : "无";
         foreach (ItemAgent rwc in UI.rewardCells)
             rwc.Clear();
-        foreach (ItemInfo info in SelectedQuest.RewardItems)
+        foreach (ItemInfo info in selectedQuest.RewardItems)
             foreach (ItemAgent rwc in UI.rewardCells)
             {
                 if (rwc.MItemInfo == null)
@@ -576,14 +580,14 @@ public class QuestManager : MonoBehaviour, IWindow
     }
     public void HideDescription()
     {
-        QuestAgent qa = questAgents.Find(x => x.MQuest == SelectedQuest);
+        QuestAgent qa = questAgents.Find(x => x.MQuest == selectedQuest);
         if (qa) qa.Deselect();
         else
         {
-            qa = completeQuestAgents.Find(x => x.MQuest == SelectedQuest);
+            qa = completeQuestAgents.Find(x => x.MQuest == selectedQuest);
             if (qa) qa.Deselect();
         }
-        SelectedQuest = null;
+        selectedQuest = null;
         UI.descriptionWindow.alpha = 0;
         UI.descriptionWindow.blocksRaycasts = false;
     }

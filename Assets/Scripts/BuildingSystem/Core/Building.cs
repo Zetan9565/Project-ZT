@@ -14,12 +14,14 @@ public class Building : MonoBehaviour
 
     public new string name;
 
-    private bool IsUnderBuilding;
+    public bool IsUnderBuilding { get; private set; }
 
     [SerializeField]
     private TextMesh buildingFlag;
 
     public bool IsBuilt { get; private set; }
+
+    public BuildingInfomation MBuildingInfo { get; private set; }
 
     private List<MonoBehaviour> components = new List<MonoBehaviour>();
     private List<bool> componentStates = new List<bool>();
@@ -28,13 +30,23 @@ public class Building : MonoBehaviour
 
     private bool custumDestroy;
 
-    public void StarBuild(BuildingInfomation buildingInfo, Vector3 position)
+    public BuildingAgent buildingAgent;
+
+    public bool StarBuild(BuildingInfomation buildingInfo, Vector3 position)
     {
         transform.position = position;
-        IDStarter = buildingInfo.IDStarter;
-        name = buildingInfo.Name;
-        leftBuildTime = buildingInfo.BuildTime;
+        MBuildingInfo = buildingInfo;
+        IDStarter = MBuildingInfo.IDStarter;
+        name = MBuildingInfo.Name;
+        leftBuildTime = MBuildingInfo.BuildTime;
+        if (buildingAgent) buildingAgent.UpdateUI();
         GetIDTail();
+        if (string.IsNullOrEmpty(IDTail))
+        {
+            MessageManager.Instance.NewMessage(name + "已经达到最大建设数量");
+            if (buildingAgent) buildingAgent.Clear(true);
+            Destroy(gameObject);
+        }
         foreach (MonoBehaviour mb in GetComponentsInChildren<MonoBehaviour>())
         {
             componentStates.Add(mb.enabled);
@@ -43,6 +55,7 @@ public class Building : MonoBehaviour
         }
         IsUnderBuilding = true;
         MyTools.SetActive(buildingFlag.gameObject, true);
+        return true;
     }
 
     public void LoadBuild(string IDStarter, string IDTail, string name, float buildTime, Vector3 position)
@@ -69,6 +82,7 @@ public class Building : MonoBehaviour
             IsBuilt = true;
             MyTools.SetActive(buildingFlag.gameObject, false);
         }
+        if (buildingAgent) buildingAgent.UpdateUI();
     }
 
     void BuildComplete()
@@ -81,6 +95,7 @@ public class Building : MonoBehaviour
         IsBuilt = true;
         buildingFlag.text = "建造完成！";
         MessageManager.Instance.NewMessage("[" + name + "] 建造完成了");
+        if (buildingAgent) buildingAgent.UpdateUI();
         StartCoroutine(WaitToUnshowFlag());
     }
 
@@ -105,7 +120,15 @@ public class Building : MonoBehaviour
     public void TryDestroy()
     {
         if (custumDestroy) onDestroy.Invoke();
-        else ConfirmHandler.Instance.NewConfirm("设施内的东西不会保留，确定销毁吗？", delegate { BuildingManager.Instance.ConfirmDestroy(); });
+        else ConfirmHandler.Instance.NewConfirm(string.Format("确定拆除{0}{1}吗？", name, (Vector2)transform.position),
+            BuildingManager.Instance.ConfirmDestroy,
+            delegate
+            {
+                if (IsBuilt && BuildingManager.Instance.ToDestroy == this)
+                {
+                    BuildingManager.Instance.CannotDestroy();
+                }
+            });
     }
 
     void GetIDTail()

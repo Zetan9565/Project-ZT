@@ -27,8 +27,12 @@ public class ConfirmHandler : MonoBehaviour, IWindow
     [SerializeField]
     private Button yes;
 
+    private UnityEvent onYesClick = new UnityEvent();
+
     [SerializeField]
     private Button no;
+
+    private UnityEvent onNoClick = new UnityEvent();
 
     public bool IsUIOpen { get; private set; }
     public bool IsPausing { get; private set; }
@@ -43,19 +47,35 @@ public class ConfirmHandler : MonoBehaviour, IWindow
 
     private void Awake()
     {
-        no.onClick.AddListener(CloseWindow);
+        yes.onClick.AddListener(Yes);
+        no.onClick.AddListener(No);
         if (!confirmWindow.GetComponent<GraphicRaycaster>()) confirmWindow.gameObject.AddComponent<GraphicRaycaster>();
         windowCanvas = confirmWindow.GetComponent<Canvas>();
         windowCanvas.overrideSorting = true;
     }
 
-    public void NewConfirm(string dialog, UnityAction yesAction = null)
+    public void NewConfirm(string dialog, UnityAction yesAction = null, UnityAction noAction = null)
     {
         dialogText.text = dialog;
-        yes.onClick.RemoveAllListeners();
-        if (yesAction != null) yes.onClick.AddListener(yesAction);
-        yes.onClick.AddListener(CloseWindow);
+        onYesClick.RemoveAllListeners();
+        onNoClick.RemoveAllListeners();
+        if (yesAction != null) onYesClick.AddListener(yesAction);
+        if (noAction != null) onNoClick.AddListener(noAction);
         OpenWindow();
+    }
+
+    private void Yes()
+    {
+        onYesClick?.Invoke();
+        onYesClick.RemoveAllListeners();
+        CloseWindow();
+    }
+
+    private void No()
+    {
+        onNoClick?.Invoke();
+        onNoClick.RemoveAllListeners();
+        CloseWindow();
     }
 
     public void OpenWindow()
@@ -76,7 +96,6 @@ public class ConfirmHandler : MonoBehaviour, IWindow
         confirmWindow.blocksRaycasts = false;
         WindowsManager.Instance.Remove(this);
         IsUIOpen = false;
-        yes.onClick.RemoveAllListeners();
     }
 
     public void OpenCloseWindow()

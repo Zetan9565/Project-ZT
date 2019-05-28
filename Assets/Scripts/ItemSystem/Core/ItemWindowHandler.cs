@@ -320,7 +320,7 @@ public class ItemWindowHandler : MonoBehaviour
     public void DiscardCurrentItem()
     {
         BackpackManager.Instance.DiscardItem(MItemInfo);
-        AmountHandler.Instance.SetPosition(new Vector3(Screen.width / 2, Screen.height / 2), Vector3.zero);
+        AmountHandler.Instance.SetPosition(MyTools.ScreenCenter, Vector2.zero);
         CloseItemWindow();
     }
 
