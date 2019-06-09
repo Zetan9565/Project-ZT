@@ -45,7 +45,6 @@ public class ItemAgent : MonoBehaviour, IDragable,
     [HideInInspector]
     public int indexInGrid;
 
-    [HideInInspector]
     private ScrollRect parentScrollRect;
 
     public bool IsEmpty { get { return MItemInfo == null || !MItemInfo.Item; } }
@@ -55,7 +54,6 @@ public class ItemAgent : MonoBehaviour, IDragable,
     {
         if (!IsEmpty) UseItem();
     }
-
 
     public void UseItem()
     {
@@ -157,6 +155,16 @@ public class ItemAgent : MonoBehaviour, IDragable,
             qualityEdge.color = GameManager.Instance.QualityColors[(int)info.Item.Quality];
         }
         UpdateInfo();
+    }
+
+    public void Show()
+    {
+        MyTools.SetActive(gameObject, true);
+    }
+
+    public void Hide()
+    {
+        MyTools.SetActive(gameObject, false);
     }
 
     public void UpdateInfo()
@@ -326,7 +334,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
             {
                 if (!IsEmpty && agentType != ItemAgentType.None && agentType != ItemAgentType.ShopBuying)
                 {
-                    StartDrag();
+                    BeginDrag();
                 }
             }
         else if (eventData.button == PointerEventData.InputButton.Right)

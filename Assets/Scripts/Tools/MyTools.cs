@@ -32,7 +32,7 @@ public class MyTools
         if (gameObject.activeSelf != value) gameObject.SetActive(value);
     }
 
-    public static Vector3 PositionToGrid(Vector3 originalPos, float gridSize = 1, float offset = 1.0f)
+    public static Vector3 PositionToGrid(Vector3 originalPos, float gridSize = 1.0f, float offset = 1.0f)
     {
         Vector3 newPos = originalPos;
         newPos -= Vector3.one * offset;
@@ -42,7 +42,7 @@ public class MyTools
         newPos += Vector3.one * offset;
         return newPos;
     }
-    public static Vector2 PositionToGrid(Vector2 originalPos, float gridSize = 1, float offset = 1.0f)
+    public static Vector2 PositionToGrid(Vector2 originalPos, float gridSize = 1.0f, float offset = 1.0f)
     {
         Vector2 newPos = originalPos;
         newPos -= Vector2.one * offset;
@@ -58,6 +58,18 @@ public class MyTools
         float height = from.y - to.y;
         float length = Vector2.Distance(new Vector2(from.x, to.x), new Vector2(from.z, to.z));
         return Mathf.Atan(height / length);
+    }
+
+    public static FileStream OpenFile(string path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite)
+    {
+        try
+        {
+            return new FileStream(path, fileMode, fileAccess);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     #region 文件安全相关
@@ -999,11 +1011,10 @@ public class ScopeFloat
 public class Heap<T> where T : IHeapItem<T>
 {
     private T[] items;
-    private int currentCount;
     private int maxSize;
     private HeapType heapType;
 
-    public int Count => currentCount;
+    public int Count { get; private set; }
 
     public Heap(int size, HeapType heapType = HeapType.MinHeap)
     {
@@ -1014,22 +1025,25 @@ public class Heap<T> where T : IHeapItem<T>
 
     public void Add(T item)
     {
-        if (currentCount >= maxSize) return;
-        item.HeapIndex = currentCount;
-        items[currentCount] = item;
-        SortUp(item);
-        currentCount++;
+        if (Count >= maxSize) return;
+        item.HeapIndex = Count;
+        items[Count] = item;
+        Count++;
+        SortUpForm(item);
     }
 
     public T RemoveRoot()
     {
-        if (currentCount < 1) return default;
+        if (Count < 1) return default;
         T root = items[0];
         root.HeapIndex = -1;
-        currentCount--;
-        items[0] = items[currentCount];
-        items[0].HeapIndex = 0;
-        SortDown(items[0]);
+        Count--;
+        if (Count > 0)
+        {
+            items[0] = items[Count];
+            items[0].HeapIndex = 0;
+            SortDownFrom(items[0]);
+        }
         return root;
     }
 
@@ -1037,6 +1051,11 @@ public class Heap<T> where T : IHeapItem<T>
     {
         if (item == default || item.HeapIndex < 0 || item.HeapIndex > items.Length - 1) return false;
         return Equals(items[item.HeapIndex], item);//用items.Contains()就等着哭吧
+    }
+
+    public void Clear()
+    {
+        Count = 0;
     }
 
     public bool Exists(Predicate<T> predicate)
@@ -1054,50 +1073,62 @@ public class Heap<T> where T : IHeapItem<T>
         return items.ToList();
     }
 
-    private void SortUp(T item)
+    private void SortUpForm(T item)
     {
         int parentIndex = (item.HeapIndex - 1) / 2;
-        if (parentIndex < 0) return;
         while (true)
         {
             T parent = items[parentIndex];
+            if (Equals(parent, item)) return;
             if (heapType == HeapType.MinHeap ? item.CompareTo(parent) < 0 : item.CompareTo(parent) > 0)
             {
-                Swap(item, parent);
+                if (!Swap(item, parent))
+                    return;//交换不成功则退出，防止死循环
             }
-            else break;
+            else return;
             parentIndex = (item.HeapIndex - 1) / 2;
-            if (parentIndex < 0) return;
         }
     }
 
-    private void SortDown(T item)
+    private void SortDownFrom(T item)
     {
         while (true)
         {
             int leftChildIndex = item.HeapIndex * 2 + 1;
             int rightChildIndex = item.HeapIndex * 2 + 2;
-            if (leftChildIndex < currentCount)
+            if (leftChildIndex < Count)
             {
                 int swapIndex = leftChildIndex;
-                if (rightChildIndex < currentCount && items[leftChildIndex].CompareTo(items[rightChildIndex]) > 0)
+                if (rightChildIndex < Count && (heapType == HeapType.MinHeap ?
+                    items[rightChildIndex].CompareTo(items[leftChildIndex]) < 0 : items[rightChildIndex].CompareTo(items[leftChildIndex]) > 0))
                     swapIndex = rightChildIndex;
-                if (heapType == HeapType.MinHeap ? item.CompareTo(items[swapIndex]) > 0 : item.CompareTo(items[swapIndex]) < 0)
-                    Swap(item, items[swapIndex]);
+                if (heapType == HeapType.MinHeap ? items[swapIndex].CompareTo(item) < 0 : items[swapIndex].CompareTo(item) > 0)
+                {
+                    if (!Swap(item, items[swapIndex]))
+                        return;//交换不成功则退出，防止死循环
+                }
                 else return;
             }
             else return;
         }
     }
 
-    private void Swap(T item1, T item2)
+    public void Update()
     {
-        if (!Contains(item1) || !Contains(item2)) return;
+        if (Count < 1) return;
+        SortDownFrom(items[0]);
+        SortUpForm(items[Count - 1]);
+    }
+
+    private bool Swap(T item1, T item2)
+    {
+        if (!Contains(item1) || !Contains(item2)) return false;
         items[item1.HeapIndex] = item2;
         items[item2.HeapIndex] = item1;
         int item1Index = item1.HeapIndex;
         item1.HeapIndex = item2.HeapIndex;
         item2.HeapIndex = item1Index;
+        return true;
     }
 
     public static implicit operator bool(Heap<T> self)

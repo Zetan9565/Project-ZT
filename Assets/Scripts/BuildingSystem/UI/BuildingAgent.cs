@@ -8,6 +8,9 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
     private Text buildingPosition;
 
     [SerializeField]
+    private Text buildingStates;
+
+    [SerializeField]
     private Button destoryButton;
 
     public Building MBuilding { get; private set; }
@@ -22,7 +25,8 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
         MBuilding = building;
         MBuilding.buildingAgent = this;
         destoryButton.interactable = MBuilding.IsBuilt;
-        buildingPosition.text = (MBuilding.IsBuilt ? string.Empty : "[建设中]") + "位置" + ((Vector2)MBuilding.transform.position).ToString();
+        buildingPosition.text = "位置" + ((Vector2)MBuilding.transform.position).ToString();
+        buildingStates.text = MBuilding.IsBuilt ? "已建成" : "建设中[" + MBuilding.leftBuildTime.ToString("F2") + "s]";
     }
 
     public void Clear(bool recycle = false)
@@ -36,7 +40,8 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
     public void UpdateUI()
     {
         destoryButton.interactable = MBuilding.IsBuilt;
-        buildingPosition.text = (MBuilding.IsBuilt ? string.Empty : "[建设中]") + "位置" + ((Vector2)MBuilding.transform.position).ToString();
+        //buildingPosition.text = "位置" + ((Vector2)MBuilding.transform.position).ToString();
+        buildingStates.text = MBuilding.IsBuilt ? "已建成" : "建设中[" + MBuilding.leftBuildTime.ToString("F2") + "s]";
     }
 
     public void OnPointerClick(PointerEventData eventData)

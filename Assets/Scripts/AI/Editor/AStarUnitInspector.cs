@@ -22,6 +22,10 @@ public class AStarUnitInspector : Editor
     SerializedProperty autoRepath;
     SerializedProperty drawGizmos;
     SerializedProperty pathRenderer;
+    SerializedProperty animator;
+    SerializedProperty animaHorizontal;
+    SerializedProperty animaVertical;
+    SerializedProperty animaMagnitude;
 
     AStarManager manager;
 
@@ -44,6 +48,10 @@ public class AStarUnitInspector : Editor
         autoRepath = serializedObject.FindProperty("autoRepath");
         drawGizmos = serializedObject.FindProperty("drawGizmos");
         pathRenderer = serializedObject.FindProperty("pathRenderer");
+        animator = serializedObject.FindProperty("animator");
+        animaHorizontal = serializedObject.FindProperty("animaHorizontal");
+        animaVertical = serializedObject.FindProperty("animaVertical");
+        animaMagnitude = serializedObject.FindProperty("animaMagnitude");
         manager = FindObjectOfType<AStarManager>();
     }
 
@@ -69,7 +77,7 @@ public class AStarUnitInspector : Editor
         }
         else
         {
-            EditorGUILayout.PropertyField(target, new GUIContent("目标"));
+            EditorGUILayout.PropertyField(target, new GUIContent("跟随目标"));
             if (target.objectReferenceValue) EditorGUILayout.PropertyField(targetFootOffset, new GUIContent("目标脚部偏移"));
         }
         if (target.objectReferenceValue) EditorGUILayout.PropertyField(targetFollowStartDistance, new GUIContent("目标跟随距离修正值"));
@@ -145,6 +153,14 @@ public class AStarUnitInspector : Editor
         EditorGUILayout.PropertyField(stopDistance, new GUIContent("提前停止距离"));
         if (stopDistance.floatValue < 0) stopDistance.floatValue = 0;
         EditorGUILayout.PropertyField(autoRepath, new GUIContent("自动修复路线"));
+        EditorGUILayout.Space();
+        EditorGUILayout.PropertyField(animator, new GUIContent("动画控制器"));
+        if (animator.objectReferenceValue)
+        {
+            EditorGUILayout.PropertyField(animaHorizontal, new GUIContent("动画水平参数"));
+            EditorGUILayout.PropertyField(animaVertical, new GUIContent("动画控垂直参数"));
+            EditorGUILayout.PropertyField(animaMagnitude, new GUIContent("动画模参数"));
+        }
         EditorGUILayout.Space();
         EditorGUILayout.PropertyField(pathRenderer, new GUIContent("路线渲染器"));
         EditorGUILayout.Space();

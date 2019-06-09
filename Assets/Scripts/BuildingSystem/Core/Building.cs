@@ -32,6 +32,8 @@ public class Building : MonoBehaviour
 
     public BuildingAgent buildingAgent;
 
+    public float leftBuildTime;
+
     public bool StarBuild(BuildingInfomation buildingInfo, Vector3 position)
     {
         transform.position = position;
@@ -85,7 +87,7 @@ public class Building : MonoBehaviour
         if (buildingAgent) buildingAgent.UpdateUI();
     }
 
-    void BuildComplete()
+    private void BuildComplete()
     {
         for (int i = 0; i < components.Count; i++)
         {
@@ -96,7 +98,7 @@ public class Building : MonoBehaviour
         buildingFlag.text = "建造完成！";
         MessageManager.Instance.NewMessage("[" + name + "] 建造完成了");
         if (buildingAgent) buildingAgent.UpdateUI();
-        StartCoroutine(WaitToUnshowFlag());
+        StartCoroutine(WaitToHideFlag());
     }
 
     public void CustumDestroy(params UnityAction[] destroyActions)
@@ -109,9 +111,7 @@ public class Building : MonoBehaviour
         custumDestroy = true;
     }
 
-    public float leftBuildTime;
-
-    IEnumerator WaitToUnshowFlag()
+    private IEnumerator WaitToHideFlag()
     {
         yield return new WaitForSeconds(2);
         MyTools.SetActive(buildingFlag.gameObject, false);
@@ -155,6 +155,7 @@ public class Building : MonoBehaviour
             {
                 BuildComplete();
             }
+            if (buildingAgent) buildingAgent.UpdateUI();
         }
     }
 

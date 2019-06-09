@@ -151,7 +151,7 @@ public class DialogueInspector : Editor
                         wordsBranchesLists.Add(dialogue.Words[index], branchesList);
                         branchesList.drawElementCallback = (_rect, _index, _isActive, _isFocused) =>
                         {
-                            wordsSP.serializedObject.Update();
+                            branches.serializedObject.Update();
                             EditorGUI.BeginChangeCheck();
                             SerializedProperty branch = branches.GetArrayElementAtIndex(_index);
                             SerializedProperty title = branch.FindPropertyRelative("title");
@@ -214,7 +214,7 @@ public class DialogueInspector : Editor
                                 _lineCount++;
                             }
                             if (EditorGUI.EndChangeCheck())
-                                wordsSP.serializedObject.ApplyModifiedProperties();
+                                branches.serializedObject.ApplyModifiedProperties();
                         };
 
                         branchesList.elementHeightCallback = (_index) =>
@@ -250,7 +250,7 @@ public class DialogueInspector : Editor
                         {
                             branches.serializedObject.Update();
                             EditorGUI.BeginChangeCheck();
-                            if (_list.index > -1 && _list.index < dialogue.Words[index].Branches.Count)
+                            if (_list.index >= 0 && _list.index < dialogue.Words[index].Branches.Count)
                                 dialogue.Words[index].Branches.Insert(_list.index, null);
                             else dialogue.Words[index].Branches.Add(null);
                             if (EditorGUI.EndChangeCheck())
@@ -262,27 +262,21 @@ public class DialogueInspector : Editor
                             branches.serializedObject.Update();
                             EditorGUI.BeginChangeCheck();
                             if (EditorUtility.DisplayDialog("删除", "确定删除这个分支吗？", "确定", "取消"))
-                            {
-                                if (_list.index >= 0 && _list.index < dialogue.Words[index].Branches.Count)
-                                {
-                                    branches.DeleteArrayElementAtIndex(_list.index);
-                                }
-                                else dialogue.Words[index].Branches.Clear();
-                            }
+                                branches.DeleteArrayElementAtIndex(_list.index);
                             if (EditorGUI.EndChangeCheck())
                                 branches.serializedObject.ApplyModifiedProperties();
                         };
 
-                        branchesList.drawHeaderCallback = (rect2) =>
+                        branchesList.drawHeaderCallback = (_rect) =>
                         {
-                            int notCmpltCount = dialogue.Words[index].Branches.FindAll(x => !x.Dialogue).Count;
-                            EditorGUI.LabelField(rect2, "分支列表", "数量：" + dialogue.Words[index].Branches.Count.ToString() +
+                            int notCmpltCount = dialogue.Words[index].Branches.FindAll(x => x.IsInvalid).Count;
+                            EditorGUI.LabelField(_rect, "分支列表", "数量：" + dialogue.Words[index].Branches.Count.ToString() +
                                 (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
                         };
 
-                        branchesList.drawNoneElementCallback = (rect2) =>
+                        branchesList.drawNoneElementCallback = (_rect) =>
                         {
-                            EditorGUI.LabelField(rect2, "空列表");
+                            EditorGUI.LabelField(_rect, "空列表");
                         };
                     }
                     else branchesList = wordsBranchesLists[dialogue.Words[index]];
@@ -307,7 +301,7 @@ public class DialogueInspector : Editor
             if (branches.isExpanded)
                 if (index != dialogWords.arraySize - 1)
                 {
-                    if (branches.arraySize > 0)
+                    if (branches.arraySize > 1)
                     {
                         lineCount++;//正确分支
                         if (indexOfRrightBranch.intValue > -1)
@@ -335,13 +329,13 @@ public class DialogueInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            if (EditorUtility.DisplayDialog("删除", "确定删除这句话吗？", "确定", "取消")) dialogWords.DeleteArrayElementAtIndex(list.index);
+            if (EditorUtility.DisplayDialog("删除", "确定删除这句话吗？", "确定", "取消")) dialogue.Words.RemoveAt(list.index);
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         };
 
         wordsList.drawHeaderCallback = (rect) =>
         {
-            int notCmpltCount = dialogue.Words.FindAll(x => !x.TalkerInfo || string.IsNullOrEmpty(x.Words) || x.Branches.Exists(y => !y.Dialogue)).Count;
+            int notCmpltCount = dialogue.Words.FindAll(x => !x.TalkerInfo || string.IsNullOrEmpty(x.Words) || x.Branches.Exists(y => y.IsInvalid)).Count;
             EditorGUI.LabelField(rect, "对话列表", "数量：" + dialogue.Words.Count +
                 (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
         };

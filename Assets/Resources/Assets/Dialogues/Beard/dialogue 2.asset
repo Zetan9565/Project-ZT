@@ -19,34 +19,4 @@ MonoBehaviour:
     words: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
     indexOfRrightBranch: 0
     wordsWhenChusWB: "\u8FD9\u90FD\u80FD\u9009\u9519\uFF0C\u592A\u83DC\u4E86"
-    branches:
-    - title: "\u5206\u652F\u6D4B\u8BD5#1"
-      specifyIndex: -1
-      words: "\u8FD9\u662F\u5206\u652F\u4E00"
-      dialogue: {fileID: 0}
-      goBack: 1
-      indexToGo: -1
-      deleteWhenCmplt: 1
-      runtimeParent: {fileID: 0}
-      runtimeIndexToGoBack: 0
-    - title: "\u5206\u652F\u6D4B\u8BD5#2"
-      specifyIndex: -1
-      words: 
-      dialogue: {fileID: 11400000, guid: 00931f27c4db01e44a9ff7817efe8119, type: 2}
-      goBack: 1
-      indexToGo: -1
-      deleteWhenCmplt: 1
-      runtimeParent: {fileID: 0}
-      runtimeIndexToGoBack: 0
-  - talkerType: 0
-    talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-    words: "\u563B\u563B"
-    indexOfRrightBranch: -1
-    wordsWhenChusWB: 
-    branches: []
-  - talkerType: 0
-    talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-    words: "\u563F\u563F"
-    indexOfRrightBranch: -1
-    wordsWhenChusWB: 
     branches: []

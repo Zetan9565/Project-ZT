@@ -14,7 +14,6 @@ public class WarehouseUI : MonoBehaviour
     public Text money;
     public Text size;
 
-    //public Button warehouseButton;
     public Button closeButton;
     public Button sortButton;
 
@@ -27,7 +26,6 @@ public class WarehouseUI : MonoBehaviour
         windowCanvas.overrideSorting = true;
         closeButton.onClick.AddListener(WarehouseManager.Instance.CloseWindow);
         sortButton.onClick.AddListener(WarehouseManager.Instance.Sort);
-        //warehouseButton.onClick.AddListener(WarehouseManager.Instance.OpenWindow);
     }
 
     private void OnDestroy()

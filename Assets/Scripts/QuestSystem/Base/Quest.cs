@@ -202,6 +202,16 @@ public class Quest : ScriptableObject
         }
     }
 
+    [SerializeField]
+    private List<CustomObjective> customObjectives = new List<CustomObjective>();
+    public List<CustomObjective> CustomObjectives
+    {
+        get
+        {
+            return customObjectives;
+        }
+    }
+
     [HideInInspector]
     public QuestGiver OriginalQuestGiver;
 
@@ -209,7 +219,7 @@ public class Quest : ScriptableObject
     public QuestGiver CurrentQuestGiver;
 
     [HideInInspector]
-    public bool IsOngoing;//任务是否正在执行，在运行时用到
+    public bool IsOngoing { get; set; }//任务是否正在执行，在运行时用到
 
     public bool IsComplete
     {
@@ -290,9 +300,9 @@ public class Quest : ScriptableObject
     /// </summary>
     /// <param name="itemID">许判断的道具</param>
     /// <returns>是否在收集</returns>
-    public bool CollectingItem(string itemID)
+    public bool CollectingItem(ItemBase item)
     {
-        return collectObjectives.Exists(x => x.Item.ID == itemID && !x.IsComplete);
+        return collectObjectives.Exists(x => x.Item == item && !x.IsComplete);
     }
 }
 
@@ -663,7 +673,6 @@ public class KillObjective : Objective
         UpdateAmountUp();
     }
 }
-
 public enum KillObjectiveType
 {
     /// <summary>
@@ -681,7 +690,6 @@ public enum KillObjectiveType
     /// </summary>
     Any
 }
-
 /// <summary>
 /// 谈话类目标
 /// </summary>
@@ -708,7 +716,7 @@ public class TalkObjective : Objective
         }
     }
 
-    public void UpdateTalkStatus()
+    public void UpdateTalkState()
     {
         UpdateAmountUp();
     }
@@ -729,9 +737,42 @@ public class MoveObjective : Objective
         }
     }
 
-    public void UpdateMoveStatus(QuestPoint point)
+    public void UpdateMoveState(QuestPoint point)
     {
         if (point.ID == PointID) UpdateAmountUp();
+    }
+}
+/// <summary>
+/// 自定义目标
+/// </summary>
+[System.Serializable]
+public class CustomObjective : Objective
+{
+    [SerializeField]
+    private string triggerName;
+    public string TriggerName
+    {
+        get
+        {
+            return triggerName;
+        }
+    }
+
+    [SerializeField]
+    private bool checkStateAtAcpt = true;//用于标识是否在接取任务时检触发器状态看是否满足目标，否则目标重头开始等待触发
+    public bool CheckStateAtAcpt
+    {
+        get
+        {
+            return checkStateAtAcpt;
+        }
+    }
+
+    public void UpdateTriggerState(string name, bool state)
+    {
+        if (name != TriggerName) return;
+        if (state) UpdateAmountUp();
+        else if (AllPrevObjCmplt && !HasNextObjOngoing) CurrentAmount--;
     }
 }
 #endregion

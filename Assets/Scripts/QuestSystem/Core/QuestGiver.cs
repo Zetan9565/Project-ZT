@@ -2,8 +2,8 @@
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class QuestGiver : Talker {
-
+public class QuestGiver : Talker
+{
     [SerializeField]
     private List<Quest> questsStored;
     public List<Quest> QuestsStored
@@ -54,6 +54,8 @@ public class QuestGiver : Talker {
                     qstinstns.Objectives.Add(to);
                 foreach (MoveObjective mo in qstinstns.MoveObjectives)
                     qstinstns.Objectives.Add(mo);
+                foreach (CustomObjective cuo in qstinstns.CustomObjectives)
+                    qstinstns.Objectives.Add(cuo);
                 if (qstinstns.CmpltObjctvInOrder)
                 {
                     qstinstns.Objectives.Sort((x, y) =>
@@ -71,9 +73,9 @@ public class QuestGiver : Talker {
                         }
                     }
                 }
-                int i1, i2, i3, i4;
-                i1 = i2 = i3 = i4 = 0;
-                foreach(Objective o in qstinstns.Objectives)
+                int i1, i2, i3, i4, i5;
+                i1 = i2 = i3 = i4 = i5 = 0;
+                foreach (Objective o in qstinstns.Objectives)
                 {
                     if (o is CollectObjective)
                     {
@@ -94,6 +96,11 @@ public class QuestGiver : Talker {
                     {
                         o.runtimeID = qstinstns.ID + "_MO" + i4;
                         i4++;
+                    }
+                    if (o is CustomObjective)
+                    {
+                        o.runtimeID = qstinstns.ID + "_CUO" + i5;
+                        i5++;
                     }
                     o.runtimeParent = qstinstns;
                 }

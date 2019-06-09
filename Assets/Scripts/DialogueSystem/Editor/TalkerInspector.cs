@@ -357,7 +357,9 @@ public class TalkerInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            questGiver.QuestsStored.Add(null);
+            if (list.index > 0 && list.index < questGiver.QuestsStored.Count)
+                questGiver.QuestsStored.Insert(list.index, null);
+            else questGiver.QuestsStored.Add(null);
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };

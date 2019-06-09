@@ -35,9 +35,27 @@ MonoBehaviour:
   - talkerType: 1
     talkerInfo: {fileID: 0}
     words: "O98K\uFF0C\u6211\u53BB\u770B\u770B\u3002"
-    indexOfRrightBranch: -1
-    wordsWhenChusWB: 
-    branches: []
+    indexOfRrightBranch: 0
+    wordsWhenChusWB: "\u9009\u98791\u624D\u662F\u5BF9\u7684"
+    branches:
+    - title: "\u9009\u98791"
+      specifyIndex: -1
+      words: "\u8FD9\u662F\u9009\u98791"
+      dialogue: {fileID: 0}
+      goBack: 0
+      indexToGo: -1
+      deleteWhenCmplt: 1
+      runtimeParent: {fileID: 0}
+      runtimeIndexToGoBack: 0
+    - title: "\u9009\u98792"
+      specifyIndex: -1
+      words: "\u8FD9\u662F\u9009\u98792"
+      dialogue: {fileID: 0}
+      goBack: 0
+      indexToGo: -1
+      deleteWhenCmplt: 1
+      runtimeParent: {fileID: 0}
+      runtimeIndexToGoBack: 0
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
     words: "\u8BF7\u5C0F\u5FC3\uFF01"

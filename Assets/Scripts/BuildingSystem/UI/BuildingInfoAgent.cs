@@ -105,7 +105,7 @@ public class BuildingInfoAgent : MonoBehaviour,
     public void OnPointerExit(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
-        BuildingManager.Instance.UnshowDescription();
+        BuildingManager.Instance.HideDescription();
 #endif
 #if UNITY_ANDROID
         isPress = false;

@@ -20,6 +20,8 @@ public class SaveData
 
     public List<DialogueData> dialogueDatas;
 
+    public List<TriggerData> triggerDatas;
+
     public SaveData()
     {
         sceneName = SceneManager.GetActiveScene().name;
@@ -30,6 +32,7 @@ public class SaveData
         ongoingQuestDatas = new List<QuestData>();
         completeQuestDatas = new List<QuestData>();
         dialogueDatas = new List<DialogueData>();
+        triggerDatas = new List<TriggerData>();
     }
 }
 
@@ -211,3 +214,16 @@ public class DialogueWordsData
     }
 }
 #endregion
+
+public class TriggerData
+{
+    public string triggerName;
+
+    public bool triggerState;
+
+    public TriggerData(string triggerName, bool triggerState)
+    {
+        this.triggerName = triggerName;
+        this.triggerState = triggerState;
+    }
+}

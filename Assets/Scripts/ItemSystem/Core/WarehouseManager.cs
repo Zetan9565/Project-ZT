@@ -18,9 +18,9 @@ public class WarehouseManager : MonoBehaviour, IWindow
     [SerializeField]
     private WarehouseUI UI;
 
-    public Transform cellsParent { get { return UI.itemCellsParent; } }
+    public Transform CellsParent { get { return UI.itemCellsParent; } }
 
-    private List<ItemAgent> itemAgents { get; } = new List<ItemAgent>();
+    private List<ItemAgent> itemAgents = new List<ItemAgent>();
 
     public Warehouse MWarehouse { get; private set; }
 
@@ -34,6 +34,19 @@ public class WarehouseManager : MonoBehaviour, IWindow
         get
         {
             return UI.windowCanvas;
+        }
+    }
+
+    private void Awake()
+    {
+        if (!UI || !UI.gameObject) return;
+        for (int i = 0; i < 300; i++)
+        {
+            ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+            itemAgents.Add(ia);
+            ia.Init(ItemAgentType.Warehouse, itemAgents.IndexOf(ia), UI.gridRect);
+            ia.Empty();
+            MyTools.SetActive(ia.gameObject, false);
         }
     }
 
@@ -52,32 +65,18 @@ public class WarehouseManager : MonoBehaviour, IWindow
                     itemAgents.Add(ia);
                     ia.Init(ItemAgentType.Warehouse, itemAgents.IndexOf(ia), UI.gridRect);
                 }
-            else
-            {
-                for (int i = 0; i < originalSize - MWarehouse.warehouseSize.Max; i++)
-                {
-                    Debug.Log("else");
-                    itemAgents[i].Clear(true);
-                }
-                itemAgents.RemoveAll(x => !x.gameObject.activeSelf);
-            }
-            /*foreach (ItemAgent ia in itemAgents)
-                ia.Empty();
-            itemAgents.RemoveAll(x => !x.gameObject.activeSelf);
+            else for (int i = MWarehouse.warehouseSize.Max; i < originalSize - MWarehouse.warehouseSize.Max; i++)//用不到的格子隐藏
+                    itemAgents[i].Hide();
             for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
-            {
-                ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-                itemAgents.Add(ia);
-                ia.Init(ItemAgentType.Warehouse, itemAgents.IndexOf(ia), UI.gridRect);
-            }*/
+                itemAgents[i].Show();
             foreach (ItemInfo info in MWarehouse.Items)
             {
                 if (info.indexInGrid > 0 && info.indexInGrid < itemAgents.Count)
                     itemAgents[info.indexInGrid].InitItem(info);
-                else foreach (ItemAgent ia in itemAgents)
-                        if (ia.IsEmpty)
+                else for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+                        if (itemAgents[i].IsEmpty)
                         {
-                            ia.InitItem(info);
+                            itemAgents[i].InitItem(info);
                             break;
                         }
             }
@@ -237,7 +236,6 @@ public class WarehouseManager : MonoBehaviour, IWindow
         IsUIOpen = true;
         WindowsManager.Instance.Push(this);
         BackpackManager.Instance.OpenWindow();
-        //MyTools.SetActive(UI.warehouseButton.gameObject, false);
         UIManager.Instance.EnableJoyStick(false);
         UIManager.Instance.EnableInteractive(false);
     }
@@ -256,6 +254,7 @@ public class WarehouseManager : MonoBehaviour, IWindow
         {
             ia.FinishDrag();
             ia.Empty();
+            MyTools.SetActive(ia.gameObject, false);
         }
         if (BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.CloseWindow();
         ItemWindowHandler.Instance.CloseItemWindow();
@@ -322,7 +321,6 @@ public class WarehouseManager : MonoBehaviour, IWindow
 
     public void CannotStore()
     {
-        //MyTools.SetActive(UI.warehouseButton.gameObject, false);
         CloseWindow();
         ItemWindowHandler.Instance.CloseItemWindow();
         StoreAble = false;

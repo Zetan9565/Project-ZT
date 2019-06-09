@@ -22,7 +22,7 @@ public class CharacterController2D : MonoBehaviour
 #if UNITY_EDITOR
     [DisplayName("Horizontal参数名")]
 #endif
-    private string animHorizontal = "Horizontal";
+    private string animaHorizontal = "Horizontal";
     [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("Vertical参数名")]
@@ -46,7 +46,7 @@ public class CharacterController2D : MonoBehaviour
         animator.SetFloat(animaMagnitude, input.magnitude);
         if (input != Vector2.zero)
         {
-            animator.SetFloat(animHorizontal, input.x);
+            animator.SetFloat(animaHorizontal, input.x);
             animator.SetFloat(animaVertical, input.y);
         }
     }

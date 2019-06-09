@@ -177,13 +177,19 @@ public class QuestManager : MonoBehaviour, IWindow
                 MoveObjective mo = o as MoveObjective;
                 try
                 {
-                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent += mo.UpdateMoveStatus;
+                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent += mo.UpdateMoveState;
                 }
                 catch
                 {
                     MessageManager.Instance.NewMessage(string.Format("[找不到任务点] ID: {0}", mo.PointID));
                     continue;
                 }
+            }
+            else if (o is CustomObjective)
+            {
+                CustomObjective cuo = o as CustomObjective;
+                TriggerManager.Instance.OnTriggerSetEvent += cuo.UpdateTriggerState;
+                if (cuo.CheckStateAtAcpt) TriggerManager.Instance.SetTrigger(cuo.TriggerName, TriggerManager.Instance.GetTriggerState(cuo.TriggerName));
             }
         }
         quest.IsOngoing = true;
@@ -256,12 +262,19 @@ public class QuestManager : MonoBehaviour, IWindow
                     TalkObjective to = o as TalkObjective;
                     to.CurrentAmount = 0;
                     GameManager.Talkers[to.Talker.ID].objectivesTalkToThis.RemoveAll(x => x == to);
+                    DialogueManager.Instance.RemoveDialogueData(to.Dialogue);
                 }
                 if (o is MoveObjective)
                 {
                     MoveObjective mo = o as MoveObjective;
                     mo.CurrentAmount = 0;
-                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveStatus;
+                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveState;
+                }
+                else if (o is CustomObjective)
+                {
+                    CustomObjective cuo = o as CustomObjective;
+                    cuo.CurrentAmount = 0;
+                    TriggerManager.Instance.OnTriggerSetEvent -= cuo.UpdateTriggerState;
                 }
             }
             if (!quest.SbmtOnOriginalNPC)
@@ -395,7 +408,12 @@ public class QuestManager : MonoBehaviour, IWindow
                 if (o is MoveObjective)
                 {
                     MoveObjective mo = o as MoveObjective;
-                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveStatus;
+                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveState;
+                }
+                else if (o is CustomObjective)
+                {
+                    CustomObjective cuo = o as CustomObjective;
+                    TriggerManager.Instance.OnTriggerSetEvent -= cuo.UpdateTriggerState;
                 }
             }
             if (!loadMode)
@@ -574,6 +592,7 @@ public class QuestManager : MonoBehaviour, IWindow
                 }
             }
         MyTools.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
+        MyTools.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = true;
         ItemWindowHandler.Instance.CloseItemWindow();
@@ -604,6 +623,7 @@ public class QuestManager : MonoBehaviour, IWindow
         WindowsManager.Instance.Push(this);
         IsUIOpen = true;
         UIManager.Instance.EnableJoyStick(false);
+        TriggerManager.Instance.SetTrigger("Open Quest", true);
     }
     public void CloseWindow()
     {

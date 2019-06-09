@@ -40,6 +40,8 @@ public class OptionAgent : MonoBehaviour
 
     public void Init(string text, Quest quest)
     {
+        if (!titleText)
+            titleText = GetComponentInChildren<Text>();
         titleText.text = text;
         OptionType = OptionType.Quest;
         MQuest = quest;

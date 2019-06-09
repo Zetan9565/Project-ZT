@@ -37,6 +37,7 @@ MonoBehaviour:
   cmpltObjctvInOrder: 1
   collectObjectives:
   - displayName: "\u6536\u96C6\u7834\u5251"
+    display: 1
     amount: 10
     inOrder: 1
     orderIndex: 1
@@ -46,6 +47,7 @@ MonoBehaviour:
     checkBagAtAcpt: 1
     loseItemAtSbmt: 0
   - displayName: "\u6536\u96C6\u7834\u5200"
+    display: 1
     amount: 10
     inOrder: 1
     orderIndex: 1
@@ -57,6 +59,6 @@ MonoBehaviour:
   killObjectives: []
   talkObjectives: []
   moveObjectives: []
+  customObjectives: []
   OriginalQuestGiver: {fileID: 0}
   CurrentQuestGiver: {fileID: 0}
-  IsOngoing: 0

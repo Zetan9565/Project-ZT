@@ -26,13 +26,28 @@ MonoBehaviour:
   rewardItems:
   - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
     amount: 3
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
   - item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
     amount: 3
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
   sbmtOnOriginalNPC: 1
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 1
   collectObjectives:
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5251"
+    display: 1
     amount: 5
     inOrder: 1
     orderIndex: 2
@@ -42,6 +57,7 @@ MonoBehaviour:
     checkBagAtAcpt: 1
     loseItemAtSbmt: 1
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5200"
+    display: 1
     amount: 5
     inOrder: 1
     orderIndex: 2
@@ -52,21 +68,28 @@ MonoBehaviour:
     loseItemAtSbmt: 1
   killObjectives:
   - displayName: "\u51FB\u6740\u9AB7\u9AC5"
+    display: 1
     amount: 5
     inOrder: 1
     orderIndex: 2
     runtimeID: 
     runtimeParent: {fileID: 0}
+    objectiveType: 0
     enemy: {fileID: 11400000, guid: 1f8636ab8a7c2a443b85d27f63bd2394, type: 2}
+    race: {fileID: 0}
   - displayName: "\u51FB\u6740\u50F5\u5C38"
+    display: 1
     amount: 5
     inOrder: 1
     orderIndex: 2
     runtimeID: 
     runtimeParent: {fileID: 0}
+    objectiveType: 0
     enemy: {fileID: 11400000, guid: fcbcd965e0bc2e14cbc0e99863634cff, type: 2}
+    race: {fileID: 0}
   talkObjectives:
   - displayName: "\u4E0E\u739B\u4E3D\u4E9A\u8C08\u8BDD"
+    display: 1
     amount: 1
     inOrder: 1
     orderIndex: 0
@@ -76,12 +99,13 @@ MonoBehaviour:
     dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491, type: 2}
   moveObjectives:
   - displayName: "\u8FBE\u5230\u6751\u5B50\u5317\u9762"
+    display: 1
     amount: 1
     inOrder: 1
     orderIndex: 1
     runtimeID: 
     runtimeParent: {fileID: 0}
     pointID: POIT001
+  customObjectives: []
   OriginalQuestGiver: {fileID: 0}
   CurrentQuestGiver: {fileID: 0}
-  IsOngoing: 0

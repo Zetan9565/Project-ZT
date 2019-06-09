@@ -9,70 +9,56 @@ public class AStarUnit : MonoBehaviour
 {
     [SerializeField, Tooltip("以单元格倍数为单位")]
     private int unitSize = 1;
+    [SerializeField]
+    private Vector3 footOffset;
+    [SerializeField, Tooltip("位置近似范围半径，最小建议值为0.1")]
+    private float fixedOffset = 0.125f;
 
     [SerializeField]
     private Transform target;
-
     [SerializeField]
     private Vector3 targetFootOffset;
-
-    public Vector3 TargetPosition
-    {
-        get
-        {
-            if (target)
-                return target.position + targetFootOffset;
-            return OffsetPosition;
-        }
-    }
-
     [SerializeField, Tooltip("目标离开原位置多远之后开始修正跟随？")]
     private float targetFollowStartDistance = 5;
 
-    [SerializeField]
-    private Vector3 footOffset;
-
-    public Vector3 OffsetPosition
-    {
-        get { return transform.position + footOffset; }
-        private set { transform.position = value - footOffset; }
-    }
-
-    [SerializeField, Tooltip("位置近似范围半径，最小建议值为0.1")]
-    private float fixedOffset = 0.125f;
 
     [SerializeField]
 #if UNITY_EDITOR
     [EnumMemberNames("普通位移(推荐)[物理效果差]", "刚体位移[性能消耗高]", "控制器位移")]
 #endif
     private UnitMoveMode moveMode = UnitMoveMode.MovePosition;
-
     [SerializeField]
     private new Rigidbody rigidbody;
-
     [SerializeField]
     private new Rigidbody2D rigidbody2D;
-
     [SerializeField]
     private CharacterController controller;
 
     public float moveSpeed = 10f;
-
     public float turnSpeed = 10f;
-
     [SerializeField]
     private float slopeLimit = 45.0f;
-
     [SerializeField]
     public float stopDistance = 1;
-
     [SerializeField]
     public bool autoRepath = true;
 
     [SerializeField]
     private LineRenderer pathRenderer;
 
-    #region 实时变量成员
+    [SerializeField]
+    private Animator animator;
+    [SerializeField]
+    private string animaHorizontal = "Horizontal";
+    [SerializeField]
+    private string animaVertical = "Vertical";
+    [SerializeField]
+    private string animaMagnitude = "Move";
+
+    [SerializeField]
+    private bool drawGizmos;
+
+    #region 实时变量
     private Vector3[] path;
     private int targetWaypointIndex;
     private Vector3 oldPosition;
@@ -116,6 +102,8 @@ public class AStarUnit : MonoBehaviour
 
     private Coroutine targetFollowCoroutine;
 
+    private Vector3 gizmosTargetPos = default;
+
     public bool HasPath
     {
         get
@@ -125,6 +113,22 @@ public class AStarUnit : MonoBehaviour
     }
 
     public bool IsStop => DesiredVelocity.magnitude == 0;
+
+    public Vector3 OffsetPosition
+    {
+        get { return transform.position + footOffset; }
+        private set { transform.position = value - footOffset; }
+    }
+
+    public Vector3 TargetPosition
+    {
+        get
+        {
+            if (target)
+                return target.position + targetFootOffset;
+            return OffsetPosition;
+        }
+    }
 
     public Vector3 DesiredVelocity//类似于NavMeshAgent.desiredVelocity
     {
@@ -177,10 +181,6 @@ public class AStarUnit : MonoBehaviour
     #endregion
 
     #region MonoBehaviour
-    [SerializeField]
-    private bool drawGizmos;
-    private Vector3 gizmosTargetPos = default;
-
     private void Awake()
     {
         if (controller && moveMode == UnitMoveMode.MoveController) controller.slopeLimit = slopeLimit;
@@ -189,6 +189,7 @@ public class AStarUnit : MonoBehaviour
 
     private void Start()
     {
+        //Debug only
         SetTarget(target, targetFootOffset, true);
     }
 
@@ -202,12 +203,21 @@ public class AStarUnit : MonoBehaviour
             pathRenderer.SetPositions(leftPoint.ToArray());
             if (Vector3.Distance(OffsetPosition, Destination) < stopDistance) ShowPath(false);
         }
+        if (animator)
+        {
+            Vector3 animaInput = DesiredVelocity.normalized;
+            if (animaInput.magnitude > 0)
+            {
+                animator.SetFloat(animaHorizontal, animaInput.x);
+                animator.SetFloat(animaVertical, animaInput.y);
+            }
+            animator.SetFloat(animaMagnitude, animaInput.magnitude);
+        }
     }
 
     private void LateUpdate()
     {
         oldPosition = OffsetPosition;
-        if (IsStop) ShowPath(false);
     }
 
     private void OnEnable()
@@ -262,7 +272,7 @@ public class AStarUnit : MonoBehaviour
 
     private void RequestPath(Vector3 destination)
     {
-        if (!AStarManager.Instance || destination == default || destination == OffsetPosition) return;
+        if (!AStarManager.Instance || destination == OffsetPosition) return;
         AStarManager.Instance.RequestPath(new PathRequest(OffsetPosition, destination, unitSize, OnPathFound));
     }
 
@@ -279,7 +289,7 @@ public class AStarUnit : MonoBehaviour
                 pathRenderer.SetPositions(path.ToArray());
             }
             targetWaypointIndex = 0;
-            if (IsFollowingPath || IsFollowingTarget)
+            if (IsFollowingPath)
             {
                 StartFollowingPath();
             }
@@ -294,7 +304,6 @@ public class AStarUnit : MonoBehaviour
 
     private IEnumerator FollowPath()
     {
-        yield return new WaitForEndOfFrame();
         if (path == null || path.Length < 1 || !IsFollowingPath)
         {
             yield break; //yield break相当于普通函数空return
@@ -317,7 +326,7 @@ public class AStarUnit : MonoBehaviour
                 if (autoRepath)
                     if (!AStarManager.Instance.WorldPointWalkable(targetWaypoint, unitSize))//自动修复路线
                     {
-                        Debug.Log("Auto fix path");
+                        //Debug.Log("Auto fix path");
                         RequestPath(Destination);
                         yield break;
                     }
@@ -342,8 +351,7 @@ public class AStarUnit : MonoBehaviour
                         transform.rotation = lerpRotation;
                     }
                 }
-                Vector3 newPosition = Vector3.MoveTowards(OffsetPosition, targetWaypoint, Time.deltaTime * moveSpeed);
-                OffsetPosition = newPosition;
+                OffsetPosition = Vector3.MoveTowards(OffsetPosition, targetWaypoint, Time.deltaTime * moveSpeed);
                 yield return null;//相当于以上步骤在Update()里执行，至于为什么不直接放在Update()里，一句两句说不清楚，感兴趣的自己试一试有什么区别
             }
             else if (moveMode == UnitMoveMode.MoveRigidbody)
@@ -376,7 +384,7 @@ public class AStarUnit : MonoBehaviour
                         Quaternion lerpRotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
                         transform.rotation = lerpRotation;
                     }
-                    controller.SimpleMove(DesiredVelocity);
+                    controller.SimpleMove(DesiredVelocity - Vector3.up * 9.8f);
                 }
                 yield return new WaitForFixedUpdate();
             }
@@ -392,7 +400,7 @@ public class AStarUnit : MonoBehaviour
     #endregion
 
     #region 目标相关
-    public void SetDestination(Vector3 destination, bool gotoImmediately = true, bool force = true)//类似NavMeshAgent.SetDestination()，但不建议逐帧使用
+    public void SetDestination(Vector3 destination, bool gotoImmediately = true)//类似NavMeshAgent.SetDestination()，但不建议逐帧使用
     {
         if (drawGizmos) gizmosTargetPos = destination;
         if (!AStarManager.Instance) return;
@@ -401,20 +409,28 @@ public class AStarUnit : MonoBehaviour
             AStarNode goal = AStarManager.Instance.WorldPointToNode(destination, unitSize);
             if (goal) gizmosTargetPos = goal;
         }
-        if (!AStarManager.Instance.WorldPointWalkable(destination, unitSize) && !force)
-        {
-            ResetPath();
-            return;
-        }
         IsFollowingPath = gotoImmediately;
         RequestPath(destination);
     }
 
-    public void SetTarget(Transform target, Vector3 footOffset = default, bool followImmediately = false)
+    public void SetTarget(Transform target, Vector3 footOffset, bool followImmediately = false)
     {
         if (!target || !AStarManager.Instance) return;
         this.target = target;
-        if (footOffset == default) targetFootOffset = Vector3.zero;
+        targetFootOffset = footOffset;
+        if (!followImmediately) SetDestination(TargetPosition, false);
+        else
+        {
+            isFollowingTarget = followImmediately;
+            StartFollowingTarget();
+        }
+    }
+
+    public void SetTarget(Transform target, bool followImmediately = false)
+    {
+        if (!target || !AStarManager.Instance) return;
+        this.target = target;
+        targetFootOffset = Vector3.zero;
         if (!followImmediately) SetDestination(TargetPosition, false);
         else
         {

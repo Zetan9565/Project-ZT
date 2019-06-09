@@ -85,7 +85,7 @@ public class DialogueWords
     {
         get
         {
-            return indexOfRrightBranch > -1 && branches.Count > 1;
+            return branches != null && indexOfRrightBranch > -1 && branches.Count > 1;
         }
     }
 
@@ -142,7 +142,7 @@ public class DialogueWords
 }
 
 [Serializable]
-public class BranchDialogue : ICloneable
+public class BranchDialogue
 {
     [SerializeField]
     private string title;
@@ -229,9 +229,11 @@ public class BranchDialogue : ICloneable
     [HideInInspector]
     public int runtimeIndexToGoBack;
 
-    public object Clone()
+    public BranchDialogue Cloned => MemberwiseClone() as BranchDialogue;
+
+    public static implicit operator bool(BranchDialogue self)
     {
-        return MemberwiseClone();
+        return self != null;
     }
 }
 

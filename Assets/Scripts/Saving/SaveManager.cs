@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -36,7 +36,7 @@ public class SaveManager : MonoBehaviour
     #region 存档相关
     public bool Save()
     {
-        using (FileStream fs = OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
+        using (FileStream fs = MyTools.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
         {
             try
             {
@@ -49,6 +49,7 @@ public class SaveManager : MonoBehaviour
                 SaveWarehouse(data);
                 SaveQuest(data);
                 SaveDialogue(data);
+                SaveTrigger(data);
 
                 bf.Serialize(fs, data);
                 MyTools.Encrypt(fs, encryptKey);
@@ -126,12 +127,20 @@ public class SaveManager : MonoBehaviour
             data.dialogueDatas.Add(kvpDialog.Value);
         }
     }
+
+    void SaveTrigger(SaveData data)
+    {
+        foreach (var trigger in TriggerManager.Instance.Triggers)
+        {
+            data.triggerDatas.Add(new TriggerData(trigger.Key, trigger.Value));
+        }
+    }
     #endregion
 
     #region 读档相关
     public void Load()
     {
-        using (FileStream fs = OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Open))
+        using (FileStream fs = MyTools.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Open))
         {
             try
             {
@@ -162,11 +171,11 @@ public class SaveManager : MonoBehaviour
         LoadPlayer(data);
         yield return new WaitUntil(() => { return BackpackManager.Instance.MBackpack != null; });
         LoadBag(data);
-        BuildingManager.Instance.Init();
         LoadBuilding(data);
         LoadWarehouse(data);
         LoadQuest(data);
         LoadDialogue(data);
+        LoadTrigger(data);
     }
 
     void LoadPlayer(SaveData data)
@@ -182,6 +191,7 @@ public class SaveManager : MonoBehaviour
 
     void LoadBuilding(SaveData data)
     {
+        BuildingManager.Instance.Init();
         BuildingManager.Instance.LoadData(data.buildingSystemData);
     }
 
@@ -260,17 +270,14 @@ public class SaveManager : MonoBehaviour
             DialogueManager.Instance.DialogueDatas.Add(dd.dialogID, dd);
         }
     }
-    #endregion
 
-    FileStream OpenFile(string path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite)
+    void LoadTrigger(SaveData data)
     {
-        try
+        TriggerManager.Instance.Triggers.Clear();
+        foreach (TriggerData td in data.triggerDatas)
         {
-            return new FileStream(path, fileMode, fileAccess);
-        }
-        catch
-        {
-            return null;
+            TriggerManager.Instance.SetTrigger(td.triggerName, td.triggerState);
         }
     }
+    #endregion
 }
