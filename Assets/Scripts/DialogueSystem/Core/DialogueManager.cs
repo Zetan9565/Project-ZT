@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -26,9 +27,9 @@ public class DialogueManager : MonoBehaviour, IWindow
     [HideInInspector]
     public UnityEvent OnFinishDialogueEvent;
 
-    public DialogueType DialogueType { get; private set; } = DialogueType.Normal;
+    public DialogueType CurrentType { get; private set; } = DialogueType.Normal;
 
-    private Queue<DialogueWords> Words = new Queue<DialogueWords>();
+    private readonly Queue<DialogueWords> Words = new Queue<DialogueWords>();
     public Dictionary<string, DialogueData> DialogueDatas { get; private set; } = new Dictionary<string, DialogueData>();
 
     private int page = 1;
@@ -47,7 +48,7 @@ public class DialogueManager : MonoBehaviour, IWindow
 
     private int MaxPage = 1;
 
-    private List<OptionAgent> optionAgents = new List<OptionAgent>();
+    private readonly List<OptionAgent> optionAgents = new List<OptionAgent>();
 
     public int OptionsCount
     {
@@ -72,7 +73,7 @@ public class DialogueManager : MonoBehaviour, IWindow
     private Dialogue currentDialog;
     private DialogueWords currentWords;
     private BranchDialogue currentBranch;
-    private Stack<BranchDialogue> branchDialogInstances = new Stack<BranchDialogue>();
+    private readonly Stack<BranchDialogue> branchDialogInstances = new Stack<BranchDialogue>();
     public bool NPCHasNotAcptQuests
     {
         get
@@ -100,6 +101,7 @@ public class DialogueManager : MonoBehaviour, IWindow
             return UI.windowCanvas;
         }
     }
+
 
     #region 开始新对话
     public void BeginNewDialogue()
@@ -146,7 +148,7 @@ public class DialogueManager : MonoBehaviour, IWindow
     {
         if (!UI) return;
         CurrentTalker = talker;
-        DialogueType = DialogueType.Normal;
+        CurrentType = DialogueType.Normal;
         if (talker is QuestGiver && (talker as QuestGiver).QuestInstances.Count > 0)
             MyUtilities.SetActive(UI.questButton.gameObject, true);
         else MyUtilities.SetActive(UI.questButton.gameObject, false);
@@ -161,7 +163,7 @@ public class DialogueManager : MonoBehaviour, IWindow
     {
         if (!quest) return;
         CurrentQuest = quest;
-        DialogueType = DialogueType.Quest;
+        CurrentType = DialogueType.Quest;
         ShowButtons(false, false, false);
         if (!CurrentQuest.IsComplete && !CurrentQuest.IsOngoing) StartDialogue(quest.BeginDialogue);
         else if (!CurrentQuest.IsComplete && CurrentQuest.IsOngoing) StartDialogue(quest.OngoingDialogue);
@@ -172,7 +174,7 @@ public class DialogueManager : MonoBehaviour, IWindow
     {
         if (talkObjective == null) return;
         this.talkObjective = talkObjective;
-        DialogueType = DialogueType.Objective;
+        CurrentType = DialogueType.Objective;
         ShowButtons(false, false, false);
         StartDialogue(talkObjective.Dialogue);
     }
@@ -371,7 +373,7 @@ public class DialogueManager : MonoBehaviour, IWindow
         DialogueData find = null;
         if (DialogueDatas.ContainsKey(currentDialog.ID))
             find = DialogueDatas[currentDialog.ID];
-        if (DialogueType == DialogueType.Normal) ClearOptions(OptionType.Quest, OptionType.Objective);
+        if (CurrentType == DialogueType.Normal) ClearOptions(OptionType.Quest, OptionType.Objective);
         else ClearOptions();
         foreach (BranchDialogue branch in currentWords.Branches)
         {
@@ -402,15 +404,15 @@ public class DialogueManager : MonoBehaviour, IWindow
     {
         if (Page <= 1 || !IsUIOpen || IsPausing) return;
         int leftLineCount = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight);
-        if (page > 0)
+        if (Page > 0)
         {
             Page--;
             for (int i = 0; i < leftLineCount; i++)
             {
-                if ((page - 1) * leftLineCount + i < optionAgents.Count && (page - 1) * leftLineCount + i >= 0)
-                    MyUtilities.SetActive(optionAgents[(page - 1) * leftLineCount + i].gameObject, true);
-                if (page * leftLineCount + i >= 0 && page * leftLineCount + i < optionAgents.Count)
-                    MyUtilities.SetActive(optionAgents[page * leftLineCount + i].gameObject, false);
+                if ((Page - 1) * leftLineCount + i < optionAgents.Count && (Page - 1) * leftLineCount + i >= 0)
+                    MyUtilities.SetActive(optionAgents[(Page - 1) * leftLineCount + i].gameObject, true);
+                if (Page * leftLineCount + i >= 0 && Page * leftLineCount + i < optionAgents.Count)
+                    MyUtilities.SetActive(optionAgents[Page * leftLineCount + i].gameObject, false);
             }
         }
         if (Page <= 1 && MaxPage > 1) SetPageArea(false, true, true);
@@ -422,14 +424,14 @@ public class DialogueManager : MonoBehaviour, IWindow
     {
         if (Page >= MaxPage || !IsUIOpen || IsPausing) return;
         int leftLineCount = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight);
-        if (page < Mathf.CeilToInt(optionAgents.Count * 1.0f / (leftLineCount * 1.0f)))
+        if (Page < Mathf.CeilToInt(optionAgents.Count * 1.0f / (leftLineCount * 1.0f)))
         {
             for (int i = 0; i < leftLineCount; i++)
             {
-                if ((page - 1) * leftLineCount + i < optionAgents.Count && (page - 1) * leftLineCount + i >= 0)
-                    MyUtilities.SetActive(optionAgents[(page - 1) * leftLineCount + i].gameObject, false);
-                if (page * leftLineCount + i >= 0 && page * leftLineCount + i < optionAgents.Count)
-                    MyUtilities.SetActive(optionAgents[page * leftLineCount + i].gameObject, true);
+                if ((Page - 1) * leftLineCount + i < optionAgents.Count && (Page - 1) * leftLineCount + i >= 0)
+                    MyUtilities.SetActive(optionAgents[(Page - 1) * leftLineCount + i].gameObject, false);
+                if (Page * leftLineCount + i >= 0 && Page * leftLineCount + i < optionAgents.Count)
+                    MyUtilities.SetActive(optionAgents[Page * leftLineCount + i].gameObject, true);
             }
             Page++;
         }
@@ -546,7 +548,7 @@ public class DialogueManager : MonoBehaviour, IWindow
     /// </summary>
     private void HandlingLastWords()
     {
-        if (DialogueType == DialogueType.Normal && CurrentTalker)
+        if (CurrentType == DialogueType.Normal && CurrentTalker)
         {
             CurrentTalker.OnTalkFinished();
             MakeTalkerCmpltQuestOption();
@@ -554,8 +556,8 @@ public class DialogueManager : MonoBehaviour, IWindow
             else ClearOptionsExceptCmlptQuest();
             QuestManager.Instance.UpdateUI();
         }
-        else if (DialogueType == DialogueType.Objective && talkObjective != null) HandlingLastObjectiveWords();
-        else if (DialogueType == DialogueType.Quest && CurrentQuest) HandlingLastQuestWords();
+        else if (CurrentType == DialogueType.Objective && talkObjective != null) HandlingLastObjectiveWords();
+        else if (CurrentType == DialogueType.Quest && CurrentQuest) HandlingLastQuestWords();
     }
     /// <summary>
     /// 处理最后一句对话型目标的对话
@@ -686,7 +688,7 @@ public class DialogueManager : MonoBehaviour, IWindow
         UI.dialogueWindow.blocksRaycasts = false;
         IsUIOpen = false;
         IsPausing = false;
-        DialogueType = DialogueType.Normal;
+        CurrentType = DialogueType.Normal;
         CurrentTalker = null;
         CurrentQuest = null;
         currentDialog = null;
@@ -728,10 +730,10 @@ public class DialogueManager : MonoBehaviour, IWindow
     {
         if (quest == null) return;
         CurrentQuest = quest;
-        UI.descriptionText.text = string.Format("<b>{0}</b>\n[委托人: {1}]\n{2}",
+        UI.descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[委托人: {1}]\n{2}",
             CurrentQuest.Title,
             CurrentQuest.OriginalQuestGiver.TalkerName,
-            CurrentQuest.Description);
+            CurrentQuest.Description).ToString();
         UI.moneyText.text = CurrentQuest.RewardMoney > 0 ? CurrentQuest.RewardMoney.ToString() : "无";
         UI.EXPText.text = CurrentQuest.RewardEXP > 0 ? CurrentQuest.RewardEXP.ToString() : "无";
         foreach (ItemAgent rwc in UI.rewardCells)

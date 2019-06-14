@@ -111,37 +111,37 @@ public class Talker : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Player")
+        if (collision.CompareTag("Player"))
             DialogueManager.Instance.CanTalk(this);
     }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.tag == "Player" && !DialogueManager.Instance.IsTalking)
+        if (collision.CompareTag("Player") && !DialogueManager.Instance.IsTalking)
             DialogueManager.Instance.CanTalk(this);
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.tag == "Player" && DialogueManager.Instance.CurrentTalker == this)
+        if (collision.CompareTag("Player") && DialogueManager.Instance.CurrentTalker == this)
             DialogueManager.Instance.CannotTalk();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Player")
+        if (other.CompareTag("Player"))
             DialogueManager.Instance.CanTalk(this);
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.tag == "Player" && !DialogueManager.Instance.IsTalking)
+        if (other.CompareTag("Player") && !DialogueManager.Instance.IsTalking)
             DialogueManager.Instance.CanTalk(this);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == "Player" && DialogueManager.Instance.CurrentTalker == this)
+        if (other.CompareTag("Player") && DialogueManager.Instance.CurrentTalker == this)
             DialogueManager.Instance.CannotTalk();
     }
 }

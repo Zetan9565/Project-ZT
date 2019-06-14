@@ -49,7 +49,7 @@ public class InputManager : MonoBehaviour
             {
                 if (!DialogueManager.Instance.IsTalking)
                     DialogueManager.Instance.BeginNewDialogue();
-                else if (DialogueManager.Instance.DialogueType == DialogueType.Normal && DialogueManager.Instance.OptionsCount < 1
+                else if (DialogueManager.Instance.CurrentType == DialogueType.Normal && DialogueManager.Instance.OptionsCount < 1
                     && DialogueManager.Instance.NPCHasNotAcptQuests)
                     DialogueManager.Instance.LoadTalkerQuest();
                 else if (DialogueManager.Instance.OptionsCount > 0)

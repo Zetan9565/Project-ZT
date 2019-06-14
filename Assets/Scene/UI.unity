@@ -769,6 +769,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -3211,6 +3212,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -3943,6 +3945,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -5320,6 +5323,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -6650,6 +6654,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -7433,6 +7438,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -7734,6 +7740,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -8273,6 +8280,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -9988,6 +9996,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -11733,6 +11742,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -13148,7 +13158,8 @@ MonoBehaviour:
   worldSize: {x: 48, y: 48}
   threeD: 0
   baseCellSize: 1
-  unitSizes: []
+  unitSizes:
+  - {x: 1, y: 1}
   worldHeight: 20
   groundLayer:
     serializedVersion: 2
@@ -15482,6 +15493,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -16382,6 +16394,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -17535,6 +17548,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -20606,6 +20620,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -22670,6 +22685,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -24473,6 +24489,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -24696,6 +24713,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -26335,6 +26353,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -26799,6 +26818,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -27508,6 +27528,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -30532,6 +30553,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -30875,9 +30897,10 @@ MonoBehaviour:
   unitSize: {x: 1, y: 1}
   footOffset: {x: 0, y: 0, z: 0}
   fixedOffset: 0.1
-  target: {fileID: 0}
+  target: {fileID: 1747857556}
   targetFootOffset: {x: 0, y: -1, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 1
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 1396470409}
@@ -31226,6 +31249,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -32443,6 +32467,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -34094,6 +34119,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -35133,6 +35159,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -35737,6 +35764,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -36402,6 +36430,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -38563,6 +38592,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -39634,6 +39664,7 @@ MonoBehaviour:
   target: {fileID: 174075524}
   targetFootOffset: {x: 0, y: -1, z: 0}
   targetFollowStartDistance: 2
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 1804632443}
   rigidbody2D: {fileID: 0}
@@ -40637,6 +40668,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}
@@ -41942,6 +41974,7 @@ MonoBehaviour:
   target: {fileID: 1396470406}
   targetFootOffset: {x: 0, y: 0, z: 0}
   targetFollowStartDistance: 3
+  repathRate: 0.1
   moveMode: 0
   rigidbody: {fileID: 0}
   rigidbody2D: {fileID: 0}

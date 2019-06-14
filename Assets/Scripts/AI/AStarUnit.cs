@@ -22,7 +22,8 @@ public class AStarUnit : MonoBehaviour
     private Vector3 targetFootOffset;
     [SerializeField, Tooltip("目标离开原位置多远之后开始修正跟随？")]
     private float targetFollowStartDistance = 5;
-
+    [SerializeField]
+    private float repathRate = 0.1f;
 
     [SerializeField]
 #if UNITY_EDITOR
@@ -51,10 +52,13 @@ public class AStarUnit : MonoBehaviour
     private Animator animator;
     [SerializeField]
     private string animaHorizontal = "Horizontal";
+    private int animaHorizontalHash;
     [SerializeField]
     private string animaVertical = "Vertical";
+    private int animaVerticalHash;
     [SerializeField]
     private string animaMagnitude = "Move";
+    private int animaMagnitudeHash;
 
     [SerializeField]
     private bool drawGizmos;
@@ -165,7 +169,7 @@ public class AStarUnit : MonoBehaviour
                 {
                     if (AStarManager.Instance.ThreeD && MyUtilities.Slope(transform.position, path[targetWaypointIndex]) > slopeLimit)
                         return Vector3.zero;
-                    if (Vector3.Distance(OffsetPosition, Destination) <= stopDistance)
+                    if ((OffsetPosition - Destination).sqrMagnitude < stopDistance * stopDistance)
                     {
                         ResetPath();
                         return Vector3.zero;
@@ -254,6 +258,7 @@ public class AStarUnit : MonoBehaviour
         pathFollowCoroutine = StartCoroutine(FollowPath());
     }
 
+    private readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
     private IEnumerator FollowPath()
     {
         if (path == null || path.Length < 1 || !IsFollowingPath) yield break; //yield break相当于普通函数空return
@@ -266,7 +271,7 @@ public class AStarUnit : MonoBehaviour
                 yield break;
             }
             if (AStarManager.Instance.ThreeD && MyUtilities.Slope(OffsetPosition, targetWaypoint) > slopeLimit) yield break;
-            if (Vector3.Distance(OffsetPosition, Destination) <= stopDistance)
+            if ((OffsetPosition - Destination).sqrMagnitude < stopDistance * stopDistance)
             {
                 ResetPath();
                 //Debug.Log("Stop");
@@ -310,7 +315,7 @@ public class AStarUnit : MonoBehaviour
                 }
                 else if (!AStarManager.Instance.ThreeD && rigidbody2D)
                     rigidbody2D.MovePosition((Vector3)rigidbody2D.position + DesiredVelocity * Time.fixedDeltaTime);
-                yield return new WaitForFixedUpdate();//相当于以上步骤在FiexdUpdate()里执行
+                yield return WaitForFixedUpdate;//相当于以上步骤在FiexdUpdate()里执行
             }
             else
             {
@@ -325,7 +330,7 @@ public class AStarUnit : MonoBehaviour
                     }
                     controller.SimpleMove(DesiredVelocity - Vector3.up * 9.81f);
                 }
-                yield return new WaitForFixedUpdate();
+                yield return WaitForFixedUpdate;
             }
         }
     }
@@ -392,10 +397,11 @@ public class AStarUnit : MonoBehaviour
         if (!target) yield break;
         Vector3 oldTargetPosition = TargetPosition;
         SetDestination(TargetPosition);
-        while (target)
+        WaitForSeconds WaitForSeconds = new WaitForSeconds(repathRate);
+        while (target && repathRate > 0)
         {
-            yield return new WaitForSeconds(0.1f);
-            if (Vector3.Distance(oldTargetPosition, TargetPosition) > targetFollowStartDistance)
+            yield return WaitForSeconds;
+            if (Vector3.SqrMagnitude(oldTargetPosition - TargetPosition) > targetFollowStartDistance * targetFollowStartDistance)
             {
                 oldTargetPosition = TargetPosition;
                 SetDestination(TargetPosition);
@@ -411,18 +417,18 @@ public class AStarUnit : MonoBehaviour
         leftPoint.AddFirst(OffsetPosition);
         pathRenderer.positionCount = leftPoint.Count;
         pathRenderer.SetPositions(leftPoint.ToArray());
-        if (Vector3.Distance(OffsetPosition, Destination) < stopDistance) ShowPath(false);
+        if ((OffsetPosition - Destination).sqrMagnitude < stopDistance * stopDistance) ShowPath(false);
     }
 
     private void UpdateAnimation()
     {
         Vector3 animaInput = DesiredVelocity.normalized;
-        if (animaInput.magnitude > 0)
+        if (animaInput.sqrMagnitude > 0)
         {
-            animator.SetFloat(animaHorizontal, animaInput.x);
-            animator.SetFloat(animaVertical, animaInput.y);
+            animator.SetFloat(animaHorizontalHash, animaInput.x);
+            animator.SetFloat(animaVerticalHash, animaInput.y);
         }
-        animator.SetFloat(animaMagnitude, animaInput.magnitude);
+        animator.SetFloat(animaMagnitudeHash, animaInput.sqrMagnitude);
     }
 
     private enum UnitMoveMode
@@ -445,6 +451,10 @@ public class AStarUnit : MonoBehaviour
         if (controller && moveMode == UnitMoveMode.MoveController) controller.slopeLimit = slopeLimit;
 
         ShowPath(false);
+
+        animaHorizontalHash = Animator.StringToHash(animaHorizontal);
+        animaVerticalHash = Animator.StringToHash(animaVertical);
+        animaMagnitudeHash = Animator.StringToHash(animaMagnitude);
     }
 
     private void Start()

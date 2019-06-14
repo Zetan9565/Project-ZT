@@ -36,9 +36,9 @@ public class WarehouseAgent : MonoBehaviour
                     delegate
                     {
                         if (MBuilding.IsBuilt && BuildingManager.Instance.ToDestroy == MBuilding)
-                         {
+                        {
                             BuildingManager.Instance.CannotDestroy();
-                         }
+                        }
                     });
             });
         }
@@ -46,7 +46,7 @@ public class WarehouseAgent : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Player" && isActiveAndEnabled)
+        if (collision.CompareTag("Player") && isActiveAndEnabled)
         {
             WarehouseManager.Instance.CanStore(this);
         }
@@ -54,7 +54,7 @@ public class WarehouseAgent : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.tag == "Player" && !WarehouseManager.Instance.IsUIOpen && isActiveAndEnabled)
+        if (collision.CompareTag("Player") && !WarehouseManager.Instance.IsUIOpen && isActiveAndEnabled)
         {
             WarehouseManager.Instance.CanStore(this);
         }
@@ -62,7 +62,7 @@ public class WarehouseAgent : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.tag == "Player" && WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled)
+        if (collision.CompareTag("Player") && WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled)
         {
             WarehouseManager.Instance.CannotStore();
         }

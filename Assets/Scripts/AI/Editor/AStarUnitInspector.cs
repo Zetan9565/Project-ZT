@@ -9,6 +9,7 @@ public class AStarUnitInspector : Editor
     SerializedProperty unitSize;
     SerializedProperty targetFootOffset;
     SerializedProperty targetFollowStartDistance;
+    SerializedProperty repathRate;
     SerializedProperty footOffset;
     SerializedProperty fixedOffset;
     SerializedProperty moveMode;
@@ -44,7 +45,7 @@ public class AStarUnitInspector : Editor
         moveSpeed = serializedObject.FindProperty("moveSpeed");
         slopeLimit = serializedObject.FindProperty("slopeLimit");
         stopDistance = serializedObject.FindProperty("stopDistance");
-        //autoRepath = serializedObject.FindProperty("autoRepath");
+        repathRate = serializedObject.FindProperty("repathRate");
         drawGizmos = serializedObject.FindProperty("drawGizmos");
         pathRenderer = serializedObject.FindProperty("pathRenderer");
         animator = serializedObject.FindProperty("animator");
@@ -68,39 +69,48 @@ public class AStarUnitInspector : Editor
             EditorGUILayout.LabelField("单位实际大小", string.Format("宽: {0} 高: {1}",
                 (manager.BaseCellSize * unitSize.vector2IntValue.x).ToString(), (manager.BaseCellSize * unitSize.vector2IntValue.y).ToString()));
         EditorGUILayout.EndVertical();
+
+
         EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.PropertyField(footOffset, new GUIContent("自身脚部偏移"));
         EditorGUILayout.PropertyField(fixedOffset, new GUIContent("近似位置修正值"));
         if (fixedOffset.floatValue < 0) fixedOffset.floatValue = 0;
         EditorGUILayout.EndVertical();
+
+
         EditorGUILayout.BeginVertical("Box");
         if (Application.isPlaying)
         {
             GUI.enabled = false;
             EditorGUILayout.PropertyField(target, new GUIContent("跟随目标(可选)"));
-            if (target.objectReferenceValue) EditorGUILayout.PropertyField(targetFootOffset, new GUIContent("目标脚部偏移"));
             GUI.enabled = true;
         }
         else
         {
             EditorGUILayout.PropertyField(target, new GUIContent("跟随目标(可选)"));
-            if (target.objectReferenceValue) EditorGUILayout.PropertyField(targetFootOffset, new GUIContent("目标脚部偏移"));
         }
-        EditorGUILayout.EndVertical();
+        if (target.objectReferenceValue)
+        {
+            if ((target.objectReferenceValue as Transform) != (base.target as AStarUnit).transform)
+            {
+                EditorGUILayout.PropertyField(targetFootOffset, new GUIContent("目标脚部偏移"));
+                EditorGUILayout.PropertyField(targetFollowStartDistance, new GUIContent("目标开始跟随距离"));
+                if (Application.isPlaying) GUI.enabled = false;
+                EditorGUILayout.PropertyField(repathRate, new GUIContent("目标位置刷新频率(秒)"));
+                if (Application.isPlaying) GUI.enabled = true;
+            }
+            else EditorGUILayout.HelpBox("跟随目标是自身！", MessageType.Warning);
+        }
         if (targetFollowStartDistance.floatValue < 0) targetFollowStartDistance.floatValue = 0;
+        EditorGUILayout.EndVertical();
+
+
         EditorGUILayout.BeginVertical("Box");
         if (Application.isPlaying)
-        {
             GUI.enabled = false;
-            EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(moveMode, new GUIContent("移动方式"));
+        EditorGUILayout.PropertyField(moveMode, new GUIContent("移动方式"));
+        if (Application.isPlaying)
             GUI.enabled = true;
-        }
-        else
-        {
-            EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(moveMode, new GUIContent("移动方式"));
-        }
         if (moveMode.enumValueIndex == 1)
         {
             if (!manager)
@@ -160,9 +170,11 @@ public class AStarUnitInspector : Editor
             slopeLimit.floatValue = EditorGUILayout.Slider("最大移动坡度", slopeLimit.floatValue, 0, 90);
         EditorGUILayout.PropertyField(stopDistance, new GUIContent("提前停止距离"));
         if (stopDistance.floatValue < 0) stopDistance.floatValue = 0;
-        //EditorGUILayout.PropertyField(autoRepath, new GUIContent("自动修复路线"));
         EditorGUILayout.EndVertical();
+
+
         EditorGUILayout.BeginVertical("Box");
+        if (Application.isPlaying) GUI.enabled = false;
         EditorGUILayout.PropertyField(animator, new GUIContent("动画控制器(可选)"));
         if (animator.objectReferenceValue)
         {
@@ -170,7 +182,10 @@ public class AStarUnitInspector : Editor
             EditorGUILayout.PropertyField(animaVertical, new GUIContent("动画控垂直参数"));
             EditorGUILayout.PropertyField(animaMagnitude, new GUIContent("动画模参数"));
         }
+        if (Application.isPlaying) GUI.enabled = true;
         EditorGUILayout.EndVertical();
+
+
         EditorGUILayout.Space();
         EditorGUILayout.PropertyField(pathRenderer, new GUIContent("路线渲染器(可选)"));
         EditorGUILayout.Space();

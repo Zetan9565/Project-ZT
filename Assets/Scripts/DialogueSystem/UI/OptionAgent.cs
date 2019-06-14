@@ -72,7 +72,7 @@ public class OptionAgent : MonoBehaviour
                 DialogueManager.Instance.StartObjectiveDialogue(TalkObjective);
                 break;
             case OptionType.Confirm:
-                if (DialogueManager.Instance.DialogueType == DialogueType.Quest)
+                if (DialogueManager.Instance.CurrentType == DialogueType.Quest)
                     if (!DialogueManager.Instance.CurrentQuest.IsComplete && QuestManager.Instance.AcceptQuest(DialogueManager.Instance.CurrentQuest))
                         DialogueManager.Instance.GotoDefault();
                     else if (QuestManager.Instance.CompleteQuest(DialogueManager.Instance.CurrentQuest))

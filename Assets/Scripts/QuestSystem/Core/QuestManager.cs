@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -520,7 +521,7 @@ public class QuestManager : MonoBehaviour, IWindow
                 qgaEnum.Current.UpdateStatus();
 
         if (selectedQuest == null) return;
-        string objectives = string.Empty;
+        StringBuilder objectives = new StringBuilder();
         QuestAgent cqa = completeQuestAgents.Find(x => x.MQuest == selectedQuest);
         if (cqa)
         {
@@ -530,14 +531,14 @@ public class QuestManager : MonoBehaviour, IWindow
                 if (selectedQuest.Objectives[i].Display)
                 {
                     string endLine = i == lineCount ? string.Empty : "\n";
-                    objectives += selectedQuest.Objectives[i].DisplayName + endLine;
+                    objectives.Append(selectedQuest.Objectives[i].DisplayName + endLine);
                 }
             }
-            UI.descriptionText.text = string.Format("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标</b>\n{3}",
-                                   selectedQuest.Title,
-                                   selectedQuest.OriginalQuestGiver.TalkerName,
-                                   selectedQuest.Description,
-                                   objectives);
+            UI.descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标</b>\n{3}",
+                                    selectedQuest.Title,
+                                    selectedQuest.OriginalQuestGiver.TalkerName,
+                                    selectedQuest.Description,
+                                    objectives.ToString()).ToString();
         }
         else
         {
@@ -547,17 +548,17 @@ public class QuestManager : MonoBehaviour, IWindow
                 if (selectedQuest.Objectives[i].Display)
                 {
                     string endLine = i == lineCount ? string.Empty : "\n";
-                    objectives += selectedQuest.Objectives[i].DisplayName +
+                    objectives.Append(selectedQuest.Objectives[i].DisplayName +
                                   "[" + selectedQuest.Objectives[i].CurrentAmount + "/" + selectedQuest.Objectives[i].Amount + "]" +
-                                  (selectedQuest.Objectives[i].IsComplete ? "(达成)" + endLine : endLine);
+                                  (selectedQuest.Objectives[i].IsComplete ? "(达成)" + endLine : endLine));
                 }
             }
-            UI.descriptionText.text = string.Format("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标{3}</b>\n{4}",
+            UI.descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标{3}</b>\n{4}",
                                    selectedQuest.Title,
                                    selectedQuest.OriginalQuestGiver.TalkerName,
                                    selectedQuest.Description,
                                    selectedQuest.IsComplete ? "(完成)" : selectedQuest.IsOngoing ? "(进行中)" : string.Empty,
-                                   objectives);
+                                   objectives.ToString()).ToString();
         }
     }
 
