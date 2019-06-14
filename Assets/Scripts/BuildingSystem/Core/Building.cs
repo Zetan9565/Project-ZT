@@ -56,7 +56,7 @@ public class Building : MonoBehaviour
             if (mb != this) mb.enabled = false;
         }
         IsUnderBuilding = true;
-        MyTools.SetActive(buildingFlag.gameObject, true);
+        MyUtilities.SetActive(buildingFlag.gameObject, true);
         return true;
     }
 
@@ -76,13 +76,13 @@ public class Building : MonoBehaviour
                 if (mb != this) mb.enabled = false;
             }
             IsUnderBuilding = true;
-            MyTools.SetActive(buildingFlag.gameObject, true);
+            MyUtilities.SetActive(buildingFlag.gameObject, true);
         }
         else
         {
             IsUnderBuilding = false;
             IsBuilt = true;
-            MyTools.SetActive(buildingFlag.gameObject, false);
+            MyUtilities.SetActive(buildingFlag.gameObject, false);
         }
         if (buildingAgent) buildingAgent.UpdateUI();
     }
@@ -114,7 +114,7 @@ public class Building : MonoBehaviour
     private IEnumerator WaitToHideFlag()
     {
         yield return new WaitForSeconds(2);
-        MyTools.SetActive(buildingFlag.gameObject, false);
+        MyUtilities.SetActive(buildingFlag.gameObject, false);
     }
 
     public void TryDestroy()

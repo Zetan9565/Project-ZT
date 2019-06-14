@@ -51,27 +51,27 @@ public class ItemWindowHandler : MonoBehaviour
                     (weapon.Hit > 0 ? "命中+" + weapon.Hit + "\n" : string.Empty);
                 if (weapon.Powerup.IsEffective)
                 {
-                    MyTools.SetActive(UI.mulFunTitle.gameObject, true);
-                    MyTools.SetActive(UI.mulFunText.gameObject, true);
+                    MyUtilities.SetActive(UI.mulFunTitle.gameObject, true);
+                    MyUtilities.SetActive(UI.mulFunText.gameObject, true);
                     UI.mulFunTitle.text = "-附加能力";
                     UI.mulFunText.text = weapon.Powerup.ToString();
                 }
                 else
                 {
-                    MyTools.SetActive(UI.mulFunTitle.gameObject, false);
-                    MyTools.SetActive(UI.mulFunText.gameObject, false);
+                    MyUtilities.SetActive(UI.mulFunTitle.gameObject, false);
+                    MyUtilities.SetActive(UI.mulFunText.gameObject, false);
                     UI.mulFunTitle.text = string.Empty;
                     UI.mulFunText.text = string.Empty;
                 }
                 if (weapon.GemSlotAmout > 0)
-                    MyTools.SetActive(UI.gemstone_1.gameObject, true);
+                    MyUtilities.SetActive(UI.gemstone_1.gameObject, true);
                 else
-                    MyTools.SetActive(UI.gemstone_1.gameObject, false);
+                    MyUtilities.SetActive(UI.gemstone_1.gameObject, false);
                 if (weapon.GemSlotAmout > 1)
-                    MyTools.SetActive(UI.gemstone_2.gameObject, true);
+                    MyUtilities.SetActive(UI.gemstone_2.gameObject, true);
                 else
-                    MyTools.SetActive(UI.gemstone_2.gameObject, false);
-                MyTools.SetActive(UI.durability.gameObject, true);
+                    MyUtilities.SetActive(UI.gemstone_2.gameObject, false);
+                MyUtilities.SetActive(UI.durability.gameObject, true);
                 if (PlayerManager.Instance.PlayerInfo.HasPrimaryWeapon)
                     OpenSubItemWindow(PlayerManager.Instance.PlayerInfo.primaryWeapon);
                 else if (PlayerManager.Instance.PlayerInfo.HasSecondaryWeapon)
@@ -79,19 +79,19 @@ public class ItemWindowHandler : MonoBehaviour
                 break;
             case ItemType.Bag:
                 UI.effectText.text = GameManager.Instance.BackpackName + "容量+" + (MItemInfo.Item as BagItem).ExpandSize;
-                MyTools.SetActive(UI.mulFunTitle.gameObject, false);
-                MyTools.SetActive(UI.mulFunText.gameObject, false);
-                MyTools.SetActive(UI.gemstone_1.gameObject, false);
-                MyTools.SetActive(UI.gemstone_2.gameObject, false);
-                MyTools.SetActive(UI.durability.gameObject, false);
+                MyUtilities.SetActive(UI.mulFunTitle.gameObject, false);
+                MyUtilities.SetActive(UI.mulFunText.gameObject, false);
+                MyUtilities.SetActive(UI.gemstone_1.gameObject, false);
+                MyUtilities.SetActive(UI.gemstone_2.gameObject, false);
+                MyUtilities.SetActive(UI.durability.gameObject, false);
                 break;
             default:
                 UI.effectText.text = string.Empty;
-                MyTools.SetActive(UI.mulFunTitle.gameObject, false);
-                MyTools.SetActive(UI.mulFunText.gameObject, false);
-                MyTools.SetActive(UI.gemstone_1.gameObject, false);
-                MyTools.SetActive(UI.gemstone_2.gameObject, false);
-                MyTools.SetActive(UI.durability.gameObject, false);
+                MyUtilities.SetActive(UI.mulFunTitle.gameObject, false);
+                MyUtilities.SetActive(UI.mulFunText.gameObject, false);
+                MyUtilities.SetActive(UI.gemstone_1.gameObject, false);
+                MyUtilities.SetActive(UI.gemstone_2.gameObject, false);
+                MyUtilities.SetActive(UI.durability.gameObject, false);
                 break;
         }
         UI.itemWindow.alpha = 1;
@@ -193,8 +193,8 @@ public class ItemWindowHandler : MonoBehaviour
 #if UNITY_ANDROID
                 MyTools.SetActive(UI.closeButton.gameObject, true);
 #endif
-                MyTools.SetActive(UI.discardButton.gameObject, false);
-                MyTools.SetActive(UI.mulFunButton.gameObject, false);
+                MyUtilities.SetActive(UI.discardButton.gameObject, false);
+                MyUtilities.SetActive(UI.mulFunButton.gameObject, false);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 break;
         }
@@ -222,35 +222,35 @@ public class ItemWindowHandler : MonoBehaviour
                     (weapon.Hit > 0 ? "命中+" + weapon.Hit + "\n" : string.Empty);
                 if (weapon.Powerup.IsEffective)
                 {
-                    MyTools.SetActive(subUI.mulFunTitle.gameObject, true);
-                    MyTools.SetActive(subUI.mulFunText.gameObject, true);
+                    MyUtilities.SetActive(subUI.mulFunTitle.gameObject, true);
+                    MyUtilities.SetActive(subUI.mulFunText.gameObject, true);
                     subUI.mulFunTitle.text = "-附加能力";
                     subUI.mulFunText.text = weapon.Powerup.ToString();
                 }
                 else
                 {
-                    MyTools.SetActive(subUI.mulFunTitle.gameObject, false);
-                    MyTools.SetActive(subUI.mulFunText.gameObject, false);
+                    MyUtilities.SetActive(subUI.mulFunTitle.gameObject, false);
+                    MyUtilities.SetActive(subUI.mulFunText.gameObject, false);
                     subUI.mulFunTitle.text = string.Empty;
                     subUI.mulFunText.text = string.Empty;
                 }
                 if (weapon.GemSlotAmout > 0)
-                    MyTools.SetActive(subUI.gemstone_1.gameObject, true);
+                    MyUtilities.SetActive(subUI.gemstone_1.gameObject, true);
                 else
-                    MyTools.SetActive(subUI.gemstone_1.gameObject, false);
+                    MyUtilities.SetActive(subUI.gemstone_1.gameObject, false);
                 if (weapon.GemSlotAmout > 1)
-                    MyTools.SetActive(subUI.gemstone_2.gameObject, true);
+                    MyUtilities.SetActive(subUI.gemstone_2.gameObject, true);
                 else
-                    MyTools.SetActive(subUI.gemstone_2.gameObject, false);
-                MyTools.SetActive(subUI.durability.gameObject, true);
+                    MyUtilities.SetActive(subUI.gemstone_2.gameObject, false);
+                MyUtilities.SetActive(subUI.durability.gameObject, true);
                 break;
             default:
                 subUI.effectText.text = string.Empty;
-                MyTools.SetActive(subUI.mulFunTitle.gameObject, false);
-                MyTools.SetActive(subUI.mulFunText.gameObject, false);
-                MyTools.SetActive(subUI.gemstone_1.gameObject, false);
-                MyTools.SetActive(subUI.gemstone_2.gameObject, false);
-                MyTools.SetActive(subUI.durability.gameObject, false);
+                MyUtilities.SetActive(subUI.mulFunTitle.gameObject, false);
+                MyUtilities.SetActive(subUI.mulFunText.gameObject, false);
+                MyUtilities.SetActive(subUI.gemstone_1.gameObject, false);
+                MyUtilities.SetActive(subUI.gemstone_2.gameObject, false);
+                MyUtilities.SetActive(subUI.durability.gameObject, false);
                 break;
         }
         subUI.itemWindow.alpha = 1;
@@ -291,7 +291,7 @@ public class ItemWindowHandler : MonoBehaviour
         UI.descriptionText.text = string.Empty;
         UI.priceText.text = string.Empty;
         UI.descriptionText.text = string.Empty;
-        MyTools.SetActive(UI.durability.gameObject, false);
+        MyUtilities.SetActive(UI.durability.gameObject, false);
         CloseSubWindow();
 #if UNITY_ANDROID
         UI.buttonAreaCanvas.alpha = 0;
@@ -308,7 +308,7 @@ public class ItemWindowHandler : MonoBehaviour
         subUI.descriptionText.text = string.Empty;
         subUI.priceText.text = string.Empty;
         subUI.descriptionText.text = string.Empty;
-        MyTools.SetActive(subUI.durability.gameObject, false);
+        MyUtilities.SetActive(subUI.durability.gameObject, false);
     }
 
     public void UseCurrenItem()
@@ -320,7 +320,7 @@ public class ItemWindowHandler : MonoBehaviour
     public void DiscardCurrentItem()
     {
         BackpackManager.Instance.DiscardItem(MItemInfo);
-        AmountHandler.Instance.SetPosition(MyTools.ScreenCenter, Vector2.zero);
+        AmountHandler.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
         CloseItemWindow();
     }
 

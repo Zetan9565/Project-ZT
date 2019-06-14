@@ -46,7 +46,7 @@ public class WarehouseManager : MonoBehaviour, IWindow
             itemAgents.Add(ia);
             ia.Init(ItemAgentType.Warehouse, itemAgents.IndexOf(ia), UI.gridRect);
             ia.Empty();
-            MyTools.SetActive(ia.gameObject, false);
+            MyUtilities.SetActive(ia.gameObject, false);
         }
     }
 
@@ -94,7 +94,7 @@ public class WarehouseManager : MonoBehaviour, IWindow
                 MessageManager.Instance.NewMessage(string.Format("存入了1个 [{0}]", info.ItemName));
             else
             {
-                AmountHandler.Instance.SetPosition(MyTools.ScreenCenter, Vector2.zero);
+                AmountHandler.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
                 AmountHandler.Instance.Init(delegate
                 {
                     if (OnStore(info, (int)AmountHandler.Instance.Amount))
@@ -171,7 +171,7 @@ public class WarehouseManager : MonoBehaviour, IWindow
                 MessageManager.Instance.NewMessage(string.Format("取出了1个 [{0}]", info.ItemName));
             else
             {
-                AmountHandler.Instance.SetPosition(MyTools.ScreenCenter, Vector2.zero);
+                AmountHandler.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
                 AmountHandler.Instance.Init(delegate
                 {
                     if (OnTakeOut(info, (int)AmountHandler.Instance.Amount))
@@ -254,7 +254,7 @@ public class WarehouseManager : MonoBehaviour, IWindow
         {
             ia.FinishDrag();
             ia.Empty();
-            MyTools.SetActive(ia.gameObject, false);
+            MyUtilities.SetActive(ia.gameObject, false);
         }
         if (BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.CloseWindow();
         ItemWindowHandler.Instance.CloseItemWindow();

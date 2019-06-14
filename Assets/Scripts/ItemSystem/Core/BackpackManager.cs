@@ -538,7 +538,7 @@ public class BackpackManager : MonoBehaviour, IWindow
         if (!UI || !UI.gameObject) return;
         foreach (ItemAgent ia in itemAgents)
         {
-            MyTools.SetActive(ia.gameObject, true);
+            MyUtilities.SetActive(ia.gameObject, true);
         }
     }
 
@@ -548,8 +548,8 @@ public class BackpackManager : MonoBehaviour, IWindow
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && !ia.MItemInfo.Item.IsEquipment)
-                MyTools.SetActive(ia.gameObject, false);
-            else if (ia.IsEmpty) MyTools.SetActive(ia.gameObject, false);
+                MyUtilities.SetActive(ia.gameObject, false);
+            else if (ia.IsEmpty) MyUtilities.SetActive(ia.gameObject, false);
         }
     }
 
@@ -559,8 +559,8 @@ public class BackpackManager : MonoBehaviour, IWindow
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && !ia.MItemInfo.Item.IsConsumable)
-                MyTools.SetActive(ia.gameObject, false);
-            else if (ia.IsEmpty) MyTools.SetActive(ia.gameObject, false);
+                MyUtilities.SetActive(ia.gameObject, false);
+            else if (ia.IsEmpty) MyUtilities.SetActive(ia.gameObject, false);
         }
     }
 
@@ -570,8 +570,8 @@ public class BackpackManager : MonoBehaviour, IWindow
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && !ia.MItemInfo.Item.IsMaterial)
-                MyTools.SetActive(ia.gameObject, false);
-            else if (ia.IsEmpty) MyTools.SetActive(ia.gameObject, false);
+                MyUtilities.SetActive(ia.gameObject, false);
+            else if (ia.IsEmpty) MyUtilities.SetActive(ia.gameObject, false);
         }
     }
     #endregion

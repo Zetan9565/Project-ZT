@@ -2,6 +2,7 @@
 using UnityEngine;
 using System;
 
+[DisallowMultipleComponent]
 public class GameManager : MonoBehaviour
 {
 

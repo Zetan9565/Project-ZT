@@ -132,6 +132,7 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346588124544}
+  buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!61 &8761270117585121961
 BoxCollider2D:

@@ -591,8 +591,8 @@ public class QuestManager : MonoBehaviour, IWindow
                     break;
                 }
             }
-        MyTools.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
-        MyTools.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
+        MyUtilities.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
+        MyUtilities.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = true;
         ItemWindowHandler.Instance.CloseItemWindow();

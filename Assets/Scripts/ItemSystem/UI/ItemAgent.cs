@@ -159,12 +159,12 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     public void Show()
     {
-        MyTools.SetActive(gameObject, true);
+        MyUtilities.SetActive(gameObject, true);
     }
 
     public void Hide()
     {
-        MyTools.SetActive(gameObject, false);
+        MyUtilities.SetActive(gameObject, false);
     }
 
     public void UpdateInfo()

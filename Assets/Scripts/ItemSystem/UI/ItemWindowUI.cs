@@ -21,9 +21,9 @@ public class ItemWindowUI : ItemWindowBaseUI
         windowCanvas.overrideSorting = true;
         windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         windowsRect = itemWindow.GetComponent<RectTransform>();
-        MyTools.SetActive(closeButton.gameObject, false);
+        MyUtilities.SetActive(closeButton.gameObject, false);
 #if UNITY_STANDALONE
-        MyTools.SetActive(buttonsArea, false);
+        MyUtilities.SetActive(buttonsArea, false);
 #elif UNITY_ANDROID
         if (!buttonsArea.GetComponent<CanvasGroup>()) buttonAreaCanvas = buttonsArea.AddComponent<CanvasGroup>();
         buttonAreaCanvas.ignoreParentGroups = true;

@@ -44,7 +44,7 @@ public class PlayerController2D : MonoBehaviour
             {
                 Unit.IsFollowingTarget = false;
                 Unit.ShowPath(true);
-                Unit.SetDestination(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                Unit.SetDestination(MyUtilities.MousePositionAsWorld);
             }
         }
     }
@@ -73,7 +73,7 @@ public class PlayerController2D : MonoBehaviour
         characterController.Move(input);
         if (Unit)
         {
-            if (input.magnitude > 0 || Unit.IsStop)
+            if (input.magnitude > 0/* || Unit.IsStop*/)
             {
                 Unit.IsFollowingPath = false;
                 Unit.IsFollowingTarget = false;

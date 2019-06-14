@@ -68,7 +68,7 @@ public class DragableHandler : MonoBehaviour
         Current = dragable;
         icon.overrideSprite = dragable.DragableIcon;
         icon.color = Color.white;
-        MyTools.SetActive(icon.gameObject, true);
+        MyUtilities.SetActive(icon.gameObject, true);
         onCancelDrag.RemoveAllListeners();
         if (cancelDragAction != null) onCancelDrag.AddListener(cancelDragAction);
         icon.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
@@ -79,7 +79,7 @@ public class DragableHandler : MonoBehaviour
     public void ResetIcon()
     {
         Current = null;
-        MyTools.SetActive(icon.gameObject, false);
+        MyUtilities.SetActive(icon.gameObject, false);
     }
 
     void CancelDrag()

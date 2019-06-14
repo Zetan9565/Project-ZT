@@ -120,7 +120,7 @@ public class BuildingManager : MonoBehaviour, IWindow
     public void ShowAndMovePreview()
     {
         if (!preview) return;
-        preview.transform.position = MyTools.PositionToGrid(GetMovePosition(), gridSize);
+        preview.transform.position = MyUtilities.PositionToGrid(GetMovePosition(), gridSize);
         if (preview.ColliderCount > 0)
         {
             if (preview.SpriteRenderer) preview.SpriteRenderer.color = Color.red;
@@ -129,7 +129,7 @@ public class BuildingManager : MonoBehaviour, IWindow
         {
             if (preview.SpriteRenderer) preview.SpriteRenderer.color = Color.white;
         }
-        if (MyTools.IsMouseInsideScreen)
+        if (MyUtilities.IsMouseInsideScreen)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -180,12 +180,39 @@ public class BuildingManager : MonoBehaviour, IWindow
                     if (!buildings.ContainsKey(currentInfo))
                         buildings.Add(currentInfo, new List<Building>());
                     buildings[currentInfo].Add(building);
-                    if ((building.GetComponentsInChildren<Collider>().Length > 1 || building.GetComponentsInChildren<Collider2D>().Length > 1)
-                        && AStarManager.Instance && Camera.main)
+                    if (AStarManager.Instance)
                     {
-                        //刷新九个屏幕范围内的寻路网格
-                        AStarManager.Instance.UpdateAStars(Camera.main.ScreenToWorldPoint(-new Vector2(Screen.width, Screen.height)),
-                            Camera.main.ScreenToWorldPoint(2 * new Vector2(Screen.width, Screen.height)));
+                        var colliders = building.GetComponentsInChildren<Collider>();
+                        if (colliders.Length > 0)
+                        {
+                            Vector3 min = colliders[0].bounds.min;
+                            Vector3 max = colliders[0].bounds.max;
+                            for (int i = 1; i < colliders.Length; i++)
+                            {
+                                if (MyUtilities.Vector3LessThan(colliders[i].bounds.min, min))
+                                    min = colliders[i].bounds.min;
+                                if (MyUtilities.Vector3LargeThan(colliders[i].bounds.max, max))
+                                    max = colliders[i].bounds.max;
+                            }
+                            AStarManager.Instance.UpdateGraphs(min, max);
+                        }
+                        else
+                        {
+                            var collider2Ds = building.GetComponentsInChildren<Collider2D>();
+                            if (collider2Ds.Length > 0)
+                            {
+                                Vector3 min = collider2Ds[0].bounds.min;
+                                Vector3 max = collider2Ds[0].bounds.max;
+                                for (int i = 1; i < collider2Ds.Length; i++)
+                                {
+                                    if (MyUtilities.Vector3LessThan(collider2Ds[i].bounds.min, min))
+                                        min = collider2Ds[i].bounds.min;
+                                    if (MyUtilities.Vector3LargeThan(collider2Ds[i].bounds.max, max))
+                                        max = collider2Ds[i].bounds.max;
+                                }
+                                AStarManager.Instance.UpdateGraphs(min, max);
+                            }
+                        }
                     }
                 }
             }
@@ -220,12 +247,12 @@ public class BuildingManager : MonoBehaviour, IWindow
                     new Vector3(buildingData.posX, buildingData.posY, buildingData.posZ));
             }
         }
-        if (AStarManager.Instance) AStarManager.Instance.UpdateAStars();
+        AStarManager.Instance.UpdateGraphs();
     }
 
     Vector2 GetMovePosition()
     {
-        if (MyTools.IsMouseInsideScreen)
+        if (MyUtilities.IsMouseInsideScreen)
             return Camera.main.ScreenToWorldPoint(Input.mousePosition);
         else return preview.transform.position;
     }
@@ -262,19 +289,48 @@ public class BuildingManager : MonoBehaviour, IWindow
                 ba.Clear();
             }
             if (buildingAgents.Count < 1 && currentInfo == building.MBuildingInfo && UI.listWindow.alpha > 0) HideBuiltList();
-            Destroy(building.gameObject);
-        }
-        if ((building.GetComponentsInChildren<Collider>().Length > 1 || building.GetComponentsInChildren<Collider2D>().Length > 1)
-            && AStarManager.Instance && Camera.main)
-        {
-            //刷新九个屏幕范围内的寻路网格
-            AStarManager.Instance.UpdateAStars(Camera.main.ScreenToWorldPoint(-new Vector2(Screen.width, Screen.height)),
-                Camera.main.ScreenToWorldPoint(2 * new Vector2(Screen.width, Screen.height)));
+            if (AStarManager.Instance)
+            {
+                var colliders = building.GetComponentsInChildren<Collider>();
+                if (colliders.Length > 0)
+                {
+                    Vector3 min = colliders[0].bounds.min;
+                    Vector3 max = colliders[0].bounds.max;
+                    for (int i = 1; i < colliders.Length; i++)
+                    {
+                        if (MyUtilities.Vector3LessThan(colliders[i].bounds.min, min))
+                            min = colliders[i].bounds.min;
+                        if (MyUtilities.Vector3LargeThan(colliders[i].bounds.max, max))
+                            max = colliders[i].bounds.max;
+                    }
+                    DestroyImmediate(building.gameObject);
+                    AStarManager.Instance.UpdateGraphs(min, max);
+                }
+                else
+                {
+                    var collider2Ds = building.GetComponentsInChildren<Collider2D>();
+                    if (collider2Ds.Length > 0)
+                    {
+                        Vector3 min = collider2Ds[0].bounds.min;
+                        Vector3 max = collider2Ds[0].bounds.max;
+                        for (int i = 1; i < collider2Ds.Length; i++)
+                        {
+                            if (MyUtilities.Vector3LessThan(collider2Ds[i].bounds.min, min))
+                                min = collider2Ds[i].bounds.min;
+                            if (MyUtilities.Vector3LargeThan(collider2Ds[i].bounds.max, max))
+                                max = collider2Ds[i].bounds.max;
+                        }
+                        DestroyImmediate(building.gameObject);
+                        AStarManager.Instance.UpdateGraphs(min, max);
+                    }
+                    else Destroy(building.gameObject);
+                }
+            }
+            else Destroy(building.gameObject);
         }
         confirmDestroy = false;
         CannotDestroy();
     }
-
     #region UI相关
     public void OpenWindow()
     {
@@ -300,7 +356,7 @@ public class BuildingManager : MonoBehaviour, IWindow
         FinishPreview();
         HideDescription();
         HideBuiltList();
-        MyTools.SetActive(UI.destroyButton.gameObject, false);
+        MyUtilities.SetActive(UI.destroyButton.gameObject, false);
     }
     public void OpenCloseWindow()
     {
@@ -320,7 +376,7 @@ public class BuildingManager : MonoBehaviour, IWindow
         {
             UI.buildingWindow.alpha = 0;
             UI.buildingWindow.blocksRaycasts = false;
-            MyTools.SetActive(UI.destroyButton.gameObject, false);
+            MyUtilities.SetActive(UI.destroyButton.gameObject, false);
         }
         IsPausing = pause;
     }
@@ -398,12 +454,12 @@ public class BuildingManager : MonoBehaviour, IWindow
     {
         if (!IsUIOpen || ToDestroy) return;
         ToDestroy = building;
-        if (!IsPausing) MyTools.SetActive(UI.destroyButton.gameObject, true);
+        if (!IsPausing) MyUtilities.SetActive(UI.destroyButton.gameObject, true);
     }
     public void CannotDestroy()
     {
         ToDestroy = null;
-        MyTools.SetActive(UI.destroyButton.gameObject, false);
+        MyUtilities.SetActive(UI.destroyButton.gameObject, false);
         if (ConfirmHandler.Instance.IsUIOpen) ConfirmHandler.Instance.CloseWindow();
     }
 

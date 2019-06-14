@@ -124,7 +124,7 @@ public class DialogueManager : MonoBehaviour, IWindow
             Words.Enqueue(dialogue.Words[i]);
         if (sayImmediately) SayNextWords();
         else MakeContinueOption(true);
-        MyTools.SetActive(UI.wordsText.gameObject, true);
+        MyUtilities.SetActive(UI.wordsText.gameObject, true);
         SetPageArea(false, false, false);
         if (!IsUIOpen) OpenWindow();
     }
@@ -148,10 +148,10 @@ public class DialogueManager : MonoBehaviour, IWindow
         CurrentTalker = talker;
         DialogueType = DialogueType.Normal;
         if (talker is QuestGiver && (talker as QuestGiver).QuestInstances.Count > 0)
-            MyTools.SetActive(UI.questButton.gameObject, true);
-        else MyTools.SetActive(UI.questButton.gameObject, false);
-        MyTools.SetActive(UI.warehouseButton.gameObject, talker.IsWarehouseAgent);
-        MyTools.SetActive(UI.shopButton.gameObject, talker.IsVendor);
+            MyUtilities.SetActive(UI.questButton.gameObject, true);
+        else MyUtilities.SetActive(UI.questButton.gameObject, false);
+        MyUtilities.SetActive(UI.warehouseButton.gameObject, talker.IsWarehouseAgent);
+        MyUtilities.SetActive(UI.shopButton.gameObject, talker.IsVendor);
         HideQuestDescription();
         StartDialogue(talker.Info.DefaultDialogue);
         talker.OnTalkBegin();
@@ -222,7 +222,7 @@ public class DialogueManager : MonoBehaviour, IWindow
         Words.Clear();
         Words.Enqueue(new DialogueWords(talkerInfo, words, talkerType));
         MakeContinueOption(true);
-        MyTools.SetActive(UI.wordsText.gameObject, true);
+        MyUtilities.SetActive(UI.wordsText.gameObject, true);
         SetPageArea(false, false, false);
         waitToGoBackRoutine = StartCoroutine(WaitToGoBack());
     }
@@ -310,7 +310,7 @@ public class DialogueManager : MonoBehaviour, IWindow
         //把第一页以外的选项隐藏
         for (int i = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight); i < optionAgents.Count; i++)
         {
-            MyTools.SetActive(optionAgents[i].gameObject, false);
+            MyUtilities.SetActive(optionAgents[i].gameObject, false);
         }
         CheckPages();
     }
@@ -334,7 +334,7 @@ public class DialogueManager : MonoBehaviour, IWindow
         //把第一页以外的选项隐藏
         for (int i = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight); i < optionAgents.Count; i++)
         {
-            MyTools.SetActive(optionAgents[i].gameObject, false);
+            MyUtilities.SetActive(optionAgents[i].gameObject, false);
         }
         CheckPages();
     }
@@ -353,7 +353,7 @@ public class DialogueManager : MonoBehaviour, IWindow
                 OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(to.runtimeParent.Title, to);
                 optionAgents.Add(oa);
-                if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) MyTools.SetActive(oa.gameObject, false);//第一页以外隐藏
+                if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) MyUtilities.SetActive(oa.gameObject, false);//第一页以外隐藏
                 index++;
             }
         }
@@ -392,7 +392,7 @@ public class DialogueManager : MonoBehaviour, IWindow
         //把第一页以外的选项隐藏
         for (int i = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight); i < optionAgents.Count; i++)
         {
-            MyTools.SetActive(optionAgents[i].gameObject, false);
+            MyUtilities.SetActive(optionAgents[i].gameObject, false);
         }
         if (optionAgents.Count < 1) MakeContinueOption();//如果分支都完成了，则直接可以进行下一句对话
         CheckPages();
@@ -408,9 +408,9 @@ public class DialogueManager : MonoBehaviour, IWindow
             for (int i = 0; i < leftLineCount; i++)
             {
                 if ((page - 1) * leftLineCount + i < optionAgents.Count && (page - 1) * leftLineCount + i >= 0)
-                    MyTools.SetActive(optionAgents[(page - 1) * leftLineCount + i].gameObject, true);
+                    MyUtilities.SetActive(optionAgents[(page - 1) * leftLineCount + i].gameObject, true);
                 if (page * leftLineCount + i >= 0 && page * leftLineCount + i < optionAgents.Count)
-                    MyTools.SetActive(optionAgents[page * leftLineCount + i].gameObject, false);
+                    MyUtilities.SetActive(optionAgents[page * leftLineCount + i].gameObject, false);
             }
         }
         if (Page <= 1 && MaxPage > 1) SetPageArea(false, true, true);
@@ -427,9 +427,9 @@ public class DialogueManager : MonoBehaviour, IWindow
             for (int i = 0; i < leftLineCount; i++)
             {
                 if ((page - 1) * leftLineCount + i < optionAgents.Count && (page - 1) * leftLineCount + i >= 0)
-                    MyTools.SetActive(optionAgents[(page - 1) * leftLineCount + i].gameObject, false);
+                    MyUtilities.SetActive(optionAgents[(page - 1) * leftLineCount + i].gameObject, false);
                 if (page * leftLineCount + i >= 0 && page * leftLineCount + i < optionAgents.Count)
-                    MyTools.SetActive(optionAgents[page * leftLineCount + i].gameObject, true);
+                    MyUtilities.SetActive(optionAgents[page * leftLineCount + i].gameObject, true);
             }
             Page++;
         }
@@ -503,9 +503,9 @@ public class DialogueManager : MonoBehaviour, IWindow
 
     private void SetPageArea(bool activeUp, bool activeDown, bool activeText)
     {
-        MyTools.SetActive(UI.pageUpButton.gameObject, activeUp);
-        MyTools.SetActive(UI.pageDownButton.gameObject, activeDown);
-        MyTools.SetActive(UI.pageText.gameObject, activeText);
+        MyUtilities.SetActive(UI.pageUpButton.gameObject, activeUp);
+        MyUtilities.SetActive(UI.pageDownButton.gameObject, activeDown);
+        MyUtilities.SetActive(UI.pageText.gameObject, activeText);
     }
     #endregion
 
@@ -794,9 +794,9 @@ public class DialogueManager : MonoBehaviour, IWindow
 
     private void ShowButtons(bool shop, bool warehouse, bool quest)
     {
-        MyTools.SetActive(UI.shopButton.gameObject, shop);
-        MyTools.SetActive(UI.warehouseButton.gameObject, warehouse);
-        MyTools.SetActive(UI.questButton.gameObject, quest);
+        MyUtilities.SetActive(UI.shopButton.gameObject, shop);
+        MyUtilities.SetActive(UI.warehouseButton.gameObject, warehouse);
+        MyUtilities.SetActive(UI.questButton.gameObject, quest);
     }
 
     public void SetUI(DialogueUI UI)
@@ -823,9 +823,9 @@ public class DialogueManager : MonoBehaviour, IWindow
     public void LoadTalkerQuest()
     {
         if (CurrentTalker == null) return;
-        MyTools.SetActive(UI.questButton.gameObject, false);
-        MyTools.SetActive(UI.warehouseButton.gameObject, false);
-        MyTools.SetActive(UI.shopButton.gameObject, false);
+        MyUtilities.SetActive(UI.questButton.gameObject, false);
+        MyUtilities.SetActive(UI.warehouseButton.gameObject, false);
+        MyUtilities.SetActive(UI.shopButton.gameObject, false);
         GotoDefault();
         Skip();
         MakeTalkerQuestOption();

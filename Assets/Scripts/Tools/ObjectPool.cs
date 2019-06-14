@@ -33,7 +33,7 @@ public class ObjectPool : MonoBehaviour
         {
             return;
         }
-        MyTools.SetActive(gameObject, false);
+        MyUtilities.SetActive(gameObject, false);
         gameObject.transform.SetParent(poolRoot, false);
         string name = gameObject.name;
         if (pool.ContainsKey(name))
@@ -60,7 +60,7 @@ public class ObjectPool : MonoBehaviour
             pool[goName].Remove(go);
             if (pool[goName].Count < 1) pool.Remove(goName);
             go.transform.SetParent(parent, worldPositonStays);
-            MyTools.SetActive(go, true);
+            MyUtilities.SetActive(go, true);
             return go;
         }
         else
@@ -80,7 +80,7 @@ public class ObjectPool : MonoBehaviour
             go.transform.rotation = rotation;
             pool[goName].Remove(go);
             go.transform.SetParent(parent, worldPositionStays);
-            MyTools.SetActive(go, true);
+            MyUtilities.SetActive(go, true);
             return go;
         }
         else

@@ -36,7 +36,7 @@ public class SaveManager : MonoBehaviour
     #region 存档相关
     public bool Save()
     {
-        using (FileStream fs = MyTools.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
+        using (FileStream fs = MyUtilities.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
         {
             try
             {
@@ -52,7 +52,7 @@ public class SaveManager : MonoBehaviour
                 SaveTrigger(data);
 
                 bf.Serialize(fs, data);
-                MyTools.Encrypt(fs, encryptKey);
+                MyUtilities.Encrypt(fs, encryptKey);
 
                 fs.Close();
 
@@ -140,13 +140,13 @@ public class SaveManager : MonoBehaviour
     #region 读档相关
     public void Load()
     {
-        using (FileStream fs = MyTools.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Open))
+        using (FileStream fs = MyUtilities.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Open))
         {
             try
             {
                 BinaryFormatter bf = new BinaryFormatter();
 
-                SaveData data = bf.Deserialize(MyTools.Decrypt(fs, encryptKey)) as SaveData;
+                SaveData data = bf.Deserialize(MyUtilities.Decrypt(fs, encryptKey)) as SaveData;
 
                 fs.Close();
 

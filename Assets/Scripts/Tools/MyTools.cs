@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
-public class MyTools
+public class MyUtilities
 {
     public static bool IsMouseInsideScreen => Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height;
 
@@ -55,9 +55,32 @@ public class MyTools
 
     public static float Slope(Vector3 from, Vector3 to)
     {
-        float height = from.y - to.y;
-        float length = Vector2.Distance(new Vector2(from.x, to.x), new Vector2(from.z, to.z));
-        return Mathf.Atan(height / length);
+        float height = Mathf.Abs(from.y - to.y);//高程差
+        float length = Vector2.Distance(new Vector2(from.x, from.z), new Vector2(to.x, to.z));//水平差
+        return Mathf.Atan(height / length) * Mathf.Rad2Deg;
+    }
+
+    public static bool Vector3LessThan(Vector3 v1, Vector3 v2)
+    {
+        return v1.x < v2.x && v1.y <= v2.y && v1.z <= v2.z || v1.x <= v2.x && v1.y < v2.y && v1.z <= v2.z || v1.x <= v2.x && v1.y <= v2.y && v1.z < v2.z;
+    }
+
+    public static bool Vector3LargeThan(Vector3 v1, Vector3 v2)
+    {
+        return v1.x > v2.x && v1.y >= v2.y && v1.z >= v2.z || v1.x >= v2.x && v1.y > v2.y && v1.z >= v2.z || v1.x >= v2.x && v1.y >= v2.y && v1.z > v2.z;
+    }
+
+    public static Vector3 CenterOf(Vector3 point1, Vector3 point2)
+    {
+        float x = point1.x - (point1.x - point2.x) / 2;
+        float y = point1.y - (point1.y - point2.y) / 2;
+        float z = point1.z - (point1.z - point2.z) / 2;
+        return new Vector3(x, y, z);
+    }
+
+    public static Vector3 SizeOf(Vector3 point1, Vector3 point2)
+    {
+        return new Vector3(Mathf.Abs(point1.x - point2.x), Mathf.Abs(point1.y - point2.y), Mathf.Abs(point1.z - point2.z));
     }
 
     public static FileStream OpenFile(string path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite)
@@ -143,9 +166,9 @@ public class MyTools
         //加密过程
         MemoryStream ms = new MemoryStream();
         CryptoStream cs = new CryptoStream(ms, cTransform, CryptoStreamMode.Write);
-        int bytesRead = 0;
         byte[] buffer = new byte[1024];
         unencryptStream.Position = 0;
+        int bytesRead;
         do
         {
             bytesRead = unencryptStream.Read(buffer, 0, 1024);
@@ -173,8 +196,8 @@ public class MyTools
         //解密过程
         MemoryStream ms = new MemoryStream();
         CryptoStream cs = new CryptoStream(encryptedStream, cTransform, CryptoStreamMode.Read);
-        int bytesRead = 0;
         byte[] buffer = new byte[1024];
+        int bytesRead;
         do
         {
             bytesRead = cs.Read(buffer, 0, 1024);
@@ -1008,11 +1031,11 @@ public class ScopeFloat
     }
 }
 
-public class Heap<T> where T : IHeapItem<T>
+public class Heap<T> where T : class, IHeapItem<T>
 {
-    private T[] items;
-    private int maxSize;
-    private HeapType heapType;
+    private readonly T[] items;
+    private readonly int maxSize;
+    private readonly HeapType heapType;
 
     public int Count { get; private set; }
 
@@ -1049,7 +1072,7 @@ public class Heap<T> where T : IHeapItem<T>
 
     public bool Contains(T item)
     {
-        if (item == default || item.HeapIndex < 0 || item.HeapIndex > items.Length - 1) return false;
+        if (item == default || item.HeapIndex < 0 || item.HeapIndex > Count - 1) return false;
         return Equals(items[item.HeapIndex], item);//用items.Contains()就等着哭吧
     }
 

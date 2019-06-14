@@ -74,7 +74,7 @@ public class MakingManager : MonoBehaviour, IWindow
         }
         else
         {
-            AmountHandler.Instance.SetPosition(MyTools.ScreenCenter, Vector2.zero);
+            AmountHandler.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
             AmountHandler.Instance.Init(delegate
             {
                 if (OnMake(currentItem, (int)AmountHandler.Instance.Amount))

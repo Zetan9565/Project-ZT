@@ -1,14 +1,16 @@
-﻿using System.Collections;
+﻿using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using Pathfinding;
 
 [DisallowMultipleComponent]
+[RequireComponent(typeof(Seeker))]
 [AddComponentMenu("ZetanStudio/AI/A*寻路单位")]
 public class AStarUnit : MonoBehaviour
 {
-    [SerializeField, Tooltip("以单元格倍数为单位")]
-    private int unitSize = 1;
+    [SerializeField, Tooltip("以单元格倍数为单位，至少是 1 倍，2D空间下 Y 数值无效")]
+    private Vector2Int unitSize = Vector2Int.one;
     [SerializeField]
     private Vector3 footOffset;
     [SerializeField, Tooltip("位置近似范围半径，最小建议值为0.1")]
@@ -33,6 +35,7 @@ public class AStarUnit : MonoBehaviour
     private new Rigidbody2D rigidbody2D;
     [SerializeField]
     private CharacterController controller;
+    private new Transform transform;
 
     public float moveSpeed = 10f;
     public float turnSpeed = 10f;
@@ -40,8 +43,6 @@ public class AStarUnit : MonoBehaviour
     private float slopeLimit = 45.0f;
     [SerializeField]
     public float stopDistance = 1;
-    [SerializeField]
-    public bool autoRepath = true;
 
     [SerializeField]
     private LineRenderer pathRenderer;
@@ -57,6 +58,17 @@ public class AStarUnit : MonoBehaviour
 
     [SerializeField]
     private bool drawGizmos;
+
+    private Seeker seeker;
+    public Seeker Seeker
+    {
+        get
+        {
+            if (!seeker) seeker = GetComponent<Seeker>();
+            if (!seeker) seeker = gameObject.AddComponent<Seeker>();
+            return seeker;
+        }
+    }
 
     #region 实时变量
     private Vector3[] path;
@@ -148,13 +160,10 @@ public class AStarUnit : MonoBehaviour
                 {
                     targetWaypointIndex++;
                     if (targetWaypointIndex >= path.Length) return Vector3.zero;
-                    if (autoRepath)
-                        if (!AStarManager.Instance.WorldPointWalkable(path[targetWaypointIndex], unitSize))
-                            RequestPath(Destination);
                 }
                 if (targetWaypointIndex < path.Length)
                 {
-                    if (AStarManager.Instance.ThreeD && MyTools.Slope(transform.position, path[targetWaypointIndex]) > slopeLimit)
+                    if (AStarManager.Instance.ThreeD && MyUtilities.Slope(transform.position, path[targetWaypointIndex]) > slopeLimit)
                         return Vector3.zero;
                     if (Vector3.Distance(OffsetPosition, Destination) <= stopDistance)
                     {
@@ -180,83 +189,13 @@ public class AStarUnit : MonoBehaviour
     }
     #endregion
 
-    #region MonoBehaviour
-    private void Awake()
-    {
-        if (controller && moveMode == UnitMoveMode.MoveController) controller.slopeLimit = slopeLimit;
-        ShowPath(false);
-    }
-
-    private void Start()
-    {
-        //Debug only
-        SetTarget(target, targetFootOffset, true);
-    }
-
-    private void Update()
-    {
-        if (pathRenderer && path != null && path.Length > 0)
-        {
-            LinkedList<Vector3> leftPoint = new LinkedList<Vector3>(path.Skip(targetWaypointIndex).ToArray());
-            leftPoint.AddFirst(OffsetPosition);
-            pathRenderer.positionCount = leftPoint.Count;
-            pathRenderer.SetPositions(leftPoint.ToArray());
-            if (Vector3.Distance(OffsetPosition, Destination) < stopDistance) ShowPath(false);
-        }
-        if (animator)
-        {
-            Vector3 animaInput = DesiredVelocity.normalized;
-            if (animaInput.magnitude > 0)
-            {
-                animator.SetFloat(animaHorizontal, animaInput.x);
-                animator.SetFloat(animaVertical, animaInput.y);
-            }
-            animator.SetFloat(animaMagnitude, animaInput.magnitude);
-        }
-    }
-
-    private void LateUpdate()
-    {
-        oldPosition = OffsetPosition;
-    }
-
-    private void OnEnable()
-    {
-        if (!AStarManager.Instance) enabled = false;
-        oldPosition = OffsetPosition;
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (drawGizmos)
-        {
-            if (path != null)
-                for (int i = targetWaypointIndex; i >= 0 && i < path.Length; i++)
-                {
-                    if (i != path.Length - 1) Gizmos.color = new Color(Color.cyan.r, Color.cyan.g, Color.cyan.b, 0.5f);
-                    else Gizmos.color = new Color(Color.green.r, Color.green.g, Color.green.b, 0.5f);
-                    Gizmos.DrawSphere(path[i], 0.25f);
-
-                    if (i == targetWaypointIndex)
-                        Gizmos.DrawLine(OffsetPosition, path[i]);
-                    else Gizmos.DrawLine(path[i - 1], path[i]);
-                }
-            if (gizmosTargetPos != default && AStarManager.Instance)
-            {
-                Gizmos.color = new Color(Color.black.r, Color.black.g, Color.black.b, 0.75f);
-                Gizmos.DrawCube(new Vector3(gizmosTargetPos.x, gizmosTargetPos.y, 0), Vector3.one * AStarManager.Instance.BaseCellSize * unitSize * 0.95f);
-            }
-        }
-    }
-    #endregion
-
     #region 路径相关
     public void SetPath(IEnumerable<Vector3> newPath, bool followImmediate = false)
     {
         if (newPath == null || !AStarManager.Instance) return;
         ResetPath();
         IsFollowingPath = followImmediate;
-        OnPathFound(newPath, true);
+        GetResult(newPath, true);
     }
 
     public void ResetPath()
@@ -273,10 +212,10 @@ public class AStarUnit : MonoBehaviour
     private void RequestPath(Vector3 destination)
     {
         if (!AStarManager.Instance || destination == OffsetPosition) return;
-        AStarManager.Instance.RequestPath(new PathRequest(OffsetPosition, destination, unitSize, OnPathFound));
+        else AStarManager.Instance.FindPath(new PathRequest(OffsetPosition, destination, seeker, unitSize, OnPathFound));
     }
 
-    private void OnPathFound(IEnumerable<Vector3> newPath, bool findSuccessfully)
+    private void GetResult(IEnumerable<Vector3> newPath, bool findSuccessfully)
     {
         if (findSuccessfully && newPath != null && newPath.Count() > 0)
         {
@@ -296,6 +235,19 @@ public class AStarUnit : MonoBehaviour
         }
     }
 
+    private void OnPathFound(Path newPath)
+    {
+        if (newPath.CompleteState == PathCompleteState.Complete || newPath.CompleteState == PathCompleteState.Partial)
+        {
+            GetResult(AStarManager.Instance.SimplifyPath(unitSize, newPath.path), true);
+        }
+        else
+        {
+            if (!target) GetResult(null, false);
+            else GetResult(new Vector3[] { TargetPosition }, true);
+        }
+    }
+
     private void StartFollowingPath()
     {
         if (pathFollowCoroutine != null) StopCoroutine(pathFollowCoroutine);
@@ -304,16 +256,20 @@ public class AStarUnit : MonoBehaviour
 
     private IEnumerator FollowPath()
     {
-        if (path == null || path.Length < 1 || !IsFollowingPath)
-        {
-            yield break; //yield break相当于普通函数空return
-        }
+        if (path == null || path.Length < 1 || !IsFollowingPath) yield break; //yield break相当于普通函数空return
         Vector3 targetWaypoint = path[0];
         while (IsFollowingPath)//模拟更新函数
         {
-            if (path.Length < 1)//如果在追踪过程中，路线没了，直接退出追踪
+            if (path == null || path.Length < 1)//如果在追踪过程中，路线没了，直接退出追踪
             {
                 ResetPath();
+                yield break;
+            }
+            if (AStarManager.Instance.ThreeD && MyUtilities.Slope(OffsetPosition, targetWaypoint) > slopeLimit) yield break;
+            if (Vector3.Distance(OffsetPosition, Destination) <= stopDistance)
+            {
+                ResetPath();
+                //Debug.Log("Stop");
                 yield break;
             }
             if (OffsetPosition.x >= targetWaypoint.x - fixedOffset && OffsetPosition.x <= targetWaypoint.x + fixedOffset//因为很多情况下无法准确定位，所以用近似值
@@ -323,21 +279,6 @@ public class AStarUnit : MonoBehaviour
                 targetWaypointIndex++;//标至下一个航点
                 if (targetWaypointIndex >= path.Length) yield break;
                 targetWaypoint = path[targetWaypointIndex];
-                if (autoRepath)
-                    if (!AStarManager.Instance.WorldPointWalkable(targetWaypoint, unitSize))//自动修复路线
-                    {
-                        //Debug.Log("Auto fix path");
-                        RequestPath(Destination);
-                        yield break;
-                    }
-            }
-            if (AStarManager.Instance.ThreeD && MyTools.Slope(OffsetPosition, targetWaypoint) > slopeLimit) yield break;
-            if (Vector3.Distance(OffsetPosition, Destination) <= stopDistance)
-            {
-                ResetPath();
-                //Debug.Log("Stop");
-                ShowPath(false);
-                yield break;
             }
             if (moveMode == UnitMoveMode.MovePosition)
             {
@@ -362,15 +303,13 @@ public class AStarUnit : MonoBehaviour
                     if (!targetDir.Equals(Vector3.zero))
                     {
                         Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);
-                        Quaternion lerpRotation = Quaternion.Lerp(rigidbody.rotation, targetRotation, turnSpeed * Time.deltaTime);
+                        Quaternion lerpRotation = Quaternion.Lerp(rigidbody.rotation, targetRotation, turnSpeed * Time.fixedDeltaTime);
                         rigidbody.MoveRotation(lerpRotation);
                     }
-                    rigidbody.MovePosition(rigidbody.position + DesiredVelocity * Time.deltaTime);
+                    rigidbody.MovePosition(rigidbody.position + DesiredVelocity * Time.fixedDeltaTime);
                 }
                 else if (!AStarManager.Instance.ThreeD && rigidbody2D)
-                {
-                    rigidbody2D.MovePosition((Vector3)rigidbody2D.position + DesiredVelocity * Time.deltaTime);
-                }
+                    rigidbody2D.MovePosition((Vector3)rigidbody2D.position + DesiredVelocity * Time.fixedDeltaTime);
                 yield return new WaitForFixedUpdate();//相当于以上步骤在FiexdUpdate()里执行
             }
             else
@@ -381,10 +320,10 @@ public class AStarUnit : MonoBehaviour
                     if (!targetDir.Equals(Vector3.zero))
                     {
                         Quaternion targetRotation = Quaternion.LookRotation(targetDir, Vector3.up);
-                        Quaternion lerpRotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+                        Quaternion lerpRotation = Quaternion.Lerp(transform.rotation, targetRotation, turnSpeed * Time.fixedDeltaTime);
                         transform.rotation = lerpRotation;
                     }
-                    controller.SimpleMove(DesiredVelocity - Vector3.up * 9.8f);
+                    controller.SimpleMove(DesiredVelocity - Vector3.up * 9.81f);
                 }
                 yield return new WaitForFixedUpdate();
             }
@@ -403,32 +342,27 @@ public class AStarUnit : MonoBehaviour
     public void SetDestination(Vector3 destination, bool gotoImmediately = true)//类似NavMeshAgent.SetDestination()，但不建议逐帧使用
     {
         if (drawGizmos) gizmosTargetPos = destination;
-        if (!AStarManager.Instance) return;
-        if (drawGizmos)
-        {
-            AStarNode goal = AStarManager.Instance.WorldPointToNode(destination, unitSize);
-            if (goal) gizmosTargetPos = goal;
-        }
-        IsFollowingPath = gotoImmediately;
+        if (!AstarPath.active) return;
+        isFollowingPath = gotoImmediately;
         RequestPath(destination);
     }
 
     public void SetTarget(Transform target, Vector3 footOffset, bool followImmediately = false)
     {
-        if (!target || !AStarManager.Instance) return;
+        if (!target || !AstarPath.active) return;
         this.target = target;
         targetFootOffset = footOffset;
         if (!followImmediately) SetDestination(TargetPosition, false);
         else
         {
-            isFollowingTarget = followImmediately;
+            isFollowingTarget = true;
             StartFollowingTarget();
         }
     }
 
     public void SetTarget(Transform target, bool followImmediately = false)
     {
-        if (!target || !AStarManager.Instance) return;
+        if (!target || !AstarPath.active) return;
         this.target = target;
         targetFootOffset = Vector3.zero;
         if (!followImmediately) SetDestination(TargetPosition, false);
@@ -470,10 +404,98 @@ public class AStarUnit : MonoBehaviour
     }
     #endregion
 
+    #region 其他
+    private void UpdatePathRenderer()
+    {
+        LinkedList<Vector3> leftPoint = new LinkedList<Vector3>(path.Skip(targetWaypointIndex).ToArray());
+        leftPoint.AddFirst(OffsetPosition);
+        pathRenderer.positionCount = leftPoint.Count;
+        pathRenderer.SetPositions(leftPoint.ToArray());
+        if (Vector3.Distance(OffsetPosition, Destination) < stopDistance) ShowPath(false);
+    }
+
+    private void UpdateAnimation()
+    {
+        Vector3 animaInput = DesiredVelocity.normalized;
+        if (animaInput.magnitude > 0)
+        {
+            animator.SetFloat(animaHorizontal, animaInput.x);
+            animator.SetFloat(animaVertical, animaInput.y);
+        }
+        animator.SetFloat(animaMagnitude, animaInput.magnitude);
+    }
+
     private enum UnitMoveMode
     {
         MovePosition,
         MoveRigidbody,
         MoveController
     }
+    #endregion
+
+    #region MonoBehaviour
+    private void Awake()
+    {
+        transform = base.transform;
+
+        seeker = GetComponent<Seeker>();
+        if (!seeker) seeker = gameObject.GetComponent<Seeker>();
+        seeker.drawGizmos = false;
+
+        if (controller && moveMode == UnitMoveMode.MoveController) controller.slopeLimit = slopeLimit;
+
+        ShowPath(false);
+    }
+
+    private void Start()
+    {
+        //Debug only
+        SetTarget(target, targetFootOffset, true);
+    }
+
+    private void Update()
+    {
+        if (pathRenderer && path != null && path.Length > 0)
+        {
+            UpdatePathRenderer();
+        }
+        if (animator)
+        {
+            UpdateAnimation();
+        }
+    }
+    private void LateUpdate()
+    {
+        oldPosition = OffsetPosition;
+    }
+
+    private void OnEnable()
+    {
+        if (!AStarManager.Instance) enabled = false;
+        oldPosition = OffsetPosition;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (drawGizmos)
+        {
+            if (path != null)
+                for (int i = targetWaypointIndex; i >= 0 && i < path.Length; i++)
+                {
+                    if (i != path.Length - 1) Gizmos.color = new Color(Color.cyan.r, Color.cyan.g, Color.cyan.b, 0.5f);
+                    else Gizmos.color = new Color(Color.green.r, Color.green.g, Color.green.b, 0.5f);
+                    Gizmos.DrawSphere(path[i], 0.25f);
+
+                    if (i == targetWaypointIndex)
+                        Gizmos.DrawLine(OffsetPosition, path[i]);
+                    else Gizmos.DrawLine(path[i - 1], path[i]);
+                }
+            if (gizmosTargetPos != default && AStarManager.Instance)
+            {
+                Gizmos.color = new Color(Color.black.r, Color.black.g, Color.black.b, 0.75f);
+                Gizmos.DrawCube(new Vector3(gizmosTargetPos.x, gizmosTargetPos.y, 0), Vector3.one * AStarManager.Instance.BaseCellSize * unitSize.x * 0.95f);
+            }
+        }
+    }
+    #endregion
 }
