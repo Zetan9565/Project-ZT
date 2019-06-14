@@ -4,19 +4,8 @@ using System.Text;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class QuestManager : MonoBehaviour, IWindow
+public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
 {
-    private static QuestManager instance;
-    public static QuestManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<QuestManager>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private QuestUI UI;
 
@@ -31,11 +20,12 @@ public class QuestManager : MonoBehaviour, IWindow
         }
     }
 
-    private List<QuestAgent> questAgents = new List<QuestAgent>();
-    private List<QuestAgent> completeQuestAgents = new List<QuestAgent>();
-    private List<QuestGroupAgent> questGroupAgents = new List<QuestGroupAgent>();
-    private List<QuestGroupAgent> cmpltQuestGroupAgents = new List<QuestGroupAgent>();
-    private List<QuestBoardAgent> questBoardAgents = new List<QuestBoardAgent>();
+    public readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
+    private readonly List<QuestAgent> questAgents = new List<QuestAgent>();
+    private readonly List<QuestAgent> completeQuestAgents = new List<QuestAgent>();
+    private readonly List<QuestGroupAgent> questGroupAgents = new List<QuestGroupAgent>();
+    private readonly List<QuestGroupAgent> cmpltQuestGroupAgents = new List<QuestGroupAgent>();
+    private readonly List<QuestBoardAgent> questBoardAgents = new List<QuestBoardAgent>();
 
     [SerializeField, Header("任务列表")]
 #if UNITY_EDITOR
@@ -297,7 +287,7 @@ public class QuestManager : MonoBehaviour, IWindow
     public void AbandonSelectedQuest()
     {
         if (!selectedQuest) return;
-        ConfirmHandler.Instance.NewConfirm("已消耗的道具不会退回，确定放弃此任务吗？", delegate
+        ConfirmManager.Instance.NewConfirm("已消耗的道具不会退回，确定放弃此任务吗？", delegate
         {
             if (AbandonQuest(selectedQuest))
             {
@@ -565,7 +555,6 @@ public class QuestManager : MonoBehaviour, IWindow
     public void ShowDescription(QuestAgent questAgent)
     {
         if (!questAgent.MQuest) return;
-        DialogueManager.Instance.HideQuestDescription();
         if (selectedQuest && selectedQuest != questAgent.MQuest)
         {
             QuestAgent qa = questAgents.Find(x => x.MQuest == selectedQuest);
@@ -581,12 +570,20 @@ public class QuestManager : MonoBehaviour, IWindow
         UpdateUI();
         UI.moneyText.text = selectedQuest.RewardMoney > 0 ? selectedQuest.RewardMoney.ToString() : "无";
         UI.EXPText.text = selectedQuest.RewardEXP > 0 ? selectedQuest.RewardEXP.ToString() : "无";
-        foreach (ItemAgent rwc in UI.rewardCells)
-            rwc.Clear();
+
+        int befCount = rewardCells.Count;
+        for (int i = 0; i < 10 - befCount; i++)
+        {
+            ItemAgent rwc = ObjectPool.Instance.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemAgent>();
+            rwc.Init();
+            rewardCells.Add(rwc);
+        }
+        foreach (ItemAgent rwc in rewardCells)
+            if (rwc) rwc.Empty();
         foreach (ItemInfo info in selectedQuest.RewardItems)
-            foreach (ItemAgent rwc in UI.rewardCells)
+            foreach (ItemAgent rwc in rewardCells)
             {
-                if (rwc.MItemInfo == null)
+                if (rwc.IsEmpty)
                 {
                     rwc.InitItem(info);
                     break;
@@ -596,7 +593,7 @@ public class QuestManager : MonoBehaviour, IWindow
         MyUtilities.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = true;
-        ItemWindowHandler.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseItemWindow();
     }
     public void HideDescription()
     {

@@ -25,6 +25,7 @@ public class AStarUnit : MonoBehaviour
     [SerializeField]
     private float repathRate = 0.1f;
 
+    #region 移动相关
     [SerializeField]
 #if UNITY_EDITOR
     [EnumMemberNames("普通位移(推荐)[物理效果差]", "刚体位移[性能消耗高]", "控制器位移")]
@@ -44,10 +45,9 @@ public class AStarUnit : MonoBehaviour
     private float slopeLimit = 45.0f;
     [SerializeField]
     public float stopDistance = 1;
+    #endregion
 
-    [SerializeField]
-    private LineRenderer pathRenderer;
-
+    #region 动画相关
     [SerializeField]
     private Animator animator;
     [SerializeField]
@@ -59,6 +59,10 @@ public class AStarUnit : MonoBehaviour
     [SerializeField]
     private string animaMagnitude = "Move";
     private int animaMagnitudeHash;
+    #endregion
+
+    [SerializeField]
+    private LineRenderer pathRenderer;
 
     [SerializeField]
     private bool drawGizmos;
@@ -216,7 +220,7 @@ public class AStarUnit : MonoBehaviour
     private void RequestPath(Vector3 destination)
     {
         if (!AStarManager.Instance || destination == OffsetPosition) return;
-        else AStarManager.Instance.FindPath(new PathRequest(OffsetPosition, destination, seeker, unitSize, OnPathFound));
+        else AStarManager.Instance.FindPath(new PathRequest(OffsetPosition, destination, Seeker, unitSize, OnPathFound));
     }
 
     private void GetResult(IEnumerable<Vector3> newPath, bool findSuccessfully)
@@ -444,9 +448,7 @@ public class AStarUnit : MonoBehaviour
     {
         transform = base.transform;
 
-        seeker = GetComponent<Seeker>();
-        if (!seeker) seeker = gameObject.AddComponent<Seeker>();
-        seeker.drawGizmos = false;
+        Seeker.drawGizmos = false;
 
         if (controller && moveMode == UnitMoveMode.MoveController) controller.slopeLimit = slopeLimit;
 

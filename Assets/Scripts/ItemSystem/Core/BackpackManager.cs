@@ -6,19 +6,8 @@ using UnityEngine.UI;
 public delegate void ItemAmountListener(ItemBase item, int amount);
 
 [DisallowMultipleComponent]
-public class BackpackManager : MonoBehaviour, IWindow
+public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
 {
-    private static BackpackManager instance;
-    public static BackpackManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<BackpackManager>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private BackpackUI UI;
 
@@ -112,7 +101,7 @@ public class BackpackManager : MonoBehaviour, IWindow
 
     public int TryGetItem_Integer(ItemInfo info)//拾取掉落物用到
     {
-        return TryGetItem_Integer(info.Item, info.Amount);
+        return TryGetItem_Integer(info.item, info.Amount);
     }
     public bool TryGetItem_Boolean(ItemBase item, int amount = 1)
     {
@@ -140,7 +129,7 @@ public class BackpackManager : MonoBehaviour, IWindow
     public bool TryGetItem_Boolean(ItemInfo info, int amount = -1)
     {
         if (info == null) return false;
-        return TryGetItem_Boolean(info.Item, amount < 0 ? info.Amount : amount);
+        return TryGetItem_Boolean(info.item, amount < 0 ? info.Amount : amount);
     }
 
     public bool GetItem(ItemBase item, int amount = 1)
@@ -149,7 +138,7 @@ public class BackpackManager : MonoBehaviour, IWindow
         if (item.StackAble)
         {
             MBackpack.GetItemSimple(item, amount);
-            ItemAgent ia = itemAgents.Find(x => !x.IsEmpty && (x.MItemInfo.Item == item || x.MItemInfo.ItemID == item.ID));
+            ItemAgent ia = itemAgents.Find(x => !x.IsEmpty && (x.MItemInfo.item == item || x.MItemInfo.ItemID == item.ID));
             if (ia) ia.UpdateInfo();
             else//如果找不到，说明该物品是新的，原来背包里没有的
             {
@@ -179,12 +168,12 @@ public class BackpackManager : MonoBehaviour, IWindow
 
     public bool GetItem(ItemInfo info, int amount)//仓库、装备专用
     {
-        if (MBackpack == null || info == null || !info.Item || amount < 1) return false;
-        if (!TryGetItem_Boolean(info.Item, amount)) return false;
-        if (info.Item.StackAble)
+        if (MBackpack == null || info == null || !info.item || amount < 1) return false;
+        if (!TryGetItem_Boolean(info.item, amount)) return false;
+        if (info.item.StackAble)
         {
             MBackpack.GetItemSimple(info, amount);
-            ItemAgent ia = itemAgents.Find(x => !x.IsEmpty && (x.MItemInfo.Item == info.Item || x.MItemInfo.ItemID == info.ItemID));
+            ItemAgent ia = itemAgents.Find(x => !x.IsEmpty && (x.MItemInfo.item == info.item || x.MItemInfo.ItemID == info.ItemID));
             if (ia) ia.UpdateInfo();
             else//如果找不到，说明该物品是新的，原来背包里没有的
             {
@@ -193,7 +182,7 @@ public class BackpackManager : MonoBehaviour, IWindow
                 else
                 {
                     MessageManager.Instance.NewMessage("发生内部错误！");
-                    Debug.Log("[Get Item Error] ID: " + info.Item.ID + "[" + System.DateTime.Now.ToString() + "]");
+                    Debug.Log("[Get Item Error] ID: " + info.item.ID + "[" + System.DateTime.Now.ToString() + "]");
                 }
             }
         }
@@ -207,47 +196,47 @@ public class BackpackManager : MonoBehaviour, IWindow
                         break;
                     }
             }
-        OnGetItemEvent?.Invoke(info.Item, amount);
+        OnGetItemEvent?.Invoke(info.item, amount);
         UpdateUI();
         return true;
     }
 
     public bool GetItem(ItemInfo info)
     {
-        return GetItem(info.Item, info.Amount);
+        return GetItem(info.item, info.Amount);
     }
 
     public void DiscardItem(ItemInfo info)
     {
-        if (MBackpack == null || info == null || !info.Item) return;
-        if (!info.Item.DiscardAble)
+        if (MBackpack == null || info == null || !info.item) return;
+        if (!info.item.DiscardAble)
         {
             MessageManager.Instance.NewMessage("该物品不可丢弃");
             return;
         }
         if (info.Amount < 2 && info.Amount > 0)
         {
-            ConfirmHandler.Instance.NewConfirm(string.Format("确定丢弃1个 [{0}] 吗？", info.ItemName), delegate
+            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃1个 [{0}] 吗？", info.ItemName), delegate
             {
                 if (OnDiscard(info))
                     MessageManager.Instance.NewMessage(string.Format("丢掉了1个 [{0}]", info.ItemName));
             });
         }
-        else AmountHandler.Instance.Init(delegate
+        else AmountManager.Instance.Init(delegate
         {
-            ConfirmHandler.Instance.NewConfirm(string.Format("确定丢弃{0}个 [{1}] 吗？", (int)AmountHandler.Instance.Amount, info.ItemName), delegate
+            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.ItemName), delegate
             {
-                if (OnDiscard(info, (int)AmountHandler.Instance.Amount))
-                    MessageManager.Instance.NewMessage(string.Format("丢掉了{0}个 [{1}]", (int)AmountHandler.Instance.Amount, info.ItemName));
+                if (OnDiscard(info, (int)AmountManager.Instance.Amount))
+                    MessageManager.Instance.NewMessage(string.Format("丢掉了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
             });
         }, info.Amount);
     }
 
     bool OnDiscard(ItemInfo info, int amount = 1)
     {
-        if (MBackpack == null || info == null || !info.Item || amount < 1) return false;
+        if (MBackpack == null || info == null || !info.item || amount < 1) return false;
         int finalLose = info.Amount < amount ? info.Amount : amount;
-        if (QuestManager.Instance.HasQuestRequiredItem(info.Item, info.Amount - finalLose))
+        if (QuestManager.Instance.HasQuestRequiredItem(info.item, info.Amount - finalLose))
         {
             MessageManager.Instance.NewMessage("该物品为任务所需");
             return false;
@@ -272,20 +261,20 @@ public class BackpackManager : MonoBehaviour, IWindow
     }
     public bool TryLoseItem_Boolean(ItemInfo info, int amount = 1)
     {
-        return TryLoseItem_Boolean(info.Item, amount);
+        return TryLoseItem_Boolean(info.item, amount);
     }
 
     public bool LoseItem(ItemInfo info, int amount = 1)
     {
-        if (MBackpack == null || info == null || !info.Item || amount < 1) return false;
+        if (MBackpack == null || info == null || !info.item || amount < 1) return false;
         if (!TryLoseItem_Boolean(info, amount)) return false;
         int amountBef = info.Amount;
         int finalLose = info.Amount < amount ? info.Amount : amount;
         MBackpack.LoseItemSimple(info, finalLose);
         ItemAgent ia = GetItemAgentByInfo(info);
         if (ia) ia.UpdateInfo();
-        OnLoseItemEvent?.Invoke(info.Item, finalLose);
-        if (ItemWindowHandler.Instance.MItemInfo == info && info.Amount < 1) ItemWindowHandler.Instance.CloseItemWindow();
+        OnLoseItemEvent?.Invoke(info.item, finalLose);
+        if (ItemWindowManager.Instance.MItemInfo == info && info.Amount < 1) ItemWindowManager.Instance.CloseItemWindow();
         UpdateUI();
         return true;
     }
@@ -367,7 +356,7 @@ public class BackpackManager : MonoBehaviour, IWindow
 
     public IEnumerable<ItemAgent> GetItemAgentsByItem(ItemBase item)
     {
-        return itemAgents.FindAll(x => !x.IsEmpty && x.MItemInfo.Item == item).AsEnumerable();
+        return itemAgents.FindAll(x => !x.IsEmpty && x.MItemInfo.item == item).AsEnumerable();
     }
 
     /// <summary>
@@ -437,8 +426,8 @@ public class BackpackManager : MonoBehaviour, IWindow
         IsUIOpen = false;
         IsPausing = false;
         WindowsManager.Instance.Remove(this);
-        AmountHandler.Instance.Cancel();
-        ItemWindowHandler.Instance.CloseItemWindow();
+        AmountManager.Instance.Cancel();
+        ItemWindowManager.Instance.CloseItemWindow();
         if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
         if (ShopManager.Instance.IsUIOpen) ShopManager.Instance.CloseWindow();
     }
@@ -455,7 +444,7 @@ public class BackpackManager : MonoBehaviour, IWindow
         {
             UI.backpackWindow.alpha = 0;
             UI.backpackWindow.blocksRaycasts = false;
-            ItemWindowHandler.Instance.CloseItemWindow();
+            ItemWindowManager.Instance.CloseItemWindow();
         }
         IsPausing = pause;
     }
@@ -547,7 +536,7 @@ public class BackpackManager : MonoBehaviour, IWindow
         ShowAll();
         foreach (ItemAgent ia in itemAgents)
         {
-            if (!ia.IsEmpty && !ia.MItemInfo.Item.IsEquipment)
+            if (!ia.IsEmpty && !ia.MItemInfo.item.IsEquipment)
                 MyUtilities.SetActive(ia.gameObject, false);
             else if (ia.IsEmpty) MyUtilities.SetActive(ia.gameObject, false);
         }
@@ -558,7 +547,7 @@ public class BackpackManager : MonoBehaviour, IWindow
         ShowAll();
         foreach (ItemAgent ia in itemAgents)
         {
-            if (!ia.IsEmpty && !ia.MItemInfo.Item.IsConsumable)
+            if (!ia.IsEmpty && !ia.MItemInfo.item.IsConsumable)
                 MyUtilities.SetActive(ia.gameObject, false);
             else if (ia.IsEmpty) MyUtilities.SetActive(ia.gameObject, false);
         }
@@ -569,7 +558,7 @@ public class BackpackManager : MonoBehaviour, IWindow
         ShowAll();
         foreach (ItemAgent ia in itemAgents)
         {
-            if (!ia.IsEmpty && !ia.MItemInfo.Item.IsMaterial)
+            if (!ia.IsEmpty && !ia.MItemInfo.item.IsMaterial)
                 MyUtilities.SetActive(ia.gameObject, false);
             else if (ia.IsEmpty) MyUtilities.SetActive(ia.gameObject, false);
         }

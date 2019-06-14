@@ -120,7 +120,7 @@ public class Building : MonoBehaviour
     public void TryDestroy()
     {
         if (custumDestroy) onDestroy.Invoke();
-        else ConfirmHandler.Instance.NewConfirm(string.Format("确定拆除{0}{1}吗？", name, (Vector2)transform.position),
+        else ConfirmManager.Instance.NewConfirm(string.Format("确定拆除{0}{1}吗？", name, (Vector2)transform.position),
             BuildingManager.Instance.ConfirmDestroy,
             delegate
             {

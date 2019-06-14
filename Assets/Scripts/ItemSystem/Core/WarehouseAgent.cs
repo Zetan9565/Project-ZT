@@ -31,7 +31,7 @@ public class WarehouseAgent : MonoBehaviour
         {
             MBuilding.CustumDestroy(delegate
             {
-                ConfirmHandler.Instance.NewConfirm(string.Format("{0}{1}\n内的东西不会保留，确定拆除吗？", MBuilding.name, ((Vector2)MBuilding.transform.position).ToString()),
+                ConfirmManager.Instance.NewConfirm(string.Format("{0}{1}\n内的东西不会保留，确定拆除吗？", MBuilding.name, ((Vector2)MBuilding.transform.position).ToString()),
                     BuildingManager.Instance.ConfirmDestroy,
                     delegate
                     {

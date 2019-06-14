@@ -52,9 +52,9 @@ public class Backpack
     {
         if (item.StackAble)
         {
-            if (Items.Exists(x => x.Item != null && (x.Item == item || x.ItemID == item.ID)))
+            if (Items.Exists(x => x.item != null && (x.item == item || x.ItemID == item.ID)))
             {
-                Items.Find(x => x.Item == item || x.ItemID == item.ID).Amount += amount;
+                Items.Find(x => x.item == item || x.ItemID == item.ID).Amount += amount;
                 weightLoad += item.Weight * amount;
             }
             else
@@ -77,12 +77,12 @@ public class Backpack
 
     public void GetItemSimple(ItemInfo info, int amount = 1)
     {
-        if (info.Item.StackAble)
+        if (info.item.StackAble)
         {
-            if (Items.Exists(x => x.Item != null && (x.Item == info.Item || x.ItemID == info.ItemID)))
+            if (Items.Exists(x => x.item != null && (x.item == info.item || x.ItemID == info.ItemID)))
             {
-                Items.Find(x => x.Item == info.Item || x.ItemID == info.ItemID).Amount += amount;
-                weightLoad += info.Item.Weight;
+                Items.Find(x => x.item == info.item || x.ItemID == info.ItemID).Amount += amount;
+                weightLoad += info.item.Weight;
             }
             else
             {
@@ -90,7 +90,7 @@ public class Backpack
                 newInfo.Amount = amount;
                 Items.Add(newInfo);
                 backpackSize++;
-                weightLoad += info.Item.Weight * amount;
+                weightLoad += info.item.Weight * amount;
             }
         }
         else
@@ -101,7 +101,7 @@ public class Backpack
                 newInfo.Amount = 1;
                 Items.Add(newInfo);
                 backpackSize++;
-                weightLoad += info.Item.Weight;
+                weightLoad += info.item.Weight;
             }
         }
     }
@@ -109,7 +109,7 @@ public class Backpack
     public void LoseItemSimple(ItemInfo info, int amount = 1)
     {
         info.Amount -= amount;
-        weightLoad -= info.Item.Weight * amount;
+        weightLoad -= info.item.Weight * amount;
         if (info.Amount <= 0)
         {
             Items.Remove(info);
@@ -123,7 +123,7 @@ public class Backpack
     }
     public ItemInfo Find(ItemBase item)
     {
-        return Items.Find(x => x.Item == item);
+        return Items.Find(x => x.item == item);
     }
 
     public IEnumerable<ItemInfo> FindAll(string itemID)
@@ -132,12 +132,12 @@ public class Backpack
     }
     public IEnumerable<ItemInfo> FindAll(ItemBase item)
     {
-        return Items.FindAll(x => x.Item == item).AsEnumerable();
+        return Items.FindAll(x => x.item == item).AsEnumerable();
     }
 
     public ItemInfo FirstNotStackAble(ItemBase notStkAblItem)
     {
-        return Items.Find(x => x.Item.StackAble && x.Item == notStkAblItem);
+        return Items.Find(x => x.item.StackAble && x.item == notStkAblItem);
     }
 
     public int GetItemAmount(string id)
@@ -145,16 +145,16 @@ public class Backpack
         if (string.IsNullOrEmpty(id)) return 0;
         var items = Items.FindAll(x => x.ItemID == id);
         if (items.Count < 1) return 0;
-        if (items[0].Item.StackAble) return items[0].Amount;
+        if (items[0].item.StackAble) return items[0].Amount;
         return items.Count;
     }
 
     public int GetItemAmount(ItemBase item)
     {
         if (!item) return 0;
-        var items = Items.FindAll(x => x.Item == item);
+        var items = Items.FindAll(x => x.item == item);
         if (items.Count < 1) return 0;
-        if (items[0].Item.StackAble) return items[0].Amount;
+        if (items[0].item.StackAble) return items[0].Amount;
         return items.Count;
     }
 
@@ -162,40 +162,40 @@ public class Backpack
     {
         Items.Sort((x, y) =>
         {
-            if (x.Item.ItemType == y.Item.ItemType)
+            if (x.item.ItemType == y.item.ItemType)
             {
-                if (x.Item.Quality < y.Item.Quality)
+                if (x.item.Quality < y.item.Quality)
                     return 1;
-                else if (x.Item.Quality > y.Item.Quality)
+                else if (x.item.Quality > y.item.Quality)
                     return -1;
                 else return string.Compare(x.ItemID, y.ItemID);
             }
             else
             {
-                if (x.Item.ItemType == ItemType.Weapon) return -1;
-                else if (y.Item.ItemType == ItemType.Weapon) return 1;
-                else if (x.Item.ItemType == ItemType.Armor) return -1;
-                else if (y.Item.ItemType == ItemType.Armor) return 1;
-                else if (x.Item.ItemType == ItemType.Jewelry) return -1;
-                else if (y.Item.ItemType == ItemType.Jewelry) return 1;
-                else if (x.Item.ItemType == ItemType.Tool) return -1;
-                else if (y.Item.ItemType == ItemType.Tool) return 1;
-                else if (x.Item.ItemType == ItemType.Cuisine) return -1;
-                else if (y.Item.ItemType == ItemType.Cuisine) return 1;
-                else if (x.Item.ItemType == ItemType.Medicine) return -1;
-                else if (y.Item.ItemType == ItemType.Medicine) return 1;
-                else if (x.Item.ItemType == ItemType.Elixir) return -1;
-                else if (y.Item.ItemType == ItemType.Elixir) return 1;
-                else if (x.Item.ItemType == ItemType.Box) return -1;
-                else if (y.Item.ItemType == ItemType.Box) return 1;
-                else if (x.Item.ItemType == ItemType.Valuables) return -1;
-                else if (y.Item.ItemType == ItemType.Valuables) return 1;
-                else if (x.Item.ItemType == ItemType.Quest) return -1;
-                else if (y.Item.ItemType == ItemType.Quest) return 1;
-                else if (x.Item.ItemType == ItemType.Material) return -1;
-                else if (y.Item.ItemType == ItemType.Material) return 1;
-                else if (x.Item.ItemType == ItemType.Other) return -1;
-                else if (y.Item.ItemType == ItemType.Other) return 1;
+                if (x.item.ItemType == ItemType.Weapon) return -1;
+                else if (y.item.ItemType == ItemType.Weapon) return 1;
+                else if (x.item.ItemType == ItemType.Armor) return -1;
+                else if (y.item.ItemType == ItemType.Armor) return 1;
+                else if (x.item.ItemType == ItemType.Jewelry) return -1;
+                else if (y.item.ItemType == ItemType.Jewelry) return 1;
+                else if (x.item.ItemType == ItemType.Tool) return -1;
+                else if (y.item.ItemType == ItemType.Tool) return 1;
+                else if (x.item.ItemType == ItemType.Cuisine) return -1;
+                else if (y.item.ItemType == ItemType.Cuisine) return 1;
+                else if (x.item.ItemType == ItemType.Medicine) return -1;
+                else if (y.item.ItemType == ItemType.Medicine) return 1;
+                else if (x.item.ItemType == ItemType.Elixir) return -1;
+                else if (y.item.ItemType == ItemType.Elixir) return 1;
+                else if (x.item.ItemType == ItemType.Box) return -1;
+                else if (y.item.ItemType == ItemType.Box) return 1;
+                else if (x.item.ItemType == ItemType.Valuables) return -1;
+                else if (y.item.ItemType == ItemType.Valuables) return 1;
+                else if (x.item.ItemType == ItemType.Quest) return -1;
+                else if (y.item.ItemType == ItemType.Quest) return 1;
+                else if (x.item.ItemType == ItemType.Material) return -1;
+                else if (y.item.ItemType == ItemType.Material) return 1;
+                else if (x.item.ItemType == ItemType.Other) return -1;
+                else if (y.item.ItemType == ItemType.Other) return 1;
                 else return 0;
             }
         });

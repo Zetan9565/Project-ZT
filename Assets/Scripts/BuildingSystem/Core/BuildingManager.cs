@@ -5,19 +5,8 @@ using System;
 using System.Linq;
 
 [DisallowMultipleComponent]
-public class BuildingManager : MonoBehaviour, IWindow
+public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
 {
-    private static BuildingManager instance;
-    public static BuildingManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<BuildingManager>();
-            return instance;
-        }
-    }
-
     public bool IsUIOpen { get; private set; }
     public bool IsPausing { get; private set; }
 
@@ -460,7 +449,7 @@ public class BuildingManager : MonoBehaviour, IWindow
     {
         ToDestroy = null;
         MyUtilities.SetActive(UI.destroyButton.gameObject, false);
-        if (ConfirmHandler.Instance.IsUIOpen) ConfirmHandler.Instance.CloseWindow();
+        if (ConfirmManager.Instance.IsUIOpen) ConfirmManager.Instance.CloseWindow();
     }
 
     public void SetUI(BuildingUI UI)

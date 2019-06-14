@@ -2,19 +2,8 @@
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class ItemWindowHandler : MonoBehaviour
+public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
 {
-    private static ItemWindowHandler instance;
-    public static ItemWindowHandler Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<ItemWindowHandler>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private ItemWindowUI UI;
 
@@ -32,20 +21,20 @@ public class ItemWindowHandler : MonoBehaviour
     public void OpenItemWindow(ItemAgent itemAgent)
     {
         //UI.windowsRect.position = new Vector3(Input.mousePosition.x - UI.windowsRect.sizeDelta.x, UI.windowsRect.position.y);
-        if (itemAgent.MItemInfo == null || !itemAgent.MItemInfo.Item || IsPause) return;
+        if (itemAgent.MItemInfo == null || !itemAgent.MItemInfo.item || IsPause) return;
         MItemInfo = itemAgent.MItemInfo;
         ItemAgentType = itemAgent.agentType;
-        UI.icon.overrideSprite = MItemInfo.Item.Icon;
+        UI.icon.overrideSprite = MItemInfo.item.Icon;
         UI.nameText.text = MItemInfo.ItemName;
         UI.nameText.color = itemAgent.currentQualityColor;
-        UI.typeText.text = GetItemTypeString(MItemInfo.Item.ItemType);
-        UI.priceText.text = MItemInfo.Item.SellAble ? MItemInfo.Item.SellPrice + GameManager.Instance.CoinName : "不可出售";
-        UI.weightText.text = "重量：" + MItemInfo.Item.Weight.ToString("F2") + "WL";
-        UI.descriptionText.text = MItemInfo.Item.Description;
-        switch (MItemInfo.Item.ItemType)
+        UI.typeText.text = GetItemTypeString(MItemInfo.item.ItemType);
+        UI.priceText.text = MItemInfo.item.SellAble ? MItemInfo.item.SellPrice + GameManager.Instance.CoinName : "不可出售";
+        UI.weightText.text = "重量：" + MItemInfo.item.Weight.ToString("F2") + "WL";
+        UI.descriptionText.text = MItemInfo.item.Description;
+        switch (MItemInfo.item.ItemType)
         {
             case ItemType.Weapon:
-                WeaponItem weapon = MItemInfo.Item as WeaponItem;
+                WeaponItem weapon = MItemInfo.item as WeaponItem;
                 UI.effectText.text = (weapon.ATK > 0 ? "攻击力+" + weapon.ATK + "\n" : string.Empty) +
                     (weapon.DEF > 0 ? "防御力力+" + weapon.DEF + "\n" : string.Empty) +
                     (weapon.Hit > 0 ? "命中+" + weapon.Hit + "\n" : string.Empty);
@@ -78,7 +67,7 @@ public class ItemWindowHandler : MonoBehaviour
                     OpenSubItemWindow(PlayerManager.Instance.PlayerInfo.secondaryWeapon);
                 break;
             case ItemType.Bag:
-                UI.effectText.text = GameManager.Instance.BackpackName + "容量+" + (MItemInfo.Item as BagItem).ExpandSize;
+                UI.effectText.text = GameManager.Instance.BackpackName + "容量+" + (MItemInfo.item as BagItem).ExpandSize;
                 MyUtilities.SetActive(UI.mulFunTitle.gameObject, false);
                 MyUtilities.SetActive(UI.mulFunText.gameObject, false);
                 MyUtilities.SetActive(UI.gemstone_1.gameObject, false);
@@ -203,20 +192,20 @@ public class ItemWindowHandler : MonoBehaviour
 
     public void OpenSubItemWindow(ItemInfo equiped)
     {
-        if (equiped == null || !equiped.Item || IsPause) return;
-        subUI.icon.overrideSprite = equiped.Item.Icon;
+        if (equiped == null || !equiped.item || IsPause) return;
+        subUI.icon.overrideSprite = equiped.item.Icon;
         subUI.nameText.text = equiped.ItemName;
         if (GameManager.Instance.QualityColors.Count >= 5)
-            subUI.nameText.color = GameManager.Instance.QualityColors[(int)equiped.Item.Quality];
-        subUI.typeText.text = GetItemTypeString(equiped.Item.ItemType);
+            subUI.nameText.color = GameManager.Instance.QualityColors[(int)equiped.item.Quality];
+        subUI.typeText.text = GetItemTypeString(equiped.item.ItemType);
         subUI.priceTitle.text = "贩卖价格";
-        subUI.priceText.text = equiped.Item.SellAble ? equiped.Item.SellPrice + GameManager.Instance.CoinName : "不可出售";
-        subUI.weightText.text = "重量：" + equiped.Item.Weight.ToString("F2") + "WL";
-        subUI.descriptionText.text = equiped.Item.Description;
-        switch (equiped.Item.ItemType)
+        subUI.priceText.text = equiped.item.SellAble ? equiped.item.SellPrice + GameManager.Instance.CoinName : "不可出售";
+        subUI.weightText.text = "重量：" + equiped.item.Weight.ToString("F2") + "WL";
+        subUI.descriptionText.text = equiped.item.Description;
+        switch (equiped.item.ItemType)
         {
             case ItemType.Weapon:
-                WeaponItem weapon = equiped.Item as WeaponItem;
+                WeaponItem weapon = equiped.item as WeaponItem;
                 subUI.effectText.text = (weapon.ATK > 0 ? "攻击力+" + weapon.ATK + "\n" : string.Empty) +
                     (weapon.DEF > 0 ? "防御力力+" + weapon.DEF + "\n" : string.Empty) +
                     (weapon.Hit > 0 ? "命中+" + weapon.Hit + "\n" : string.Empty);
@@ -320,7 +309,7 @@ public class ItemWindowHandler : MonoBehaviour
     public void DiscardCurrentItem()
     {
         BackpackManager.Instance.DiscardItem(MItemInfo);
-        AmountHandler.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+        AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
         CloseItemWindow();
     }
 

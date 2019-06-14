@@ -11,7 +11,9 @@ public class QuestUIInspector : Editor
     SerializedProperty questPrefab;
     SerializedProperty questGroupPrefab;
     SerializedProperty questListParent;
+    SerializedProperty questListToggle;
     SerializedProperty cmpltQuestListParent;
+    SerializedProperty cmpltQuestListToggle;
     SerializedProperty descriptionWindow;
     SerializedProperty descriptionText;
     SerializedProperty abandonButton;
@@ -34,7 +36,9 @@ public class QuestUIInspector : Editor
         questPrefab = serializedObject.FindProperty("questPrefab");
         questGroupPrefab = serializedObject.FindProperty("questGroupPrefab");
         questListParent = serializedObject.FindProperty("questListParent");
+        questListToggle = serializedObject.FindProperty("questListToggle");
         cmpltQuestListParent = serializedObject.FindProperty("cmpltQuestListParent");
+        cmpltQuestListToggle = serializedObject.FindProperty("cmpltQuestListToggle");
         descriptionWindow = serializedObject.FindProperty("descriptionWindow");
         descriptionText = serializedObject.FindProperty("descriptionText");
         abandonButton = serializedObject.FindProperty("abandonButton");
@@ -60,7 +64,9 @@ public class QuestUIInspector : Editor
         EditorGUILayout.PropertyField(questPrefab, new GUIContent("任务载体预制体"));
         EditorGUILayout.PropertyField(questGroupPrefab, new GUIContent("任务组载体预制体"));
         EditorGUILayout.PropertyField(questListParent, new GUIContent("进行中任务放置根"));
+        EditorGUILayout.PropertyField(questListToggle, new GUIContent("进行中任务页面切换器"));
         EditorGUILayout.PropertyField(cmpltQuestListParent, new GUIContent("已完成任务放置根"));
+        EditorGUILayout.PropertyField(cmpltQuestListToggle, new GUIContent("已完成任务页面切换器"));
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");

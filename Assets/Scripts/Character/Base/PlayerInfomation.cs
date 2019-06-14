@@ -26,9 +26,9 @@ public class PlayerInfomation : CharacterInfomation
 
     public bool EquipWeapon(ItemInfo toEquip)
     {
-        if (toEquip == null || !toEquip.Item) return false;
-        if (!toEquip.Item.IsWeapon) return false;
-        WeaponItem weapon = toEquip.Item as WeaponItem;
+        if (toEquip == null || !toEquip.item) return false;
+        if (!toEquip.item.IsWeapon) return false;
+        WeaponItem weapon = toEquip.item as WeaponItem;
         ATK += weapon.ATK + weapon.Powerup.ATK_Add +
             (toEquip.gemstone1 ? toEquip.gemstone1.Powerup.ATK_Add : 0) + (toEquip.gemstone2 ? toEquip.gemstone2.Powerup.ATK_Add : 0);
         DEF += weapon.DEF + weapon.Powerup.DEF_Add +
@@ -53,13 +53,13 @@ public class PlayerInfomation : CharacterInfomation
         if (primary)
         {
             info = primaryWeapon;
-            weapon = primaryWeapon.Item as WeaponItem;
+            weapon = primaryWeapon.item as WeaponItem;
             primaryWeapon = null;
         }
         else
         {
             info = secondaryWeapon;
-            weapon = secondaryWeapon.Item as WeaponItem;
+            weapon = secondaryWeapon.item as WeaponItem;
             secondaryWeapon = null;
         }
         if (weapon)
@@ -79,7 +79,7 @@ public class PlayerInfomation : CharacterInfomation
     {
         get
         {
-            return primaryWeapon != null && primaryWeapon.Item;
+            return primaryWeapon != null && primaryWeapon.item;
         }
     }
 
@@ -87,7 +87,7 @@ public class PlayerInfomation : CharacterInfomation
     {
         get
         {
-            return secondaryWeapon != null && secondaryWeapon.Item;
+            return secondaryWeapon != null && secondaryWeapon.item;
         }
     }
     #endregion

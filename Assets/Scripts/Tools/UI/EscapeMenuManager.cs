@@ -1,18 +1,7 @@
 ﻿using UnityEngine;
 
-public class EscapeMenuManager : MonoBehaviour, IWindow
+public class EscapeMenuManager : SingletonMonoBehaviour<EscapeMenuManager>, IWindow
 {
-    private static EscapeMenuManager instance;
-    public static EscapeMenuManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<EscapeMenuManager>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private EscapeUI UI;
 
@@ -90,6 +79,6 @@ public class EscapeMenuManager : MonoBehaviour, IWindow
 
     public void Exit()
     {
-        ConfirmHandler.Instance.NewConfirm("确定退出" + Application.productName + "吗？", Application.Quit);
+        ConfirmManager.Instance.NewConfirm("确定退出" + Application.productName + "吗？", Application.Quit);
     }
 }

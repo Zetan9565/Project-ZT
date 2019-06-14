@@ -2,19 +2,8 @@
 using UnityEngine.UI;
 using UnityEngine.Events;
 
-public class ConfirmHandler : MonoBehaviour, IWindow
+public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindow
 {
-    private static ConfirmHandler instance;
-    public static ConfirmHandler Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<ConfirmHandler>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private CanvasGroup confirmWindow;
 

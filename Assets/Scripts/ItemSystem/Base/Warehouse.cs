@@ -36,11 +36,11 @@ public class Warehouse
 
     public void GetItemSimple(ItemInfo info, int amount = 1)
     {
-        if (info.Item.StackAble)
+        if (info.item.StackAble)
         {
-            if (Items.Exists(x => x.Item == info.Item))
+            if (Items.Exists(x => x.item == info.item))
             {
-                Items.Find(x => x.Item == info.Item).Amount += amount;
+                Items.Find(x => x.item == info.item).Amount += amount;
             }
             else
             {
@@ -73,36 +73,36 @@ public class Warehouse
     {
         Items.Sort((i1, i2) =>
         {
-            if (i1.Item.ItemType == i2.Item.ItemType)
+            if (i1.item.ItemType == i2.item.ItemType)
             {
                 return string.Compare(i1.ItemID, i2.ItemID);
             }
             else
             {
-                if (i1.Item.ItemType == ItemType.Weapon) return -1;
-                else if (i2.Item.ItemType == ItemType.Weapon) return 1;
-                else if (i1.Item.ItemType == ItemType.Armor) return -1;
-                else if (i2.Item.ItemType == ItemType.Armor) return 1;
-                else if (i1.Item.ItemType == ItemType.Jewelry) return -1;
-                else if (i2.Item.ItemType == ItemType.Jewelry) return 1;
-                else if (i1.Item.ItemType == ItemType.Tool) return -1;
-                else if (i2.Item.ItemType == ItemType.Tool) return 1;
-                else if (i1.Item.ItemType == ItemType.Cuisine) return -1;
-                else if (i2.Item.ItemType == ItemType.Cuisine) return 1;
-                else if (i1.Item.ItemType == ItemType.Medicine) return -1;
-                else if (i2.Item.ItemType == ItemType.Medicine) return 1;
-                else if (i1.Item.ItemType == ItemType.Elixir) return -1;
-                else if (i2.Item.ItemType == ItemType.Elixir) return 1;
-                else if (i1.Item.ItemType == ItemType.Box) return -1;
-                else if (i2.Item.ItemType == ItemType.Box) return 1;
-                else if (i1.Item.ItemType == ItemType.Valuables) return -1;
-                else if (i2.Item.ItemType == ItemType.Valuables) return 1;
-                else if (i1.Item.ItemType == ItemType.Quest) return -1;
-                else if (i2.Item.ItemType == ItemType.Quest) return 1;
-                else if (i1.Item.ItemType == ItemType.Material) return -1;
-                else if (i2.Item.ItemType == ItemType.Material) return 1;
-                else if (i1.Item.ItemType == ItemType.Other) return -1;
-                else if (i2.Item.ItemType == ItemType.Other) return 1;
+                if (i1.item.ItemType == ItemType.Weapon) return -1;
+                else if (i2.item.ItemType == ItemType.Weapon) return 1;
+                else if (i1.item.ItemType == ItemType.Armor) return -1;
+                else if (i2.item.ItemType == ItemType.Armor) return 1;
+                else if (i1.item.ItemType == ItemType.Jewelry) return -1;
+                else if (i2.item.ItemType == ItemType.Jewelry) return 1;
+                else if (i1.item.ItemType == ItemType.Tool) return -1;
+                else if (i2.item.ItemType == ItemType.Tool) return 1;
+                else if (i1.item.ItemType == ItemType.Cuisine) return -1;
+                else if (i2.item.ItemType == ItemType.Cuisine) return 1;
+                else if (i1.item.ItemType == ItemType.Medicine) return -1;
+                else if (i2.item.ItemType == ItemType.Medicine) return 1;
+                else if (i1.item.ItemType == ItemType.Elixir) return -1;
+                else if (i2.item.ItemType == ItemType.Elixir) return 1;
+                else if (i1.item.ItemType == ItemType.Box) return -1;
+                else if (i2.item.ItemType == ItemType.Box) return 1;
+                else if (i1.item.ItemType == ItemType.Valuables) return -1;
+                else if (i2.item.ItemType == ItemType.Valuables) return 1;
+                else if (i1.item.ItemType == ItemType.Quest) return -1;
+                else if (i2.item.ItemType == ItemType.Quest) return 1;
+                else if (i1.item.ItemType == ItemType.Material) return -1;
+                else if (i2.item.ItemType == ItemType.Material) return 1;
+                else if (i1.item.ItemType == ItemType.Other) return -1;
+                else if (i2.item.ItemType == ItemType.Other) return 1;
                 else return 0;
             }
         });

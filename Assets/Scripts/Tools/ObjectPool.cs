@@ -2,20 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectPool : MonoBehaviour
+public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
 {
-    private static ObjectPool instance;
-    public static ObjectPool Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<ObjectPool>();
-            return instance;
-        }
-    }
-
-    private Dictionary<string, List<GameObject>> pool = new Dictionary<string, List<GameObject>>();
+    private readonly Dictionary<string, List<GameObject>> pool = new Dictionary<string, List<GameObject>>();
     [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("池子")]
@@ -49,6 +38,11 @@ public class ObjectPool : MonoBehaviour
     public void Put(GameObject gameObject, float delayTime)
     {
         StartCoroutine(PutDelay(gameObject, delayTime));
+    }
+    IEnumerator PutDelay(GameObject gameObject, float delayTime)
+    {
+        yield return new WaitForSeconds(delayTime);
+        Put(gameObject);
     }
 
     public GameObject Get(GameObject prefab, Transform parent = null, bool worldPositonStays = false)
@@ -97,13 +91,7 @@ public class ObjectPool : MonoBehaviour
         StartCoroutine(CleanDelay());
     }
 
-    IEnumerator PutDelay(GameObject gameObject, float delayTime)
-    {
-        yield return new WaitForSeconds(delayTime);
-        Put(gameObject);
-    }
-
-    IEnumerator CleanDelay()
+    private IEnumerator CleanDelay()
     {
         yield return new WaitForSeconds(cleanDelayTime);
         Clean();

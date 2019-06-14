@@ -3,19 +3,8 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 
 [DisallowMultipleComponent]
-public class DragableHandler : MonoBehaviour
+public class DragableManager : SingletonMonoBehaviour<DragableManager>
 {
-    private static DragableHandler instance;
-    public static DragableHandler Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<DragableHandler>();
-            return instance;
-        }
-    }
-
     public IDragable Current { get; private set; }
 
     public bool IsDraging

@@ -398,8 +398,8 @@ public class QuestInspector : Editor
         rewardItemList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
-            if (quest.RewardItems[index] != null && quest.RewardItems[index].Item != null)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), quest.RewardItems[index].Item.name);
+            if (quest.RewardItems[index] != null && quest.RewardItems[index].item != null)
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), quest.RewardItems[index].item.name);
             else
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             EditorGUI.BeginChangeCheck();
@@ -443,7 +443,7 @@ public class QuestInspector : Editor
 
         rewardItemList.drawHeaderCallback = (rect) =>
         {
-            int notCmpltCount = quest.RewardItems.FindAll(x => !x.Item).Count;
+            int notCmpltCount = quest.RewardItems.FindAll(x => !x.item).Count;
             EditorGUI.LabelField(rect, "道具奖励列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
         };
 
@@ -1130,7 +1130,7 @@ public class QuestInspector : Editor
 
         editComplete &= quest.BeginDialogue && quest.OngoingDialogue && quest.CompleteDialogue;
 
-        editComplete &= !quest.RewardItems.Exists(x => x.Item == null);
+        editComplete &= !quest.RewardItems.Exists(x => x.item == null);
 
         editComplete &= !quest.CollectObjectives.Exists(x => string.IsNullOrEmpty(x.DisplayName) || x.Item == null);
 

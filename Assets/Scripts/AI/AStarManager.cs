@@ -5,19 +5,8 @@ using UnityEngine;
 [DisallowMultipleComponent]
 [RequireComponent(typeof(AstarPath))]
 [AddComponentMenu("ZetanStudio/AI/A*寻路管理器")]
-public class AStarManager : MonoBehaviour
+public class AStarManager : SingletonMonoBehaviour<AStarManager>
 {
-    private static AStarManager instance;
-    public static AStarManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<AStarManager>();
-            return instance;
-        }
-    }
-
     #region Gizmos相关
     [SerializeField]
     private bool gizmosPriview = true;

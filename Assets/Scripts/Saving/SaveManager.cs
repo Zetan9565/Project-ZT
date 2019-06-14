@@ -8,19 +8,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [DisallowMultipleComponent]
-public class SaveManager : MonoBehaviour
+public class SaveManager : SingletonMonoBehaviour<SaveManager>
 {
-    private static SaveManager instance;
-    public static SaveManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<SaveManager>();
-            return instance;
-        }
-    }
-
     [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("存档文件名")]
@@ -209,10 +198,7 @@ public class SaveManager : MonoBehaviour
             else
             {
                 WarehouseAgent handler = Array.Find(warehouseAgents, x => x.ID == wd.handlerID);
-                if (handler)
-                {
-                    warehouse = handler.MWarehouse;
-                }
+                if (handler) warehouse = handler.MWarehouse;
             }
             if (warehouse != null)
             {
@@ -220,8 +206,10 @@ public class SaveManager : MonoBehaviour
                 warehouse.Items.Clear();
                 foreach (ItemData id in wd.itemDatas)
                 {
-                    ItemInfo newInfo = new ItemInfo(GameManager.GetItemByID(id.itemID), id.amount);
-                    newInfo.indexInGrid = id.indexInGrid;
+                    ItemInfo newInfo = new ItemInfo(GameManager.GetItemByID(id.itemID), id.amount)
+                    {
+                        indexInGrid = id.indexInGrid
+                    };
                     //TODO 把newInfo的耐久度等信息处理
                     warehouse.Items.Add(newInfo);
                 }

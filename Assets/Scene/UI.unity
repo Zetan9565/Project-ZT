@@ -778,11 +778,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 33372330}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &33372326
 CircleCollider2D:
@@ -3221,11 +3221,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 130097667}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &130097663
 CircleCollider2D:
@@ -3954,11 +3954,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 148590921}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &148590917
 CircleCollider2D:
@@ -5332,11 +5332,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 209046160}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!114 &209046155
 MonoBehaviour:
@@ -6663,11 +6663,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 303863149}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &303863145
 CircleCollider2D:
@@ -7447,11 +7447,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 340145895}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &340145891
 CircleCollider2D:
@@ -7749,11 +7749,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 365270538}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!114 &365270534
 MonoBehaviour:
@@ -8289,11 +8289,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 384878979}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &384878975
 CircleCollider2D:
@@ -10005,11 +10005,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 448579593}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!114 &448579588
 MonoBehaviour:
@@ -11751,11 +11751,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 525495867}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &525495863
 CircleCollider2D:
@@ -11934,7 +11934,9 @@ MonoBehaviour:
   questGroupPrefab: {fileID: 4222113218122140904, guid: b2e7de499637b0647a5f6fa74caf6d47,
     type: 3}
   questListParent: {fileID: 1330258121}
+  questListToggle: {fileID: 1835029005}
   cmpltQuestListParent: {fileID: 1088422542}
+  cmpltQuestListToggle: {fileID: 1554073850}
   descriptionWindow: {fileID: 1075283714}
   descriptionText: {fileID: 1136904117}
   abandonButton: {fileID: 1297342879}
@@ -11945,17 +11947,6 @@ MonoBehaviour:
   rewardCellPrefab: {fileID: 5012386420257715135, guid: e66e862fa19e5df4eabdeaae86e6a25a,
     type: 3}
   rewardCellsParent: {fileID: 110459415}
-  rewardCells:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   questBoard: {fileID: 1057029450}
   boardQuestPrefab: {fileID: 6967801831333258822, guid: fdee3a2508e7fa44ba37cc4733f36261,
     type: 3}
@@ -13190,7 +13181,7 @@ MonoBehaviour:
     data_cachedStartup: 
     cacheStartup: 0
   showNavGraphs: 1
-  showUnwalkableNodes: 1
+  showUnwalkableNodes: 0
   debugMode: 0
   debugFloor: 0
   debugRoof: 1
@@ -15502,11 +15493,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 640681884}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &640681880
 CircleCollider2D:
@@ -16403,11 +16394,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 671210505}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &671210501
 CircleCollider2D:
@@ -17400,7 +17391,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1409990641}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &767119397
 MonoBehaviour:
@@ -17557,11 +17548,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 779163950}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &779163946
 CircleCollider2D:
@@ -20629,11 +20620,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 959506155}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &959506151
 CircleCollider2D:
@@ -22694,11 +22685,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1058665624}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1058665620
 CircleCollider2D:
@@ -24498,11 +24489,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1111577599}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!114 &1111577594
 MonoBehaviour:
@@ -24722,11 +24713,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1112351078}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1112351074
 CircleCollider2D:
@@ -26362,11 +26353,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1171858664}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!114 &1171858660
 MonoBehaviour:
@@ -26827,11 +26818,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1173924801}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1173924797
 CircleCollider2D:
@@ -27537,11 +27528,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1224266344}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1224266340
 CircleCollider2D:
@@ -30562,11 +30553,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1394434178}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1394434174
 CircleCollider2D:
@@ -30909,11 +30900,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 1396470412}
   animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 1396470412}
   drawGizmos: 1
 --- !u!120 &1396470412
 LineRenderer:
@@ -31188,9 +31179,9 @@ Transform:
   - {fileID: 158647661}
   - {fileID: 1176418490}
   - {fileID: 1912663090}
+  - {fileID: 1523429043}
   - {fileID: 1934156261}
   - {fileID: 767119396}
-  - {fileID: 1523429043}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -31258,11 +31249,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1412412302}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1412412298
 CircleCollider2D:
@@ -32476,11 +32467,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1467781653}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1467781649
 CircleCollider2D:
@@ -33421,7 +33412,7 @@ GameObject:
   - component: {fileID: 1523429043}
   - component: {fileID: 1523429044}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: TriggerManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33439,7 +33430,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1409990641}
-  m_RootOrder: 12
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1523429044
 MonoBehaviour:
@@ -33955,17 +33946,6 @@ MonoBehaviour:
   rewardCellPrefab: {fileID: 5012386420257715135, guid: e66e862fa19e5df4eabdeaae86e6a25a,
     type: 3}
   rewardCellsParent: {fileID: 60112217}
-  rewardCells:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!1 &1554073848
 GameObject:
   m_ObjectHideFlags: 0
@@ -34049,21 +34029,10 @@ MonoBehaviour:
   m_Group: {fileID: 1925553263}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 612175512}
-        m_MethodName: SetActive
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
     m_TypeName: UnityEngine.UI.Toggle+ToggleEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!1 &1567882063
 GameObject:
   m_ObjectHideFlags: 0
@@ -34128,11 +34097,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1567882070}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1567882066
 CircleCollider2D:
@@ -35168,11 +35137,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1616631159}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1616631155
 CircleCollider2D:
@@ -35773,11 +35742,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1635053597}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1635053593
 CircleCollider2D:
@@ -36439,11 +36408,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1690495732}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1690495728
 CircleCollider2D:
@@ -38601,11 +38570,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1760510975}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!114 &1760510970
 MonoBehaviour:
@@ -39673,11 +39642,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!136 &1804632439
 CapsuleCollider:
@@ -40032,21 +40001,10 @@ MonoBehaviour:
   m_Group: {fileID: 1925553263}
   onValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1867291214}
-        m_MethodName: SetActive
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
     m_TypeName: UnityEngine.UI.Toggle+ToggleEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!1 &1852217030
 GameObject:
   m_ObjectHideFlags: 0
@@ -40677,11 +40635,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1874379353}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!58 &1874379349
 CircleCollider2D:
@@ -41478,7 +41436,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1409990641}
-  m_RootOrder: 10
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1934156262
 MonoBehaviour:
@@ -41983,11 +41941,11 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  pathRenderer: {fileID: 0}
   animator: {fileID: 1985110947}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
+  pathRenderer: {fileID: 0}
   drawGizmos: 1
 --- !u!114 &1985110942
 MonoBehaviour:

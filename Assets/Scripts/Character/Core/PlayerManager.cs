@@ -1,18 +1,7 @@
 ﻿using UnityEngine;
 
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
 {
-    private static PlayerManager instance;
-    public static PlayerManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<PlayerManager>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private PlayerInfomation playerInfo;
     public PlayerInfomation PlayerInfo
@@ -60,17 +49,17 @@ public class PlayerManager : MonoBehaviour
 
     public void Equip(ItemInfo toEquip)
     {
-        if (toEquip == null || !toEquip.Item) return;
+        if (toEquip == null || !toEquip.item) return;
         ItemInfo equiped = null;
-        switch (toEquip.Item.ItemType)
+        switch (toEquip.item.ItemType)
         {
             case ItemType.Weapon:
                 BackpackManager.Instance.MBackpack.backpackSize--;//为将要替换出来的武器留出空间
-                if (PlayerInfo.HasPrimaryWeapon && (toEquip.Item as WeaponItem).IsPrimary)
+                if (PlayerInfo.HasPrimaryWeapon && (toEquip.item as WeaponItem).IsPrimary)
                 {
                     equiped = PlayerInfo.UnequipWeapon(true);
                 }
-                else if (PlayerInfo.HasSecondaryWeapon && !(toEquip.Item as WeaponItem).IsPrimary)
+                else if (PlayerInfo.HasSecondaryWeapon && !(toEquip.item as WeaponItem).IsPrimary)
                 {
                     equiped = PlayerInfo.UnequipWeapon(false);
                 }
@@ -81,7 +70,7 @@ public class PlayerManager : MonoBehaviour
                     return;
                 }
                 BackpackManager.Instance.LoseItem(toEquip);
-                BackpackManager.Instance.MBackpack.weightLoad += toEquip.Item.Weight;
+                BackpackManager.Instance.MBackpack.weightLoad += toEquip.item.Weight;
                 BackpackManager.Instance.UpdateUI();
                 MessageManager.Instance.NewMessage(string.Format("装备了 [{0}]", toEquip.ItemName));
                 break;
@@ -91,7 +80,7 @@ public class PlayerManager : MonoBehaviour
         }
         if (BackpackManager.Instance.GetItem(equiped, 1))
         {
-            BackpackManager.Instance.MBackpack.weightLoad -= equiped.Item.Weight;
+            BackpackManager.Instance.MBackpack.weightLoad -= equiped.item.Weight;
             BackpackManager.Instance.UpdateUI();
         }
     }
@@ -100,16 +89,16 @@ public class PlayerManager : MonoBehaviour
     {
         if (toUnequip == null) return;
         ItemInfo equiped = toUnequip;
-        switch (toUnequip.Item.ItemType)
+        switch (toUnequip.item.ItemType)
         {
             case ItemType.Weapon:
-                BackpackManager.Instance.MBackpack.weightLoad -= equiped.Item.Weight;
+                BackpackManager.Instance.MBackpack.weightLoad -= equiped.item.Weight;
                 BackpackManager.Instance.MBackpack.backpackSize--;
-                if (PlayerInfo.HasPrimaryWeapon && (equiped.Item as WeaponItem).IsPrimary)
+                if (PlayerInfo.HasPrimaryWeapon && (equiped.item as WeaponItem).IsPrimary)
                 {
                     equiped = PlayerInfo.UnequipWeapon(true);
                 }
-                else if (PlayerInfo.HasSecondaryWeapon && !(equiped.Item as WeaponItem).IsPrimary)
+                else if (PlayerInfo.HasSecondaryWeapon && !(equiped.item as WeaponItem).IsPrimary)
                 {
                     equiped = PlayerInfo.UnequipWeapon(false);
                 }
@@ -119,7 +108,7 @@ public class PlayerManager : MonoBehaviour
         if (!BackpackManager.Instance.TryGetItem_Boolean(equiped))
         {
             PlayerInfo.EquipWeapon(equiped);
-            BackpackManager.Instance.MBackpack.weightLoad += equiped.Item.Weight;
+            BackpackManager.Instance.MBackpack.weightLoad += equiped.item.Weight;
             BackpackManager.Instance.MBackpack.backpackSize++;
             return;
         }

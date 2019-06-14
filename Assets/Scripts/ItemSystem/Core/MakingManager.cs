@@ -3,19 +3,8 @@ using System.Linq;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class MakingManager : MonoBehaviour, IWindow
+public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
 {
-    private static MakingManager instance;
-    public static MakingManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<MakingManager>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private MakingUI UI;
 
@@ -66,7 +55,7 @@ public class MakingManager : MonoBehaviour, IWindow
         }
         if (amountCanMake > 0 && amountCanMake < 2)
         {
-            ConfirmHandler.Instance.NewConfirm(string.Format("确定制作1个 [{0}] 吗？", currentItem.name), delegate
+            ConfirmManager.Instance.NewConfirm(string.Format("确定制作1个 [{0}] 吗？", currentItem.name), delegate
             {
                 if (OnMake(currentItem))
                     MessageManager.Instance.NewMessage(string.Format("制作了1个 [{0}]", currentItem.name));
@@ -74,11 +63,11 @@ public class MakingManager : MonoBehaviour, IWindow
         }
         else
         {
-            AmountHandler.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
-            AmountHandler.Instance.Init(delegate
+            AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.Init(delegate
             {
-                if (OnMake(currentItem, (int)AmountHandler.Instance.Amount))
-                    MessageManager.Instance.NewMessage(string.Format("制作了{0}个 [{1}]", currentItem.name, (int)AmountHandler.Instance.Amount));
+                if (OnMake(currentItem, (int)AmountManager.Instance.Amount))
+                    MessageManager.Instance.NewMessage(string.Format("制作了{0}个 [{1}]", currentItem.name, (int)AmountManager.Instance.Amount));
             }, amountCanMake);
         }
     }
@@ -161,8 +150,8 @@ public class MakingManager : MonoBehaviour, IWindow
         CurrentTool = null;
         currentItem = null;
         HideDescription();
-        AmountHandler.Instance.Cancel();
-        ItemWindowHandler.Instance.CloseItemWindow();
+        AmountManager.Instance.Cancel();
+        ItemWindowManager.Instance.CloseItemWindow();
     }
 
     public void OpenCloseWindow()

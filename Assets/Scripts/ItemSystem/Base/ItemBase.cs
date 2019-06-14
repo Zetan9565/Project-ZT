@@ -497,7 +497,7 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
     {
         get
         {
-            if (Item) return Item.ID;
+            if (item) return item.ID;
             else return string.Empty;
         }
     }
@@ -506,7 +506,7 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
     {
         get
         {
-            if (Item) return Item.name;
+            if (item) return item.name;
             else return string.Empty;
         }
     }
@@ -517,19 +517,7 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
     }
 
     [SerializeField]
-    private ItemBase item;
-    public ItemBase Item
-    {
-        get
-        {
-            return item;
-        }
-
-        set
-        {
-            item = value;
-        }
-    }
+    public ItemBase item;
 
     [SerializeField]
     private int amount;

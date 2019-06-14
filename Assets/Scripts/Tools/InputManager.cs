@@ -1,19 +1,8 @@
 ﻿using UnityEngine;
 
 [DisallowMultipleComponent]
-public class InputManager : MonoBehaviour
+public class InputManager : SingletonMonoBehaviour<InputManager>
 {
-    private static InputManager instance;
-    public static InputManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<InputManager>();
-            return instance;
-        }
-    }
-
     public InputCustomInfo customInfo;
 
     void Update()
@@ -38,7 +27,7 @@ public class InputManager : MonoBehaviour
         {
             BackpackManager.Instance.OpenCloseWindow();
         }
-        if(Input.GetKeyDown(customInfo.TraceButton))
+        if (Input.GetKeyDown(customInfo.TraceButton))
         {
             PlayerManager.Instance.PlayerController.Trace();
         }

@@ -1170,3 +1170,19 @@ public interface IHeapItem<T> : IComparable<T>
 {
     int HeapIndex { get; set; }
 }
+
+public abstract class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
+{
+    private static T instance;
+    public static T Instance
+    {
+        get
+        {
+            if (!instance || !instance.gameObject)
+                instance = FindObjectOfType<T>();
+            if (!instance)
+                instance = new GameObject(nameof(T)).AddComponent<T>();
+            return instance;
+        }
+    }
+}

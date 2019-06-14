@@ -6,19 +6,8 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [DisallowMultipleComponent]
-public class DialogueManager : MonoBehaviour, IWindow
+public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
 {
-    private static DialogueManager instance;
-    public static DialogueManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<DialogueManager>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private DialogueUI UI;
 
@@ -48,6 +37,7 @@ public class DialogueManager : MonoBehaviour, IWindow
 
     private int MaxPage = 1;
 
+    public readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
     private readonly List<OptionAgent> optionAgents = new List<OptionAgent>();
 
     public int OptionsCount
@@ -736,12 +726,19 @@ public class DialogueManager : MonoBehaviour, IWindow
             CurrentQuest.Description).ToString();
         UI.moneyText.text = CurrentQuest.RewardMoney > 0 ? CurrentQuest.RewardMoney.ToString() : "无";
         UI.EXPText.text = CurrentQuest.RewardEXP > 0 ? CurrentQuest.RewardEXP.ToString() : "无";
-        foreach (ItemAgent rwc in UI.rewardCells)
-            rwc.Empty();
+        int befCount = rewardCells.Count;
+        for (int i = 0; i < 10 - befCount; i++)
+        {
+            ItemAgent rwc = ObjectPool.Instance.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemAgent>();
+            rwc.Init();
+            rewardCells.Add(rwc);
+        }
+        foreach (ItemAgent rwc in rewardCells)
+            if (rwc) rwc.Empty();
         foreach (ItemInfo info in quest.RewardItems)
-            foreach (ItemAgent rw in UI.rewardCells)
+            foreach (ItemAgent rw in rewardCells)
             {
-                if (rw.MItemInfo == null)
+                if (rw.IsEmpty)
                 {
                     rw.InitItem(info);
                     break;
@@ -755,7 +752,7 @@ public class DialogueManager : MonoBehaviour, IWindow
         CurrentQuest = null;
         UI.descriptionWindow.alpha = 0;
         UI.descriptionWindow.blocksRaycasts = false;
-        ItemWindowHandler.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseItemWindow();
     }
 
     public void OpenTalkerWarehouse()

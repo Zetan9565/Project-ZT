@@ -26,18 +26,18 @@ public class AmountUI : MonoBehaviour
         windowCanvas = amountWindow.GetComponent<Canvas>();
         windowCanvas.overrideSorting = true;
         windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
-        amount.onValueChanged.AddListener(delegate { AmountHandler.Instance.FixAmount(); });
-        max.onClick.AddListener(AmountHandler.Instance.Max);
-        clear.onClick.AddListener(AmountHandler.Instance.Clear);
-        cancel.onClick.AddListener(AmountHandler.Instance.Cancel);
-        plus.onClick.AddListener(AmountHandler.Instance.Plus);
-        minus.onClick.AddListener(AmountHandler.Instance.Minus);
+        amount.onValueChanged.AddListener(delegate { AmountManager.Instance.FixAmount(); });
+        max.onClick.AddListener(AmountManager.Instance.Max);
+        clear.onClick.AddListener(AmountManager.Instance.Clear);
+        cancel.onClick.AddListener(AmountManager.Instance.Cancel);
+        plus.onClick.AddListener(AmountManager.Instance.Plus);
+        minus.onClick.AddListener(AmountManager.Instance.Minus);
         amount.characterLimit = 12;
         amount.text = 0.ToString();
         for (int i = 0; i < numButtons.Length; i++)
         {
             int num = i;
-            if (numButtons[i]) numButtons[i].onClick.AddListener(delegate { AmountHandler.Instance.Number(num); });
+            if (numButtons[i]) numButtons[i].onClick.AddListener(delegate { AmountManager.Instance.Number(num); });
         }
     }
 }

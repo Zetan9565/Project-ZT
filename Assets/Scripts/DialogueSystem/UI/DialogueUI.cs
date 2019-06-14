@@ -48,8 +48,6 @@ public class DialogueUI : MonoBehaviour
     public GameObject rewardCellPrefab;
     public Transform rewardCellsParent;
 
-    public List<ItemAgent> rewardCells = new List<ItemAgent>();
-
     private void Awake()
     {
         if (!dialogueWindow.gameObject.GetComponent<GraphicRaycaster>()) dialogueWindow.gameObject.AddComponent<GraphicRaycaster>();
@@ -62,18 +60,6 @@ public class DialogueUI : MonoBehaviour
         questButton.onClick.AddListener(DialogueManager.Instance.LoadTalkerQuest);
         pageUpButton.onClick.AddListener(DialogueManager.Instance.OptionPageUp);
         pageDownButton.onClick.AddListener(DialogueManager.Instance.OptionPageDown);
-        foreach (ItemAgent rwc in rewardCells)
-        {
-            if (rwc) rwc.Clear(true);
-        }
-        rewardCells.Clear();
-        for (int i = 0; i < 10; i++)
-        {
-            ItemAgent rwc = ObjectPool.Instance.Get(rewardCellPrefab, rewardCellsParent).GetComponent<ItemAgent>();
-            rwc.Clear();
-            rwc.Init();
-            rewardCells.Add(rwc);
-        }
     }
 
     public void OnDestroy()

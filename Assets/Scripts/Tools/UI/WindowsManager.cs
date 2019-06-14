@@ -2,19 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-public class WindowsManager : MonoBehaviour
+public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
 {
-    private static WindowsManager instance;
-    public static WindowsManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<WindowsManager>();
-            return instance;
-        }
-    }
-
     private int topOrder = 0;
     public int TopOrder
     {

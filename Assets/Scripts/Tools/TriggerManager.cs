@@ -2,19 +2,8 @@
 using System.Collections.Generic;
 
 public delegate void TriggerStateListner(string name, bool value);
-public class TriggerManager : MonoBehaviour
+public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
 {
-    private static TriggerManager instance;
-    public static TriggerManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<TriggerManager>();
-            return instance;
-        }
-    }
-
     public Dictionary<string, bool> Triggers { get; } = new Dictionary<string, bool>();
 
     public event TriggerStateListner OnTriggerSetEvent;

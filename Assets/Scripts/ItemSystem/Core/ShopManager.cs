@@ -2,19 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-public class ShopManager : MonoBehaviour, IWindow
+public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
 {
-    private static ShopManager instance;
-    public static ShopManager Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<ShopManager>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private ShopUI UI;
 
@@ -86,7 +75,7 @@ public class ShopManager : MonoBehaviour, IWindow
         long maxAmount = info.SOorENAble ? info.LeftAmount : info.SellPrice > 0 ? BackpackManager.Instance.MBackpack.Money / info.SellPrice : 999;
         if (info.LeftAmount == 1 && info.SOorENAble)
         {
-            ConfirmHandler.Instance.NewConfirm(string.Format("确定购买1个 [{0}] 吗？", info.Item.name), delegate
+            ConfirmManager.Instance.NewConfirm(string.Format("确定购买1个 [{0}] 吗？", info.Item.name), delegate
             {
                 if (OnSell(info))
                     MessageManager.Instance.NewMessage(string.Format("购买了1个 [{0}]", info.Item.name));
@@ -94,17 +83,17 @@ public class ShopManager : MonoBehaviour, IWindow
         }
         else if (info.IsSoldOut)
         {
-            ConfirmHandler.Instance.NewConfirm("该商品暂时缺货");
+            ConfirmManager.Instance.NewConfirm("该商品暂时缺货");
         }
         else
         {
-            AmountHandler.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
-            AmountHandler.Instance.Init(delegate
+            AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.Init(delegate
             {
-                ConfirmHandler.Instance.NewConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)AmountHandler.Instance.Amount, info.Item.name), delegate
+                ConfirmManager.Instance.NewConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
                 {
-                    if (OnSell(info, (int)AmountHandler.Instance.Amount))
-                        MessageManager.Instance.NewMessage(string.Format("购买了{0}个 [{1}]", (int)AmountHandler.Instance.Amount, info.Item.name));
+                    if (OnSell(info, (int)AmountManager.Instance.Amount))
+                        MessageManager.Instance.NewMessage(string.Format("购买了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
                 });
             }, maxAmount);
         }
@@ -139,28 +128,28 @@ public class ShopManager : MonoBehaviour, IWindow
         int maxAmount = info.SOorENAble ? (info.LeftAmount > backpackAmount ? backpackAmount : info.LeftAmount) : backpackAmount;
         if (info.LeftAmount == 1)
         {
-            ConfirmHandler.Instance.NewConfirm(string.Format("确定出售1个 [{0}] 吗？", info.Item.name), delegate
+            ConfirmManager.Instance.NewConfirm(string.Format("确定出售1个 [{0}] 吗？", info.Item.name), delegate
             {
-                if (OnPurchase(info, (int)AmountHandler.Instance.Amount))
-                    MessageManager.Instance.NewMessage(string.Format("出售了1个 [{1}]", (int)AmountHandler.Instance.Amount, info.Item.name));
+                if (OnPurchase(info, (int)AmountManager.Instance.Amount))
+                    MessageManager.Instance.NewMessage(string.Format("出售了1个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
             });
         }
         else if (info.IsEnough)
         {
-            ConfirmHandler.Instance.NewConfirm("这种物品暂无特价收购需求，确定按原价出售吗？", delegate
+            ConfirmManager.Instance.NewConfirm("这种物品暂无特价收购需求，确定按原价出售吗？", delegate
             {
                 PurchaseItem(MItemInfo, true);
             });
         }
         else
         {
-            AmountHandler.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
-            AmountHandler.Instance.Init(delegate
+            AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.Init(delegate
             {
-                ConfirmHandler.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountHandler.Instance.Amount, info.Item.name), delegate
+                ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
                 {
-                    if (OnPurchase(info, (int)AmountHandler.Instance.Amount))
-                        MessageManager.Instance.NewMessage(string.Format("出售了{0}个 [{1}]", (int)AmountHandler.Instance.Amount, info.Item.name));
+                    if (OnPurchase(info, (int)AmountManager.Instance.Amount))
+                        MessageManager.Instance.NewMessage(string.Format("出售了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
                 });
             }, maxAmount);
         }
@@ -168,8 +157,8 @@ public class ShopManager : MonoBehaviour, IWindow
 
     public void PurchaseItem(ItemInfo info, bool force = false)
     {
-        if (MShop == null || info == null || !info.Item) return;
-        if (!info.Item.SellAble)
+        if (MShop == null || info == null || !info.item) return;
+        if (!info.item.SellAble)
         {
             MessageManager.Instance.NewMessage("这种物品不可出售");
             return;
@@ -180,7 +169,7 @@ public class ShopManager : MonoBehaviour, IWindow
             return;
         }
         MItemInfo = info;
-        MerchandiseInfo find = MShop.Acquisitions.Find(x => x.Item == info.Item);
+        MerchandiseInfo find = MShop.Acquisitions.Find(x => x.Item == info.item);
         if (find != null && !force)
         {
             PurchaseItem(find);
@@ -188,23 +177,23 @@ public class ShopManager : MonoBehaviour, IWindow
         }
         if (info.Amount == 1)
         {
-            ConfirmHandler.Instance.NewConfirm(string.Format("确定出售1个 [{0}] 吗？", info.Item.name), delegate
+            ConfirmManager.Instance.NewConfirm(string.Format("确定出售1个 [{0}] 吗？", info.item.name), delegate
             {
                 if (OnPurchase(info))
-                    MessageManager.Instance.NewMessage(string.Format("出售了1个 [{1}]", (int)AmountHandler.Instance.Amount, info.Item.name));
+                    MessageManager.Instance.NewMessage(string.Format("出售了1个 [{1}]", (int)AmountManager.Instance.Amount, info.item.name));
             });
         }
         else
         {
-            AmountHandler.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
-            AmountHandler.Instance.Init(delegate
+            AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.Init(delegate
             {
-                ConfirmHandler.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountHandler.Instance.Amount, info.Item.name), delegate
+                ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.item.name), delegate
                 {
-                    if (OnPurchase(info, (int)AmountHandler.Instance.Amount))
-                        MessageManager.Instance.NewMessage(string.Format("出售了{0}个 [{1}]", (int)AmountHandler.Instance.Amount, info.Item.name));
+                    if (OnPurchase(info, (int)AmountManager.Instance.Amount))
+                        MessageManager.Instance.NewMessage(string.Format("出售了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.item.name));
                 });
-            }, BackpackManager.Instance.GetItemAmount(info.Item));
+            }, BackpackManager.Instance.GetItemAmount(info.item));
         }
     }
 
@@ -224,7 +213,7 @@ public class ShopManager : MonoBehaviour, IWindow
             else MessageManager.Instance.NewMessage("这种物品暂无收购需求");
             return false;
         }
-        ItemBase item = itemAgents[0].MItemInfo.Item;
+        ItemBase item = itemAgents[0].MItemInfo.item;
         if (!BackpackManager.Instance.TryLoseItem_Boolean(item, amount)) return false;
         BackpackManager.Instance.GetMoney(amount * info.PurchasePrice);
         BackpackManager.Instance.LoseItem(item, amount);
@@ -236,14 +225,14 @@ public class ShopManager : MonoBehaviour, IWindow
 
     bool OnPurchase(ItemInfo info, int amount = 1)
     {
-        if (MShop == null || info == null || !info.Item || amount < 1) return false;
+        if (MShop == null || info == null || !info.item || amount < 1) return false;
         MItemInfo = null;
-        if (!info.Item.SellAble)
+        if (!info.item.SellAble)
         {
             MessageManager.Instance.NewMessage("这种物品不可出售");
             return false;
         }
-        if (BackpackManager.Instance.GetItemAmount(info.Item) < 1)
+        if (BackpackManager.Instance.GetItemAmount(info.item) < 1)
         {
             MessageManager.Instance.NewMessage("行囊中没有这种物品");
             return false;
@@ -254,7 +243,7 @@ public class ShopManager : MonoBehaviour, IWindow
             return false;
         }
         if (!BackpackManager.Instance.TryLoseItem_Boolean(info, amount)) return false;
-        BackpackManager.Instance.GetMoney(amount * info.Item.SellPrice);
+        BackpackManager.Instance.GetMoney(amount * info.item.SellPrice);
         BackpackManager.Instance.LoseItem(info, amount);
         return true;
     }
@@ -286,9 +275,9 @@ public class ShopManager : MonoBehaviour, IWindow
         MItemInfo = null;
         WindowsManager.Instance.Remove(this);
         if (BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.CloseWindow();
-        ItemWindowHandler.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseItemWindow();
         if (DialogueManager.Instance.IsUIOpen) DialogueManager.Instance.PauseDisplay(false);
-        AmountHandler.Instance.Cancel();
+        AmountManager.Instance.Cancel();
     }
 
     public void OpenCloseWindow()
@@ -371,7 +360,7 @@ public class ShopManager : MonoBehaviour, IWindow
                 break;
             default: break;
         }
-        ItemWindowHandler.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseItemWindow();
     }
 
     public void SetUI(ShopUI UI)

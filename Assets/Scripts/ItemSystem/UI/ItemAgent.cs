@@ -47,7 +47,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     private ScrollRect parentScrollRect;
 
-    public bool IsEmpty { get { return MItemInfo == null || !MItemInfo.Item; } }
+    public bool IsEmpty { get { return MItemInfo == null || !MItemInfo.item; } }
 
     #region 道具使用相关
     public void OnUse()
@@ -57,22 +57,22 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     public void UseItem()
     {
-        if (!MItemInfo.Item) return;
-        if (!MItemInfo.Item.Useable)
+        if (!MItemInfo.item) return;
+        if (!MItemInfo.item.Useable)
         {
             MessageManager.Instance.NewMessage("该物品不可使用");
             return;
         }
-        if (MItemInfo.Item.IsBox) UseBox();
-        else if (MItemInfo.Item.IsEquipment) UseEuipment();
-        else if (MItemInfo.Item.IsBook) UseBook();
-        else if (MItemInfo.Item.IsBag) UseBag();
-        if (ItemWindowHandler.Instance.MItemInfo == MItemInfo) ItemWindowHandler.Instance.CloseItemWindow();
+        if (MItemInfo.item.IsBox) UseBox();
+        else if (MItemInfo.item.IsEquipment) UseEuipment();
+        else if (MItemInfo.item.IsBook) UseBook();
+        else if (MItemInfo.item.IsBag) UseBag();
+        if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
     }
 
     void UseBox()
     {
-        BoxItem box = MItemInfo.Item as BoxItem;
+        BoxItem box = MItemInfo.item as BoxItem;
         if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo))
         {
             BackpackManager.Instance.MBackpack.weightLoad -= box.Weight;
@@ -103,7 +103,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     void UseBook()
     {
-        BookItem book = MItemInfo.Item as BookItem;
+        BookItem book = MItemInfo.item as BookItem;
         switch (book.BookType)
         {
             case BookType.Building:
@@ -127,7 +127,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     void UseBag()
     {
-        BagItem bag = MItemInfo.Item as BagItem;
+        BagItem bag = MItemInfo.item as BagItem;
         if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo))
         {
             if (BackpackManager.Instance.Expand(bag.ExpandSize))
@@ -152,7 +152,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
         MItemInfo.indexInGrid = indexInGrid;
         if (GameManager.Instance.QualityColors.Count >= 5)
         {
-            qualityEdge.color = GameManager.Instance.QualityColors[(int)info.Item.Quality];
+            qualityEdge.color = GameManager.Instance.QualityColors[(int)info.item.Quality];
         }
         UpdateInfo();
     }
@@ -169,8 +169,8 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     public void UpdateInfo()
     {
-        if (MItemInfo == null || !MItemInfo.Item) return;
-        if (MItemInfo.Item.Icon) icon.overrideSprite = MItemInfo.Item.Icon;
+        if (MItemInfo == null || !MItemInfo.item) return;
+        if (MItemInfo.item.Icon) icon.overrideSprite = MItemInfo.item.Icon;
         if (agentType != ItemAgentType.ShopSelling && agentType != ItemAgentType.ShopBuying)
             amount.text = MItemInfo.Amount > 1 || (agentType == ItemAgentType.Making && MItemInfo.Amount > 0) ? MItemInfo.Amount.ToString() : string.Empty;
         else amount.text = string.Empty;
@@ -179,11 +179,11 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     public void OnRightClick()
     {
-        if (!DragableHandler.Instance.IsDraging)
+        if (!DragableManager.Instance.IsDraging)
             if (agentType == ItemAgentType.Backpack && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen) OnUse();
             else if (WarehouseManager.Instance.IsUIOpen)
             {
-                if (ItemWindowHandler.Instance.MItemInfo == MItemInfo) ItemWindowHandler.Instance.CloseItemWindow();
+                if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
                 if (agentType == ItemAgentType.Warehouse)
                     WarehouseManager.Instance.TakeOutItem(MItemInfo, true);
                 else if (agentType == ItemAgentType.Backpack)
@@ -191,7 +191,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
             }
             else if (ShopManager.Instance.IsUIOpen)
             {
-                if (ItemWindowHandler.Instance.MItemInfo == MItemInfo) ItemWindowHandler.Instance.CloseItemWindow();
+                if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
                 if (agentType == ItemAgentType.ShopSelling && ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo))
                     ShopManager.Instance.SellItem(ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo);
                 else if (agentType == ItemAgentType.Backpack)
@@ -303,14 +303,14 @@ public class ItemAgent : MonoBehaviour, IDragable,
     private void BeginDrag()
     {
         icon.color = Color.grey;
-        DragableHandler.Instance.GetDragable(this, FinishDrag, icon.rectTransform.rect.width, icon.rectTransform.rect.height);
-        ItemWindowHandler.Instance.PauseShowing(true);
+        DragableManager.Instance.GetDragable(this, FinishDrag, icon.rectTransform.rect.width, icon.rectTransform.rect.height);
+        ItemWindowManager.Instance.PauseShowing(true);
     }
     public void FinishDrag()
     {
         icon.color = Color.white;
-        DragableHandler.Instance.ResetIcon();
-        ItemWindowHandler.Instance.PauseShowing(false);
+        DragableManager.Instance.ResetIcon();
+        ItemWindowManager.Instance.PauseShowing(false);
     }
     #endregion
 
@@ -319,14 +319,14 @@ public class ItemAgent : MonoBehaviour, IDragable,
     {
         if (eventData.button == PointerEventData.InputButton.Left && agentType == ItemAgentType.Making)
         {
-            ItemWindowHandler.Instance.OpenItemWindow(this);
+            ItemWindowManager.Instance.OpenItemWindow(this);
             return;
         }
 #if UNITY_STANDALONE
         if (eventData.button == PointerEventData.InputButton.Left)
-            if (DragableHandler.Instance.IsDraging)
+            if (DragableManager.Instance.IsDraging)
             {
-                ItemAgent source = DragableHandler.Instance.Current as ItemAgent;
+                ItemAgent source = DragableManager.Instance.Current as ItemAgent;
                 if (source)
                     source.SwapInfoTo(this);
             }
@@ -387,8 +387,8 @@ public class ItemAgent : MonoBehaviour, IDragable,
     public void OnPointerEnter(PointerEventData eventData)//用于PC
     {
 #if UNITY_STANDALONE
-        ItemWindowHandler.Instance.OpenItemWindow(this);
-        if (!DragableHandler.Instance.IsDraging)
+        ItemWindowManager.Instance.OpenItemWindow(this);
+        if (!DragableManager.Instance.IsDraging)
         {
             if ((agentType == ItemAgentType.None && !IsEmpty) || agentType != ItemAgentType.None)
                 icon.color = Color.yellow;
@@ -399,8 +399,8 @@ public class ItemAgent : MonoBehaviour, IDragable,
     public void OnPointerExit(PointerEventData eventData)//用于安卓拖拽、PC
     {
 #if UNITY_STANDALONE
-        if (!ItemWindowHandler.Instance.IsHeld) ItemWindowHandler.Instance.CloseItemWindow();
-        if (!DragableHandler.Instance.IsDraging)
+        if (!ItemWindowManager.Instance.IsHeld) ItemWindowManager.Instance.CloseItemWindow();
+        if (!DragableManager.Instance.IsDraging)
         {
             icon.color = Color.white;
         }

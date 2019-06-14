@@ -1,19 +1,8 @@
 ﻿using UnityEngine.UI;
 using UnityEngine;
 
-public class AmountHandler : MonoBehaviour
+public class AmountManager : SingletonMonoBehaviour<AmountManager>
 {
-    private static AmountHandler instance;
-    public static AmountHandler Instance
-    {
-        get
-        {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<AmountHandler>();
-            return instance;
-        }
-    }
-
     public AmountUI UI;
 
     [SerializeField]

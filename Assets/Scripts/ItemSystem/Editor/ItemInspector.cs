@@ -183,8 +183,8 @@ public class ItemInspector : Editor
         boxItemList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
-            if (box.ItemsInBox[index] != null && box.ItemsInBox[index].Item != null)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), box.ItemsInBox[index].Item.name);
+            if (box.ItemsInBox[index] != null && box.ItemsInBox[index].item != null)
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), box.ItemsInBox[index].item.name);
             else
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             EditorGUI.BeginChangeCheck();
@@ -228,7 +228,7 @@ public class ItemInspector : Editor
 
         boxItemList.drawHeaderCallback = (rect) =>
         {
-            int notCmpltCount = box.ItemsInBox.FindAll(x => !x.Item).Count;
+            int notCmpltCount = box.ItemsInBox.FindAll(x => !x.item).Count;
             EditorGUI.LabelField(rect, "盒内道具列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
         };
 
@@ -453,7 +453,7 @@ public class ItemInspector : Editor
             );
 
         if (box)
-            editComplete &= !box.ItemsInBox.Exists(x => x.Item == null);
+            editComplete &= !box.ItemsInBox.Exists(x => x.item == null);
 
         if (item.MakingMethod != MakingMethod.None)
             editComplete &= !item.Materials.Exists(x => x.MakingType == MakingType.SingleItem && x.Item == null);

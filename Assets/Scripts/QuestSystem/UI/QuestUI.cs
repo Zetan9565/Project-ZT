@@ -17,7 +17,9 @@ public class QuestUI : MonoBehaviour
     public GameObject questGroupPrefab;
 
     public Transform questListParent;
+    public Toggle questListToggle;
     public Transform cmpltQuestListParent;
+    public Toggle cmpltQuestListToggle;
 
     public CanvasGroup descriptionWindow;
 
@@ -35,8 +37,6 @@ public class QuestUI : MonoBehaviour
     public GameObject rewardCellPrefab;
     public Transform rewardCellsParent;
 
-    public List<ItemAgent> rewardCells = new List<ItemAgent>();
-
     public CanvasGroup questBoard;
 
     public GameObject boardQuestPrefab;
@@ -53,18 +53,12 @@ public class QuestUI : MonoBehaviour
         abandonButton.onClick.AddListener(QuestManager.Instance.AbandonSelectedQuest);
         traceButton.onClick.AddListener(QuestManager.Instance.TraceSelectedQuest);
         closeDescription.onClick.AddListener(QuestManager.Instance.HideDescription);
-        foreach (ItemAgent rwc in rewardCells)
-        {
-            if (rwc) rwc.Clear(true);
-        }
-        rewardCells.Clear();
-        for (int i = 0; i < 10; i++)
-        {
-            ItemAgent rwc = ObjectPool.Instance.Get(rewardCellPrefab, rewardCellsParent).GetComponent<ItemAgent>();
-            rwc.Clear();
-            rwc.Init();
-            rewardCells.Add(rwc);
-        }
+        questListToggle.onValueChanged.AddListener(questListParent.gameObject.SetActive);
+        questListToggle.group.RegisterToggle(questListToggle); ;
+        cmpltQuestListToggle.onValueChanged.AddListener(cmpltQuestListParent.gameObject.SetActive);
+        cmpltQuestListToggle.group.RegisterToggle(cmpltQuestListToggle);
+        questListToggle.isOn = true;
+        cmpltQuestListToggle.isOn = false;
     }
 
     private void OnDestroy()
