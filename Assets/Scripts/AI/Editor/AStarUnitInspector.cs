@@ -56,6 +56,7 @@ public class AStarUnitInspector : Editor
 
     public override void OnInspectorGUI()
     {
+        EditorGUILayout.BeginVertical("Box");
         if (manager) EditorGUILayout.LabelField("寻路单元格大小", manager.BaseCellSize.ToString());
         else EditorGUILayout.HelpBox("未找到A*管理器对象!", MessageType.Warning);
         serializedObject.Update();
@@ -66,11 +67,13 @@ public class AStarUnitInspector : Editor
         if (manager)
             EditorGUILayout.LabelField("单位实际大小", string.Format("宽: {0} 高: {1}",
                 (manager.BaseCellSize * unitSize.vector2IntValue.x).ToString(), (manager.BaseCellSize * unitSize.vector2IntValue.y).ToString()));
-        EditorGUILayout.Space();
+        EditorGUILayout.EndVertical();
+        EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.PropertyField(footOffset, new GUIContent("自身脚部偏移"));
         EditorGUILayout.PropertyField(fixedOffset, new GUIContent("近似位置修正值"));
         if (fixedOffset.floatValue < 0) fixedOffset.floatValue = 0;
-        EditorGUILayout.Space();
+        EditorGUILayout.EndVertical();
+        EditorGUILayout.BeginVertical("Box");
         if (Application.isPlaying)
         {
             GUI.enabled = false;
@@ -83,8 +86,9 @@ public class AStarUnitInspector : Editor
             EditorGUILayout.PropertyField(target, new GUIContent("跟随目标(可选)"));
             if (target.objectReferenceValue) EditorGUILayout.PropertyField(targetFootOffset, new GUIContent("目标脚部偏移"));
         }
-        if (target.objectReferenceValue) EditorGUILayout.PropertyField(targetFollowStartDistance, new GUIContent("目标跟随距离修正值"));
+        EditorGUILayout.EndVertical();
         if (targetFollowStartDistance.floatValue < 0) targetFollowStartDistance.floatValue = 0;
+        EditorGUILayout.BeginVertical("Box");
         if (Application.isPlaying)
         {
             GUI.enabled = false;
@@ -157,7 +161,8 @@ public class AStarUnitInspector : Editor
         EditorGUILayout.PropertyField(stopDistance, new GUIContent("提前停止距离"));
         if (stopDistance.floatValue < 0) stopDistance.floatValue = 0;
         //EditorGUILayout.PropertyField(autoRepath, new GUIContent("自动修复路线"));
-        EditorGUILayout.Space();
+        EditorGUILayout.EndVertical();
+        EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.PropertyField(animator, new GUIContent("动画控制器(可选)"));
         if (animator.objectReferenceValue)
         {
@@ -165,6 +170,7 @@ public class AStarUnitInspector : Editor
             EditorGUILayout.PropertyField(animaVertical, new GUIContent("动画控垂直参数"));
             EditorGUILayout.PropertyField(animaMagnitude, new GUIContent("动画模参数"));
         }
+        EditorGUILayout.EndVertical();
         EditorGUILayout.Space();
         EditorGUILayout.PropertyField(pathRenderer, new GUIContent("路线渲染器(可选)"));
         EditorGUILayout.Space();

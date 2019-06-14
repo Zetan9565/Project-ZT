@@ -439,7 +439,7 @@ public class AStarUnit : MonoBehaviour
         transform = base.transform;
 
         seeker = GetComponent<Seeker>();
-        if (!seeker) seeker = gameObject.GetComponent<Seeker>();
+        if (!seeker) seeker = gameObject.AddComponent<Seeker>();
         seeker.drawGizmos = false;
 
         if (controller && moveMode == UnitMoveMode.MoveController) controller.slopeLimit = slopeLimit;
