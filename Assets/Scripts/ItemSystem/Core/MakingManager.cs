@@ -136,6 +136,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         UI.makingWindow.blocksRaycasts = true;
         IsUIOpen = true;
         WindowsManager.Instance.Push(this);
+        if (UI.tabs != null && UI.tabs.Length > 0)
+            UI.tabs[0].isOn = true;
     }
 
     public void CloseWindow()
@@ -207,6 +209,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         if (!IsUIOpen) return;
         Init();
         if (UI.descriptionWindow.alpha > 0) ShowDescription(currentItem);
+        SetPage(currentPage);
     }
 
     public void CanMake(MakingTool tool)
@@ -220,6 +223,61 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
     {
         UIManager.Instance.EnableInteractive(false);
     }
+
+    #region 道具页相关
+    private int currentPage;
+    public void SetPage(int index)
+    {
+        if (!UI || !UI.gameObject) return;
+        currentPage = index;
+        switch (index)
+        {
+            case 1: ShowEquipments(); break;
+            case 3: ShowConsumables(); break;
+            case 4: ShowMaterials(); break;
+            default: ShowAll(); break;
+        }
+    }
+
+    private void ShowAll()
+    {
+        if (!UI || !UI.gameObject) return;
+        foreach (MakingAgent ia in MakingAgents)
+        {
+            MyUtilities.SetActive(ia.gameObject, true);
+        }
+    }
+
+    private void ShowEquipments()
+    {
+        foreach (MakingAgent ia in MakingAgents)
+        {
+            if (ia.MItem.IsEquipment)
+                MyUtilities.SetActive(ia.gameObject, true);
+            else MyUtilities.SetActive(ia.gameObject, false);
+        }
+    }
+
+    private void ShowConsumables()
+    {
+        foreach (MakingAgent ia in MakingAgents)
+        {
+            if (ia.MItem.IsConsumable)
+                MyUtilities.SetActive(ia.gameObject, true);
+            else MyUtilities.SetActive(ia.gameObject, false);
+        }
+    }
+
+    private void ShowMaterials()
+    {
+        foreach (MakingAgent ia in MakingAgents)
+        {
+            if (ia.MItem.IsMaterial)
+                MyUtilities.SetActive(ia.gameObject, true);
+            else MyUtilities.SetActive(ia.gameObject, false);
+        }
+    }
+    #endregion
 
     public void SetUI(MakingUI UI)
     {

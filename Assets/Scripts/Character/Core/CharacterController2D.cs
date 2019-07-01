@@ -34,6 +34,14 @@ public class CharacterController2D : MonoBehaviour
 #endif
     private string animaMagnitude = "Move";
 
+    public Animator Animator
+    {
+        get
+        {
+            return animator;
+        }
+    }
+
     public void Move(Vector2 input)
     {
         if (moveSpeed < 0) return;
@@ -43,11 +51,11 @@ public class CharacterController2D : MonoBehaviour
 
     public void SetAnima(Vector2 input)
     {
-        animator.SetFloat(animaMagnitude, input.magnitude);
+        Animator.SetFloat(animaMagnitude, input.magnitude);
         if (input != Vector2.zero)
         {
-            animator.SetFloat(animaHorizontal, input.x);
-            animator.SetFloat(animaVertical, input.y);
+            Animator.SetFloat(animaHorizontal, input.x);
+            Animator.SetFloat(animaVertical, input.y);
         }
     }
 }

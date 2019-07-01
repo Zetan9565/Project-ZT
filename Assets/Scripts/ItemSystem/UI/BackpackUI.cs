@@ -34,11 +34,12 @@ public class BackpackUI : MonoBehaviour
         windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         closeButton.onClick.AddListener(BackpackManager.Instance.CloseWindow);
         sortButton.onClick.AddListener(BackpackManager.Instance.Sort);
-        for (int i = 0; i < tabs.Length; i++)
-        {
-            int num = i;
-            tabs[i].onValueChanged.AddListener(delegate { if (BackpackManager.Instance) BackpackManager.Instance.SetPage(num); });
-        }
+        if (tabs != null)
+            for (int i = 0; i < tabs.Length; i++)
+            {
+                int num = i;
+                tabs[i].onValueChanged.AddListener(delegate { if (BackpackManager.Instance) BackpackManager.Instance.SetPage(num); });
+            }
         if (!discardArea.GetComponent<DiscardArea>()) discardArea.AddComponent<DiscardArea>();
         if (!handworkButton.GetComponent<Button>()) handworkButton.gameObject.AddComponent<Button>();
         handworkButton.GetComponent<Button>().onClick.AddListener(delegate
@@ -47,9 +48,7 @@ public class BackpackUI : MonoBehaviour
             MakingManager.Instance.OpenWindow();
         });
         if (tabs != null && tabs.Length > 0)
-        {
             tabs[0].isOn = true;
-        }
     }
 
     private void OnDestroy()

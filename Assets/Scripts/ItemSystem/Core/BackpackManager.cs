@@ -22,8 +22,6 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
 
     public Image GridMask { get { return UI.gridMask; } }
 
-    private int currentPage;
-
     public event ItemAmountListener OnGetItemEvent;
     public event ItemAmountListener OnLoseItemEvent;
 
@@ -64,7 +62,6 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
             UpdateUI();
         }
     }
-
 
     #region 道具处理相关
     /// <summary>
@@ -470,16 +467,12 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         MBackpack.Sort();
         Init();
         foreach (ItemInfo info in MBackpack.Items)
-        {
             foreach (ItemAgent ia in itemAgents)
-            {
                 if (ia.IsEmpty)
                 {
                     ia.InitItem(info);
                     break;
                 }
-            }
-        }
         UpdateUI();
     }
 
@@ -509,6 +502,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
     }
 
     #region 道具页相关
+    private int currentPage;
     public void SetPage(int index)
     {
         if (!UI || !UI.gameObject) return;
@@ -533,34 +527,31 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
 
     private void ShowEquipments()
     {
-        ShowAll();
         foreach (ItemAgent ia in itemAgents)
         {
-            if (!ia.IsEmpty && !ia.MItemInfo.item.IsEquipment)
-                MyUtilities.SetActive(ia.gameObject, false);
-            else if (ia.IsEmpty) MyUtilities.SetActive(ia.gameObject, false);
+            if (!ia.IsEmpty && ia.MItemInfo.item.IsEquipment)
+                MyUtilities.SetActive(ia.gameObject, true);
+            else MyUtilities.SetActive(ia.gameObject, false);
         }
     }
 
     private void ShowConsumables()
     {
-        ShowAll();
         foreach (ItemAgent ia in itemAgents)
         {
-            if (!ia.IsEmpty && !ia.MItemInfo.item.IsConsumable)
-                MyUtilities.SetActive(ia.gameObject, false);
-            else if (ia.IsEmpty) MyUtilities.SetActive(ia.gameObject, false);
+            if (!ia.IsEmpty && ia.MItemInfo.item.IsConsumable)
+                MyUtilities.SetActive(ia.gameObject, true);
+            else MyUtilities.SetActive(ia.gameObject, false);
         }
     }
 
     private void ShowMaterials()
     {
-        ShowAll();
         foreach (ItemAgent ia in itemAgents)
         {
-            if (!ia.IsEmpty && !ia.MItemInfo.item.IsMaterial)
-                MyUtilities.SetActive(ia.gameObject, false);
-            else if (ia.IsEmpty) MyUtilities.SetActive(ia.gameObject, false);
+            if (!ia.IsEmpty && ia.MItemInfo.item.IsMaterial)
+                MyUtilities.SetActive(ia.gameObject, true);
+            else MyUtilities.SetActive(ia.gameObject, false);
         }
     }
     #endregion

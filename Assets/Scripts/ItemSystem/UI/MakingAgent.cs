@@ -6,27 +6,27 @@ public class MakingAgent : MonoBehaviour
     [SerializeField]
     private Text nameText;
 
-    private ItemBase item;
+    public ItemBase MItem { get; private set; }
 
     public void OnClick()
     {
-        if (item)
+        if (MItem)
         {
-            MakingManager.Instance.ShowDescription(item);
+            MakingManager.Instance.ShowDescription(MItem);
         }
     }
 
     public void Init(ItemBase item)
     {
         if (!item) return;
-        this.item = item;
+        this.MItem = item;
         nameText.text = item.name;
     }
 
     public void Clear(bool recycle = false)
     {
         nameText.text = string.Empty;
-        item = null;
+        MItem = null;
         if (recycle) ObjectPool.Instance.Put(gameObject);
     }
 }

@@ -1180,8 +1180,6 @@ public abstract class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBe
         {
             if (!instance || !instance.gameObject)
                 instance = FindObjectOfType<T>();
-            if (!instance)
-                instance = new GameObject(nameof(T)).AddComponent<T>();
             return instance;
         }
     }

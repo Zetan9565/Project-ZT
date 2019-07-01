@@ -71,7 +71,6 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.PropertyField(textLineHeight, new GUIContent("每行高度"));
         EditorGUILayout.PropertyField(lineAmount, new GUIContent("总行数"));
         EditorGUILayout.EndVertical();
-
         EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.LabelField("选项相关", new GUIStyle() { fontStyle = FontStyle.Bold });
         EditorGUILayout.PropertyField(optionPrefab, new GUIContent("选项预制体"));

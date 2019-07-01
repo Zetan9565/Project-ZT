@@ -21,6 +21,15 @@ public class PlayerController2D : MonoBehaviour
         }
     }
 
+    public Animator Animator
+    {
+        get
+        {
+            if (characterController) return characterController.Animator;
+            else return null;
+        }
+    }
+
     [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("更新方式")]
