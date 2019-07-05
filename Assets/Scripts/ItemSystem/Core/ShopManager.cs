@@ -36,21 +36,13 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
     {
         /*System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
         stopwatch.Start();*/
-        var vendorEnum = Vendors.GetEnumerator();
-        while (vendorEnum.MoveNext())
-        {
-            vendorEnum.Current.shop.Refresh(time);
-        }
-        vendorEnum.Dispose();
+        using (var vendorEnum = Vendors.GetEnumerator())
+            while (vendorEnum.MoveNext())
+                vendorEnum.Current.shop.Refresh(time);
         if (IsUIOpen)
-        {
-            var agentEnum = merchandiseAgents.GetEnumerator();
-            while (agentEnum.MoveNext())
-            {
-                agentEnum.Current.UpdateInfo();
-            }
-            agentEnum.Dispose();
-        }
+            using (var agentEnum = merchandiseAgents.GetEnumerator())
+                while (agentEnum.MoveNext())
+                    agentEnum.Current.UpdateInfo();
         /*stopwatch.Stop();
         Debug.Log(stopwatch.Elapsed.TotalMilliseconds);*/
     }
@@ -88,7 +80,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
         else
         {
             AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
-            AmountManager.Instance.Init(delegate
+            AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
                 {
@@ -144,7 +136,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
         else
         {
             AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
-            AmountManager.Instance.Init(delegate
+            AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
                 {
@@ -186,7 +178,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
         else
         {
             AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
-            AmountManager.Instance.Init(delegate
+            AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.item.name), delegate
                 {
@@ -204,7 +196,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
         var itemAgents = BackpackManager.Instance.GetItemAgentsByItem(info.Item).ToArray();
         if (itemAgents.Length < 1)
         {
-            MessageManager.Instance.NewMessage("行囊中没有这种物品");
+            MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这种物品");
             return false;
         }
         if (info.SOorENAble && amount > info.LeftAmount)
@@ -234,12 +226,12 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
         }
         if (BackpackManager.Instance.GetItemAmount(info.item) < 1)
         {
-            MessageManager.Instance.NewMessage("行囊中没有这种物品");
+            MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这种物品");
             return false;
         }
         if (amount > info.Amount)
         {
-            MessageManager.Instance.NewMessage("行囊中没有这么多的这种物品");
+            MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这么多的这种物品");
             return false;
         }
         if (!BackpackManager.Instance.TryLoseItem_Boolean(info, amount)) return false;

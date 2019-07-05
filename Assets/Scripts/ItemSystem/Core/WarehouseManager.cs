@@ -84,7 +84,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             else
             {
                 AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
-                AmountManager.Instance.Init(delegate
+                AmountManager.Instance.NewAmount(delegate
                 {
                     if (OnStore(info, (int)AmountManager.Instance.Amount))
                         MessageManager.Instance.NewMessage(string.Format("存入了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
@@ -161,7 +161,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             else
             {
                 AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
-                AmountManager.Instance.Init(delegate
+                AmountManager.Instance.NewAmount(delegate
                 {
                     if (OnTakeOut(info, (int)AmountManager.Instance.Amount))
                         MessageManager.Instance.NewMessage(string.Format("取出了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
@@ -252,10 +252,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         UIManager.Instance.EnableJoyStick(true);
     }
 
-    public void OpenCloseWindow()
-    {
-
-    }
+    void IWindow.OpenCloseWindow() { }
 
     public void PauseDisplay(bool pause)
     {

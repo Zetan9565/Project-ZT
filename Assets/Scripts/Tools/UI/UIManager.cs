@@ -49,8 +49,8 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         MyUtilities.SetActive(JoyStick.gameObject, false);
         MyUtilities.SetActive(JoyStick.KnobBackground.gameObject, false);
 #elif UNITY_ANDROID
-        MyTools.SetActive(JoyStick.gameObject, true);
-        MyTools.SetActive(JoyStick.KnobBackground.gameObject, true);
+        MyUtilities.SetActive(JoyStick.gameObject, true);
+        MyUtilities.SetActive(JoyStick.KnobBackground.gameObject, true);
 #endif
         MyUtilities.SetActive(InteractiveButton.gameObject, false);
         questButton.onClick.AddListener(QuestManager.Instance.OpenCloseWindow);
@@ -69,12 +69,13 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     {
 #if UNITY_ANDROID
         if (!value)
-            MyTools.SetActive(InteractiveButton.gameObject, value);
+            MyUtilities.SetActive(InteractiveButton.gameObject, value);
         else
         {
-            MyTools.SetActive(InteractiveButton.gameObject, value &&
-                (DialogueManager.Instance.TalkAble && !WarehouseManager.Instance.IsUIOpen ||
-                WarehouseManager.Instance.StoreAble && !DialogueManager.Instance.IsUIOpen
+            MyUtilities.SetActive(InteractiveButton.gameObject, value &&
+                (DialogueManager.Instance.TalkAble && !WarehouseManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen ||
+                WarehouseManager.Instance.StoreAble && !DialogueManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen ||
+                LootManager.Instance.PickAble && !DialogueManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen
                 ));
         }
 #endif

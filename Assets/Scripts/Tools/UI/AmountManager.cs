@@ -1,43 +1,49 @@
 ﻿using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class AmountManager : SingletonMonoBehaviour<AmountManager>
 {
-    public AmountUI UI;
+    [SerializeField]
+    private AmountUI UI;
 
     [SerializeField]
     private Vector2 defaultOffset = new Vector2(-100, 100);
 
     public long Amount { get; private set; }
 
-    public Button Confirm { get { return UI.confirm; } }
+    public bool IsUIOpen
+    {
+        get
+        {
+            if (!UI || !UI.gameObject) return false;
+            else if (UI.amountWindow.alpha > 0) return true;
+            else return false;
+        }
+    }
+
+    private readonly UnityEvent onConfirm = new UnityEvent();
 
     private long min;
     private long max;
 
-    public void Init(UnityEngine.Events.UnityAction confirmAction, long max, long min = 0)
+    public void NewAmount(UnityAction confirmAction, long max, long min = 0)
     {
+        if (max < min)
+        {
+            max = max + min;
+            min = max - min;
+            max = max - min;
+        }
         this.max = max;
         this.min = min;
-        Amount = max >= 1 ? 1 : min;
+        Amount = max >= 0 ? 0 : min;
         UI.amount.text = Amount.ToString();
-        UI.confirm.onClick.RemoveAllListeners();
-        if (confirmAction != null) UI.confirm.onClick.AddListener(confirmAction);
-        UI.confirm.onClick.AddListener(CloseAmountWindow);
-        OpenAmountWindow();
-    }
-
-    private void OpenAmountWindow()
-    {
+        onConfirm.RemoveAllListeners();
+        if (confirmAction != null) onConfirm.AddListener(confirmAction);
         UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         UI.amountWindow.alpha = 1;
         UI.amountWindow.blocksRaycasts = true;
-    }
-
-    private void CloseAmountWindow()
-    {
-        UI.amountWindow.alpha = 0;
-        UI.amountWindow.blocksRaycasts = false;
     }
 
     public void Number(int num)
@@ -91,10 +97,17 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         UI.amount.MoveTextEnd(false);
     }
 
+    public void Confirm()
+    {
+        UI.amountWindow.alpha = 0;
+        UI.amountWindow.blocksRaycasts = false;
+        onConfirm?.Invoke();
+    }
+
     public void Cancel()
     {
-        UI.confirm.onClick.RemoveAllListeners();
-        CloseAmountWindow();
+        UI.amountWindow.alpha = 0;
+        UI.amountWindow.blocksRaycasts = false;
     }
 
     public void SetPosition(Vector2 target, Vector2 offset)
@@ -118,7 +131,7 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         Amount = current;
         UI.amount.text = Amount.ToString();
         UI.amount.MoveTextEnd(false);
-        if (Amount < 1) Confirm.interactable = false;
-        else Confirm.interactable = true;
+        if (Amount < 1) UI.confirm.interactable = false;
+        else UI.confirm.interactable = true;
     }
 }

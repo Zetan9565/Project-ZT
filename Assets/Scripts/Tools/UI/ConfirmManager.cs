@@ -36,8 +36,8 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindow
 
     private void Awake()
     {
-        yes.onClick.AddListener(Yes);
-        no.onClick.AddListener(No);
+        yes.onClick.AddListener(Confirm);
+        no.onClick.AddListener(Cancel);
         if (!confirmWindow.GetComponent<GraphicRaycaster>()) confirmWindow.gameObject.AddComponent<GraphicRaycaster>();
         windowCanvas = confirmWindow.GetComponent<Canvas>();
         windowCanvas.overrideSorting = true;
@@ -50,24 +50,24 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindow
         onNoClick.RemoveAllListeners();
         if (yesAction != null) onYesClick.AddListener(yesAction);
         if (noAction != null) onNoClick.AddListener(noAction);
-        OpenWindow();
+        (this as IWindow).OpenWindow();
     }
 
-    private void Yes()
+    public void Confirm()
     {
         onYesClick?.Invoke();
         onYesClick.RemoveAllListeners();
         CloseWindow();
     }
 
-    private void No()
+    public void Cancel()
     {
         onNoClick?.Invoke();
         onNoClick.RemoveAllListeners();
         CloseWindow();
     }
 
-    public void OpenWindow()
+    void IWindow.OpenWindow()
     {
         if (IsUIOpen) return;
         if (IsPausing) return;
@@ -87,10 +87,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindow
         IsUIOpen = false;
     }
 
-    public void OpenCloseWindow()
-    {
-
-    }
+    void IWindow.OpenCloseWindow() { }
 
     public void PauseDisplay(bool pause)
     {

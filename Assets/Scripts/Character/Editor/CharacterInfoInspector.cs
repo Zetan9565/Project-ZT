@@ -130,6 +130,15 @@ public class CharacterInfoInspector : Editor
                 dropItemList.DoLayoutList();
                 serializedObject.ApplyModifiedProperties();
             }
+            serializedObject.Update();
+            if (dropItems.arraySize > 0)
+            {
+                EditorGUI.BeginChangeCheck();
+                SerializedProperty lootPrefab = serializedObject.FindProperty("lootPrefab");
+                EditorGUILayout.PropertyField(lootPrefab, new GUIContent("掉落道具预制体"));
+                if (EditorGUI.EndChangeCheck())
+                    serializedObject.ApplyModifiedProperties();
+            }
         }
         else if (talker)
         {

@@ -24,4 +24,13 @@ public class EnemyInfomation : CharacterInfomation
         }
     }
 
+    [SerializeField]
+    private GameObject lootPrefab;
+    public GameObject LootPrefab
+    {
+        get
+        {
+            return lootPrefab;
+        }
+    }
 }

@@ -38,8 +38,8 @@ public class MerchandiseAgent : MonoBehaviour, IPointerClickHandler
         if (info == null || !info.Item) return;
         merchandiseInfo = info;
         merchandiseType = type;
-        if (type == MerchandiseType.SellToPlayer) itemAgentSon.Init(ItemAgentType.ShopSelling);
-        else itemAgentSon.Init(ItemAgentType.ShopBuying);
+        if (type == MerchandiseType.SellToPlayer) itemAgentSon.Init(ItemAgentType.Selling);
+        else itemAgentSon.Init(ItemAgentType.Purchasing);
         itemAgentSon.InitItem(new ItemInfo(info.Item));
         UpdateInfo();
     }

@@ -27,8 +27,8 @@ public class ItemWindowUI : ItemWindowBaseUI
 #elif UNITY_ANDROID
         if (!buttonsArea.GetComponent<CanvasGroup>()) buttonAreaCanvas = buttonsArea.AddComponent<CanvasGroup>();
         buttonAreaCanvas.ignoreParentGroups = true;
-        discardButton.onClick.AddListener(ItemWindowHandler.Instance.DiscardCurrentItem);
-        closeButton.onClick.AddListener(ItemWindowHandler.Instance.CloseItemWindow);
+        discardButton.onClick.AddListener(ItemWindowManager.Instance.DiscardCurrentItem);
+        closeButton.onClick.AddListener(ItemWindowManager.Instance.CloseItemWindow);
 #endif
         gemstone_1.Clear();
         gemstone_2.Clear();

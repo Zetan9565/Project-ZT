@@ -90,7 +90,10 @@ public class DialogueWords
     }
 
     [SerializeField]
-    private string wordsWhenChusWB;//ChuseWB = Choose Wrong Branch
+    private string wordsWhenChusWB;
+    /// <summary>
+    /// ChuseWB = Choose Wrong Branch
+    /// </summary>
     public string WordsWhenChusWB
     {
         get
@@ -164,6 +167,40 @@ public class BranchDialogue
             return specifyIndex;
         }
     }
+
+    [SerializeField]
+    public string TalkerName
+    {
+        get
+        {
+            if (TalkerType == TalkerType.NPC)
+                if (TalkerInfo)
+                    return TalkerInfo.Name;
+                else return string.Empty;
+            else return "玩家角色";
+        }
+    }
+
+    [SerializeField]
+    private TalkerType talkerType;
+    public TalkerType TalkerType
+    {
+        get
+        {
+            return talkerType;
+        }
+    }
+
+    [SerializeField]
+    private TalkerInfomation talkerInfo;
+    public TalkerInfomation TalkerInfo
+    {
+        get
+        {
+            return talkerInfo;
+        }
+    }
+
 
     [SerializeField]
     private string words;

@@ -14,8 +14,6 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
     public bool IsPausing { get; private set; }
     public bool IsUIOpen { get; private set; }
 
-    public Transform cellsParent { get { return UI.itemCellsParent; } }
-
 #if UNITY_ANDROID
     public GameObject DiscardArea { get { return UI.discardArea; } }
 #endif
@@ -25,7 +23,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
     public event ItemAmountListener OnGetItemEvent;
     public event ItemAmountListener OnLoseItemEvent;
 
-    private List<ItemAgent> itemAgents = new List<ItemAgent>();
+    private readonly List<ItemAgent> itemAgents = new List<ItemAgent>();
 
     public Backpack MBackpack
     {
@@ -96,23 +94,24 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         return finalGet;
     }
 
-    public int TryGetItem_Integer(ItemInfo info)//拾取掉落物用到
+    public int TryGetItem_Integer(ItemInfo info)
     {
         return TryGetItem_Integer(info.item, info.Amount);
     }
+
     public bool TryGetItem_Boolean(ItemBase item, int amount = 1)
     {
         if (MBackpack == null || !item || amount < 1) return false;
         if (MBackpack.IsFull)
         {
-            MessageManager.Instance.NewMessage(GameManager.Instance.BackpackName + "已满");
+            MessageManager.Instance.NewMessage(GameManager.BackpackName + "已满");
             return false;
         }
         if (!item.StackAble)
         {
             if (amount > MBackpack.backpackSize.Rest)
             {
-                MessageManager.Instance.NewMessage(string.Format("请至少留出{0}个{1}空间", amount, GameManager.Instance.BackpackName));
+                MessageManager.Instance.NewMessage(string.Format("请至少留出{0}个{1}空间", amount, GameManager.BackpackName));
                 return false;
             }
         }
@@ -213,13 +212,13 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         }
         if (info.Amount < 2 && info.Amount > 0)
         {
-            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃1个 [{0}] 吗？", info.ItemName), delegate
+            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃1个 [<color=#{0}>{1}</color>] 吗？", ColorUtility.ToHtmlStringRGB(GameManager.QualityToColor(info.item.Quality)), info.ItemName), delegate
             {
                 if (OnDiscard(info))
                     MessageManager.Instance.NewMessage(string.Format("丢掉了1个 [{0}]", info.ItemName));
             });
         }
-        else AmountManager.Instance.Init(delegate
+        else AmountManager.Instance.NewAmount(delegate
         {
             ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.ItemName), delegate
             {
@@ -246,7 +245,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         if (MBackpack == null || !item || amount < 1) return false;
         if (GetItemAmount(item) < amount)
         {
-            MessageManager.Instance.NewMessage(GameManager.Instance.BackpackName + "中没有这么多的 [" + item.name + "]");
+            MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这么多的 [" + item.name + "]");
             return false;
         }
         if (QuestManager.Instance.HasQuestRequiredItem(item, GetItemAmount(item) - amount))
@@ -276,16 +275,6 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         return true;
     }
 
-    /*private void Awake()
-    {
-        OnLoseItemEvent += DebugLose;
-    }
-
-    public void DebugLose(ItemBase item, int amount)
-    {
-        Debug.LogFormat("失去[{0}]{1}个。", item.Name, amount);
-    }*/
-
     public bool LoseItem(ItemBase item, int amount = 1)
     {
         if (item.StackAble)
@@ -297,7 +286,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
             ItemInfo[] finds = MBackpack.FindAll(item).ToArray();
             if (finds.Length < 1)
             {
-                MessageManager.Instance.NewMessage("该物品不在" + GameManager.Instance.BackpackName + "中");
+                MessageManager.Instance.NewMessage("该物品不在" + GameManager.BackpackName + "中");
                 return false;
             }
             for (int i = 0; i < amount; i++)
@@ -319,7 +308,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         if (value < 0) return false;
         if (MBackpack.Money < value)
         {
-            MessageManager.Instance.NewMessage("货币不足");
+            MessageManager.Instance.NewMessage("钱币不足");
         }
         return true;
     }
@@ -366,7 +355,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         if (size < 1) return false;
         if (MBackpack.backpackSize.Max >= 192)
         {
-            MessageManager.Instance.NewMessage(GameManager.Instance.BackpackName + "已经达到最大容量了");
+            MessageManager.Instance.NewMessage(GameManager.BackpackName + "已经达到最大容量了");
             return false;
         }
         int finallyExpand = MBackpack.backpackSize.Max + size > 192 ? 192 - MBackpack.backpackSize.Max : size;
@@ -377,7 +366,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
             itemAgents.Add(ia);
             ia.Init(ItemAgentType.Backpack, itemAgents.IndexOf(ia), UI.gridRect);
         }
-        MessageManager.Instance.NewMessage(GameManager.Instance.BackpackName + "扩张了!");
+        MessageManager.Instance.NewMessage(GameManager.BackpackName + "扩张了!");
         return true;
     }
 
@@ -391,11 +380,11 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         if (weightLoad < 0.01f) return false;
         if (MBackpack.weightLoad.Max >= 1500.0f)
         {
-            MessageManager.Instance.NewMessage(GameManager.Instance.BackpackName + "已经达到最大负重了");
+            MessageManager.Instance.NewMessage(GameManager.BackpackName + "已经达到最大负重了");
             return false;
         }
         MBackpack.weightLoad.Max += MBackpack.weightLoad.Max + weightLoad > 1500.0f ? 1500.0f - MBackpack.weightLoad.Max : weightLoad;
-        MessageManager.Instance.NewMessage(GameManager.Instance.BackpackName + "扩张了!");
+        MessageManager.Instance.NewMessage(GameManager.BackpackName + "扩张了!");
         return true;
     }
     #endregion
@@ -479,7 +468,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
     public void UpdateUI()
     {
         if (!UI || !UI.gameObject) return;
-        UI.money.text = MBackpack.Money.ToString() + GameManager.Instance.CoinName;
+        UI.money.text = MBackpack.Money.ToString() + GameManager.CoinName;
         UI.weight.text = MBackpack.weightLoad.ToString("F2") + "WL";
         UI.size.text = MBackpack.backpackSize.ToString();
         SetPage(currentPage);

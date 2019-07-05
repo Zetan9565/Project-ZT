@@ -34,7 +34,13 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
 #endif
         if (Input.GetKeyDown(customInfo.InteractiveButton) || Input.GetButtonDownMobile("Interactive"))
         {
-            if (DialogueManager.Instance.TalkAble)
+            if (LootManager.Instance.PickAble)
+            {
+                if (!LootManager.Instance.IsPicking)
+                    LootManager.Instance.OpenWindow();
+                else LootManager.Instance.TakeAll();
+            }
+            else if (DialogueManager.Instance.TalkAble)
             {
                 if (!DialogueManager.Instance.IsTalking)
                     DialogueManager.Instance.BeginNewDialogue();
@@ -47,10 +53,16 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
             else if (WarehouseManager.Instance.StoreAble)
                 WarehouseManager.Instance.OpenWindow();
         }
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetButtonDown("Cancel") || Input.GetButtonDownMobile("Cancel"))
         {
-            if (WindowsManager.Instance.WindowsCount > 0) WindowsManager.Instance.CloseTop();
+            if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();
+            else if (WindowsManager.Instance.WindowsCount > 0) WindowsManager.Instance.CloseTop();
             else EscapeMenuManager.Instance.OpenWindow();
+        }
+        if (Input.GetButtonDown("Submit") || Input.GetButtonDownMobile("Submit"))
+        {
+            if (AmountManager.Instance.IsUIOpen && !ConfirmManager.Instance.IsUIOpen) AmountManager.Instance.Confirm();
+            else if (!AmountManager.Instance.IsUIOpen && ConfirmManager.Instance.IsUIOpen) ConfirmManager.Instance.Confirm();
         }
     }
 }

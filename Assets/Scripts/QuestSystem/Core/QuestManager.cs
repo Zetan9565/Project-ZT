@@ -68,7 +68,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             MessageManager.Instance.NewMessage("空任务");
             return false;
         }
-        if (HasQuest(quest))
+        if (HasOngoingQuest(quest))
         {
             MessageManager.Instance.NewMessage("已经在执行");
             return false;
@@ -212,7 +212,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
     /// <param name="quest">要放弃的任务</param>
     public bool AbandonQuest(Quest quest)
     {
-        if (HasQuest(quest) && quest && quest.Abandonable)
+        if (HasOngoingQuest(quest) && quest && quest.Abandonable)
         {
             quest.IsOngoing = false;
             QuestsOngoing.Remove(quest);
@@ -305,7 +305,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
     public bool CompleteQuest(Quest quest, bool loadMode = false)
     {
         if (!quest) return false;
-        if (HasQuest(quest) && quest.IsComplete)
+        if (HasOngoingQuest(quest) && quest.IsComplete)
         {
             if (!loadMode)
             {
@@ -663,15 +663,20 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
     #endregion
 
     #region 其它
-    public bool HasQuest(Quest quest)
+    public bool HasOngoingQuest(Quest quest)
     {
         return QuestsOngoing.Contains(quest);
     }
+    public bool HasOngoingQuestWithID(string questID)
+    {
+        return QuestsOngoing.Exists(x => x.ID == questID);
+    }
+
     public bool HasCompleteQuest(Quest quest)
     {
         return QuestsComplete.Contains(quest);
     }
-    public bool HasCmpltQuestWithID(string questID)
+    public bool HasCompleteQuestWithID(string questID)
     {
         return QuestsComplete.Exists(x => x.ID == questID);
     }

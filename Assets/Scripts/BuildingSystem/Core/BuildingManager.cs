@@ -90,7 +90,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
         WindowsManager.Instance.PauseAll(true);
         IsPreviewing = true;
 #if UNITY_ANDROID
-        MyTools.SetActive(CancelArea, true);
+        MyUtilities.SetActive(CancelArea, true);
         UIManager.Instance.EnableJoyStick(false);
 #endif
         ShowAndMovePreview();
@@ -139,7 +139,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
         WindowsManager.Instance.PauseAll(false);
         IsPreviewing = false;
 #if UNITY_ANDROID
-        MyTools.SetActive(CancelArea, false);
+        MyUtilities.SetActive(CancelArea, false);
         UIManager.Instance.EnableJoyStick(true);
 #endif
     }

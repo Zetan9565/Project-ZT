@@ -155,6 +155,8 @@ public class DialogueInspector : Editor
                             EditorGUI.BeginChangeCheck();
                             SerializedProperty branch = branches.GetArrayElementAtIndex(_index);
                             SerializedProperty title = branch.FindPropertyRelative("title");
+                            SerializedProperty b_talkerType = branch.FindPropertyRelative("talkerType");
+                            SerializedProperty b_talkerInfo = branch.FindPropertyRelative("talkerInfo");
                             SerializedProperty b_words = branch.FindPropertyRelative("words");
                             SerializedProperty dialogue = branch.FindPropertyRelative("dialogue");
                             SerializedProperty specifyIndex = branch.FindPropertyRelative("specifyIndex");
@@ -170,15 +172,6 @@ public class DialogueInspector : Editor
                                 EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                     title, new GUIContent("分支标题"));
                                 _lineCount++;
-                                if (!dialogue.objectReferenceValue)
-                                {
-                                    EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                        "分支语句");
-                                    _lineCount++;
-                                    b_words.stringValue = EditorGUI.TextField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                        b_words.stringValue);
-                                    _lineCount++;
-                                }
                                 if (string.IsNullOrEmpty(b_words.stringValue))
                                 {
                                     EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
@@ -196,6 +189,36 @@ public class DialogueInspector : Editor
                                         GUI.enabled = true;
                                         _lineCount++;
                                     }
+                                }
+                                if (!dialogue.objectReferenceValue)
+                                {
+                                    string b_talkerName;
+                                    if (b_talkerType.enumValueIndex == (int)TalkerType.NPC)
+                                        b_talkerName = this.dialogue.Words[index].Branches[_index] == null ? "(空)" : !this.dialogue.Words[index].TalkerInfo ?
+                                        "(空谈话人)" : this.dialogue.Words[index].Branches[_index].TalkerName + "说";
+                                    else b_talkerName = "玩家说";
+                                    EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight), b_talkerName);
+                                    EditorGUI.PropertyField(new Rect(_rect.x + _rect.width / 2, _rect.y + lineHeightSpace * _lineCount, _rect.width / 2, lineHeight),
+                                        b_talkerType, new GUIContent(string.Empty));
+                                    _lineCount++;
+                                    if (b_talkerType.enumValueIndex == (int)TalkerType.NPC)
+                                    {
+                                        if (this.dialogue.Words[index].Branches[_index].TalkerInfo) b_talkerInfo.objectReferenceValue =
+                                            npcs[EditorGUI.Popup(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                            "谈话人", GetNPCIndex(this.dialogue.Words[index].Branches[_index].TalkerInfo), npcNames)];
+                                        else if (npcs.Length > 0) b_talkerInfo.objectReferenceValue =
+                                             npcs[EditorGUI.Popup(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight), "谈话人", 0, npcNames)];
+                                        else EditorGUI.Popup(new Rect(_rect.x + _rect.width / 2f, _rect.y, _rect.width / 2f, lineHeight), "谈话人", 0, new string[] { "无可用谈话人" });
+                                        _lineCount++;
+                                        GUI.enabled = false;
+                                        EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                            b_talkerInfo, new GUIContent("引用资源"));
+                                        GUI.enabled = true;
+                                        _lineCount++;
+                                    }
+                                    b_words.stringValue = EditorGUI.TextField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                        b_words.stringValue);
+                                    _lineCount++;
                                 }
                                 if (indexOfRrightBranch.intValue < 0)
                                 {
@@ -221,12 +244,13 @@ public class DialogueInspector : Editor
                         {
                             int _lineCount = 1;
                             SerializedProperty branch = branches.GetArrayElementAtIndex(_index);
+                            SerializedProperty b_talkerType = branch.FindPropertyRelative("talkerType");
+                            SerializedProperty b_talkerInfo = branch.FindPropertyRelative("talkerInfo");
                             SerializedProperty b_words = branch.FindPropertyRelative("words");
                             SerializedProperty dialogue = branch.FindPropertyRelative("dialogue");
                             if (branch.isExpanded)
                             {
                                 _lineCount += 1;//分支标题
-                                if (!dialogue.objectReferenceValue) _lineCount += 2;//分支语句、语句填写
                                 if (string.IsNullOrEmpty(b_words.stringValue))
                                 {
                                     _lineCount += 1;//对话
@@ -234,6 +258,15 @@ public class DialogueInspector : Editor
                                     {
                                         _lineCount += 2;//序号、对应句子
                                     }
+                                }
+                                if (!dialogue.objectReferenceValue)
+                                {
+                                    _lineCount++;//谈话人类型
+                                    if (b_talkerType.enumValueIndex == (int)TalkerType.NPC)
+                                    {
+                                        _lineCount += 2;//谈话人、引用资源
+                                    }
+                                    _lineCount += 1;//语句填写
                                 }
                                 if (indexOfRrightBranch.intValue < 0)
                                 {

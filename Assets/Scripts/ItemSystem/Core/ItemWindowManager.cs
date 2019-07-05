@@ -28,7 +28,7 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
         UI.nameText.text = MItemInfo.ItemName;
         UI.nameText.color = itemAgent.currentQualityColor;
         UI.typeText.text = GetItemTypeString(MItemInfo.item.ItemType);
-        UI.priceText.text = MItemInfo.item.SellAble ? MItemInfo.item.SellPrice + GameManager.Instance.CoinName : "不可出售";
+        UI.priceText.text = MItemInfo.item.SellAble ? MItemInfo.item.SellPrice + GameManager.CoinName : "不可出售";
         UI.weightText.text = "重量：" + MItemInfo.item.Weight.ToString("F2") + "WL";
         UI.descriptionText.text = MItemInfo.item.Description;
         switch (MItemInfo.item.ItemType)
@@ -67,7 +67,7 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
                     OpenSubItemWindow(PlayerManager.Instance.PlayerInfo.secondaryWeapon);
                 break;
             case ItemType.Bag:
-                UI.effectText.text = GameManager.Instance.BackpackName + "容量+" + (MItemInfo.item as BagItem).ExpandSize;
+                UI.effectText.text = GameManager.BackpackName + "容量+" + (MItemInfo.item as BagItem).ExpandSize;
                 MyUtilities.SetActive(UI.mulFunTitle.gameObject, false);
                 MyUtilities.SetActive(UI.mulFunText.gameObject, false);
                 MyUtilities.SetActive(UI.gemstone_1.gameObject, false);
@@ -90,50 +90,50 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
         UI.buttonAreaCanvas.alpha = 1;
         UI.buttonAreaCanvas.blocksRaycasts = true;
         UI.mulFunButton.onClick.RemoveAllListeners();
-        MyTools.SetActive(UI.closeButton.gameObject, true);
+        MyUtilities.SetActive(UI.closeButton.gameObject, true);
 #endif
         switch (itemAgent.agentType)
         {
             case ItemAgentType.Backpack:
                 UI.priceTitle.text = "贩卖价格";
 #if UNITY_ANDROID
-                MyTools.SetActive(UI.buttonsArea, true);
-                MyTools.SetActive(UI.discardButton.gameObject, MItemInfo.Item.DiscardAble);
-                MyTools.SetActive(UI.mulFunButton.gameObject, false);
+                MyUtilities.SetActive(UI.buttonsArea, true);
+                MyUtilities.SetActive(UI.discardButton.gameObject, MItemInfo.item.DiscardAble);
+                MyUtilities.SetActive(UI.mulFunButton.gameObject, false);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 if (!WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen)
                 {
-                    if (MItemInfo.Item.Useable)
+                    if (MItemInfo.item.Useable)
                     {
-                        MyTools.SetActive(UI.mulFunButton.gameObject, true);
-                        UI.mulFunButton.GetComponentInChildren<Text>().text = MItemInfo.Item.IsEquipment ? "装备" : "使用";
+                        MyUtilities.SetActive(UI.mulFunButton.gameObject, true);
+                        UI.mulFunButton.GetComponentInChildren<Text>().text = MItemInfo.item.IsEquipment ? "装备" : "使用";
                         UI.mulFunButton.onClick.AddListener(UseCurrenItem);
                     }
                 }
                 else if (WarehouseManager.Instance.IsUIOpen)
                 {
-                    MyTools.SetActive(UI.mulFunButton.gameObject, true);
+                    MyUtilities.SetActive(UI.mulFunButton.gameObject, true);
                     UI.mulFunButton.GetComponentInChildren<Text>().text = "存入";
                     UI.mulFunButton.onClick.AddListener(StoreCurrentItem);
                 }
                 else if (ShopManager.Instance.IsUIOpen)
                 {
-                    if (MItemInfo.Item.SellAble)
+                    if (MItemInfo.item.SellAble)
                     {
-                        MyTools.SetActive(UI.mulFunButton.gameObject, true);
+                        MyUtilities.SetActive(UI.mulFunButton.gameObject, true);
                         UI.mulFunButton.GetComponentInChildren<Text>().text = "出售";
                         UI.mulFunButton.onClick.AddListener(SellOrPurchaseCurrentItem);
                     }
-                    MyTools.SetActive(UI.discardButton.gameObject, false);
+                    MyUtilities.SetActive(UI.discardButton.gameObject, false);
                 }
 #endif
                 break;
             case ItemAgentType.Warehouse:
                 UI.priceTitle.text = "贩卖价格";
 #if UNITY_ANDROID
-                MyTools.SetActive(UI.buttonsArea, true);
-                MyTools.SetActive(UI.discardButton.gameObject, false);
-                MyTools.SetActive(UI.mulFunButton.gameObject, true);
+                MyUtilities.SetActive(UI.buttonsArea, true);
+                MyUtilities.SetActive(UI.discardButton.gameObject, false);
+                MyUtilities.SetActive(UI.mulFunButton.gameObject, true);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(TakeOutCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "取出";
@@ -142,45 +142,56 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
             case ItemAgentType.Making:
                 UI.priceTitle.text = "贩卖价格";
 #if UNITY_ANDROID
-                MyTools.SetActive(UI.buttonsArea, true);
-                MyTools.SetActive(UI.discardButton.gameObject, false);
-                MyTools.SetActive(UI.mulFunButton.gameObject, MItemInfo.Amount > 0);
+                MyUtilities.SetActive(UI.buttonsArea, true);
+                MyUtilities.SetActive(UI.discardButton.gameObject, false);
+                MyUtilities.SetActive(UI.mulFunButton.gameObject, MItemInfo.Amount > 0);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(MakeCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "制作";
 #endif
                 break;
-            case ItemAgentType.ShopSelling:
+            case ItemAgentType.Selling:
                 UI.priceTitle.text = "售价";
                 if (ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo))
-                    UI.priceText.text = ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo.SellPrice.ToString() + GameManager.Instance.CoinName;
+                    UI.priceText.text = ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo.SellPrice.ToString() + GameManager.CoinName;
                 else CloseItemWindow();
 #if UNITY_ANDROID
-                MyTools.SetActive(UI.buttonsArea, true);
-                MyTools.SetActive(UI.discardButton.gameObject, false);
-                MyTools.SetActive(UI.mulFunButton.gameObject, true);
+                MyUtilities.SetActive(UI.buttonsArea, true);
+                MyUtilities.SetActive(UI.discardButton.gameObject, false);
+                MyUtilities.SetActive(UI.mulFunButton.gameObject, true);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(SellOrPurchaseCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "购买";
 #endif
                 break;
-            case ItemAgentType.ShopBuying:
+            case ItemAgentType.Purchasing:
                 UI.priceTitle.text = "收购价";
                 if (ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo))
-                    UI.priceText.text = ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo.PurchasePrice.ToString() + GameManager.Instance.CoinName;
+                    UI.priceText.text = ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo.PurchasePrice.ToString() + GameManager.CoinName;
                 else CloseItemWindow();
 #if UNITY_ANDROID
-                MyTools.SetActive(UI.buttonsArea, true);
-                MyTools.SetActive(UI.discardButton.gameObject, false);
-                MyTools.SetActive(UI.mulFunButton.gameObject, true);
+                MyUtilities.SetActive(UI.buttonsArea, true);
+                MyUtilities.SetActive(UI.discardButton.gameObject, false);
+                MyUtilities.SetActive(UI.mulFunButton.gameObject, true);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(SellOrPurchaseCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "出售";
 #endif
                 break;
+            case ItemAgentType.Loot:
+                UI.priceTitle.text = "贩卖价格";
+#if UNITY_ANDROID
+                MyUtilities.SetActive(UI.buttonsArea, true);
+                MyUtilities.SetActive(UI.discardButton.gameObject, false);
+                MyUtilities.SetActive(UI.mulFunButton.gameObject, true);
+                UI.mulFunButton.onClick.RemoveAllListeners();
+                UI.mulFunButton.onClick.AddListener(TakeCurrentItem);
+                UI.mulFunButton.GetComponentInChildren<Text>().text = "拾取";
+#endif
+                break;
             default:
 #if UNITY_ANDROID
-                MyTools.SetActive(UI.closeButton.gameObject, true);
+                MyUtilities.SetActive(UI.closeButton.gameObject, true);
 #endif
                 MyUtilities.SetActive(UI.discardButton.gameObject, false);
                 MyUtilities.SetActive(UI.mulFunButton.gameObject, false);
@@ -195,11 +206,11 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
         if (equiped == null || !equiped.item || IsPause) return;
         subUI.icon.overrideSprite = equiped.item.Icon;
         subUI.nameText.text = equiped.ItemName;
-        if (GameManager.Instance.QualityColors.Count >= 5)
-            subUI.nameText.color = GameManager.Instance.QualityColors[(int)equiped.item.Quality];
+        if (GameManager.QualityColors.Count >= 5)
+            subUI.nameText.color = GameManager.QualityColors[(int)equiped.item.Quality];
         subUI.typeText.text = GetItemTypeString(equiped.item.ItemType);
         subUI.priceTitle.text = "贩卖价格";
-        subUI.priceText.text = equiped.item.SellAble ? equiped.item.SellPrice + GameManager.Instance.CoinName : "不可出售";
+        subUI.priceText.text = equiped.item.SellAble ? equiped.item.SellPrice + GameManager.CoinName : "不可出售";
         subUI.weightText.text = "重量：" + equiped.item.Weight.ToString("F2") + "WL";
         subUI.descriptionText.text = equiped.item.Description;
         switch (equiped.item.ItemType)
@@ -285,7 +296,7 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
 #if UNITY_ANDROID
         UI.buttonAreaCanvas.alpha = 0;
         UI.buttonAreaCanvas.blocksRaycasts = false;
-        MyTools.SetActive(UI.closeButton.gameObject, false);
+        MyUtilities.SetActive(UI.closeButton.gameObject, false);
 #endif
     }
 
@@ -316,6 +327,12 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
     public void StoreCurrentItem()
     {
         WarehouseManager.Instance.StoreItem(MItemInfo);
+        CloseItemWindow();
+    }
+
+    public void TakeCurrentItem()
+    {
+        LootManager.Instance.TakeItem(MItemInfo);
         CloseItemWindow();
     }
 

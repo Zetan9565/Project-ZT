@@ -364,7 +364,7 @@ public class QuestAcceptCondition
         {
             switch (AcceptCondition)
             {
-                case QuestCondition.ComplexQuest: return QuestManager.Instance.HasCmpltQuestWithID(CompleteQuest.ID);
+                case QuestCondition.ComplexQuest: return QuestManager.Instance.HasCompleteQuestWithID(CompleteQuest.ID);
                 case QuestCondition.HasItem: return BackpackManager.Instance.HasItemWithID(OwnedItem.ID);
                 default: return true;
             }

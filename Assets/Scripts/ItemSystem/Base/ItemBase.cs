@@ -606,7 +606,7 @@ public class DropItemInfo
     }
 
     [SerializeField]
-    private int amount;
+    private int amount = 1;
     public int Amount
     {
         get
@@ -622,7 +622,7 @@ public class DropItemInfo
     }
 
     [SerializeField]
-    private float dropRate;
+    private float dropRate = 100.0f;
     public float DropRate
     {
         get

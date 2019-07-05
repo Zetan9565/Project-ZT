@@ -39,5 +39,10 @@ public class Enemy : MonoBehaviour
         //Debug.Log("One [" + info.Name + "] was killed");
         OnDeathEvent?.Invoke();
         QuestManager.Instance.UpdateUI();
+        if (info.DropItems.Count > 0)
+        {
+            LootAgent la = ObjectPool.Instance.Get(info.LootPrefab).GetComponent<LootAgent>();
+            la.Init(info.DropItems, transform.position);
+        }
     }
 }

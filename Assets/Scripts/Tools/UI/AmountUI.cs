@@ -29,6 +29,7 @@ public class AmountUI : MonoBehaviour
         amount.onValueChanged.AddListener(delegate { AmountManager.Instance.FixAmount(); });
         max.onClick.AddListener(AmountManager.Instance.Max);
         clear.onClick.AddListener(AmountManager.Instance.Clear);
+        confirm.onClick.AddListener(AmountManager.Instance.Confirm);
         cancel.onClick.AddListener(AmountManager.Instance.Cancel);
         plus.onClick.AddListener(AmountManager.Instance.Plus);
         minus.onClick.AddListener(AmountManager.Instance.Minus);

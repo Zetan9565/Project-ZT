@@ -111,7 +111,7 @@ public class Talker : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        if (collision.CompareTag("Player") && !DialogueManager.Instance.IsTalking)
             DialogueManager.Instance.CanTalk(this);
     }
 
@@ -129,7 +129,7 @@ public class Talker : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && !DialogueManager.Instance.IsTalking)
             DialogueManager.Instance.CanTalk(this);
     }
 

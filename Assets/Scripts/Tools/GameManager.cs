@@ -3,47 +3,41 @@ using UnityEngine;
 using System;
 
 [DisallowMultipleComponent]
-public class GameManager : MonoBehaviour
+public class GameManager : SingletonMonoBehaviour<GameManager>
 {
-
-    private static GameManager instance;
-    public static GameManager Instance
+    [SerializeField]
+    private string backpackName = "背包";
+    public static string BackpackName
     {
         get
         {
-            if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<GameManager>();
-            return instance;
+            if (Instance)
+                return Instance.backpackName;
+            else return "背包";
         }
     }
 
     [SerializeField]
-    private string backpackName = "行囊";
-    public string BackpackName
+    private string coinName = "铜币";
+    public static string CoinName
     {
         get
         {
-            return backpackName;
-        }
-    }
-
-    [SerializeField]
-    private string coinName = "文";
-    public string CoinName
-    {
-        get
-        {
-            return coinName;
+            if (Instance)
+                return Instance.coinName;
+            else return "铜币";
         }
     }
 
     [SerializeField]
     private List<Color> qualityColors = new List<Color>();
-    public List<Color> QualityColors
+    public static List<Color> QualityColors
     {
         get
         {
-            return qualityColors;
+            if (Instance)
+                return Instance.qualityColors;
+            else return null;
         }
     }
 
@@ -94,5 +88,12 @@ public class GameManager : MonoBehaviour
         ItemBase[] items = Resources.LoadAll<ItemBase>("");
         if (items.Length < 1) return null;
         return Array.Find(items, x => x.ID == id);
+    }
+
+    public static Color QualityToColor(ItemQuality quality)
+    {
+        if (quality > 0 && QualityColors != null && (int)quality < QualityColors.Count)
+            return QualityColors[(int)quality];
+        else return Color.black;
     }
 }

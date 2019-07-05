@@ -64,7 +64,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         else
         {
             AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
-            AmountManager.Instance.Init(delegate
+            AmountManager.Instance.NewAmount(delegate
             {
                 if (OnMake(currentItem, (int)AmountManager.Instance.Amount))
                     MessageManager.Instance.NewMessage(string.Format("制作了{0}个 [{1}]", currentItem.name, (int)AmountManager.Instance.Amount));
@@ -76,30 +76,36 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
     {
         if (!item || amount < 1 || !currentItem) return false;
         foreach (MatertialInfo mi in item.Materials)
-            if (!BackpackManager.Instance.TryLoseItem_Boolean(mi.Item, mi.Amount))
+            if (!BackpackManager.Instance.TryLoseItem_Boolean(mi.Item, mi.Amount * amount))
                 return false;
         foreach (MatertialInfo mi in item.Materials)//模拟空出位置来放制作的道具
         {
-            BackpackManager.Instance.MBackpack.weightLoad -= mi.Item.Weight * mi.Amount;
-            if ((!mi.Item.StackAble && BackpackManager.Instance.GetItemAmount(mi.Item) - mi.Amount == 0) || mi.Item.StackAble)
+            BackpackManager.Instance.MBackpack.weightLoad -= mi.Item.Weight * mi.Amount * amount;
+            if (mi.Item.StackAble && BackpackManager.Instance.GetItemAmount(mi.Item) - mi.Amount * amount == 0)//可叠加且消耗后用尽，则空出一格
                 BackpackManager.Instance.MBackpack.backpackSize--;
+            else if (!mi.Item.StackAble)//不可叠加，则消耗多少个就能空出多少格
+                BackpackManager.Instance.MBackpack.backpackSize -= amount;
         }
         if (!BackpackManager.Instance.TryGetItem_Boolean(currentItem, amount))
         {
             foreach (MatertialInfo mi in item.Materials)//取消模拟
             {
-                BackpackManager.Instance.MBackpack.weightLoad += mi.Item.Weight * mi.Amount;
-                if ((!mi.Item.StackAble && BackpackManager.Instance.GetItemAmount(mi.Item) - mi.Amount == 0) || mi.Item.StackAble)
+                BackpackManager.Instance.MBackpack.weightLoad += mi.Item.Weight * mi.Amount * amount;
+                if (mi.Item.StackAble && BackpackManager.Instance.GetItemAmount(mi.Item) - mi.Amount * amount == 0)
                     BackpackManager.Instance.MBackpack.backpackSize++;
+                else if (!mi.Item.StackAble)
+                    BackpackManager.Instance.MBackpack.backpackSize += amount;
             }
             return false;
         }
         foreach (MatertialInfo mi in item.Materials)//取消模拟并确认操作
         {
-            BackpackManager.Instance.MBackpack.weightLoad += mi.Item.Weight * mi.Amount;
-            if ((!mi.Item.StackAble && BackpackManager.Instance.GetItemAmount(mi.Item) - mi.Amount == 0) || mi.Item.StackAble)
+            BackpackManager.Instance.MBackpack.weightLoad += mi.Item.Weight * mi.Amount * amount;
+            if (mi.Item.StackAble && BackpackManager.Instance.GetItemAmount(mi.Item) - mi.Amount * amount == 0)
                 BackpackManager.Instance.MBackpack.backpackSize++;
-            BackpackManager.Instance.LoseItem(mi.Item, mi.Amount);
+            else if (!mi.Item.StackAble)
+                BackpackManager.Instance.MBackpack.backpackSize += amount;
+            BackpackManager.Instance.LoseItem(mi.Item, mi.Amount * amount);
         }
         BackpackManager.Instance.GetItem(item, amount);
         UpdateUI();
@@ -156,10 +162,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         ItemWindowManager.Instance.CloseItemWindow();
     }
 
-    public void OpenCloseWindow()
-    {
-
-    }
+    void IWindow.OpenCloseWindow() { }
 
     public void PauseDisplay(bool pause)
     {

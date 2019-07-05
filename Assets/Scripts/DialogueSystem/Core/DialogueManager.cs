@@ -194,13 +194,13 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
             StartDialogue(branchDialogInstances.Peek().Dialogue, branchDialogInstances.Peek().SpecifyIndex);
         else if (!string.IsNullOrEmpty(branch.Words))
         {
-            StartOneWords(currentWords.TalkerInfo, branchDialogInstances.Peek().Words, currentWords.TalkerType, currentDialog,
+            StartOneWords(branchDialogInstances.Peek().TalkerInfo, branchDialogInstances.Peek().TalkerType, branchDialogInstances.Peek().Words, currentDialog,
                          branchDialogInstances.Peek().IndexToGo);
             SayNextWords();
         }
     }
 
-    public void StartOneWords(TalkerInfomation talkerInfo, string words, TalkerType talkerType, Dialogue dialogToGoBack, int indexToGoBack)
+    public void StartOneWords(TalkerInfomation talkerInfo, TalkerType talkerType, string words, Dialogue dialogToGoBack, int indexToGoBack)
     {
         if (!UI) return;
         if (waitToGoBackRoutine != null) StopCoroutine(waitToGoBackRoutine);
@@ -620,7 +620,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
         }
         else if (topWordsParent != null && topWordsParent.NeedToChusRightBranch && !topWordsParent.IsRightBranch(currentBranch))
         {
-            StartOneWords(topWordsParent.TalkerInfo, topWordsParent.WordsWhenChusWB, topWordsParent.TalkerType, top.runtimeParent, top.runtimeIndexToGoBack);
+            StartOneWords(topWordsParent.TalkerInfo, topWordsParent.TalkerType, topWordsParent.WordsWhenChusWB, top.runtimeParent, top.runtimeIndexToGoBack);
         }
         else if (top.GoBack && top.runtimeParent.Words.IndexOf(topWordsParent) != top.runtimeParent.Words.Count - 1)//不是最后一句，则处理普通的带返回的分支
         {
@@ -695,10 +695,9 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
         ShopManager.Instance.CloseWindow();
         UIManager.Instance.EnableJoyStick(true);
     }
-    public void OpenCloseWindow()
-    {
 
-    }
+    void IWindow.OpenCloseWindow() { }
+
     public void PauseDisplay(bool pause)
     {
         if (!UI || !UI.gameObject) return;
