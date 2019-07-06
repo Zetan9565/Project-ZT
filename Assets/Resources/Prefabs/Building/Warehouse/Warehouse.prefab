@@ -115,7 +115,7 @@ MonoBehaviour:
   warehouse:
     warehouseSize:
       min: 0
-      max: 300
+      max: 100
 --- !u!114 &8733002829509734158
 MonoBehaviour:
   m_ObjectHideFlags: 0

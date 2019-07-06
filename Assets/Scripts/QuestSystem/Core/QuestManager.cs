@@ -433,15 +433,20 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
     /// </summary>
     public void TraceSelectedQuest()
     {
-        if (!selectedQuest || !AStarManager.Instance || !PlayerManager.Instance.PlayerController.Unit) return;
-        if (selectedQuest.IsComplete && selectedQuest.CurrentQuestGiver)
+        TraceQuest(selectedQuest);
+    }
+
+    public void TraceQuest(Quest quest)
+    {
+        if (!quest || !AStarManager.Instance || !PlayerManager.Instance.PlayerController.Unit) return;
+        if (quest.IsComplete && quest.CurrentQuestGiver)
         {
             PlayerManager.Instance.PlayerController.Unit.IsFollowingTarget = false;
             PlayerManager.Instance.PlayerController.Unit.ShowPath(true);
-            PlayerManager.Instance.PlayerController.Unit.SetDestination(selectedQuest.CurrentQuestGiver.transform.position, false);
+            PlayerManager.Instance.PlayerController.Unit.SetDestination(quest.CurrentQuestGiver.transform.position, false);
         }
-        else if (selectedQuest.Objectives.Count > 0)
-            using (var objectiveEnum = selectedQuest.Objectives.GetEnumerator())
+        else if (quest.Objectives.Count > 0)
+            using (var objectiveEnum = quest.Objectives.GetEnumerator())
             {
                 Vector3 destination = default;
                 Objective currentObj = null;

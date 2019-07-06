@@ -74,7 +74,7 @@ public class TalkerInspector : Editor
         {
             SerializedProperty warehouseSize = warehouse.FindPropertyRelative("warehouseSize");
             warehouseSize.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认仓库容量(格)",
-                warehouseSize.FindPropertyRelative("max").intValue, 100, 500);
+                warehouseSize.FindPropertyRelative("max").intValue, 50, 150);
         }
         if (!isWarehouseAgent.boolValue) EditorGUILayout.PropertyField(isVendor, new GUIContent("是商贩"));
         if (isVendor.boolValue && !isWarehouseAgent.boolValue)

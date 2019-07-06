@@ -253,7 +253,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
     {
         if (isPress)
         {
-            touchTime += Time.deltaTime;
+            touchTime += Time.fixedDeltaTime;
             if (touchTime >= 0.5f)
             {
                 isPress = false;
@@ -262,7 +262,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
         }
         if (isClick)
         {
-            clickTime += Time.deltaTime;
+            clickTime += Time.fixedDeltaTime;
             if (clickTime > 0.2f)
             {
                 isClick = false;
@@ -351,14 +351,9 @@ public class ItemAgent : MonoBehaviour, IDragable,
             else
             {
                 if (!IsEmpty && agentType != ItemAgentType.None && agentType != ItemAgentType.Loot && agentType != ItemAgentType.Purchasing)
-                {
                     BeginDrag();
-                }
             }
-        else if (eventData.button == PointerEventData.InputButton.Right && !IsEmpty)
-        {
-            OnRightClick();
-        }
+        else if (eventData.button == PointerEventData.InputButton.Right && !IsEmpty) OnRightClick();
 #elif UNITY_ANDROID
         if (eventData.button == PointerEventData.InputButton.Left)
         {

@@ -71,38 +71,42 @@ public class Warehouse
 
     public void Sort()
     {
-        Items.Sort((i1, i2) =>
+        Items.Sort((x, y) =>
         {
-            if (i1.item.ItemType == i2.item.ItemType)
+            if (x.item.ItemType == y.item.ItemType)
             {
-                return string.Compare(i1.ItemID, i2.ItemID);
+                if (x.item.Quality < y.item.Quality)
+                    return 1;
+                else if (x.item.Quality > y.item.Quality)
+                    return -1;
+                else return string.Compare(x.ItemID, y.ItemID);
             }
             else
             {
-                if (i1.item.ItemType == ItemType.Weapon) return -1;
-                else if (i2.item.ItemType == ItemType.Weapon) return 1;
-                else if (i1.item.ItemType == ItemType.Armor) return -1;
-                else if (i2.item.ItemType == ItemType.Armor) return 1;
-                else if (i1.item.ItemType == ItemType.Jewelry) return -1;
-                else if (i2.item.ItemType == ItemType.Jewelry) return 1;
-                else if (i1.item.ItemType == ItemType.Tool) return -1;
-                else if (i2.item.ItemType == ItemType.Tool) return 1;
-                else if (i1.item.ItemType == ItemType.Cuisine) return -1;
-                else if (i2.item.ItemType == ItemType.Cuisine) return 1;
-                else if (i1.item.ItemType == ItemType.Medicine) return -1;
-                else if (i2.item.ItemType == ItemType.Medicine) return 1;
-                else if (i1.item.ItemType == ItemType.Elixir) return -1;
-                else if (i2.item.ItemType == ItemType.Elixir) return 1;
-                else if (i1.item.ItemType == ItemType.Box) return -1;
-                else if (i2.item.ItemType == ItemType.Box) return 1;
-                else if (i1.item.ItemType == ItemType.Valuables) return -1;
-                else if (i2.item.ItemType == ItemType.Valuables) return 1;
-                else if (i1.item.ItemType == ItemType.Quest) return -1;
-                else if (i2.item.ItemType == ItemType.Quest) return 1;
-                else if (i1.item.ItemType == ItemType.Material) return -1;
-                else if (i2.item.ItemType == ItemType.Material) return 1;
-                else if (i1.item.ItemType == ItemType.Other) return -1;
-                else if (i2.item.ItemType == ItemType.Other) return 1;
+                if (x.item.ItemType == ItemType.Weapon) return -1;
+                else if (y.item.ItemType == ItemType.Weapon) return 1;
+                else if (x.item.ItemType == ItemType.Armor) return -1;
+                else if (y.item.ItemType == ItemType.Armor) return 1;
+                else if (x.item.ItemType == ItemType.Jewelry) return -1;
+                else if (y.item.ItemType == ItemType.Jewelry) return 1;
+                else if (x.item.ItemType == ItemType.Tool) return -1;
+                else if (y.item.ItemType == ItemType.Tool) return 1;
+                else if (x.item.ItemType == ItemType.Cuisine) return -1;
+                else if (y.item.ItemType == ItemType.Cuisine) return 1;
+                else if (x.item.ItemType == ItemType.Medicine) return -1;
+                else if (y.item.ItemType == ItemType.Medicine) return 1;
+                else if (x.item.ItemType == ItemType.Elixir) return -1;
+                else if (y.item.ItemType == ItemType.Elixir) return 1;
+                else if (x.item.ItemType == ItemType.Box) return -1;
+                else if (y.item.ItemType == ItemType.Box) return 1;
+                else if (x.item.ItemType == ItemType.Valuables) return -1;
+                else if (y.item.ItemType == ItemType.Valuables) return 1;
+                else if (x.item.ItemType == ItemType.Quest) return -1;
+                else if (y.item.ItemType == ItemType.Quest) return 1;
+                else if (x.item.ItemType == ItemType.Material) return -1;
+                else if (y.item.ItemType == ItemType.Material) return 1;
+                else if (x.item.ItemType == ItemType.Other) return -1;
+                else if (y.item.ItemType == ItemType.Other) return 1;
                 else return 0;
             }
         });

@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class QuestBoardAgent : MonoBehaviour
+public class QuestBoardAgent : MonoBehaviour, UnityEngine.EventSystems.IPointerClickHandler
 {
     [HideInInspector]
     public QuestAgent questAgent;
@@ -54,16 +55,75 @@ public class QuestBoardAgent : MonoBehaviour
         ObjectiveText.text = objectives;
     }
 
-    public void OnClick()
+    private void OnClick()
     {
         QuestManager.Instance.OpenWindow();
         if (!questAgent.parent.IsExpanded) questAgent.parent.IsExpanded = true;
         questAgent.OnClick();
     }
 
+    private void RightClick()
+    {
+        QuestManager.Instance.TraceQuest(questAgent.MQuest);
+    }
+
     public void Init(QuestAgent qa)
     {
         questAgent = qa;
         UpdateStatus();
+    }
+
+#if UNITY_ANDROID
+    private float clickTime;
+    private int clickCount;
+    private bool isClick;
+
+    private void FixedUpdate()
+    {
+        if (isClick)
+        {
+            clickTime += Time.fixedDeltaTime;
+            if (clickTime > 0.2f)
+            {
+                isClick = false;
+                clickCount = 0;
+                clickTime = 0;
+            }
+        }
+    }
+#endif
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+#if UNITY_STANDALONE
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            OnClick();
+        }
+        else if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            RightClick();
+        }
+#elif UNITY_ANDROID
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            if (clickCount < 1) isClick = true;
+            if (clickTime <= 0.2f) clickCount++;
+            if (!IsEmpty)
+            {
+                if (clickCount > 1)
+                {
+                    OnRightClick();
+                    isClick = false;
+                    clickCount = 0;
+                    clickTime = 0;
+                }
+                else if (clickCount == 1)
+                {
+                    OnClick();
+                }
+            }
+        }
+#endif
     }
 }

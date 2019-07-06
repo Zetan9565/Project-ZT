@@ -66,8 +66,11 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
             AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
-                if (OnMake(currentItem, (int)AmountManager.Instance.Amount))
-                    MessageManager.Instance.NewMessage(string.Format("制作了{0}个 [{1}]", currentItem.name, (int)AmountManager.Instance.Amount));
+                ConfirmManager.Instance.NewConfirm(string.Format("确定制作{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, currentItem.name), delegate
+                {
+                    if (OnMake(currentItem, (int)AmountManager.Instance.Amount))
+                        MessageManager.Instance.NewMessage(string.Format("制作了{0}个 [{1}]", currentItem.name, (int)AmountManager.Instance.Amount));
+                });
             }, amountCanMake);
         }
     }

@@ -10,8 +10,10 @@ public class QuestUIInspector : Editor
     SerializedProperty closeWindow;
     SerializedProperty questPrefab;
     SerializedProperty questGroupPrefab;
+    SerializedProperty questList;
     SerializedProperty questListParent;
     SerializedProperty questListToggle;
+    SerializedProperty cmpltQuestList;
     SerializedProperty cmpltQuestListParent;
     SerializedProperty cmpltQuestListToggle;
     SerializedProperty descriptionWindow;
@@ -35,8 +37,10 @@ public class QuestUIInspector : Editor
         closeWindow = serializedObject.FindProperty("closeWindow");
         questPrefab = serializedObject.FindProperty("questPrefab");
         questGroupPrefab = serializedObject.FindProperty("questGroupPrefab");
+        questList = serializedObject.FindProperty("questList");
         questListParent = serializedObject.FindProperty("questListParent");
         questListToggle = serializedObject.FindProperty("questListToggle");
+        cmpltQuestList = serializedObject.FindProperty("cmpltQuestList");
         cmpltQuestListParent = serializedObject.FindProperty("cmpltQuestListParent");
         cmpltQuestListToggle = serializedObject.FindProperty("cmpltQuestListToggle");
         descriptionWindow = serializedObject.FindProperty("descriptionWindow");
@@ -64,8 +68,10 @@ public class QuestUIInspector : Editor
         EditorGUILayout.PropertyField(questPrefab, new GUIContent("任务载体预制体"));
         EditorGUILayout.PropertyField(questGroupPrefab, new GUIContent("任务组载体预制体"));
         EditorGUILayout.PropertyField(questListParent, new GUIContent("进行中任务放置根"));
+        EditorGUILayout.PropertyField(questList, new GUIContent("进行中任务页面"));
         EditorGUILayout.PropertyField(questListToggle, new GUIContent("进行中任务页面切换器"));
         EditorGUILayout.PropertyField(cmpltQuestListParent, new GUIContent("已完成任务放置根"));
+        EditorGUILayout.PropertyField(cmpltQuestList, new GUIContent("已完成任务页面"));
         EditorGUILayout.PropertyField(cmpltQuestListToggle, new GUIContent("已完成任务页面切换器"));
         EditorGUILayout.EndVertical();
 

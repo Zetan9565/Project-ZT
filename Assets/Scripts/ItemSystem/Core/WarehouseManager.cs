@@ -29,7 +29,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
     private void Awake()
     {
         if (!UI || !UI.gameObject) return;
-        for (int i = 0; i < 300; i++)
+        for (int i = 0; i < 150; i++)
         {
             ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
             itemAgents.Add(ia);
@@ -71,8 +71,10 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             }
             UpdateUI();
         }
+        if (UI.tabs != null && UI.tabs.Length > 0) UI.tabs[0].isOn = true;
     }
 
+    #region 道具处理相关
     public void StoreItem(ItemInfo info, bool all = false)
     {
         if (MWarehouse == null || info == null || !info.item) return;
@@ -213,6 +215,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
     {
         return itemAgents.Find(x => x.MItemInfo == info);
     }
+    #endregion
 
     #region UI相关
     public void OpenWindow()
@@ -275,12 +278,29 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
     {
         UI.money.text = MWarehouse.Money.ToString();
         UI.size.text = MWarehouse.warehouseSize.ToString();
+        SetPage(currentPage);
     }
 
     public void Sort()
     {
         MWarehouse.Sort();
-        Init(MWarehouse);
+        //Init(MWarehouse);
+        foreach (ItemAgent ia in itemAgents)
+        {
+            ia.Empty();
+        }
+        foreach (ItemInfo ii in MWarehouse.Items)
+        {
+            foreach (ItemAgent ia in itemAgents)
+            {
+                if (ia.IsEmpty)
+                {
+                    ia.InitItem(ii);
+                    break;
+                }
+            }
+        }
+        UpdateUI();
     }
 
     public void SetUI(WarehouseUI UI)
@@ -312,4 +332,59 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         StoreAble = false;
         if (!(DialogueManager.Instance.TalkAble || DialogueManager.Instance.IsUIOpen)) UIManager.Instance.EnableInteractive(false);
     }
+
+    #region 道具页相关
+    private int currentPage;
+    public void SetPage(int index)
+    {
+        if (!UI || !UI.gameObject) return;
+        currentPage = index;
+        switch (index)
+        {
+            case 1: ShowEquipments(); break;
+            case 2: ShowConsumables(); break;
+            case 3: ShowMaterials(); break;
+            default: ShowAll(); break;
+        }
+    }
+
+    private void ShowAll()
+    {
+        if (!UI || !UI.gameObject) return;
+        for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+        {
+            MyUtilities.SetActive(itemAgents[i].gameObject, true);
+        }
+    }
+
+    private void ShowEquipments()
+    {
+        for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+        {
+            if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsEquipment)
+                MyUtilities.SetActive(itemAgents[i].gameObject, true);
+            else MyUtilities.SetActive(itemAgents[i].gameObject, false);
+        }
+    }
+
+    private void ShowConsumables()
+    {
+        for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+        {
+            if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsConsumable)
+                MyUtilities.SetActive(itemAgents[i].gameObject, true);
+            else MyUtilities.SetActive(itemAgents[i].gameObject, false);
+        }
+    }
+
+    private void ShowMaterials()
+    {
+        for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+        {
+            if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsMaterial)
+                MyUtilities.SetActive(itemAgents[i].gameObject, true);
+            else MyUtilities.SetActive(itemAgents[i].gameObject, false);
+        }
+    }
+    #endregion
 }

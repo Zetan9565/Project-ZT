@@ -6843,7 +6843,7 @@ GameObject:
   - component: {fileID: 289955188}
   - component: {fileID: 289955189}
   m_Layer: 5
-  m_Name: Eat
+  m_Name: Consumable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12535,8 +12535,10 @@ MonoBehaviour:
     type: 3}
   questGroupPrefab: {fileID: 4222113218122140904, guid: b2e7de499637b0647a5f6fa74caf6d47,
     type: 3}
+  questList: {fileID: 1867291215}
   questListParent: {fileID: 1330258121}
   questListToggle: {fileID: 1835029005}
+  cmpltQuestList: {fileID: 612175513}
   cmpltQuestListParent: {fileID: 1088422542}
   cmpltQuestListToggle: {fileID: 1554073850}
   descriptionWindow: {fileID: 1075283714}
@@ -15349,7 +15351,7 @@ MonoBehaviour:
   m_Content: {fileID: 1088422542}
   m_Horizontal: 0
   m_Vertical: 1
-  m_MovementType: 0
+  m_MovementType: 2
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
@@ -36195,6 +36197,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   warehouseWindow: {fileID: 879970174}
   windowCanvas: {fileID: 0}
+  tabs:
+  - {fileID: 1703549448}
+  - {fileID: 232062217}
+  - {fileID: 1713540617}
+  - {fileID: 575361777}
+  - {fileID: 1048662993}
   itemCellPrefab: {fileID: 5012386420257715135, guid: e66e862fa19e5df4eabdeaae86e6a25a,
     type: 3}
   itemCellsParent: {fileID: 2121514207}
@@ -38802,7 +38810,7 @@ GameObject:
   - component: {fileID: 1713540616}
   - component: {fileID: 1713540617}
   m_Layer: 5
-  m_Name: Eat
+  m_Name: Consumable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40061,7 +40069,7 @@ MonoBehaviour:
   warehouse:
     warehouseSize:
       min: 0
-      max: 300
+      max: 50
   isVendor: 0
   shop:
     shopName: 

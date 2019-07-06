@@ -47,8 +47,6 @@ public class BackpackUI : MonoBehaviour
             MakingManager.Instance.CanMake(handworkButton);
             MakingManager.Instance.OpenWindow();
         });
-        if (tabs != null && tabs.Length > 0)
-            tabs[0].isOn = true;
     }
 
     private void OnDestroy()

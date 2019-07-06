@@ -14,16 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _IDStarter: WRHS
   name: "\u4ED3\u5E93"
-  description: "300\u5BB9\u91CF\u7684\u4ED3\u5E93"
+  description: "100\u5BB9\u91CF\u7684\u4ED3\u5E93"
   buildTime: 10
   prefab: {fileID: 8733002829509734158, guid: 76eecb4cfd43c1e4bbc73823efba185c, type: 3}
   preview: {fileID: 6972957327784061452, guid: 62834e54bf1298e4695cd0c62b4dfedb, type: 3}
   materials:
   - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
     amount: 5
-    processType: 0
+    makingType: 0
     materialType: 0
   - item: {fileID: 11400000, guid: eb68c8a7b1bbeb8408eed1d2af6b8ad6, type: 2}
     amount: 5
-    processType: 0
+    makingType: 0
     materialType: 0

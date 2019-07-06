@@ -16,8 +16,11 @@ public class QuestUI : MonoBehaviour
 
     public GameObject questGroupPrefab;
 
+    public Transform questList;
     public Transform questListParent;
     public Toggle questListToggle;
+
+    public Transform cmpltQuestList;
     public Transform cmpltQuestListParent;
     public Toggle cmpltQuestListToggle;
 
@@ -53,9 +56,9 @@ public class QuestUI : MonoBehaviour
         abandonButton.onClick.AddListener(QuestManager.Instance.AbandonSelectedQuest);
         traceButton.onClick.AddListener(QuestManager.Instance.TraceSelectedQuest);
         closeDescription.onClick.AddListener(QuestManager.Instance.HideDescription);
-        questListToggle.onValueChanged.AddListener(questListParent.gameObject.SetActive);
-        questListToggle.group.RegisterToggle(questListToggle); ;
-        cmpltQuestListToggle.onValueChanged.AddListener(cmpltQuestListParent.gameObject.SetActive);
+        questListToggle.onValueChanged.AddListener(questList.gameObject.SetActive);
+        questListToggle.group.RegisterToggle(questListToggle);
+        cmpltQuestListToggle.onValueChanged.AddListener(cmpltQuestList.gameObject.SetActive);
         cmpltQuestListToggle.group.RegisterToggle(cmpltQuestListToggle);
         questListToggle.isOn = true;
         cmpltQuestListToggle.isOn = false;

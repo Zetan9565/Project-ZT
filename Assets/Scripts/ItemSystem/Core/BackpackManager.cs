@@ -59,6 +59,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
             }
             UpdateUI();
         }
+        if (UI.tabs != null && UI.tabs.Length > 0) UI.tabs[0].isOn = true;
     }
 
     #region 道具处理相关

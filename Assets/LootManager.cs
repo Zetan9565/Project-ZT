@@ -26,7 +26,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindow
         }
     }
 
-    public void Init()
+    private void Init()
     {
         foreach (var ia in itemAgents)
             ia.Empty();
@@ -146,7 +146,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindow
         CannotPick();
         if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();
     }
-    public void OpenCloseWindow() { }
+    void IWindow.OpenCloseWindow() { }
     public void PauseDisplay(bool pause)
     {
         if (!UI || !UI.gameObject) return;

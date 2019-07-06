@@ -599,14 +599,14 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
     /// </summary>
     private void HandlingLastBranchWords()
     {
-        BranchDialogue top = branchDialogInstances.Pop();
-        DialogueWords topWordsParent = top.runtimeParent.Words.Find(x => x.Branches.Contains(currentBranch));//找到包含当前分支的语句
+        BranchDialogue topBranch = branchDialogInstances.Pop();
+        DialogueWords topWordsParent = topBranch.runtimeParent.Words.Find(x => x.Branches.Contains(currentBranch));//找到包含当前分支的语句
         if (topWordsParent != null && topWordsParent.IsRightBranch(currentBranch))
         {
-            int indexOfWordsParent = top.runtimeParent.Words.IndexOf(topWordsParent);
+            int indexOfWordsParent = topBranch.runtimeParent.Words.IndexOf(topWordsParent);
             foreach (BranchDialogue branch in topWordsParent.Branches)
             {
-                string parentID = top.runtimeParent.ID;
+                string parentID = topBranch.runtimeParent.ID;
                 DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
                 if (_find == null)
                 {
@@ -616,28 +616,27 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
                 int indexOfBranch = topWordsParent.Branches.IndexOf(branch);
                 _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
             }
-            StartDialogue(top.runtimeParent, top.runtimeIndexToGoBack, false);
+            StartDialogue(topBranch.runtimeParent, topBranch.runtimeIndexToGoBack, false);
         }
-        else if (topWordsParent != null && topWordsParent.NeedToChusRightBranch && !topWordsParent.IsRightBranch(currentBranch))
+        else
         {
-            StartOneWords(topWordsParent.TalkerInfo, topWordsParent.TalkerType, topWordsParent.WordsWhenChusWB, top.runtimeParent, top.runtimeIndexToGoBack);
-        }
-        else if (top.GoBack && top.runtimeParent.Words.IndexOf(topWordsParent) != top.runtimeParent.Words.Count - 1)//不是最后一句，则处理普通的带返回的分支
-        {
-            int indexOfFind = top.runtimeParent.Words.IndexOf(topWordsParent);
-            if (top.DeleteWhenCmplt)
+            int indexOfFind = topBranch.runtimeParent.Words.IndexOf(topWordsParent);
+            if (topBranch.DeleteWhenCmplt)
             {
-                string parentID = top.runtimeParent.ID;
+                string parentID = topBranch.runtimeParent.ID;
                 DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfFind);
                 if (_find == null)
                 {
-                    DialogueDatas.Add(parentID, new DialogueData(top.runtimeParent));
+                    DialogueDatas.Add(parentID, new DialogueData(topBranch.runtimeParent));
                     _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfFind);
                 }
-                int indexOfBranch = topWordsParent.Branches.IndexOf(top);
+                int indexOfBranch = topWordsParent.Branches.IndexOf(currentBranch);
                 _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
             }
-            StartDialogue(top.runtimeParent, top.runtimeIndexToGoBack, false);
+            if (topWordsParent != null && topWordsParent.NeedToChusRightBranch && !topWordsParent.IsRightBranch(currentBranch))//选择错误，则说选择错误时应该说的话
+                StartOneWords(topWordsParent.TalkerInfo, topWordsParent.TalkerType, topWordsParent.WordsWhenChusWB, topBranch.runtimeParent, topBranch.runtimeIndexToGoBack);
+            else if (topBranch.GoBack && topBranch.runtimeParent.Words.IndexOf(topWordsParent) != topBranch.runtimeParent.Words.Count - 1)//不是最后一句，则处理普通的带返回的分支
+                StartDialogue(topBranch.runtimeParent, topBranch.runtimeIndexToGoBack, false);
         }
         currentBranch = null;
     }
