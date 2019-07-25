@@ -8,7 +8,7 @@ public class SkillManager : SingletonMonoBehaviour<SkillManager>
     private int animaAttackIndexNameHash;
 
     private readonly Dictionary<string, List<SkillActionBehaviour>> skillActionSMBs = new Dictionary<string, List<SkillActionBehaviour>>();
-    private readonly Dictionary<string, SkillInfomation> allSkillInfos = new Dictionary<string, SkillInfomation>();
+    private readonly Dictionary<string, SkillInformation> allSkillInfos = new Dictionary<string, SkillInformation>();
 
     private SkillAgent currentSkill;
     private readonly Queue<SkillAction> currentskillActions = new Queue<SkillAction>();
@@ -28,7 +28,7 @@ public class SkillManager : SingletonMonoBehaviour<SkillManager>
 
     private void Awake()
     {
-        var skillInfos = Resources.LoadAll<SkillInfomation>("");
+        var skillInfos = Resources.LoadAll<SkillInformation>("");
         foreach (var info in skillInfos)
         {
             if (!allSkillInfos.ContainsKey(info.ID))

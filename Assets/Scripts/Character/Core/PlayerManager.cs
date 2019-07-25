@@ -3,8 +3,8 @@
 public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
 {
     [SerializeField]
-    private PlayerInfomation playerInfo;
-    public PlayerInfomation PlayerInfo
+    private PlayerInformation playerInfo;
+    public PlayerInformation PlayerInfo
     {
         get
         {
@@ -41,7 +41,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
     }
 
-    public void SetPlayerInfo(PlayerInfomation playerInfo)
+    public void SetPlayerInfo(PlayerInformation playerInfo)
     {
         this.playerInfo = playerInfo;
         Init();

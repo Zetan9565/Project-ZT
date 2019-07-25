@@ -48,10 +48,11 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
                 MessageManager.Instance.NewMessage("保存成功！");
                 return true;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Debug.LogWarning(ex.Message);
                 if (fs != null) fs.Close();
+                MessageManager.Instance.NewMessage("保存失败！");
                 return false;
             }
         }
@@ -169,7 +170,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void LoadPlayer(SaveData data)
     {
-        //PlayerInfoManager.Instance.SetPlayerInfo(new PlayerInfomation());
+        //PlayerInfoManager.Instance.SetPlayerInfo(new PlayerInformation());
         //TODO 读取玩家信息
     }
 

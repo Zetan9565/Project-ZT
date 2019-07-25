@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "enemy info", menuName = "ZetanStudio/角色/敌人信息")]
-public class EnemyInfomation : CharacterInfomation
+public class EnemyInformation : CharacterInformation
 {
     [SerializeField]
     private EnemyRace race;

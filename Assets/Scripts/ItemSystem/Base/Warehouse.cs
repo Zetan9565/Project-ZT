@@ -111,4 +111,9 @@ public class Warehouse
             }
         });
     }
+
+    public static implicit operator bool(Warehouse self)
+    {
+        return self != null;
+    }
 }

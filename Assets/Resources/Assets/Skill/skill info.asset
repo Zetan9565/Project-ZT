@@ -16,4 +16,14 @@ MonoBehaviour:
   _name: 
   description: 
   animaTriggerName: 
-  skillActions: []
+  skillActions:
+  - damageCount: 0
+    damageMultiple: 0
+    expendMP: 0
+    expendMPIncrOnLV_UP: 0
+    recoverHP: 0
+    recHPIncrOnLV_UP: 0
+    recoverMP: 0
+    recMPIncrOnLV_UP: 0
+    inputListenBeginNrmlzTime: 0
+    inputTimeOutNrmlzTime: 0

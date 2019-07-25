@@ -17,8 +17,8 @@ public class BookItem : ItemBase
     }
 
     [SerializeField]
-    private BuildingInfomation buildingToLearn;
-    public BuildingInfomation BuildingToLearn
+    private BuildingInformation buildingToLearn;
+    public BuildingInformation BuildingToLearn
     {
         get
         {

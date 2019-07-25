@@ -52,8 +52,8 @@ public class DialogueWords
     }
 
     [SerializeField]
-    private TalkerInfomation talkerInfo;
-    public TalkerInfomation TalkerInfo
+    private TalkerInformation talkerInfo;
+    public TalkerInformation TalkerInfo
     {
         get
         {
@@ -112,12 +112,20 @@ public class DialogueWords
         }
     }
 
+    public bool IsInvalid
+    {
+        get
+        {
+            return talkerType == TalkerType.NPC && !talkerInfo || string.IsNullOrEmpty(words);
+        }
+    }
+
     public DialogueWords()
     {
 
     }
 
-    public DialogueWords(TalkerInfomation talkerInfo, string words, TalkerType talkerType = 0)
+    public DialogueWords(TalkerInformation talkerInfo, string words, TalkerType talkerType = 0)
     {
         this.talkerInfo = talkerInfo;
         this.words = words;
@@ -192,8 +200,8 @@ public class BranchDialogue
     }
 
     [SerializeField]
-    private TalkerInfomation talkerInfo;
-    public TalkerInfomation TalkerInfo
+    private TalkerInformation talkerInfo;
+    public TalkerInformation TalkerInfo
     {
         get
         {

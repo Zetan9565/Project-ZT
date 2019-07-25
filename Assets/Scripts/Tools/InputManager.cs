@@ -40,6 +40,10 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
                     LootManager.Instance.OpenWindow();
                 else LootManager.Instance.TakeAll();
             }
+            else if (GatherManager.Instance.GatherAble)
+            {
+                GatherManager.Instance.TryGather();
+            }
             else if (DialogueManager.Instance.TalkAble)
             {
                 if (!DialogueManager.Instance.IsTalking)

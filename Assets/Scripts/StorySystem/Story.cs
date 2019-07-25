@@ -89,8 +89,8 @@ public class PlotAction
     }
 
     [SerializeField]
-    private CharacterInfomation character;
-    public CharacterInfomation Character
+    private CharacterInformation character;
+    public CharacterInformation Character
     {
         get
         {

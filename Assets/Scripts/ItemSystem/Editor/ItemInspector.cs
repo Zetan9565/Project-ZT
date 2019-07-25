@@ -378,7 +378,7 @@ public class ItemInspector : Editor
                         EditorGUILayout.PropertyField(building, new GUIContent("可学设施"), true);
                         if (building.objectReferenceValue)
                         {
-                            EditorGUILayout.LabelField("设施名称", (building.objectReferenceValue as BuildingInfomation).Name);
+                            EditorGUILayout.LabelField("设施名称", (building.objectReferenceValue as BuildingInformation).Name);
                         }
                         break;
                     case BookType.Making:

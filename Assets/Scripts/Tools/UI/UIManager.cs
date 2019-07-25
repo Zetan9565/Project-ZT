@@ -73,9 +73,10 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         else
         {
             MyUtilities.SetActive(InteractiveButton.gameObject, value &&
-                (DialogueManager.Instance.TalkAble && !WarehouseManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen ||
-                WarehouseManager.Instance.StoreAble && !DialogueManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen ||
-                LootManager.Instance.PickAble && !DialogueManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen
+                (DialogueManager.Instance.TalkAble && !WarehouseManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen && !GatherManager.Instance.IsGathering ||
+                WarehouseManager.Instance.StoreAble && !DialogueManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen && !GatherManager.Instance.IsGathering ||
+                LootManager.Instance.PickAble && !DialogueManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !GatherManager.Instance.IsGathering ||
+                GatherManager.Instance.GatherAble && !DialogueManager.Instance.TalkAble && !WarehouseManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen
                 ));
         }
 #endif

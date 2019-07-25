@@ -133,8 +133,8 @@ public class Quest : ScriptableObject
         }
     }
     [SerializeField]
-    private TalkerInfomation _NPCToSubmit;
-    public TalkerInfomation NPCToSubmit
+    private TalkerInformation _NPCToSubmit;
+    public TalkerInformation NPCToSubmit
     {
         get
         {
@@ -649,8 +649,8 @@ public class KillObjective : Objective
     }
 
     [SerializeField]
-    private EnemyInfomation enemy;
-    public EnemyInfomation Enemy
+    private EnemyInformation enemy;
+    public EnemyInformation Enemy
     {
         get
         {
@@ -697,8 +697,8 @@ public enum KillObjectiveType
 public class TalkObjective : Objective
 {
     [SerializeField]
-    private TalkerInfomation talker;
-    public TalkerInfomation Talker
+    private TalkerInformation talker;
+    public TalkerInformation Talker
     {
         get
         {

@@ -3,7 +3,7 @@ using System;
 
 public class SkillActionBehaviour : StateMachineBehaviour
 {
-    public SkillInfomation parentSkill;
+    public SkillInformation parentSkill;
     public int actionIndex;
 
     [HideInInspector]

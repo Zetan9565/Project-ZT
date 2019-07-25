@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public delegate void EnermyDeathListener();
 
@@ -16,8 +17,8 @@ public class Enemy : MonoBehaviour
     }
 
     [SerializeField]
-    private EnemyInfomation info;
-    public EnemyInfomation Info
+    private EnemyInformation info;
+    public EnemyInformation Info
     {
         get
         {
@@ -41,8 +42,16 @@ public class Enemy : MonoBehaviour
         QuestManager.Instance.UpdateUI();
         if (info.DropItems.Count > 0)
         {
-            LootAgent la = ObjectPool.Instance.Get(info.LootPrefab).GetComponent<LootAgent>();
-            la.Init(info.DropItems, transform.position);
+            List<ItemInfo> lootItems = new List<ItemInfo>();
+            foreach (DropItemInfo di in info.DropItems)
+                if (MyUtilities.Probability(di.DropRate))
+                    if (!di.OnlyDropForQuest || (di.OnlyDropForQuest && QuestManager.Instance.HasOngoingQuestWithID(di.BindedQuest.ID)))
+                        lootItems.Add(new ItemInfo(di.Item, Random.Range(1, di.Amount + 1)));
+            if (lootItems.Count > 0)
+            {
+                LootAgent la = ObjectPool.Instance.Get(info.LootPrefab).GetComponent<LootAgent>();
+                la.Init(lootItems, transform.position);
+            }
         }
     }
 }

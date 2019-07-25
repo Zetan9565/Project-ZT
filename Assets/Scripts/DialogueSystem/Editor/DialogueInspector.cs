@@ -17,7 +17,7 @@ public class DialogueInspector : Editor
     float lineHeight;
     float lineHeightSpace;
 
-    TalkerInfomation[] npcs;
+    TalkerInformation[] npcs;
     string[] npcNames;
 
     //bool showOriginal = false;
@@ -26,7 +26,7 @@ public class DialogueInspector : Editor
 
     private void OnEnable()
     {
-        npcs = Resources.LoadAll<TalkerInfomation>("");
+        npcs = Resources.LoadAll<TalkerInformation>("");
         npcNames = npcs.Select(x => x.Name).ToArray();//Linq分离出NPC名字
 
         lineHeight = EditorGUIUtility.singleLineHeight;
@@ -84,7 +84,7 @@ public class DialogueInspector : Editor
         wordsList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
-            SerializedProperty wordsSP = this.dialogWords.GetArrayElementAtIndex(index);
+            SerializedProperty wordsSP = dialogWords.GetArrayElementAtIndex(index);
             SerializedProperty talkerType = wordsSP.FindPropertyRelative("talkerType");
             SerializedProperty talkerInfo = wordsSP.FindPropertyRelative("talkerInfo");
             SerializedProperty words = wordsSP.FindPropertyRelative("words");
@@ -118,7 +118,7 @@ public class DialogueInspector : Editor
                 words, new GUIContent(string.Empty));
             lineCount += 2;
             EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
-                branches, new GUIContent("分支"));
+                branches, new GUIContent("分支\t\t" + (branches.arraySize > 0 ? "数量: " + branches.arraySize : "无分支")));
             lineCount++;
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
@@ -379,7 +379,7 @@ public class DialogueInspector : Editor
         };
     }
 
-    int GetNPCIndex(TalkerInfomation npc)
+    int GetNPCIndex(TalkerInformation npc)
     {
         if (npcs.Contains(npc))
             return Array.IndexOf(npcs, npc);

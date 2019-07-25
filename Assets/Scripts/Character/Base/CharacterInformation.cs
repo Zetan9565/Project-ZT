@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "character info", menuName = "ZetanStudio/角色/角色信息")]
-public class CharacterInfomation : ScriptableObject
+public class CharacterInformation : ScriptableObject
 {
     [SerializeField]
     protected string _ID;

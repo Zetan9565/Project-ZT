@@ -7,8 +7,8 @@ public delegate void DialogueListener();
 public class Talker : MonoBehaviour
 {
     [SerializeField]
-    private TalkerInfomation info;
-    public TalkerInfomation Info
+    private TalkerInformation info;
+    public TalkerInformation Info
     {
         get
         {

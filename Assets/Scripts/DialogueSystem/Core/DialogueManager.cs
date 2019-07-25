@@ -194,25 +194,21 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
             StartDialogue(branchDialogInstances.Peek().Dialogue, branchDialogInstances.Peek().SpecifyIndex);
         else if (!string.IsNullOrEmpty(branch.Words))
         {
-            StartOneWords(branchDialogInstances.Peek().TalkerInfo, branchDialogInstances.Peek().TalkerType, branchDialogInstances.Peek().Words, currentDialog,
+            StartOneWords(new DialogueWords(branchDialogInstances.Peek().TalkerInfo, branchDialogInstances.Peek().Words, branchDialogInstances.Peek().TalkerType), currentDialog,
                          branchDialogInstances.Peek().IndexToGo);
             SayNextWords();
         }
     }
 
-    public void StartOneWords(TalkerInfomation talkerInfo, TalkerType talkerType, string words, Dialogue dialogToGoBack, int indexToGoBack)
+    public void StartOneWords(DialogueWords words, Dialogue dialogToGoBack, int indexToGoBack)
     {
-        if (!UI) return;
+        if (!UI || words.IsInvalid) return;
         if (waitToGoBackRoutine != null) StopCoroutine(waitToGoBackRoutine);
-        if (talkerType == TalkerType.NPC && !talkerInfo || string.IsNullOrEmpty(words))
-        {
-            return;
-        }
         currentDialog = dialogToGoBack;
         IndexToGoBack = indexToGoBack;
         IsTalking = true;
         Words.Clear();
-        Words.Enqueue(new DialogueWords(talkerInfo, words, talkerType));
+        Words.Enqueue(words);
         MakeContinueOption(true);
         MyUtilities.SetActive(UI.wordsText.gameObject, true);
         SetPageArea(false, false, false);
@@ -599,14 +595,14 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
     /// </summary>
     private void HandlingLastBranchWords()
     {
-        BranchDialogue topBranch = branchDialogInstances.Pop();
-        DialogueWords topWordsParent = topBranch.runtimeParent.Words.Find(x => x.Branches.Contains(currentBranch));//找到包含当前分支的语句
+        BranchDialogue topBranchInstance = branchDialogInstances.Pop();
+        DialogueWords topWordsParent = topBranchInstance.runtimeParent.Words.Find(x => x.Branches.Contains(currentBranch));//找到包含当前分支的语句
         if (topWordsParent != null && topWordsParent.IsRightBranch(currentBranch))
         {
-            int indexOfWordsParent = topBranch.runtimeParent.Words.IndexOf(topWordsParent);
+            int indexOfWordsParent = topBranchInstance.runtimeParent.Words.IndexOf(topWordsParent);
             foreach (BranchDialogue branch in topWordsParent.Branches)
             {
-                string parentID = topBranch.runtimeParent.ID;
+                string parentID = topBranchInstance.runtimeParent.ID;
                 DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
                 if (_find == null)
                 {
@@ -616,27 +612,28 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
                 int indexOfBranch = topWordsParent.Branches.IndexOf(branch);
                 _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
             }
-            StartDialogue(topBranch.runtimeParent, topBranch.runtimeIndexToGoBack, false);
+            StartDialogue(topBranchInstance.runtimeParent, topBranchInstance.runtimeIndexToGoBack, false);
         }
         else
         {
-            int indexOfFind = topBranch.runtimeParent.Words.IndexOf(topWordsParent);
-            if (topBranch.DeleteWhenCmplt)
+            int indexOfFind = topBranchInstance.runtimeParent.Words.IndexOf(topWordsParent);
+            if (topBranchInstance.DeleteWhenCmplt)
             {
-                string parentID = topBranch.runtimeParent.ID;
+                string parentID = topBranchInstance.runtimeParent.ID;
                 DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfFind);
                 if (_find == null)
                 {
-                    DialogueDatas.Add(parentID, new DialogueData(topBranch.runtimeParent));
+                    DialogueDatas.Add(parentID, new DialogueData(topBranchInstance.runtimeParent));
                     _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfFind);
                 }
                 int indexOfBranch = topWordsParent.Branches.IndexOf(currentBranch);
                 _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
             }
             if (topWordsParent != null && topWordsParent.NeedToChusRightBranch && !topWordsParent.IsRightBranch(currentBranch))//选择错误，则说选择错误时应该说的话
-                StartOneWords(topWordsParent.TalkerInfo, topWordsParent.TalkerType, topWordsParent.WordsWhenChusWB, topBranch.runtimeParent, topBranch.runtimeIndexToGoBack);
-            else if (topBranch.GoBack && topBranch.runtimeParent.Words.IndexOf(topWordsParent) != topBranch.runtimeParent.Words.Count - 1)//不是最后一句，则处理普通的带返回的分支
-                StartDialogue(topBranch.runtimeParent, topBranch.runtimeIndexToGoBack, false);
+                StartOneWords(new DialogueWords(topWordsParent.TalkerInfo, topWordsParent.WordsWhenChusWB, topWordsParent.TalkerType),
+                    topBranchInstance.runtimeParent, topBranchInstance.runtimeIndexToGoBack);
+            else if (topBranchInstance.GoBack && topBranchInstance.runtimeParent.Words.IndexOf(topWordsParent) != topBranchInstance.runtimeParent.Words.Count - 1)//不是最后一句，则处理普通的带返回的分支
+                StartDialogue(topBranchInstance.runtimeParent, topBranchInstance.runtimeIndexToGoBack, false);
         }
         currentBranch = null;
     }

@@ -21,7 +21,7 @@ public class Building : MonoBehaviour
 
     public bool IsBuilt { get; private set; }
 
-    public BuildingInfomation MBuildingInfo { get; private set; }
+    public BuildingInformation MBuildingInfo { get; private set; }
 
     private List<MonoBehaviour> components = new List<MonoBehaviour>();
     private List<bool> componentStates = new List<bool>();
@@ -34,7 +34,7 @@ public class Building : MonoBehaviour
 
     public float leftBuildTime;
 
-    public bool StarBuild(BuildingInfomation buildingInfo, Vector3 position)
+    public bool StarBuild(BuildingInformation buildingInfo, Vector3 position)
     {
         transform.position = position;
         MBuildingInfo = buildingInfo;
@@ -56,6 +56,7 @@ public class Building : MonoBehaviour
             if (mb != this) mb.enabled = false;
         }
         IsUnderBuilding = true;
+        StartCoroutine(Build());
         MyUtilities.SetActive(buildingFlag.gameObject, true);
         return true;
     }
@@ -76,6 +77,7 @@ public class Building : MonoBehaviour
                 if (mb != this) mb.enabled = false;
             }
             IsUnderBuilding = true;
+            StartCoroutine(Build());
             MyUtilities.SetActive(buildingFlag.gameObject, true);
         }
         else
@@ -109,6 +111,22 @@ public class Building : MonoBehaviour
             onDestroy.AddListener(ua);
         }
         custumDestroy = true;
+    }
+
+    private IEnumerator Build()
+    {
+        while (IsUnderBuilding)
+        {
+            leftBuildTime -= Time.deltaTime;
+            buildingFlag.text = "建造中[" + leftBuildTime.ToString("F2") + "s]";
+            if (leftBuildTime <= 0)
+            {
+                BuildComplete();
+                yield break;
+            }
+            if (buildingAgent) buildingAgent.UpdateUI();
+            yield return null;
+        }
     }
 
     private IEnumerator WaitToHideFlag()
@@ -145,20 +163,6 @@ public class Building : MonoBehaviour
     }
 
     #region MonoBehaviour
-    private void Update()
-    {
-        if (IsUnderBuilding)
-        {
-            leftBuildTime -= Time.deltaTime;
-            buildingFlag.text = "建造中[" + leftBuildTime.ToString("F2") + "s]";
-            if (leftBuildTime <= 0)
-            {
-                BuildComplete();
-            }
-            if (buildingAgent) buildingAgent.UpdateUI();
-        }
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == "Player" && IsBuilt)

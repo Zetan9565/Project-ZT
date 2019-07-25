@@ -13,9 +13,9 @@ public class BuildingInfoAgent : MonoBehaviour,
 
     private ScrollRect parentRect;
 
-    public BuildingInfomation MBuildingInfo { get; private set; }
+    public BuildingInformation MBuildingInfo { get; private set; }
 
-    public void Init(BuildingInfomation buildingInfo, ScrollRect parentRect = null)
+    public void Init(BuildingInformation buildingInfo, ScrollRect parentRect = null)
     {
         MBuildingInfo = buildingInfo;
         nameText.text = buildingInfo.Name;

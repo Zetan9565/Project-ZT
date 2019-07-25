@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "skill info", menuName = "ZetanStudio/技能")]
-public class SkillInfomation : ScriptableObject
+[CreateAssetMenu(fileName = "skill info", menuName = "ZetanStudio/技能信息")]
+public class SkillInformation : ScriptableObject
 {
     [SerializeField]
     private string _ID;

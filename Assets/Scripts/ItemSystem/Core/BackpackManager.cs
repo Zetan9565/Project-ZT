@@ -517,6 +517,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
 
     private void ShowEquipments()
     {
+        if (!UI || !UI.gameObject) return;
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsEquipment)
@@ -527,6 +528,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
 
     private void ShowConsumables()
     {
+        if (!UI || !UI.gameObject) return;
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsConsumable)
@@ -537,6 +539,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
 
     private void ShowMaterials()
     {
+        if (!UI || !UI.gameObject) return;
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsMaterial)

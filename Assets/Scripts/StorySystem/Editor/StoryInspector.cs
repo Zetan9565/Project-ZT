@@ -136,7 +136,7 @@ public class StoryInspector : Editor
                                         if (character.objectReferenceValue)
                                         {
                                             EditorGUI.LabelField(new Rect(rect2.x, rect2.y + lineHeightSpace * _lineCount, rect2.width, lineHeight),
-                                                "角色名字", (character.objectReferenceValue as CharacterInfomation).Name);
+                                                "角色名字", (character.objectReferenceValue as CharacterInformation).Name);
                                             _lineCount++;
                                         }
                                     }
@@ -201,7 +201,7 @@ public class StoryInspector : Editor
                                         if (character.objectReferenceValue)
                                         {
                                             EditorGUI.LabelField(new Rect(rect2.x, rect2.y + lineHeightSpace * _lineCount, rect2.width, lineHeight),
-                                                "角色名字", (character.objectReferenceValue as CharacterInfomation).Name);
+                                                "角色名字", (character.objectReferenceValue as CharacterInformation).Name);
                                             _lineCount++;
                                         }
                                     }

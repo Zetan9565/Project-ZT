@@ -23,14 +23,11 @@ public class LootAgent : MonoBehaviour
     public List<ItemInfo> lootItems = new List<ItemInfo>();
 
 
-    public void Init(List<DropItemInfo> dropItems, Vector3 position)
+    public void Init(List<ItemInfo> lootItems, Vector3 position)
     {
-        foreach (DropItemInfo di in dropItems)
-            if (MyUtilities.Probability(di.DropRate))
-                if (!di.OnlyDropForQuest || (di.OnlyDropForQuest && QuestManager.Instance.HasOngoingQuestWithID(di.BindedQuest.ID)))
-                    lootItems.Add(new ItemInfo(di.Item, di.Amount));
+        this.lootItems = lootItems;
         transform.position = position;
-        if (lootItems.Count < 1) Recycle();//没有产出，直接消失
+        if (this.lootItems.Count < 1) Recycle();//没有产出，直接消失
         else recycleRoutine = StartCoroutine(RecycleDelay());//有产出，延迟消失
     }
 

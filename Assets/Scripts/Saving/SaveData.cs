@@ -215,6 +215,7 @@ public class DialogueWordsData
 }
 #endregion
 
+[Serializable]
 public class TriggerData
 {
     public string triggerName;

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "player info", menuName = "ZetanStudio/角色/玩家信息")]
-public class PlayerInfomation : CharacterInfomation
+public class PlayerInformation : CharacterInformation
 {
     public Backpack backpack;
 

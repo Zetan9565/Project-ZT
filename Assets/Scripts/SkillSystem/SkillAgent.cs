@@ -4,7 +4,7 @@ using System.Collections;
 public class SkillAgent : MonoBehaviour
 {
 
-    public SkillInfomation info;
+    public SkillInformation info;
 
     public void OnUse()
     {

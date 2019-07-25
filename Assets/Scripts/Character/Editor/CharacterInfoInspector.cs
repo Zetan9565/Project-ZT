@@ -4,18 +4,18 @@ using UnityEditorInternal;
 using System;
 using System.Linq;
 
-[CustomEditor(typeof(CharacterInfomation), true)]
+[CustomEditor(typeof(CharacterInformation), true)]
 public class CharacterInfoInspector : Editor
 {
-    CharacterInfomation character;
+    CharacterInformation character;
     SerializedProperty _ID;
     SerializedProperty _Name;
     SerializedProperty sex;
 
-    EnemyInfomation enemy;
+    EnemyInformation enemy;
     SerializedProperty dropItems;
 
-    TalkerInfomation talker;
+    TalkerInformation talker;
     SerializedProperty defalutDialogue;
     SerializedProperty canDEV_RLAT;
     SerializedProperty favoriteItemDialogue;
@@ -25,7 +25,7 @@ public class CharacterInfoInspector : Editor
     SerializedProperty hateItems;
     SerializedProperty canMarry;
 
-    PlayerInfomation player;
+    PlayerInformation player;
     SerializedProperty backpack;
 
     ReorderableList dropItemList;
@@ -37,10 +37,10 @@ public class CharacterInfoInspector : Editor
 
     private void OnEnable()
     {
-        character = target as CharacterInfomation;
-        enemy = target as EnemyInfomation;
-        talker = target as TalkerInfomation;
-        player = target as PlayerInfomation;
+        character = target as CharacterInformation;
+        enemy = target as EnemyInformation;
+        talker = target as TalkerInformation;
+        player = target as PlayerInformation;
 
         _ID = serializedObject.FindProperty("_ID");
         _Name = serializedObject.FindProperty("_Name");
@@ -466,7 +466,7 @@ public class CharacterInfoInspector : Editor
         string newID = string.Empty;
         if (enemy)
         {
-            EnemyInfomation[] enemies = Resources.LoadAll<EnemyInfomation>("");
+            EnemyInformation[] enemies = Resources.LoadAll<EnemyInformation>("");
             for (int i = 1; i < 1000; i++)
             {
                 newID = "ENMY" + i.ToString().PadLeft(3, '0');
@@ -476,7 +476,7 @@ public class CharacterInfoInspector : Editor
         }
         else if (talker)
         {
-            TalkerInfomation[] talkers = Resources.LoadAll<TalkerInfomation>("");
+            TalkerInformation[] talkers = Resources.LoadAll<TalkerInformation>("");
             for (int i = 1; i < 1000; i++)
             {
                 newID = "NPC" + i.ToString().PadLeft(3, '0');
@@ -486,7 +486,7 @@ public class CharacterInfoInspector : Editor
         }
         else if (player)
         {
-            PlayerInfomation[] players = Resources.LoadAll<PlayerInfomation>("");
+            PlayerInformation[] players = Resources.LoadAll<PlayerInformation>("");
             for (int i = 1; i < 1000; i++)
             {
                 newID = "PLAY" + i.ToString().PadLeft(3, '0');
@@ -496,7 +496,7 @@ public class CharacterInfoInspector : Editor
         }
         else
         {
-            CharacterInfomation[] characters = Resources.LoadAll<CharacterInfomation>("").Where(x => !(x is EnemyInfomation) && !(x is TalkerInfomation)).ToArray();
+            CharacterInformation[] characters = Resources.LoadAll<CharacterInformation>("").Where(x => !(x is EnemyInformation) && !(x is TalkerInformation)).ToArray();
             for (int i = 1; i < 1000; i++)
             {
                 newID = "CHAR" + i.ToString().PadLeft(3, '0');
@@ -509,9 +509,9 @@ public class CharacterInfoInspector : Editor
 
     bool ExistsID()
     {
-        CharacterInfomation[] characters = Resources.LoadAll<CharacterInfomation>("");
+        CharacterInformation[] characters = Resources.LoadAll<CharacterInformation>("");
 
-        CharacterInfomation find = Array.Find(characters, x => x.ID == _ID.stringValue);
+        CharacterInformation find = Array.Find(characters, x => x.ID == _ID.stringValue);
         if (!find) return false;//若没有找到，则ID可用
                                 //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
         return find != character || (find == character && Array.FindAll(characters, x => x.ID == _ID.stringValue).Length > 1);

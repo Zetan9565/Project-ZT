@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "npc info", menuName = "ZetanStudio/角色/NPC信息")]
-public class TalkerInfomation : CharacterInfomation
+public class TalkerInformation : CharacterInformation
 {
     [SerializeField]
     private Dialogue defaultDialogue;

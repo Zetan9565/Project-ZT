@@ -3,7 +3,7 @@ using System;
 
 public class SkillMachineBehaviour : StateMachineBehaviour
 {
-    public SkillInfomation skillInfo;
+    public SkillInformation skillInfo;
 
     public Action<string> enterCallback;
     public Action<string> updateCallback;

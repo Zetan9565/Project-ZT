@@ -21,7 +21,7 @@ public class SkillSMBInspector : Editor
         if (Application.isPlaying) GUI.enabled = false;
         if (parentSkill.objectReferenceValue)
         {
-            actionIndex.intValue = EditorGUILayout.IntSlider("招式序号", actionIndex.intValue, -1, (parentSkill.objectReferenceValue as SkillInfomation).SkillActions.Count - 1);
+            actionIndex.intValue = EditorGUILayout.IntSlider("招式序号", actionIndex.intValue, -1, (parentSkill.objectReferenceValue as SkillInformation).SkillActions.Count - 1);
             EditorGUILayout.HelpBox("务必严格对应动画顺序", MessageType.Info);
         }
         if (Application.isPlaying) GUI.enabled = true;

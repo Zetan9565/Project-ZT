@@ -2,8 +2,8 @@
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "building info", menuName = "ZetanStudio/建筑/建筑物")]
-public class BuildingInfomation : ScriptableObject
+[CreateAssetMenu(fileName = "building info", menuName = "ZetanStudio/建筑物信息")]
+public class BuildingInformation : ScriptableObject
 {
     [SerializeField]
     private string _IDStarter;

@@ -23,7 +23,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
     private BuildingUI UI;
 
     [HideInInspector]
-    public BuildingInfomation currentInfo;
+    public BuildingInformation currentInfo;
 
     [HideInInspector]
     public BuildingPreview preview;
@@ -31,13 +31,13 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
     [Range(1, 2)]
     public int gridSize = 1;
 
-    public List<BuildingInfomation> BuildingsLearned { get; private set; } = new List<BuildingInfomation>();
+    public List<BuildingInformation> BuildingsLearned { get; private set; } = new List<BuildingInformation>();
 
     private List<BuildingInfoAgent> buildingInfoAgents = new List<BuildingInfoAgent>();
 
     private List<BuildingAgent> buildingAgents = new List<BuildingAgent>();
 
-    private Dictionary<BuildingInfomation, List<Building>> buildings = new Dictionary<BuildingInfomation, List<Building>>();
+    private Dictionary<BuildingInformation, List<Building>> buildings = new Dictionary<BuildingInformation, List<Building>>();
 
     public GameObject CancelArea { get { return UI.cancelArea; } }
 
@@ -59,7 +59,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
             if (ba) ba.Clear(true);
         }
         buildingInfoAgents.RemoveAll(x => !x || !x.gameObject.activeSelf || !x.gameObject);
-        foreach (BuildingInfomation bi in BuildingsLearned)
+        foreach (BuildingInformation bi in BuildingsLearned)
         {
             BuildingInfoAgent ba = ObjectPool.Instance.Get(UI.buildingInfoCellPrefab, UI.buildingInfoCellsParent).GetComponent<BuildingInfoAgent>();
             ba.Init(bi, UI.cellsRect);
@@ -67,7 +67,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
         }
     }
 
-    public bool Learn(BuildingInfomation buildingInfo)
+    public bool Learn(BuildingInformation buildingInfo)
     {
         if (!buildingInfo) return false;
         if (BuildingsLearned.Contains(buildingInfo))
@@ -80,7 +80,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
         return true;
     }
 
-    public void CreatPreview(BuildingInfomation info)
+    public void CreatPreview(BuildingInformation info)
     {
         if (info == null) return;
         HideDescription();
@@ -220,15 +220,15 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
     public void LoadData(BuildingSystemData buildingSystemData)
     {
         BuildingsLearned.Clear();
-        BuildingInfomation[] buildingInfos = Resources.LoadAll<BuildingInfomation>("");
+        BuildingInformation[] buildingInfos = Resources.LoadAll<BuildingInformation>("");
         foreach (string learned in buildingSystemData.learneds)
         {
-            BuildingInfomation find = Array.Find(buildingInfos, x => x.IDStarter == learned);
+            BuildingInformation find = Array.Find(buildingInfos, x => x.IDStarter == learned);
             if (find) BuildingsLearned.Add(find);
         }
         foreach (BuildingData buildingData in buildingSystemData.buildingDatas)
         {
-            BuildingInfomation find = Array.Find(buildingInfos, x => x.IDStarter == buildingData.IDStarter);
+            BuildingInformation find = Array.Find(buildingInfos, x => x.IDStarter == buildingData.IDStarter);
             if (find)
             {
                 Building building = Instantiate(find.Prefab);
@@ -370,7 +370,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
         IsPausing = pause;
     }
 
-    public void ShowDescription(BuildingInfomation buildingInfo)
+    public void ShowDescription(BuildingInformation buildingInfo)
     {
         if (buildingInfo == null) return;
         currentInfo = buildingInfo;
@@ -399,7 +399,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
         UI.desciptionText.text = string.Empty;
     }
 
-    public void ShowBuiltList(BuildingInfomation buildingInfo)
+    public void ShowBuiltList(BuildingInformation buildingInfo)
     {
         if (!this.buildings.ContainsKey(buildingInfo)) return;
         List<Building> buildings = this.buildings[buildingInfo];

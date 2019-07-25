@@ -72,6 +72,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             UpdateUI();
         }
         if (UI.tabs != null && UI.tabs.Length > 0) UI.tabs[0].isOn = true;
+        SetPage(0);
     }
 
     #region 道具处理相关
@@ -350,7 +351,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
 
     private void ShowAll()
     {
-        if (!UI || !UI.gameObject) return;
+        if (!UI || !UI.gameObject || !MWarehouse) return;
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             MyUtilities.SetActive(itemAgents[i].gameObject, true);
@@ -359,6 +360,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
 
     private void ShowEquipments()
     {
+        if (!UI || !UI.gameObject || !MWarehouse) return;
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsEquipment)
@@ -369,6 +371,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
 
     private void ShowConsumables()
     {
+        if (!UI || !UI.gameObject || !MWarehouse) return;
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsConsumable)
@@ -379,6 +382,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
 
     private void ShowMaterials()
     {
+        if (!UI || !UI.gameObject || !MWarehouse) return;
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsMaterial)
