@@ -72,7 +72,7 @@ public class DialogueWords
     }
 
     [SerializeField]
-    private int indexOfRrightBranch = -1;
+    private int indexOfRrightBranch;
     public int IndexOfRightBranch
     {
         get
@@ -81,11 +81,11 @@ public class DialogueWords
         }
     }
 
-    public bool NeedToChusRightBranch
+    public bool NeedToChusRightBranch//仅当所有选项都是选择型时才有效
     {
         get
         {
-            return branches != null && indexOfRrightBranch > -1 && branches.Count > 1;
+            return branches != null && indexOfRrightBranch > -1 && branches.TrueForAll(x => x.OptionType == WordsOptionType.Choice);
         }
     }
 
@@ -152,6 +152,7 @@ public class DialogueWords
     }
 }
 
+
 [Serializable]
 public class BranchDialogue
 {
@@ -167,12 +168,25 @@ public class BranchDialogue
     }
 
     [SerializeField]
-    private int specifyIndex = -1;//-1和0是等价的
-    public int SpecifyIndex
+#if UNITY_EDITOR
+    [EnumMemberNames("一句普通分支", "一段普通分支", "选择型分支", "提交和取得道具", "取得道具")]
+#endif
+    private WordsOptionType optionType;
+    public WordsOptionType OptionType
     {
         get
         {
-            return specifyIndex;
+            return optionType;
+        }
+    }
+
+    [SerializeField]
+    private bool hasWords;
+    public bool HasWords
+    {
+        get
+        {
+            return hasWords && optionType == WordsOptionType.Choice;
         }
     }
 
@@ -209,7 +223,6 @@ public class BranchDialogue
         }
     }
 
-
     [SerializeField]
     private string words;
     public string Words
@@ -227,6 +240,16 @@ public class BranchDialogue
         get
         {
             return dialogue;
+        }
+    }
+
+    [SerializeField]
+    private int specifyIndex = -1;//-1和0是等价的
+    public int SpecifyIndex
+    {
+        get
+        {
+            return specifyIndex;
         }
     }
 
@@ -251,6 +274,53 @@ public class BranchDialogue
     }
 
     [SerializeField]
+    private ItemInfo itemToSubmit;
+    public ItemInfo ItemToSubmit
+    {
+        get
+        {
+            return itemToSubmit;
+        }
+    }
+
+    [SerializeField]
+    private ItemInfo itemCanGet;
+    public ItemInfo ItemCanGet
+    {
+        get
+        {
+            return itemCanGet;
+        }
+    }
+    [SerializeField]
+    private bool showOnlyWhenNotHave;
+    public bool ShowOnlyWhenNotHave
+    {
+        get
+        {
+            return showOnlyWhenNotHave;
+        }
+    }
+    [SerializeField]
+    private bool onlyForQuest;
+    public bool OnlyForQuest
+    {
+        get
+        {
+            return onlyForQuest;
+        }
+    }
+    [SerializeField]
+    private Quest bindedQuest;
+    public Quest BindedQuest
+    {
+        get
+        {
+            return bindedQuest;
+        }
+    }
+
+    [SerializeField]
     private bool deleteWhenCmplt = true;
     public bool DeleteWhenCmplt
     {
@@ -260,11 +330,15 @@ public class BranchDialogue
         }
     }
 
-    public bool IsInvalid
+    public bool IsValid
     {
         get
         {
-            return !dialogue && string.IsNullOrEmpty(words);
+            return !(optionType == WordsOptionType.BranchDialogue && !dialogue
+                || optionType == WordsOptionType.BranchWords && (TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
+                || HasWords && (TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
+                || optionType == WordsOptionType.SubmitAndGet && (!ItemToSubmit || !ItemToSubmit.item || TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
+                || optionType == WordsOptionType.OnlyGet && (!ItemCanGet || !ItemCanGet.item || TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words)));
         }
     }
 
@@ -280,6 +354,15 @@ public class BranchDialogue
     {
         return self != null;
     }
+}
+
+public enum WordsOptionType
+{
+    BranchWords,
+    BranchDialogue,
+    Choice,
+    SubmitAndGet,
+    OnlyGet
 }
 
 public enum TalkerType

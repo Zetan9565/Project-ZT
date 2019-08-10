@@ -15,7 +15,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
     public bool IsUIOpen { get; private set; }
 
 #if UNITY_ANDROID
-    public GameObject DiscardArea { get { return UI.discardArea; } }
+    public DiscardArea DiscardArea { get { return UI.discardArea; } }
 #endif
 
     public Image GridMask { get { return UI.gridMask; } }
@@ -23,7 +23,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
     public event ItemAmountListener OnGetItemEvent;
     public event ItemAmountListener OnLoseItemEvent;
 
-    private readonly List<ItemAgent> itemAgents = new List<ItemAgent>();
+    public List<ItemAgent> itemAgents = new List<ItemAgent>();
 
     public Backpack MBackpack
     {
@@ -59,7 +59,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
             }
             UpdateUI();
         }
-        if (UI.tabs != null && UI.tabs.Length > 0) UI.tabs[0].isOn = true;
+        UI.pageSelector.SetValueWithoutNotify(0);
     }
 
     #region 道具处理相关
@@ -256,9 +256,9 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         }
         return true;
     }
-    public bool TryLoseItem_Boolean(ItemInfo info, int amount = 1)
+    public bool TryLoseItem_Boolean(ItemInfo info, int amount = -1)
     {
-        return TryLoseItem_Boolean(info.item, amount);
+        return TryLoseItem_Boolean(info.item, amount < 0 ? (info.Amount < amount ? info.Amount : amount) : amount);
     }
 
     public bool LoseItem(ItemInfo info, int amount = 1)
@@ -480,15 +480,14 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
 
     public void SetUI(BackpackUI UI)
     {
-        this.UI = UI;
-    }
-
-    public void ResetUI()
-    {
-        itemAgents.Clear();
-        IsUIOpen = false;
+        itemAgents.RemoveAll(x => !x || !x.gameObject);
+        foreach (var ia in itemAgents)
+        {
+            ia.Empty();
+        }
         IsPausing = false;
-        WindowsManager.Instance.Remove(this);
+        CloseWindow();
+        this.UI = UI;
     }
 
     #region 道具页相关

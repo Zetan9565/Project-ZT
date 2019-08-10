@@ -15,14 +15,14 @@ public class GatherAgent : MonoBehaviour
     }
 
     private bool gatherAble = true;
-    private bool GatherAble
+    public bool GatherAble
     {
         get
         {
             return gatherAble && gatheringInfo;
         }
 
-        set
+        private set
         {
             gatherAble = value;
         }
@@ -36,6 +36,7 @@ public class GatherAgent : MonoBehaviour
     public void GatherSuccess()
     {
         onGatherFinish?.Invoke();
+        GetComponent<Renderer>().enabled = false;
         GatherAble = false;
         if (GatheringInfo.ProductItems.Count > 0)
         {
@@ -61,15 +62,21 @@ public class GatherAgent : MonoBehaviour
             leftRefreshTime -= Time.deltaTime;
             if (leftRefreshTime <= 0)
             {
-                GatherAble = true;
                 leftRefreshTime = GatheringInfo.RefreshTime;
+                Refresh();
                 yield break;
             }
             yield return null;
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void Refresh()
+    {
+        GatherAble = true;
+        GetComponent<Renderer>().enabled = true;
+    }
+
+    /*private void OnTriggerEnter(Collider other)
     {
         if (!GatherAble || !GatheringInfo) return;
         if (other.CompareTag("Player") && !GatherManager.Instance.IsGathering)
@@ -77,7 +84,6 @@ public class GatherAgent : MonoBehaviour
             GatherManager.Instance.CanGather(this);
         }
     }
-
     private void OnTriggerStay(Collider other)
     {
         if (!GatherAble || !GatheringInfo) return;
@@ -86,14 +92,13 @@ public class GatherAgent : MonoBehaviour
             GatherManager.Instance.CanGather(this);
         }
     }
-
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player") && GatherManager.Instance.GatherAgent == this)
         {
             GatherManager.Instance.CannotGather();
         }
-    }
+    }*/
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -103,7 +108,6 @@ public class GatherAgent : MonoBehaviour
             GatherManager.Instance.CanGather(this);
         }
     }
-
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (!GatherAble || !GatheringInfo) return;
@@ -112,7 +116,6 @@ public class GatherAgent : MonoBehaviour
             GatherManager.Instance.CanGather(this);
         }
     }
-
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.CompareTag("Player") && GatherManager.Instance.GatherAgent == this)

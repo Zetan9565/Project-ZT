@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1827504e3a4d6184ca30c3ead316328c, type: 3}
+  m_Name: building info 1
+  m_EditorClassIdentifier: 
+  _IDStarter: FARM
+  name: "3X3\u519C\u7530"
+  description: "\u6700\u5927\u53EF\u79CD\u690D9\u4E2A\u4F5C\u7269\u7684\u519C\u7530\u3002"
+  buildTime: 10
+  prefab: {fileID: 814971409869507840, guid: 74d259af2e68f3d49b92ffb11b1a6732, type: 3}
+  preview: {fileID: 7034579680335251296, guid: f7d8c628e0b664b46858efd152d50e17, type: 3}
+  materials: []

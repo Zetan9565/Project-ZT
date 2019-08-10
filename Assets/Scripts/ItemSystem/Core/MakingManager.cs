@@ -145,8 +145,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         UI.makingWindow.blocksRaycasts = true;
         IsUIOpen = true;
         WindowsManager.Instance.Push(this);
-        if (UI.tabs != null && UI.tabs.Length > 0)
-            UI.tabs[0].isOn = true;
+        UI.pageSelector.SetValueWithoutNotify(0);
+        SetPage(0);
     }
 
     public void CloseWindow()
@@ -287,12 +287,10 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
 
     public void SetUI(MakingUI UI)
     {
+        MakingAgents.RemoveAll(x => !x || !x.gameObject);
+        IsPausing = false;
+        CloseWindow();
         this.UI = UI;
-    }
-
-    public void ResetUI()
-    {
-        MakingAgents.Clear();
     }
     #endregion
 }

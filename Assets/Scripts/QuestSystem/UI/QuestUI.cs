@@ -63,9 +63,4 @@ public class QuestUI : MonoBehaviour
         questListToggle.isOn = true;
         cmpltQuestListToggle.isOn = false;
     }
-
-    private void OnDestroy()
-    {
-        if (QuestManager.Instance) QuestManager.Instance.ResetUI();
-    }
 }

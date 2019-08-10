@@ -357,14 +357,14 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
 
     public void SetUI(ShopUI UI)
     {
-        this.UI = UI;
-    }
-
-    public void ResetUI()
-    {
+        foreach (var ma in merchandiseAgents)
+        {
+            if (ma && ma.gameObject) ma.Clear(true);
+        }
         merchandiseAgents.Clear();
-        IsUIOpen = false;
         IsPausing = false;
+        CloseWindow();
+        this.UI = UI;
     }
     #endregion
 

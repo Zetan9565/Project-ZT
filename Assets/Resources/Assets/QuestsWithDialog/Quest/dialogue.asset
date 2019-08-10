@@ -33,24 +33,72 @@ MonoBehaviour:
     wordsWhenChusWB: "\u4F60\u4E0D\u4FE1\u5C31\u7B97\u4E86\uFF0C\u5C45\u7136\u8FD8\u8BF4\u8FD9\u79CD\u8BDD\uFF01"
     branches:
     - title: "\u76F8\u4FE1\u5979\u7684\u8BDD"
-      specifyIndex: -1
+      optionType: 2
       talkerType: 1
       talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
       words: "O98K\uFF0C\u6211\u8FD9\u5C31\u53BB\u770B\u770B\u3002"
       dialogue: {fileID: 0}
+      specifyIndex: -1
       goBack: 0
       indexToGo: -1
+      itemToSubmit:
+        item: {fileID: 0}
+        amount: 1
+        indexInGrid: 0
+        durability:
+          min: 0
+          max: 1
+        gemSlotAmount: 0
+        gemstone1: {fileID: 0}
+        gemstone2: {fileID: 0}
+      itemCanGet:
+        item: {fileID: 0}
+        amount: 1
+        indexInGrid: 0
+        durability:
+          min: 0
+          max: 1
+        gemSlotAmount: 0
+        gemstone1: {fileID: 0}
+        gemstone2: {fileID: 0}
+      showOnlyWhenNotHave: 0
+      onlyForQuest: 0
+      bindedQuest: {fileID: 0}
       deleteWhenCmplt: 1
       runtimeParent: {fileID: 0}
       runtimeIndexToGoBack: 0
     - title: "\u4E0D\u76F8\u4FE1\u5979\u7684\u8BDD"
-      specifyIndex: -1
+      optionType: 2
       talkerType: 1
       talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
       words: "\u6211\u4FE1\u4F60\u4E2A\u9B3C\uFF0C\u6211\u600E\u4E48\u6CA1\u770B\u89C1\uFF1F"
       dialogue: {fileID: 0}
+      specifyIndex: -1
       goBack: 0
       indexToGo: -1
+      itemToSubmit:
+        item: {fileID: 0}
+        amount: 1
+        indexInGrid: 0
+        durability:
+          min: 0
+          max: 1
+        gemSlotAmount: 0
+        gemstone1: {fileID: 0}
+        gemstone2: {fileID: 0}
+      itemCanGet:
+        item: {fileID: 0}
+        amount: 1
+        indexInGrid: 0
+        durability:
+          min: 0
+          max: 1
+        gemSlotAmount: 0
+        gemstone1: {fileID: 0}
+        gemstone2: {fileID: 0}
+      showOnlyWhenNotHave: 0
+      onlyForQuest: 0
+      bindedQuest: {fileID: 0}
       deleteWhenCmplt: 1
       runtimeParent: {fileID: 0}
       runtimeIndexToGoBack: 0

@@ -19,4 +19,40 @@ MonoBehaviour:
     words: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
     indexOfRrightBranch: 0
     wordsWhenChusWB: "\u8FD9\u90FD\u80FD\u9009\u9519\uFF0C\u592A\u83DC\u4E86"
-    branches: []
+    branches:
+    - title: "\u83B7\u53D6\u7834\u65E7\u7684\u5251"
+      optionType: 4
+      hasWords: 0
+      talkerType: 0
+      talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+      words: "\u7ED9\u4F60\u7834\u65E7\u7684\u5251\uFF0C\u62FF\u597D\u4E86\u3002"
+      dialogue: {fileID: 0}
+      specifyIndex: -1
+      goBack: 0
+      indexToGo: -1
+      itemToSubmit:
+        item: {fileID: 0}
+        amount: 1
+        indexInGrid: 0
+        durability:
+          min: 0
+          max: 1
+        gemSlotAmount: 0
+        gemstone1: {fileID: 0}
+        gemstone2: {fileID: 0}
+      itemCanGet:
+        item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+        amount: 1
+        indexInGrid: 0
+        durability:
+          min: 0
+          max: 1
+        gemSlotAmount: 0
+        gemstone1: {fileID: 0}
+        gemstone2: {fileID: 0}
+      showOnlyWhenNotHave: 0
+      onlyForQuest: 0
+      bindedQuest: {fileID: 0}
+      deleteWhenCmplt: 1
+      runtimeParent: {fileID: 0}
+      runtimeIndexToGoBack: 0

@@ -39,9 +39,4 @@ public class BuildingUI : MonoBehaviour
         destroyButton.onClick.AddListener(BuildingManager.Instance.DestroyToDestroyBuilding);
         closeList.onClick.AddListener(BuildingManager.Instance.HideBuiltList);
     }
-
-    private void OnDestroy()
-    {
-        if (BuildingManager.Instance) BuildingManager.Instance.ResetUI();
-    }
 }

@@ -61,9 +61,4 @@ public class DialogueUI : MonoBehaviour
         pageUpButton.onClick.AddListener(DialogueManager.Instance.OptionPageUp);
         pageDownButton.onClick.AddListener(DialogueManager.Instance.OptionPageDown);
     }
-
-    public void OnDestroy()
-    {
-        if (DialogueManager.Instance) DialogueManager.Instance.ResetUI();
-    }
 }

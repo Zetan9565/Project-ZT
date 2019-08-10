@@ -42,6 +42,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     [SerializeField]
     private Text interactiveName;
 
+    private static bool dontDestroyOnLoadOnce;
     private void Awake()
     {
 #if UNITY_STANDALONE
@@ -57,6 +58,15 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         backpackButton.onClick.AddListener(BackpackManager.Instance.OpenCloseWindow);
         buildingButton.onClick.AddListener(BuildingManager.Instance.OpenCloseWindow);
         settingButton.onClick.AddListener(EscapeMenuManager.Instance.OpenCloseWindow);
+        if (!dontDestroyOnLoadOnce)
+        {
+            DontDestroyOnLoad(this);
+            dontDestroyOnLoadOnce = true;
+        }
+        else
+        {
+            DestroyImmediate(gameObject);
+        }
     }
 
     public void EnableJoyStick(bool value)
@@ -104,5 +114,23 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         canvasGroup.alpha = 0;
         canvasGroup.blocksRaycasts = false;
         JoyStick.enabled = false;
+    }
+
+    public void Init()
+    {
+        WindowsManager.Instance.CloseAll();
+
+        DragableManager.Instance.ResetIcon();
+        ProgressBar.Instance.CancelWithoutEvent();
+
+        QuestManager.Instance.SetUI(FindObjectOfType<QuestUI>());
+        BackpackManager.Instance.SetUI(FindObjectOfType<BackpackUI>());
+        BackpackManager.Instance.Init();
+        WarehouseManager.Instance.SetUI(FindObjectOfType<WarehouseUI>());
+        DialogueManager.Instance.SetUI(FindObjectOfType<DialogueUI>());
+        BuildingManager.Instance.SetUI(FindObjectOfType<BuildingUI>());
+        BuildingManager.Instance.Init();
+        ShopManager.Instance.SetUI(FindObjectOfType<ShopUI>());
+        EscapeMenuManager.Instance.SetUI(FindObjectOfType<EscapeUI>());
     }
 }

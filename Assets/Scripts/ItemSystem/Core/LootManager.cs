@@ -118,6 +118,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindow
         LootAgent = null;
         UIManager.Instance.EnableInteractive(false);
         PickAble = false;
+        CloseWindow();
     }
 
     public void OpenWindow()

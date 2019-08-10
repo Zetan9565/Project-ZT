@@ -43,7 +43,7 @@ public class QuestAgent : MonoBehaviour
     /// <summary>
     /// 回收
     /// </summary>
-    public void OnRecycle()
+    public void Recycle()
     {
         MQuest = null;
         TitleText.text = string.Empty;

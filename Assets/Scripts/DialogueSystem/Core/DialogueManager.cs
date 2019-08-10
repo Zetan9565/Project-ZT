@@ -37,8 +37,8 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
 
     private int MaxPage = 1;
 
-    public readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
-    private readonly List<OptionAgent> optionAgents = new List<OptionAgent>();
+    private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
+    private List<OptionAgent> optionAgents = new List<OptionAgent>();
 
     public int OptionsCount
     {
@@ -171,7 +171,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
 
     public void StartBranchDialogue(BranchDialogue branch)
     {
-        if (branch == null || branch.IsInvalid) return;
+        if (branch == null || !branch.IsValid) return;
         if (currentWords.NeedToChusRightBranch)
         {
             branchDialogInstances.Push(branch.Cloned);
@@ -190,29 +190,69 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
         }
         else branchDialogInstances.Push(branch.Cloned);
         currentBranch = branch;
+        if (branch.OptionType == WordsOptionType.SubmitAndGet && branch.IsValid)
+        {
+            if (BackpackManager.Instance.TryLoseItem_Boolean(branch.ItemToSubmit))
+            {
+                BackpackManager.Instance.MBackpack.weightLoad -= branch.ItemToSubmit.item.Weight * branch.ItemToSubmit.Amount;
+                int leftAmount = BackpackManager.Instance.GetItemAmount(branch.ItemToSubmit.item) - branch.ItemToSubmit.Amount;
+                if (leftAmount == 0) BackpackManager.Instance.MBackpack.backpackSize--;
+                if (!BackpackManager.Instance.TryGetItem_Boolean(branch.ItemCanGet))
+                {
+                    BackpackManager.Instance.MBackpack.weightLoad += branch.ItemToSubmit.item.Weight * branch.ItemToSubmit.Amount;
+                    if (leftAmount == 0) BackpackManager.Instance.MBackpack.backpackSize++;
+                    return;
+                }
+                else
+                {
+                    BackpackManager.Instance.MBackpack.weightLoad += branch.ItemToSubmit.item.Weight * branch.ItemToSubmit.Amount;
+                    if (leftAmount == 0) BackpackManager.Instance.MBackpack.backpackSize++;
+                    BackpackManager.Instance.LoseItem(branch.ItemToSubmit.item, branch.ItemToSubmit.Amount);
+                    BackpackManager.Instance.GetItem(branch.ItemCanGet);
+                }
+            }
+            else return;
+        }
+        if (branch.OptionType == WordsOptionType.OnlyGet && branch.IsValid)
+        {
+            if (!BackpackManager.Instance.TryGetItem_Boolean(branch.ItemCanGet))
+                return;
+            else BackpackManager.Instance.GetItem(branch.ItemCanGet);
+        }
+        if (branch.HasWords && string.IsNullOrEmpty(branch.Words))
+        {
+            HandlingLastBranchWords();
+            SayNextWords();
+            return;
+        }
         if (branch.Dialogue && string.IsNullOrEmpty(branch.Words))
             StartDialogue(branchDialogInstances.Peek().Dialogue, branchDialogInstances.Peek().SpecifyIndex);
         else if (!string.IsNullOrEmpty(branch.Words))
         {
-            StartOneWords(new DialogueWords(branchDialogInstances.Peek().TalkerInfo, branchDialogInstances.Peek().Words, branchDialogInstances.Peek().TalkerType), currentDialog,
-                         branchDialogInstances.Peek().IndexToGo);
+            if (branch.GoBack)
+                StartOneWords(new DialogueWords(branchDialogInstances.Peek().TalkerInfo, branchDialogInstances.Peek().Words, branchDialogInstances.Peek().TalkerType),
+                    currentDialog, branchDialogInstances.Peek().IndexToGo);
+            else StartOneWords(new DialogueWords(branchDialogInstances.Peek().TalkerInfo, branchDialogInstances.Peek().Words, branchDialogInstances.Peek().TalkerType));
             SayNextWords();
         }
     }
 
-    public void StartOneWords(DialogueWords words, Dialogue dialogToGoBack, int indexToGoBack)
+    public void StartOneWords(DialogueWords words, Dialogue dialogToGoBack = null, int indexToGoBack = -1)
     {
         if (!UI || words.IsInvalid) return;
-        if (waitToGoBackRoutine != null) StopCoroutine(waitToGoBackRoutine);
-        currentDialog = dialogToGoBack;
-        IndexToGoBack = indexToGoBack;
         IsTalking = true;
         Words.Clear();
         Words.Enqueue(words);
         MakeContinueOption(true);
         MyUtilities.SetActive(UI.wordsText.gameObject, true);
         SetPageArea(false, false, false);
-        waitToGoBackRoutine = StartCoroutine(WaitToGoBack());
+        if (dialogToGoBack)
+        {
+            if (waitToGoBackRoutine != null) StopCoroutine(waitToGoBackRoutine);
+            currentDialog = dialogToGoBack;
+            IndexToGoBack = indexToGoBack;
+            waitToGoBackRoutine = StartCoroutine(WaitToGoBack());
+        }
     }
     #endregion
 
@@ -309,7 +349,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
     private void MakeTalkerCmpltQuestOption()
     {
         if (!(CurrentTalker is QuestGiver)) return;
-        ClearOptions();
+        ClearOptions(OptionType.Branch);
         foreach (Quest quest in (CurrentTalker as QuestGiver).QuestInstances)
         {
             if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.AcceptAble && quest.IsComplete)
@@ -333,7 +373,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
     private void MakeTalkerObjectiveOption()
     {
         int index = 1;
-        ClearOptionsExceptCmlptQuest();
+        ClearOptions(OptionType.Quest, OptionType.Branch);
         foreach (TalkObjective to in CurrentTalker.objectivesTalkToThis)
         {
             if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
@@ -353,25 +393,28 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
     /// </summary>
     private void MakeBranchDialogueOption()
     {
-        if (currentDialog.Words.IndexOf(Words.Peek()) >= currentDialog.Words.Count - 1) return;//最后一句话不支持分支
-        if (Words.Peek().Branches.Count < 1) return;
+        if (Words.Count < 1 || Words.Peek().Branches.Count < 1) return;
         DialogueWords currentWords = Words.Peek();
-        DialogueData find = null;
+        DialogueData dialogFound = null;
         if (DialogueDatas.ContainsKey(currentDialog.ID))
-            find = DialogueDatas[currentDialog.ID];
+            dialogFound = DialogueDatas[currentDialog.ID];
         if (CurrentType == DialogueType.Normal) ClearOptions(OptionType.Quest, OptionType.Objective);
         else ClearOptions();
+        bool isLastBranch = currentDialog.Words.IndexOf(Words.Peek()) >= currentDialog.Words.Count - 1;
         foreach (BranchDialogue branch in currentWords.Branches)
         {
-            if (find != null)
+            if (branch.OptionType == WordsOptionType.Choice && dialogFound != null)
             {
-                DialogueWordsData _find = find.wordsDatas.Find(x => x.wordsIndex == currentDialog.Words.IndexOf(currentWords));
-                //这个分支是否完成了
-                if (_find != null && _find.IsCmpltBranchWithIndex(currentWords.Branches.IndexOf(branch)))
+                DialogueWordsData wordsFound = dialogFound.wordsDatas.Find(x => x.wordsIndex == currentDialog.Words.IndexOf(currentWords));
+                //这个选择型分支是否完成了
+                if (!isLastBranch && wordsFound != null && wordsFound.IsCmpltBranchWithIndex(currentWords.Branches.IndexOf(branch)))
                     continue;//完成则跳过创建
             }
-            if (!branch.IsInvalid)
+            if (branch.IsValid)
             {
+                if (branch.OptionType == WordsOptionType.OnlyGet && branch.OnlyForQuest && branch.BindedQuest
+                    && QuestManager.Instance.HasOngoingQuestWithID(branch.BindedQuest.ID))
+                    continue;
                 OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(branch.Title, branch);
                 optionAgents.Add(oa);
@@ -382,8 +425,11 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
         {
             MyUtilities.SetActive(optionAgents[i].gameObject, false);
         }
-        if (optionAgents.Count < 1) MakeContinueOption();//如果分支都完成了，则直接可以进行下一句对话
+        if (optionAgents.Count < 1)
+            MakeContinueOption();//如果所有选择型分支都完成了，则可以进行下一句对话
         CheckPages();
+        //Debug.Log("make");
+        //Debug.Log(optionAgents.Count);
     }
 
     public void OptionPageUp()
@@ -430,7 +476,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
     {
         for (int i = 0; i < optionAgents.Count; i++)
         {
-            if (exceptions.Contains(OptionType.Quest) && optionAgents[i] && optionAgents[i].OptionType == OptionType.Quest)
+            if (exceptions.Contains(OptionType.Quest) && optionAgents[i] && optionAgents[i].OptionType == OptionType.Quest)//此时的OptionType.Quest表示完成的任务
             {
                 if (optionAgents[i].MQuest.IsComplete)
                     continue;
@@ -443,23 +489,21 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
         }
         if (exceptions.Length < 1) optionAgents.Clear();
         else optionAgents.RemoveAll(x => !x.gameObject.activeSelf || !x.gameObject);
-        Page = 1;
-        SetPageArea(false, false, false);
+        CheckPages();
     }
 
-    private void ClearOptionsExceptCmlptQuest()
-    {
-        for (int i = 0; i < optionAgents.Count; i++)
-        {
-            if (optionAgents[i] && (optionAgents[i].OptionType != OptionType.Quest || (optionAgents[i].OptionType == OptionType.Quest && !optionAgents[i].MQuest.IsComplete)))
-            {
-                optionAgents[i].Recycle();
-            }
-        }
-        optionAgents.RemoveAll(x => !x.gameObject.activeSelf || !x.gameObject);
-        Page = 1;
-        SetPageArea(false, false, false);
-    }
+    //private void ClearOptionsExceptCmlptQuest()
+    //{
+    //    for (int i = 0; i < optionAgents.Count; i++)
+    //    {
+    //        if (optionAgents[i] && (optionAgents[i].OptionType != OptionType.Quest || (optionAgents[i].OptionType == OptionType.Quest && !optionAgents[i].MQuest.IsComplete)))
+    //        {
+    //            optionAgents[i].Recycle();
+    //        }
+    //    }
+    //    optionAgents.RemoveAll(x => !x.gameObject.activeSelf || !x.gameObject);
+    //    CheckPages();
+    //}
 
     //private void ClearOptionExceptContinue()
     //{
@@ -504,7 +548,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
     public void SayNextWords()
     {
         MakeContinueOption();
-        if (Words.Peek().Branches.Count > 0)
+        if (Words.Count > 0 && Words.Peek().Branches.Count > 0)
         {
             MakeTalkerCmpltQuestOption();
             MakeTalkerObjectiveOption();
@@ -539,7 +583,12 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
             CurrentTalker.OnTalkFinished();
             MakeTalkerCmpltQuestOption();
             if (CurrentTalker.objectivesTalkToThis != null && CurrentTalker.objectivesTalkToThis.Count > 0) MakeTalkerObjectiveOption();
-            else ClearOptionsExceptCmlptQuest();
+            else
+            {
+                ClearOptions(OptionType.Quest);
+                if (Words.Peek().Branches.Count > 0)
+                    MakeBranchDialogueOption();
+            }
             QuestManager.Instance.UpdateUI();
         }
         else if (CurrentType == DialogueType.Objective && talkObjective != null) HandlingLastObjectiveWords();
@@ -596,44 +645,51 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
     private void HandlingLastBranchWords()
     {
         BranchDialogue topBranchInstance = branchDialogInstances.Pop();
-        DialogueWords topWordsParent = topBranchInstance.runtimeParent.Words.Find(x => x.Branches.Contains(currentBranch));//找到包含当前分支的语句
-        if (topWordsParent != null && topWordsParent.IsRightBranch(currentBranch))
+        if (topBranchInstance.runtimeParent)
         {
-            int indexOfWordsParent = topBranchInstance.runtimeParent.Words.IndexOf(topWordsParent);
-            foreach (BranchDialogue branch in topWordsParent.Branches)
+            DialogueWords topWordsParent = topBranchInstance.runtimeParent.Words.Find(x => x.Branches.Contains(currentBranch));//找到包含当前分支的语句
+            if (topWordsParent != null && topWordsParent.IsRightBranch(currentBranch))
             {
-                string parentID = topBranchInstance.runtimeParent.ID;
-                DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
-                if (_find == null)
+                if (topBranchInstance.OptionType == WordsOptionType.Choice)
                 {
-                    DialogueDatas.Add(parentID, new DialogueData(branch.runtimeParent));
-                    _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
+                    int indexOfWordsParent = topBranchInstance.runtimeParent.Words.IndexOf(topWordsParent);
+                    foreach (BranchDialogue branch in topWordsParent.Branches)
+                    {
+                        string parentID = topBranchInstance.runtimeParent.ID;
+                        DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
+                        if (_find == null)
+                        {
+                            DialogueDatas.Add(parentID, new DialogueData(branch.runtimeParent));
+                            _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
+                        }
+                        int indexOfBranch = topWordsParent.Branches.IndexOf(branch);
+                        _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
+                    }
+                    StartDialogue(topBranchInstance.runtimeParent, topBranchInstance.runtimeIndexToGoBack, false);
                 }
-                int indexOfBranch = topWordsParent.Branches.IndexOf(branch);
-                _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
             }
-            StartDialogue(topBranchInstance.runtimeParent, topBranchInstance.runtimeIndexToGoBack, false);
-        }
-        else
-        {
-            int indexOfFind = topBranchInstance.runtimeParent.Words.IndexOf(topWordsParent);
-            if (topBranchInstance.DeleteWhenCmplt)
+            else
             {
-                string parentID = topBranchInstance.runtimeParent.ID;
-                DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfFind);
-                if (_find == null)
+                if (topBranchInstance.OptionType == WordsOptionType.Choice && topBranchInstance.DeleteWhenCmplt)
                 {
-                    DialogueDatas.Add(parentID, new DialogueData(topBranchInstance.runtimeParent));
-                    _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfFind);
+                    int indexOfWords = topBranchInstance.runtimeParent.Words.IndexOf(topWordsParent);
+                    string parentID = topBranchInstance.runtimeParent.ID;
+                    DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWords);
+                    if (_find == null)
+                    {
+                        DialogueDatas.Add(parentID, new DialogueData(topBranchInstance.runtimeParent));
+                        _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWords);
+                    }
+                    int indexOfBranch = topWordsParent.Branches.IndexOf(currentBranch);
+                    _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
                 }
-                int indexOfBranch = topWordsParent.Branches.IndexOf(currentBranch);
-                _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
+                if (topWordsParent != null && topWordsParent.NeedToChusRightBranch && !topWordsParent.IsRightBranch(currentBranch))//选择错误，则说选择错误时应该说的话
+                    StartOneWords(new DialogueWords(topWordsParent.TalkerInfo, topWordsParent.WordsWhenChusWB, topWordsParent.TalkerType),
+                        topBranchInstance.runtimeParent, topBranchInstance.runtimeIndexToGoBack);
+                else if (topBranchInstance.GoBack)
+                    //处理普通的带返回的分支
+                    StartDialogue(topBranchInstance.runtimeParent, topBranchInstance.runtimeIndexToGoBack, false);
             }
-            if (topWordsParent != null && topWordsParent.NeedToChusRightBranch && !topWordsParent.IsRightBranch(currentBranch))//选择错误，则说选择错误时应该说的话
-                StartOneWords(new DialogueWords(topWordsParent.TalkerInfo, topWordsParent.WordsWhenChusWB, topWordsParent.TalkerType),
-                    topBranchInstance.runtimeParent, topBranchInstance.runtimeIndexToGoBack);
-            else if (topBranchInstance.GoBack && topBranchInstance.runtimeParent.Words.IndexOf(topWordsParent) != topBranchInstance.runtimeParent.Words.Count - 1)//不是最后一句，则处理普通的带返回的分支
-                StartDialogue(topBranchInstance.runtimeParent, topBranchInstance.runtimeIndexToGoBack, false);
         }
         currentBranch = null;
     }
@@ -642,6 +698,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
     private IEnumerator WaitToGoBack()
     {
         yield return new WaitUntil(() => Words.Count <= 0);
+        if (IndexToGoBack < 0) yield break;
         try
         {
             StartDialogue(currentDialog, IndexToGoBack, false);
@@ -795,15 +852,16 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindow
 
     public void SetUI(DialogueUI UI)
     {
-        if (!UI) return;
-        this.UI = UI;
-    }
-    public void ResetUI()
-    {
+        if (waitToGoBackRoutine != null) StopCoroutine(waitToGoBackRoutine);
+        foreach (var oa in optionAgents)
+        {
+            if (oa && oa.gameObject) oa.Recycle();
+        }
         optionAgents.Clear();
-        IsUIOpen = false;
+        branchDialogInstances.Clear();
         IsPausing = false;
-        WindowsManager.Instance.Remove(this);
+        CloseWindow();
+        this.UI = UI;
     }
     #endregion
 

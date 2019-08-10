@@ -67,14 +67,9 @@ public class EscapeMenuManager : SingletonMonoBehaviour<EscapeMenuManager>, IWin
 
     public void SetUI(EscapeUI UI)
     {
-        this.UI = UI;
-    }
-
-    public void ResetUI()
-    {
-        IsUIOpen = false;
         IsPausing = false;
-        WindowsManager.Instance.Remove(this);
+        CloseWindow();
+        this.UI = UI;
     }
 
     public void Exit()

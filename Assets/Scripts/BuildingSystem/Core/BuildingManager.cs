@@ -109,7 +109,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
     public void ShowAndMovePreview()
     {
         if (!preview) return;
-        preview.transform.position = MyUtilities.PositionToGrid(GetMovePosition(), gridSize);
+        preview.transform.position = MyUtilities.PositionToGrid(GetMovePosition(), gridSize, preview.CenterOffset);
         if (preview.ColliderCount > 0)
         {
             if (preview.SpriteRenderer) preview.SpriteRenderer.color = Color.red;
@@ -401,8 +401,17 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
 
     public void ShowBuiltList(BuildingInformation buildingInfo)
     {
-        if (!this.buildings.ContainsKey(buildingInfo)) return;
+        if (!this.buildings.ContainsKey(buildingInfo))
+        {
+            HideBuiltList();
+            return;
+        }
         List<Building> buildings = this.buildings[buildingInfo];
+        if (buildings.Count < 1)
+        {
+            HideBuiltList();
+            return;
+        }
         if (buildings.Count > buildingAgents.Count)
         {
             for (int i = 0; i < buildings.Count - buildingAgents.Count; i++)
@@ -454,15 +463,11 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindow
 
     public void SetUI(BuildingUI UI)
     {
-        this.UI = UI;
-    }
-    public void ResetUI()
-    {
-        buildingInfoAgents.Clear();
-        buildingAgents.Clear();
-        IsUIOpen = false;
+        buildingInfoAgents.RemoveAll(x => !x || !x.gameObject);
+        buildingAgents.RemoveAll(x => !x || !x.gameObject);
         IsPausing = false;
-        WindowsManager.Instance.Remove(this);
+        CloseWindow();
+        this.UI = UI;
     }
     #endregion
 }

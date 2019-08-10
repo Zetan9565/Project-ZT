@@ -63,7 +63,7 @@ public class LootAgent : MonoBehaviour
             LootManager.Instance.CannotPick();
     }
 
-    private void OnTriggerEnter(Collider other)
+    /*private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player") && !LootManager.Instance.IsPicking)
             LootManager.Instance.CanPick(this);
@@ -79,5 +79,5 @@ public class LootAgent : MonoBehaviour
     {
         if (other.CompareTag("Player") && LootManager.Instance.LootAgent == this)
             LootManager.Instance.CannotPick();
-    }
+    }*/
 }

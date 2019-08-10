@@ -708,7 +708,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
                 }
             }
             questAgents.Remove(qa);
-            qa.OnRecycle();
+            qa.Recycle();
         }
     }
 
@@ -729,15 +729,23 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
 
     public void SetUI(QuestUI UI)
     {
-        if (!UI) return;
-        this.UI = UI;
-    }
-
-    public void ResetUI()
-    {
+        foreach (var qa in questAgents)
+        {
+            if (qa) qa.Recycle();
+        }
         questAgents.Clear();
-        IsUIOpen = false;
+        foreach (var qba in questBoardAgents)
+        {
+            if (qba)
+            {
+                qba.questAgent = null;
+                ObjectPool.Instance.Put(qba.gameObject);
+            }
+        }
+        questBoardAgents.Clear();
         IsPausing = false;
+        CloseWindow();
+        this.UI = UI;
     }
     #endregion
 }

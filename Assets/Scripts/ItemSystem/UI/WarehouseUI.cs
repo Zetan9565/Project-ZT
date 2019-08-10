@@ -9,7 +9,7 @@ public class WarehouseUI : MonoBehaviour
     [HideInInspector]
     public Canvas windowCanvas;
 
-    public Toggle[] tabs;
+    public Dropdown pageSelector;
 
     public GameObject itemCellPrefab;
     public Transform itemCellsParent;
@@ -29,16 +29,6 @@ public class WarehouseUI : MonoBehaviour
         windowCanvas.overrideSorting = true;
         closeButton.onClick.AddListener(WarehouseManager.Instance.CloseWindow);
         sortButton.onClick.AddListener(WarehouseManager.Instance.Sort);
-        if (tabs != null)
-            for (int i = 0; i < tabs.Length; i++)
-            {
-                int num = i;
-                tabs[i].onValueChanged.AddListener(delegate { if (WarehouseManager.Instance) WarehouseManager.Instance.SetPage(num); });
-            }
-    }
-
-    private void OnDestroy()
-    {
-        if (WarehouseManager.Instance) WarehouseManager.Instance.ResetUI();
+        pageSelector.onValueChanged.AddListener(WarehouseManager.Instance.SetPage);
     }
 }

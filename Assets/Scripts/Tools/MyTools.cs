@@ -37,7 +37,7 @@ public class MyUtilities
         Vector3 newPos = originalPos;
         newPos -= Vector3.one * offset;
         newPos /= gridSize;
-        newPos = new Vector3(Mathf.Round(newPos.x), Mathf.Round(newPos.y), 0);
+        newPos = new Vector3(Mathf.Round(newPos.x), Mathf.Round(newPos.y), Mathf.Round(newPos.z));
         newPos *= gridSize;
         newPos += Vector3.one * offset;
         return newPos;
@@ -47,7 +47,7 @@ public class MyUtilities
         Vector2 newPos = originalPos;
         newPos -= Vector2.one * offset;
         newPos /= gridSize;
-        newPos = new Vector3(Mathf.Round(newPos.x), Mathf.Round(newPos.y), 0);
+        newPos = new Vector2(Mathf.Round(newPos.x), Mathf.Round(newPos.y));
         newPos *= gridSize;
         newPos += Vector2.one * offset;
         return newPos;

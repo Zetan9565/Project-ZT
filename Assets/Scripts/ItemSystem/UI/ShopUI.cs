@@ -29,9 +29,4 @@ public class ShopUI : MonoBehaviour
         acquisitionTab.onValueChanged.AddListener(delegate { if (ShopManager.Instance) ShopManager.Instance.SetPage(1); });
         commodityTab.isOn = true;
     }
-
-    private void OnDestroy()
-    {
-        if (ShopManager.Instance) ShopManager.Instance.ResetUI();
-    }
 }

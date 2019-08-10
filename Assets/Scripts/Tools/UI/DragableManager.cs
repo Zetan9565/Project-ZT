@@ -29,13 +29,13 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
         iconSortCanvas = icon.GetComponent<Canvas>();
         iconSortCanvas.overrideSorting = true;
     }
-
-    public void Update()
-    {
 #if UNITY_STANDALONE
+
+    private void Update()
+    {
         MoveIcon();
-#endif
     }
+#endif
 
     // Update is called once per frame
     public void MoveIcon()
@@ -71,7 +71,7 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
         MyUtilities.SetActive(icon.gameObject, false);
     }
 
-    void CancelDrag()
+    public void CancelDrag()
     {
         ResetIcon();
         onCancelDrag?.Invoke();

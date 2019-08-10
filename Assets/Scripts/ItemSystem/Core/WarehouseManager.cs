@@ -71,7 +71,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             }
             UpdateUI();
         }
-        if (UI.tabs != null && UI.tabs.Length > 0) UI.tabs[0].isOn = true;
+        UI.pageSelector.SetValueWithoutNotify(0);
         SetPage(0);
     }
 
@@ -306,15 +306,14 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
 
     public void SetUI(WarehouseUI UI)
     {
-        this.UI = UI;
-    }
-
-    public void ResetUI()
-    {
-        itemAgents.Clear();
-        IsUIOpen = false;
+        itemAgents.RemoveAll(x => !x || !x.gameObject);
+        foreach (var ia in itemAgents)
+        {
+            ia.Empty();
+        }
         IsPausing = false;
-        WindowsManager.Instance.Remove(this);
+        CloseWindow();
+        this.UI = UI;
     }
     #endregion
 

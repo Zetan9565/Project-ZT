@@ -43,6 +43,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     private static bool dontDestroyOnLoadOnce;
 
+    [SerializeField]
+    private UIManager UIRootPrefab;
     private void Awake()
     {
         if (!dontDestroyOnLoadOnce)
@@ -52,7 +54,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }
         else
         {
-            Destroy(gameObject);
+            DestroyImmediate(gameObject);
         }
     }
 
@@ -70,16 +72,12 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     public static void Init()
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
-        QuestManager.Instance.SetUI(FindObjectOfType<QuestUI>());
-        BackpackManager.Instance.SetUI(FindObjectOfType<BackpackUI>());
-        WarehouseManager.Instance.SetUI(FindObjectOfType<WarehouseUI>());
-        DialogueManager.Instance.SetUI(FindObjectOfType<DialogueUI>());
-        BuildingManager.Instance.SetUI(FindObjectOfType<BuildingUI>());
-        ShopManager.Instance.SetUI(FindObjectOfType<ShopUI>());
-        EscapeMenuManager.Instance.SetUI(FindObjectOfType<EscapeUI>());
         foreach (KeyValuePair<string, Talker> kvp in Talkers)
             if (kvp.Value is QuestGiver) (kvp.Value as QuestGiver).Init();
         PlayerManager.Instance.Init();
+        GatherManager.Instance.Init();
+        if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIRootPrefab);
+        UIManager.Instance.Init();
         WindowsManager.Instance.Clear();
     }
 

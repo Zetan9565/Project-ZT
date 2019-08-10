@@ -17,7 +17,7 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
     public bool GatherAble { get; private set; }
     public bool IsGathering { get; private set; }
 
-    private void Awake()
+    public void Init()
     {
         animaNameHash = Animator.StringToHash(animaName);
         var gatherBehaviours = PlayerManager.Instance.PlayerController.Animator.GetBehaviours<GatherBehaviour>();

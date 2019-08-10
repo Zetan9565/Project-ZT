@@ -109,19 +109,16 @@ public class QuestBoardAgent : MonoBehaviour, UnityEngine.EventSystems.IPointerC
         {
             if (clickCount < 1) isClick = true;
             if (clickTime <= 0.2f) clickCount++;
-            if (!IsEmpty)
+            if (clickCount > 1)
             {
-                if (clickCount > 1)
-                {
-                    OnRightClick();
-                    isClick = false;
-                    clickCount = 0;
-                    clickTime = 0;
-                }
-                else if (clickCount == 1)
-                {
-                    OnClick();
-                }
+                RightClick();
+                isClick = false;
+                clickCount = 0;
+                clickTime = 0;
+            }
+            else if (clickCount == 1)
+            {
+                OnClick();
             }
         }
 #endif

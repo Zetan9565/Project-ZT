@@ -71,6 +71,13 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         onCancel?.Invoke();
     }
 
+    public void CancelWithoutEvent()
+    {
+        targetTime = 0;
+        currentTime = 0;
+        isProgressing = false;
+        MyUtilities.SetActive(bar, false);
+    }
     private IEnumerator Progress()
     {
         while (isProgressing)

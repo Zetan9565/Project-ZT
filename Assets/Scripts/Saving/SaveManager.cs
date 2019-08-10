@@ -160,7 +160,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         GameManager.Init();
         LoadPlayer(data);
         yield return new WaitUntil(() => { return BackpackManager.Instance.MBackpack != null; });
-        LoadBag(data);
+        LoadBackpack(data);
         LoadBuilding(data);
         LoadWarehouse(data);
         LoadQuest(data);
@@ -174,7 +174,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         //TODO 读取玩家信息
     }
 
-    void LoadBag(SaveData data)
+    void LoadBackpack(SaveData data)
     {
         BackpackManager.Instance.LoadData(data.backpackData);
     }
@@ -220,12 +220,13 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void LoadQuest(SaveData data)
     {
+        QuestManager.Instance.QuestsOngoing.Clear();
         foreach (QuestData questData in data.ongoingQuestDatas)
         {
             HandlingQuestData(questData);
             QuestManager.Instance.UpdateUI();
         }
-
+        QuestManager.Instance.QuestsComplete.Clear();
         foreach (QuestData questData in data.completeQuestDatas)
         {
             Quest quest = HandlingQuestData(questData);

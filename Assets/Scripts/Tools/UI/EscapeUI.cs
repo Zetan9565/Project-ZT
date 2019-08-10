@@ -21,9 +21,4 @@ public class EscapeUI : MonoBehaviour
         closeButton.onClick.AddListener(EscapeMenuManager.Instance.CloseWindow);
         exitButton.onClick.AddListener(EscapeMenuManager.Instance.Exit);
     }
-
-    private void OnDestroy()
-    {
-        if (EscapeMenuManager.Instance) EscapeMenuManager.Instance.ResetUI();
-    }
 }

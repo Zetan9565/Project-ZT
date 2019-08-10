@@ -9,7 +9,7 @@ public class BackpackUI : MonoBehaviour
     [HideInInspector]
     public Canvas windowCanvas;
 
-    public Toggle[] tabs;
+    public Dropdown pageSelector;
 
     public GameObject itemCellPrefab;
     public Transform itemCellsParent;
@@ -22,7 +22,7 @@ public class BackpackUI : MonoBehaviour
     public Button sortButton;
     public MakingTool handworkButton;
 
-    public GameObject discardArea;
+    public DiscardArea discardArea;
     public ScrollRect gridRect;
     public Image gridMask;
 
@@ -34,23 +34,13 @@ public class BackpackUI : MonoBehaviour
         windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         closeButton.onClick.AddListener(BackpackManager.Instance.CloseWindow);
         sortButton.onClick.AddListener(BackpackManager.Instance.Sort);
-        if (tabs != null)
-            for (int i = 0; i < tabs.Length; i++)
-            {
-                int num = i;
-                tabs[i].onValueChanged.AddListener(delegate { if (BackpackManager.Instance) BackpackManager.Instance.SetPage(num); });
-            }
-        if (!discardArea.GetComponent<DiscardArea>()) discardArea.AddComponent<DiscardArea>();
+        pageSelector.onValueChanged.AddListener(BackpackManager.Instance.SetPage);
+        //if (!discardArea.GetComponent<DiscardArea>()) discardArea.AddComponent<DiscardArea>();
         if (!handworkButton.GetComponent<Button>()) handworkButton.gameObject.AddComponent<Button>();
         handworkButton.GetComponent<Button>().onClick.AddListener(delegate
         {
             MakingManager.Instance.CanMake(handworkButton);
             MakingManager.Instance.OpenWindow();
         });
-    }
-
-    private void OnDestroy()
-    {
-        if (BackpackManager.Instance) BackpackManager.Instance.ResetUI();
     }
 }

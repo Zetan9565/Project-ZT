@@ -37,8 +37,8 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         if (playerInfo)
         {
             playerInfo = Instantiate(playerInfo);
-            BackpackManager.Instance.Init();
         }
+        playerController = FindObjectOfType<PlayerController2D>();
     }
 
     public void SetPlayerInfo(PlayerInformation playerInfo)

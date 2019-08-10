@@ -73,7 +73,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
     void UseBox()
     {
         BoxItem box = MItemInfo.item as BoxItem;
-        if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo))
+        if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo, 1))
         {
             BackpackManager.Instance.MBackpack.weightLoad -= box.Weight;
             BackpackManager.Instance.MBackpack.backpackSize--;
@@ -107,14 +107,14 @@ public class ItemAgent : MonoBehaviour, IDragable,
         switch (book.BookType)
         {
             case BookType.Building:
-                if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo) && BuildingManager.Instance.Learn(book.BuildingToLearn))
+                if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo, 1) && BuildingManager.Instance.Learn(book.BuildingToLearn))
                 {
                     BackpackManager.Instance.LoseItem(MItemInfo);
                     BuildingManager.Instance.Init();
                 }
                 break;
             case BookType.Making:
-                if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo) && MakingManager.Instance.Learn(book.ItemToLearn))
+                if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo, 1) && MakingManager.Instance.Learn(book.ItemToLearn))
                 {
                     BackpackManager.Instance.LoseItem(MItemInfo);
                     MakingManager.Instance.Init();
@@ -128,7 +128,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
     void UseBag()
     {
         BagItem bag = MItemInfo.item as BagItem;
-        if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo))
+        if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo, 1))
         {
             if (BackpackManager.Instance.Expand(bag.ExpandSize))
                 BackpackManager.Instance.LoseItem(MItemInfo);
@@ -453,7 +453,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
         {
             ItemAgent target = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<ItemAgent>();
             if (target) SwapInfoTo(target);
-            else if (eventData.pointerCurrentRaycast.gameObject == BackpackManager.Instance.DiscardArea && agentType == ItemAgentType.Backpack)
+            else if (eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<DiscardArea>() == BackpackManager.Instance.DiscardArea && agentType == ItemAgentType.Backpack)
             {
                 BackpackManager.Instance.DiscardItem(MItemInfo);
                 AmountManager.Instance.SetPosition(eventData.position);

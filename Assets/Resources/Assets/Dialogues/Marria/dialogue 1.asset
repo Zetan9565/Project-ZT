@@ -19,7 +19,79 @@ MonoBehaviour:
     words: "\u4ECA\u5E74\u7684\u6536\u6210\u6BD4\u53BB\u5E74\u597D\u5462\u3002"
     indexOfRrightBranch: 0
     wordsWhenChusWB: "\u8FD9\u90FD\u80FD\u9009\u9519\uFF0C\u592A\u8521\u4E86\uFF01"
-    branches: []
+    branches:
+    - title: "\u6D4B\u8BD5\u98791"
+      optionType: 2
+      hasWords: 1
+      talkerType: 0
+      talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+      words: "\u8FD9\u662F\u6D4B\u8BD5\u98791"
+      dialogue: {fileID: 0}
+      specifyIndex: -1
+      goBack: 1
+      indexToGo: 0
+      itemToSubmit:
+        item: {fileID: 0}
+        amount: 1
+        indexInGrid: 0
+        durability:
+          min: 0
+          max: 1
+        gemSlotAmount: 0
+        gemstone1: {fileID: 0}
+        gemstone2: {fileID: 0}
+      itemCanGet:
+        item: {fileID: 0}
+        amount: 1
+        indexInGrid: 0
+        durability:
+          min: 0
+          max: 1
+        gemSlotAmount: 0
+        gemstone1: {fileID: 0}
+        gemstone2: {fileID: 0}
+      showOnlyWhenNotHave: 0
+      onlyForQuest: 0
+      bindedQuest: {fileID: 0}
+      deleteWhenCmplt: 1
+      runtimeParent: {fileID: 0}
+      runtimeIndexToGoBack: 0
+    - title: "\u6D4B\u8BD5\u98792"
+      optionType: 2
+      hasWords: 0
+      talkerType: 0
+      talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+      words: 
+      dialogue: {fileID: 0}
+      specifyIndex: -1
+      goBack: 1
+      indexToGo: 0
+      itemToSubmit:
+        item: {fileID: 0}
+        amount: 1
+        indexInGrid: 0
+        durability:
+          min: 0
+          max: 1
+        gemSlotAmount: 0
+        gemstone1: {fileID: 0}
+        gemstone2: {fileID: 0}
+      itemCanGet:
+        item: {fileID: 0}
+        amount: 1
+        indexInGrid: 0
+        durability:
+          min: 0
+          max: 1
+        gemSlotAmount: 0
+        gemstone1: {fileID: 0}
+        gemstone2: {fileID: 0}
+      showOnlyWhenNotHave: 0
+      onlyForQuest: 0
+      bindedQuest: {fileID: 0}
+      deleteWhenCmplt: 0
+      runtimeParent: {fileID: 0}
+      runtimeIndexToGoBack: 0
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
     words: "\u6BCF\u5929\u90FD\u5FD9\u5F97\u4E0D\u53EF\u5F00\u4EA4\u3002"

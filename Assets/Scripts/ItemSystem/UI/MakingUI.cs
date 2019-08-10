@@ -9,7 +9,7 @@ public class MakingUI : MonoBehaviour
     [HideInInspector]
     public Canvas windowCanvas;
 
-    public Toggle[] tabs;
+    public Dropdown pageSelector;
 
     public GameObject itemCellPrefab;
     public Transform itemCellsParent;
@@ -35,21 +35,6 @@ public class MakingUI : MonoBehaviour
         icon.Init(ItemAgentType.Making);
         closeButton.onClick.AddListener(MakingManager.Instance.CloseWindow);
         makeButton.onClick.AddListener(MakingManager.Instance.MakeCurrent);
-        if (tabs != null)
-            for (int i = 0; i < tabs.Length; i++)
-            {
-                int num = i;
-                tabs[i].onValueChanged.AddListener(delegate
-                {
-                    if (MakingManager.Instance) MakingManager.Instance.SetPage(num);
-                });
-            }
-        if (tabs != null && tabs.Length > 0)
-            tabs[0].isOn = true;
-    }
-
-    private void OnDestroy()
-    {
-        if (MakingManager.Instance) MakingManager.Instance.ResetUI();
+        pageSelector.onValueChanged.AddListener(MakingManager.Instance.SetPage);
     }
 }
