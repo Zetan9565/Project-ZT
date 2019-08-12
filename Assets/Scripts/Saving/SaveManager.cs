@@ -85,9 +85,9 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void SaveWarehouse(SaveData data)
     {
-        foreach (KeyValuePair<string, Talker> kvp in GameManager.Talkers)
+        foreach (KeyValuePair<string, TalkerData> kvp in GameManager.TalkerDatas)
         {
-            if (kvp.Value.IsWarehouseAgent)
+            if (kvp.Value.info.IsWarehouseAgent)
             {
                 data.warehouseDatas.Add(new WarehouseData(kvp.Value.TalkerID, kvp.Value.warehouse));
             }
@@ -191,9 +191,9 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         foreach (WarehouseData wd in data.warehouseDatas)
         {
             Warehouse warehouse = null;
-            if (GameManager.Talkers.ContainsKey(wd.handlerID))
+            if (GameManager.TalkerDatas.ContainsKey(wd.handlerID))
             {
-                Talker handler = GameManager.Talkers[wd.handlerID];
+                TalkerData handler = GameManager.TalkerDatas[wd.handlerID];
                 warehouse = handler.warehouse;
             }
             else
@@ -235,11 +235,11 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     }
     Quest HandlingQuestData(QuestData questData)
     {
-        QuestGiver questGiver = GameManager.Talkers[questData.originalGiverID] as QuestGiver;
-        Quest quest = questGiver.QuestInstances.Find(x => x.ID == questData.questID);
+        TalkerData questGiver = GameManager.TalkerDatas[questData.originalGiverID];
+        Quest quest = questGiver.questInstances.Find(x => x.ID == questData.questID);
         foreach (ObjectiveData od in questData.objectiveDatas)
         {
-            foreach (Objective o in quest.Objectives)
+            foreach (Objective o in quest.ObjectiveInstances)
             {
                 if (o.runtimeID == od.objectiveID)
                 {

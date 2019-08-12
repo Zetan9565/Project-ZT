@@ -153,12 +153,12 @@ public class Quest : ScriptableObject
     }
 
     [System.NonSerialized]
-    private List<Objective> objectives = new List<Objective>();//存储所有目标，在运行时用到，初始化时自动填，不用人为干预，详见QuestGiver类
-    public List<Objective> Objectives
+    private List<Objective> objectiveInstances = new List<Objective>();//存储所有目标，在运行时用到，初始化时自动填，不用人为干预，详见QuestGiver类
+    public List<Objective> ObjectiveInstances
     {
         get
         {
-            return objectives;
+            return objectiveInstances;
         }
     }
 
@@ -213,10 +213,10 @@ public class Quest : ScriptableObject
     }
 
     [HideInInspector]
-    public QuestGiver OriginalQuestGiver;
+    public TalkerData OriginalQuestGiver;
 
     [HideInInspector]
-    public QuestGiver CurrentQuestGiver;
+    public TalkerData CurrentQuestGiver;
 
     [HideInInspector]
     public bool IsOngoing { get; set; }//任务是否正在执行，在运行时用到
@@ -225,7 +225,7 @@ public class Quest : ScriptableObject
     {
         get
         {
-            if (Objectives.Exists(x => !x.IsComplete))
+            if (ObjectiveInstances.Exists(x => !x.IsComplete))
                 return false;
             return true;
         }
@@ -261,7 +261,7 @@ public class Quest : ScriptableObject
     {
         if (CmpltObjctvInOrder)
         {
-            foreach (Objective o in Objectives)
+            foreach (Objective o in ObjectiveInstances)
             {
                 //当目标是收集类目标时才进行判断
                 if (o is CollectObjective && item == (o as CollectObjective).Item)

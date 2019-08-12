@@ -43,13 +43,13 @@ public class QuestBoardAgent : MonoBehaviour, UnityEngine.EventSystems.IPointerC
         }
         else
         {
-            for (int i = 0; i < questAgent.MQuest.Objectives.Count; i++)
+            for (int i = 0; i < questAgent.MQuest.ObjectiveInstances.Count; i++)
             {
-                bool isCmplt = questAgent.MQuest.Objectives[i].IsComplete;
-                string endLine = i == questAgent.MQuest.Objectives.Count - 1 ? string.Empty : "\n";
-                objectives += (isCmplt ? "<color=#" + ColorUtility.ToHtmlStringRGB(cmpltObjectv) + ">" : string.Empty) + "-" + questAgent.MQuest.Objectives[i].DisplayName +
+                bool isCmplt = questAgent.MQuest.ObjectiveInstances[i].IsComplete;
+                string endLine = i == questAgent.MQuest.ObjectiveInstances.Count - 1 ? string.Empty : "\n";
+                objectives += (isCmplt ? "<color=#" + ColorUtility.ToHtmlStringRGB(cmpltObjectv) + ">" : string.Empty) + "-" + questAgent.MQuest.ObjectiveInstances[i].DisplayName +
                               (isCmplt ? "(达成)</color>" + endLine :
-                              "[" + questAgent.MQuest.Objectives[i].CurrentAmount + "/" + questAgent.MQuest.Objectives[i].Amount + "]" + endLine);
+                              "[" + questAgent.MQuest.ObjectiveInstances[i].CurrentAmount + "/" + questAgent.MQuest.ObjectiveInstances[i].Amount + "]" + endLine);
             }
         }
         ObjectiveText.text = objectives;

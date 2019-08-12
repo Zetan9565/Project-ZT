@@ -16,6 +16,18 @@ MonoBehaviour:
   _Name: "\u5927\u80E1\u5B50"
   sex: 1
   defaultDialogue: {fileID: 11400000, guid: 982521bacf361f14289d5658a605bca4, type: 2}
+  isWarehouseAgent: 1
+  warehouse:
+    warehouseSize:
+      min: 0
+      max: 50
+  isVendor: 0
+  shop: {fileID: 0}
+  isQuestGiver: 1
+  questsStored:
+  - {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
+  - {fileID: 11400000, guid: 5288a43013e44284baed8b30be1f92de, type: 2}
+  - {fileID: 11400000, guid: 75021802295611e4bb73ffff88713358, type: 2}
   canDEV_RLAT: 0
   normalItemDialogue: {fileID: 0}
   favoriteItemDialogue:

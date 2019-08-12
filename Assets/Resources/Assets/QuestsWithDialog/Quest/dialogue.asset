@@ -28,19 +28,26 @@ MonoBehaviour:
     branches: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    words: "\u5662\uFF0C\u8FD9\u4E2A\u4E8B\u513F\u554A~\u602A\u7269\u5728\u6751\u5B50\u5317\u8FB9\u90A3\u6761\u8DEF\u7684\u51FA\u53E3\u90A3\u513F\u5F98\u5F8A\u7740\u5462\u3002"
+    words: "\u5662\uFF0C\u662F\u8FD9\u4E2A\u4E8B\u513F\u554A\u3002"
+    indexOfRrightBranch: 0
+    wordsWhenChusWB: 
+    branches: []
+  - talkerType: 0
+    talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+    words: "\u602A\u7269\u5728\u6751\u5B50\u5317\u8FB9\u90A3\u6761\u8DEF\u7684\u51FA\u53E3\u90A3\u513F\u5F98\u5F8A\u7740\u5462\u3002"
     indexOfRrightBranch: 0
     wordsWhenChusWB: "\u4F60\u4E0D\u4FE1\u5C31\u7B97\u4E86\uFF0C\u5C45\u7136\u8FD8\u8BF4\u8FD9\u79CD\u8BDD\uFF01"
     branches:
     - title: "\u76F8\u4FE1\u5979\u7684\u8BDD"
       optionType: 2
+      hasWords: 1
       talkerType: 1
       talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
       words: "O98K\uFF0C\u6211\u8FD9\u5C31\u53BB\u770B\u770B\u3002"
       dialogue: {fileID: 0}
       specifyIndex: -1
       goBack: 0
-      indexToGo: -1
+      indexToGoBack: -1
       itemToSubmit:
         item: {fileID: 0}
         amount: 1
@@ -69,13 +76,14 @@ MonoBehaviour:
       runtimeIndexToGoBack: 0
     - title: "\u4E0D\u76F8\u4FE1\u5979\u7684\u8BDD"
       optionType: 2
+      hasWords: 1
       talkerType: 1
       talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
       words: "\u6211\u4FE1\u4F60\u4E2A\u9B3C\uFF0C\u6211\u600E\u4E48\u6CA1\u770B\u89C1\uFF1F"
       dialogue: {fileID: 0}
       specifyIndex: -1
       goBack: 0
-      indexToGo: -1
+      indexToGoBack: -1
       itemToSubmit:
         item: {fileID: 0}
         amount: 1

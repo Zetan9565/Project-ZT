@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b809358986d43b246a26f4921502b11d, type: 3}
+  m_Name: shop info
+  m_EditorClassIdentifier: 
+  shopName: "\u6D4B\u8BD5\u7528\u5546\u5E97"
+  commodities:
+  - item: {fileID: 11400000, guid: bd4452dc99e9afc4d818dd914aa1b72f, type: 2}
+    maxAmount: 1
+    priceMultiple: 1
+    emptyAble: 0
+    leftRefreshTime: 0
+    refreshTime: 300
+    minRefreshAmount: 1
+    maxRefreshAmount: 1
+  - item: {fileID: 11400000, guid: 3be704b7f65170443ad9de4ad93ede92, type: 2}
+    maxAmount: 1
+    priceMultiple: 1
+    emptyAble: 0
+    leftRefreshTime: 0
+    refreshTime: 300
+    minRefreshAmount: 1
+    maxRefreshAmount: 1
+  acquisitions:
+  - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
+    maxAmount: 1
+    priceMultiple: 1
+    emptyAble: 0
+    leftRefreshTime: 0
+    refreshTime: 300
+    minRefreshAmount: 1
+    maxRefreshAmount: 1
