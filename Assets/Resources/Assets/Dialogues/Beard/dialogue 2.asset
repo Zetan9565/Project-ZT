@@ -17,19 +17,19 @@ MonoBehaviour:
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     words: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
-    indexOfCorrectOption: 0
+    indexOfRrightBranch: 0
     wordsWhenChusWB: "\u8FD9\u90FD\u80FD\u9009\u9519\uFF0C\u592A\u83DC\u4E86"
     branches:
-    - title: "\u9886\u53D6\u7834\u65E7\u7684\u5251"
+    - title: "\u83B7\u53D6\u7834\u65E7\u7684\u5251"
       optionType: 4
-      hasWordsToSay: 0
+      hasWords: 0
       talkerType: 0
       talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
       words: "\u7ED9\u4F60\u7834\u65E7\u7684\u5251\uFF0C\u62FF\u597D\u4E86\u3002"
       dialogue: {fileID: 0}
       specifyIndex: -1
       goBack: 0
-      indexToGoBack: -1
+      indexToGo: -1
       itemToSubmit:
         item: {fileID: 0}
         amount: 1
@@ -51,44 +51,8 @@ MonoBehaviour:
         gemstone1: {fileID: 0}
         gemstone2: {fileID: 0}
       showOnlyWhenNotHave: 0
-      onlyForQuest: 1
-      bindedQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
-      deleteWhenCmplt: 1
-      runtimeParent: {fileID: 0}
-      runtimeIndexToGoBack: 0
-    - title: "\u4E0A\u4EA4\u7834\u65E7\u7684\u5200"
-      optionType: 3
-      hasWordsToSay: 0
-      talkerType: 0
-      talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-      words: "\u90A3\u6211\u5C31\u6536\u4E0B\u4E86\u3002"
-      dialogue: {fileID: 0}
-      specifyIndex: -1
-      goBack: 0
-      indexToGoBack: -1
-      itemToSubmit:
-        item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
-        amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
-      itemCanGet:
-        item: {fileID: 0}
-        amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
-      showOnlyWhenNotHave: 0
       onlyForQuest: 0
-      bindedQuest: {fileID: 11400000, guid: 595e2a2d93ade6b488ed91ba27bdb42b, type: 2}
+      bindedQuest: {fileID: 0}
       deleteWhenCmplt: 1
       runtimeParent: {fileID: 0}
       runtimeIndexToGoBack: 0

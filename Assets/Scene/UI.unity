@@ -13652,7 +13652,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1382322451}
   m_HandleRect: {fileID: 1382322450}
   m_Direction: 3
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -25981,24 +25981,47 @@ MonoBehaviour:
   m_GameObject: {fileID: 1137171744}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12d026f0d5dcebe40a47aeaebc07607e, type: 3}
+  m_Script: {fileID: 11500000, guid: 3cf94d653a7fbfb45925daab8362a57e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-  data:
-    info: {fileID: 0}
-    relationshipInstance:
-      relationshipValue:
-        min: -500
-        max: 20000
-      relationshipLevel: 0
-    warehouse:
-      warehouseSize:
-        min: 0
-        max: 300
-    shop: {fileID: 0}
-    objectivesTalkToThis: []
-    questInstances: []
+  isWarehouseAgent: 0
+  warehouse:
+    warehouseSize:
+      min: 0
+      max: 300
+  isVendor: 1
+  shop:
+    shopName: "\u6D4B\u8BD5\u5546\u5E97"
+    commodities:
+    - item: {fileID: 11400000, guid: b952706ed1975d3499cb510b6bcfcf83, type: 2}
+      maxAmount: 50
+      priceMultiple: 1
+      emptyAble: 1
+      leftRefreshTime: 0
+      refreshTime: 300
+      minRefreshAmount: 0
+      maxRefreshAmount: 20
+    - item: {fileID: 11400000, guid: bd4452dc99e9afc4d818dd914aa1b72f, type: 2}
+      maxAmount: 1
+      priceMultiple: 1
+      emptyAble: 0
+      leftRefreshTime: 0
+      refreshTime: 300
+      minRefreshAmount: 0
+      maxRefreshAmount: 1
+    acquisitions:
+    - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
+      maxAmount: 5
+      priceMultiple: 1
+      emptyAble: 1
+      leftRefreshTime: 0
+      refreshTime: 300
+      minRefreshAmount: 0
+      maxRefreshAmount: 5
+  objectivesTalkToThis: []
+  questsStored: []
+  questInstances: []
 --- !u!1 &1150941291
 GameObject:
   m_ObjectHideFlags: 0
@@ -38899,24 +38922,31 @@ MonoBehaviour:
   m_GameObject: {fileID: 1747857554}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12d026f0d5dcebe40a47aeaebc07607e, type: 3}
+  m_Script: {fileID: 11500000, guid: 3cf94d653a7fbfb45925daab8362a57e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-  data:
-    info: {fileID: 0}
-    relationshipInstance:
-      relationshipValue:
-        min: -500
-        max: 20000
-      relationshipLevel: 0
-    warehouse:
-      warehouseSize:
-        min: 0
-        max: 300
-    shop: {fileID: 0}
-    objectivesTalkToThis: []
-    questInstances: []
+  isWarehouseAgent: 1
+  warehouse:
+    warehouseSize:
+      min: 0
+      max: 50
+  isVendor: 0
+  shop:
+    shopName: 
+    commodities: []
+    acquisitions: []
+  objectivesTalkToThis: []
+  questsStored:
+  - {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
+  - {fileID: 11400000, guid: 5288a43013e44284baed8b30be1f92de, type: 2}
+  - {fileID: 11400000, guid: 75021802295611e4bb73ffff88713358, type: 2}
+  - {fileID: 11400000, guid: 595e2a2d93ade6b488ed91ba27bdb42b, type: 2}
+  - {fileID: 11400000, guid: 7a90b7d663a11b84c800679cd76bbaf9, type: 2}
+  - {fileID: 11400000, guid: d67f15969a89f7d4fa712968760ef52b, type: 2}
+  - {fileID: 11400000, guid: 2591151dae1b3274884095bd7e907dbb, type: 2}
+  - {fileID: 11400000, guid: 02a391306b5a40c44a3eaeeb74dba552, type: 2}
+  questInstances: []
 --- !u!58 &1747857561
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -45137,7 +45167,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2045133974}
   m_HandleRect: {fileID: 2045133973}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

@@ -258,7 +258,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
     }
     public bool TryLoseItem_Boolean(ItemInfo info, int amount = -1)
     {
-        return TryLoseItem_Boolean(info.item, amount < 0 ? info.Amount : amount);
+        return TryLoseItem_Boolean(info.item, amount < 0 ? (info.Amount < amount ? info.Amount : amount) : amount);
     }
 
     public bool LoseItem(ItemInfo info, int amount = 1)

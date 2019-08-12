@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-[CreateAssetMenu(fileName = "shop info", menuName = "ZetanStudio/商店信息")]
-public class ShopInformation : ScriptableObject
+[System.Serializable]
+public class Shop
 {
     [SerializeField]
     private string shopName;
@@ -85,6 +85,11 @@ public class ShopInformation : ScriptableObject
                     }
                 }
             }
+    }
+
+    public static implicit operator bool(Shop self)
+    {
+        return self != null;
     }
 }
 

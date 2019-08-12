@@ -15,63 +15,6 @@ public class TalkerInformation : CharacterInformation
     }
 
     [SerializeField]
-    private bool isWarehouseAgent;
-    public bool IsWarehouseAgent
-    {
-        get
-        {
-            return isWarehouseAgent && !isVendor;
-        }
-    }
-    [SerializeField]
-    private Warehouse warehouse = new Warehouse();
-    public Warehouse Warehouse
-    {
-        get
-        {
-            return warehouse;
-        }
-    }
-
-    [SerializeField]
-    private bool isVendor;
-    public bool IsVendor
-    {
-        get
-        {
-            return isVendor && !isWarehouseAgent;
-        }
-    }
-    [SerializeField]
-    private ShopInformation shop;
-    public ShopInformation Shop
-    {
-        get
-        {
-            return shop;
-        }
-    }
-
-    [SerializeField]
-    private bool isQuestGiver;
-    public bool IsQuestGiver
-    {
-        get
-        {
-            return isQuestGiver;
-        }
-    }
-    [SerializeField]
-    private List<Quest> questsStored = new List<Quest>();
-    public List<Quest> QuestsStored
-    {
-        get
-        {
-            return questsStored;
-        }
-    }
-
-    [SerializeField]
     private bool canDEV_RLAT;
     public bool CanDEV_RLAT
     {
@@ -130,6 +73,7 @@ public class TalkerInformation : CharacterInformation
             return hateItems;
         }
     }
+
 
     [SerializeField]
     private bool canMarry;

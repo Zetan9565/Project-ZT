@@ -66,17 +66,14 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     public static Dictionary<string, List<Enemy>> Enermies { get; } = new Dictionary<string, List<Enemy>>();
 
     public static Dictionary<string, Talker> Talkers { get; } = new Dictionary<string, Talker>();
-    public static Dictionary<string, TalkerData> TalkerDatas { get; } = new Dictionary<string, TalkerData>();
 
     public static Dictionary<string, QuestPoint> QuestPoints { get; } = new Dictionary<string, QuestPoint>();
 
     public static void Init()
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
-        Talkers.Clear();
-        TalkerDatas.Clear();
-        foreach (var talker in FindObjectsOfType<Talker>())
-            talker.Init();
+        foreach (KeyValuePair<string, Talker> kvp in Talkers)
+            if (kvp.Value is QuestGiver) (kvp.Value as QuestGiver).Init();
         PlayerManager.Instance.Init();
         GatherManager.Instance.Init();
         if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIRootPrefab);

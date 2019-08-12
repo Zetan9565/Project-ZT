@@ -7,11 +7,11 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
     [SerializeField]
     private ShopUI UI;
 
-    public static List<TalkerData> Vendors { get; } = new List<TalkerData>();
+    public static List<Talker> Vendors { get; } = new List<Talker>();
 
     private List<MerchandiseAgent> merchandiseAgents = new List<MerchandiseAgent>();
 
-    public ShopInformation MShop { get; private set; }
+    public Shop MShop { get; private set; }
 
     public ItemInfo MItemInfo { get; private set; }
 
@@ -47,7 +47,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
         Debug.Log(stopwatch.Elapsed.TotalMilliseconds);*/
     }
 
-    public void Init(ShopInformation shop)
+    public void Init(Shop shop)
     {
         if (shop == null) return;
         MShop = shop;

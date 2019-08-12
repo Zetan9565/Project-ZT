@@ -147,7 +147,7 @@ public class QuestData
     {
         questID = quest.ID;
         originalGiverID = quest.OriginalQuestGiver.TalkerID;
-        foreach (Objective o in quest.ObjectiveInstances)
+        foreach (Objective o in quest.Objectives)
         {
             objectiveDatas.Add(new ObjectiveData(o));
         }
