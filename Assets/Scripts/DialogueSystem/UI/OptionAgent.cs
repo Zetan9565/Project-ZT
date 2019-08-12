@@ -12,7 +12,7 @@ public class OptionAgent : MonoBehaviour
 
     public TalkObjective TalkObjective { get; private set; }
 
-    public BranchDialogue BranchDialogue { get; private set; }
+    public WordsOption BranchDialogue { get; private set; }
 
     private void Awake()
     {
@@ -54,9 +54,14 @@ public class OptionAgent : MonoBehaviour
         TalkObjective = objective;
     }
 
-    public void Init(string text, BranchDialogue branch)
+    public void Init(string text, WordsOption branch)
     {
         titleText.text = text;
+        if (branch.OptionType == WordsOptionType.SubmitAndGet)
+        {
+            if (branch.IsValid)
+                titleText.text += string.Format("(需[{0}]{1}个)", branch.ItemToSubmit.ItemName, branch.ItemToSubmit.Amount);
+        }
         OptionType = OptionType.Branch;
         BranchDialogue = branch;
     }

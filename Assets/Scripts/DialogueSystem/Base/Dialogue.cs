@@ -72,20 +72,20 @@ public class DialogueWords
     }
 
     [SerializeField]
-    private int indexOfRrightBranch;
-    public int IndexOfRightBranch
+    private int indexOfCorrectOption;
+    public int IndexOfCorrectOption
     {
         get
         {
-            return indexOfRrightBranch;
+            return indexOfCorrectOption;
         }
     }
 
-    public bool NeedToChusRightBranch//仅当所有选项都是选择型时才有效
+    public bool NeedToChusCorrectOption//仅当所有选项都是选择型且多于1个时才有效
     {
         get
         {
-            return branches != null && indexOfRrightBranch > -1 && branches.TrueForAll(x => x.OptionType == WordsOptionType.Choice);
+            return branches != null && indexOfCorrectOption > -1 && branches.Count > 1 && branches.TrueForAll(x => x.OptionType == WordsOptionType.Choice);
         }
     }
 
@@ -103,8 +103,8 @@ public class DialogueWords
     }
 
     [SerializeField]
-    private List<BranchDialogue> branches = new List<BranchDialogue>();
-    public List<BranchDialogue> Branches
+    private List<WordsOption> branches = new List<WordsOption>();
+    public List<WordsOption> Options
     {
         get
         {
@@ -112,11 +112,11 @@ public class DialogueWords
         }
     }
 
-    public bool IsInvalid
+    public bool IsValid
     {
         get
         {
-            return talkerType == TalkerType.NPC && !talkerInfo || string.IsNullOrEmpty(words);
+            return !(talkerType == TalkerType.NPC && !talkerInfo || string.IsNullOrEmpty(words));
         }
     }
 
@@ -132,9 +132,9 @@ public class DialogueWords
         this.talkerType = talkerType;
     }
 
-    public bool IsRightBranch(BranchDialogue branch)
+    public bool IsCorrectOption(WordsOption branch)
     {
-        return NeedToChusRightBranch && Branches.Contains(branch) && Branches.IndexOf(branch) == IndexOfRightBranch;
+        return NeedToChusCorrectOption && Options.Contains(branch) && Options.IndexOf(branch) == IndexOfCorrectOption;
     }
 
     public override string ToString()
@@ -146,15 +146,15 @@ public class DialogueWords
         else return "[Unnamed]说：" + words;
     }
 
-    public int IndexOf(BranchDialogue branch)
+    public int IndexOf(WordsOption option)
     {
-        return Branches.IndexOf(branch);
+        return Options.IndexOf(option);
     }
 }
 
 
 [Serializable]
-public class BranchDialogue
+public class WordsOption
 {
     [SerializeField]
     private string title;
@@ -169,7 +169,7 @@ public class BranchDialogue
 
     [SerializeField]
 #if UNITY_EDITOR
-    [EnumMemberNames("一句普通分支", "一段普通分支", "选择型分支", "提交和取得道具", "取得道具")]
+    [EnumMemberNames("类型：一句分支", "类型：一段分支", "类型：选择项", "类型：提交、交换道具", "类型：取得道具")]
 #endif
     private WordsOptionType optionType;
     public WordsOptionType OptionType
@@ -181,12 +181,12 @@ public class BranchDialogue
     }
 
     [SerializeField]
-    private bool hasWords;
-    public bool HasWords
+    private bool hasWordsToSay;
+    public bool HasWordsToSay
     {
         get
         {
-            return hasWords && optionType == WordsOptionType.Choice;
+            return hasWordsToSay;
         }
     }
 
@@ -245,6 +245,9 @@ public class BranchDialogue
 
     [SerializeField]
     private int specifyIndex = -1;//-1和0是等价的
+    /// <summary>
+    /// 指定分支句子序号
+    /// </summary>
     public int SpecifyIndex
     {
         get
@@ -259,17 +262,20 @@ public class BranchDialogue
     {
         get
         {
-            return goBack;
+            return goBack || optionType == WordsOptionType.SubmitAndGet || optionType == WordsOptionType.OnlyGet;
         }
     }
 
     [SerializeField]
-    private int indexToGo = -1;//-1表示不自定义
-    public int IndexToGo
+    private int indexToGoBack = -1;//-1表示返回分支开始时的句子
+    /// <summary>
+    /// 指定对话返回序号
+    /// </summary>
+    public int IndexToGoBack
     {
         get
         {
-            return indexToGo;
+            return indexToGoBack;
         }
     }
 
@@ -336,7 +342,7 @@ public class BranchDialogue
         {
             return !(optionType == WordsOptionType.BranchDialogue && !dialogue
                 || optionType == WordsOptionType.BranchWords && (TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
-                || HasWords && (TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
+                || HasWordsToSay && (TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
                 || optionType == WordsOptionType.SubmitAndGet && (!ItemToSubmit || !ItemToSubmit.item || TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
                 || optionType == WordsOptionType.OnlyGet && (!ItemCanGet || !ItemCanGet.item || TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words)));
         }
@@ -348,9 +354,19 @@ public class BranchDialogue
     [HideInInspector]
     public int runtimeIndexToGoBack;
 
-    public BranchDialogue Cloned => MemberwiseClone() as BranchDialogue;
+    public WordsOption()
+    {
 
-    public static implicit operator bool(BranchDialogue self)
+    }
+
+    public WordsOption(WordsOptionType optionType)
+    {
+        this.optionType = optionType;
+    }
+
+    public WordsOption Cloned => MemberwiseClone() as WordsOption;
+
+    public static implicit operator bool(WordsOption self)
     {
         return self != null;
     }

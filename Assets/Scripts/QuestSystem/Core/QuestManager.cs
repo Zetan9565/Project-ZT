@@ -101,7 +101,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
         QuestBoardAgent qba = ObjectPool.Instance.Get(UI.boardQuestPrefab, UI.questBoardArea).GetComponent<QuestBoardAgent>();
         qba.Init(qa);
         questBoardAgents.Add(qba);
-        foreach (Objective o in quest.Objectives)
+        foreach (Objective o in quest.ObjectiveInstances)
         {
             if (o is CollectObjective)
             {
@@ -155,7 +155,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
                 TalkObjective to = o as TalkObjective;
                 try
                 {
-                    if (!o.IsComplete) GameManager.Talkers[to.Talker.ID].objectivesTalkToThis.Add(to);
+                    if (!o.IsComplete) GameManager.TalkerDatas[to.Talker.ID].objectivesTalkToThis.Add(to);
                 }
                 catch
                 {
@@ -189,7 +189,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
         {
             try
             {
-                (GameManager.Talkers[quest.NPCToSubmit.ID] as QuestGiver).TransferQuestToThis(quest);
+                GameManager.TalkerDatas[quest.NPCToSubmit.ID].TransferQuestToThis(quest);
             }
             catch
             {
@@ -216,7 +216,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
         {
             quest.IsOngoing = false;
             QuestsOngoing.Remove(quest);
-            foreach (Objective o in quest.Objectives)
+            foreach (Objective o in quest.ObjectiveInstances)
             {
                 if (o is CollectObjective)
                 {
@@ -252,7 +252,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
                 {
                     TalkObjective to = o as TalkObjective;
                     to.CurrentAmount = 0;
-                    GameManager.Talkers[to.Talker.ID].objectivesTalkToThis.RemoveAll(x => x == to);
+                    GameManager.TalkerDatas[to.Talker.ID].objectivesTalkToThis.RemoveAll(x => x == to);
                     DialogueManager.Instance.RemoveDialogueData(to.Dialogue);
                 }
                 if (o is MoveObjective)
@@ -313,7 +313,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
                     if (!BackpackManager.Instance.TryGetItem_Boolean(rwi))
                         return false;
                 List<Quest> questsReqThisQuestItem = new List<Quest>();
-                foreach (Objective o in quest.Objectives)
+                foreach (Objective o in quest.ObjectiveInstances)
                 {
                     if (o is CollectObjective)
                     {
@@ -332,7 +332,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             quest.IsOngoing = false;
             QuestsOngoing.Remove(quest);
             RemoveQuestAgentByQuest(quest);
-            quest.CurrentQuestGiver.QuestInstances.Remove(quest);
+            quest.CurrentQuestGiver.questInstances.Remove(quest);
             QuestsComplete.Add(quest);
             QuestAgent cqa;
             if (quest.Group)
@@ -361,7 +361,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             else cqa = ObjectPool.Instance.Get(UI.questPrefab, UI.cmpltQuestListParent).GetComponent<QuestAgent>();
             cqa.Init(quest, true);
             completeQuestAgents.Add(cqa);
-            foreach (Objective o in quest.Objectives)
+            foreach (Objective o in quest.ObjectiveInstances)
             {
                 if (o is CollectObjective)
                 {
@@ -394,7 +394,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
                 }
                 if (o is TalkObjective)
                 {
-                    GameManager.Talkers[(o as TalkObjective).Talker.ID].objectivesTalkToThis.RemoveAll(x => x == (o as TalkObjective));
+                    GameManager.TalkerDatas[(o as TalkObjective).Talker.ID].objectivesTalkToThis.RemoveAll(x => x == (o as TalkObjective));
                 }
                 if (o is MoveObjective)
                 {
@@ -439,14 +439,14 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
     public void TraceQuest(Quest quest)
     {
         if (!quest || !AStarManager.Instance || !PlayerManager.Instance.PlayerController.Unit) return;
-        if (quest.IsComplete && quest.CurrentQuestGiver)
+        if (quest.IsComplete && GameManager.Talkers[quest.CurrentQuestGiver.TalkerID])
         {
             PlayerManager.Instance.PlayerController.Unit.IsFollowingTarget = false;
             PlayerManager.Instance.PlayerController.Unit.ShowPath(true);
-            PlayerManager.Instance.PlayerController.Unit.SetDestination(quest.CurrentQuestGiver.transform.position, false);
+            PlayerManager.Instance.PlayerController.Unit.SetDestination(GameManager.Talkers[quest.CurrentQuestGiver.TalkerID].transform.position, false);
         }
-        else if (quest.Objectives.Count > 0)
-            using (var objectiveEnum = quest.Objectives.GetEnumerator())
+        else if (quest.ObjectiveInstances.Count > 0)
+            using (var objectiveEnum = quest.ObjectiveInstances.GetEnumerator())
             {
                 Vector3 destination = default;
                 Objective currentObj = null;
@@ -520,13 +520,13 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
         QuestAgent cqa = completeQuestAgents.Find(x => x.MQuest == selectedQuest);
         if (cqa)
         {
-            int lineCount = selectedQuest.Objectives.FindAll(x => x.Display).Count - 1;
-            for (int i = 0; i < selectedQuest.Objectives.Count; i++)
+            int lineCount = selectedQuest.ObjectiveInstances.FindAll(x => x.Display).Count - 1;
+            for (int i = 0; i < selectedQuest.ObjectiveInstances.Count; i++)
             {
-                if (selectedQuest.Objectives[i].Display)
+                if (selectedQuest.ObjectiveInstances[i].Display)
                 {
                     string endLine = i == lineCount ? string.Empty : "\n";
-                    objectives.Append(selectedQuest.Objectives[i].DisplayName + endLine);
+                    objectives.Append(selectedQuest.ObjectiveInstances[i].DisplayName + endLine);
                 }
             }
             UI.descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标</b>\n{3}",
@@ -537,15 +537,15 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
         }
         else
         {
-            int lineCount = selectedQuest.Objectives.FindAll(x => x.Display).Count - 1;
-            for (int i = 0; i < selectedQuest.Objectives.Count; i++)
+            int lineCount = selectedQuest.ObjectiveInstances.FindAll(x => x.Display).Count - 1;
+            for (int i = 0; i < selectedQuest.ObjectiveInstances.Count; i++)
             {
-                if (selectedQuest.Objectives[i].Display)
+                if (selectedQuest.ObjectiveInstances[i].Display)
                 {
                     string endLine = i == lineCount ? string.Empty : "\n";
-                    objectives.Append(selectedQuest.Objectives[i].DisplayName +
-                                  "[" + selectedQuest.Objectives[i].CurrentAmount + "/" + selectedQuest.Objectives[i].Amount + "]" +
-                                  (selectedQuest.Objectives[i].IsComplete ? "(达成)" + endLine : endLine));
+                    objectives.Append(selectedQuest.ObjectiveInstances[i].DisplayName +
+                                  "[" + selectedQuest.ObjectiveInstances[i].CurrentAmount + "/" + selectedQuest.ObjectiveInstances[i].Amount + "]" +
+                                  (selectedQuest.ObjectiveInstances[i].IsComplete ? "(达成)" + endLine : endLine));
                 }
             }
             UI.descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标{3}</b>\n{4}",
