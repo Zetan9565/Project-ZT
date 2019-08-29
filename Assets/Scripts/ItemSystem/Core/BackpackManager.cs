@@ -3,10 +3,8 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
 
-public delegate void ItemAmountListener(ItemBase item, int amount);
-
 [DisallowMultipleComponent]
-public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
+public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowHandler
 {
     [SerializeField]
     private BackpackUI UI;
@@ -20,6 +18,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
 
     public Image GridMask { get { return UI.gridMask; } }
 
+    public delegate void ItemAmountListener(ItemBase item, int leftAmount);
     public event ItemAmountListener OnGetItemEvent;
     public event ItemAmountListener OnLoseItemEvent;
 
@@ -158,7 +157,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
                         break;
                     }
             }
-        OnGetItemEvent?.Invoke(item, amount);
+        OnGetItemEvent?.Invoke(item, GetItemAmount(item));
         UpdateUI();
         return true;
     }
@@ -270,7 +269,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         MBackpack.LoseItemSimple(info, finalLose);
         ItemAgent ia = GetItemAgentByInfo(info);
         if (ia) ia.UpdateInfo();
-        OnLoseItemEvent?.Invoke(info.item, finalLose);
+        OnLoseItemEvent?.Invoke(info.item, GetItemAmount(info.item));
         if (ItemWindowManager.Instance.MItemInfo == info && info.Amount < 1) ItemWindowManager.Instance.CloseItemWindow();
         UpdateUI();
         return true;
@@ -510,7 +509,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         if (!UI || !UI.gameObject) return;
         foreach (ItemAgent ia in itemAgents)
         {
-            MyUtilities.SetActive(ia.gameObject, true);
+            ZetanUtilities.SetActive(ia.gameObject, true);
         }
     }
 
@@ -520,8 +519,8 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsEquipment)
-                MyUtilities.SetActive(ia.gameObject, true);
-            else MyUtilities.SetActive(ia.gameObject, false);
+                ZetanUtilities.SetActive(ia.gameObject, true);
+            else ZetanUtilities.SetActive(ia.gameObject, false);
         }
     }
 
@@ -531,8 +530,8 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsConsumable)
-                MyUtilities.SetActive(ia.gameObject, true);
-            else MyUtilities.SetActive(ia.gameObject, false);
+                ZetanUtilities.SetActive(ia.gameObject, true);
+            else ZetanUtilities.SetActive(ia.gameObject, false);
         }
     }
 
@@ -542,8 +541,8 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindow
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsMaterial)
-                MyUtilities.SetActive(ia.gameObject, true);
-            else MyUtilities.SetActive(ia.gameObject, false);
+                ZetanUtilities.SetActive(ia.gameObject, true);
+            else ZetanUtilities.SetActive(ia.gameObject, false);
         }
     }
     #endregion

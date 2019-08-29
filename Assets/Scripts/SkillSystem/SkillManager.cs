@@ -43,8 +43,9 @@ public class SkillManager : SingletonMonoBehaviour<SkillManager>
                 behaviour.enterCallback = OnActionEnter;
                 behaviour.updateCallback = OnActionUpdate;
                 behaviour.exitCallback = OnActionExit;
-                if (skillActionSMBs.ContainsKey(behaviour.parentSkill.ID))
-                    skillActionSMBs[behaviour.parentSkill.ID].Add(behaviour);
+                skillActionSMBs.TryGetValue(behaviour.parentSkill.ID, out var actionBehaviours);
+                if (actionBehaviours != null && actionBehaviours.Count > 0)
+                    actionBehaviours.Add(behaviour);
                 else skillActionSMBs.Add(behaviour.parentSkill.ID, new List<SkillActionBehaviour>() { behaviour });
             }
         foreach (var actionList in skillActionSMBs.Values)

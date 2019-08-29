@@ -19,7 +19,7 @@ public class Warehouse
     }
 
     [HideInInspector]
-    public ScopeInt warehouseSize = new ScopeInt(300);
+    public ScopeInt warehouseSize = new ScopeInt(50);
 
     public bool IsFull { get { return warehouseSize.IsMax; } }
 
@@ -32,7 +32,13 @@ public class Warehouse
         }
     }
 
-    public List<ItemInfo> Items { get; } = new List<ItemInfo>();
+    public List<ItemInfo> Items { get; }
+
+    public Warehouse(int size = 50)
+    {
+        warehouseSize = new ScopeInt(size);
+        Items = new List<ItemInfo>();
+    }
 
     public void GetItemSimple(ItemInfo info, int amount = 1)
     {

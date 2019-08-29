@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
+public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
 {
     [SerializeField]
     private ShopUI UI;
@@ -79,7 +79,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
         }
         else
         {
-            AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
@@ -135,7 +135,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
         }
         else
         {
-            AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
@@ -177,7 +177,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindow
         }
         else
         {
-            AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.item.name), delegate

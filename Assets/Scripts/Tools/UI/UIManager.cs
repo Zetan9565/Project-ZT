@@ -14,6 +14,9 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     private Button backpackButton;
 
     [SerializeField]
+    private Button calendarButton;
+
+    [SerializeField]
     private Button buildingButton;
 
     [SerializeField]
@@ -50,12 +53,13 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         MyUtilities.SetActive(JoyStick.gameObject, false);
         MyUtilities.SetActive(JoyStick.KnobBackground.gameObject, false);
 #elif UNITY_ANDROID
-        MyUtilities.SetActive(JoyStick.gameObject, true);
-        MyUtilities.SetActive(JoyStick.KnobBackground.gameObject, true);
+        ZetanUtilities.SetActive(JoyStick.gameObject, true);
+        ZetanUtilities.SetActive(JoyStick.KnobBackground.gameObject, true);
 #endif
-        MyUtilities.SetActive(InteractiveButton.gameObject, false);
+        ZetanUtilities.SetActive(InteractiveButton.gameObject, false);
         questButton.onClick.AddListener(QuestManager.Instance.OpenCloseWindow);
         backpackButton.onClick.AddListener(BackpackManager.Instance.OpenCloseWindow);
+        calendarButton.onClick.AddListener(CalendarManager.Instance.OpenCloseWindow);
         buildingButton.onClick.AddListener(BuildingManager.Instance.OpenCloseWindow);
         settingButton.onClick.AddListener(EscapeMenuManager.Instance.OpenCloseWindow);
         if (!dontDestroyOnLoadOnce)
@@ -79,10 +83,10 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     {
 #if UNITY_ANDROID
         if (!value)
-            MyUtilities.SetActive(InteractiveButton.gameObject, value);
+            ZetanUtilities.SetActive(InteractiveButton.gameObject, value);
         else
         {
-            MyUtilities.SetActive(InteractiveButton.gameObject, value &&
+            ZetanUtilities.SetActive(InteractiveButton.gameObject, value &&
                 (DialogueManager.Instance.TalkAble && !WarehouseManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen && !GatherManager.Instance.IsGathering ||
                 WarehouseManager.Instance.StoreAble && !DialogueManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen && !GatherManager.Instance.IsGathering ||
                 LootManager.Instance.PickAble && !DialogueManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !GatherManager.Instance.IsGathering ||
@@ -92,12 +96,12 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 #endif
         if (!string.IsNullOrEmpty(name) && value)
         {
-            MyUtilities.SetActive(interactiveName.transform.parent.gameObject, true);
+            ZetanUtilities.SetActive(interactiveName.transform.parent.gameObject, true);
             interactiveName.text = name;
         }
         else
         {
-            MyUtilities.SetActive(interactiveName.transform.parent.gameObject, false);
+            ZetanUtilities.SetActive(interactiveName.transform.parent.gameObject, false);
             interactiveName.text = string.Empty;
         }
     }
@@ -129,8 +133,8 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         WarehouseManager.Instance.SetUI(FindObjectOfType<WarehouseUI>());
         DialogueManager.Instance.SetUI(FindObjectOfType<DialogueUI>());
         BuildingManager.Instance.SetUI(FindObjectOfType<BuildingUI>());
-        BuildingManager.Instance.Init();
         ShopManager.Instance.SetUI(FindObjectOfType<ShopUI>());
         EscapeMenuManager.Instance.SetUI(FindObjectOfType<EscapeUI>());
+        CalendarManager.Instance.SetUI(FindObjectOfType<CalendarUI>());
     }
 }

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: gathering info
   m_EditorClassIdentifier: 
   _name: "\u836F\u8349"
-  gatherType: 1
+  gatherType: 0
   gatherTime: 5
   refreshTime: 60
   productItems:

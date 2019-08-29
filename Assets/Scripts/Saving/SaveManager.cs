@@ -25,7 +25,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     #region 存档相关
     public bool Save()
     {
-        using (FileStream fs = MyUtilities.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
+        using (FileStream fs = ZetanUtilities.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
         {
             try
             {
@@ -41,7 +41,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
                 SaveTrigger(data);
 
                 bf.Serialize(fs, data);
-                MyUtilities.Encrypt(fs, encryptKey);
+                ZetanUtilities.Encrypt(fs, encryptKey);
 
                 fs.Close();
 
@@ -130,13 +130,13 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     #region 读档相关
     public void Load()
     {
-        using (FileStream fs = MyUtilities.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Open))
+        using (FileStream fs = ZetanUtilities.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Open))
         {
             try
             {
                 BinaryFormatter bf = new BinaryFormatter();
 
-                SaveData data = bf.Deserialize(MyUtilities.Decrypt(fs, encryptKey)) as SaveData;
+                SaveData data = bf.Deserialize(ZetanUtilities.Decrypt(fs, encryptKey)) as SaveData;
 
                 fs.Close();
 
@@ -191,15 +191,12 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         foreach (WarehouseData wd in data.warehouseDatas)
         {
             Warehouse warehouse = null;
-            if (GameManager.TalkerDatas.ContainsKey(wd.handlerID))
-            {
-                TalkerData handler = GameManager.TalkerDatas[wd.handlerID];
-                warehouse = handler.warehouse;
-            }
+            GameManager.TalkerDatas.TryGetValue(wd.handlerID, out TalkerData handler);
+            if (handler) warehouse = handler.warehouse;
             else
             {
-                WarehouseAgent handler = Array.Find(warehouseAgents, x => x.ID == wd.handlerID);
-                if (handler) warehouse = handler.MWarehouse;
+                WarehouseAgent wagent = Array.Find(warehouseAgents, x => x.ID == wd.handlerID);
+                if (wagent) warehouse = wagent.MWarehouse;
             }
             if (warehouse != null)
             {

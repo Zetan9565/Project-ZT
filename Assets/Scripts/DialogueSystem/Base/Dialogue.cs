@@ -16,6 +16,36 @@ public class Dialogue : ScriptableObject
     }
 
     [SerializeField]
+    private bool useUnifiedNPC;
+    public bool UseUnifiedNPC
+    {
+        get
+        {
+            return useUnifiedNPC;
+        }
+    }
+
+    [SerializeField]
+    private bool useTalkerInfo;
+    public bool UseTalkerInfo
+    {
+        get
+        {
+            return useTalkerInfo;
+        }
+    }
+
+    [SerializeField]
+    private TalkerInformation unifiedNPC;
+    public TalkerInformation UnifiedNPC
+    {
+        get
+        {
+            return unifiedNPC;
+        }
+    }
+
+    [SerializeField]
     private List<DialogueWords> words = new List<DialogueWords>();
     public List<DialogueWords> Words
     {
@@ -25,6 +55,10 @@ public class Dialogue : ScriptableObject
         }
     }
 
+    public int IndexOfWords(DialogueWords words)
+    {
+        return Words.IndexOf(words);
+    }
 }
 [Serializable]
 public class DialogueWords
@@ -132,9 +166,9 @@ public class DialogueWords
         this.talkerType = talkerType;
     }
 
-    public bool IsCorrectOption(WordsOption branch)
+    public bool IsCorrectOption(WordsOption option)
     {
-        return NeedToChusCorrectOption && Options.Contains(branch) && Options.IndexOf(branch) == IndexOfCorrectOption;
+        return NeedToChusCorrectOption && Options.Contains(option) && Options.IndexOf(option) == IndexOfCorrectOption;
     }
 
     public override string ToString()
@@ -146,12 +180,11 @@ public class DialogueWords
         else return "[Unnamed]说：" + words;
     }
 
-    public int IndexOf(WordsOption option)
+    public int IndexOfOption(WordsOption option)
     {
         return Options.IndexOf(option);
     }
 }
-
 
 [Serializable]
 public class WordsOption
@@ -244,9 +277,9 @@ public class WordsOption
     }
 
     [SerializeField]
-    private int specifyIndex = -1;//-1和0是等价的
+    private int specifyIndex = 0;
     /// <summary>
-    /// 指定分支句子序号
+    /// 指定分支句子序号，在进入该分支时从第几句开始
     /// </summary>
     public int SpecifyIndex
     {
@@ -269,7 +302,7 @@ public class WordsOption
     [SerializeField]
     private int indexToGoBack = -1;//-1表示返回分支开始时的句子
     /// <summary>
-    /// 指定对话返回序号
+    /// 指定对话返回序号，在返回原对话时从第几句开始
     /// </summary>
     public int IndexToGoBack
     {
@@ -313,7 +346,7 @@ public class WordsOption
     {
         get
         {
-            return onlyForQuest;
+            return onlyForQuest && optionType == WordsOptionType.OnlyGet ? showOnlyWhenNotHave : true;
         }
     }
     [SerializeField]
@@ -340,7 +373,7 @@ public class WordsOption
     {
         get
         {
-            return !(optionType == WordsOptionType.BranchDialogue && !dialogue
+            return !(optionType == WordsOptionType.BranchDialogue && (!dialogue || dialogue.Words.Count < 1)
                 || optionType == WordsOptionType.BranchWords && (TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
                 || HasWordsToSay && (TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
                 || optionType == WordsOptionType.SubmitAndGet && (!ItemToSubmit || !ItemToSubmit.item || TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))

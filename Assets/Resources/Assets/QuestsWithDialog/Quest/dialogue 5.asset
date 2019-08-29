@@ -17,42 +17,42 @@ MonoBehaviour:
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     words: "\u54E5\u4EEC\uFF0C\u6700\u8FD1\u6751\u5B50\u6709\u4E9B\u4E0D\u592A\u5E73\uFF0C\u6240\u4EE5\u6211\u60F3\u62DC\u6258\u4F60\u4E2A\u4E8B\u3002"
-    indexOfRrightBranch: -1
+    indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []
   - talkerType: 1
     talkerInfo: {fileID: 0}
     words: "\u4EC0\u4E48\u4E8B\uFF1F"
-    indexOfRrightBranch: -1
+    indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     words: "\u542C\u5916\u51FA\u56DE\u6765\u7684\u739B\u4E3D\u4E9A\u8BF4\uFF0C\u6751\u5B50\u9644\u8FD1\u51FA\u73B0\u4E86\u602A\u7269\uFF01"
-    indexOfRrightBranch: -1
+    indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []
   - talkerType: 1
     talkerInfo: {fileID: 0}
     words: "\u54E6\uFF1F\u8FD8\u6709\u8FD9\u79CD\u64CD\u4F5C\uFF1F"
-    indexOfRrightBranch: -1
+    indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     words: "\u4F60\u53BB\u95EE\u95EE\u739B\u4E3D\u4E9A\u5177\u4F53\u4F4D\u7F6E\uFF0C\u7136\u540E\u53BB\u8C03\u67E5\u4E00\u4E0B\u3002"
-    indexOfRrightBranch: -1
+    indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     words: "\u5982\u679C\u771F\u7684\u6709\uFF0C\u5C31\u72E0\u72E0\u6559\u8BAD\u5B83\u4EEC\uFF0C\u5E76\u56DE\u6536\u4E00\u70B9\u6B66\u5668\u56DE\u6765\uFF01"
-    indexOfRrightBranch: -1
+    indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     words: "\u4F60\u770B\u600E\u4E48\u6837\uFF1F"
-    indexOfRrightBranch: -1
+    indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []

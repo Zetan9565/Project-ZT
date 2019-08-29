@@ -203,6 +203,16 @@ public class Quest : ScriptableObject
     }
 
     [SerializeField]
+    private List<SubmitObjective> submitObjectives = new List<SubmitObjective>();
+    public List<SubmitObjective> SubmitObjectives
+    {
+        get
+        {
+            return submitObjectives;
+        }
+    }
+
+    [SerializeField]
     private List<CustomObjective> customObjectives = new List<CustomObjective>();
     public List<CustomObjective> CustomObjectives
     {
@@ -213,10 +223,10 @@ public class Quest : ScriptableObject
     }
 
     [HideInInspector]
-    public TalkerData OriginalQuestGiver;
+    public TalkerData originalQuestHolder;
 
     [HideInInspector]
-    public TalkerData CurrentQuestGiver;
+    public TalkerData currentQuestHolder;
 
     [HideInInspector]
     public bool IsOngoing { get; set; }//任务是否正在执行，在运行时用到
@@ -227,6 +237,33 @@ public class Quest : ScriptableObject
         {
             if (ObjectiveInstances.Exists(x => !x.IsComplete))
                 return false;
+            return true;
+        }
+    }
+
+    public bool IsValid
+    {
+        get
+        {
+            if (ObjectiveInstances.Count < 1) return false;
+            if (string.IsNullOrEmpty(ID) || string.IsNullOrEmpty(Title)) return false;
+            if (!SbmtOnOriginalNPC && (!NPCToSubmit || !GameManager.TalkerDatas.ContainsKey(NPCToSubmit.ID))) return false;
+            foreach (var co in CollectObjectives)
+                if (!co.IsValid) return false;
+            foreach (var ko in KillObjectives)
+                if (!ko.IsValid) return false;
+                else if (!GameManager.Enermies.ContainsKey(ko.Enemy.ID)) return false;
+            foreach (var to in TalkObjectives)
+                if (!to.IsValid) return false;
+                else if (!GameManager.TalkerDatas.ContainsKey(to.NPCToTalk.ID)) return false;
+            foreach (var mo in MoveObjectives)
+                if (!mo.IsValid) return false;
+                else if (!GameManager.QuestPoints.ContainsKey(mo.PointID)) return false;
+            foreach (var so in SubmitObjectives)
+                if (!so.IsValid) return false;
+                else if (!GameManager.TalkerDatas.ContainsKey(so.NPCToSubmit.ID)) return false;
+            foreach (var cuo in CustomObjectives)
+                if (!cuo.IsValid) return false;
             return true;
         }
     }
@@ -384,6 +421,7 @@ public enum QuestCondition
 #endregion
 
 #region 任务目标
+public delegate void ObjectiveStateListner(Objective objective, bool cmpltStateBef);
 /// <summary>
 /// 任务目标
 /// </summary>
@@ -440,16 +478,7 @@ public abstract class Objective
             else currentAmount = amount;
             if (!befCmplt && IsComplete)
                 UpdateNextCollectObjectives();
-        }
-    }
-
-    public bool IsComplete
-    {
-        get
-        {
-            if (currentAmount >= amount)
-                return true;
-            return false;
+            OnStateChangeEvent?.Invoke(this, befCmplt);
         }
     }
 
@@ -473,6 +502,47 @@ public abstract class Objective
         }
     }
 
+    public bool IsComplete
+    {
+        get
+        {
+            if (currentAmount >= amount)
+                return true;
+            return false;
+        }
+    }
+
+    public bool IsValid
+    {
+        get
+        {
+            if (Amount < 0) return false;
+            if (this is CollectObjective && !(this as CollectObjective).Item)
+                return false;
+            if (this is KillObjective)
+            {
+                var ko = this as KillObjective;
+                if (ko.ObjectiveType == KillObjectiveType.Specific && !ko.Enemy)
+                    return false;
+                else if (ko.ObjectiveType == KillObjectiveType.Race && !ko.Race)
+                    return false;
+            }
+            if (this is TalkObjective && (!(this as TalkObjective).NPCToTalk || !(this as TalkObjective).Dialogue))
+                return false;
+            if (this is MoveObjective && string.IsNullOrEmpty((this as MoveObjective).PointID))
+                return false;
+            if (this is SubmitObjective)
+            {
+                var so = this as SubmitObjective;
+                if (!so.NPCToSubmit || !so.ItemToSubmit || string.IsNullOrEmpty(so.WordsWhenSubmit))
+                    return false;
+            }
+            if (this is CustomObjective && string.IsNullOrEmpty((this as CustomObjective).TriggerName))
+                return false;
+            return true;
+        }
+    }
+
     [System.NonSerialized]
     public Objective PrevObjective;
     [System.NonSerialized]
@@ -483,6 +553,9 @@ public abstract class Objective
 
     [HideInInspector]
     public Quest runtimeParent;
+
+    [HideInInspector]
+    public ObjectiveStateListner OnStateChangeEvent;
 
     protected virtual void UpdateAmountUp(int amount = 1)
     {
@@ -531,6 +604,9 @@ public abstract class Objective
         }
     }
 
+    /// <summary>
+    /// 可并发
+    /// </summary>
     public bool Concurrent
     {
         get
@@ -605,18 +681,28 @@ public class CollectObjective : Objective
         }
     }
 
-    public void UpdateCollectAmountUp(ItemBase item, int amount)//得道具时用到
+    public void UpdateCollectAmount(ItemBase item, int leftAmount)//得道具时用到
     {
-        if (item == Item) UpdateAmountUp(amount);
+        if (item == Item)
+        {
+            if (IsComplete) return;
+            if (!InOrder) CurrentAmount = leftAmount;
+            else if (AllPrevObjCmplt) CurrentAmount = leftAmount;
+            if (CurrentAmount > 0)
+            {
+                string message = DisplayName + (IsComplete ? "(完成)" : "[" + CurrentAmount + "/" + Amount + "]");
+                MessageManager.Instance.NewMessage(message);
+            }
+            if (runtimeParent.IsComplete)
+                MessageManager.Instance.NewMessage("[任务]" + runtimeParent.Title + "(已完成)");
+        }
     }
 
-    public void UpdateCollectAmountDown(ItemBase item, int amount)//丢道具时用到
+    public void UpdateCollectAmountDown(ItemBase item, int leftAmount)//丢道具时用到
     {
-        /*Debug.Log("AllPrevObjCmplt: " + AllPrevObjCmplt);
-        Debug.Log("!HasNextObjOngoing: " + !HasNextObjOngoing);*/
         if (item == Item && AllPrevObjCmplt && !HasNextObjOngoing)
             //前置目标都完成且没有后置目标在进行时，才允许更新
-            CurrentAmount -= amount;
+            CurrentAmount = leftAmount;
     }
 }
 /// <summary>
@@ -697,12 +783,12 @@ public enum KillObjectiveType
 public class TalkObjective : Objective
 {
     [SerializeField]
-    private TalkerInformation talker;
-    public TalkerInformation Talker
+    private TalkerInformation _NPCToTalk;
+    public TalkerInformation NPCToTalk
     {
         get
         {
-            return talker;
+            return _NPCToTalk;
         }
     }
 
@@ -740,6 +826,60 @@ public class MoveObjective : Objective
     public void UpdateMoveState(QuestPoint point)
     {
         if (point.ID == PointID) UpdateAmountUp();
+    }
+}
+/// <summary>
+/// 提交类目标
+/// </summary>
+[System.Serializable]
+public class SubmitObjective : Objective
+{
+    [SerializeField]
+    private TalkerInformation _NPCToSubmit;
+    public TalkerInformation NPCToSubmit
+    {
+        get
+        {
+            return _NPCToSubmit;
+        }
+    }
+
+    [SerializeField]
+    private ItemBase itemToSubmit;
+    public ItemBase ItemToSubmit
+    {
+        get
+        {
+            return itemToSubmit;
+        }
+    }
+
+    [SerializeField]
+    private string wordsWhenSubmit;
+    public string WordsWhenSubmit
+    {
+        get
+        {
+            return wordsWhenSubmit;
+        }
+    }
+
+    [SerializeField]
+#if UNITY_EDITOR
+    [EnumMemberNames("提交的NPC", "玩家")]
+#endif
+    private TalkerType talkerType;
+    public TalkerType TalkerType
+    {
+        get
+        {
+            return talkerType;
+        }
+    }
+
+    public void UpdateSubmitState(int amount = 1)
+    {
+        UpdateAmountUp(amount);
     }
 }
 /// <summary>

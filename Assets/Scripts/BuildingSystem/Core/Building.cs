@@ -26,9 +26,7 @@ public class Building : MonoBehaviour
     private List<MonoBehaviour> components = new List<MonoBehaviour>();
     private List<bool> componentStates = new List<bool>();
 
-    private UnityEvent onDestroy = new UnityEvent();
-
-    private bool custumDestroy;
+    protected UnityEvent onDestroy = new UnityEvent();
 
     public BuildingAgent buildingAgent;
 
@@ -57,7 +55,7 @@ public class Building : MonoBehaviour
         }
         IsUnderBuilding = true;
         StartCoroutine(Build());
-        MyUtilities.SetActive(buildingFlag.gameObject, true);
+        if (buildingFlag) ZetanUtilities.SetActive(buildingFlag.gameObject, true);
         return true;
     }
 
@@ -78,13 +76,13 @@ public class Building : MonoBehaviour
             }
             IsUnderBuilding = true;
             StartCoroutine(Build());
-            MyUtilities.SetActive(buildingFlag.gameObject, true);
+            if (buildingFlag) ZetanUtilities.SetActive(buildingFlag.gameObject, true);
         }
         else
         {
             IsUnderBuilding = false;
             IsBuilt = true;
-            MyUtilities.SetActive(buildingFlag.gameObject, false);
+            if (buildingFlag) ZetanUtilities.SetActive(buildingFlag.gameObject, false);
         }
         if (buildingAgent) buildingAgent.UpdateUI();
     }
@@ -97,20 +95,10 @@ public class Building : MonoBehaviour
         }
         IsUnderBuilding = false;
         IsBuilt = true;
-        buildingFlag.text = "建造完成！";
+        if (buildingFlag) buildingFlag.text = "建造完成！";
         MessageManager.Instance.NewMessage("[" + name + "] 建造完成了");
         if (buildingAgent) buildingAgent.UpdateUI();
         StartCoroutine(WaitToHideFlag());
-    }
-
-    public void CustumDestroy(params UnityAction[] destroyActions)
-    {
-        if (destroyActions.Length < 1) { custumDestroy = false; return; }
-        foreach (UnityAction ua in destroyActions)
-        {
-            onDestroy.AddListener(ua);
-        }
-        custumDestroy = true;
     }
 
     private IEnumerator Build()
@@ -118,7 +106,7 @@ public class Building : MonoBehaviour
         while (IsUnderBuilding)
         {
             leftBuildTime -= Time.deltaTime;
-            buildingFlag.text = "建造中[" + leftBuildTime.ToString("F2") + "s]";
+            if (buildingFlag) buildingFlag.text = "建造中[" + leftBuildTime.ToString("F2") + "s]";
             if (leftBuildTime <= 0)
             {
                 BuildComplete();
@@ -132,13 +120,13 @@ public class Building : MonoBehaviour
     private IEnumerator WaitToHideFlag()
     {
         yield return new WaitForSeconds(2);
-        MyUtilities.SetActive(buildingFlag.gameObject, false);
+        if (buildingFlag) ZetanUtilities.SetActive(buildingFlag.gameObject, false);
     }
 
-    public void TryDestroy()
+    public virtual void TryDestroy()
     {
-        if (custumDestroy) onDestroy.Invoke();
-        else ConfirmManager.Instance.NewConfirm(string.Format("确定拆除{0}{1}吗？", name, (Vector2)transform.position),
+        onDestroy?.Invoke();
+        ConfirmManager.Instance.NewConfirm(string.Format("确定拆除{0}{1}吗？", name, (Vector2)transform.position),
             BuildingManager.Instance.ConfirmDestroy,
             delegate
             {
@@ -163,7 +151,7 @@ public class Building : MonoBehaviour
     }
 
     #region MonoBehaviour
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == "Player" && IsBuilt)
         {
@@ -171,7 +159,7 @@ public class Building : MonoBehaviour
         }
     }
 
-    private void OnTriggerStay2D(Collider2D collision)
+    protected virtual void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.tag == "Player" && IsBuilt)
         {
@@ -179,7 +167,7 @@ public class Building : MonoBehaviour
         }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    protected virtual void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.tag == "Player" && IsBuilt && BuildingManager.Instance.ToDestroy == this)
         {
@@ -187,7 +175,7 @@ public class Building : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    /*protected virtual void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Player" && IsBuilt)
         {
@@ -195,7 +183,7 @@ public class Building : MonoBehaviour
         }
     }
 
-    private void OnTriggerStay(Collider other)
+    protected virtual void OnTriggerStay(Collider other)
     {
         if (other.tag == "Player" && IsBuilt)
         {
@@ -203,12 +191,12 @@ public class Building : MonoBehaviour
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    protected virtual void OnTriggerExit(Collider other)
     {
         if (other.tag == "Player" && IsBuilt && BuildingManager.Instance.ToDestroy == this)
         {
             BuildingManager.Instance.CannotDestroy();
         }
-    }
+    }*/
     #endregion
 }

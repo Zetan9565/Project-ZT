@@ -53,7 +53,7 @@ public class PlayerController2D : MonoBehaviour
             {
                 Unit.IsFollowingTarget = false;
                 Unit.ShowPath(true);
-                Unit.SetDestination(MyUtilities.MousePositionAsWorld);
+                Unit.SetDestination(ZetanUtilities.MousePositionAsWorld);
             }
         }
     }
@@ -107,5 +107,6 @@ public class PlayerController2D : MonoBehaviour
 public enum UpdateMode
 {
     Update,
+    LateUpdate,
     FixedUpdate
 }

@@ -146,7 +146,7 @@ public class QuestData
     public QuestData(Quest quest)
     {
         questID = quest.ID;
-        originalGiverID = quest.OriginalQuestGiver.TalkerID;
+        originalGiverID = quest.originalQuestHolder.TalkerID;
         foreach (Objective o in quest.ObjectiveInstances)
         {
             objectiveDatas.Add(new ObjectiveData(o));
@@ -185,8 +185,8 @@ public class DialogueData
     {
         dialogID = dialogue.ID;
         wordsDatas = new List<DialogueWordsData>();
-        foreach (DialogueWords words in dialogue.Words)
-            wordsDatas.Add(new DialogueWordsData() { wordsIndex = dialogue.Words.IndexOf(words) });
+        for (int i = 0; i < dialogue.Words.Count; i++)
+            wordsDatas.Add(new DialogueWordsData() { wordsIndex = i });
     }
 }
 
@@ -208,7 +208,7 @@ public class DialogueWordsData
         cmpltBranchIndexes = new List<int>();
     }
 
-    public bool IsCmpltBranchWithIndex(int index)
+    public bool IsCmpltOptionWithIndex(int index)
     {
         return cmpltBranchIndexes.Contains(index);
     }

@@ -5,7 +5,7 @@ using UnityEngine;
 public class GatherAgent : MonoBehaviour
 {
     [SerializeField]
-    private GatheringInformation gatheringInfo;
+    protected GatheringInformation gatheringInfo;
     public GatheringInformation GatheringInfo
     {
         get
@@ -22,18 +22,18 @@ public class GatherAgent : MonoBehaviour
             return gatherAble && gatheringInfo;
         }
 
-        private set
+        protected set
         {
             gatherAble = value;
         }
     }
 
-    private float leftRefreshTime;
+    public float LeftRefreshTime { get; protected set; }
 
     [HideInInspector]
     public UnityEngine.Events.UnityEvent onGatherFinish = new UnityEngine.Events.UnityEvent();
 
-    public void GatherSuccess()
+    public virtual void GatherSuccess()
     {
         onGatherFinish?.Invoke();
         GetComponent<Renderer>().enabled = false;
@@ -42,7 +42,7 @@ public class GatherAgent : MonoBehaviour
         {
             List<ItemInfo> lootItems = new List<ItemInfo>();
             foreach (DropItemInfo di in GatheringInfo.ProductItems)
-                if (MyUtilities.Probability(di.DropRate))
+                if (ZetanUtilities.Probability(di.DropRate))
                     if (!di.OnlyDropForQuest || (di.OnlyDropForQuest && QuestManager.Instance.HasOngoingQuestWithID(di.BindedQuest.ID)))
                         lootItems.Add(new ItemInfo(di.Item, Random.Range(1, di.Amount + 1)));
             if (lootItems.Count > 0)
@@ -54,15 +54,15 @@ public class GatherAgent : MonoBehaviour
         StartCoroutine(UpdateTime());
     }
 
-    private IEnumerator UpdateTime()
+    protected IEnumerator UpdateTime()
     {
-        leftRefreshTime = GatheringInfo.RefreshTime;
+        LeftRefreshTime = GatheringInfo.RefreshTime;
         while (!GatherAble && GatheringInfo)
         {
-            leftRefreshTime -= Time.deltaTime;
-            if (leftRefreshTime <= 0)
+            LeftRefreshTime -= Time.deltaTime;
+            if (LeftRefreshTime <= 0)
             {
-                leftRefreshTime = GatheringInfo.RefreshTime;
+                LeftRefreshTime = GatheringInfo.RefreshTime;
                 Refresh();
                 yield break;
             }
@@ -70,7 +70,7 @@ public class GatherAgent : MonoBehaviour
         }
     }
 
-    public void Refresh()
+    public virtual void Refresh()
     {
         GatherAble = true;
         GetComponent<Renderer>().enabled = true;
@@ -100,7 +100,7 @@ public class GatherAgent : MonoBehaviour
         }
     }*/
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
         if (!GatherAble || !GatheringInfo) return;
         if (collision.CompareTag("Player") && !GatherManager.Instance.IsGathering)
@@ -108,7 +108,7 @@ public class GatherAgent : MonoBehaviour
             GatherManager.Instance.CanGather(this);
         }
     }
-    private void OnTriggerStay2D(Collider2D collision)
+    protected virtual void OnTriggerStay2D(Collider2D collision)
     {
         if (!GatherAble || !GatheringInfo) return;
         if (collision.CompareTag("Player") && !GatherManager.Instance.IsGathering)
@@ -116,7 +116,7 @@ public class GatherAgent : MonoBehaviour
             GatherManager.Instance.CanGather(this);
         }
     }
-    private void OnTriggerExit2D(Collider2D collision)
+    protected virtual void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.CompareTag("Player") && GatherManager.Instance.GatherAgent == this)
         {

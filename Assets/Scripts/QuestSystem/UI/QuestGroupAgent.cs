@@ -23,12 +23,12 @@ public class QuestGroupAgent : MonoBehaviour
         {
             if (!value)
             {
-                MyUtilities.SetActive(questListParent.gameObject, false);
+                ZetanUtilities.SetActive(questListParent.gameObject, false);
                 isExpanded = false;
             }
             else
             {
-                MyUtilities.SetActive(questListParent.gameObject, true);
+                ZetanUtilities.SetActive(questListParent.gameObject, true);
                 isExpanded = true;
             }
             UpdateStatus();

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public interface IWindow
+public interface IWindowHandler
 {
     /// <summary>
     /// 在这个方法中把自己入栈到WindowsManager的窗口栈中

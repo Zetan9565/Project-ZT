@@ -11,6 +11,7 @@ public class OptionAgent : MonoBehaviour
     public Quest MQuest { get; private set; }
 
     public TalkObjective TalkObjective { get; private set; }
+    public SubmitObjective SubmitObjective { get; private set; }
 
     public WordsOption BranchDialogue { get; private set; }
 
@@ -54,6 +55,13 @@ public class OptionAgent : MonoBehaviour
         TalkObjective = objective;
     }
 
+    public void Init(string text, SubmitObjective objective)
+    {
+        titleText.text = text;
+        OptionType = OptionType.Objective;
+        SubmitObjective = objective;
+    }
+
     public void Init(string text, WordsOption branch)
     {
         titleText.text = text;
@@ -74,7 +82,8 @@ public class OptionAgent : MonoBehaviour
                 DialogueManager.Instance.StartQuestDialogue(MQuest);
                 break;
             case OptionType.Objective:
-                DialogueManager.Instance.StartObjectiveDialogue(TalkObjective);
+                if (TalkObjective) DialogueManager.Instance.StartObjectiveDialogue(TalkObjective);
+                else DialogueManager.Instance.StartObjectiveDialogue(SubmitObjective);
                 break;
             case OptionType.Confirm:
                 if (DialogueManager.Instance.CurrentType == DialogueType.Quest)
@@ -102,6 +111,7 @@ public class OptionAgent : MonoBehaviour
     {
         titleText.text = string.Empty;
         TalkObjective = null;
+        SubmitObjective = null;
         MQuest = null;
         BranchDialogue = null;
         OptionType = OptionType.None;

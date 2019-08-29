@@ -22,12 +22,13 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
         {
             return;
         }
-        MyUtilities.SetActive(gameObject, false);
+        ZetanUtilities.SetActive(gameObject, false);
         gameObject.transform.SetParent(poolRoot, false);
         string name = gameObject.name;
-        if (pool.ContainsKey(name))
+        pool.TryGetValue(name, out var oListFound);
+        if (oListFound != null)
         {
-            pool[name].Add(gameObject);
+            oListFound.Add(gameObject);
         }
         else
         {
@@ -48,13 +49,14 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
     public GameObject Get(GameObject prefab, Transform parent = null, bool worldPositonStays = false)
     {
         string goName = prefab.name + "(Clone)";
-        if (pool.ContainsKey(goName) && pool[goName].Count > 0)
+        pool.TryGetValue(goName, out var oListDound);
+        if (oListDound != null && oListDound.Count > 0)
         {
-            GameObject go = pool[goName][0];
-            pool[goName].Remove(go);
-            if (pool[goName].Count < 1) pool.Remove(goName);
+            GameObject go = oListDound[0];
+            oListDound.Remove(go);
+            if (oListDound.Count < 1) pool.Remove(goName);
             go.transform.SetParent(parent, worldPositonStays);
-            MyUtilities.SetActive(go, true);
+            ZetanUtilities.SetActive(go, true);
             return go;
         }
         else
@@ -67,14 +69,16 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
     public GameObject Get(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent = null, bool worldPositionStays = false)
     {
         string goName = prefab.name + "(Clone)";
-        if (pool.ContainsKey(goName) && pool[goName].Count > 0)
+        pool.TryGetValue(goName, out var oListDound);
+        if (oListDound != null && oListDound.Count > 0)
         {
-            GameObject go = pool[goName][0];
+            GameObject go = oListDound[0];
             go.transform.position = position;
             go.transform.rotation = rotation;
-            pool[goName].Remove(go);
+            oListDound.Remove(go);
+            if (oListDound.Count < 1) pool.Remove(goName);
             go.transform.SetParent(parent, worldPositionStays);
-            MyUtilities.SetActive(go, true);
+            ZetanUtilities.SetActive(go, true);
             return go;
         }
         else

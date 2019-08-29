@@ -136,7 +136,7 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
 
     public void UpdateGraphs(Vector3 fromPoint, Vector3 toPoint)
     {
-        PathFinder.UpdateGraphs(new Bounds(MyUtilities.CenterOf(fromPoint, toPoint), MyUtilities.SizeOf(fromPoint, toPoint) / 2));
+        PathFinder.UpdateGraphs(new Bounds(ZetanUtilities.CenterBetween(fromPoint, toPoint), ZetanUtilities.SizeBetween(fromPoint, toPoint) / 2));
     }
     #endregion
 

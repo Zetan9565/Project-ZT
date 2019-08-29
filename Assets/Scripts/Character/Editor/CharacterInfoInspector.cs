@@ -187,14 +187,15 @@ public class CharacterInfoInspector : Editor
                         if (talker.DefaultDialogue.Words.Exists(x => x.NeedToChusCorrectOption && x.Options.Count > 0))
                             EditorGUILayout.HelpBox("该对话有选择型分支，不建议用作默认对话。", MessageType.Warning);
                         string dialogue = string.Empty;
-                        foreach (DialogueWords words in talker.DefaultDialogue.Words)
+                        for (int i = 0; i < talker.DefaultDialogue.Words.Count; i++)
                         {
+                            var words = talker.DefaultDialogue.Words[i];
                             dialogue += "[" + words.TalkerName + "]说：\n-" + words.Words;
-                            for (int i = 0; i < words.Options.Count; i++)
+                            for (int j = 0; j < words.Options.Count; j++)
                             {
-                                dialogue += "\n--(选项" + (i + 1) + ")" + words.Options[i].Title;
+                                dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
                             }
-                            dialogue += talker.DefaultDialogue.Words.IndexOf(words) == talker.DefaultDialogue.Words.Count - 1 ? string.Empty : "\n";
+                            dialogue += i == talker.DefaultDialogue.Words.Count - 1 ? string.Empty : "\n";
                         }
                         GUI.enabled = false;
                         EditorGUILayout.TextArea(dialogue);
@@ -287,10 +288,15 @@ public class CharacterInfoInspector : Editor
                         if (talker.NormalItemDialogue)
                         {
                             string dialogue = string.Empty;
-                            foreach (DialogueWords word in talker.NormalItemDialogue.Words)
+                            for (int i = 0; i < talker.NormalItemDialogue.Words.Count; i++)
                             {
-                                dialogue += "[" + word.TalkerName + "]说：\n-" + word.Words;
-                                dialogue += talker.NormalItemDialogue.Words.IndexOf(word) == talker.NormalItemDialogue.Words.Count - 1 ? string.Empty : "\n";
+                                var words = talker.NormalItemDialogue.Words[i];
+                                dialogue += "[" + words.TalkerName + "]说：\n-" + words.Words;
+                                for (int j = 0; j < words.Options.Count; j++)
+                                {
+                                    dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
+                                }
+                                dialogue += i == talker.NormalItemDialogue.Words.Count - 1 ? string.Empty : "\n";
                             }
                             GUI.enabled = false;
                             EditorGUILayout.TextArea(dialogue);

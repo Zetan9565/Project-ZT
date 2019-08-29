@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using UnityEngine.Events;
 
-public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindow
+public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHandler
 {
     [SerializeField]
     private CanvasGroup confirmWindow;
@@ -50,7 +50,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindow
         onNoClick.RemoveAllListeners();
         if (yesAction != null) onYesClick.AddListener(yesAction);
         if (noAction != null) onNoClick.AddListener(noAction);
-        (this as IWindow).OpenWindow();
+        (this as IWindowHandler).OpenWindow();
     }
 
     public void Confirm()
@@ -67,7 +67,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindow
         CloseWindow();
     }
 
-    void IWindow.OpenWindow()
+    void IWindowHandler.OpenWindow()
     {
         if (IsUIOpen) return;
         if (IsPausing) return;
@@ -87,7 +87,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindow
         IsUIOpen = false;
     }
 
-    void IWindow.OpenCloseWindow() { }
+    void IWindowHandler.OpenCloseWindow() { }
 
     public void PauseDisplay(bool pause)
     {

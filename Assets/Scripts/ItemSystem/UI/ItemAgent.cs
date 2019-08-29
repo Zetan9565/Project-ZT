@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -159,12 +160,12 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     public void Show()
     {
-        MyUtilities.SetActive(gameObject, true);
+        ZetanUtilities.SetActive(gameObject, true);
     }
 
     public void Hide()
     {
-        MyUtilities.SetActive(gameObject, false);
+        ZetanUtilities.SetActive(gameObject, false);
     }
 
     public void UpdateInfo()
@@ -242,24 +243,12 @@ public class ItemAgent : MonoBehaviour, IDragable,
     }
 
 #if UNITY_ANDROID
-    private float touchTime;
-    private bool isPress;
-
     private float clickTime;
     private int clickCount;
     private bool isClick;
 
     private void FixedUpdate()
     {
-        if (isPress)
-        {
-            touchTime += Time.fixedDeltaTime;
-            if (touchTime >= 0.5f)
-            {
-                isPress = false;
-                OnLongPress();
-            }
-        }
         if (isClick)
         {
             clickTime += Time.fixedDeltaTime;
@@ -269,6 +258,25 @@ public class ItemAgent : MonoBehaviour, IDragable,
                 clickCount = 0;
                 clickTime = 0;
             }
+        }
+    }
+
+    WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
+    Coroutine pressCoroutine;
+    IEnumerator Press()
+    {
+        float touchTime = 0;
+        bool isPress = true;
+        while (isPress)
+        {
+            touchTime += Time.fixedDeltaTime;
+            if (touchTime >= 0.5f)
+            {
+                isPress = false;
+                OnLongPress();
+                yield break;
+            }
+            yield return WaitForFixedUpdate;
         }
     }
 
@@ -357,8 +365,10 @@ public class ItemAgent : MonoBehaviour, IDragable,
 #elif UNITY_ANDROID
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (clickCount < 1) isClick = true;
-            if (clickTime <= 0.2f) clickCount++;
+            if (clickCount < 1)
+                isClick = true;
+            if (clickTime <= 0.2f)
+                clickCount++;
             if (!IsEmpty)
             {
                 if (clickCount > 1)
@@ -382,8 +392,8 @@ public class ItemAgent : MonoBehaviour, IDragable,
 #if UNITY_ANDROID
         if (!IsEmpty && eventData.button == PointerEventData.InputButton.Left)
         {
-            touchTime = 0;
-            isPress = true;
+            if (pressCoroutine != null) StopCoroutine(pressCoroutine);
+            pressCoroutine = StartCoroutine(Press());
         }
 #endif
     }
@@ -391,7 +401,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
     public void OnPointerUp(PointerEventData eventData)//用于安卓拖拽
     {
 #if UNITY_ANDROID
-        isPress = false;
+        if (pressCoroutine != null) StopCoroutine(pressCoroutine);
         if (DragableManager.Instance.IsDraging && (DragableManager.Instance.Current as ItemAgent) == this)
             OnEndDrag(eventData);
 #endif
@@ -418,7 +428,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
             icon.color = Color.white;
         }
 #elif UNITY_ANDROID
-        isPress = false;
+        if (pressCoroutine != null) StopCoroutine(pressCoroutine);
 #endif
     }
 
@@ -426,7 +436,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
     {
 #if UNITY_ANDROID
         if (parentScrollRect) parentScrollRect.OnBeginDrag(eventData);//修复ScrollRect冲突
-        isPress = false;
+        if (pressCoroutine != null) StopCoroutine(pressCoroutine);
         isClick = false;
 #endif
     }

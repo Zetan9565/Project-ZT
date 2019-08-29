@@ -20,7 +20,7 @@ MonoBehaviour:
   sellAble: 1
   sellPrice: 0
   buyPrice: 0
-  icon: {fileID: 21300000, guid: 5b4f1e91572a225498ac4e51833f266d, type: 3}
+  icon: {fileID: 21300000, guid: fe2f1500bcba49b4b833b547eec8be6d, type: 3}
   description: "\u8BB0\u8F7D\u7740\u6B62\u8840\u6563\u7684\u505A\u6CD5\u7684\u6307\u5357\u4E66\u3002"
   stackAble: 1
   discardAble: 1

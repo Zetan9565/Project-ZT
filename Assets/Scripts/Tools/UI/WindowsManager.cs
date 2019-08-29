@@ -18,15 +18,15 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
         }
     }
 
-    private Stack<IWindow> Windows = new Stack<IWindow>();
+    private Stack<IWindowHandler> Windows = new Stack<IWindowHandler>();
 
     public int WindowsCount { get { return Windows.Count; } }
 
     public void CloseTop()
     {
         if (Windows.Count < 1) return;
-        IWindow window;
-        Stack<IWindow> tempWins = new Stack<IWindow>();//不受影响的窗口集
+        IWindowHandler window;
+        Stack<IWindowHandler> tempWins = new Stack<IWindowHandler>();//不受影响的窗口集
         while (WindowsCount > 0)
         {
             window = Windows.Pop();
@@ -42,7 +42,7 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
             Push(tempWins.Pop());//重新把不受影响的窗口按新打开的方式放回去，使其有新的Sort Order
     }
 
-    public void CloseAll(params IWindow[] exceptions)
+    public void CloseAll(params IWindowHandler[] exceptions)
     {
         while (WindowsCount > 0)
         {
@@ -51,9 +51,9 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
         }
     }
 
-    public void PauseAll(bool pause, params IWindow[] exceptions)
+    public void PauseAll(bool pause, params IWindowHandler[] exceptions)
     {
-        foreach (IWindow window in Windows)
+        foreach (IWindowHandler window in Windows)
         {
             if (!exceptions.Contains(window))
                 window.PauseDisplay(pause);
@@ -63,21 +63,21 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
         else UIManager.Instance.ShowAll();
     }
 
-    public void Push(IWindow window)
+    public void Push(IWindowHandler window)
     {
         Windows.Push(window);
         window.SortCanvas.sortingOrder = TopOrder + 1;
         TopOrder = window.SortCanvas.sortingOrder;
     }
 
-    public void Remove(IWindow window)
+    public void Remove(IWindowHandler window)
     {
         if (WindowsCount < 1) return;
         if (window == null || !Windows.Contains(window)) return;
-        Stack<IWindow> tempWins = new Stack<IWindow>();//不受影响的窗口集
+        Stack<IWindowHandler> tempWins = new Stack<IWindowHandler>();//不受影响的窗口集
         while (Windows.Count > 0)
         {
-            IWindow tempWin = Windows.Pop();
+            IWindowHandler tempWin = Windows.Pop();
             if (tempWin != window) tempWins.Push(tempWin);
             TopOrder--;
         }

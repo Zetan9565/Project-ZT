@@ -1,19 +1,10 @@
 ﻿using UnityEngine;
 
 [DisallowMultipleComponent]
-public class WarehouseAgent : MonoBehaviour
+public class WarehouseAgent : Building
 {
-    public string ID
-    {
-        get
-        {
-            if (MBuilding) return MBuilding.ID;
-            return string.Empty;
-        }
-    }
-
     [SerializeField]
-    private Warehouse warehouse;
+    private Warehouse warehouse = new Warehouse(50);
     public Warehouse MWarehouse
     {
         get
@@ -22,73 +13,71 @@ public class WarehouseAgent : MonoBehaviour
         }
     }
 
-    public Building MBuilding { get; private set; }
-
-    private void Awake()
+    public override void TryDestroy()
     {
-        if (!MBuilding) MBuilding = GetComponent<Building>();
-        if (MBuilding)
-        {
-            MBuilding.CustumDestroy(delegate
+        onDestroy?.Invoke();
+        ConfirmManager.Instance.NewConfirm(string.Format("{0}{1}\n内的东西不会保留，确定拆除吗？", name, ((Vector2)transform.position).ToString()),
+            BuildingManager.Instance.ConfirmDestroy,
+            delegate
             {
-                ConfirmManager.Instance.NewConfirm(string.Format("{0}{1}\n内的东西不会保留，确定拆除吗？", MBuilding.name, ((Vector2)MBuilding.transform.position).ToString()),
-                    BuildingManager.Instance.ConfirmDestroy,
-                    delegate
-                    {
-                        if (MBuilding.IsBuilt && BuildingManager.Instance.ToDestroy == MBuilding)
-                        {
-                            BuildingManager.Instance.CannotDestroy();
-                        }
-                    });
+                if (IsBuilt && BuildingManager.Instance.ToDestroy == this)
+                {
+                    BuildingManager.Instance.CannotDestroy();
+                }
             });
-        }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected override void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && isActiveAndEnabled)
+        base.OnTriggerEnter2D(collision);
+        if (collision.CompareTag("Player") && isActiveAndEnabled && IsBuilt)
         {
             WarehouseManager.Instance.CanStore(this);
         }
     }
 
-    private void OnTriggerStay2D(Collider2D collision)
+    protected override void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && !WarehouseManager.Instance.IsUIOpen && isActiveAndEnabled)
+        base.OnTriggerStay2D(collision);
+        if (collision.CompareTag("Player") && !WarehouseManager.Instance.IsUIOpen && isActiveAndEnabled && IsBuilt)
         {
             WarehouseManager.Instance.CanStore(this);
         }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    protected override void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled)
+        base.OnTriggerExit2D(collision);
+        if (collision.CompareTag("Player") && WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled && IsBuilt)
         {
             WarehouseManager.Instance.CannotStore();
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    /*protected override void OnTriggerEnter(Collider other)
     {
+        base.OnTriggerEnter(other);
         if (other.tag == "Player" && isActiveAndEnabled)
         {
             WarehouseManager.Instance.CanStore(this);
         }
     }
 
-    private void OnTriggerStay(Collider other)
+    protected override void OnTriggerStay(Collider other)
     {
+        base.OnTriggerStay(other);
         if (other.tag == "Player" && !WarehouseManager.Instance.IsUIOpen && isActiveAndEnabled)
         {
             WarehouseManager.Instance.CanStore(this);
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    protected override void OnTriggerExit(Collider other)
     {
+        base.OnTriggerExit(other);
         if (other.tag == "Player" && WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled)
         {
             WarehouseManager.Instance.CannotStore();
         }
-    }
+    }*/
 }

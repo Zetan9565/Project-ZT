@@ -7,13 +7,9 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
-public class MyUtilities
+public class ZetanUtilities
 {
     public static bool IsMouseInsideScreen => Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height;
-
-    public static Vector2 ScreenCenter => new Vector2(Screen.width / 2, Screen.height / 2);
-
-    public static Vector3 MousePositionAsWorld => Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
     /// <summary>
     /// 概率计算
@@ -31,6 +27,51 @@ public class MyUtilities
         if (!gameObject) return;
         if (gameObject.activeSelf != value) gameObject.SetActive(value);
     }
+
+    public static Rect GetScreenSpaceRect(RectTransform rectTransform)
+    {
+        Vector2 size = Vector2.Scale(rectTransform.rect.size, rectTransform.lossyScale);
+        float x = rectTransform.position.x + rectTransform.anchoredPosition.x;
+        float y = Screen.height - (rectTransform.position.y - rectTransform.anchoredPosition.y);
+        return new Rect(x, y, size.x, size.y);
+    }
+
+    public static void DrawGizmosCircle(Vector3 center, float radius, float delta, Color color, bool horizontal)
+    {
+        if (delta < 0.0001f) delta = 0.0001f;
+        Color colorBef = Gizmos.color;
+        Gizmos.color = color;
+        Vector3 first = Vector3.zero;
+        Vector3 from = Vector3.zero;
+        for (float perimeter = 0; perimeter < 2 * Mathf.PI; perimeter += delta)
+        {
+            float x = center.x + radius * Mathf.Cos(perimeter);
+            float yz = horizontal ? center.z : center.y + radius * Mathf.Sin(perimeter);
+            Vector3 to = new Vector3(x, horizontal ? 0 : yz, horizontal ? yz : 0);
+            if (perimeter == 0) first = to;
+            else Gizmos.DrawLine(from, to);
+            from = to;
+        }
+        Gizmos.DrawLine(first, from);
+        Gizmos.color = colorBef;
+    }
+
+    public static FileStream OpenFile(string path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite)
+    {
+        try
+        {
+            return new FileStream(path, fileMode, fileAccess);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    #region Vector相关
+    public static Vector2 ScreenCenter => new Vector2(Screen.width / 2, Screen.height / 2);
+
+    public static Vector3 MousePositionAsWorld => Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
     public static Vector3 PositionToGrid(Vector3 originalPos, float gridSize = 1.0f, float offset = 1.0f)
     {
@@ -70,7 +111,7 @@ public class MyUtilities
         return v1.x > v2.x && v1.y >= v2.y && v1.z >= v2.z || v1.x >= v2.x && v1.y > v2.y && v1.z >= v2.z || v1.x >= v2.x && v1.y >= v2.y && v1.z > v2.z;
     }
 
-    public static Vector3 CenterOf(Vector3 point1, Vector3 point2)
+    public static Vector3 CenterBetween(Vector3 point1, Vector3 point2)
     {
         float x = point1.x - (point1.x - point2.x) / 2;
         float y = point1.y - (point1.y - point2.y) / 2;
@@ -78,22 +119,11 @@ public class MyUtilities
         return new Vector3(x, y, z);
     }
 
-    public static Vector3 SizeOf(Vector3 point1, Vector3 point2)
+    public static Vector3 SizeBetween(Vector3 point1, Vector3 point2)
     {
         return new Vector3(Mathf.Abs(point1.x - point2.x), Mathf.Abs(point1.y - point2.y), Mathf.Abs(point1.z - point2.z));
     }
-
-    public static FileStream OpenFile(string path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite)
-    {
-        try
-        {
-            return new FileStream(path, fileMode, fileAccess);
-        }
-        catch
-        {
-            return null;
-        }
-    }
+    #endregion
 
     #region 文件安全相关
     /// <summary>
@@ -595,6 +625,10 @@ public class ScopeInt
     {
         return original.Current;
     }
+    public static implicit operator ScopeFloat(ScopeInt original)
+    {
+        return new ScopeFloat(original.Min, original.Max) { Current = original.Current };
+    }
     #endregion
 
     public override string ToString()
@@ -950,6 +984,10 @@ public class ScopeFloat
     public static explicit operator int(ScopeFloat original)
     {
         return (int)original.Current;
+    }
+    public static explicit operator ScopeInt(ScopeFloat original)
+    {
+        return new ScopeInt((int)original.Min, (int)original.Max) { Current = (int)original.Current };
     }
     #endregion
 

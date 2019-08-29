@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LootManager : SingletonMonoBehaviour<LootManager>, IWindow
+public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
 {
     [SerializeField]
     private LootUI UI;
@@ -55,7 +55,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindow
             if (info.Amount == 1) OnTake(info, 1);
             else
             {
-                AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+                AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.NewAmount(delegate
                 {
                     OnTake(info, (int)AmountManager.Instance.Amount);
@@ -147,7 +147,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindow
         CannotPick();
         if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();
     }
-    void IWindow.OpenCloseWindow() { }
+    void IWindowHandler.OpenCloseWindow() { }
     public void PauseDisplay(bool pause)
     {
         if (!UI || !UI.gameObject) return;

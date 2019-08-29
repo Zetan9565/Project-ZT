@@ -16,6 +16,9 @@ public class GatheringInformation : ScriptableObject
     }
 
     [SerializeField]
+#if UNITY_EDITOR
+    [EnumMemberNames("手动", "斧子", "镐子", "铲子", "锄头")]
+#endif
     private GatherType gatherType;
     public GatherType GatherType
     {
@@ -68,6 +71,24 @@ public class GatheringInformation : ScriptableObject
 }
 public enum GatherType
 {
-    Ore,
-    Plant
+    /// <summary>
+    /// 手采
+    /// </summary>
+    Hands,
+    /// <summary>
+    /// 斧子
+    /// </summary>
+    Axe,
+    /// <summary>
+    /// 镐子
+    /// </summary>
+    Shovel,
+    /// <summary>
+    /// 铲子
+    /// </summary>
+    Spade,
+    /// <summary>
+    /// 锄头
+    /// </summary>
+    Hoe
 }

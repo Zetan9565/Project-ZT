@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindow
+public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindowHandler
 {
     [SerializeField]
     private WarehouseUI UI;
@@ -35,7 +35,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             itemAgents.Add(ia);
             ia.Init(ItemAgentType.Warehouse, itemAgents.IndexOf(ia), UI.gridRect);
             ia.Empty();
-            MyUtilities.SetActive(ia.gameObject, false);
+            ZetanUtilities.SetActive(ia.gameObject, false);
         }
     }
 
@@ -86,7 +86,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
                 MessageManager.Instance.NewMessage(string.Format("存入了1个 [{0}]", info.ItemName));
             else
             {
-                AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+                AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.NewAmount(delegate
                 {
                     if (OnStore(info, (int)AmountManager.Instance.Amount))
@@ -163,7 +163,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
                 MessageManager.Instance.NewMessage(string.Format("取出了1个 [{0}]", info.ItemName));
             else
             {
-                AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+                AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.NewAmount(delegate
                 {
                     if (OnTakeOut(info, (int)AmountManager.Instance.Amount))
@@ -247,7 +247,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         {
             ia.FinishDrag();
             ia.Empty();
-            MyUtilities.SetActive(ia.gameObject, false);
+            ZetanUtilities.SetActive(ia.gameObject, false);
         }
         if (BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.CloseWindow();
         ItemWindowManager.Instance.CloseItemWindow();
@@ -256,7 +256,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         UIManager.Instance.EnableJoyStick(true);
     }
 
-    void IWindow.OpenCloseWindow() { }
+    void IWindowHandler.OpenCloseWindow() { }
 
     public void PauseDisplay(bool pause)
     {
@@ -322,7 +322,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         if (DialogueManager.Instance.TalkAble || DialogueManager.Instance.IsUIOpen || IsUIOpen) return;
         MWarehouse = agent.MWarehouse;
         StoreAble = true;
-        UIManager.Instance.EnableInteractive(true, agent.MBuilding.name);
+        UIManager.Instance.EnableInteractive(true, agent.name);
     }
 
     public void CannotStore()
@@ -353,7 +353,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         if (!UI || !UI.gameObject || !MWarehouse) return;
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
-            MyUtilities.SetActive(itemAgents[i].gameObject, true);
+            ZetanUtilities.SetActive(itemAgents[i].gameObject, true);
         }
     }
 
@@ -363,8 +363,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsEquipment)
-                MyUtilities.SetActive(itemAgents[i].gameObject, true);
-            else MyUtilities.SetActive(itemAgents[i].gameObject, false);
+                ZetanUtilities.SetActive(itemAgents[i].gameObject, true);
+            else ZetanUtilities.SetActive(itemAgents[i].gameObject, false);
         }
     }
 
@@ -374,8 +374,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsConsumable)
-                MyUtilities.SetActive(itemAgents[i].gameObject, true);
-            else MyUtilities.SetActive(itemAgents[i].gameObject, false);
+                ZetanUtilities.SetActive(itemAgents[i].gameObject, true);
+            else ZetanUtilities.SetActive(itemAgents[i].gameObject, false);
         }
     }
 
@@ -385,8 +385,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsMaterial)
-                MyUtilities.SetActive(itemAgents[i].gameObject, true);
-            else MyUtilities.SetActive(itemAgents[i].gameObject, false);
+                ZetanUtilities.SetActive(itemAgents[i].gameObject, true);
+            else ZetanUtilities.SetActive(itemAgents[i].gameObject, false);
         }
     }
     #endregion

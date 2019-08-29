@@ -4,7 +4,7 @@ using System.Text;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
+public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
 {
     [SerializeField]
     private QuestUI UI;
@@ -20,12 +20,14 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
         }
     }
 
-    public readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
+    private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
     private readonly List<QuestAgent> questAgents = new List<QuestAgent>();
     private readonly List<QuestAgent> completeQuestAgents = new List<QuestAgent>();
     private readonly List<QuestGroupAgent> questGroupAgents = new List<QuestGroupAgent>();
     private readonly List<QuestGroupAgent> cmpltQuestGroupAgents = new List<QuestGroupAgent>();
     private readonly List<QuestBoardAgent> questBoardAgents = new List<QuestBoardAgent>();
+    private readonly Dictionary<Objective, MapIcon> questIcons = new Dictionary<Objective, MapIcon>();
+
 
     [SerializeField, Header("任务列表")]
 #if UNITY_EDITOR
@@ -63,9 +65,9 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
     /// <param name="loadMode">是否读档模式</param>
     public bool AcceptQuest(Quest quest, bool loadMode = false)
     {
-        if (!quest)
+        if (!quest || !quest.IsValid)
         {
-            MessageManager.Instance.NewMessage("空任务");
+            MessageManager.Instance.NewMessage("无效任务");
             return false;
         }
         if (HasOngoingQuest(quest))
@@ -106,96 +108,50 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             if (o is CollectObjective)
             {
                 CollectObjective co = o as CollectObjective;
-                try
-                {
-                    BackpackManager.Instance.OnGetItemEvent += co.UpdateCollectAmountUp;
-                    BackpackManager.Instance.OnLoseItemEvent += co.UpdateCollectAmountDown;
-                    if (co.CheckBagAtAcpt && !loadMode) co.UpdateCollectAmountUp(co.Item, BackpackManager.Instance.GetItemAmount(co.Item.ID));
-                }
-                catch
-                {
-                    BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmountUp;
-                    BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
-                    MessageManager.Instance.NewMessage(string.Format("[尝试使用null道具] 任务名称：" + quest.Title));
-                    continue;
-                }
+                BackpackManager.Instance.OnGetItemEvent += co.UpdateCollectAmount;
+                BackpackManager.Instance.OnLoseItemEvent += co.UpdateCollectAmountDown;
+                if (co.CheckBagAtAcpt && !loadMode) co.UpdateCollectAmount(co.Item, BackpackManager.Instance.GetItemAmount(co.Item.ID));
             }
-            else if (o is KillObjective)
+            if (o is KillObjective)
             {
                 KillObjective ko = o as KillObjective;
-                try
+                switch (ko.ObjectiveType)
                 {
-                    switch (ko.ObjectiveType)
-                    {
-                        case KillObjectiveType.Specific:
-                            foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
+                    case KillObjectiveType.Specific:
+                        foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
+                            enemy.OnDeathEvent += ko.UpdateKillAmount;
+                        break;
+                    case KillObjectiveType.Race:
+                        foreach (List<Enemy> enemies in
+                            GameManager.Enermies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
+                            foreach (Enemy enemy in enemies)
                                 enemy.OnDeathEvent += ko.UpdateKillAmount;
-                            break;
-                        case KillObjectiveType.Race:
-                            foreach (List<Enemy> enemies in
-                                GameManager.Enermies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
-                                foreach (Enemy enemy in enemies)
-                                    enemy.OnDeathEvent += ko.UpdateKillAmount;
-                            break;
-                        case KillObjectiveType.Any:
-                            foreach (List<Enemy> enemies in GameManager.Enermies.Select(x => x.Value))
-                                foreach (Enemy enemy in enemies)
-                                    enemy.OnDeathEvent += ko.UpdateKillAmount;
-                            break;
-                    }
-                }
-                catch
-                {
-                    MessageManager.Instance.NewMessage(string.Format("[找不到敌人] ID: {0}", ko.Enemy.ID));
-                    continue;
+                        break;
+                    case KillObjectiveType.Any:
+                        foreach (List<Enemy> enemies in GameManager.Enermies.Select(x => x.Value))
+                            foreach (Enemy enemy in enemies)
+                                enemy.OnDeathEvent += ko.UpdateKillAmount;
+                        break;
                 }
             }
-            else if (o is TalkObjective)
-            {
-                TalkObjective to = o as TalkObjective;
-                try
-                {
-                    if (!o.IsComplete) GameManager.TalkerDatas[to.Talker.ID].objectivesTalkToThis.Add(to);
-                }
-                catch
-                {
-                    MessageManager.Instance.NewMessage(string.Format("[找不到NPC] ID: {0}", to.Talker.ID));
-                    continue;
-                }
-            }
-            else if (o is MoveObjective)
-            {
-                MoveObjective mo = o as MoveObjective;
-                try
-                {
-                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent += mo.UpdateMoveState;
-                }
-                catch
-                {
-                    MessageManager.Instance.NewMessage(string.Format("[找不到任务点] ID: {0}", mo.PointID));
-                    continue;
-                }
-            }
-            else if (o is CustomObjective)
+            if (o is TalkObjective)
+                if (!o.IsComplete) GameManager.TalkerDatas[(o as TalkObjective).NPCToTalk.ID].objectivesTalkToThis.Add(o as TalkObjective);
+            if (o is MoveObjective)
+                GameManager.QuestPoints[(o as MoveObjective).PointID].OnMoveIntoEvent += (o as MoveObjective).UpdateMoveState;
+            if (o is SubmitObjective)
+                if (!o.IsComplete) GameManager.TalkerDatas[(o as SubmitObjective).NPCToSubmit.ID].objectivesSubmitToThis.Add(o as SubmitObjective);
+            if (o is CustomObjective)
             {
                 CustomObjective cuo = o as CustomObjective;
                 TriggerManager.Instance.OnTriggerSetEvent += cuo.UpdateTriggerState;
                 if (cuo.CheckStateAtAcpt) TriggerManager.Instance.SetTrigger(cuo.TriggerName, TriggerManager.Instance.GetTriggerState(cuo.TriggerName));
             }
+            o.OnStateChangeEvent += OnObjectiveStateChange;
         }
         quest.IsOngoing = true;
         QuestsOngoing.Add(quest);
         if (!quest.SbmtOnOriginalNPC)
-        {
-            try
-            {
-                GameManager.TalkerDatas[quest.NPCToSubmit.ID].TransferQuestToThis(quest);
-            }
-            catch
-            {
-                MessageManager.Instance.NewMessage(string.Format("[找不到NPC] ID: {0}", quest.NPCToSubmit));
-            }
-        }
+            GameManager.TalkerDatas[quest.NPCToSubmit.ID].TransferQuestToThis(quest);
         if (!loadMode)
             MessageManager.Instance.NewMessage("接取了任务 [" + quest.Title + "]");
         if (QuestsOngoing.Count > 0)
@@ -204,6 +160,8 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             UI.questBoard.blocksRaycasts = true;
         }
         UpdateUI();
+        Objective firstObj = quest.ObjectiveInstances[0];
+        CreateObjectiveIcon(firstObj);
         return true;
     }
     /// <summary>
@@ -218,11 +176,12 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             QuestsOngoing.Remove(quest);
             foreach (Objective o in quest.ObjectiveInstances)
             {
+                o.OnStateChangeEvent -= OnObjectiveStateChange;
                 if (o is CollectObjective)
                 {
                     CollectObjective co = o as CollectObjective;
                     co.CurrentAmount = 0;
-                    BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmountUp;
+                    BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmount;
                     BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
                 }
                 if (o is KillObjective)
@@ -252,7 +211,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
                 {
                     TalkObjective to = o as TalkObjective;
                     to.CurrentAmount = 0;
-                    GameManager.TalkerDatas[to.Talker.ID].objectivesTalkToThis.RemoveAll(x => x == to);
+                    GameManager.TalkerDatas[to.NPCToTalk.ID].objectivesTalkToThis.RemoveAll(x => x == to);
                     DialogueManager.Instance.RemoveDialogueData(to.Dialogue);
                 }
                 if (o is MoveObjective)
@@ -261,16 +220,24 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
                     mo.CurrentAmount = 0;
                     GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveState;
                 }
-                else if (o is CustomObjective)
+                if (o is SubmitObjective)
+                {
+                    SubmitObjective so = o as SubmitObjective;
+                    so.CurrentAmount = 0;
+                    GameManager.TalkerDatas[so.NPCToSubmit.ID].objectivesSubmitToThis.RemoveAll(x => x == so);
+                }
+                if (o is CustomObjective)
                 {
                     CustomObjective cuo = o as CustomObjective;
                     cuo.CurrentAmount = 0;
                     TriggerManager.Instance.OnTriggerSetEvent -= cuo.UpdateTriggerState;
                 }
+                questIcons.TryGetValue(o, out MapIcon icon);
+                if (icon) MapManager.Instance.RemoveMapIcon(icon);
             }
             if (!quest.SbmtOnOriginalNPC)
             {
-                quest.OriginalQuestGiver.TransferQuestToThis(quest);
+                quest.originalQuestHolder.TransferQuestToThis(quest);
             }
             if (QuestsOngoing.Count < 1)
             {
@@ -279,6 +246,8 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             }
             return true;
         }
+        else if (!quest.Abandonable)
+            ConfirmManager.Instance.NewConfirm("该任务无法放弃。");
         return false;
     }
     /// <summary>
@@ -332,7 +301,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             quest.IsOngoing = false;
             QuestsOngoing.Remove(quest);
             RemoveQuestAgentByQuest(quest);
-            quest.CurrentQuestGiver.questInstances.Remove(quest);
+            quest.currentQuestHolder.questInstances.Remove(quest);
             QuestsComplete.Add(quest);
             QuestAgent cqa;
             if (quest.Group)
@@ -363,10 +332,11 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             completeQuestAgents.Add(cqa);
             foreach (Objective o in quest.ObjectiveInstances)
             {
+                o.OnStateChangeEvent -= OnObjectiveStateChange;
                 if (o is CollectObjective)
                 {
                     CollectObjective co = o as CollectObjective;
-                    BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmountUp;
+                    BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmount;
                     BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
                     if (!loadMode && co.LoseItemAtSbmt) BackpackManager.Instance.LoseItem(co.Item, o.Amount);
                 }
@@ -394,18 +364,24 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
                 }
                 if (o is TalkObjective)
                 {
-                    GameManager.TalkerDatas[(o as TalkObjective).Talker.ID].objectivesTalkToThis.RemoveAll(x => x == (o as TalkObjective));
+                    GameManager.TalkerDatas[(o as TalkObjective).NPCToTalk.ID].objectivesTalkToThis.RemoveAll(x => x == (o as TalkObjective));
                 }
                 if (o is MoveObjective)
                 {
                     MoveObjective mo = o as MoveObjective;
                     GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveState;
                 }
-                else if (o is CustomObjective)
+                if (o is SubmitObjective)
+                {
+                    GameManager.TalkerDatas[(o as SubmitObjective).NPCToSubmit.ID].objectivesSubmitToThis.RemoveAll(x => x == (o as SubmitObjective));
+                }
+                if (o is CustomObjective)
                 {
                     CustomObjective cuo = o as CustomObjective;
                     TriggerManager.Instance.OnTriggerSetEvent -= cuo.UpdateTriggerState;
                 }
+                questIcons.TryGetValue(o, out MapIcon icon);
+                if (icon) MapManager.Instance.RemoveMapIcon(icon);
             }
             if (!loadMode)
             {
@@ -438,12 +414,12 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
 
     public void TraceQuest(Quest quest)
     {
-        if (!quest || !AStarManager.Instance || !PlayerManager.Instance.PlayerController.Unit) return;
-        if (quest.IsComplete && GameManager.Talkers[quest.CurrentQuestGiver.TalkerID])
+        if (!quest || !quest.IsValid || !AStarManager.Instance || !PlayerManager.Instance.PlayerController.Unit) return;
+        if (quest.IsComplete && GameManager.Talkers[quest.currentQuestHolder.TalkerID])
         {
             PlayerManager.Instance.PlayerController.Unit.IsFollowingTarget = false;
             PlayerManager.Instance.PlayerController.Unit.ShowPath(true);
-            PlayerManager.Instance.PlayerController.Unit.SetDestination(GameManager.Talkers[quest.CurrentQuestGiver.TalkerID].transform.position, false);
+            PlayerManager.Instance.PlayerController.Unit.SetDestination(GameManager.Talkers[quest.currentQuestHolder.TalkerID].transform.position, false);
         }
         else if (quest.ObjectiveInstances.Count > 0)
             using (var objectiveEnum = quest.ObjectiveInstances.GetEnumerator())
@@ -472,31 +448,100 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
                 if (currentObj is TalkObjective)
                 {
                     TalkObjective to = currentObj as TalkObjective;
-                    if (GameManager.Talkers.ContainsKey(to.Talker.ID))
-                        destination = GameManager.Talkers[to.Talker.ID].transform.position;
+                    GameManager.TalkerDatas.TryGetValue(to.NPCToTalk.ID, out TalkerData talkerFound);
+                    if (talkerFound)
+                    {
+                        destination = talkerFound.currentPostition;
+                        SetDestination();
+                    }
                 }
                 else if (currentObj is KillObjective)
                 {
                     KillObjective ko = currentObj as KillObjective;
-                    if (GameManager.Enermies.ContainsKey(ko.Enemy.ID))
+                    GameManager.Enermies.TryGetValue(ko.Enemy.ID, out List<Enemy> enemiesFound);
+                    if (enemiesFound != null && enemiesFound.Count > 0)
                     {
-                        Enemy enemy = GameManager.Enermies[ko.Enemy.ID].FirstOrDefault();
-                        if (enemy) destination = enemy.transform.position;
+                        Enemy enemy = enemiesFound.FirstOrDefault();
+                        if (enemy)
+                        {
+                            destination = enemy.transform.position;
+                            SetDestination();
+                        }
                     }
                 }
                 else if (currentObj is MoveObjective)
                 {
                     MoveObjective mo = currentObj as MoveObjective;
-                    if (GameManager.QuestPoints[mo.PointID])
-                        destination = GameManager.QuestPoints[mo.PointID].transform.position;
+                    GameManager.QuestPoints.TryGetValue(mo.PointID, out QuestPoint pointFound);
+                    if (pointFound)
+                    {
+                        destination = pointFound.transform.position;
+                        SetDestination();
+                    }
                 }
-                if (destination != default)
+                else if (currentObj is SubmitObjective)
+                {
+                    SubmitObjective so = currentObj as SubmitObjective;
+                    GameManager.TalkerDatas.TryGetValue(so.NPCToSubmit.ID, out TalkerData talkerFound);
+                    if (talkerFound)
+                    {
+                        destination = talkerFound.currentPostition;
+                        SetDestination();
+                    }
+                }
+
+                void SetDestination()
                 {
                     PlayerManager.Instance.PlayerController.Unit.IsFollowingTarget = false;
                     PlayerManager.Instance.PlayerController.Unit.ShowPath(true);
+                    PlayerManager.Instance.PlayerController.Unit.SetDestination(destination, false);
                 }
-                PlayerManager.Instance.PlayerController.Unit.SetDestination(destination, false);
             }
+    }
+
+    private void OnObjectiveStateChange(Objective objective, bool stateBef)
+    {
+        Objective nextToDo = null;
+        Quest quest = objective.runtimeParent;
+        List<Objective> concurrentObj = new List<Objective>();
+        for (int i = 0; i < quest.ObjectiveInstances.Count - 1; i++)
+        {
+            if (quest.ObjectiveInstances[i] == objective)
+            {
+                for (int j = i - 1; j > -1; j--)//往前找可以并发的目标
+                {
+                    Objective prevObj = quest.ObjectiveInstances[j];
+                    if (!prevObj.Concurrent) break;//只要碰到一个不能并发的，就中断
+                    else concurrentObj.Add(prevObj);
+                }
+                for (int j = i + 1; j < quest.ObjectiveInstances.Count; j++)//往后找可以并发的目标
+                {
+                    Objective nextObj = quest.ObjectiveInstances[j];
+                    if (!nextObj.Concurrent)//只要碰到一个不能并发的，就中断
+                    {
+                        if (nextObj.AllPrevObjCmplt)
+                            nextToDo = nextObj;//同时，若该不能并发目标的所有前置目标都完成了，那么它就是下一个要做的目标
+                        break;
+                    }
+                    else concurrentObj.Add(nextObj);
+                }
+                break;
+            }
+        }
+        if (!nextToDo)//当目标不能并发时此变量才不为空，所以此时表示所有后置目标都是可并发的，或者不存在后置目标
+        {
+            concurrentObj.RemoveAll(x => x.IsComplete);//把所有已完成的可并发目标去掉
+            if (concurrentObj.Count > 0)//若还剩下可并发目标，则随机选一个作为下一个要做的目标
+            {
+                int index = Random.Range(0, concurrentObj.Count);
+                nextToDo = concurrentObj[index];
+            }
+        }
+        if (!stateBef && objective.IsComplete)//从没完成变为完成
+        {
+            RemoveObjectiveIcon(objective);
+            CreateObjectiveIcon(nextToDo);
+        }
     }
     #endregion
 
@@ -531,7 +576,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             }
             UI.descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标</b>\n{3}",
                                     selectedQuest.Title,
-                                    selectedQuest.OriginalQuestGiver.TalkerName,
+                                    selectedQuest.originalQuestHolder.TalkerName,
                                     selectedQuest.Description,
                                     objectives.ToString()).ToString();
         }
@@ -550,7 +595,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
             }
             UI.descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标{3}</b>\n{4}",
                                    selectedQuest.Title,
-                                   selectedQuest.OriginalQuestGiver.TalkerName,
+                                   selectedQuest.originalQuestHolder.TalkerName,
                                    selectedQuest.Description,
                                    selectedQuest.IsComplete ? "(完成)" : selectedQuest.IsOngoing ? "(进行中)" : string.Empty,
                                    objectives.ToString()).ToString();
@@ -594,8 +639,8 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
                     break;
                 }
             }
-        MyUtilities.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
-        MyUtilities.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
+        ZetanUtilities.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
+        ZetanUtilities.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = true;
         ItemWindowManager.Instance.CloseItemWindow();
@@ -685,6 +730,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
     {
         return QuestsComplete.Exists(x => x.ID == questID);
     }
+
     private void RemoveQuestAgentByQuest(Quest quest)
     {
         QuestAgent qa = questAgents.Find(x => x.MQuest == quest);
@@ -722,9 +768,88 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindow
     {
         return QuestsRequiredItem(item, leftAmount).Count() > 0;
     }
-    public IEnumerable<Quest> QuestsRequiredItem(ItemBase item, int leftAmount)
+    private IEnumerable<Quest> QuestsRequiredItem(ItemBase item, int leftAmount)
     {
         return QuestsOngoing.FindAll(x => x.RequiredItem(item, leftAmount)).AsEnumerable();
+    }
+
+    private void CreateObjectiveIcon(Objective objective)
+    {
+        if (!objective) return;
+        Vector3 destination;
+        if (objective is TalkObjective)
+        {
+            TalkObjective to = objective as TalkObjective;
+            GameManager.TalkerDatas.TryGetValue(to.NPCToTalk.ID, out TalkerData talkerFound);
+            if (talkerFound)
+            {
+                destination = talkerFound.currentPostition;
+                CreateIcon();
+            }
+        }
+        else if (objective is KillObjective)
+        {
+            KillObjective ko = objective as KillObjective;
+            GameManager.Enermies.TryGetValue(ko.Enemy.ID, out List<Enemy> enemiesFound);
+            if (enemiesFound != null && enemiesFound.Count > 0)
+            {
+                Enemy enemy = enemiesFound.FirstOrDefault();
+                if (enemy)
+                {
+                    destination = enemy.transform.position;
+                    CreateIcon();
+                }
+            }
+        }
+        else if (objective is MoveObjective)
+        {
+            MoveObjective mo = objective as MoveObjective;
+            GameManager.QuestPoints.TryGetValue(mo.PointID, out QuestPoint pointFound);
+            if (pointFound)
+            {
+                destination = pointFound.transform.position;
+                CreateIcon();
+            }
+        }
+        else if (objective is SubmitObjective)
+        {
+            SubmitObjective so = objective as SubmitObjective;
+            GameManager.TalkerDatas.TryGetValue(so.NPCToSubmit.ID, out TalkerData talkerFound);
+            if (talkerFound)
+            {
+                destination = talkerFound.currentPostition;
+                CreateIcon();
+            }
+        }
+
+        void CreateIcon()
+        {
+            var icon = MapManager.Instance.CreateMark(destination, true);
+            if (icon)
+            {
+                questIcons.TryGetValue(objective, out MapIcon iconExist);
+                if (iconExist)
+                {
+                    MapManager.Instance.RemoveMapIcon(iconExist);
+                    questIcons[objective] = icon;
+                }
+                else questIcons.Add(objective, icon);
+            }
+        }
+    }
+    private void RemoveObjectiveIcon(Objective objective)
+    {
+        if (!objective) return;
+        questIcons.TryGetValue(objective, out MapIcon icon);
+        if (icon) MapManager.Instance.RemoveMapIcon(icon);
+        Quest quest = objective.runtimeParent;
+        if (quest.IsValid && quest.IsComplete && !quest.IsFinished)
+        {
+            if (quest.SbmtOnOriginalNPC)
+                MapManager.Instance.CreateMark(GameManager.TalkerDatas[quest.originalQuestHolder.TalkerID].currentPostition, true);
+            else
+                MapManager.Instance.CreateMark(GameManager.TalkerDatas[quest.currentQuestHolder.TalkerID].currentPostition, true);
+        }
     }
 
     public void SetUI(QuestUI UI)

@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
+public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandler
 {
     [SerializeField]
     private MakingUI UI;
@@ -63,7 +63,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         }
         else
         {
-            AmountManager.Instance.SetPosition(MyUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定制作{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, currentItem.name), delegate
@@ -165,7 +165,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         ItemWindowManager.Instance.CloseItemWindow();
     }
 
-    void IWindow.OpenCloseWindow() { }
+    void IWindowHandler.OpenCloseWindow() { }
 
     public void PauseDisplay(bool pause)
     {
@@ -250,7 +250,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         if (!UI || !UI.gameObject) return;
         foreach (MakingAgent ia in MakingAgents)
         {
-            MyUtilities.SetActive(ia.gameObject, true);
+            ZetanUtilities.SetActive(ia.gameObject, true);
         }
     }
 
@@ -259,8 +259,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         foreach (MakingAgent ia in MakingAgents)
         {
             if (ia.MItem.IsEquipment)
-                MyUtilities.SetActive(ia.gameObject, true);
-            else MyUtilities.SetActive(ia.gameObject, false);
+                ZetanUtilities.SetActive(ia.gameObject, true);
+            else ZetanUtilities.SetActive(ia.gameObject, false);
         }
     }
 
@@ -269,8 +269,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         foreach (MakingAgent ia in MakingAgents)
         {
             if (ia.MItem.IsConsumable)
-                MyUtilities.SetActive(ia.gameObject, true);
-            else MyUtilities.SetActive(ia.gameObject, false);
+                ZetanUtilities.SetActive(ia.gameObject, true);
+            else ZetanUtilities.SetActive(ia.gameObject, false);
         }
     }
 
@@ -279,8 +279,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindow
         foreach (MakingAgent ia in MakingAgents)
         {
             if (ia.MItem.IsMaterial)
-                MyUtilities.SetActive(ia.gameObject, true);
-            else MyUtilities.SetActive(ia.gameObject, false);
+                ZetanUtilities.SetActive(ia.gameObject, true);
+            else ZetanUtilities.SetActive(ia.gameObject, false);
         }
     }
     #endregion

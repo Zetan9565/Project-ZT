@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class EscapeMenuManager : SingletonMonoBehaviour<EscapeMenuManager>, IWindow
+public class EscapeMenuManager : SingletonMonoBehaviour<EscapeMenuManager>, IWindowHandler
 {
     [SerializeField]
     private EscapeUI UI;

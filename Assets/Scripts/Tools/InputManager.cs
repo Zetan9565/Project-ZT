@@ -34,7 +34,7 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
 #endif
         if (Input.GetKeyDown(customInfo.InteractiveButton) || Input.GetButtonDownMobile("Interactive"))
         {
-            if (LootManager.Instance.PickAble)
+            if (LootManager.Instance.PickAble)//优先拾取
             {
                 if (!LootManager.Instance.IsPicking)
                     LootManager.Instance.OpenWindow();

@@ -2,10 +2,9 @@
 
 public delegate void MoveToPointListener(QuestPoint point);
 
-[DisallowMultipleComponent]
+[DisallowMultipleComponent, RequireComponent(typeof(MapIconHolder))]
 public class QuestPoint : MonoBehaviour
 {
-
     [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("识别码")]
