@@ -272,7 +272,6 @@ public class ItemAgent : MonoBehaviour, IDragable,
             touchTime += Time.fixedDeltaTime;
             if (touchTime >= 0.5f)
             {
-                isPress = false;
                 OnLongPress();
                 yield break;
             }

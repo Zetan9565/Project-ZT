@@ -23,8 +23,6 @@ public class DialogueInspector : Editor
     TalkerInformation[] npcs;
     string[] npcNames;
 
-    bool cmpltEdit;
-
     private void OnEnable()
     {
         npcs = Resources.LoadAll<TalkerInformation>("");
@@ -46,22 +44,20 @@ public class DialogueInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        if (string.IsNullOrEmpty(dialogue.ID) || dialogue.Words.Exists(w => w.TalkerType == TalkerType.NPC && (!w.TalkerInfo || string.IsNullOrEmpty(w.Words)) ||
+        if (string.IsNullOrEmpty(dialogue.ID) || useUnifiedNPC.boolValue && !useTalkerInfo.boolValue && !unifiedNPC.objectReferenceValue ||
+            dialogue.Words.Exists(w => w.TalkerType == TalkerType.NPC && !useUnifiedNPC.boolValue && !w.TalkerInfo || string.IsNullOrEmpty(w.Words) ||
             w.Options.Exists(b => b && !b.IsValid) || w.NeedToChusCorrectOption && string.IsNullOrEmpty(w.WordsWhenChusWB)))
         {
             EditorGUILayout.HelpBox("该对话存在未补全信息。", MessageType.Warning);
         }
-        else
-            EditorGUILayout.HelpBox("该对话已完整。", MessageType.Info);
+        else EditorGUILayout.HelpBox("该对话已完整。", MessageType.Info);
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
         if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID())
         {
-            if (!string.IsNullOrEmpty(_ID.stringValue) && ExistsID())
-                EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
-            else
-                EditorGUILayout.HelpBox("识别码为空！", MessageType.Error);
+            if (!string.IsNullOrEmpty(_ID.stringValue) && ExistsID()) EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
+            else EditorGUILayout.HelpBox("识别码为空！", MessageType.Error);
             if (GUILayout.Button("自动生成识别码"))
             {
                 _ID.stringValue = GetAutoID();
@@ -117,20 +113,39 @@ public class DialogueInspector : Editor
             EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width * 0.5f, lineHeight), words, new GUIContent(talkerName));
             if (!words.isExpanded)
                 EditorGUI.LabelField(new Rect(rect.x + rect.width * 0.5f, rect.y, rect.width / 4, lineHeight), options.arraySize > 0 ? "( " + options.arraySize + " 个选项)" : string.Empty);
-            EditorGUI.PropertyField(new Rect(rect.x + rect.width * 0.75f, rect.y, rect.width / 4, lineHeight), talkerType, new GUIContent(string.Empty));
+            int oIndex = talkerType.enumValueIndex == 1 ? 0 : (useUnifiedNPC.boolValue ? 1 : (GetNPCIndex(talkerInfo.objectReferenceValue as TalkerInformation) + 1));
+            List<int> indexes = new List<int>() { 0 };
+            List<string> names = new List<string>() { "玩家" };
+            if (!useUnifiedNPC.boolValue)
+            {
+                for (int i = 1; i <= npcNames.Length; i++)
+                {
+                    indexes.Add(i);
+                    names.Add(npcNames[i - 1]);
+                }
+            }
+            else
+            {
+                indexes.Add(1);
+                names.Add("NPC");
+            }
+            oIndex = EditorGUI.IntPopup(new Rect(rect.x + rect.width * 0.75f, rect.y, rect.width / 4, lineHeight), oIndex, names.ToArray(), indexes.ToArray());
+            if (oIndex > 0)
+            {
+                talkerType.enumValueIndex = 0;
+                if (!useUnifiedNPC.boolValue)
+                    if (oIndex <= npcs.Length) talkerInfo.objectReferenceValue = npcs[oIndex - 1];
+                    else talkerInfo.objectReferenceValue = null;
+            }
+            else talkerType.enumValueIndex = 1;
             if (words.isExpanded)
             {
                 int lineCount = 1;
                 if (talkerType.enumValueIndex == (int)TalkerType.NPC && !useUnifiedNPC.boolValue)
                 {
-                    if (dialogue.Words[index].TalkerInfo) talkerInfo.objectReferenceValue =
-                        npcs[EditorGUI.Popup(new Rect(rect.x + rect.width / 2f, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight),
-                        GetNPCIndex(dialogue.Words[index].TalkerInfo), npcNames)];
-                    else if (npcs.Length > 0) talkerInfo.objectReferenceValue =
-                         npcs[EditorGUI.Popup(new Rect(rect.x + rect.width / 2f, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight), 0, npcNames)];
-                    else EditorGUI.Popup(new Rect(rect.x + rect.width / 2f, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight), 0, new string[] { "无可用谈话人" });
+                    EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight), "引用资源");
                     GUI.enabled = false;
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight),
+                    EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight),
                         talkerInfo, new GUIContent(string.Empty));
                     GUI.enabled = true;
                     lineCount++;
@@ -180,7 +195,6 @@ public class DialogueInspector : Editor
                             SerializedProperty optionType = option.FindPropertyRelative("optionType");
                             SerializedProperty hasWordsToSay = option.FindPropertyRelative("hasWordsToSay");
                             SerializedProperty b_talkerType = option.FindPropertyRelative("talkerType");
-                            SerializedProperty b_talkerInfo = option.FindPropertyRelative("talkerInfo");
                             SerializedProperty b_words = option.FindPropertyRelative("words");
                             SerializedProperty dialogue = option.FindPropertyRelative("dialogue");
                             SerializedProperty specifyIndex = option.FindPropertyRelative("specifyIndex");
@@ -305,28 +319,12 @@ public class DialogueInspector : Editor
                                         }
                                         string b_talkerName;
                                         if (b_talkerType.enumValueIndex == (int)TalkerType.NPC)
-                                            b_talkerName = this.dialogue.Words[index].Options[_index] == null ? "(空)" : !this.dialogue.Words[index].TalkerInfo ?
-                                            "(空谈话人)" : this.dialogue.Words[index].Options[_index].TalkerName + "说";
+                                            b_talkerName = this.dialogue.Words[index].TalkerName + "说";
                                         else b_talkerName = "玩家说";
                                         EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight), b_talkerName);
                                         EditorGUI.PropertyField(new Rect(_rect.x + _rect.width / 2, _rect.y + lineHeightSpace * _lineCount, _rect.width / 2, lineHeight),
                                             b_talkerType, new GUIContent(string.Empty));
                                         _lineCount++;
-                                        if (b_talkerType.enumValueIndex == (int)TalkerType.NPC)
-                                        {
-                                            if (this.dialogue.Words[index].Options[_index].TalkerInfo) b_talkerInfo.objectReferenceValue =
-                                                npcs[EditorGUI.Popup(new Rect(_rect.x + _rect.width / 2f, _rect.y + lineHeightSpace * _lineCount, _rect.width / 2f, lineHeight),
-                                                GetNPCIndex(this.dialogue.Words[index].Options[_index].TalkerInfo), npcNames)];
-                                            else if (npcs.Length > 0) b_talkerInfo.objectReferenceValue =
-                                                 npcs[EditorGUI.Popup(new Rect(_rect.x + _rect.width / 2f, _rect.y + lineHeightSpace * _lineCount, _rect.width / 2f, lineHeight), 0, npcNames)];
-                                            else EditorGUI.Popup(new Rect(_rect.x + _rect.width / 2f, _rect.y + lineHeightSpace * _lineCount, _rect.width / 2f, lineHeight),
-                                                "谈话人", 0, new string[] { "无可用谈话人" });
-                                            GUI.enabled = false;
-                                            EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width / 2, lineHeight),
-                                                b_talkerInfo, new GUIContent(string.Empty));
-                                            GUI.enabled = true;
-                                            _lineCount++;
-                                        }
                                         b_words.stringValue = EditorGUI.TextField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                             b_words.stringValue);
                                         _lineCount++;
@@ -362,7 +360,6 @@ public class DialogueInspector : Editor
                             SerializedProperty option = options.GetArrayElementAtIndex(_index);
                             SerializedProperty optionType = option.FindPropertyRelative("optionType");
                             SerializedProperty b_talkerType = option.FindPropertyRelative("talkerType");
-                            SerializedProperty b_talkerInfo = option.FindPropertyRelative("talkerInfo");
                             SerializedProperty b_words = option.FindPropertyRelative("words");
                             SerializedProperty dialogue = option.FindPropertyRelative("dialogue");
                             SerializedProperty goBack = option.FindPropertyRelative("goBack");
@@ -410,10 +407,7 @@ public class DialogueInspector : Editor
                                             }
                                             _lineCount++;//对话粗体
                                         }
-                                        _lineCount++;//谈话人名字
-                                        if (b_talkerType.enumValueIndex == (int)TalkerType.NPC)
-                                            _lineCount += 1;//谈话人选择
-                                        _lineCount++;//说的话
+                                        _lineCount += 2;//谈话人名字、说的话
                                     }
                                     if ((optionType.intValue != (int)WordsOptionType.Choice && optionType.intValue != (int)WordsOptionType.SubmitAndGet && optionType.intValue != (int)WordsOptionType.OnlyGet
                                     || optionType.intValue == (int)WordsOptionType.Choice && indexOfCorrectOption.intValue >= 0) && !this.dialogue.Words[index].NeedToChusCorrectOption)
@@ -565,7 +559,7 @@ public class DialogueInspector : Editor
     {
         if (npcs.Contains(npc))
             return Array.IndexOf(npcs, npc);
-        else return 0;
+        else return -1;
     }
 
     string GetAutoID()

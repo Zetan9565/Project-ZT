@@ -224,35 +224,12 @@ public class WordsOption
     }
 
     [SerializeField]
-    public string TalkerName
-    {
-        get
-        {
-            if (TalkerType == TalkerType.NPC)
-                if (TalkerInfo)
-                    return TalkerInfo.Name;
-                else return string.Empty;
-            else return "玩家角色";
-        }
-    }
-
-    [SerializeField]
     private TalkerType talkerType;
     public TalkerType TalkerType
     {
         get
         {
             return talkerType;
-        }
-    }
-
-    [SerializeField]
-    private TalkerInformation talkerInfo;
-    public TalkerInformation TalkerInfo
-    {
-        get
-        {
-            return talkerInfo;
         }
     }
 
@@ -374,15 +351,17 @@ public class WordsOption
         get
         {
             return !(optionType == WordsOptionType.BranchDialogue && (!dialogue || dialogue.Words.Count < 1)
-                || optionType == WordsOptionType.BranchWords && (TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
-                || HasWordsToSay && (TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
-                || optionType == WordsOptionType.SubmitAndGet && (!ItemToSubmit || !ItemToSubmit.item || TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words))
-                || optionType == WordsOptionType.OnlyGet && (!ItemCanGet || !ItemCanGet.item || TalkerType == TalkerType.NPC && !TalkerInfo || string.IsNullOrEmpty(words)));
+                || optionType == WordsOptionType.BranchWords && string.IsNullOrEmpty(words)
+                || optionType == WordsOptionType.Choice && HasWordsToSay && string.IsNullOrEmpty(words))
+                || optionType == WordsOptionType.SubmitAndGet && (!ItemToSubmit || !ItemToSubmit.item || string.IsNullOrEmpty(words))
+                || optionType == WordsOptionType.OnlyGet && (!ItemCanGet || !ItemCanGet.item || string.IsNullOrEmpty(words));
         }
     }
 
     [HideInInspector]
-    public Dialogue runtimeParent;
+    public Dialogue runtimeDialogParent;
+    [HideInInspector]
+    public int runtimeWordsParentIndex;
 
     [HideInInspector]
     public int runtimeIndexToGoBack;

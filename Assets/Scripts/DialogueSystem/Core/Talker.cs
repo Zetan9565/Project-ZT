@@ -33,21 +33,13 @@ public class Talker : MonoBehaviour
         }
     }
 
-    [SerializeField]
-    private TalkerData data;
-    public TalkerData Data
-    {
-        get
-        {
-            return data;
-        }
-    }
+    public TalkerData Data { get; private set; }
 
     public List<Quest> QuestInstances
     {
         get
         {
-            return data.questInstances;
+            return Data.questInstances;
         }
     }
 
@@ -78,25 +70,20 @@ public class Talker : MonoBehaviour
         GameManager.TalkerDatas.TryGetValue(TalkerID, out TalkerData dataFound);
         if (!dataFound)
         {
+            Data = new TalkerData();
             if (Info.IsVendor)
             {
                 Data.shop = Instantiate(Info.Shop);
                 Data.shop.Init();
             }
-            else if (Info.IsWarehouseAgent)
-            {
-                Data.warehouse = new Warehouse(Info.Warehouse.warehouseSize.Max);
-            }
+            else if (Info.IsWarehouseAgent) Data.warehouse = new Warehouse(Info.Warehouse.warehouseSize.Max);
             Data.info = Info;
             Data.InitQuest(Info.QuestsStored);
-            Data.currentPostition = transform.position;
             GameManager.TalkerDatas.Add(TalkerID, Data);
         }
-        else
-        {
-            dataFound.currentPostition = transform.position;
-            data = dataFound;
-        }
+        else Data = dataFound;
+        Data.currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        Data.currentPostition = transform.position;
         if (Info.IsVendor && !ShopManager.Vendors.Contains(Data)) ShopManager.Vendors.Add(Data);
     }
 
@@ -159,6 +146,7 @@ public class TalkerData
         }
     }
 
+    public string currentScene;
     public Vector3 currentPostition;
 
     public Relationship relationshipInstance;

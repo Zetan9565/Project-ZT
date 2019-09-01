@@ -4,8 +4,6 @@ using UnityEditor;
 [CustomEditor(typeof(MapManager))]
 public class MapManagerInspector : Editor
 {
-    MapManager manager;
-
     SerializedProperty UI;
     SerializedProperty updateMode;
     SerializedProperty player;
@@ -30,7 +28,6 @@ public class MapManagerInspector : Editor
 
     private void OnEnable()
     {
-        manager = target as MapManager;
         UI = serializedObject.FindProperty("UI");
         updateMode = serializedObject.FindProperty("updateMode");
         player = serializedObject.FindProperty("player");
@@ -62,8 +59,8 @@ public class MapManagerInspector : Editor
         EditorGUILayout.PropertyField(use2D, new GUIContent("2D"));
         EditorGUILayout.PropertyField(rotateMap, new GUIContent("旋转地图"));
         EditorGUILayout.EndHorizontal();
-        EditorGUILayout.PropertyField(updateMode, new GUIContent("更新方式"));
         EditorGUILayout.PropertyField(UI);
+        EditorGUILayout.PropertyField(updateMode, new GUIContent("更新方式"));
         if (UI.objectReferenceValue)
         {
             int mode = circle.boolValue ? 1 : 0;
@@ -115,10 +112,7 @@ public class MapManagerInspector : Editor
         if (Application.isPlaying) GUI.enabled = true;
         DrawModeInfo(miniModeInfo, true);
         DrawModeInfo(worldModeInfo, false);
-        if (EditorGUI.EndChangeCheck())
-        {
-            serializedObject.ApplyModifiedProperties();
-        }
+        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
     }
 
     private void DrawModeInfo(SerializedProperty modeInfo, bool mini)
@@ -140,20 +134,25 @@ public class MapManagerInspector : Editor
             if (Application.isPlaying) GUI.enabled = false;
             if (GUILayout.Button("以当前状态作为" + (mini ? "小地图" : "大地图")))
             {
-                if (camera.objectReferenceValue) sizeOfCam.floatValue = (camera.objectReferenceValue as Camera).orthographicSize;
-                windowAnchoreMin.vector2Value = UI.mapWindowRect.anchorMin;
-                windowAnchoreMax.vector2Value = UI.mapWindowRect.anchorMax;
-                mapAnchoreMin.vector2Value = UI.mapRect.anchorMin;
-                mapAnchoreMax.vector2Value = UI.mapRect.anchorMax;
-                anchoredPosition.vector2Value = UI.mapWindowRect.anchoredPosition;
-                sizeOfWindow.vector2Value = UI.mapWindowRect.sizeDelta;
-                sizeOfMap.vector2Value = UI.mapRect.sizeDelta;
+                if (!(mini && isViewingWorldMap.boolValue))
+                {
+                    if (camera.objectReferenceValue) sizeOfCam.floatValue = (camera.objectReferenceValue as Camera).orthographicSize;
+                    windowAnchoreMin.vector2Value = UI.mapWindowRect.anchorMin;
+                    windowAnchoreMax.vector2Value = UI.mapWindowRect.anchorMax;
+                    mapAnchoreMin.vector2Value = UI.mapRect.anchorMin;
+                    mapAnchoreMax.vector2Value = UI.mapRect.anchorMax;
+                    anchoredPosition.vector2Value = UI.mapWindowRect.anchoredPosition;
+                    sizeOfWindow.vector2Value = UI.mapWindowRect.sizeDelta;
+                    sizeOfMap.vector2Value = UI.mapRect.sizeDelta;
+                    if (mini) isViewingWorldMap.boolValue = false;
+                    else isViewingWorldMap.boolValue = true;
+                }
             }
             if (Application.isPlaying) GUI.enabled = true;
             if (GUILayout.Button("切换至" + (mini ? "小地图" : "大地图") + "模式"))
             {
-                if (mini) manager.ToMiniMap();
-                else manager.ToWorldMap();
+                if (mini) (target as MapManager).ToMiniMap();
+                else (target as MapManager).ToWorldMap();
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.PropertyField(modeInfo, new GUIContent(mini ? "小地图模式信息" : "大地图模式信息"));

@@ -194,28 +194,26 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         SayNextWords();
     }
 
-    public void StartBranchDialogue(WordsOption option)
+    public void StartOptionDialogue(WordsOption option)
     {
         if (option == null || !option.IsValid) return;
+        var optionInstance = option.Cloned;
+        optionInstance.runtimeWordsParentIndex = currentDialog.IndexOfWords(currentWords);
         if (currentWords.NeedToChusCorrectOption)
         {
-            wordsOptionInstances.Push(option.Cloned);
-            wordsOptionInstances.Peek().runtimeParent = currentDialog;
+            optionInstance.runtimeDialogParent = currentDialog;
             if (currentWords.IndexOfCorrectOption == currentWords.IndexOfOption(option))
-            {
-                wordsOptionInstances.Peek().runtimeIndexToGoBack = currentDialog.IndexOfWords(currentWords) + 1;
-            }
-            else wordsOptionInstances.Peek().runtimeIndexToGoBack = currentDialog.IndexOfWords(currentWords);
+                optionInstance.runtimeIndexToGoBack = optionInstance.runtimeWordsParentIndex + 1;
+            else optionInstance.runtimeIndexToGoBack = optionInstance.runtimeWordsParentIndex;
         }
         else if (option.GoBack)
         {
-            wordsOptionInstances.Push(option.Cloned);
-            wordsOptionInstances.Peek().runtimeParent = currentDialog;
+            optionInstance.runtimeDialogParent = currentDialog;
             if (option.OptionType == WordsOptionType.SubmitAndGet || option.OptionType == WordsOptionType.OnlyGet || option.IndexToGoBack < 0)
-                wordsOptionInstances.Peek().runtimeIndexToGoBack = currentDialog.IndexOfWords(currentWords);
-            else wordsOptionInstances.Peek().runtimeIndexToGoBack = option.IndexToGoBack;
+                optionInstance.runtimeIndexToGoBack = optionInstance.runtimeWordsParentIndex;
+            else optionInstance.runtimeIndexToGoBack = option.IndexToGoBack;
         }
-        else wordsOptionInstances.Push(option.Cloned);
+        wordsOptionInstances.Push(optionInstance);
         currentOption = option;
         if (option.OptionType == WordsOptionType.SubmitAndGet && option.IsValid)
         {
@@ -240,17 +238,13 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
                         BackpackManager.Instance.GetItem(option.ItemCanGet);
                     }
                 }
-                else
-                {
-                    BackpackManager.Instance.LoseItem(option.ItemToSubmit.item, option.ItemToSubmit.Amount);
-                }
+                else BackpackManager.Instance.LoseItem(option.ItemToSubmit.item, option.ItemToSubmit.Amount);
             }
             else return;
         }
         if (option.OptionType == WordsOptionType.OnlyGet && option.IsValid)
         {
-            if (!BackpackManager.Instance.TryGetItem_Boolean(option.ItemCanGet))
-                return;
+            if (!BackpackManager.Instance.TryGetItem_Boolean(option.ItemCanGet)) return;
             else BackpackManager.Instance.GetItem(option.ItemCanGet);
         }
         if (option.OptionType == WordsOptionType.Choice && (!option.HasWordsToSay || option.HasWordsToSay && string.IsNullOrEmpty(option.Words)))
@@ -259,14 +253,14 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
             SayNextWords();
             return;
         }
-        if (option.OptionType == WordsOptionType.BranchDialogue && option.Dialogue)
-            StartDialogue(wordsOptionInstances.Peek().Dialogue, wordsOptionInstances.Peek().SpecifyIndex);
+        if (option.OptionType == WordsOptionType.BranchDialogue && option.Dialogue) StartDialogue(optionInstance.Dialogue, optionInstance.SpecifyIndex);
         else if (!string.IsNullOrEmpty(option.Words))
         {
-            if (option.GoBack)
-                StartOneWords(new DialogueWords(wordsOptionInstances.Peek().TalkerInfo, wordsOptionInstances.Peek().Words, wordsOptionInstances.Peek().TalkerType),
-                    currentDialog, wordsOptionInstances.Peek().runtimeIndexToGoBack);
-            else StartOneWords(new DialogueWords(wordsOptionInstances.Peek().TalkerInfo, wordsOptionInstances.Peek().Words, wordsOptionInstances.Peek().TalkerType));
+            TalkerInformation talkerInfo = null;
+            if (optionInstance.runtimeWordsParentIndex > -1 && optionInstance.runtimeWordsParentIndex < currentDialog.Words.Count)
+                talkerInfo = currentDialog.Words[optionInstance.runtimeWordsParentIndex].TalkerInfo;
+            if (option.GoBack) StartOneWords(new DialogueWords(talkerInfo, optionInstance.Words, optionInstance.TalkerType), currentDialog, optionInstance.runtimeIndexToGoBack);
+            else StartOneWords(new DialogueWords(talkerInfo, optionInstance.Words, optionInstance.TalkerType));
             SayNextWords();
         }
     }
@@ -376,7 +370,6 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         }
         CheckPages();
     }
-
     /// <summary>
     /// 生成已完成任务选项
     /// </summary>
@@ -400,7 +393,6 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         }
         CheckPages();
     }
-
     /// <summary>
     /// 生成对话目标列表的选项
     /// </summary>
@@ -433,7 +425,6 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         }
         CheckPages();
     }
-
     /// <summary>
     /// 生成分支对话选项
     /// </summary>
@@ -498,7 +489,6 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         else if (Page > 1 && MaxPage > 1) SetPageArea(true, true, true);
         UI.pageText.text = Page.ToString() + "/" + MaxPage.ToString();
     }
-
     public void OptionPageDown()
     {
         if (Page >= MaxPage || !IsUIOpen || IsPausing) return;
@@ -540,33 +530,6 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         CheckPages();
     }
 
-    //private void ClearOptionsExceptCmlptQuest()
-    //{
-    //    for (int i = 0; i < optionAgents.Count; i++)
-    //    {
-    //        if (optionAgents[i] && (optionAgents[i].OptionType != OptionType.Quest || (optionAgents[i].OptionType == OptionType.Quest && !optionAgents[i].MQuest.IsComplete)))
-    //        {
-    //            optionAgents[i].Recycle();
-    //        }
-    //    }
-    //    optionAgents.RemoveAll(x => !x.gameObject.activeSelf || !x.gameObject);
-    //    CheckPages();
-    //}
-
-    //private void ClearOptionExceptContinue()
-    //{
-    //    for (int i = 0; i < optionAgents.Count; i++)
-    //    {
-    //        if (optionAgents[i] && optionAgents[i].OptionType != OptionType.Continue)
-    //        {
-    //            optionAgents[i].Recycle();
-    //        }
-    //    }
-    //    optionAgents.RemoveAll(x => !x.gameObject.activeSelf || !x.gameObject);
-    //    Page = 1;
-    //    SetPageArea(false, false, false);
-    //}
-
     private void CheckPages()
     {
         MaxPage = Mathf.CeilToInt(optionAgents.Count * 1.0f / ((UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) * 1.0f));
@@ -575,10 +538,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
             SetPageArea(false, true, true);
             UI.pageText.text = Page.ToString() + "/" + MaxPage.ToString();
         }
-        else
-        {
-            SetPageArea(false, false, false);
-        }
+        else SetPageArea(false, false, false);
     }
 
     private void SetPageArea(bool activeUp, bool activeDown, bool activeText)
@@ -599,7 +559,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         if (Words.Count > 0 && Words.Peek().Options.Count > 0)
         {
             MakeTalkerCmpltQuestOption();
-            MakeTalkerObjectiveOption();
+            if (AllOptionComplete()) MakeTalkerObjectiveOption();
         }
         MakeWordsOptionOption();
         if (Words.Count > 0) currentWords = Words.Peek();
@@ -748,39 +708,41 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     private void HandlingLastOptionWords()
     {
         WordsOption topOptionInstance = wordsOptionInstances.Pop();
-        if (topOptionInstance.runtimeParent)
+        if (topOptionInstance.runtimeDialogParent)
         {
-            DialogueWords topWordsParent = topOptionInstance.runtimeParent.Words.Find(x => x.Options.Contains(currentOption));//找到包含当前分支的语句
+            DialogueWords topWordsParent = null;
+            if (topOptionInstance.runtimeWordsParentIndex > -1 && topOptionInstance.runtimeWordsParentIndex < topOptionInstance.runtimeDialogParent.Words.Count)
+                topWordsParent = topOptionInstance.runtimeDialogParent.Words[topOptionInstance.runtimeWordsParentIndex];//找到包含当前分支的语句
             if (topWordsParent != null && topWordsParent.IsCorrectOption(currentOption))
             {
                 if (topOptionInstance.OptionType == WordsOptionType.Choice)
                 {
-                    int indexOfWordsParent = topOptionInstance.runtimeParent.IndexOfWords(topWordsParent);
+                    int indexOfWordsParent = topOptionInstance.runtimeDialogParent.IndexOfWords(topWordsParent);
                     foreach (WordsOption option in topWordsParent.Options)
                     {
-                        string parentID = topOptionInstance.runtimeParent.ID;
+                        string parentID = topOptionInstance.runtimeDialogParent.ID;
                         DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
                         if (_find == null)
                         {
-                            DialogueDatas.Add(parentID, new DialogueData(option.runtimeParent));
+                            DialogueDatas.Add(parentID, new DialogueData(option.runtimeDialogParent));
                             _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
                         }
                         int indexOfBranch = topWordsParent.IndexOfOption(option);
                         _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
                     }
-                    StartDialogue(topOptionInstance.runtimeParent, topOptionInstance.runtimeIndexToGoBack, false);
+                    StartDialogue(topOptionInstance.runtimeDialogParent, topOptionInstance.runtimeIndexToGoBack, false);
                 }
             }
             else
             {
                 if (topOptionInstance.OptionType == WordsOptionType.Choice && topOptionInstance.DeleteWhenCmplt)
                 {
-                    int indexOfWords = topOptionInstance.runtimeParent.IndexOfWords(topWordsParent);
-                    string parentID = topOptionInstance.runtimeParent.ID;
+                    int indexOfWords = topOptionInstance.runtimeDialogParent.IndexOfWords(topWordsParent);
+                    string parentID = topOptionInstance.runtimeDialogParent.ID;
                     DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWords);
                     if (_find == null)
                     {
-                        DialogueDatas.Add(parentID, new DialogueData(topOptionInstance.runtimeParent));
+                        DialogueDatas.Add(parentID, new DialogueData(topOptionInstance.runtimeDialogParent));
                         _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWords);
                     }
                     int indexOfBranch = topWordsParent.IndexOfOption(currentOption);
@@ -788,10 +750,10 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
                 }
                 if (topWordsParent != null && topWordsParent.NeedToChusCorrectOption && !topWordsParent.IsCorrectOption(currentOption))//选择错误，则说选择错误时应该说的话
                     StartOneWords(new DialogueWords(topWordsParent.TalkerInfo, topWordsParent.WordsWhenChusWB, topWordsParent.TalkerType),
-                        topOptionInstance.runtimeParent, topOptionInstance.runtimeIndexToGoBack);
+                        topOptionInstance.runtimeDialogParent, topOptionInstance.runtimeIndexToGoBack);
                 else if (topOptionInstance.GoBack)
                     //处理普通的带返回的分支
-                    StartDialogue(topOptionInstance.runtimeParent, topOptionInstance.runtimeIndexToGoBack, false);
+                    StartDialogue(topOptionInstance.runtimeDialogParent, topOptionInstance.runtimeIndexToGoBack, false);
             }
         }
         currentOption = null;

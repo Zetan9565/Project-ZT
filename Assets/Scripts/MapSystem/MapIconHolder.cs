@@ -52,12 +52,10 @@ public class MapIconHolder : MonoBehaviour
     {
         if (forceHided) return;
         if (iconInstance && iconInstance.iconImage) iconInstance.iconImage.enabled = true;
-        if (iconInstance && iconInstance.iconButton) iconInstance.iconButton.enabled = true;
     }
     public void HideIcon()
     {
         if (iconInstance && iconInstance.iconImage) iconInstance.iconImage.enabled = false;
-        if (iconInstance && iconInstance.iconButton) iconInstance.iconButton.enabled = false;
     }
 
     private void OnDestroy()

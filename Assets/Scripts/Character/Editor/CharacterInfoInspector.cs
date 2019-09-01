@@ -184,7 +184,7 @@ public class CharacterInfoInspector : Editor
                     EditorGUILayout.PropertyField(defalutDialogue, new GUIContent("默认对话"));
                     if (talker.DefaultDialogue)
                     {
-                        if (talker.DefaultDialogue.Words.Exists(x => x.NeedToChusCorrectOption && x.Options.Count > 0))
+                        if (talker.DefaultDialogue.Words.Exists(x => x.NeedToChusCorrectOption))
                             EditorGUILayout.HelpBox("该对话有选择型分支，不建议用作默认对话。", MessageType.Warning);
                         string dialogue = string.Empty;
                         for (int i = 0; i < talker.DefaultDialogue.Words.Count; i++)

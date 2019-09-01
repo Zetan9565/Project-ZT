@@ -100,7 +100,7 @@ public class OptionAgent : MonoBehaviour
                 DialogueManager.Instance.SayNextWords();
                 break;
             case OptionType.Branch:
-                DialogueManager.Instance.StartBranchDialogue(BranchDialogue);
+                DialogueManager.Instance.StartOptionDialogue(BranchDialogue);
                 break;
             default:
                 break;

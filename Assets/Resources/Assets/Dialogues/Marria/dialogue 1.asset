@@ -15,7 +15,7 @@ MonoBehaviour:
   _ID: DIALG000003
   useUnifiedNPC: 0
   useTalkerInfo: 0
-  unifiedNPC: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+  unifiedNPC: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
   words:
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
@@ -27,7 +27,6 @@ MonoBehaviour:
       optionType: 2
       hasWordsToSay: 1
       talkerType: 0
-      talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
       words: "\u4F60\u9009\u5BF9\u4E86\u3002"
       dialogue: {fileID: 0}
       specifyIndex: -1
@@ -57,13 +56,13 @@ MonoBehaviour:
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 0
-      runtimeParent: {fileID: 0}
+      runtimeDialogParent: {fileID: 0}
+      runtimeWordsParentIndex: 0
       runtimeIndexToGoBack: 0
     - title: "\u6D4B\u8BD5\u98792"
       optionType: 2
       hasWordsToSay: 0
       talkerType: 0
-      talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
       words: 
       dialogue: {fileID: 0}
       specifyIndex: -1
@@ -93,7 +92,8 @@ MonoBehaviour:
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 0
-      runtimeParent: {fileID: 0}
+      runtimeDialogParent: {fileID: 0}
+      runtimeWordsParentIndex: 0
       runtimeIndexToGoBack: 0
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
@@ -105,7 +105,6 @@ MonoBehaviour:
       optionType: 1
       hasWordsToSay: 0
       talkerType: 0
-      talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
       words: "\u8FD9\u662F\u6D4B\u8BD5\u5206\u652F\u3002"
       dialogue: {fileID: 11400000, guid: 00931f27c4db01e44a9ff7817efe8119, type: 2}
       specifyIndex: 0
@@ -135,13 +134,13 @@ MonoBehaviour:
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 1
-      runtimeParent: {fileID: 0}
+      runtimeDialogParent: {fileID: 0}
+      runtimeWordsParentIndex: 0
       runtimeIndexToGoBack: 0
     - title: "\u5206\u652F\u4E8C"
       optionType: 0
       hasWordsToSay: 0
       talkerType: 0
-      talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
       words: "\u8FD9\u662F\u5206\u652F\u4E8C\u6D4B\u8BD5\u3002"
       dialogue: {fileID: 0}
       specifyIndex: -1
@@ -171,5 +170,6 @@ MonoBehaviour:
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 1
-      runtimeParent: {fileID: 0}
+      runtimeDialogParent: {fileID: 0}
+      runtimeWordsParentIndex: 0
       runtimeIndexToGoBack: 0

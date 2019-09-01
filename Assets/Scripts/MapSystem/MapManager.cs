@@ -47,6 +47,13 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private float worldEdgeSize;
     [SerializeField]
     private bool isViewingWorldMap;
+    public bool IsViewingWorldMap
+    {
+        get
+        {
+            return isViewingWorldMap;
+        }
+    }
     [SerializeField]
     private float dragSensitivity = 0.135f;
 
@@ -63,6 +70,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private Vector2 startPositionOfMap;
     private Vector2 startSizeOfMapWindow;
     private Vector2 startSizeOfMap;
+
+    private bool isMovingCamera;
+    private float cameraMovingTime;
+    private Vector3 camMoveDestination;
 
     [SerializeField]
     private MapModeInfo miniModeInfo = new MapModeInfo();
@@ -81,24 +92,27 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         icon.iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
         icon.iconImage.overrideSprite = holder.icon;
         icon.iconImage.rectTransform.sizeDelta = holder.iconSize;
+        icon.iconType = holder.iconType;
         holder.iconInstance = icon;
         iconsWithHolder.TryGetValue(holder, out MapIcon iconFound);
         if (iconFound != null) holder.iconInstance = icon;
         else iconsWithHolder.Add(holder, icon);
         return icon;
     }
-    public MapIcon CearteMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap)
+    public MapIcon CearteMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap, MapIconType iconType = MapIconType.Normal)
     {
         if (!UI || !UI.gameObject) return null;
         MapIcon icon = ObjectPool.Instance.Get(UI.iconPrefb.gameObject, UI.iconsParent).GetComponent<MapIcon>();
+        icon.iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
         icon.iconImage.overrideSprite = iconSprite;
         icon.iconImage.rectTransform.sizeDelta = size;
+        icon.iconType = iconType;
         iconsWithoutHolder.Add(new MapIconWithoutHolder(worldPosition, icon, keepOnMap));
         return icon;
     }
     public MapIcon CreateMark(Vector3 worldPosition, bool keepOnMap)
     {
-        return CearteMapIcon(defaultMarkIcon, defaultMarkSize, worldPosition, keepOnMap);
+        return CearteMapIcon(defaultMarkIcon, defaultMarkSize, worldPosition, keepOnMap, MapIconType.Mark);
     }
     public MapIcon CreateMarkByMousePosition(Vector3 mousePosition)
     {
@@ -185,43 +199,6 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
         iconTrans.position = screenPos;
     }
-
-    private void FollowPlayer()
-    {
-        if (!player || !playerIconInsatance) return;
-        DrawMapIcon(isViewingWorldMap ? player.position : camera.transform.position, playerIconInsatance.transform, true);
-        playerIconInsatance.transform.SetSiblingIndex(playerIconInsatance.transform.childCount - 1);
-        if (!rotateMap)
-        {
-            if (use2D)
-                playerIconInsatance.transform.eulerAngles = new Vector3(playerIconInsatance.transform.eulerAngles.x, playerIconInsatance.transform.eulerAngles.y, player.eulerAngles.z);
-            else
-                playerIconInsatance.transform.eulerAngles = new Vector3(playerIconInsatance.transform.eulerAngles.x, player.eulerAngles.y, playerIconInsatance.transform.eulerAngles.z);
-        }
-        else
-        {
-            if (use2D) camera.transform.eulerAngles = new Vector3(0, 0, player.eulerAngles.z);
-            else camera.transform.eulerAngles = new Vector3(camera.transform.eulerAngles.x, player.eulerAngles.y, camera.transform.eulerAngles.z);
-        }
-        Vector3 newCamPos = new Vector3(player.position.x, use2D ? player.position.y : camera.transform.position.y, use2D ? camera.transform.position.z : player.position.z);
-        if (!isViewingWorldMap && !isSwitching) camera.transform.position = newCamPos;
-    }
-
-    public void Test()
-    {
-        UnityEditor.Undo.RecordObject(this, "Undo sososos");
-        tag = "NPC";
-    }
-
-    public Vector3 MapPointToWorldPoint(Vector3 mousePosition)
-    {
-        Rect screenSpaceRect = ZetanUtilities.GetScreenSpaceRect(UI.mapRect);
-        Vector3[] corners = new Vector3[4];
-        UI.mapRect.GetWorldCorners(corners);
-        Vector2 viewportPoint = new Vector2((mousePosition.x - corners[0].x) / screenSpaceRect.width, (mousePosition.y - corners[0].y) / screenSpaceRect.height);
-        Vector3 worldPosition = camera.ViewportToWorldPoint(viewportPoint);
-        return use2D ? new Vector3(worldPosition.x, worldPosition.y) : worldPosition;
-    }
     #endregion
 
     #region 地图切换相关
@@ -229,6 +206,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         if (!UI || !UI.gameObject) return;
         isViewingWorldMap = !isViewingWorldMap;
+        isMovingCamera = false;
         if (!isViewingWorldMap)//从大向小切换
         {
             if (animationSpeed > 0)
@@ -294,14 +272,18 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void ToMiniMap()
     {
         isSwitching = false;
+        isMovingCamera = false;
         switchTime = 0;
+        cameraMovingTime = 0;
         isViewingWorldMap = false;
         SetInfoFrom(miniModeInfo);
     }
     public void ToWorldMap()
     {
         isSwitching = false;
+        isMovingCamera = false;
         switchTime = 0;
+        cameraMovingTime = 0;
         isViewingWorldMap = true;
         SetInfoFrom(worldModeInfo);
     }
@@ -345,13 +327,64 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         modeInfo.sizeOfWindow = UI.mapWindowRect.sizeDelta;
         modeInfo.sizeOfMap = UI.mapRect.sizeDelta;
     }
+    #endregion
 
-    public void DragWorldMap(Vector2 dir)
+    #region 相机相关
+    private void FollowPlayer()
     {
+        if (!player || !playerIconInsatance) return;
+        DrawMapIcon(isViewingWorldMap ? player.position : camera.transform.position, playerIconInsatance.transform, true);
+        playerIconInsatance.transform.SetSiblingIndex(playerIconInsatance.transform.childCount - 1);
+        if (!rotateMap)
+        {
+            if (use2D)
+                playerIconInsatance.transform.eulerAngles = new Vector3(playerIconInsatance.transform.eulerAngles.x, playerIconInsatance.transform.eulerAngles.y, player.eulerAngles.z);
+            else
+                playerIconInsatance.transform.eulerAngles = new Vector3(playerIconInsatance.transform.eulerAngles.x, player.eulerAngles.y, playerIconInsatance.transform.eulerAngles.z);
+        }
+        else
+        {
+            if (use2D) camera.transform.eulerAngles = new Vector3(0, 0, player.eulerAngles.z);
+            else camera.transform.eulerAngles = new Vector3(camera.transform.eulerAngles.x, player.eulerAngles.y, camera.transform.eulerAngles.z);
+        }
+        if (!isViewingWorldMap && !isSwitching && !isMovingCamera)
+        {
+            Vector3 newCamPos = new Vector3(player.position.x, use2D ? player.position.y : camera.transform.position.y, use2D ? camera.transform.position.z : player.position.z);
+            camera.transform.position = newCamPos;
+        }
+    }
+    public void LocatePlayer()
+    {
+        MoveCameraTo(player.position);
+    }
+
+    public void MoveCameraTo(Vector3 worldPosition)
+    {
+        if (isSwitching || !isViewingWorldMap) return;
+        Vector3 newCamPos = new Vector3(worldPosition.x, use2D ? worldPosition.y : camera.transform.position.y, use2D ? camera.transform.position.z : worldPosition.z);
+        startPosOfCamForMap = camera.transform.position;
+        camMoveDestination = newCamPos;
+        isMovingCamera = true;
+        cameraMovingTime = 0;
+    }
+
+    public Vector3 MapPointToWorldPoint(Vector3 mousePosition)
+    {
+        Rect screenSpaceRect = ZetanUtilities.GetScreenSpaceRect(UI.mapRect);
+        Vector3[] corners = new Vector3[4];
+        UI.mapRect.GetWorldCorners(corners);
+        Vector2 viewportPoint = new Vector2((mousePosition.x - corners[0].x) / screenSpaceRect.width, (mousePosition.y - corners[0].y) / screenSpaceRect.height);
+        Vector3 worldPosition = camera.ViewportToWorldPoint(viewportPoint);
+        return use2D ? new Vector3(worldPosition.x, worldPosition.y) : worldPosition;
+    }
+
+    public void DragWorldMap(Vector2 direction)
+    {
+        isMovingCamera = false;
+        cameraMovingTime = 0;
         float mag = new Vector2(Screen.width, Screen.height).magnitude;
-        dir = new Vector2(dir.x * 1000 / mag, dir.y * 1000 / mag);
-        if (isViewingWorldMap)
-            camera.transform.Translate(new Vector3(dir.x, use2D ? dir.y : 0, use2D ? 0 : dir.y) * -dragSensitivity / (Application.platform == RuntimePlatform.Android ? 2 : 1));
+        direction = new Vector2(direction.x * 1000 / mag, direction.y * 1000 / mag);
+        if (isViewingWorldMap && !isSwitching) camera.transform.Translate(new Vector3(direction.x, use2D ? direction.y : 0, use2D ? 0 : direction.y) * dragSensitivity);
     }
     #endregion
 
@@ -361,6 +394,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         playerIconInsatance = ObjectPool.Instance.Get(UI.iconPrefb.gameObject, UI.iconsParent).GetComponent<MapIcon>();
         playerIconInsatance.iconImage.overrideSprite = playerIcon;
         playerIconInsatance.iconImage.rectTransform.sizeDelta = playerIconSize;
+        playerIconInsatance.iconType = MapIconType.Main;
         camera.targetTexture = targetTexture;
         UI.mapImage.texture = targetTexture;
     }
@@ -369,6 +403,17 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         if (updateMode == UpdateMode.Update) DrawMapIcons();
         if (isSwitching) AnimateSwitching();
+        if (isMovingCamera)
+        {
+            cameraMovingTime += Time.deltaTime * 5;
+            if (camMoveDestination != camera.transform.position)
+                camera.transform.position = Vector3.Lerp(startPosOfCamForMap, camMoveDestination, cameraMovingTime);
+            else
+            {
+                isMovingCamera = false;
+                cameraMovingTime = 0;
+            }
+        }
     }
     private void LateUpdate()
     {
@@ -415,7 +460,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public class MapModeInfo
     {
         public float sizeOfCam;

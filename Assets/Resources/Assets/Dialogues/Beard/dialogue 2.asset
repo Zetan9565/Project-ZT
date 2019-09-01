@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: dialogue 2
   m_EditorClassIdentifier: 
   _ID: DIALG000001
+  useUnifiedNPC: 0
+  useTalkerInfo: 1
+  unifiedNPC: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
   words:
-  - talkerType: 0
+  - talkerType: 1
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     words: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
     indexOfCorrectOption: 0
@@ -54,13 +57,20 @@ MonoBehaviour:
       onlyForQuest: 1
       bindedQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
       deleteWhenCmplt: 1
-      runtimeParent: {fileID: 0}
+      runtimeDialogParent: {fileID: 0}
+      runtimeWordsParent:
+        talkerType: 0
+        talkerInfo: {fileID: 0}
+        words: 
+        indexOfCorrectOption: 0
+        wordsWhenChusWB: 
+        branches: []
       runtimeIndexToGoBack: 0
     - title: "\u4E0A\u4EA4\u7834\u65E7\u7684\u5200"
       optionType: 3
       hasWordsToSay: 0
-      talkerType: 0
-      talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+      talkerType: 1
+      talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
       words: "\u90A3\u6211\u5C31\u6536\u4E0B\u4E86\u3002"
       dialogue: {fileID: 0}
       specifyIndex: -1
@@ -90,5 +100,12 @@ MonoBehaviour:
       onlyForQuest: 0
       bindedQuest: {fileID: 11400000, guid: 595e2a2d93ade6b488ed91ba27bdb42b, type: 2}
       deleteWhenCmplt: 1
-      runtimeParent: {fileID: 0}
+      runtimeDialogParent: {fileID: 0}
+      runtimeWordsParent:
+        talkerType: 0
+        talkerInfo: {fileID: 0}
+        words: 
+        indexOfCorrectOption: 0
+        wordsWhenChusWB: 
+        branches: []
       runtimeIndexToGoBack: 0

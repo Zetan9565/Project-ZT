@@ -14,9 +14,11 @@ public class MapUI : MonoBehaviour
     public RawImage mapImage;
 
     public Button @switch;
+    public Button locate;
 
     private void Awake()
     {
         @switch.onClick.AddListener(MapManager.Instance.SwitchMapMode);
+        locate.onClick.AddListener(MapManager.Instance.LocatePlayer);
     }
 }
