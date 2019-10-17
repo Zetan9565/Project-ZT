@@ -12,8 +12,8 @@ public class MapIconHolder : MonoBehaviour
 
     public bool keepOnMap = true;
 
-    [Tooltip("小于 0 时表示显示状态不受距离影响。")]
-    public float maxValidDistance = -1;
+    [SerializeField, Tooltip("小于 0 时表示显示状态不受距离影响。")]
+    private float maxValidDistance = -1;
 
     [HideInInspector]
     public float distanceSqr;
@@ -23,6 +23,8 @@ public class MapIconHolder : MonoBehaviour
     public MapIconType iconType;
 
     public MapIcon iconInstance;
+
+    public bool AutoHide => maxValidDistance > 0;
 
     private void Awake()
     {
@@ -34,7 +36,7 @@ public class MapIconHolder : MonoBehaviour
         if (MapManager.Instance) MapManager.Instance.CreateMapIcon(this);
     }
 
-    //以下三个方法用于在游戏时动态修改图标信息
+    //以下四个方法用于在游戏时动态修改图标信息
     public void SetIconImage(Sprite icon)
     {
         if (iconInstance) iconInstance.iconImage.overrideSprite = icon;
@@ -46,6 +48,11 @@ public class MapIconHolder : MonoBehaviour
     public void SetIconType(MapIconType iconType)
     {
         if (iconInstance) iconInstance.iconType = iconType;
+    }
+    public void SetIconValidDistance(float distance)
+    {
+        maxValidDistance = distance;
+        distanceSqr = maxValidDistance * maxValidDistance;
     }
 
     public void ShowIcon()

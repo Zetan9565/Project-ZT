@@ -426,11 +426,11 @@ public class DialogueInspector : Editor
                         optionsList.onAddDropdownCallback = (_rect, _list) =>
                         {
                             GenericMenu menu = new GenericMenu();
-                            menu.AddItem(new GUIContent("一句分支"), false, OnAddOption, 0);
-                            menu.AddItem(new GUIContent("一段分支"), false, OnAddOption, 1);
+                            menu.AddItem(new GUIContent("分支/一句"), false, OnAddOption, 0);
+                            menu.AddItem(new GUIContent("分支/一段"), false, OnAddOption, 1);
+                            menu.AddItem(new GUIContent("道具/提交并获得"), false, OnAddOption, 3);
+                            menu.AddItem(new GUIContent("道具/仅获得"), false, OnAddOption, 4);
                             menu.AddItem(new GUIContent("选择项"), false, OnAddOption, 2);
-                            menu.AddItem(new GUIContent("提交、交换道具"), false, OnAddOption, 3);
-                            menu.AddItem(new GUIContent("取得道具"), false, OnAddOption, 4);
                             menu.DropDown(_rect);
 
                             void OnAddOption(object data)

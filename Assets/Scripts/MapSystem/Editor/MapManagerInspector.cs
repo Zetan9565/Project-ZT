@@ -128,10 +128,9 @@ public class MapManagerInspector : Editor
             SerializedProperty anchoredPosition = modeInfo.FindPropertyRelative("anchoredPosition");
             SerializedProperty sizeOfWindow = modeInfo.FindPropertyRelative("sizeOfWindow");
             SerializedProperty sizeOfMap = modeInfo.FindPropertyRelative("sizeOfMap");
-
             EditorGUILayout.BeginVertical("Box");
             EditorGUILayout.BeginHorizontal();
-            if (Application.isPlaying) GUI.enabled = false;
+            if (Application.isPlaying || mini && isViewingWorldMap.boolValue || !mini && !isViewingWorldMap.boolValue) GUI.enabled = false;
             if (GUILayout.Button("以当前状态作为" + (mini ? "小地图" : "大地图")))
             {
                 if (!(mini && isViewingWorldMap.boolValue))
@@ -148,17 +147,19 @@ public class MapManagerInspector : Editor
                     else isViewingWorldMap.boolValue = true;
                 }
             }
-            if (Application.isPlaying) GUI.enabled = true;
+            if (Application.isPlaying || mini && isViewingWorldMap.boolValue || !mini && !isViewingWorldMap.boolValue) GUI.enabled = true;
+            if (mini && !isViewingWorldMap.boolValue || !mini && isViewingWorldMap.boolValue) GUI.enabled = false;
             if (GUILayout.Button("切换至" + (mini ? "小地图" : "大地图") + "模式"))
             {
                 if (mini) (target as MapManager).ToMiniMap();
                 else (target as MapManager).ToWorldMap();
             }
+            if (mini && !isViewingWorldMap.boolValue || !mini && isViewingWorldMap.boolValue) GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.PropertyField(modeInfo, new GUIContent(mini ? "小地图模式信息" : "大地图模式信息"));
             if (modeInfo.isExpanded)
             {
-                EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("sizeOfCam"), new GUIContent("相机视野大小"));
+                EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("sizeOfCam"), new GUIContent("地图相机视野大小"));
                 EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("windowAnchoreMin"), new GUIContent("窗口锚点最小值"));
                 EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("windowAnchoreMax"), new GUIContent("窗口锚点最大值"));
                 EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("mapAnchoreMin"), new GUIContent("地图锚点最小值"));

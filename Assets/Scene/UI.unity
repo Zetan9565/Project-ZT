@@ -9224,8 +9224,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 242.32812, y: -313}
-  m_SizeDelta: {x: 430.04004, y: 430}
+  m_AnchoredPosition: {x: 243.71997, y: -300.94}
+  m_SizeDelta: {x: 434.14, y: 434.14}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &398428579
 CanvasGroup:
@@ -12757,6 +12757,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapWindow: {fileID: 398428579}
   mapWindowRect: {fileID: 398428578}
+  mapMaskRect: {fileID: 522088603}
   iconPrefb: {fileID: 4022907399929590145, guid: eec892b8d02ecd04d9b88b2dbfc312db,
     type: 3}
   iconsParent: {fileID: 1252703870}
@@ -23651,7 +23652,7 @@ MonoBehaviour:
     m_Bits: 1024
   use2D: 1
   rotateMap: 0
-  circle: 1
+  circle: 0
   edgeSize: 0.125
   radius: 0.9
   worldEdgeSize: 0.08
@@ -23664,8 +23665,8 @@ MonoBehaviour:
     windowAnchoreMax: {x: 0, y: 1}
     mapAnchoreMin: {x: 0.5, y: 0.5}
     mapAnchoreMax: {x: 0.5, y: 0.5}
-    anchoredPosition: {x: 242.33002, y: -313}
-    sizeOfWindow: {x: 430.04004, y: 430}
+    anchoredPosition: {x: 243.71997, y: -300.94}
+    sizeOfWindow: {x: 434.14, y: 434.14}
     sizeOfMap: {x: 430.63998, y: 430.59998}
   worldModeInfo:
     sizeOfCam: 30

@@ -38,12 +38,12 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 
     [SerializeField]
     private bool circle;
-    [SerializeField, Tooltip("此值为地图Rect宽度、高度两者中较小值的倍数。"), Range(0, 0.5f)]
+    [SerializeField, Tooltip("此值为地图遮罩Rect宽度、高度两者中较小值的倍数。"), Range(0, 0.5f)]
     private float edgeSize;
-    [SerializeField, Tooltip("此值为地图Rect宽度、高度两者中较小值的倍数。"), Range(0.5f, 1)]
+    [SerializeField, Tooltip("此值为地图遮罩Rect宽度、高度两者中较小值的倍数。"), Range(0.5f, 1)]
     private float radius = 1;
 
-    [SerializeField, Tooltip("此值为地图Rect宽度、高度两者中较小值的倍数。"), Range(0, 0.5f)]
+    [SerializeField, Tooltip("此值为地图遮罩Rect宽度、高度两者中较小值的倍数。"), Range(0, 0.5f)]
     private float worldEdgeSize;
     [SerializeField]
     private bool isViewingWorldMap;
@@ -152,8 +152,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         camera.tag = "MapCamera";
         camera.cullingMask = mapRenderMask;
         foreach (var iconKvp in iconsWithHolder)
-            if (!iconKvp.Key.forceHided && (isViewingWorldMap && iconKvp.Key.drawOnWorldMap || !isViewingWorldMap && (iconKvp.Key.maxValidDistance <= 0
-                || iconKvp.Key.maxValidDistance > 0 && iconKvp.Key.distanceSqr >= Vector3.SqrMagnitude(iconKvp.Key.transform.position - player.position))))
+            if (!iconKvp.Key.forceHided && (isViewingWorldMap && iconKvp.Key.drawOnWorldMap || !isViewingWorldMap && (!iconKvp.Key.AutoHide
+                || iconKvp.Key.AutoHide && iconKvp.Key.distanceSqr >= Vector3.SqrMagnitude(iconKvp.Key.transform.position - player.position))))
             {
                 iconKvp.Key.ShowIcon();
                 DrawMapIcon(iconKvp.Key.transform.position, iconKvp.Value.transform, iconKvp.Key.keepOnMap);
@@ -168,7 +168,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         //把相机视野内的世界坐标归一化为一个裁剪正方体中的坐标，其边长为1，就是说所有视野内的坐标都变成了x、z、y分量都在(0,1)以内的裁剪坐标
         //（图形学基础，不知所云的读者得加强一下）
         Vector3 viewportPoint = camera.WorldToViewportPoint(worldPosition);
-        //这一步用于修正UI因设备分辨率不一样而进行缩放后实际Rect信息变了从而产生的问题
+        //这一步用于修正UI因设备分辨率不一样，在进行缩放后实际Rect信息变了而产生的问题
         Rect screenSpaceRect = ZetanUtilities.GetScreenSpaceRect(UI.mapRect);
         Vector3[] corners = new Vector3[4];
         UI.mapRect.GetWorldCorners(corners);
@@ -179,13 +179,13 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         Vector3 screenPos = new Vector3(viewportPoint.x * screenSpaceRect.width + corners[0].x, viewportPoint.y * screenSpaceRect.height + corners[0].y, 0);
         if (keepOnMap)
         {
-            //以窗口的Rect为范围基准而不是地图的
-            screenSpaceRect = ZetanUtilities.GetScreenSpaceRect(UI.mapWindowRect);
+            //以遮罩的Rect为范围基准而不是地图的
+            screenSpaceRect = ZetanUtilities.GetScreenSpaceRect(UI.mapMaskRect);
             float size = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) / 2;//地图的一半尺寸
             UI.mapWindowRect.GetWorldCorners(corners);
             if (circle && !isViewingWorldMap)
             {
-                //以下不使用UI.mapWindowRect.position，是因为该position值会受轴心(UI.mapWindowRect.pivot)位置的影响而使得最后的结果出现偏移
+                //以下不使用UI.mapMaskRect.position，是因为该position值会受轴心(UI.mapMaskRect.pivot)位置的影响而使得最后的结果出现偏移
                 Vector3 realCenter = ZetanUtilities.CenterBetween(corners[0], corners[2]);
                 Vector3 positionOffset = Vector3.ClampMagnitude(screenPos - realCenter, radius * size);
                 screenPos = realCenter + positionOffset;
@@ -427,10 +427,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 
     private void OnDrawGizmos()
     {
-        if (!UI || !UI.gameObject || !UI.mapWindowRect) return;
-        Rect screenSpaceRect = ZetanUtilities.GetScreenSpaceRect(UI.mapWindowRect);
+        if (!UI || !UI.gameObject || !UI.mapMaskRect) return;
+        Rect screenSpaceRect = ZetanUtilities.GetScreenSpaceRect(UI.mapMaskRect);
         Vector3[] corners = new Vector3[4];
-        UI.mapWindowRect.GetWorldCorners(corners);
+        UI.mapMaskRect.GetWorldCorners(corners);
         if (circle && !isViewingWorldMap)
         {
             float radius = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) / 2 * this.radius;
