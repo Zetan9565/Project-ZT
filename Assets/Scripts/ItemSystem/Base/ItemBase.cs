@@ -131,12 +131,16 @@ public abstract class ItemBase : ScriptableObject
     }
 
     [SerializeField]
-    protected bool useable = true;
-    public virtual bool Useable
+    protected bool lockAble = true;
+    public virtual bool LockAble => lockAble;
+
+    [SerializeField]
+    protected bool usable = true;
+    public virtual bool Usable
     {
         get
         {
-            return useable;
+            return usable;
         }
     }
 
@@ -537,6 +541,19 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
 
     [HideInInspector]
     public int indexInGrid;
+
+    [HideInInspector]
+    private bool locked;
+    public bool Locked
+    {
+        get => IsValid && locked && item.LockAble;
+        set
+        {
+            locked = !IsValid ? false : (item.LockAble ? false : value);
+        }
+    }
+
+    public bool IsValid => item && amount > 1;
 
     public ItemInfo(ItemBase item, int amount = 1)
     {

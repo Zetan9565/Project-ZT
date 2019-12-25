@@ -79,7 +79,7 @@ public class CropInfoInspector : Editor
         }
         if (growthTime.intValue * dayMult < stages.arraySize) growthTime.intValue = stages.arraySize / dayMult;
         EditorGUILayout.EndHorizontal();
-        EditorGUILayout.PropertyField(stages, new GUIContent("生长阶段"));
+        EditorGUILayout.PropertyField(stages, new GUIContent("生长阶段"), false);
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         if (stages.isExpanded)
         {

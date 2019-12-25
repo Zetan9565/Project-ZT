@@ -220,11 +220,11 @@ public class TriggerData
 {
     public string triggerName;
 
-    public bool triggerState;
+    public int triggerState;
 
-    public TriggerData(string triggerName, bool triggerState)
+    public TriggerData(string triggerName, TriggerState triggerState)
     {
         this.triggerName = triggerName;
-        this.triggerState = triggerState;
+        this.triggerState = (int)triggerState;
     }
 }

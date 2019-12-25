@@ -51,12 +51,12 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
 
     public void Show()
     {
-        ZetanUtilities.SetActive(gameObject, true);
+        ZetanUtil.SetActive(gameObject, true);
     }
 
     public void Hide()
     {
-        ZetanUtilities.SetActive(gameObject, false);
+        ZetanUtil.SetActive(gameObject, false);
     }
 
     public void Destroy()

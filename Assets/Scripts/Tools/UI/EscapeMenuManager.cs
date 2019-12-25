@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+[DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/退出菜单管理器")]
 public class EscapeMenuManager : SingletonMonoBehaviour<EscapeMenuManager>, IWindowHandler
 {
     [SerializeField]

@@ -26,7 +26,7 @@ using Thread = System.Threading.Thread;
 [HelpURL("http://arongranberg.com/astar/docs/class_astar_path.php")]
 public class AstarPath : VersionedMonoBehaviour {
 	/// <summary>The version number for the A* %Pathfinding Project</summary>
-	public static readonly System.Version Version = new System.Version(4, 2, 8);
+	public static readonly System.Version Version = new System.Version(4, 2, 11);
 
 	/// <summary>Information about where the package was downloaded</summary>
 	public enum AstarDistribution { WebsiteDownload, AssetStore };
@@ -616,7 +616,7 @@ public class AstarPath : VersionedMonoBehaviour {
 
 	/// <summary>
 	/// Holds settings for heuristic optimization.
-	/// See: heuristic-opt
+	/// See: heuristic-opt (view in online documentation for working links)
 	/// </summary>
 	public EuclideanEmbedding euclideanEmbedding = new EuclideanEmbedding();
 
@@ -713,7 +713,7 @@ public class AstarPath : VersionedMonoBehaviour {
 		for (int i = 0; i < graphs.Length; i++) {
 			if (graphs[i] != null && graphs[i].drawGizmos) {
 				graphs[i].GetNodes(node => {
-					if (ignoreSearchTree || Pathfinding.Util.GraphGizmoHelper.InSearchTree(node, debugPathData, debugPathID)) {
+					if (node.Walkable && (ignoreSearchTree || Pathfinding.Util.GraphGizmoHelper.InSearchTree(node, debugPathData, debugPathID))) {
 						if (debugMode == GraphDebugMode.Penalty) {
 							debugFloor = Mathf.Min(debugFloor, node.Penalty);
 							debugRoof = Mathf.Max(debugRoof, node.Penalty);
@@ -1202,7 +1202,7 @@ public class AstarPath : VersionedMonoBehaviour {
 
 			return 1;
 		} else {
-			return count > 0 ? 1 : 0;
+			return (int)count > 0 ? 1 : 0;
 		}
 #endif
 	}
@@ -1389,7 +1389,7 @@ public class AstarPath : VersionedMonoBehaviour {
 		FlushWorkItems();
 
 		// Don't accept any more path calls to this AstarPath instance.
-		// This will cause all eventual multithreading threads to exit
+		// This will cause all pathfinding threads to exit (if any exist)
 		pathProcessor.queue.TerminateReceivers();
 
 		if (logPathResults == PathLog.Heavy)
@@ -1964,15 +1964,6 @@ public class AstarPath : VersionedMonoBehaviour {
 		if (!Application.isPlaying) {
 			BlockUntilCalculated(path);
 		}
-	}
-
-	/// <summary>Terminates pathfinding threads when the application quits</summary>
-	void OnApplicationQuit () {
-		OnDestroy();
-
-		// Abort threads if they are still running (likely because of some bug in that case)
-		// to make sure that the application can shut down properly
-		pathProcessor.AbortThreads();
 	}
 
 	/// <summary>

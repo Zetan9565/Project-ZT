@@ -13,6 +13,13 @@ namespace Pathfinding.Util {
 			if (gizmos && UnityEngine.Gizmos.color != color) UnityEngine.Gizmos.color = color;
 		}
 
+		public void Polyline (System.Collections.Generic.List<Vector3> points, Color color, bool cycle = false) {
+			for (int i = 0; i < points.Count - 1; i++) {
+				Line(points[i], points[i+1], color);
+			}
+			if (cycle && points.Count > 1) Line(points[points.Count - 1], points[0], color);
+		}
+
 		public void Line (Vector3 a, Vector3 b, Color color) {
 			SetColor(color);
 			if (gizmos) UnityEngine.Gizmos.DrawLine(matrix.MultiplyPoint3x4(a), matrix.MultiplyPoint3x4(b));

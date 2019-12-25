@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/存档管理器")]
 public class SaveManager : SingletonMonoBehaviour<SaveManager>
 {
     [SerializeField]
@@ -25,7 +26,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     #region 存档相关
     public bool Save()
     {
-        using (FileStream fs = ZetanUtilities.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
+        using (FileStream fs = ZetanUtil.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
         {
             try
             {
@@ -41,7 +42,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
                 SaveTrigger(data);
 
                 bf.Serialize(fs, data);
-                ZetanUtilities.Encrypt(fs, encryptKey);
+                ZetanUtil.Encrypt(fs, encryptKey);
 
                 fs.Close();
 
@@ -130,13 +131,13 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     #region 读档相关
     public void Load()
     {
-        using (FileStream fs = ZetanUtilities.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Open))
+        using (FileStream fs = ZetanUtil.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Open))
         {
             try
             {
                 BinaryFormatter bf = new BinaryFormatter();
 
-                SaveData data = bf.Deserialize(ZetanUtilities.Decrypt(fs, encryptKey)) as SaveData;
+                SaveData data = bf.Deserialize(ZetanUtil.Decrypt(fs, encryptKey)) as SaveData;
 
                 fs.Close();
 
@@ -263,7 +264,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         TriggerManager.Instance.Triggers.Clear();
         foreach (TriggerData td in data.triggerDatas)
         {
-            TriggerManager.Instance.SetTrigger(td.triggerName, td.triggerState);
+            TriggerManager.Instance.SetTrigger(td.triggerName, td.triggerState == (int)TriggerState.On);
         }
     }
     #endregion

@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 [DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/制作管理器")]
 public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandler
 {
     [SerializeField]
@@ -63,7 +65,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         }
         else
         {
-            AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定制作{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, currentItem.name), delegate
@@ -189,12 +191,11 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         if (!item) return;
         currentItem = item;
         List<string> info = currentItem.GetMaterialsInfo(BackpackManager.Instance.MBackpack).ToList();
-        string materials = "<b>制作材料：</b>\n";
+        StringBuilder materials = new StringBuilder("<b>持有数量：</b>" + BackpackManager.Instance.GetItemAmount(item));
+        materials.Append("\n<b>制作材料：</b>\n");
         for (int i = 0; i < info.Count; i++)
-        {
-            materials += info[i] + (i == info.Count - 1 ? string.Empty : "\n");
-        }
-        UI.description.text = materials;
+            materials.Append(info[i] + (i == info.Count - 1 ? string.Empty : "\n"));
+        UI.description.text = materials.ToString();
         int makeAmount = currentItem.GetMakeAmount(BackpackManager.Instance.MBackpack);
         UI.icon.InitItem(new ItemInfo(currentItem, makeAmount));
         UI.makeButton.interactable = makeAmount > 0;
@@ -250,7 +251,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         if (!UI || !UI.gameObject) return;
         foreach (MakingAgent ia in MakingAgents)
         {
-            ZetanUtilities.SetActive(ia.gameObject, true);
+            ZetanUtil.SetActive(ia.gameObject, true);
         }
     }
 
@@ -259,8 +260,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         foreach (MakingAgent ia in MakingAgents)
         {
             if (ia.MItem.IsEquipment)
-                ZetanUtilities.SetActive(ia.gameObject, true);
-            else ZetanUtilities.SetActive(ia.gameObject, false);
+                ZetanUtil.SetActive(ia.gameObject, true);
+            else ZetanUtil.SetActive(ia.gameObject, false);
         }
     }
 
@@ -269,8 +270,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         foreach (MakingAgent ia in MakingAgents)
         {
             if (ia.MItem.IsConsumable)
-                ZetanUtilities.SetActive(ia.gameObject, true);
-            else ZetanUtilities.SetActive(ia.gameObject, false);
+                ZetanUtil.SetActive(ia.gameObject, true);
+            else ZetanUtil.SetActive(ia.gameObject, false);
         }
     }
 
@@ -279,8 +280,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         foreach (MakingAgent ia in MakingAgents)
         {
             if (ia.MItem.IsMaterial)
-                ZetanUtilities.SetActive(ia.gameObject, true);
-            else ZetanUtilities.SetActive(ia.gameObject, false);
+                ZetanUtil.SetActive(ia.gameObject, true);
+            else ZetanUtil.SetActive(ia.gameObject, false);
         }
     }
     #endregion

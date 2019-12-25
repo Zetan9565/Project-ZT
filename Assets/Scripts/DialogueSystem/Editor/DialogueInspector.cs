@@ -16,6 +16,7 @@ public class DialogueInspector : Editor
     SerializedProperty dialogWords;
     ReorderableList wordsList;
     Dictionary<DialogueWords, ReorderableList> wordsOptionsLists = new Dictionary<DialogueWords, ReorderableList>();
+    Dictionary<DialogueWords, ReorderableList> wordsEventsLists = new Dictionary<DialogueWords, ReorderableList>();
 
     float lineHeight;
     float lineHeightSpace;
@@ -44,9 +45,7 @@ public class DialogueInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        if (string.IsNullOrEmpty(dialogue.ID) || useUnifiedNPC.boolValue && !useTalkerInfo.boolValue && !unifiedNPC.objectReferenceValue ||
-            dialogue.Words.Exists(w => w.TalkerType == TalkerType.NPC && !useUnifiedNPC.boolValue && !w.TalkerInfo || string.IsNullOrEmpty(w.Words) ||
-            w.Options.Exists(b => b && !b.IsValid) || w.NeedToChusCorrectOption && string.IsNullOrEmpty(w.WordsWhenChusWB)))
+        if (string.IsNullOrEmpty(dialogue.ID) || useUnifiedNPC.boolValue && !useTalkerInfo.boolValue && !unifiedNPC.objectReferenceValue || dialogue.Words.Exists(w => w && !w.IsValid))
         {
             EditorGUILayout.HelpBox("该对话存在未补全信息。", MessageType.Warning);
         }
@@ -67,7 +66,7 @@ public class DialogueInspector : Editor
         EditorGUILayout.PropertyField(useUnifiedNPC, new GUIContent("使用统一的NPC"));
         if (useUnifiedNPC.boolValue)
         {
-            EditorGUILayout.PropertyField(useTalkerInfo, new GUIContent("统一NPC为对话人"));
+            EditorGUILayout.PropertyField(useTalkerInfo, new GUIContent("统一为当前对话人"));
             if (!useTalkerInfo.boolValue)
             {
                 EditorGUILayout.BeginHorizontal();
@@ -93,6 +92,8 @@ public class DialogueInspector : Editor
         wordsList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
             serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
+
             SerializedProperty words = dialogWords.GetArrayElementAtIndex(index);
             SerializedProperty talkerType = words.FindPropertyRelative("talkerType");
             SerializedProperty talkerInfo = words.FindPropertyRelative("talkerInfo");
@@ -100,10 +101,10 @@ public class DialogueInspector : Editor
             SerializedProperty indexOfCorrectOption = words.FindPropertyRelative("indexOfCorrectOption");
             SerializedProperty wordsWhenChusWB = words.FindPropertyRelative("wordsWhenChusWB");
             SerializedProperty options = words.FindPropertyRelative("branches");
+            SerializedProperty events = words.FindPropertyRelative("events");
 
-            EditorGUI.BeginChangeCheck();
             string talkerName;
-            if (talkerType.enumValueIndex == (int)TalkerType.NPC)
+            if (talkerType.enumValueIndex == (int)TalkerType.NPC || talkerType.enumValueIndex == (int)TalkerType.UnifiedNPC)
             {
                 if (!useUnifiedNPC.boolValue)
                     talkerName = dialogue.Words[index] == null ? "(空)" : !dialogue.Words[index].TalkerInfo ? "(空谈话人)" : (dialogue.Words[index].TalkerName + "说");
@@ -112,7 +113,19 @@ public class DialogueInspector : Editor
             else talkerName = "玩家说";
             EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width * 0.5f, lineHeight), words, new GUIContent(talkerName));
             if (!words.isExpanded)
-                EditorGUI.LabelField(new Rect(rect.x + rect.width * 0.5f, rect.y, rect.width / 4, lineHeight), options.arraySize > 0 ? "( " + options.arraySize + " 个选项)" : string.Empty);
+            {
+                int os = options.arraySize;
+                int ts = events.arraySize;
+                if (os > 0 || ts > 0)
+                {
+                    System.Text.StringBuilder label = new System.Text.StringBuilder("(");
+                    label.Append(os > 0 ? os + "个选项" : string.Empty);
+                    label.Append(os > 0 && ts > 0 ? ", " : string.Empty);
+                    label.Append(ts > 0 ? ts + "个事件" : string.Empty);
+                    label.Append(')');
+                    EditorGUI.LabelField(new Rect(rect.x + rect.width * 0.42f, rect.y, rect.width, lineHeight), label.ToString());
+                }
+            }
             int oIndex = talkerType.enumValueIndex == 1 ? 0 : (useUnifiedNPC.boolValue ? 1 : (GetNPCIndex(talkerInfo.objectReferenceValue as TalkerInformation) + 1));
             List<int> indexes = new List<int>() { 0 };
             List<string> names = new List<string>() { "玩家" };
@@ -132,14 +145,20 @@ public class DialogueInspector : Editor
             oIndex = EditorGUI.IntPopup(new Rect(rect.x + rect.width * 0.75f, rect.y, rect.width / 4, lineHeight), oIndex, names.ToArray(), indexes.ToArray());
             if (oIndex > 0)
             {
-                talkerType.enumValueIndex = 0;
                 if (!useUnifiedNPC.boolValue)
+                {
+                    talkerType.enumValueIndex = 0;
                     if (oIndex <= npcs.Length) talkerInfo.objectReferenceValue = npcs[oIndex - 1];
                     else talkerInfo.objectReferenceValue = null;
+                }
+                else talkerType.enumValueIndex = 2;
             }
             else talkerType.enumValueIndex = 1;
+            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (words.isExpanded)
             {
+                words.serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
                 int lineCount = 1;
                 if (talkerType.enumValueIndex == (int)TalkerType.NPC && !useUnifiedNPC.boolValue)
                 {
@@ -154,35 +173,46 @@ public class DialogueInspector : Editor
                     w_words, new GUIContent(string.Empty));
                 lineCount += 2;
                 EditorGUI.PropertyField(new Rect(rect.x + 12, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
-                    options, new GUIContent("选项\t\t" + (options.arraySize > 0 ? "数量: " + options.arraySize : "无选项")));
+                    options, new GUIContent("选项\t\t" + (options.isExpanded ? string.Empty : (options.arraySize > 0 ? "数量: " + options.arraySize : "无选项"))));
                 lineCount++;
-                if (EditorGUI.EndChangeCheck())
-                    serializedObject.ApplyModifiedProperties();
+                if (EditorGUI.EndChangeCheck()) words.serializedObject.ApplyModifiedProperties();
+                ReorderableList optionsList = null;
                 if (options.isExpanded)
                 {
                     options.serializedObject.Update();
                     EditorGUI.BeginChangeCheck();
-                    if (options.arraySize > 1)
-                        //仅在所有选项都为选择型时才支持选取正确选项
-                        if (dialogue.Words[index].Options.TrueForAll(x => x.OptionType == WordsOptionType.Choice))
-                        {
-                            indexOfCorrectOption.intValue = EditorGUI.IntSlider(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
-                                "正确选项序号", indexOfCorrectOption.intValue, 0, options.arraySize - 1);
-                            lineCount++;
-                            if (indexOfCorrectOption.intValue > -1)
+                    //仅在选择型选项大于1个时才支持选取正确选项
+                    if (dialogue.Words[index].Options.FindAll(x => x.OptionType == WordsOptionType.Choice).Count > 1)
+                    {
+                        /*indexOfCorrectOption.intValue = EditorGUI.IntSlider(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
+                            "正确选项序号", indexOfCorrectOption.intValue, 0, options.arraySize - 1);*/
+                        List<int> choiceIndexes = new List<int>() { -1 };
+                        List<string> choiceIndexStrings = new List<string>() { "不指定" };
+                        var wordsOptions = dialogue.Words[index].Options;
+                        for (int i = 0; i < wordsOptions.Count; i++)
+                            if (wordsOptions[i].OptionType == WordsOptionType.Choice)
                             {
-                                EditorGUI.LabelField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
-                                    "选择其它选项时说的话：");
-                                lineCount++;
-                                wordsWhenChusWB.stringValue = EditorGUI.TextArea(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
-                                    wordsWhenChusWB.stringValue);
-                                lineCount++;
+                                choiceIndexes.Add(i);
+                                choiceIndexStrings.Add("[ " + i + " ] " + wordsOptions[i].Title);
                             }
+                        if (!choiceIndexes.Contains(indexOfCorrectOption.intValue)) indexOfCorrectOption.intValue = choiceIndexes[1];
+                        indexOfCorrectOption.intValue = EditorGUI.IntPopup(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
+                            "正确选项序号", indexOfCorrectOption.intValue, choiceIndexStrings.ToArray(), choiceIndexes.ToArray());
+                        lineCount++;
+                        if (indexOfCorrectOption.intValue > -1)
+                        {
+                            EditorGUI.LabelField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
+                                "选择其它选项时说的话：");
+                            lineCount++;
+                            wordsWhenChusWB.stringValue = EditorGUI.TextArea(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
+                                wordsWhenChusWB.stringValue);
+                            lineCount++;
                         }
+                    }
                     if (EditorGUI.EndChangeCheck())
                         options.serializedObject.ApplyModifiedProperties();
-                    ReorderableList optionsList;
-                    if (!wordsOptionsLists.ContainsKey(dialogue.Words[index]))
+                    wordsOptionsLists.TryGetValue(dialogue.Words[index], out optionsList);
+                    if (optionsList == null)
                     {
                         optionsList = new ReorderableList(words.serializedObject, options, true, true, true, true);
                         wordsOptionsLists.Add(dialogue.Words[index], optionsList);
@@ -209,7 +239,7 @@ public class DialogueInspector : Editor
                             string label = string.IsNullOrEmpty(title.stringValue) ? "(空标题)" : title.stringValue;
                             EditorGUI.PropertyField(new Rect(_rect.x + 8, _rect.y, _rect.width / 2, lineHeight),
                                 option, new GUIContent(label));
-                            EditorGUI.PropertyField(new Rect(_rect.x + 8 + _rect.width / 2, _rect.y, _rect.width / 2, lineHeight),
+                            EditorGUI.PropertyField(new Rect(_rect.x + 8 + _rect.width / 2, _rect.y, _rect.width / 2 - 8, lineHeight),
                                 optionType, new GUIContent(string.Empty));
                             if (optionType.intValue == (int)WordsOptionType.Choice && index == dialogWords.arraySize - 1)
                             {
@@ -350,8 +380,7 @@ public class DialogueInspector : Editor
                                     _lineCount++;
                                 }
                             }
-                            if (EditorGUI.EndChangeCheck())
-                                options.serializedObject.ApplyModifiedProperties();
+                            if (EditorGUI.EndChangeCheck()) options.serializedObject.ApplyModifiedProperties();
                         };
 
                         optionsList.elementHeightCallback = (_index) =>
@@ -455,7 +484,6 @@ public class DialogueInspector : Editor
                             }
                         };
 
-
                         optionsList.onRemoveCallback = (_list) =>
                         {
                             options.serializedObject.Update();
@@ -478,9 +506,106 @@ public class DialogueInspector : Editor
                             EditorGUI.LabelField(_rect, "空列表");
                         };
                     }
-                    else optionsList = wordsOptionsLists[dialogue.Words[index]];
                     words.serializedObject.Update();
                     optionsList.DoList(new Rect(rect.x, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width, lineHeight * (options.arraySize + 1)));
+                    words.serializedObject.ApplyModifiedProperties();
+                }
+                words.serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                EditorGUI.PropertyField(new Rect(rect.x + 12, rect.y + (optionsList == null ? 0 : optionsList.GetHeight()) + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
+                    events, new GUIContent("事件\t\t" + (events.isExpanded ? string.Empty : (events.arraySize > 0 ? "数量: " + events.arraySize : "无事件"))));
+                lineCount++;
+                if (EditorGUI.EndChangeCheck()) words.serializedObject.ApplyModifiedProperties();
+                if (events.isExpanded)
+                {
+                    events.serializedObject.Update();
+                    EditorGUI.BeginChangeCheck();
+                    wordsEventsLists.TryGetValue(dialogue.Words[index], out ReorderableList eventsList);
+                    if (eventsList == null)
+                    {
+                        eventsList = new ReorderableList(words.serializedObject, events, true, true, true, true);
+                        wordsEventsLists.Add(dialogue.Words[index], eventsList);
+                        eventsList.drawElementCallback = (_rect, _index, _isActive, _isFocused) =>
+                        {
+                            events.serializedObject.Update();
+                            EditorGUI.BeginChangeCheck();
+                            SerializedProperty trigger = events.GetArrayElementAtIndex(_index);
+                            SerializedProperty eventType = trigger.FindPropertyRelative("eventType");
+                            SerializedProperty wordsTrigrName = trigger.FindPropertyRelative("wordsTrigrName");
+                            SerializedProperty triggerActType = trigger.FindPropertyRelative("triggerActType");
+                            SerializedProperty toWhom = trigger.FindPropertyRelative("toWhom");
+                            SerializedProperty favorabilityValue = trigger.FindPropertyRelative("favorabilityValue");
+                            EditorGUI.PropertyField(new Rect(_rect.x, _rect.y, _rect.width, lineHeight), eventType, new GUIContent("事件类型"));
+                            switch ((WordsEventType)eventType.intValue)
+                            {
+                                case WordsEventType.Trigger:
+                                    EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace, 28, lineHeight), "名称");
+                                    EditorGUI.PropertyField(new Rect(_rect.x + 28, _rect.y + lineHeightSpace, _rect.width / 1.5f - 28, lineHeight), wordsTrigrName, new GUIContent(string.Empty));
+                                    EditorGUI.LabelField(new Rect(_rect.x + 2 + _rect.width / 1.5f, _rect.y + lineHeightSpace, 38, lineHeight), "操作");
+                                    EditorGUI.PropertyField(new Rect(_rect.x + 30 + _rect.width / 1.5f, _rect.y + lineHeightSpace, _rect.width - 30 - _rect.width / 1.5f, lineHeight),
+                                        triggerActType, new GUIContent(string.Empty));
+                                    break;
+                                case WordsEventType.GetFavorability:
+                                case WordsEventType.LoseFavorability:
+                                    oIndex = GetNPCIndex(toWhom.objectReferenceValue as TalkerInformation);
+                                    indexes.Clear();
+                                    names.Clear();
+                                    for (int i = 0; i < npcNames.Length; i++)
+                                    {
+                                        indexes.Add(i);
+                                        names.Add(npcNames[i]);
+                                    }
+                                    EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace, 28, lineHeight), "对谁");
+                                    oIndex = EditorGUI.IntPopup(new Rect(_rect.x + 28, _rect.y + lineHeightSpace, _rect.width / 2 - 28, lineHeight), oIndex, names.ToArray(), indexes.ToArray());
+                                    if (oIndex >= 0 && oIndex < npcs.Length) toWhom.objectReferenceValue = npcs[oIndex];
+                                    else toWhom.objectReferenceValue = null;
+                                    EditorGUI.LabelField(new Rect(_rect.x + 2 + _rect.width / 2, _rect.y + lineHeightSpace, 40, lineHeight), "好感值");
+                                    EditorGUI.PropertyField(new Rect(_rect.x + 42 + _rect.width / 2, _rect.y + lineHeightSpace, _rect.width / 2 - 42, lineHeight),
+                                        favorabilityValue, new GUIContent(string.Empty));
+                                    break;
+                                default:
+                                    break;
+                            }
+                            if (EditorGUI.EndChangeCheck()) events.serializedObject.ApplyModifiedProperties();
+                        };
+
+                        eventsList.elementHeightCallback = (_index) =>
+                        {
+                            return lineHeightSpace * 2;
+                        };
+
+                        eventsList.onRemoveCallback = (_list) =>
+                        {
+                            events.serializedObject.Update();
+                            EditorGUI.BeginChangeCheck();
+                            if (EditorUtility.DisplayDialog("删除", "确定删除这个事件吗？", "确定", "取消"))
+                                events.DeleteArrayElementAtIndex(_list.index);
+                            if (EditorGUI.EndChangeCheck()) events.serializedObject.ApplyModifiedProperties();
+                        };
+
+                        eventsList.onAddCallback = (_list) =>
+                        {
+                            events.serializedObject.Update();
+                            EditorGUI.BeginChangeCheck();
+                            dialogue.Words[index].Events.Add(new WordsEvent());
+                            if (EditorGUI.EndChangeCheck()) events.serializedObject.ApplyModifiedProperties();
+                        };
+
+                        eventsList.drawHeaderCallback = (_rect) =>
+                        {
+                            int notCmpltCount = dialogue.Words[index].Events.FindAll(x => !x.IsValid).Count;
+                            EditorGUI.LabelField(_rect, "事件列表", "数量：" + dialogue.Words[index].Events.Count.ToString() +
+                                (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+                        };
+
+                        eventsList.drawNoneElementCallback = (_rect) =>
+                        {
+                            EditorGUI.LabelField(_rect, "空列表");
+                        };
+                    }
+                    words.serializedObject.Update();
+                    eventsList.DoList(new Rect(rect.x, rect.y + (optionsList == null ? 0 : optionsList.GetHeight()) + lineHeightSpace * lineCount + lineHeight - 5,
+                        rect.width, lineHeight * (events.arraySize + 1)));
                     words.serializedObject.ApplyModifiedProperties();
                 }
             }
@@ -489,8 +614,6 @@ public class DialogueInspector : Editor
                 GUI.enabled = false;
                 EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), w_words.stringValue);
                 GUI.enabled = true;
-                if (EditorGUI.EndChangeCheck())
-                    serializedObject.ApplyModifiedProperties();
             }
         };
 
@@ -500,6 +623,7 @@ public class DialogueInspector : Editor
             float totalListHeight = 0.0f;
             SerializedProperty words = dialogWords.GetArrayElementAtIndex(index);
             SerializedProperty options = words.FindPropertyRelative("branches");
+            SerializedProperty events = words.FindPropertyRelative("events");
             SerializedProperty indexOfCorrectOption = words.FindPropertyRelative("indexOfCorrectOption");
             if (words.isExpanded)
             {
@@ -508,14 +632,20 @@ public class DialogueInspector : Editor
                 if (options.isExpanded)
                 {
                     if (options.arraySize > 1)
-                        if (dialogue.Words[index].Options.TrueForAll(x => x && x.OptionType == WordsOptionType.Choice))
+                        if (dialogue.Words[index].Options.FindAll(x => x && x.OptionType == WordsOptionType.Choice).Count > 1)
                         {
                             lineCount++;//正确分支
                             if (indexOfCorrectOption.intValue > -1)
                                 lineCount += 2;//说的话、说的话填写
                         }
-                    if (wordsOptionsLists.ContainsKey(dialogue.Words[index]))
-                        totalListHeight += wordsOptionsLists[dialogue.Words[index]].GetHeight();
+                    if (wordsOptionsLists.TryGetValue(dialogue.Words[index], out var optionList))
+                        totalListHeight += optionList.GetHeight();
+                }
+                lineCount++;//选项
+                if (events.isExpanded)
+                {
+                    if (wordsEventsLists.TryGetValue(dialogue.Words[index], out var triggersList))
+                        totalListHeight += triggersList.GetHeight();
                 }
                 totalListHeight -= 8;
             }

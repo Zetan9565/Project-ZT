@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+[DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/技能管理器")]
 public class SkillManager : SingletonMonoBehaviour<SkillManager>
 {
     [SerializeField]

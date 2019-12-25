@@ -54,7 +54,7 @@ namespace Pathfinding {
 
 		/// <summary>Show the surface of the navmesh</summary>
 		[JsonMember]
-		public bool showMeshSurface;
+		public bool showMeshSurface = true;
 
 		/// <summary>Number of tiles along the X-axis</summary>
 		public int tileXCount;

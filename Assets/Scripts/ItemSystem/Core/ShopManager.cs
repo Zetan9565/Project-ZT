@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+[DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/商铺管理器")]
 public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
 {
     [SerializeField]
@@ -79,7 +81,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         }
         else
         {
-            AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
@@ -135,7 +137,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         }
         else
         {
-            AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
@@ -177,7 +179,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         }
         else
         {
-            AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.item.name), delegate

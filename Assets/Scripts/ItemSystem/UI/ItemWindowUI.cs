@@ -21,7 +21,7 @@ public class ItemWindowUI : ItemWindowBaseUI
         windowCanvas.overrideSorting = true;
         windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         windowsRect = itemWindow.GetComponent<RectTransform>();
-        ZetanUtilities.SetActive(closeButton.gameObject, false);
+        ZetanUtil.SetActive(closeButton.gameObject, false);
 #if UNITY_STANDALONE
         MyUtilities.SetActive(buttonsArea, false);
 #elif UNITY_ANDROID

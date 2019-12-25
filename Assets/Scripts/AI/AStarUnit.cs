@@ -171,7 +171,7 @@ public class AStarUnit : MonoBehaviour
                 }
                 if (targetWaypointIndex < path.Length)
                 {
-                    if (AStarManager.Instance.ThreeD && ZetanUtilities.Slope(transform.position, path[targetWaypointIndex]) > slopeLimit)
+                    if (AStarManager.Instance.ThreeD && ZetanUtil.Slope(transform.position, path[targetWaypointIndex]) > slopeLimit)
                         return Vector3.zero;
                     if ((OffsetPosition - Destination).sqrMagnitude < stopDistance * stopDistance)
                     {
@@ -274,7 +274,7 @@ public class AStarUnit : MonoBehaviour
                 ResetPath();
                 yield break;
             }
-            if (AStarManager.Instance.ThreeD && ZetanUtilities.Slope(OffsetPosition, targetWaypoint) > slopeLimit) yield break;
+            if (AStarManager.Instance.ThreeD && ZetanUtil.Slope(OffsetPosition, targetWaypoint) > slopeLimit) yield break;
             if ((OffsetPosition - Destination).sqrMagnitude < stopDistance * stopDistance)
             {
                 ResetPath();

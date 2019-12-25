@@ -37,12 +37,12 @@ public class ArmorItem : ItemBase
     }
 
     [SerializeField]
-    private int dodge;
-    public int Dodge
+    private int flee;
+    public int Flee
     {
         get
         {
-            return dodge;
+            return flee;
         }
     }
 

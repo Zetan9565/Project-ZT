@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 [DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/输入管理器")]
 public class InputManager : SingletonMonoBehaviour<InputManager>
 {
     public InputCustomInfo customInfo;

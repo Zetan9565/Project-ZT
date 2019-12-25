@@ -30,9 +30,9 @@ public class Enemy : MonoBehaviour
 
     private void Awake()
     {
-        if (!GameManager.Enermies.ContainsKey(EnemyID)) GameManager.Enermies.Add(EnemyID, new List<Enemy>() { this });
-        else if (!GameManager.Enermies[EnemyID].Contains(this)) GameManager.Enermies[EnemyID].Add(this);
-        else if (GameManager.Enermies[EnemyID].Exists(x => !x.gameObject)) GameManager.Enermies[EnemyID].RemoveAll(x => !x.gameObject);
+        GameManager.Enemies.TryGetValue(EnemyID, out var enemies);
+        if (enemies == null || enemies.Count < 1) GameManager.Enemies.Add(EnemyID, new List<Enemy>() { this });
+        else if (!enemies.Contains(this)) GameManager.Enemies[EnemyID].Add(this);
     }
 
     public void Death()
@@ -44,7 +44,7 @@ public class Enemy : MonoBehaviour
         {
             List<ItemInfo> lootItems = new List<ItemInfo>();
             foreach (DropItemInfo di in info.DropItems)
-                if (ZetanUtilities.Probability(di.DropRate))
+                if (ZetanUtil.Probability(di.DropRate))
                     if (!di.OnlyDropForQuest || (di.OnlyDropForQuest && QuestManager.Instance.HasOngoingQuestWithID(di.BindedQuest.ID)))
                         lootItems.Add(new ItemInfo(di.Item, Random.Range(1, di.Amount + 1)));
             if (lootItems.Count > 0)

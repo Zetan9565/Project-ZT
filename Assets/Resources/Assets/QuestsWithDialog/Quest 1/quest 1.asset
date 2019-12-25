@@ -18,10 +18,11 @@ MonoBehaviour:
   abandonable: 1
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptConditions:
-  - acceptCondition: 4
+  - acceptCondition: 5
     level: 0
     completeQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
     ownedItem: {fileID: 0}
+    triggerName: 
   beginDialogue: {fileID: 11400000, guid: 860a800ebd1f57e409389453a7b350e1, type: 2}
   ongoingDialogue: {fileID: 11400000, guid: c9bd66b12bc670d48895c486a701c376, type: 2}
   completeDialogue: {fileID: 11400000, guid: 216422843cfd8d041970f69c4cccd4b4, type: 2}
@@ -37,12 +38,11 @@ MonoBehaviour:
     gemSlotAmount: 0
     gemstone1: {fileID: 0}
     gemstone2: {fileID: 0}
-  sbmtOnOriginalNPC: 1
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 1
   collectObjectives: []
   killObjectives:
-  - displayName: "\u6E05\u7406\u9AB7\u9AC5"
+  - displayName: "\u51FB\u6740\u9AB7\u9AC5"
     display: 1
     amount: 5
     inOrder: 1
@@ -53,7 +53,7 @@ MonoBehaviour:
     enemy: {fileID: 11400000, guid: 1f8636ab8a7c2a443b85d27f63bd2394, type: 2}
     race: {fileID: 0}
   talkObjectives:
-  - displayName: "\u53BB\u5B89\u6170\u739B\u4E3D\u4E9A"
+  - displayName: "\u5B89\u6170\u739B\u4E3D\u4E9A"
     display: 1
     amount: 1
     inOrder: 1
@@ -65,8 +65,10 @@ MonoBehaviour:
   moveObjectives: []
   submitObjectives: []
   customObjectives: []
-  OriginalQuestGiver:
+  originalQuestHolder:
     info: {fileID: 0}
+    currentScene: 
+    currentPostition: {x: 0, y: 0, z: 0}
     relationshipInstance:
       relationshipValue:
         min: -500
@@ -75,13 +77,15 @@ MonoBehaviour:
     warehouse:
       warehouseSize:
         min: 0
-        max: 300
+        max: 1
     shop: {fileID: 0}
     objectivesTalkToThis: []
     objectivesSubmitToThis: []
     questInstances: []
-  CurrentQuestGiver:
+  currentQuestHolder:
     info: {fileID: 0}
+    currentScene: 
+    currentPostition: {x: 0, y: 0, z: 0}
     relationshipInstance:
       relationshipValue:
         min: -500
@@ -90,7 +94,7 @@ MonoBehaviour:
     warehouse:
       warehouseSize:
         min: 0
-        max: 300
+        max: 1
     shop: {fileID: 0}
     objectivesTalkToThis: []
     objectivesSubmitToThis: []

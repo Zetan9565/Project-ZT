@@ -29,7 +29,7 @@ public class PlayerInformation : CharacterInformation
         if (toEquip == null || !toEquip.item) return false;
         if (!toEquip.item.IsWeapon) return false;
         WeaponItem weapon = toEquip.item as WeaponItem;
-        ATK += weapon.ATK + weapon.Powerup.ATK_Add +
+        ATK += weapon.CutATK + weapon.Powerup.ATK_Add +
             (toEquip.gemstone1 ? toEquip.gemstone1.Powerup.ATK_Add : 0) + (toEquip.gemstone2 ? toEquip.gemstone2.Powerup.ATK_Add : 0);
         DEF += weapon.DEF + weapon.Powerup.DEF_Add +
             (toEquip.gemstone1 ? toEquip.gemstone1.Powerup.DEF_Add : 0) + (toEquip.gemstone2 ? toEquip.gemstone2.Powerup.DEF_Add : 0);
@@ -64,7 +64,7 @@ public class PlayerInformation : CharacterInformation
         }
         if (weapon)
         {
-            ATK -= weapon.ATK + weapon.Powerup.ATK_Add;
+            ATK -= weapon.CutATK + weapon.Powerup.ATK_Add;
             DEF -= weapon.DEF + weapon.Powerup.DEF_Add;
             Hit -= weapon.Hit + weapon.Powerup.Hit_Add;
 
@@ -174,4 +174,6 @@ public class PlayerInformation : CharacterInformation
     }
 
     #endregion
+
+    public int level;
 }

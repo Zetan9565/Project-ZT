@@ -123,7 +123,7 @@ namespace Pathfinding {
 		/// If the linecast did not hit anything then this will be set to the last node along the line's path (the one which contains the endpoint).
 		///
 		/// For layered grid graphs the linecast will return true (i.e: no free line of sight) if when walking the graph we ended up at X,Z coordinate for the end node
-		/// but the end node was on a different level (e.g the floor below or above in a building). In this case no node edge was really hit so this field will still be null.
+		/// even if end node was on a different level (e.g the floor below or above in a building). In this case no node edge was really hit so this field will still be null.
 		/// </summary>
 		public GraphNode node;
 		/// <summary>
@@ -1133,4 +1133,10 @@ namespace Pathfinding {
 	}
 
 	#endregion
+}
+
+namespace Pathfinding.Util {
+	/// <summary>Prevents code stripping. See: https://docs.unity3d.com/Manual/ManagedCodeStripping.html</summary>
+	public class PreserveAttribute : System.Attribute {
+	}
 }

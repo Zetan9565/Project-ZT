@@ -219,30 +219,20 @@ namespace Pathfinding {
 		public void JoinThreads () {
 			if (threads != null) {
 				for (int i = 0; i < threads.Length; i++) {
-#if UNITY_WEBPLAYER
 					if (!threads[i].Join(200)) {
-						Debug.LogError("Could not terminate pathfinding thread["+i+"] in 200ms." +
-							"Not good.\nUnity webplayer does not support Thread.Abort\nHoping that it will be terminated by Unity WebPlayer");
-					}
-#else
-					if (!threads[i].Join(50)) {
-						Debug.LogError("Could not terminate pathfinding thread["+i+"] in 50ms, trying Thread.Abort");
+						Debug.LogError("Could not terminate pathfinding thread["+i+"] in 200ms, trying Thread.Abort");
 						threads[i].Abort();
 					}
-#endif
 				}
 			}
 		}
 
 		/// <summary>Calls 'Abort' on each of the threads</summary>
 		public void AbortThreads () {
-#if !UNITY_WEBPLAYER
 			if (threads == null) return;
-			// Unity webplayer does not support Abort (even though it supports starting threads). Hope that UnityPlayer aborts the threads
 			for (int i = 0; i < threads.Length; i++) {
 				if (threads[i] != null && threads[i].IsAlive) threads[i].Abort();
 			}
-#endif
 		}
 
 		/// <summary>

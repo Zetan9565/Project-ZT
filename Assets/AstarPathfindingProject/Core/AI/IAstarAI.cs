@@ -18,7 +18,7 @@ namespace Pathfinding {
 		///
 		/// Note: The <see cref="Pathfinding.AILerp"/> script doesn't really have any use of knowing the radius or the height of the character, so this property will always return 0 in that script.
 		/// </summary>
-		float height { get; set; }
+		float radius { get; set; }
 
 		/// <summary>
 		/// Radius of the agent in world units.
@@ -26,7 +26,7 @@ namespace Pathfinding {
 		///
 		/// Note: The <see cref="Pathfinding.AILerp"/> script doesn't really have any use of knowing the radius or the height of the character, so this property will always return 0 in that script.
 		/// </summary>
-		float radius { get; set; }
+		float height { get; set; }
 
 		/// <summary>
 		/// Position of the agent.
@@ -75,6 +75,7 @@ namespace Pathfinding {
 		///
 		/// See: <see cref="reachedDestination"/>
 		/// See: <see cref="reachedEndOfPath"/>
+		/// See: <see cref="pathPending"/>
 		/// </summary>
 		float remainingDistance { get; }
 
@@ -97,6 +98,19 @@ namespace Pathfinding {
 		/// even though it may actually be quite a long way around the wall to the other side.
 		///
 		/// In contrast to <see cref="reachedEndOfPath"/>, this property is immediately updated when the <see cref="destination"/> is changed.
+		///
+		/// <code>
+		/// IEnumerator Start () {
+		///     ai.destination = somePoint;
+		///     // Start to search for a path to the destination immediately
+		///     ai.SearchPath();
+		///     // Wait until the agent has reached the destination
+		///     while (!ai.reachedDestination) {
+		///         yield return null;
+		///     }
+		///     // The agent has reached the destination now
+		/// }
+		/// </code>
 		///
 		/// See: <see cref="AIPath.endReachedDistance"/>
 		/// See: <see cref="remainingDistance"/>
@@ -133,7 +147,21 @@ namespace Pathfinding {
 		/// During this time the <see cref="pathPending"/> property will return true.
 		///
 		/// If you are setting a destination and then want to know when the agent has reached that destination
-		/// then you should check both <see cref="pathPending"/> and <see cref="reachedEndOfPath"/>:
+		/// then you could either use <see cref="reachedDestination"/> (recommended) or check both <see cref="pathPending"/> and <see cref="reachedEndOfPath"/>.
+		/// Check the documentation for the respective fields to learn about their differences.
+		///
+		/// <code>
+		/// IEnumerator Start () {
+		///     ai.destination = somePoint;
+		///     // Start to search for a path to the destination immediately
+		///     ai.SearchPath();
+		///     // Wait until the agent has reached the destination
+		///     while (!ai.reachedDestination) {
+		///         yield return null;
+		///     }
+		///     // The agent has reached the destination now
+		/// }
+		/// </code>
 		/// <code>
 		/// IEnumerator Start () {
 		///     ai.destination = somePoint;
@@ -248,6 +276,9 @@ namespace Pathfinding {
 		/// Note that if you calculate the path using seeker.StartPath then this script will already pick it up because it is listening for
 		/// all paths that the Seeker finishes calculating. In that case you do not need to call this function.
 		///
+		/// If you pass null as a parameter then the current path will be cleared and the agent will stop moving.
+		/// Note than unless you have also disabled <see cref="canSearch"/> then the agent will soon recalculate its path and start moving again.
+		///
 		/// You can disable the automatic path recalculation by setting the <see cref="canSearch"/> field to false.
 		///
 		/// <code>
@@ -258,6 +289,11 @@ namespace Pathfinding {
 		/// // The path will be about 20 world units long (the default cost of moving 1 world unit is 1000).
 		/// var path = FleePath.Construct(ai.position, pointToAvoid, 1000 * 20);
 		/// ai.SetPath(path);
+		///
+		/// // If you want to make use of properties like ai.reachedDestination or ai.remainingDistance or similar
+		/// // you should also set the destination property to something reasonable.
+		/// // Since the agent's own path recalculation is disabled, setting this will not affect how the paths are calculated.
+		/// // ai.destination = ...
 		/// </code>
 		/// </summary>
 		void SetPath (Path path);

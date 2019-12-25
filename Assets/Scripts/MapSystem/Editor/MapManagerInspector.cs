@@ -2,14 +2,16 @@
 using UnityEditor;
 
 [CustomEditor(typeof(MapManager))]
-public class MapManagerInspector : Editor
+public class MapManagerInspector : SingletonMonoBehaviourInspector
 {
     SerializedProperty UI;
     SerializedProperty updateMode;
     SerializedProperty player;
+    SerializedProperty offset;
     SerializedProperty playerIcon;
     SerializedProperty playerIconSize;
-    SerializedProperty camera;
+    SerializedProperty mapCamera;
+    SerializedProperty cameraPrefab;
     SerializedProperty targetTexture;
     SerializedProperty mapRenderMask;
     SerializedProperty use2D;
@@ -31,9 +33,11 @@ public class MapManagerInspector : Editor
         UI = serializedObject.FindProperty("UI");
         updateMode = serializedObject.FindProperty("updateMode");
         player = serializedObject.FindProperty("player");
+        offset = serializedObject.FindProperty("offset");
         playerIcon = serializedObject.FindProperty("playerIcon");
         playerIconSize = serializedObject.FindProperty("playerIconSize");
-        camera = serializedObject.FindProperty("camera");
+        mapCamera = serializedObject.FindProperty("mapCamera");
+        cameraPrefab = serializedObject.FindProperty("cameraPrefab");
         targetTexture = serializedObject.FindProperty("targetTexture");
         mapRenderMask = serializedObject.FindProperty("mapRenderMask");
         use2D = serializedObject.FindProperty("use2D");
@@ -53,8 +57,15 @@ public class MapManagerInspector : Editor
 
     public override void OnInspectorGUI()
     {
+        if (!CheckValid(out string text))
+        {
+            EditorGUILayout.HelpBox(text, MessageType.Error);
+            return;
+        }
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(player, new GUIContent("跟随目标"));
+        EditorGUILayout.PropertyField(offset, new GUIContent("位置偏移量"));
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.PropertyField(use2D, new GUIContent("2D"));
         EditorGUILayout.PropertyField(rotateMap, new GUIContent("旋转地图"));
@@ -69,7 +80,6 @@ public class MapManagerInspector : Editor
             if (!circle.boolValue) EditorGUILayout.PropertyField(edgeSize, new GUIContent("边框厚度"));
             if (circle.boolValue) EditorGUILayout.PropertyField(radius, new GUIContent("半径"));
         }
-        EditorGUILayout.PropertyField(player, new GUIContent("跟随对象"));
         if (Application.isPlaying) GUI.enabled = false;
         EditorGUILayout.PropertyField(playerIcon, new GUIContent("主图标"));
         EditorGUILayout.PropertyField(playerIconSize, new GUIContent("主图标大小"));
@@ -95,14 +105,21 @@ public class MapManagerInspector : Editor
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUILayout.Space();
+            EditorGUILayout.Space();
         }
         if (Application.isPlaying) GUI.enabled = false;
-        EditorGUILayout.PropertyField(camera, new GUIContent("地图相机"));
+        EditorGUILayout.PropertyField(mapCamera, new GUIContent("地图相机"));
+        EditorGUILayout.PropertyField(cameraPrefab, new GUIContent("地图相机预制体"));
         EditorGUILayout.PropertyField(targetTexture, new GUIContent("采样贴图"));
         if (Application.isPlaying) GUI.enabled = true;
         EditorGUILayout.PropertyField(mapRenderMask, new GUIContent("地图相机可视层"));
-        if (camera.objectReferenceValue && targetTexture.objectReferenceValue)
-            (camera.objectReferenceValue as Camera).targetTexture = targetTexture.objectReferenceValue as RenderTexture;
+        if (mapCamera.objectReferenceValue)
+        {
+            Camera cam = (mapCamera.objectReferenceValue as MapCamera).Camera;
+            cam.cullingMask = mapRenderMask.intValue;
+            if (targetTexture.objectReferenceValue && cam.targetTexture != targetTexture.objectReferenceValue)
+                cam.targetTexture = targetTexture.objectReferenceValue as RenderTexture;
+        }
         EditorGUILayout.Space();
         EditorGUILayout.PropertyField(worldEdgeSize, new GUIContent("大地图边框厚度"));
         EditorGUILayout.PropertyField(dragSensitivity, new GUIContent("大地图拖拽灵敏度"));
@@ -121,6 +138,8 @@ public class MapManagerInspector : Editor
         if (UI)
         {
             SerializedProperty sizeOfCam = modeInfo.FindPropertyRelative("sizeOfCam");
+            SerializedProperty minZoomOfCam = modeInfo.FindPropertyRelative("minZoomOfCam");
+            SerializedProperty maxZoomOfCam = modeInfo.FindPropertyRelative("maxZoomOfCam");
             SerializedProperty windowAnchoreMin = modeInfo.FindPropertyRelative("windowAnchoreMin");
             SerializedProperty windowAnchoreMax = modeInfo.FindPropertyRelative("windowAnchoreMax");
             SerializedProperty mapAnchoreMin = modeInfo.FindPropertyRelative("mapAnchoreMin");
@@ -135,7 +154,10 @@ public class MapManagerInspector : Editor
             {
                 if (!(mini && isViewingWorldMap.boolValue))
                 {
-                    if (camera.objectReferenceValue) sizeOfCam.floatValue = (camera.objectReferenceValue as Camera).orthographicSize;
+                    if (mapCamera.objectReferenceValue)
+                    {
+                        sizeOfCam.floatValue = (mapCamera.objectReferenceValue as Camera).orthographicSize;
+                    }
                     windowAnchoreMin.vector2Value = UI.mapWindowRect.anchorMin;
                     windowAnchoreMax.vector2Value = UI.mapWindowRect.anchorMax;
                     mapAnchoreMin.vector2Value = UI.mapRect.anchorMin;
@@ -156,17 +178,19 @@ public class MapManagerInspector : Editor
             }
             if (mini && !isViewingWorldMap.boolValue || !mini && isViewingWorldMap.boolValue) GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
-            EditorGUILayout.PropertyField(modeInfo, new GUIContent(mini ? "小地图模式信息" : "大地图模式信息"));
+            EditorGUILayout.PropertyField(modeInfo, new GUIContent(mini ? "小地图模式信息" : "大地图模式信息"), false);
             if (modeInfo.isExpanded)
             {
-                EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("sizeOfCam"), new GUIContent("地图相机视野大小"));
-                EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("windowAnchoreMin"), new GUIContent("窗口锚点最小值"));
-                EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("windowAnchoreMax"), new GUIContent("窗口锚点最大值"));
-                EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("mapAnchoreMin"), new GUIContent("地图锚点最小值"));
-                EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("mapAnchoreMax"), new GUIContent("地图锚点最大值"));
-                EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("anchoredPosition"), new GUIContent("窗口修正位置"));
-                EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("sizeOfWindow"), new GUIContent("窗口矩形大小"));
-                EditorGUILayout.PropertyField(modeInfo.FindPropertyRelative("sizeOfMap"), new GUIContent("地图矩形大小"));
+                EditorGUILayout.PropertyField(sizeOfCam, new GUIContent("地图相机视野大小"));
+                EditorGUILayout.Slider(minZoomOfCam, mini ? 1 : miniModeInfo.FindPropertyRelative("sizeOfCam").floatValue, sizeOfCam.floatValue, new GUIContent("相机视野大小下限"));
+                EditorGUILayout.Slider(maxZoomOfCam, sizeOfCam.floatValue, mini ? worldModeInfo.FindPropertyRelative("sizeOfCam").floatValue : 255, new GUIContent("相机视野大小上限"));
+                EditorGUILayout.PropertyField(windowAnchoreMin, new GUIContent("窗口锚点最小值"));
+                EditorGUILayout.PropertyField(windowAnchoreMax, new GUIContent("窗口锚点最大值"));
+                EditorGUILayout.PropertyField(mapAnchoreMin, new GUIContent("地图锚点最小值"));
+                EditorGUILayout.PropertyField(mapAnchoreMax, new GUIContent("地图锚点最大值"));
+                EditorGUILayout.PropertyField(anchoredPosition, new GUIContent("窗口修正位置"));
+                EditorGUILayout.PropertyField(sizeOfWindow, new GUIContent("窗口矩形大小"));
+                EditorGUILayout.PropertyField(sizeOfMap, new GUIContent("地图矩形大小"));
             }
             EditorGUILayout.EndVertical();
         }

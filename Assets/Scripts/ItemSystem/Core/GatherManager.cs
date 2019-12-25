@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/采集理器")]
 public class GatherManager : SingletonMonoBehaviour<GatherManager>
 {
     [SerializeField]

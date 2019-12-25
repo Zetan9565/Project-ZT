@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/对话管理器")]
 public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowHandler
 {
     [SerializeField]
@@ -18,7 +19,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
 
     public DialogueType CurrentType { get; private set; } = DialogueType.Normal;
 
-    private readonly Queue<DialogueWords> Words = new Queue<DialogueWords>();
+    private readonly Queue<DialogueWords> WordsToSay = new Queue<DialogueWords>();
     public Dictionary<string, DialogueData> DialogueDatas { get; private set; } = new Dictionary<string, DialogueData>();
 
     private int page = 1;
@@ -40,13 +41,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
     private List<OptionAgent> optionAgents = new List<OptionAgent>();
 
-    public int OptionsCount
-    {
-        get
-        {
-            return optionAgents.Count;
-        }
-    }
+    public int OptionsCount => optionAgents.Count;
     public OptionAgent FirstOption
     {
         get
@@ -69,8 +64,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     {
         get
         {
-            Talker questGiver = CurrentTalker;
-            if (!questGiver || !questGiver.QuestInstances.Exists(x => !x.IsOngoing) || questGiver.QuestInstances.Exists(x => x.IsComplete)) return false;
+            if (!CurrentTalker || !CurrentTalker.QuestInstances.Exists(x => !x.IsOngoing) || CurrentTalker.QuestInstances.Exists(x => x.IsComplete)) return false;
             return true;
         }
     }
@@ -109,14 +103,14 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         currentDialog = dialogue;
         if (!DialogueDatas.ContainsKey(dialogue.ID)) DialogueDatas.Add(dialogue.ID, new DialogueData(dialogue));
         IsTalking = true;
-        Words.Clear();
+        WordsToSay.Clear();
         if (startIndex < 0) startIndex = 0;
         else if (startIndex > dialogue.Words.Count - 1) startIndex = dialogue.Words.Count - 1;
         for (int i = startIndex; i < dialogue.Words.Count; i++)
-            Words.Enqueue(dialogue.Words[i]);
+            WordsToSay.Enqueue(dialogue.Words[i]);
         if (sayImmediately) SayNextWords();
         else MakeContinueOption(true);
-        ZetanUtilities.SetActive(UI.wordsText.gameObject, true);
+        ZetanUtil.SetActive(UI.wordsText.gameObject, true);
         SetPageArea(false, false, false);
         if (!IsUIOpen) OpenWindow();
     }
@@ -139,11 +133,11 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         if (!UI) return;
         CurrentTalker = talker;
         CurrentType = DialogueType.Normal;
-        if (talker.QuestInstances.Count > 0)
-            ZetanUtilities.SetActive(UI.questButton.gameObject, true);
-        else ZetanUtilities.SetActive(UI.questButton.gameObject, false);
-        ZetanUtilities.SetActive(UI.warehouseButton.gameObject, talker.Info.IsWarehouseAgent);
-        ZetanUtilities.SetActive(UI.shopButton.gameObject, talker.Info.IsVendor);
+        if (talker.QuestInstances.FindAll(q => q.AcceptAble).Count > 0)
+            ZetanUtil.SetActive(UI.questButton.gameObject, true);
+        else ZetanUtil.SetActive(UI.questButton.gameObject, false);
+        ZetanUtil.SetActive(UI.warehouseButton.gameObject, talker.Info.IsWarehouseAgent);
+        ZetanUtil.SetActive(UI.shopButton.gameObject, talker.Info.IsVendor);
         HideQuestDescription();
         StartDialogue(talker.Info.DefaultDialogue);
         talker.OnTalkBegin();
@@ -172,11 +166,11 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     public void StartObjectiveDialogue(SubmitObjective submitObj)
     {
         if (submitObj == null) return;
-        Quest parent = submitObj.runtimeParent;
+        Quest parentQ = submitObj.runtimeParent;
         var amount = BackpackManager.Instance.GetItemAmount(submitObj.ItemToSubmit);
         bool submitAble = true;
-        if (parent.CmpltObjctvInOrder)
-            foreach (var o in parent.ObjectiveInstances)
+        if (parentQ.CmpltObjctvInOrder)
+            foreach (var o in parentQ.ObjectiveInstances)
                 if (o is CollectObjective)
                     if (o.InOrder && o.IsComplete)
                         if (amount - submitObj.Amount < o.Amount)
@@ -269,10 +263,10 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     {
         if (!UI || !words.IsValid) return;
         IsTalking = true;
-        Words.Clear();
-        Words.Enqueue(words);
+        WordsToSay.Clear();
+        WordsToSay.Enqueue(words);
         MakeContinueOption(true);
-        ZetanUtilities.SetActive(UI.wordsText.gameObject, true);
+        ZetanUtil.SetActive(UI.wordsText.gameObject, true);
         SetPageArea(false, false, false);
         if (dialogToGoBack && indexToGoBack > -1)
         {
@@ -292,7 +286,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     {
         ClearOptions(OptionType.Continue);
         OptionAgent oa = optionAgents.Find(x => x.OptionType == OptionType.Continue);
-        if (Words.Count > 1 || force)
+        if (WordsToSay.Count > 1 || force)
         {
             //如果还有话没说完，弹出一个“继续”按钮
             if (!oa)
@@ -349,13 +343,13 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
                     //若找到了合适的位置
                     if (!optionAgents[j].MQuest.IsOngoing && !optionAgents[j].MQuest.IsComplete)
                     {
-                        //则从该位置开始到选项的原位置，逐个前移一位，填补(覆盖)选项的原位置并空出新位置
+                        //则从该位置开始到选项的原位置，逐个前移一位，填充(覆盖)选项的原位置并空出新位置
                         for (int k = i; k < j; k++)
                         {
                             //在k指向目标位置之前，逐个前移
                             optionAgents[k] = optionAgents[k + 1];
                         }
-                        //把选项放入新位置，此时选项的原位置即OptionAgents[i]已被填补(覆盖)
+                        //把选项放入新位置，此时选项的原位置即OptionAgents[i]已被填充(覆盖)
                         optionAgents[j] = oa;
                         oa.transform.SetSiblingIndex(j);
                         break;
@@ -366,7 +360,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         //把第一页以外的选项隐藏
         for (int i = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight); i < optionAgents.Count; i++)
         {
-            ZetanUtilities.SetActive(optionAgents[i].gameObject, false);
+            ZetanUtil.SetActive(optionAgents[i].gameObject, false);
         }
         CheckPages();
     }
@@ -379,7 +373,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         ClearOptions(OptionType.Branch);
         foreach (Quest quest in CurrentTalker.QuestInstances)
         {
-            if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.AcceptAble && quest.IsComplete)
+            if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.IsComplete)
             {
                 OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(quest.Title + "(完成)", quest);
@@ -389,7 +383,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         //把第一页以外的选项隐藏
         for (int i = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight); i < optionAgents.Count; i++)
         {
-            ZetanUtilities.SetActive(optionAgents[i].gameObject, false);
+            ZetanUtil.SetActive(optionAgents[i].gameObject, false);
         }
         CheckPages();
     }
@@ -407,7 +401,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
                 OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(to.runtimeParent.Title, to);
                 optionAgents.Add(oa);
-                if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) ZetanUtilities.SetActive(oa.gameObject, false);//第一页以外隐藏
+                if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) ZetanUtil.SetActive(oa.gameObject, false);//第一页以外隐藏
                 index++;
             }
         }
@@ -419,7 +413,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
                 OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(so.DisplayName, so);
                 optionAgents.Add(oa);
-                if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) ZetanUtilities.SetActive(oa.gameObject, false);//第一页以外隐藏
+                if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) ZetanUtil.SetActive(oa.gameObject, false);//第一页以外隐藏
                 index++;
             }
         }
@@ -430,12 +424,12 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     /// </summary>
     private void MakeWordsOptionOption()
     {
-        if (Words.Count < 1 || Words.Peek().Options.Count < 1) return;
-        DialogueWords currentWords = Words.Peek();
+        if (WordsToSay.Count < 1 || WordsToSay.Peek().Options.Count < 1) return;
+        DialogueWords currentWords = WordsToSay.Peek();
         DialogueDatas.TryGetValue(currentDialog.ID, out DialogueData dialogDataFound);
         if (CurrentType == DialogueType.Normal) ClearOptions(OptionType.Quest, OptionType.Objective);
         else ClearOptions();
-        bool isLastWords = currentDialog.IndexOfWords(Words.Peek()) == currentDialog.Words.Count - 1;
+        bool isLastWords = currentDialog.IndexOfWords(WordsToSay.Peek()) == currentDialog.Words.Count - 1;
         foreach (WordsOption option in currentWords.Options)
         {
             if (option.OptionType == WordsOptionType.Choice && dialogDataFound != null)
@@ -461,7 +455,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         //把第一页以外的选项隐藏
         for (int i = UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight); i < optionAgents.Count; i++)
         {
-            ZetanUtilities.SetActive(optionAgents[i].gameObject, false);
+            ZetanUtil.SetActive(optionAgents[i].gameObject, false);
         }
         if (optionAgents.Count < 1)
             MakeContinueOption();//如果所有选择型分支都完成了，则可以进行下一句对话
@@ -480,9 +474,9 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
             for (int i = 0; i < leftLineCount; i++)
             {
                 if ((Page - 1) * leftLineCount + i < optionAgents.Count && (Page - 1) * leftLineCount + i >= 0)
-                    ZetanUtilities.SetActive(optionAgents[(Page - 1) * leftLineCount + i].gameObject, true);
+                    ZetanUtil.SetActive(optionAgents[(Page - 1) * leftLineCount + i].gameObject, true);
                 if (Page * leftLineCount + i >= 0 && Page * leftLineCount + i < optionAgents.Count)
-                    ZetanUtilities.SetActive(optionAgents[Page * leftLineCount + i].gameObject, false);
+                    ZetanUtil.SetActive(optionAgents[Page * leftLineCount + i].gameObject, false);
             }
         }
         if (Page <= 1 && MaxPage > 1) SetPageArea(false, true, true);
@@ -498,9 +492,9 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
             for (int i = 0; i < leftLineCount; i++)
             {
                 if ((Page - 1) * leftLineCount + i < optionAgents.Count && (Page - 1) * leftLineCount + i >= 0)
-                    ZetanUtilities.SetActive(optionAgents[(Page - 1) * leftLineCount + i].gameObject, false);
+                    ZetanUtil.SetActive(optionAgents[(Page - 1) * leftLineCount + i].gameObject, false);
                 if (Page * leftLineCount + i >= 0 && Page * leftLineCount + i < optionAgents.Count)
-                    ZetanUtilities.SetActive(optionAgents[Page * leftLineCount + i].gameObject, true);
+                    ZetanUtil.SetActive(optionAgents[Page * leftLineCount + i].gameObject, true);
             }
             Page++;
         }
@@ -543,9 +537,9 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
 
     private void SetPageArea(bool activeUp, bool activeDown, bool activeText)
     {
-        ZetanUtilities.SetActive(UI.pageUpButton.gameObject, activeUp);
-        ZetanUtilities.SetActive(UI.pageDownButton.gameObject, activeDown);
-        ZetanUtilities.SetActive(UI.pageText.gameObject, activeText);
+        ZetanUtil.SetActive(UI.pageUpButton.gameObject, activeUp);
+        ZetanUtil.SetActive(UI.pageDownButton.gameObject, activeDown);
+        ZetanUtil.SetActive(UI.pageText.gameObject, activeText);
     }
     #endregion
 
@@ -555,25 +549,44 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     /// </summary>
     public void SayNextWords()
     {
+        if (WordsToSay.Count < 1) return;
         MakeContinueOption();
-        if (Words.Count > 0 && Words.Peek().Options.Count > 0)
+        if (WordsToSay.Count > 0 && WordsToSay.Peek().Options.Count > 0)
         {
             MakeTalkerCmpltQuestOption();
             if (AllOptionComplete()) MakeTalkerObjectiveOption();
         }
         MakeWordsOptionOption();
-        if (Words.Count > 0) currentWords = Words.Peek();
-        if (Words.Count == 1) HandlingLastWords();//因为Dequeue之后，话就没了，Words.Count就不是1了，而是0，所以要在此之前做这一步，意思是倒数第二句做这一步
-        if (Words.Count > 0)
+        if (WordsToSay.Count >= 1) currentWords = WordsToSay.Peek();
+        if (WordsToSay.Count == 1) HandlingLastWords();//因为Dequeue之后，话就没了，Words.Count就不是1了，而是0，所以要在Dequeue之前做这一步，意思是倒数第二句做这一步
+        if (WordsToSay.Count >= 1)
         {
-            string talkerName = currentDialog.UseUnifiedNPC ? (currentDialog.UseTalkerInfo ? CurrentTalker.Info.Name : currentDialog.UnifiedNPC.Name) : Words.Peek().TalkerName;
-            if (Words.Peek().TalkerType == TalkerType.Player && PlayerManager.Instance.PlayerInfo)
+            string talkerName = currentDialog.UseUnifiedNPC ? (currentDialog.UseTalkerInfo ? CurrentTalker.Info.Name : currentDialog.UnifiedNPC.Name) : WordsToSay.Peek().TalkerName;
+            if (WordsToSay.Peek().TalkerType == TalkerType.Player && PlayerManager.Instance.PlayerInfo)
                 talkerName = PlayerManager.Instance.PlayerInfo.Name;
             UI.nameText.text = talkerName;
-            UI.wordsText.text = Words.Peek().Words;
-            Words.Dequeue();
+            UI.wordsText.text = WordsToSay.Peek().Words;
+            var words = WordsToSay.Dequeue();
+            if (TriggerManager.Instance)
+            {
+                foreach (var trigger in words.Events.FindAll(x => x.EventType == WordsEventType.Trigger))
+                {
+                    switch (trigger.TriggerActType)
+                    {
+                        case TriggerActionType.Set:
+                            TriggerManager.Instance.SetTrigger(trigger.WordsTrigrName, true);
+                            break;
+                        case TriggerActionType.Reset:
+                            TriggerManager.Instance.SetTrigger(trigger.WordsTrigrName, false);
+                            break;
+                        case TriggerActionType.None:
+                        default:
+                            break;
+                    }
+                }
+            }
         }
-        if (Words.Count <= 0)
+        if (WordsToSay.Count == 0)
         {
             if (wordsOptionInstances.Count > 0)
                 HandlingLastOptionWords();//分支处理比较特殊，放到Dequque之后，否则分支最后一句不会讲
@@ -596,7 +609,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
             else
             {
                 ClearOptions(OptionType.Quest);
-                if (Words.Peek().Options.Count > 0)
+                if (WordsToSay.Peek().Options.Count > 0)
                     MakeWordsOptionOption();
             }
             QuestManager.Instance.UpdateUI();
@@ -762,7 +775,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     private Coroutine waitToGoBackRoutine;
     private IEnumerator WaitToGoBack()
     {
-        yield return new WaitUntil(() => Words.Count <= 0);
+        yield return new WaitUntil(() => WordsToSay.Count <= 0);
         if (IndexToGoBack < 0) yield break;
         try
         {
@@ -916,9 +929,9 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
 
     private void ShowButtons(bool shop, bool warehouse, bool quest)
     {
-        ZetanUtilities.SetActive(UI.shopButton.gameObject, shop);
-        ZetanUtilities.SetActive(UI.warehouseButton.gameObject, warehouse);
-        ZetanUtilities.SetActive(UI.questButton.gameObject, quest);
+        ZetanUtil.SetActive(UI.shopButton.gameObject, shop);
+        ZetanUtil.SetActive(UI.warehouseButton.gameObject, warehouse);
+        ZetanUtil.SetActive(UI.questButton.gameObject, quest);
     }
 
     public void SetUI(DialogueUI UI)
@@ -946,9 +959,9 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     public void LoadTalkerQuest()
     {
         if (CurrentTalker == null) return;
-        ZetanUtilities.SetActive(UI.questButton.gameObject, false);
-        ZetanUtilities.SetActive(UI.warehouseButton.gameObject, false);
-        ZetanUtilities.SetActive(UI.shopButton.gameObject, false);
+        ZetanUtil.SetActive(UI.questButton.gameObject, false);
+        ZetanUtil.SetActive(UI.warehouseButton.gameObject, false);
+        ZetanUtil.SetActive(UI.shopButton.gameObject, false);
         GotoDefault();
         Skip();
         MakeTalkerQuestOption();
@@ -962,7 +975,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
                 for (int j = 0; j < currentDialog.Words[i].Options.Count; j++)
                     if (!find.wordsDatas[i].IsCmpltOptionWithIndex(j))
                         return;
-        while (Words.Count > 0)
+        while (WordsToSay.Count > 0)
             SayNextWords();
     }
 

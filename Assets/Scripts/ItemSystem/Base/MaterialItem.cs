@@ -19,7 +19,7 @@ public class MaterialItem : ItemBase
     public MaterialItem()
     {
         itemType = ItemType.Material;
-        useable = false;
+        usable = false;
     }
 }
 

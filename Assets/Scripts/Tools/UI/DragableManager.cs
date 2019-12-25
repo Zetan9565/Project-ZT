@@ -57,7 +57,7 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
         Current = dragable;
         icon.overrideSprite = dragable.DragableIcon;
         icon.color = Color.white;
-        ZetanUtilities.SetActive(icon.gameObject, true);
+        ZetanUtil.SetActive(icon.gameObject, true);
         onCancelDrag.RemoveAllListeners();
         if (cancelDragAction != null) onCancelDrag.AddListener(cancelDragAction);
         icon.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
@@ -68,7 +68,7 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
     public void ResetIcon()
     {
         Current = null;
-        ZetanUtilities.SetActive(icon.gameObject, false);
+        ZetanUtil.SetActive(icon.gameObject, false);
     }
 
     public void CancelDrag()

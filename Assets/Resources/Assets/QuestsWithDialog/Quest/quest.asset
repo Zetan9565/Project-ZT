@@ -18,6 +18,7 @@ MonoBehaviour:
   abandonable: 1
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptConditions: []
+  conditionRelational: 0 * (1 + 2)
   beginDialogue: {fileID: 11400000, guid: 751fe4671932886419688231ec9e5518, type: 2}
   ongoingDialogue: {fileID: 11400000, guid: 3dd42e42c554ed947a725a4b4ca24641, type: 2}
   completeDialogue: {fileID: 11400000, guid: 4590ede6f624ae34883291bfd21fa8a5, type: 2}
@@ -42,7 +43,6 @@ MonoBehaviour:
     gemSlotAmount: 0
     gemstone1: {fileID: 0}
     gemstone2: {fileID: 0}
-  sbmtOnOriginalNPC: 1
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 1
   collectObjectives:
@@ -50,77 +50,68 @@ MonoBehaviour:
     display: 1
     amount: 5
     inOrder: 1
-    orderIndex: 2
+    orderIndex: 3
     runtimeID: 
     runtimeParent: {fileID: 0}
     item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    checkBagAtAcpt: 1
-    loseItemAtSbmt: 1
+    checkBagAtStart: 1
+    loseItemAtSbmt: 0
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5200"
     display: 1
     amount: 5
     inOrder: 1
-    orderIndex: 2
+    orderIndex: 3
     runtimeID: 
     runtimeParent: {fileID: 0}
     item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
-    checkBagAtAcpt: 1
-    loseItemAtSbmt: 1
+    checkBagAtStart: 1
+    loseItemAtSbmt: 0
   killObjectives:
-  - displayName: "\u51FB\u6740\u9AB7\u9AC5"
+  - displayName: "\u6D88\u706D\u9AB7\u9AC5"
     display: 1
     amount: 5
     inOrder: 1
-    orderIndex: 2
+    orderIndex: 3
     runtimeID: 
     runtimeParent: {fileID: 0}
     objectiveType: 0
     enemy: {fileID: 11400000, guid: 1f8636ab8a7c2a443b85d27f63bd2394, type: 2}
     race: {fileID: 0}
-  - displayName: "\u51FB\u6740\u50F5\u5C38"
+  - displayName: "\u6D88\u706D\u50F5\u5C38"
     display: 1
     amount: 5
     inOrder: 1
-    orderIndex: 2
+    orderIndex: 3
     runtimeID: 
     runtimeParent: {fileID: 0}
     objectiveType: 0
     enemy: {fileID: 11400000, guid: fcbcd965e0bc2e14cbc0e99863634cff, type: 2}
     race: {fileID: 0}
   talkObjectives:
-  - displayName: "\u4E0E\u739B\u4E3D\u4E9A\u8C08\u8BDD"
-    display: 1
-    amount: 1
-    inOrder: 1
-    orderIndex: 0
-    runtimeID: 
-    runtimeParent: {fileID: 0}
-    _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491, type: 2}
-  moveObjectives:
-  - displayName: "\u8FBE\u5230\u6751\u5B50\u5317\u9762"
+  - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
     display: 1
     amount: 1
     inOrder: 1
     orderIndex: 1
     runtimeID: 
     runtimeParent: {fileID: 0}
-    pointID: POIT001
-  submitObjectives:
-  - displayName: "\u63D0\u4EA45\u4E2A\u7834\u65E7\u7684\u5251"
+    _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+    dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491, type: 2}
+  moveObjectives:
+  - displayName: "\u53BB\u5230\u6751\u5B50\u5317\u90E8\u8C03\u67E5"
     display: 1
-    amount: 5
+    amount: 1
     inOrder: 1
-    orderIndex: 7
+    orderIndex: 2
     runtimeID: 
     runtimeParent: {fileID: 0}
-    _NPCToSubmit: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-    itemToSubmit: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    wordsWhenSubmit: "\u8FD9\u662F\u4F60\u60F3\u8981\u7684\u4E1C\u897F\u3002"
-    talkerType: 1
+    pointID: POIT001
+  submitObjectives: []
   customObjectives: []
-  OriginalQuestGiver:
+  originalQuestHolder:
     info: {fileID: 0}
+    currentScene: 
+    currentPostition: {x: 0, y: 0, z: 0}
     relationshipInstance:
       relationshipValue:
         min: -500
@@ -129,13 +120,15 @@ MonoBehaviour:
     warehouse:
       warehouseSize:
         min: 0
-        max: 300
+        max: 1
     shop: {fileID: 0}
     objectivesTalkToThis: []
     objectivesSubmitToThis: []
     questInstances: []
-  CurrentQuestGiver:
+  currentQuestHolder:
     info: {fileID: 0}
+    currentScene: 
+    currentPostition: {x: 0, y: 0, z: 0}
     relationshipInstance:
       relationshipValue:
         min: -500
@@ -144,7 +137,7 @@ MonoBehaviour:
     warehouse:
       warehouseSize:
         min: 0
-        max: 300
+        max: 1
     shop: {fileID: 0}
     objectivesTalkToThis: []
     objectivesSubmitToThis: []

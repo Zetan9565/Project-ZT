@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b2a7e5350d9549438ded90c9606e6c6, type: 3}
   m_Name: enemy race
   m_EditorClassIdentifier: 
-  _ID: 
-  _name: 
+  _ID: ERAC001
+  _name: "\u4E0D\u6B7B"

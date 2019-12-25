@@ -145,10 +145,10 @@ public class CharacterInfoInspector : Editor
                     SerializedProperty race = serializedObject.FindProperty("race");
                     EditorGUILayout.PropertyField(race, new GUIContent("种族"));
                     if (serializedObject.FindProperty("race").objectReferenceValue)
-                        EditorGUILayout.LabelField((race.objectReferenceValue as EnemyRace).name);
+                        EditorGUILayout.LabelField("种族名称", (race.objectReferenceValue as EnemyRace).name);
                     if (EditorGUI.EndChangeCheck())
                         serializedObject.ApplyModifiedProperties();
-                    EditorGUILayout.PropertyField(dropItems, new GUIContent("掉落道具\t\t" + (dropItems.arraySize > 0 ? "数量：" + dropItems.arraySize : "无")));
+                    EditorGUILayout.PropertyField(dropItems, new GUIContent("掉落道具\t\t" + (dropItems.arraySize > 0 ? "数量：" + dropItems.arraySize : "无")), false);
                     if (dropItems.isExpanded)
                     {
                         serializedObject.Update();
@@ -231,13 +231,13 @@ public class CharacterInfoInspector : Editor
                             {
                                 EditorGUILayout.LabelField("商品列表", new GUIStyle { fontStyle = FontStyle.Bold });
                                 for (int i = 0; i < talker.Shop.Commodities.Count; i++)
-                                    EditorGUILayout.LabelField("商品 " + i, talker.Shop.Commodities[i].Item.name);
+                                    EditorGUILayout.LabelField("商品 " + (i + 1), talker.Shop.Commodities[i].Item.name);
                             }
                             if (talker.Shop.Acquisitions.Count > 0)
                             {
                                 EditorGUILayout.LabelField("收购品列表", new GUIStyle { fontStyle = FontStyle.Bold });
                                 for (int i = 0; i < talker.Shop.Acquisitions.Count; i++)
-                                    EditorGUILayout.LabelField("收购品 " + i, talker.Shop.Acquisitions[i].Item.name);
+                                    EditorGUILayout.LabelField("收购品 " + (i + 1), talker.Shop.Acquisitions[i].Item.name);
                             }
                             EditorGUILayout.EndVertical();
                         }
@@ -284,7 +284,7 @@ public class CharacterInfoInspector : Editor
                     {
                         serializedObject.Update();
                         EditorGUI.BeginChangeCheck();
-                        EditorGUILayout.PropertyField(normalItemDialogue, new GUIContent("赠送中性物品时的对话"), true);
+                        EditorGUILayout.PropertyField(normalItemDialogue, new GUIContent("赠送中性物品时的对话"));
                         if (talker.NormalItemDialogue)
                         {
                             string dialogue = string.Empty;
@@ -302,7 +302,7 @@ public class CharacterInfoInspector : Editor
                             EditorGUILayout.TextArea(dialogue);
                             GUI.enabled = true;
                         }
-                        EditorGUILayout.PropertyField(favoriteItemDialogue, new GUIContent("赠送喜爱物品时的对话"));
+                        EditorGUILayout.PropertyField(favoriteItemDialogue, new GUIContent("赠送喜爱物品时的对话"), false);
                         if (favoriteItemDialogue.isExpanded)
                         {
                             SerializedProperty level_1 = favoriteItemDialogue.FindPropertyRelative("level_1");
@@ -314,7 +314,7 @@ public class CharacterInfoInspector : Editor
                             SerializedProperty level_4 = favoriteItemDialogue.FindPropertyRelative("level_4");
                             EditorGUILayout.PropertyField(level_4, new GUIContent("为其疯狂时的对话"));
                         }
-                        EditorGUILayout.PropertyField(hateItemDialogue, new GUIContent("赠送讨厌物品时的对话"));
+                        EditorGUILayout.PropertyField(hateItemDialogue, new GUIContent("赠送讨厌物品时的对话"), false);
                         if (hateItemDialogue.isExpanded)
                         {
                             SerializedProperty level_1 = hateItemDialogue.FindPropertyRelative("level_1");
@@ -329,14 +329,14 @@ public class CharacterInfoInspector : Editor
                         if (EditorGUI.EndChangeCheck())
                             serializedObject.ApplyModifiedProperties();
                         EditorGUILayout.Space();
-                        EditorGUILayout.PropertyField(favoriteItems, new GUIContent("喜爱的道具\t\t" + (favoriteItems.arraySize > 0 ? "数量：" + favoriteItems.arraySize : "无")));
+                        EditorGUILayout.PropertyField(favoriteItems, new GUIContent("喜爱的道具\t\t" + (favoriteItems.arraySize > 0 ? "数量：" + favoriteItems.arraySize : "无")), false);
                         if (favoriteItems.isExpanded)
                         {
                             serializedObject.Update();
                             favoriteItemList.DoLayoutList();
                             serializedObject.ApplyModifiedProperties();
                         }
-                        EditorGUILayout.PropertyField(hateItems, new GUIContent("讨厌的道具\t\t" + (hateItems.arraySize > 0 ? "数量：" + hateItems.arraySize : "无")));
+                        EditorGUILayout.PropertyField(hateItems, new GUIContent("讨厌的道具\t\t" + (hateItems.arraySize > 0 ? "数量：" + hateItems.arraySize : "无")), false);
                         if (hateItems.isExpanded)
                         {
                             serializedObject.Update();

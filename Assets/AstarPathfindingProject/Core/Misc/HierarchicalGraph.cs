@@ -151,10 +151,10 @@ namespace Pathfinding {
 				// the array may also end up containing many destroyed nodes. This can in rare cases cause it to go out of bounds.
 				// In that case we need to go through the array and filter out any destroyed nodes while making sure to mark their
 				// corresponding hierarchical nodes as being dirty.
-				try {
-					dirtyNodes[numDirtyNodes++] = node;
-				} catch {
-					numDirtyNodes--;
+				if (numDirtyNodes < dirtyNodes.Length) {
+					dirtyNodes[numDirtyNodes] = node;
+					numDirtyNodes++;
+				} else {
 					int maxIndex = 0;
 					for (int i = numDirtyNodes - 1; i >= 0; i--) {
 						if (dirtyNodes[i].Destroyed) {

@@ -31,7 +31,8 @@ public class ItemInspector : Editor
     SerializedProperty description;
     SerializedProperty stackAble;
     SerializedProperty discardAble;
-    SerializedProperty useable;
+    SerializedProperty lockAble;
+    SerializedProperty usable;
     SerializedProperty inexhaustible;
     SerializedProperty maxDurability;
     SerializedProperty makingMethod;
@@ -59,7 +60,8 @@ public class ItemInspector : Editor
         description = serializedObject.FindProperty("description");
         stackAble = serializedObject.FindProperty("stackAble");
         discardAble = serializedObject.FindProperty("discardAble");
-        useable = serializedObject.FindProperty("useable");
+        lockAble = serializedObject.FindProperty("lockAble");
+        usable = serializedObject.FindProperty("usable");
         inexhaustible = serializedObject.FindProperty("inexhaustible");
         maxDurability = serializedObject.FindProperty("maxDurability");
         materials = serializedObject.FindProperty("materials");
@@ -137,8 +139,9 @@ public class ItemInspector : Editor
         if (!item.IsEquipment && !item.IsBag)
             EditorGUILayout.PropertyField(stackAble, new GUIContent("可叠加"));
         if (!item.IsForQuest) EditorGUILayout.PropertyField(discardAble, new GUIContent("可丢弃"));
-        if (item.IsForQuest) EditorGUILayout.PropertyField(useable, new GUIContent("可使用"));
-        if (item.IsForQuest && item.Useable) EditorGUILayout.PropertyField(inexhaustible, new GUIContent("可无限使用"));
+        EditorGUILayout.PropertyField(lockAble, new GUIContent("可上锁"));
+        if (item.IsForQuest) EditorGUILayout.PropertyField(usable, new GUIContent("可使用"));
+        if (item.IsForQuest && item.Usable) EditorGUILayout.PropertyField(inexhaustible, new GUIContent("可无限使用"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
         if (!(item is BoxItem) && !(item is BookItem))
@@ -151,7 +154,7 @@ public class ItemInspector : Editor
                 serializedObject.ApplyModifiedProperties();
             if (makingMethod.enumValueIndex != 0)
             {
-                EditorGUILayout.PropertyField(materials, new GUIContent("制作材料\t\t" + (materials.arraySize > 0 ? "数量：" + materials.arraySize : "无")));
+                EditorGUILayout.PropertyField(materials, new GUIContent("制作材料\t\t" + (materials.arraySize > 0 ? "数量：" + materials.arraySize : "无")), false);
                 if (materials.isExpanded)
                 {
                     serializedObject.Update();
@@ -341,8 +344,12 @@ public class ItemInspector : Editor
 
                 break;
             case ItemType.Weapon:
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("_ATK"), new GUIContent("攻击力"));
-                if (serializedObject.FindProperty("_ATK").intValue < 0) serializedObject.FindProperty("_ATK").intValue = 0;
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("cutATK"), new GUIContent("斩击攻击力"));
+                if (serializedObject.FindProperty("cutATK").intValue < 0) serializedObject.FindProperty("cutATK").intValue = 0;
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("punATK"), new GUIContent("刺击攻击力"));
+                if (serializedObject.FindProperty("punATK").intValue < 0) serializedObject.FindProperty("punATK").intValue = 0;
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("bluATK"), new GUIContent("钝击攻击力"));
+                if (serializedObject.FindProperty("bluATK").intValue < 0) serializedObject.FindProperty("bluATK").intValue = 0;
 
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("_DEF"), new GUIContent("防御力"));
                 if (serializedObject.FindProperty("_DEF").intValue < 0) serializedObject.FindProperty("_DEF").intValue = 0;
@@ -361,8 +368,8 @@ public class ItemInspector : Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("hit"), new GUIContent("命中力"));
                 if (serializedObject.FindProperty("hit").intValue < 0) serializedObject.FindProperty("hit").intValue = 0;
 
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("dodge"), new GUIContent("闪避力"));
-                if (serializedObject.FindProperty("dodge").intValue < 0) serializedObject.FindProperty("dodge").intValue = 0;
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("flee"), new GUIContent("闪避力"));
+                if (serializedObject.FindProperty("flee").intValue < 0) serializedObject.FindProperty("flee").intValue = 0;
 
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("gemSlotAmount"), new GUIContent("默认宝石槽数"));
                 goto case ItemType.Gemstone;
@@ -434,7 +441,7 @@ public class ItemInspector : Editor
         {
             itemType.enumValueIndex = (int)ItemType.Quest;
         }
-        else if(item.IsMedicine && item.ItemType != ItemType.Medicine)
+        else if (item.IsMedicine && item.ItemType != ItemType.Medicine)
         {
             itemType.enumValueIndex = (int)ItemType.Medicine;
         }
@@ -448,7 +455,7 @@ public class ItemInspector : Editor
             string.IsNullOrEmpty(item.Description) || item.Icon == null ||
             ExistsID() || string.IsNullOrEmpty(Regex.Replace(item.ID, @"[^0-9]+", "")) || !Regex.IsMatch(item.ID, @"(\d+)$") ||
             (item.IsBook && (item as BookItem).BookType == BookType.Building && !(item as BookItem).BuildingToLearn) ||
-            (item.IsBook && (item as BookItem).BookType == BookType.Making && (!(item as BookItem).ItemToLearn || 
+            (item.IsBook && (item as BookItem).BookType == BookType.Making && (!(item as BookItem).ItemToLearn ||
             (item as BookItem).ItemToLearn.MakingMethod == MakingMethod.None))
             );
 

@@ -115,11 +115,11 @@ public class DialogueWords
         }
     }
 
-    public bool NeedToChusCorrectOption//仅当所有选项都是选择型且多于1个时才有效
+    public bool NeedToChusCorrectOption//仅当选择型选项多于1个时才需要选取正确选项
     {
         get
         {
-            return branches != null && indexOfCorrectOption > -1 && branches.Count > 1 && branches.TrueForAll(x => x.OptionType == WordsOptionType.Choice);
+            return branches != null && indexOfCorrectOption > -1 && branches.FindAll(x => x.OptionType == WordsOptionType.Choice).Count > 1;
         }
     }
 
@@ -146,11 +146,22 @@ public class DialogueWords
         }
     }
 
+    [SerializeField]
+    private List<WordsEvent> events = new List<WordsEvent>();
+    public List<WordsEvent> Events
+    {
+        get
+        {
+            return events;
+        }
+    }
+
     public bool IsValid
     {
         get
         {
-            return !(talkerType == TalkerType.NPC && !talkerInfo || string.IsNullOrEmpty(words));
+            return !(TalkerType == TalkerType.NPC && !talkerInfo || string.IsNullOrEmpty(words) ||
+            branches.Exists(b => b && !b.IsValid) || events.Exists(e => e && !e.IsValid) || NeedToChusCorrectOption && string.IsNullOrEmpty(wordsWhenChusWB));
         }
     }
 
@@ -184,8 +195,12 @@ public class DialogueWords
     {
         return Options.IndexOf(option);
     }
-}
 
+    public static implicit operator bool(DialogueWords self)
+    {
+        return self != null;
+    }
+}
 [Serializable]
 public class WordsOption
 {
@@ -383,7 +398,6 @@ public class WordsOption
         return self != null;
     }
 }
-
 public enum WordsOptionType
 {
     BranchWords,
@@ -393,10 +407,85 @@ public enum WordsOptionType
     OnlyGet
 }
 
+[Serializable]
+public class WordsEvent
+{
+    [SerializeField]
+#if UNITY_EDITOR
+    [EnumMemberNames("触发器", "增加好感", "减少好感")]
+#endif
+    private WordsEventType eventType;
+    public WordsEventType EventType
+    {
+        get
+        {
+            return eventType;
+        }
+    }
+
+    [SerializeField]
+    private string wordsTrigrName;
+    public string WordsTrigrName
+    {
+        get
+        {
+            return wordsTrigrName;
+        }
+    }
+
+    [SerializeField]
+#if UNITY_EDITOR
+    [EnumMemberNames("无", "置位", "复位")]
+#endif
+    private TriggerActionType triggerActType;
+    public TriggerActionType TriggerActType
+    {
+        get
+        {
+            return triggerActType;
+        }
+    }
+
+    [SerializeField]
+    private TalkerInformation toWhom;
+    public TalkerInformation ToWhom
+    {
+        get
+        {
+            return toWhom;
+        }
+    }
+
+    [SerializeField]
+    private int favorabilityValue;
+    public int FavorabilityValue
+    {
+        get
+        {
+            return favorabilityValue;
+        }
+    }
+
+    public bool IsValid => eventType == WordsEventType.Trigger && !string.IsNullOrEmpty(wordsTrigrName)
+        || eventType != WordsEventType.Trigger && toWhom && favorabilityValue >= 0;
+
+    public static implicit operator bool(WordsEvent self)
+    {
+        return self != null;
+    }
+}
+public enum WordsEventType
+{
+    Trigger,
+    GetFavorability,
+    LoseFavorability
+}
+
 public enum TalkerType
 {
     NPC,
-    Player
+    Player,
+    UnifiedNPC
 }
 
 [Serializable]

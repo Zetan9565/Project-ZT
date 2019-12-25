@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/仓库管理器")]
 public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindowHandler
 {
     [SerializeField]
@@ -35,7 +37,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             itemAgents.Add(ia);
             ia.Init(ItemAgentType.Warehouse, itemAgents.IndexOf(ia), UI.gridRect);
             ia.Empty();
-            ZetanUtilities.SetActive(ia.gameObject, false);
+            ZetanUtil.SetActive(ia.gameObject, false);
         }
     }
 
@@ -86,7 +88,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
                 MessageManager.Instance.NewMessage(string.Format("存入了1个 [{0}]", info.ItemName));
             else
             {
-                AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
+                AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.NewAmount(delegate
                 {
                     if (OnStore(info, (int)AmountManager.Instance.Amount))
@@ -163,7 +165,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
                 MessageManager.Instance.NewMessage(string.Format("取出了1个 [{0}]", info.ItemName));
             else
             {
-                AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
+                AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.NewAmount(delegate
                 {
                     if (OnTakeOut(info, (int)AmountManager.Instance.Amount))
@@ -247,7 +249,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         {
             ia.FinishDrag();
             ia.Empty();
-            ZetanUtilities.SetActive(ia.gameObject, false);
+            ZetanUtil.SetActive(ia.gameObject, false);
         }
         if (BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.CloseWindow();
         ItemWindowManager.Instance.CloseItemWindow();
@@ -353,7 +355,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         if (!UI || !UI.gameObject || !MWarehouse) return;
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
-            ZetanUtilities.SetActive(itemAgents[i].gameObject, true);
+            ZetanUtil.SetActive(itemAgents[i].gameObject, true);
         }
     }
 
@@ -363,8 +365,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsEquipment)
-                ZetanUtilities.SetActive(itemAgents[i].gameObject, true);
-            else ZetanUtilities.SetActive(itemAgents[i].gameObject, false);
+                ZetanUtil.SetActive(itemAgents[i].gameObject, true);
+            else ZetanUtil.SetActive(itemAgents[i].gameObject, false);
         }
     }
 
@@ -374,8 +376,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsConsumable)
-                ZetanUtilities.SetActive(itemAgents[i].gameObject, true);
-            else ZetanUtilities.SetActive(itemAgents[i].gameObject, false);
+                ZetanUtil.SetActive(itemAgents[i].gameObject, true);
+            else ZetanUtil.SetActive(itemAgents[i].gameObject, false);
         }
     }
 
@@ -385,8 +387,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsMaterial)
-                ZetanUtilities.SetActive(itemAgents[i].gameObject, true);
-            else ZetanUtilities.SetActive(itemAgents[i].gameObject, false);
+                ZetanUtil.SetActive(itemAgents[i].gameObject, true);
+            else ZetanUtil.SetActive(itemAgents[i].gameObject, false);
         }
     }
     #endregion

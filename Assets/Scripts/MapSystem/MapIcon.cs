@@ -4,13 +4,15 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using System.Collections;
 
-[RequireComponent(typeof(Image))]
 public class MapIcon : MonoBehaviour, IPointerClickHandler,
     IPointerDownHandler, IPointerUpHandler,
     IPointerEnterHandler, IPointerExitHandler
 {
     [HideInInspector]
     public Image iconImage;
+
+    [HideInInspector]
+    public Image iconRange;
 
     [HideInInspector]
     public UnityEvent onClick = new UnityEvent();
@@ -65,7 +67,9 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
 
     private void Awake()
     {
-        iconImage = GetComponent<Image>();
+        iconImage = transform.Find("Icon").GetComponent<Image>();
+        iconRange = transform.Find("Range").GetComponent<Image>();
+        if (iconRange) iconRange.raycastTarget = false;
     }
 
 #if UNITY_ANDROID

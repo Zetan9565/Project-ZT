@@ -7,220 +7,90 @@ public class Quest : ScriptableObject
 {
     [SerializeField]
     private string _ID;
-    public string ID
-    {
-        get
-        {
-            return _ID;
-        }
-    }
+    public string ID => _ID;
 
     [SerializeField, TextArea(1, 1)]
     private string title = string.Empty;
-    public string Title
-    {
-        get
-        {
-            return title;
-        }
-    }
+    public string Title => title;
 
     [SerializeField, TextArea(3, 5)]
     private string description;
-    public string Description
-    {
-        get
-        {
-            return description;
-        }
-    }
+    public string Description => description;
 
     [SerializeField]
     private bool abandonable = true;
-    public bool Abandonable
-    {
-        get
-        {
-            return abandonable;
-        }
-    }
+    public bool Abandonable => abandonable;
 
     [SerializeField]
     private QuestGroup group;
-    public QuestGroup Group
-    {
-        get
-        {
-            return group;
-        }
-    }
+    public QuestGroup Group => group;
 
     [SerializeField]
     private List<QuestAcceptCondition> acceptConditions = new List<QuestAcceptCondition>();
-    public List<QuestAcceptCondition> AcceptConditions
-    {
-        get
-        {
-            return acceptConditions;
-        }
-    }
+    public List<QuestAcceptCondition> AcceptConditions => acceptConditions;
+
+    [SerializeField]
+    private string conditionRelational;
+    public string ConditionRelational => conditionRelational;
+
 
     [SerializeField]
     private Dialogue beginDialogue;
-    public Dialogue BeginDialogue
-    {
-        get
-        {
-            return beginDialogue;
-        }
-    }
+    public Dialogue BeginDialogue => beginDialogue;
     [SerializeField]
     private Dialogue ongoingDialogue;
-    public Dialogue OngoingDialogue
-    {
-        get
-        {
-            return ongoingDialogue;
-        }
-    }
+    public Dialogue OngoingDialogue => ongoingDialogue;
     [SerializeField]
     private Dialogue completeDialogue;
-    public Dialogue CompleteDialogue
-    {
-        get
-        {
-            return completeDialogue;
-        }
-    }
+    public Dialogue CompleteDialogue => completeDialogue;
 
     [SerializeField]
     private int rewardMoney;
-    public int RewardMoney
-    {
-        get
-        {
-            return rewardMoney;
-        }
-    }
+    public int RewardMoney => rewardMoney;
 
     [SerializeField]
     private int rewardEXP;
-    public int RewardEXP
-    {
-        get
-        {
-            return rewardEXP;
-        }
-    }
+    public int RewardEXP => rewardEXP;
 
     [SerializeField]
     private List<ItemInfo> rewardItems = new List<ItemInfo>();
-    public List<ItemInfo> RewardItems
-    {
-        get
-        {
-            return rewardItems;
-        }
-    }
+    public List<ItemInfo> RewardItems => rewardItems;
 
     [SerializeField]
-    private bool sbmtOnOriginalNPC = true;
-    public bool SbmtOnOriginalNPC
-    {
-        get
-        {
-            return sbmtOnOriginalNPC;
-        }
-    }
-    [SerializeField]
     private TalkerInformation _NPCToSubmit;
-    public TalkerInformation NPCToSubmit
-    {
-        get
-        {
-            return _NPCToSubmit;
-        }
-    }
+    public TalkerInformation NPCToSubmit => _NPCToSubmit;
 
     [SerializeField]
     private bool cmpltObjctvInOrder = false;
-    public bool CmpltObjctvInOrder
-    {
-        get
-        {
-            return cmpltObjctvInOrder;
-        }
-    }
+    public bool CmpltObjctvInOrder => cmpltObjctvInOrder;
 
     [System.NonSerialized]
     private List<Objective> objectiveInstances = new List<Objective>();//存储所有目标，在运行时用到，初始化时自动填，不用人为干预，详见QuestGiver类
-    public List<Objective> ObjectiveInstances
-    {
-        get
-        {
-            return objectiveInstances;
-        }
-    }
+    public List<Objective> ObjectiveInstances => objectiveInstances;
 
     [SerializeField]
     private List<CollectObjective> collectObjectives = new List<CollectObjective>();
-    public List<CollectObjective> CollectObjectives
-    {
-        get
-        {
-            return collectObjectives;
-        }
-    }
+    public List<CollectObjective> CollectObjectives => collectObjectives;
 
     [SerializeField]
     private List<KillObjective> killObjectives = new List<KillObjective>();
-    public List<KillObjective> KillObjectives
-    {
-        get
-        {
-            return killObjectives;
-        }
-    }
+    public List<KillObjective> KillObjectives => killObjectives;
 
     [SerializeField]
     private List<TalkObjective> talkObjectives = new List<TalkObjective>();
-    public List<TalkObjective> TalkObjectives
-    {
-        get
-        {
-            return talkObjectives;
-        }
-    }
+    public List<TalkObjective> TalkObjectives => talkObjectives;
 
     [SerializeField]
     private List<MoveObjective> moveObjectives = new List<MoveObjective>();
-    public List<MoveObjective> MoveObjectives
-    {
-        get
-        {
-            return moveObjectives;
-        }
-    }
+    public List<MoveObjective> MoveObjectives => moveObjectives;
 
     [SerializeField]
     private List<SubmitObjective> submitObjectives = new List<SubmitObjective>();
-    public List<SubmitObjective> SubmitObjectives
-    {
-        get
-        {
-            return submitObjectives;
-        }
-    }
+    public List<SubmitObjective> SubmitObjectives => submitObjectives;
 
     [SerializeField]
     private List<CustomObjective> customObjectives = new List<CustomObjective>();
-    public List<CustomObjective> CustomObjectives
-    {
-        get
-        {
-            return customObjectives;
-        }
-    }
+    public List<CustomObjective> CustomObjectives => customObjectives;
 
     [HideInInspector]
     public TalkerData originalQuestHolder;
@@ -247,12 +117,12 @@ public class Quest : ScriptableObject
         {
             if (ObjectiveInstances.Count < 1) return false;
             if (string.IsNullOrEmpty(ID) || string.IsNullOrEmpty(Title)) return false;
-            if (!SbmtOnOriginalNPC && (!NPCToSubmit || !GameManager.TalkerDatas.ContainsKey(NPCToSubmit.ID))) return false;
+            if (NPCToSubmit && !GameManager.TalkerDatas.ContainsKey(NPCToSubmit.ID)) return false;
             foreach (var co in CollectObjectives)
                 if (!co.IsValid) return false;
             foreach (var ko in KillObjectives)
                 if (!ko.IsValid) return false;
-                else if (!GameManager.Enermies.ContainsKey(ko.Enemy.ID)) return false;
+                else if (!GameManager.Enemies.ContainsKey(ko.Enemy.ID)) return false;
             foreach (var to in TalkObjectives)
                 if (!to.IsValid) return false;
                 else if (!GameManager.TalkerDatas.ContainsKey(to.NPCToTalk.ID)) return false;
@@ -280,11 +150,131 @@ public class Quest : ScriptableObject
     {
         get
         {
-            foreach (QuestAcceptCondition qac in AcceptConditions)
+            bool calFailed = false;
+            if (string.IsNullOrEmpty(conditionRelational) || AcceptConditions.Count < 2) calFailed = true;
+            else
             {
-                if (!qac.IsEligible) return false;
+                var cr = conditionRelational.Replace(" ", "").ToCharArray();//删除所有空格才开始计算
+                List<string> RPN = new List<string>();//逆波兰表达式
+                string indexStr = string.Empty;//数字串
+                Stack<char> optStack = new Stack<char>();//运算符栈
+                for (int i = 0; i < cr.Length; i++)
+                {
+                    var c = cr[i];
+                    string item;
+                    if (c < '0' || c > '9')
+                    {
+                        if (!string.IsNullOrEmpty(indexStr))
+                        {
+                            item = indexStr;
+                            indexStr = string.Empty;
+                            GetRPNItem(item);
+                        }
+                        if (c == '(' || c == ')' || c == '+' || c == '*')
+                        {
+                            item = c + "";
+                            GetRPNItem(item);
+                        }
+                        else
+                        {
+                            calFailed = true;
+                            break;
+                        }//既不是数字也不是运算符，直接放弃计算
+                    }
+                    else
+                    {
+                        indexStr += c;//拼接数字
+                        if (i + 1 >= cr.Length)
+                        {
+                            item = indexStr;
+                            indexStr = string.Empty;
+                            GetRPNItem(item);
+                        }
+                    }
+                }
+                while (optStack.Count > 0)
+                    RPN.Add(optStack.Pop() + "");
+                Stack<bool> values = new Stack<bool>();
+                foreach (var item in RPN)
+                {
+                    //Debug.Log(item);
+                    if (int.TryParse(item, out int index))
+                    {
+                        if (index >= 0 && index < AcceptConditions.Count)
+                            values.Push(AcceptConditions[index].IsEligible);
+                        else
+                        {
+                            //Debug.Log("return 1");
+                            return true;
+                        }
+                    }
+                    else if (values.Count > 1)
+                    {
+                        if (item == "+") values.Push(values.Pop() | values.Pop());
+                        else if (item == "*") values.Push(values.Pop() & values.Pop());
+                    }
+                }
+                if (values.Count == 1)
+                {
+                    //Debug.Log("return 2");
+                    return values.Pop();
+                }
+
+                void GetRPNItem(string item)
+                {
+                    //Debug.Log(item);
+                    if (item == "+" || item == "*")//遇到运算符
+                    {
+                        char opt = item[0];
+                        if (optStack.Count < 1) optStack.Push(opt);//栈空则直接入栈
+                        else while (optStack.Count > 0)//栈不空则出栈所有优先级大于或等于opt的运算符后才入栈opt
+                            {
+                                char top = optStack.Peek();
+                                if (top + "" == item || top == '*' && opt == '+')
+                                {
+                                    RPN.Add(optStack.Pop() + "");
+                                    if (optStack.Count < 1)
+                                    {
+                                        optStack.Push(opt);
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    optStack.Push(opt);
+                                    break;
+                                }
+                            }
+                    }
+                    else if (item == "(") optStack.Push('(');
+                    else if (item == ")")
+                    {
+                        while (optStack.Count > 0)
+                        {
+                            char opt = optStack.Pop();
+                            if (opt == '(') break;
+                            else RPN.Add(opt + "");
+                        }
+                    }
+                    else if (int.TryParse(item, out _)) RPN.Add(item);//遇到数字
+                }
             }
-            return true;
+            if (!calFailed)
+            {
+                //Debug.Log("return 3");
+                return true;
+            }
+            else
+            {
+                foreach (QuestAcceptCondition qac in AcceptConditions)
+                    if (!qac.IsEligible)
+                    {
+                        //Debug.Log("return 4");
+                        return false;
+                    }
+                //Debug.Log("return 5");
+                return true;
+            }
         }
     }
 
@@ -300,8 +290,8 @@ public class Quest : ScriptableObject
         {
             foreach (Objective o in ObjectiveInstances)
             {
-                //当目标是收集类目标时才进行判断
-                if (o is CollectObjective && item == (o as CollectObjective).Item)
+                //当目标是收集类目标且在提交任务同时会失去相应道具时，才进行判断
+                if (o is CollectObjective && item == (o as CollectObjective).Item && (o as CollectObjective).LoseItemAtSbmt)
                 {
                     if (o.IsComplete && o.InOrder)
                     {
@@ -352,7 +342,7 @@ public class QuestAcceptCondition
 {
     [SerializeField]
 #if UNITY_EDITOR
-    [EnumMemberNames("等级大于", "等级小于", "等级大于或等于", "等级小于或等于", "完成任务", "拥有道具")]
+    [EnumMemberNames("等级等于", "等级大于", "等级小于", "等级大于或等于", "等级小于或等于", "完成任务", "拥有道具", "触发器开启", "触发器关闭")]
 #endif
     private QuestCondition acceptCondition = QuestCondition.ComplexQuest;
     public QuestCondition AcceptCondition
@@ -392,6 +382,17 @@ public class QuestAcceptCondition
             return ownedItem;
         }
     }
+
+    [SerializeField]
+    private string triggerName;
+    public string TriggerName
+    {
+        get
+        {
+            return triggerName;
+        }
+    }
+
     /// <summary>
     /// 是否符合条件
     /// </summary>
@@ -403,6 +404,17 @@ public class QuestAcceptCondition
             {
                 case QuestCondition.ComplexQuest: return QuestManager.Instance.HasCompleteQuestWithID(CompleteQuest.ID);
                 case QuestCondition.HasItem: return BackpackManager.Instance.HasItemWithID(OwnedItem.ID);
+                case QuestCondition.LevelEquals: return PlayerManager.Instance.PlayerInfo.level == level;
+                case QuestCondition.LevelLargeThen: return PlayerManager.Instance.PlayerInfo.level > level;
+                case QuestCondition.LevelLargeOrEqualsThen: return PlayerManager.Instance.PlayerInfo.level >= level;
+                case QuestCondition.LevelLessThen: return PlayerManager.Instance.PlayerInfo.level < level;
+                case QuestCondition.LevelLessOrEqualsThen: return PlayerManager.Instance.PlayerInfo.level <= level;
+                case QuestCondition.TriggerSet:
+                    var state = TriggerManager.Instance.GetTriggerState(triggerName);
+                    return state != TriggerState.NotExist ? (state == TriggerState.On ? true : false) : false;
+                case QuestCondition.TriggerReset:
+                    state = TriggerManager.Instance.GetTriggerState(triggerName);
+                    return state != TriggerState.NotExist ? (state == TriggerState.Off ? true : false) : false;
                 default: return true;
             }
         }
@@ -411,12 +423,15 @@ public class QuestAcceptCondition
 
 public enum QuestCondition
 {
+    LevelEquals,
     LevelLargeThen,
     LevelLessThen,
     LevelLargeOrEqualsThen,
     LevelLessOrEqualsThen,
     ComplexQuest,
-    HasItem
+    HasItem,
+    TriggerSet,
+    TriggerReset
 }
 #endregion
 
@@ -493,7 +508,7 @@ public abstract class Objective
     }
 
     [SerializeField]
-    private int orderIndex;
+    private int orderIndex = 1;
     public int OrderIndex
     {
         get
@@ -635,7 +650,7 @@ public abstract class Objective
             if (tempObj is CollectObjective)
             {
                 co = tempObj as CollectObjective;
-                co.CurrentAmount = BackpackManager.Instance.GetItemAmount(co.Item.ID);
+                if (co.CheckBagAtStart) co.CurrentAmount = BackpackManager.Instance.GetItemAmount(co.Item.ID);
             }
             tempObj = tempObj.NextObjective;
         }
@@ -663,12 +678,12 @@ public class CollectObjective : Objective
     }
 
     [SerializeField]
-    private bool checkBagAtAcpt = true;//用于标识是否在接取任务时检查背包道具看是否满足目标，否则目标重头开始计数
-    public bool CheckBagAtAcpt
+    private bool checkBagAtStart = true;//用于标识是否在目标开始执行时检查背包道具看是否满足目标，否则目标重头开始计数
+    public bool CheckBagAtStart
     {
         get
         {
-            return checkBagAtAcpt;
+            return checkBagAtStart;
         }
     }
     [SerializeField]
@@ -700,8 +715,8 @@ public class CollectObjective : Objective
 
     public void UpdateCollectAmountDown(ItemBase item, int leftAmount)//丢道具时用到
     {
-        if (item == Item && AllPrevObjCmplt && !HasNextObjOngoing)
-            //前置目标都完成且没有后置目标在进行时，才允许更新
+        if (item == Item && AllPrevObjCmplt && !HasNextObjOngoing && LoseItemAtSbmt)
+            //前置目标都完成且没有后置目标在进行时，才允许更新；在提交任务时不需要提交相应道具，也不会更新减少值。
             CurrentAmount = leftAmount;
     }
 }

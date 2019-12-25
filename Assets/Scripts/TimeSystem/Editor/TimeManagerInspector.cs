@@ -2,7 +2,7 @@
 using UnityEditor;
 
 [CustomEditor(typeof(TimeManager))]
-public class TimeManagerInspector : Editor
+public class TimeManagerInspector : SingletonMonoBehaviourInspector
 {
     SerializedProperty multiples;
     SerializedProperty UI;
@@ -31,6 +31,11 @@ public class TimeManagerInspector : Editor
 
     public override void OnInspectorGUI()
     {
+        if (!CheckValid(out string text))
+        {
+            EditorGUILayout.HelpBox(text, MessageType.Error);
+            return;
+        }
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(UI);

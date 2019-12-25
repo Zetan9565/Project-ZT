@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler
+public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public void OnDrag(PointerEventData eventData)
     {
@@ -29,6 +29,26 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler
             }
         }
 #endif
+    }
+
+    bool canZoom;
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+#if UNITY_STANDALONE
+#endif
+        canZoom = true;
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+#if UNITY_STANDALONE
+#endif
+        canZoom = false;
+    }
+
+    private void Update()
+    {
+        if (canZoom) MapManager.Instance.ZoomMap(Input.mouseScrollDelta.y);
     }
 
 #if UNITY_ANDROID

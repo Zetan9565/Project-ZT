@@ -27,14 +27,16 @@ MonoBehaviour:
   useable: 1
   inexhaustible: 0
   maxDurability: 100
-  processMethod: 2
+  makingMethod: 0
   materials:
   - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
     amount: 1
-    processType: 0
+    makingType: 0
     materialType: 1
   weaponType: 0
-  _ATK: 10
+  cutATK: 5
+  punATK: 5
+  bluATK: 1
   _DEF: 0
   hit: 5
   gemSlotAmount: 0

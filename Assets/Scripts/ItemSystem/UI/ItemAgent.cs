@@ -51,15 +51,10 @@ public class ItemAgent : MonoBehaviour, IDragable,
     public bool IsEmpty { get { return MItemInfo == null || !MItemInfo.item; } }
 
     #region 道具使用相关
-    public void OnUse()
-    {
-        if (!IsEmpty) UseItem();
-    }
-
     public void UseItem()
     {
-        if (!MItemInfo.item) return;
-        if (!MItemInfo.item.Useable)
+        if (IsEmpty) return;
+        if (!MItemInfo.item.Usable)
         {
             MessageManager.Instance.NewMessage("该物品不可使用");
             return;
@@ -131,7 +126,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
         BagItem bag = MItemInfo.item as BagItem;
         if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo, 1))
         {
-            if (BackpackManager.Instance.Expand(bag.ExpandSize))
+            if (BackpackManager.Instance.ExpandSize(bag.ExpandSize))
                 BackpackManager.Instance.LoseItem(MItemInfo);
         }
     }
@@ -160,12 +155,12 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     public void Show()
     {
-        ZetanUtilities.SetActive(gameObject, true);
+        ZetanUtil.SetActive(gameObject, true);
     }
 
     public void Hide()
     {
-        ZetanUtilities.SetActive(gameObject, false);
+        ZetanUtil.SetActive(gameObject, false);
     }
 
     public void UpdateInfo()
@@ -173,7 +168,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
         if (MItemInfo == null || !MItemInfo.item) return;
         if (MItemInfo.item.Icon) icon.overrideSprite = MItemInfo.item.Icon;
         if (agentType != ItemAgentType.Selling && agentType != ItemAgentType.Purchasing)
-            amount.text = MItemInfo.Amount > 1 || (agentType == ItemAgentType.Making && MItemInfo.Amount > 0) ? MItemInfo.Amount.ToString() : string.Empty;
+            amount.text = MItemInfo.Amount > 0 && MItemInfo.item.StackAble || agentType == ItemAgentType.Making && MItemInfo.Amount > 0 ? MItemInfo.Amount.ToString() : string.Empty;
         else amount.text = string.Empty;
         if (MItemInfo.Amount < 1 && (agentType == ItemAgentType.Backpack || agentType == ItemAgentType.Warehouse || agentType == ItemAgentType.Loot)) Empty();
     }
@@ -181,7 +176,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
     public void OnRightClick()
     {
         if (!DragableManager.Instance.IsDraging)
-            if (agentType == ItemAgentType.Backpack && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen) OnUse();
+            if (agentType == ItemAgentType.Backpack && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen) UseItem();
             else if (WarehouseManager.Instance.IsUIOpen)
             {
                 if (agentType == ItemAgentType.Warehouse)

@@ -4,6 +4,7 @@ using System.Text;
 using UnityEngine;
 
 [DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/任务管理器")]
 public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
 {
     [SerializeField]
@@ -12,13 +13,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
     public bool IsPausing { get; private set; }
     public bool IsUIOpen { get; private set; }
 
-    public Canvas SortCanvas
-    {
-        get
-        {
-            return UI.windowCanvas;
-        }
-    }
+    public Canvas SortCanvas => UI.windowCanvas;
 
     private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
     private readonly List<QuestAgent> questAgents = new List<QuestAgent>();
@@ -34,26 +29,14 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
     [ReadOnly]
 #endif
     private List<Quest> questsOngoing = new List<Quest>();
-    public List<Quest> QuestsOngoing
-    {
-        get
-        {
-            return questsOngoing;
-        }
-    }
+    public List<Quest> QuestsOngoing => questsOngoing;
 
     [SerializeField]
 #if UNITY_EDITOR
     [ReadOnly]
 #endif
     private List<Quest> questsComplete = new List<Quest>();
-    public List<Quest> QuestsComplete
-    {
-        get
-        {
-            return questsComplete;
-        }
-    }
+    public List<Quest> QuestsComplete => questsComplete;
 
     private Quest selectedQuest;
 
@@ -110,7 +93,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                 CollectObjective co = o as CollectObjective;
                 BackpackManager.Instance.OnGetItemEvent += co.UpdateCollectAmount;
                 BackpackManager.Instance.OnLoseItemEvent += co.UpdateCollectAmountDown;
-                if (co.CheckBagAtAcpt && !loadMode) co.UpdateCollectAmount(co.Item, BackpackManager.Instance.GetItemAmount(co.Item.ID));
+                if (co.CheckBagAtStart && !loadMode) co.UpdateCollectAmount(co.Item, BackpackManager.Instance.GetItemAmount(co.Item.ID));
             }
             if (o is KillObjective)
             {
@@ -118,17 +101,17 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                 switch (ko.ObjectiveType)
                 {
                     case KillObjectiveType.Specific:
-                        foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
+                        foreach (Enemy enemy in GameManager.Enemies[ko.Enemy.ID])
                             enemy.OnDeathEvent += ko.UpdateKillAmount;
                         break;
                     case KillObjectiveType.Race:
                         foreach (List<Enemy> enemies in
-                            GameManager.Enermies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
+                            GameManager.Enemies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
                             foreach (Enemy enemy in enemies)
                                 enemy.OnDeathEvent += ko.UpdateKillAmount;
                         break;
                     case KillObjectiveType.Any:
-                        foreach (List<Enemy> enemies in GameManager.Enermies.Select(x => x.Value))
+                        foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
                             foreach (Enemy enemy in enemies)
                                 enemy.OnDeathEvent += ko.UpdateKillAmount;
                         break;
@@ -143,14 +126,16 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
             if (o is CustomObjective)
             {
                 CustomObjective cuo = o as CustomObjective;
-                TriggerManager.Instance.OnTriggerSetEvent += cuo.UpdateTriggerState;
-                if (cuo.CheckStateAtAcpt) TriggerManager.Instance.SetTrigger(cuo.TriggerName, TriggerManager.Instance.GetTriggerState(cuo.TriggerName));
+                TriggerManager.Instance.RegisterTriggerEvent(cuo.UpdateTriggerState);
+                var state = TriggerManager.Instance.GetTriggerState(cuo.TriggerName);
+                if (cuo.CheckStateAtAcpt && state != TriggerState.NotExist)
+                    TriggerManager.Instance.SetTrigger(cuo.TriggerName, state == TriggerState.On ? true : false);
             }
             o.OnStateChangeEvent += OnObjectiveStateChange;
         }
         quest.IsOngoing = true;
         QuestsOngoing.Add(quest);
-        if (!quest.SbmtOnOriginalNPC)
+        if (quest.NPCToSubmit)
             GameManager.TalkerDatas[quest.NPCToSubmit.ID].TransferQuestToThis(quest);
         if (!loadMode)
             MessageManager.Instance.NewMessage("接取了任务 [" + quest.Title + "]");
@@ -191,17 +176,17 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                     switch (ko.ObjectiveType)
                     {
                         case KillObjectiveType.Specific:
-                            foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
+                            foreach (Enemy enemy in GameManager.Enemies[ko.Enemy.ID])
                                 enemy.OnDeathEvent -= ko.UpdateKillAmount;
                             break;
                         case KillObjectiveType.Race:
                             foreach (List<Enemy> enemies in
-                                GameManager.Enermies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
+                                GameManager.Enemies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
                                 foreach (Enemy enemy in enemies)
                                     enemy.OnDeathEvent -= ko.UpdateKillAmount;
                             break;
                         case KillObjectiveType.Any:
-                            foreach (List<Enemy> enemies in GameManager.Enermies.Select(x => x.Value))
+                            foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
                                 foreach (Enemy enemy in enemies)
                                     enemy.OnDeathEvent -= ko.UpdateKillAmount;
                             break;
@@ -230,15 +215,13 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                 {
                     CustomObjective cuo = o as CustomObjective;
                     cuo.CurrentAmount = 0;
-                    TriggerManager.Instance.OnTriggerSetEvent -= cuo.UpdateTriggerState;
+                    TriggerManager.Instance.DeleteTriggerEvent(cuo.UpdateTriggerState);
                 }
                 questIcons.TryGetValue(o, out MapIcon icon);
                 if (icon) MapManager.Instance.RemoveMapIcon(icon);
             }
-            if (!quest.SbmtOnOriginalNPC)
-            {
+            if (quest.NPCToSubmit)
                 quest.originalQuestHolder.TransferQuestToThis(quest);
-            }
             if (QuestsOngoing.Count < 1)
             {
                 UI.questBoard.alpha = 0;
@@ -346,17 +329,17 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                     switch (ko.ObjectiveType)
                     {
                         case KillObjectiveType.Specific:
-                            foreach (Enemy enemy in GameManager.Enermies[ko.Enemy.ID])
+                            foreach (Enemy enemy in GameManager.Enemies[ko.Enemy.ID])
                                 enemy.OnDeathEvent -= ko.UpdateKillAmount;
                             break;
                         case KillObjectiveType.Race:
                             foreach (List<Enemy> enemies in
-                                GameManager.Enermies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
+                                GameManager.Enemies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
                                 foreach (Enemy enemy in enemies)
                                     enemy.OnDeathEvent -= ko.UpdateKillAmount;
                             break;
                         case KillObjectiveType.Any:
-                            foreach (List<Enemy> enemies in GameManager.Enermies.Select(x => x.Value))
+                            foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
                                 foreach (Enemy enemy in enemies)
                                     enemy.OnDeathEvent -= ko.UpdateKillAmount;
                             break;
@@ -378,7 +361,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                 if (o is CustomObjective)
                 {
                     CustomObjective cuo = o as CustomObjective;
-                    TriggerManager.Instance.OnTriggerSetEvent -= cuo.UpdateTriggerState;
+                    TriggerManager.Instance.DeleteTriggerEvent(cuo.UpdateTriggerState);
                 }
                 questIcons.TryGetValue(o, out MapIcon icon);
                 if (icon) MapManager.Instance.RemoveMapIcon(icon);
@@ -458,7 +441,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                 else if (currentObj is KillObjective)
                 {
                     KillObjective ko = currentObj as KillObjective;
-                    GameManager.Enermies.TryGetValue(ko.Enemy.ID, out List<Enemy> enemiesFound);
+                    GameManager.Enemies.TryGetValue(ko.Enemy.ID, out List<Enemy> enemiesFound);
                     if (enemiesFound != null && enemiesFound.Count > 0)
                     {
                         Enemy enemy = enemiesFound.FirstOrDefault();
@@ -639,8 +622,8 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                     break;
                 }
             }
-        ZetanUtilities.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
-        ZetanUtilities.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
+        ZetanUtil.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
+        ZetanUtil.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = true;
         ItemWindowManager.Instance.CloseItemWindow();
@@ -790,7 +773,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
         else if (objective is KillObjective)
         {
             KillObjective ko = objective as KillObjective;
-            GameManager.Enermies.TryGetValue(ko.Enemy.ID, out List<Enemy> enemiesFound);
+            GameManager.Enemies.TryGetValue(ko.Enemy.ID, out List<Enemy> enemiesFound);
             if (enemiesFound != null && enemiesFound.Count > 0)
             {
                 Enemy enemy = enemiesFound.FirstOrDefault();
@@ -845,7 +828,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
         Quest quest = objective.runtimeParent;
         if (quest.IsValid && quest.IsComplete && !quest.IsFinished)
         {
-            if (quest.SbmtOnOriginalNPC)
+            if (quest.NPCToSubmit)
                 MapManager.Instance.CreateMark(GameManager.TalkerDatas[quest.originalQuestHolder.TalkerID].currentPostition, true);
             else
                 MapManager.Instance.CreateMark(GameManager.TalkerDatas[quest.currentQuestHolder.TalkerID].currentPostition, true);

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/拾取管理器")]
 public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
 {
     [SerializeField]
@@ -55,7 +57,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
             if (info.Amount == 1) OnTake(info, 1);
             else
             {
-                AmountManager.Instance.SetPosition(ZetanUtilities.ScreenCenter, Vector2.zero);
+                AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.NewAmount(delegate
                 {
                     OnTake(info, (int)AmountManager.Instance.Amount);
@@ -146,6 +148,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
         IsPicking = false;
         CannotPick();
         if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();
+        ItemWindowManager.Instance.CloseItemWindow();
     }
     void IWindowHandler.OpenCloseWindow() { }
     public void PauseDisplay(bool pause)

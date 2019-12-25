@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 
 [DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/游戏管理器")]
 public class GameManager : SingletonMonoBehaviour<GameManager>
 {
     [SerializeField]
@@ -63,7 +64,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         Init();
     }
 
-    public static Dictionary<string, List<Enemy>> Enermies { get; } = new Dictionary<string, List<Enemy>>();
+    public static Dictionary<string, List<Enemy>> Enemies { get; } = new Dictionary<string, List<Enemy>>();
 
     public static Dictionary<string, Talker> Talkers { get; } = new Dictionary<string, Talker>();
     public static Dictionary<string, TalkerData> TalkerDatas { get; } = new Dictionary<string, TalkerData>();
@@ -75,6 +76,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
         Talkers.Clear();
         TalkerDatas.Clear();
+        foreach (var kvp in Enemies)
+            kvp.Value.RemoveAll(x => !x || !x.gameObject);
         foreach (var talker in FindObjectsOfType<Talker>())
             talker.Init();
         PlayerManager.Instance.Init();
@@ -82,6 +85,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIRootPrefab);
         UIManager.Instance.Init();
         WindowsManager.Instance.Clear();
+        MapManager.Instance.SetPlayer(PlayerManager.Instance.PlayerController.CharacterController.transform);
+        MapManager.Instance.RemakeCamera();
     }
 
     public static ItemBase GetItemByID(string id)

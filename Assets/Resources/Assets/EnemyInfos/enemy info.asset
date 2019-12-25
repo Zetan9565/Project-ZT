@@ -15,17 +15,12 @@ MonoBehaviour:
   _ID: ENMY001
   _Name: "\u9AB7\u9AC5"
   sex: 0
-  race: {fileID: 0}
+  race: {fileID: 11400000, guid: 150e8a581f32093459fd9b32c975e6f7, type: 2}
   dropItems:
   - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
     amount: 1
     dropRate: 75
     onlyDropForQuest: 0
     bindedQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
-  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    amount: 1
-    dropRate: 75
-    onlyDropForQuest: 1
-    bindedQuest: {fileID: 11400000, guid: 75021802295611e4bb73ffff88713358, type: 2}
   lootPrefab: {fileID: 4971178635026308412, guid: 7786fb215e3056c4e93993db12bea13e,
     type: 3}

@@ -9,7 +9,6 @@ namespace Pathfinding {
 	using Pathfinding.Serialization;
 	using Pathfinding.Util;
 
-	[JsonOptIn]
 	/// <summary>
 	/// Generates a grid of nodes.
 	/// The GridGraph does exactly what the name implies, generates nodes in a grid pattern.\n
@@ -82,6 +81,8 @@ namespace Pathfinding {
 	/// See: <see cref="Pathfinding.GraphCollision"/> for documentation on the 'Height Testing' and 'Collision Testing' sections
 	/// of the grid graph settings.
 	/// </summary>
+	[JsonOptIn]
+	[Pathfinding.Util.Preserve]
 	public class GridGraph : NavGraph, IUpdatableGraph, ITransformedGraph {
 		/// <summary>This function will be called when this graph is destroyed</summary>
 		protected override void OnDestroy () {
@@ -157,6 +158,8 @@ namespace Pathfinding {
 		///
 		/// This field is only used in the graph inspector, the <see cref="nodeSize"/> field will always use the same internal units.
 		/// If you want to set the node size through code then you can use <see cref="ConvertHexagonSizeToNodeSize"/>.
+		///
+		/// [Open online documentation to see images]
 		///
 		/// See: <see cref="InspectorGridHexagonNodeSize"/>
 		/// See: <see cref="ConvertHexagonSizeToNodeSize"/>

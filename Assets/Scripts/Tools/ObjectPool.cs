@@ -22,7 +22,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
         {
             return;
         }
-        ZetanUtilities.SetActive(gameObject, false);
+        ZetanUtil.SetActive(gameObject, false);
         gameObject.transform.SetParent(poolRoot, false);
         string name = gameObject.name;
         pool.TryGetValue(name, out var oListFound);
@@ -56,7 +56,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             oListDound.Remove(go);
             if (oListDound.Count < 1) pool.Remove(goName);
             go.transform.SetParent(parent, worldPositonStays);
-            ZetanUtilities.SetActive(go, true);
+            ZetanUtil.SetActive(go, true);
             return go;
         }
         else
@@ -78,7 +78,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             oListDound.Remove(go);
             if (oListDound.Count < 1) pool.Remove(goName);
             go.transform.SetParent(parent, worldPositionStays);
-            ZetanUtilities.SetActive(go, true);
+            ZetanUtil.SetActive(go, true);
             return go;
         }
         else

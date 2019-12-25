@@ -2,8 +2,53 @@
 /// \page changelog Changelog
 /// \order{-10}
 ///
+/// - 4.2.11 (2019-11-28)
+/// 	- Fixed animations for the agent character were missing in the example scenes in some newer versions of Unity. This could cause exceptions to be thrown in some example scenes.
+/// 	- Removed some stray uses of the old and deprecated GUIText component. This could cause descriptions for some example scenes not to show up in newer versions of Unity.
+///
+/// - 4.2.10 (2019-11-19)
+/// 	- This release contains fixes and features that have been backported from the 4.3 beta.
+/// 	- Upgrade notes
+/// 		- This release is supported in Unity 2017.4 LTS and later. Support for earlier versions has been dropped (however it probably still works in all 2017.x releases).
+/// 		- The Unity WebPlayer target is no longer supported. This target was deprecated in Unity 5.4.
+/// 	- Known bugs
+/// 		- In some versions of Unity the spider bot in the example scenes may be missing its animations. This is due to a bug in how Unity upgrades scenes and is unfortunately tricky to fix for all Unity versions simultaneously. This does not affect any other part of the package.
+/// 	- Fixed a crash when scanning a graph on the WebGL platform and exception support is disabled.
+///
+/// - 4.2.9 (2019-11-15)
+/// 	- This release contains fixes and features that have been backported from the 4.3 beta.
+/// 	- Upgrade notes
+/// 		- This release is supported in Unity 2017.4 LTS and later. Support for earlier versions has been dropped (however it probably still works in all 2017.x releases).
+/// 		- The Unity WebPlayer target is no longer supported. This target was deprecated in Unity 5.4.
+///     - Added a visualization for which dimension of the hexagons that is being edited when using a hexagonal grid graph.
+///         [Open online documentation to see images]
+/// 	- RichAI's Funnel Simplification now does a straight line check as the first thing it does.
+/// 		This can help improve both performance and the quality of the path.
+/// 	- Added a small helper window to the scene view when the A* Inspector is open.
+/// 	    I think this should work well with the dark Unity theme as well, but please start a thread in the support forum if something looks off.
+/// 	    [Open online documentation to see images]
+/// 	- Using managed code stripping even up to the High level is now supported out of the box.
+/// 	- If an RVOController was attached to a GameObject with an AIPath/RichAI component during runtime after the movement script had been initialized then the movement script would previously possibly not find it.
+/// 		This is fixed now and the RVOController notifies the AIPath/RichAI script that it has been attached.
+/// 	- The <see cref="Pathfinding.IAstarAI.SetPath"/> method on all built-in movement scripts can now be passed a null parameter. This will clear the current path of the agent.
+/// 		In earlier versions this caused an exception to be thrown.
+/// 	- Fixed NavmeshBase.Linecast (used by RecastGraph and Navmesh linecast methods) would not fill the trace out parameter with the starting node in case the start point of the linecast was identical to the end point.
+/// 	- AIPath and RichAI now clear their paths when they are disabled. Not clearing the path has caused some issues when using object pooling and also some other unexpected behavior.
+/// 		If you want to just temporarily disable the movement then use the <see cref="Pathfinding.IAstarAI.canMove"/> or <see cref="Pathfinding.IAstarAI.isStopped"/> properties.
+/// 	- Fixed RichAI.remainingDistance could refer to the previous path for one frame after a new path had been calculated.
+/// 	- Fixed AIPath and RichAI scripts sometimes starting with a height of 0.01 when creating a new component in the unity inspector.
+/// 		Now they start with a more reasonable height of 2.0.
+/// 	- The AIBase.usingGravity setter is now protected instead of private which helps when overriding some methods.
+/// 	- The "Show Surface" mode on recast and navmesh graphs is now enabled by default when creating a new graph.
+/// 	- The system no longer destroys itself in OnApplicationQuit and is instead always destroyed during OnDestroy. Using OnApplicationQuit could cause trouble when the quitting process was cancelled (e.g. using Application.wantsToQuit).
+/// 	- Fixed exceptions could be thrown in the editor if the project contains some assemblies that can for some reason not be read. Thanks joshcamas for reporting this.
+/// 	- Changed the automatic graph coloring limits code to ignore nodes that are unwalkable. This improves the contrast when some unwalkable nodes, that are not visible anyway, have very high penalties (or whatever other value you are visualizing in the scene view).
+/// 	- Fixed missing null checks in TriangleMeshNode.GetPortal and TriangleMeshNode.SharedEdge.
+/// 	- The RichAI inspector will now show a helpful warning if one tries to use it in a scene that does not contain a navmesh or recast graph.
+/// 	- <see cref="Pathfinding.GraphUtilities.GetContours"/> for grid graphs now simplifies the contour more consistently. Previously there could be one or two additional points where the algorithm started to traverse the contour.
+///
 /// - 4.2.8 (2019-04-29)
-/// 	- Made it possible for nearest node queries on point graphs to find the closst connection instead of just the closest node.
+/// 	- Made it possible for nearest node queries on point graphs to find the closest connection instead of just the closest node.
 /// 		This will make it easier to use graphs when you have many long connections.
 /// 		See <see cref="Pathfinding.PointGraph.nearestNodeDistanceMode"/>.
 /// 	- Improved the Seeker->StartEndModifier's Connection snapping mode. Now it will behave better if the path only moves along a single connection in the graph.

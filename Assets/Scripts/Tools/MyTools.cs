@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
-public class ZetanUtilities
+public class ZetanUtil
 {
     public static bool IsMouseInsideScreen => Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height;
 
@@ -20,6 +20,11 @@ public class ZetanUtilities
     {
         if (probability < 0) return false;
         return UnityEngine.Random.Range(100, 10001) / 100.0f <= probability;
+    }
+
+    public static string ColorRichText(string origin, Color color)
+    {
+        return string.Format("<color=#{0}>{1}</color>", ColorUtility.ToHtmlStringRGB(color), origin);
     }
 
     public static void SetActive(GameObject gameObject, bool value)

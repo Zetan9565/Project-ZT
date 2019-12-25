@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+[DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/时间管理器")]
 public class TimeManager : SingletonMonoBehaviour<TimeManager>
 {
     #region 静态属性

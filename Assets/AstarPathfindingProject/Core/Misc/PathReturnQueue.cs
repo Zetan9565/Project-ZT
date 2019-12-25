@@ -63,7 +63,7 @@ namespace Pathfinding {
 				if (counter > 5 && timeSlice) {
 					counter = 0;
 					if (System.DateTime.UtcNow.Ticks >= targetTick) {
-						return;
+						break;
 					}
 				}
 			}

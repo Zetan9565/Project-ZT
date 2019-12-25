@@ -7,6 +7,13 @@ public class PlayerController2D : MonoBehaviour
     [DisplayName("角色控制器")]
 #endif
     private CharacterController2D characterController;
+    public CharacterController2D CharacterController
+    {
+        get
+        {
+            return characterController;
+        }
+    }
 
     [SerializeField]
 #if UNITY_EDITOR
@@ -29,6 +36,7 @@ public class PlayerController2D : MonoBehaviour
             else return null;
         }
     }
+
 
     [SerializeField]
 #if UNITY_EDITOR
@@ -53,7 +61,7 @@ public class PlayerController2D : MonoBehaviour
             {
                 Unit.IsFollowingTarget = false;
                 Unit.ShowPath(true);
-                Unit.SetDestination(ZetanUtilities.MousePositionAsWorld);
+                Unit.SetDestination(ZetanUtil.MousePositionAsWorld);
             }
         }
     }

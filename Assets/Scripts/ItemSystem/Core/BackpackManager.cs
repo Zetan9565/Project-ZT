@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/背包管理器")]
 public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowHandler
 {
     [SerializeField]
@@ -136,7 +137,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
             MBackpack.GetItemSimple(item, amount);
             ItemAgent ia = itemAgents.Find(x => !x.IsEmpty && (x.MItemInfo.item == item || x.MItemInfo.ItemID == item.ID));
             if (ia) ia.UpdateInfo();
-            else//如果找不到，说明该物品是新的，原来背包里没有的
+            else//如果找不到，说明该物品是新的，是原来背包里没有的
             {
                 ia = itemAgents.Find(x => x.IsEmpty);
                 if (ia) ia.InitItem(MBackpack.Latest);
@@ -212,11 +213,11 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         }
         if (info.Amount < 2 && info.Amount > 0)
         {
-            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃1个 [<color=#{0}>{1}</color>] 吗？", ColorUtility.ToHtmlStringRGB(GameManager.QualityToColor(info.item.Quality)), info.ItemName), delegate
-            {
-                if (OnDiscard(info))
-                    MessageManager.Instance.NewMessage(string.Format("丢掉了1个 [{0}]", info.ItemName));
-            });
+            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃1个 [{0}] 吗？", ZetanUtil.ColorRichText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
+             {
+                 if (OnDiscard(info))
+                     MessageManager.Instance.NewMessage(string.Format("丢掉了1个 [{0}]", info.ItemName));
+             });
         }
         else AmountManager.Instance.NewAmount(delegate
         {
@@ -350,7 +351,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     /// </summary>
     /// <param name="size">扩展数量</param>
     /// <returns>是否成功扩展</returns>
-    public bool Expand(int size)
+    public bool ExpandSize(int size)
     {
         if (size < 1) return false;
         if (MBackpack.backpackSize.Max >= 192)
@@ -366,7 +367,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
             itemAgents.Add(ia);
             ia.Init(ItemAgentType.Backpack, itemAgents.IndexOf(ia), UI.gridRect);
         }
-        MessageManager.Instance.NewMessage(GameManager.BackpackName + "扩张了!");
+        MessageManager.Instance.NewMessage(GameManager.BackpackName + "空间增加了");
         return true;
     }
 
@@ -375,16 +376,16 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     /// </summary>
     /// <param name="weightLoad">扩展数量</param>
     /// <returns>是否成功扩展</returns>
-    public bool Expand(float weightLoad)
+    public bool ExpandWeightLoad(float weightLoad)
     {
         if (weightLoad < 0.01f) return false;
         if (MBackpack.weightLoad.Max >= 1500.0f)
         {
-            MessageManager.Instance.NewMessage(GameManager.BackpackName + "已经达到最大负重了");
+            MessageManager.Instance.NewMessage(GameManager.BackpackName + "已经达到最大载重了");
             return false;
         }
         MBackpack.weightLoad.Max += MBackpack.weightLoad.Max + weightLoad > 1500.0f ? 1500.0f - MBackpack.weightLoad.Max : weightLoad;
-        MessageManager.Instance.NewMessage(GameManager.BackpackName + "扩张了!");
+        MessageManager.Instance.NewMessage(GameManager.BackpackName + "载重增加了");
         return true;
     }
     #endregion
@@ -509,7 +510,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         if (!UI || !UI.gameObject) return;
         foreach (ItemAgent ia in itemAgents)
         {
-            ZetanUtilities.SetActive(ia.gameObject, true);
+            ZetanUtil.SetActive(ia.gameObject, true);
         }
     }
 
@@ -519,8 +520,8 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsEquipment)
-                ZetanUtilities.SetActive(ia.gameObject, true);
-            else ZetanUtilities.SetActive(ia.gameObject, false);
+                ZetanUtil.SetActive(ia.gameObject, true);
+            else ZetanUtil.SetActive(ia.gameObject, false);
         }
     }
 
@@ -530,8 +531,8 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsConsumable)
-                ZetanUtilities.SetActive(ia.gameObject, true);
-            else ZetanUtilities.SetActive(ia.gameObject, false);
+                ZetanUtil.SetActive(ia.gameObject, true);
+            else ZetanUtil.SetActive(ia.gameObject, false);
         }
     }
 
@@ -541,8 +542,8 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         foreach (ItemAgent ia in itemAgents)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsMaterial)
-                ZetanUtilities.SetActive(ia.gameObject, true);
-            else ZetanUtilities.SetActive(ia.gameObject, false);
+                ZetanUtil.SetActive(ia.gameObject, true);
+            else ZetanUtil.SetActive(ia.gameObject, false);
         }
     }
     #endregion

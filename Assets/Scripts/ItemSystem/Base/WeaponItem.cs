@@ -15,12 +15,30 @@ public class WeaponItem : ItemBase
     }
 
     [SerializeField]
-    private int _ATK;
-    public int ATK
+    private int cutATK;
+    public int CutATK
     {
         get
         {
-            return _ATK;
+            return cutATK;
+        }
+    }
+    [SerializeField]
+    private int punATK;
+    public int PunATK
+    {
+        get
+        {
+            return punATK;
+        }
+    }
+    [SerializeField]
+    private int bluATK;
+    public int BluATK
+    {
+        get
+        {
+            return bluATK;
         }
     }
 

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+[DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/UI窗口管理器")]
 public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
 {
     private int topOrder = 0;

@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 
 [DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/建筑管理器")]
 public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowHandler
 {
     public bool IsUIOpen { get; private set; }
@@ -90,7 +91,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
         WindowsManager.Instance.PauseAll(true);
         IsPreviewing = true;
 #if UNITY_ANDROID
-        ZetanUtilities.SetActive(CancelArea, true);
+        ZetanUtil.SetActive(CancelArea, true);
         UIManager.Instance.EnableJoyStick(false);
 #endif
         ShowAndMovePreview();
@@ -109,7 +110,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
     public void ShowAndMovePreview()
     {
         if (!preview) return;
-        preview.transform.position = ZetanUtilities.PositionToGrid(GetMovePosition(), gridSize, preview.CenterOffset);
+        preview.transform.position = ZetanUtil.PositionToGrid(GetMovePosition(), gridSize, preview.CenterOffset);
         if (preview.ColliderCount > 0)
         {
             if (preview.SpriteRenderer) preview.SpriteRenderer.color = Color.red;
@@ -118,7 +119,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
         {
             if (preview.SpriteRenderer) preview.SpriteRenderer.color = Color.white;
         }
-        if (ZetanUtilities.IsMouseInsideScreen)
+        if (ZetanUtil.IsMouseInsideScreen)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -139,7 +140,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
         WindowsManager.Instance.PauseAll(false);
         IsPreviewing = false;
 #if UNITY_ANDROID
-        ZetanUtilities.SetActive(CancelArea, false);
+        ZetanUtil.SetActive(CancelArea, false);
         UIManager.Instance.EnableJoyStick(true);
 #endif
     }
@@ -178,9 +179,9 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
                             Vector3 max = colliders[0].bounds.max;
                             for (int i = 1; i < colliders.Length; i++)
                             {
-                                if (ZetanUtilities.Vector3LessThan(colliders[i].bounds.min, min))
+                                if (ZetanUtil.Vector3LessThan(colliders[i].bounds.min, min))
                                     min = colliders[i].bounds.min;
-                                if (ZetanUtilities.Vector3LargeThan(colliders[i].bounds.max, max))
+                                if (ZetanUtil.Vector3LargeThan(colliders[i].bounds.max, max))
                                     max = colliders[i].bounds.max;
                             }
                             AStarManager.Instance.UpdateGraphs(min, max);
@@ -194,9 +195,9 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
                                 Vector3 max = collider2Ds[0].bounds.max;
                                 for (int i = 1; i < collider2Ds.Length; i++)
                                 {
-                                    if (ZetanUtilities.Vector3LessThan(collider2Ds[i].bounds.min, min))
+                                    if (ZetanUtil.Vector3LessThan(collider2Ds[i].bounds.min, min))
                                         min = collider2Ds[i].bounds.min;
-                                    if (ZetanUtilities.Vector3LargeThan(collider2Ds[i].bounds.max, max))
+                                    if (ZetanUtil.Vector3LargeThan(collider2Ds[i].bounds.max, max))
                                         max = collider2Ds[i].bounds.max;
                                 }
                                 AStarManager.Instance.UpdateGraphs(min, max);
@@ -241,7 +242,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
 
     Vector2 GetMovePosition()
     {
-        if (ZetanUtilities.IsMouseInsideScreen)
+        if (ZetanUtil.IsMouseInsideScreen)
             return Camera.main.ScreenToWorldPoint(Input.mousePosition);
         else return preview.transform.position;
     }
@@ -287,9 +288,9 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
                     Vector3 max = colliders[0].bounds.max;
                     for (int i = 1; i < colliders.Length; i++)
                     {
-                        if (ZetanUtilities.Vector3LessThan(colliders[i].bounds.min, min))
+                        if (ZetanUtil.Vector3LessThan(colliders[i].bounds.min, min))
                             min = colliders[i].bounds.min;
-                        if (ZetanUtilities.Vector3LargeThan(colliders[i].bounds.max, max))
+                        if (ZetanUtil.Vector3LargeThan(colliders[i].bounds.max, max))
                             max = colliders[i].bounds.max;
                     }
                     DestroyImmediate(building.gameObject);
@@ -304,9 +305,9 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
                         Vector3 max = collider2Ds[0].bounds.max;
                         for (int i = 1; i < collider2Ds.Length; i++)
                         {
-                            if (ZetanUtilities.Vector3LessThan(collider2Ds[i].bounds.min, min))
+                            if (ZetanUtil.Vector3LessThan(collider2Ds[i].bounds.min, min))
                                 min = collider2Ds[i].bounds.min;
-                            if (ZetanUtilities.Vector3LargeThan(collider2Ds[i].bounds.max, max))
+                            if (ZetanUtil.Vector3LargeThan(collider2Ds[i].bounds.max, max))
                                 max = collider2Ds[i].bounds.max;
                         }
                         DestroyImmediate(building.gameObject);
@@ -346,7 +347,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
         FinishPreview();
         HideDescription();
         HideBuiltList();
-        ZetanUtilities.SetActive(UI.destroyButton.gameObject, false);
+        ZetanUtil.SetActive(UI.destroyButton.gameObject, false);
     }
     public void OpenCloseWindow()
     {
@@ -366,7 +367,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
         {
             UI.buildingWindow.alpha = 0;
             UI.buildingWindow.blocksRaycasts = false;
-            ZetanUtilities.SetActive(UI.destroyButton.gameObject, false);
+            ZetanUtil.SetActive(UI.destroyButton.gameObject, false);
         }
         IsPausing = pause;
     }
@@ -453,12 +454,12 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
     {
         if (!IsUIOpen || ToDestroy) return;
         ToDestroy = building;
-        if (!IsPausing) ZetanUtilities.SetActive(UI.destroyButton.gameObject, true);
+        if (!IsPausing) ZetanUtil.SetActive(UI.destroyButton.gameObject, true);
     }
     public void CannotDestroy()
     {
         ToDestroy = null;
-        ZetanUtilities.SetActive(UI.destroyButton.gameObject, false);
+        ZetanUtil.SetActive(UI.destroyButton.gameObject, false);
         if (ConfirmManager.Instance.IsUIOpen) ConfirmManager.Instance.CloseWindow();
     }
 

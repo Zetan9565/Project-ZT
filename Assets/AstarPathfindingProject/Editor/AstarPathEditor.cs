@@ -636,6 +636,8 @@ namespace Pathfinding {
 		public void OnSceneGUI () {
 			script = target as AstarPath;
 
+			DrawSceneGUISettings();
+
 			// OnSceneGUI may be called from EditorUtility.DisplayProgressBar
 			// which is called repeatedly while the graphs are scanned in the
 			// editor. However running the OnSceneGUI method while the graphs
@@ -667,6 +669,35 @@ namespace Pathfinding {
 				EditorUtility.SetDirty(target);
 			}
 		}
+
+		void DrawSceneGUISettings () {
+			var darkSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Scene);
+
+			Handles.BeginGUI();
+			float width = 180;
+			float height = 76;
+			float margin = 10;
+
+			var origWidth = EditorGUIUtility.labelWidth;
+			EditorGUIUtility.labelWidth = 144;
+			GUILayout.BeginArea(new Rect(Camera.current.pixelWidth - width, Camera.current.pixelHeight - height, width - margin, height - margin), "Graph Display", astarSkin.FindStyle("SceneBoxDark"));
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.PrefixLabel("Show Graphs", darkSkin.toggle, astarSkin.FindStyle("ScenePrefixLabel"));
+			script.showNavGraphs = EditorGUILayout.Toggle(script.showNavGraphs, darkSkin.toggle);
+			EditorGUILayout.EndHorizontal();
+
+			if (GUILayout.Button("Scan", darkSkin.button)) {
+				MenuScan();
+			}
+
+			// Invisible button to capture clicks. This prevents a click inside the box from causing some other GameObject to be selected.
+			GUI.Button(new Rect(0, 0, width - margin, height - margin), "", GUIStyle.none);
+			GUILayout.EndArea();
+
+			EditorGUIUtility.labelWidth = origWidth;
+			Handles.EndGUI();
+		}
+
 
 		TextAsset SaveGraphData (byte[] bytes, TextAsset target = null) {
 			string projectPath = System.IO.Path.GetDirectoryName(Application.dataPath) + "/";
@@ -1358,7 +1389,14 @@ namespace Pathfinding {
 
 			var graphList = new List<System.Type>();
 			foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies()) {
-				System.Type[] types = assembly.GetTypes();
+				System.Type[] types = null;
+				try {
+					types = assembly.GetTypes();
+				} catch {
+					// Ignore type load exceptions and things like that.
+					// We might not be able to read all assemblies for some reason, but hopefully the relevant types exist in the assemblies that we can read
+					continue;
+				}
 
 				// Iterate through the assembly for classes which inherit from GraphEditor
 				foreach (var type in types) {

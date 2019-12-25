@@ -53,10 +53,10 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         MyUtilities.SetActive(JoyStick.gameObject, false);
         MyUtilities.SetActive(JoyStick.KnobBackground.gameObject, false);
 #elif UNITY_ANDROID
-        ZetanUtilities.SetActive(JoyStick.gameObject, true);
-        ZetanUtilities.SetActive(JoyStick.KnobBackground.gameObject, true);
+        ZetanUtil.SetActive(JoyStick.gameObject, true);
+        ZetanUtil.SetActive(JoyStick.KnobBackground.gameObject, true);
 #endif
-        ZetanUtilities.SetActive(InteractiveButton.gameObject, false);
+        ZetanUtil.SetActive(InteractiveButton.gameObject, false);
         questButton.onClick.AddListener(QuestManager.Instance.OpenCloseWindow);
         backpackButton.onClick.AddListener(BackpackManager.Instance.OpenCloseWindow);
         calendarButton.onClick.AddListener(CalendarManager.Instance.OpenCloseWindow);
@@ -83,10 +83,10 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     {
 #if UNITY_ANDROID
         if (!value)
-            ZetanUtilities.SetActive(InteractiveButton.gameObject, value);
+            ZetanUtil.SetActive(InteractiveButton.gameObject, value);
         else
         {
-            ZetanUtilities.SetActive(InteractiveButton.gameObject, value &&
+            ZetanUtil.SetActive(InteractiveButton.gameObject, value &&
                 (DialogueManager.Instance.TalkAble && !WarehouseManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen && !GatherManager.Instance.IsGathering ||
                 WarehouseManager.Instance.StoreAble && !DialogueManager.Instance.IsUIOpen && !LootManager.Instance.IsUIOpen && !GatherManager.Instance.IsGathering ||
                 LootManager.Instance.PickAble && !DialogueManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !GatherManager.Instance.IsGathering ||
@@ -96,12 +96,12 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 #endif
         if (!string.IsNullOrEmpty(name) && value)
         {
-            ZetanUtilities.SetActive(interactiveName.transform.parent.gameObject, true);
+            ZetanUtil.SetActive(interactiveName.transform.parent.gameObject, true);
             interactiveName.text = name;
         }
         else
         {
-            ZetanUtilities.SetActive(interactiveName.transform.parent.gameObject, false);
+            ZetanUtil.SetActive(interactiveName.transform.parent.gameObject, false);
             interactiveName.text = string.Empty;
         }
     }

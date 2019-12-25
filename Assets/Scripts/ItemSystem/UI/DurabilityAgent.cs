@@ -9,6 +9,6 @@ public class DurabilityAgent : MonoBehaviour
 
     public void UnShow()
     {
-        ZetanUtilities.SetActive(gameObject, false);
+        ZetanUtil.SetActive(gameObject, false);
     }
 }

@@ -42,14 +42,14 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         if (actionText)
         {
             if (string.IsNullOrEmpty(actionName))
-                ZetanUtilities.SetActive(actionText.gameObject, false);
+                ZetanUtil.SetActive(actionText.gameObject, false);
             else
             {
                 actionText.text = actionName;
-                ZetanUtilities.SetActive(actionText.gameObject, true);
+                ZetanUtil.SetActive(actionText.gameObject, true);
             }
         }
-        ZetanUtilities.SetActive(bar, true);
+        ZetanUtil.SetActive(bar, true);
         StartCoroutine(Progress());
     }
 
@@ -58,7 +58,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         targetTime = 0;
         currentTime = 0;
         isProgressing = false;
-        ZetanUtilities.SetActive(bar, false);
+        ZetanUtil.SetActive(bar, false);
         onDone?.Invoke();
     }
 
@@ -67,7 +67,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         targetTime = 0;
         currentTime = 0;
         isProgressing = false;
-        ZetanUtilities.SetActive(bar, false);
+        ZetanUtil.SetActive(bar, false);
         onCancel?.Invoke();
     }
 
@@ -76,7 +76,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         targetTime = 0;
         currentTime = 0;
         isProgressing = false;
-        ZetanUtilities.SetActive(bar, false);
+        ZetanUtil.SetActive(bar, false);
     }
     private IEnumerator Progress()
     {

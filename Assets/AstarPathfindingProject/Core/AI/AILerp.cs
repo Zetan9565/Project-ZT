@@ -103,7 +103,7 @@ namespace Pathfinding {
 		/// <summary>\copydoc Pathfinding::IAstarAI::reachedDestination</summary>
 		public bool reachedDestination {
 			get {
-				if (!reachedEndOfPath) return false;
+				if (!reachedEndOfPath || !interpolator.valid) return false;
 				// Note: distanceToSteeringTarget is the distance to the end of the path when approachingPathEndpoint is true
 				var dir = destination - interpolator.endPoint;
 				// Ignore either the y or z coordinate depending on if we are using 2D mode or not
@@ -347,21 +347,13 @@ namespace Pathfinding {
 		}
 
 		public void OnDisable () {
-			// Abort any calculations in progress
-			if (seeker != null) seeker.CancelCurrentPathRequest();
-			canSearchAgain = true;
-
-			// Release current path so that it can be pooled
-			if (path != null) path.Release(this);
-			path = null;
-			interpolator.SetPath(null);
-
+			ClearPath();
 			// Make sure we no longer receive callbacks when paths complete
 			seeker.pathCallback -= OnPathComplete;
 		}
 
 		public void Teleport (Vector3 position, bool clearPath = true) {
-			if (clearPath) interpolator.SetPath(null);
+			if (clearPath) ClearPath();
 			simulatedPosition = previousPosition1 = previousPosition2 = position;
 			if (updatePosition) tr.position = position;
 			reachedEndOfPath = false;
@@ -387,9 +379,9 @@ namespace Pathfinding {
 		/// <summary>Requests a path to the target.</summary>
 		public virtual void SearchPath () {
 			if (float.IsPositiveInfinity(destination.x)) return;
-            onSearchPath?.Invoke();
+			if (onSearchPath != null) onSearchPath();
 
-            lastRepath = Time.time;
+			lastRepath = Time.time;
 
 			// This is where the path should start to search from
 			var currentPosition = GetFeetPosition();
@@ -481,9 +473,31 @@ namespace Pathfinding {
 			}
 		}
 
+		/// <summary>
+		/// Clears the current path of the agent.
+		///
+		/// Usually invoked using <see cref="SetPath(null)"/>
+		///
+		/// See: <see cref="SetPath"/>
+		/// See: <see cref="isStopped"/>
+		/// </summary>
+		protected virtual void ClearPath () {
+			// Abort any calculations in progress
+			if (seeker != null) seeker.CancelCurrentPathRequest();
+			canSearchAgain = true;
+			reachedEndOfPath = false;
+
+			// Release current path so that it can be pooled
+			if (path != null) path.Release(this);
+			path = null;
+			interpolator.SetPath(null);
+		}
+
 		/// <summary>\copydoc Pathfinding::IAstarAI::SetPath</summary>
 		public void SetPath (Path path) {
-			if (path.PipelineState == PathState.Created) {
+			if (path == null) {
+				ClearPath();
+			} else if (path.PipelineState == PathState.Created) {
 				// Path has not started calculation yet
 				lastRepath = Time.time;
 				canSearchAgain = false;
@@ -538,8 +552,10 @@ namespace Pathfinding {
 		protected virtual void Update () {
 			if (shouldRecalculatePath) SearchPath();
 			if (canMove) {
-                MovementUpdate(Time.deltaTime, out Vector3 nextPosition, out Quaternion nextRotation);
-                FinalizeMovement(nextPosition, nextRotation);
+				Vector3 nextPosition;
+				Quaternion nextRotation;
+				MovementUpdate(Time.deltaTime, out nextPosition, out nextRotation);
+				FinalizeMovement(nextPosition, nextRotation);
 			}
 		}
 
@@ -548,9 +564,11 @@ namespace Pathfinding {
 			if (updatePosition) simulatedPosition = tr.position;
 			if (updateRotation) simulatedRotation = tr.rotation;
 
-            nextPosition = CalculateNextPosition(out Vector3 direction, isStopped ? 0f : deltaTime);
+			Vector3 direction;
 
-            if (enableRotation) nextRotation = SimulateRotationTowards(direction, deltaTime);
+			nextPosition = CalculateNextPosition(out direction, isStopped ? 0f : deltaTime);
+
+			if (enableRotation) nextRotation = SimulateRotationTowards(direction, deltaTime);
 			else nextRotation = simulatedRotation;
 		}
 

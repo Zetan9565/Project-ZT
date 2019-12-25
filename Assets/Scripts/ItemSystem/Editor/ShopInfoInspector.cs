@@ -35,7 +35,7 @@ public class ShopInfoInspector : Editor
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(shopName, new GUIContent("商店名称"));
-        EditorGUILayout.PropertyField(commodities, new GUIContent("在售品列表\t\t" + (commodities.arraySize > 0 ? "数量：" + commodities.arraySize : "无")));
+        EditorGUILayout.PropertyField(commodities, new GUIContent("在售品列表\t\t" + (commodities.arraySize > 0 ? "数量：" + commodities.arraySize : "无")), false);
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
         if (commodities.isExpanded)
@@ -46,7 +46,7 @@ public class ShopInfoInspector : Editor
         }
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(acquisitions, new GUIContent("收购品列表\t\t" + (acquisitions.arraySize > 0 ? "数量：" + acquisitions.arraySize : "无")));
+        EditorGUILayout.PropertyField(acquisitions, new GUIContent("收购品列表\t\t" + (acquisitions.arraySize > 0 ? "数量：" + acquisitions.arraySize : "无")), false);
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
         if (acquisitions.isExpanded)

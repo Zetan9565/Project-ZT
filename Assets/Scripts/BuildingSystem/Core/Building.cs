@@ -55,7 +55,7 @@ public class Building : MonoBehaviour
         }
         IsUnderBuilding = true;
         StartCoroutine(Build());
-        if (buildingFlag) ZetanUtilities.SetActive(buildingFlag.gameObject, true);
+        if (buildingFlag) ZetanUtil.SetActive(buildingFlag.gameObject, true);
         return true;
     }
 
@@ -76,13 +76,13 @@ public class Building : MonoBehaviour
             }
             IsUnderBuilding = true;
             StartCoroutine(Build());
-            if (buildingFlag) ZetanUtilities.SetActive(buildingFlag.gameObject, true);
+            if (buildingFlag) ZetanUtil.SetActive(buildingFlag.gameObject, true);
         }
         else
         {
             IsUnderBuilding = false;
             IsBuilt = true;
-            if (buildingFlag) ZetanUtilities.SetActive(buildingFlag.gameObject, false);
+            if (buildingFlag) ZetanUtil.SetActive(buildingFlag.gameObject, false);
         }
         if (buildingAgent) buildingAgent.UpdateUI();
     }
@@ -120,7 +120,7 @@ public class Building : MonoBehaviour
     private IEnumerator WaitToHideFlag()
     {
         yield return new WaitForSeconds(2);
-        if (buildingFlag) ZetanUtilities.SetActive(buildingFlag.gameObject, false);
+        if (buildingFlag) ZetanUtil.SetActive(buildingFlag.gameObject, false);
     }
 
     public virtual void TryDestroy()

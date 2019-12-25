@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[DisallowMultipleComponent]
+[AddComponentMenu("ZetanStudio/管理器/日历管理器")]
 public class CalendarManager : SingletonMonoBehaviour<CalendarManager>, IWindowHandler
 {
     [SerializeField]
@@ -72,11 +74,11 @@ public class CalendarManager : SingletonMonoBehaviour<CalendarManager>, IWindowH
         if (!UI || !UI.gameObject) return;
         if (IsPausing) return;
         if (IsUIOpen) return;
+        IsUIOpen = true;
         UpdateUI();
         UI.calendarWindow.alpha = 1;
         UI.calendarWindow.blocksRaycasts = true;
         WindowsManager.Instance.Push(this);
-        IsUIOpen = true;
     }
 
     public void CloseWindow()
