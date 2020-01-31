@@ -62,6 +62,9 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         }
     }
 
+    public delegate void TimePassedListner(int second);
+    public event TimePassedListner OnTimePassed;
+
     public delegate void DayPassedListner();
     public event DayPassedListner OnDayPassed;
 
@@ -287,7 +290,19 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         float timelineBef = timeline;
         timeline = (timeline + UnityEngine.Time.deltaTime * Scale) % 24;
         if (UI && UI.time) UI.time.text = Time;
-        if (timelineBef > timeline) NextDayWithoutNotify();
+        if (timelineBef > timeline) NextDay();
+    }
+
+    public void TimePase(int second)
+    {
+        float timelineBef = timeline;
+        int days = (int)(second * Scale / 24f);
+        for (int i = 0; i < days - 1; i++)
+            NextDay();
+        timeline = (timeline + second * Scale) % 24;
+        if (UI && UI.time) UI.time.text = Time;
+        if (timelineBef > timeline) NextDay();
+        OnTimePassed?.Invoke(second);
     }
 
     private void NextDayWithoutNotify()
@@ -318,7 +333,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         }
     }
 
-    public void NextDay()
+    private void NextDay()
     {
         NextDayWithoutNotify();
         OnDayPassed?.Invoke();

@@ -148,10 +148,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void RemoveMapIcon(Vector3 worldPosition)
     {
         foreach (var icon in iconsWithoutHolder)
-        {
             if (icon.worldPosition == worldPosition)
                 ObjectPool.Instance.Put(icon.mapIcon.gameObject);
-        }
         iconsWithoutHolder.RemoveAll(x => x.worldPosition == worldPosition);
     }
 

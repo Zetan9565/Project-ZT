@@ -160,7 +160,7 @@ public class CharacterInfoInspector : Editor
                     {
                         EditorGUI.BeginChangeCheck();
                         SerializedProperty lootPrefab = serializedObject.FindProperty("lootPrefab");
-                        EditorGUILayout.PropertyField(lootPrefab, new GUIContent("掉落道具预制体"));
+                        EditorGUILayout.PropertyField(lootPrefab, new GUIContent("掉落道具预制件"));
                         if (EditorGUI.EndChangeCheck())
                             serializedObject.ApplyModifiedProperties();
                     }
@@ -366,9 +366,9 @@ public class CharacterInfoInspector : Editor
             serializedObject.Update();
             SerializedProperty itemInfo = dropItems.GetArrayElementAtIndex(index);
             if (enemy.DropItems[index] != null && enemy.DropItems[index].Item != null)
-                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), itemInfo, new GUIContent(enemy.DropItems[index].ItemName));
+                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2, lineHeight), itemInfo, new GUIContent(enemy.DropItems[index].ItemName));
             else
-                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), itemInfo, new GUIContent("(空)"));
+                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2, lineHeight), itemInfo, new GUIContent("(空)"));
             EditorGUI.BeginChangeCheck();
             SerializedProperty item = itemInfo.FindPropertyRelative("item");
             SerializedProperty amount = itemInfo.FindPropertyRelative("amount");

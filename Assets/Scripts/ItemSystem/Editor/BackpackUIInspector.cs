@@ -48,7 +48,7 @@ public class BackpackUIInspector : Editor
         EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.PropertyField(backpackWindow, new GUIContent("背包窗口"));
         EditorGUILayout.PropertyField(pageSelector, new GUIContent("换页下拉"));
-        EditorGUILayout.PropertyField(itemCellPrefab, new GUIContent("单元格预制体"));
+        EditorGUILayout.PropertyField(itemCellPrefab, new GUIContent("单元格预制件"));
         EditorGUILayout.PropertyField(itemCellsParent, new GUIContent("单元格放置根"));
         EditorGUILayout.PropertyField(money, new GUIContent("金钱文字"));
         EditorGUILayout.PropertyField(weight, new GUIContent("负重文字"));

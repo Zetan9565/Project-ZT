@@ -65,8 +65,8 @@ public class QuestUIInspector : Editor
         EditorGUILayout.LabelField("任务窗口相关", new GUIStyle() { fontStyle = FontStyle.Bold });
         EditorGUILayout.PropertyField(questsWindow, new GUIContent("任务窗口"));
         EditorGUILayout.PropertyField(closeWindow, new GUIContent("关闭任务窗口"));
-        EditorGUILayout.PropertyField(questPrefab, new GUIContent("任务载体预制体"));
-        EditorGUILayout.PropertyField(questGroupPrefab, new GUIContent("任务组载体预制体"));
+        EditorGUILayout.PropertyField(questPrefab, new GUIContent("任务载体预制件"));
+        EditorGUILayout.PropertyField(questGroupPrefab, new GUIContent("任务组载体预制件"));
         EditorGUILayout.PropertyField(questListParent, new GUIContent("进行中任务放置根"));
         EditorGUILayout.PropertyField(questList, new GUIContent("进行中任务页面"));
         EditorGUILayout.PropertyField(questListToggle, new GUIContent("进行中任务页面切换器"));
@@ -84,14 +84,14 @@ public class QuestUIInspector : Editor
         EditorGUILayout.PropertyField(closeDescription, new GUIContent("关闭详情窗口"));
         EditorGUILayout.PropertyField(moneyText, new GUIContent("金钱奖励文本"));
         EditorGUILayout.PropertyField(EXPText, new GUIContent("经验奖励文本"));
-        EditorGUILayout.PropertyField(rewardCellPrefab, new GUIContent("道具奖励格预制体"), true);
+        EditorGUILayout.PropertyField(rewardCellPrefab, new GUIContent("道具奖励格预制件"), true);
         EditorGUILayout.PropertyField(rewardCellsParent, new GUIContent("道具奖励放置根"), true);
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.LabelField("任务栏相关", new GUIStyle() { fontStyle = FontStyle.Bold });
         EditorGUILayout.PropertyField(questBoard, new GUIContent("任务栏"));
-        EditorGUILayout.PropertyField(boardQuestPrefab, new GUIContent("栏任务载体预制体"));
+        EditorGUILayout.PropertyField(boardQuestPrefab, new GUIContent("栏任务载体预制件"));
         EditorGUILayout.PropertyField(questBoardArea, new GUIContent("任务栏放置根"), true);
         EditorGUILayout.EndVertical();
         if (EditorGUI.EndChangeCheck())

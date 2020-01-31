@@ -64,6 +64,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         Init();
     }
 
+    public static Dictionary<CropInformation, List<Crop>> Crops { get; } = new Dictionary<CropInformation, List<Crop>>();
+
     public static Dictionary<string, List<Enemy>> Enemies { get; } = new Dictionary<string, List<Enemy>>();
 
     public static Dictionary<string, Talker> Talkers { get; } = new Dictionary<string, Talker>();
@@ -74,6 +76,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     public static void Init()
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
+        Crops.Clear();
         Talkers.Clear();
         TalkerDatas.Clear();
         foreach (var kvp in Enemies)

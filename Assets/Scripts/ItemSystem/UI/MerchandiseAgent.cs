@@ -50,9 +50,9 @@ public class MerchandiseAgent : MonoBehaviour, IPointerClickHandler
         nameText.text = merchandiseInfo.Item.name;
         if (merchandiseType == MerchandiseType.SellToPlayer) priceText.text = (merchandiseInfo.Item.BuyPrice * merchandiseInfo.PriceMultiple).ToString("F0") + "文";
         else priceText.text = (merchandiseInfo.Item.SellPrice * merchandiseInfo.PriceMultiple).ToString("F0") + "文";
-        if (merchandiseInfo.SOorENAble)
+        if (merchandiseInfo.EmptyAble)
         {
-            if (merchandiseType == MerchandiseType.BuyFromPlayer) amountText.text = merchandiseInfo.IsEnough ? "暂无需求" : merchandiseInfo.LeftAmount + "/" + merchandiseInfo.MaxAmount;
+            if (merchandiseType == MerchandiseType.BuyFromPlayer) amountText.text = merchandiseInfo.IsEmpty ? "暂无需求" : merchandiseInfo.LeftAmount + "/" + merchandiseInfo.MaxAmount;
             else amountText.text = merchandiseInfo.IsSoldOut ? "售罄" : merchandiseInfo.LeftAmount + "/" + merchandiseInfo.MaxAmount;
         }
         else

@@ -3,7 +3,7 @@
 public interface IWindowHandler
 {
     /// <summary>
-    /// 在这个方法中把自己入栈到WindowsManager的窗口栈中
+    /// 需在这个方法中把自身入栈到WindowsManager的窗口栈中
     /// </summary>
     void OpenWindow();
 

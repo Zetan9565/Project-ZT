@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 7689348374307004f9085070a2b473f5
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: FZSuXinShiLiuKai-R-JF
+  fontNames:
+  - "\u65B9\u6B63\u82CF\u65B0\u8BD7\u67F3\u6977\u7B80\u7E41"
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -73,7 +73,7 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.EndVertical();
         EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.LabelField("选项相关", new GUIStyle() { fontStyle = FontStyle.Bold });
-        EditorGUILayout.PropertyField(optionPrefab, new GUIContent("选项预制体"));
+        EditorGUILayout.PropertyField(optionPrefab, new GUIContent("选项预制件"));
         EditorGUILayout.PropertyField(optionsParent, new GUIContent("选项放置根"));
         EditorGUILayout.PropertyField(pageUpButton, new GUIContent("上翻页按钮"));
         EditorGUILayout.PropertyField(pageDownButton, new GUIContent("下翻页按钮"));
@@ -87,7 +87,7 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.PropertyField(descriptionText, new GUIContent("任务描述文字"));
         EditorGUILayout.PropertyField(moneyText, new GUIContent("金钱奖励文字"));
         EditorGUILayout.PropertyField(EXPText, new GUIContent("经验奖励文字"));
-        EditorGUILayout.PropertyField(rewardCellPrefab, new GUIContent("道具奖励格预制体"), true);
+        EditorGUILayout.PropertyField(rewardCellPrefab, new GUIContent("道具奖励格预制件"), true);
         EditorGUILayout.PropertyField(rewardCellsParent, new GUIContent("道具奖励放置根"), true);
         EditorGUILayout.EndVertical();
         if (EditorGUI.EndChangeCheck())

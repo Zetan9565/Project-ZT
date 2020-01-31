@@ -13,47 +13,74 @@ MonoBehaviour:
   m_Name: crop info
   m_EditorClassIdentifier: 
   _ID: CROP001
-  gatheringInfo: {fileID: 0}
+  _name: "\u6D4B\u8BD5\u4F5C\u72691"
   plantSeason: 0
-  growthTime: 7
-  timeUnit: 2
-  repeatTimes: 2
-  repeatStage:
-    min: 2
-    max: 3
   stages:
   - stage: 0
-    lifespanPer:
-      min: 1
-      max: 1
+    lastingDays: 1
     graph: {fileID: 21300000, guid: 92157dd176782664291ac2f7194171ea, type: 3}
+    gatherType: 0
+    gatherTime: 0
+    lootPrefab: {fileID: 0}
+    repeatTimes: 0
+    indexToReturn: 0
+    productItems: []
   - stage: 1
-    lifespanPer:
-      min: 2
-      max: 2
+    lastingDays: 1
     graph: {fileID: 0}
+    gatherType: 0
+    gatherTime: 0
+    lootPrefab: {fileID: 0}
+    repeatTimes: 0
+    indexToReturn: 0
+    productItems: []
   - stage: 2
-    lifespanPer:
-      min: 3
-      max: 3
+    lastingDays: 1
     graph: {fileID: 0}
+    gatherType: 0
+    gatherTime: 0
+    lootPrefab: {fileID: 0}
+    repeatTimes: 0
+    indexToReturn: 0
+    productItems: []
   - stage: 4
-    lifespanPer:
-      min: 4
-      max: 4
+    lastingDays: 1
     graph: {fileID: 0}
+    gatherType: 0
+    gatherTime: 0
+    lootPrefab: {fileID: 0}
+    repeatTimes: 1
+    indexToReturn: 0
+    productItems: []
   - stage: 5
-    lifespanPer:
-      min: 5
-      max: 5
+    lastingDays: 1
     graph: {fileID: 0}
+    gatherType: 0
+    gatherTime: 0
+    lootPrefab: {fileID: 0}
+    repeatTimes: 1
+    indexToReturn: 0
+    productItems:
+    - item: {fileID: 11400000, guid: a7d72e2d91b0a664392e7855e2e4d192, type: 2}
+      amount: 1
+      dropRate: 100
+      onlyDropForQuest: 0
+      bindedQuest: {fileID: 0}
   - stage: 8
-    lifespanPer:
-      min: 6
-      max: 6
+    lastingDays: 1
     graph: {fileID: 0}
+    gatherType: 0
+    gatherTime: 0
+    lootPrefab: {fileID: 0}
+    repeatTimes: 1
+    indexToReturn: 0
+    productItems: []
   - stage: 9
-    lifespanPer:
-      min: 7
-      max: 7
+    lastingDays: 1
     graph: {fileID: 0}
+    gatherType: 0
+    gatherTime: 0
+    lootPrefab: {fileID: 0}
+    repeatTimes: 1
+    indexToReturn: 0
+    productItems: []

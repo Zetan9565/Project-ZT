@@ -109,7 +109,7 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
         }
         if (Application.isPlaying) GUI.enabled = false;
         EditorGUILayout.PropertyField(mapCamera, new GUIContent("地图相机"));
-        EditorGUILayout.PropertyField(cameraPrefab, new GUIContent("地图相机预制体"));
+        EditorGUILayout.PropertyField(cameraPrefab, new GUIContent("地图相机预制件"));
         EditorGUILayout.PropertyField(targetTexture, new GUIContent("采样贴图"));
         if (Application.isPlaying) GUI.enabled = true;
         EditorGUILayout.PropertyField(mapRenderMask, new GUIContent("地图相机可视层"));

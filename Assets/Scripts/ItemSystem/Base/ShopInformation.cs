@@ -60,7 +60,7 @@ public class ShopInformation : ScriptableObject
             while (commodityEnum.MoveNext())
             {
                 MerchandiseInfo commodity = commodityEnum.Current;
-                if (commodity.SOorENAble && commodity.RefreshTime > 0)
+                if (commodity.EmptyAble && commodity.RefreshTime > 0)
                 {
                     commodity.leftRefreshTime -= time;
                     if (commodity.leftRefreshTime <= 0)
@@ -75,7 +75,7 @@ public class ShopInformation : ScriptableObject
             while (acquisitionEnum.MoveNext())
             {
                 MerchandiseInfo acquisiton = acquisitionEnum.Current;
-                if (acquisiton.SOorENAble && acquisiton.RefreshTime > 0)
+                if (acquisiton.EmptyAble && acquisiton.RefreshTime > 0)
                 {
                     acquisiton.leftRefreshTime -= time;
                     if (acquisiton.leftRefreshTime <= 0)
@@ -139,7 +139,7 @@ public class MerchandiseInfo
 
     [SerializeField]
     private bool emptyAble;
-    public bool SOorENAble
+    public bool EmptyAble
     {
         get
         {
@@ -208,15 +208,15 @@ public class MerchandiseInfo
     {
         get
         {
-            return SOorENAble && leftAmount <= 0;
+            return EmptyAble && leftAmount <= 0;
         }
     }
 
-    public bool IsEnough
+    public bool IsEmpty
     {
         get
         {
-            return SOorENAble && leftAmount <= 0;
+            return EmptyAble && leftAmount <= 0;
         }
     }
 

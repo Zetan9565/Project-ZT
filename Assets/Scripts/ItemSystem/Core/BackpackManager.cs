@@ -213,7 +213,8 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         }
         if (info.Amount < 2 && info.Amount > 0)
         {
-            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃1个 [{0}] 吗？", ZetanUtil.ColorRichText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
+            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃1个 [{0}] 吗？",
+                ZetanUtil.ColorRichText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
              {
                  if (OnDiscard(info))
                      MessageManager.Instance.NewMessage(string.Format("丢掉了1个 [{0}]", info.ItemName));
@@ -221,7 +222,8 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         }
         else AmountManager.Instance.NewAmount(delegate
         {
-            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.ItemName), delegate
+            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount,
+                ZetanUtil.ColorRichText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
             {
                 if (OnDiscard(info, (int)AmountManager.Instance.Amount))
                     MessageManager.Instance.NewMessage(string.Format("丢掉了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
@@ -401,6 +403,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         WindowsManager.Instance.Push(this);
         IsUIOpen = true;
         GridMask.raycastTarget = true;
+        ZetanUtil.SetActive(UI.handworkButton.gameObject, !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen);
     }
     public void CloseWindow()
     {

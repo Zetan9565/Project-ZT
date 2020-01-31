@@ -21,10 +21,11 @@ MonoBehaviour:
   sellPrice: 0
   buyPrice: 0
   icon: {fileID: 21300000, guid: 9dadbe075381e114eaf16c43fe52f891, type: 3}
-  description: "\u7528\u7AF9\u7247\u4E32\u6210\u7684\u62A4\u7532\u3002"
+  description: "\u7528\u94C1\u7247\u4E32\u6210\u7684\u62A4\u7532\u3002"
   stackAble: 0
   discardAble: 1
-  useable: 1
+  lockAble: 1
+  usable: 1
   inexhaustible: 0
   maxDurability: 100
   makingMethod: 3
@@ -36,7 +37,7 @@ MonoBehaviour:
   armorType: 0
   _DEF: 0
   hit: 0
-  dodge: 0
+  flee: 0
   gemSlotAmount: 0
   powerup:
     _ATK_Add: 0

@@ -6,7 +6,17 @@ using UnityEngine;
 public class GatheringInformation : ScriptableObject
 {
     [SerializeField]
-    private string _name;
+    protected string _ID;
+    public string ID
+    {
+        get
+        {
+            return _ID;
+        }
+    }
+
+    [SerializeField]
+    protected string _name;
     public new string name
     {
         get
@@ -19,7 +29,7 @@ public class GatheringInformation : ScriptableObject
 #if UNITY_EDITOR
     [EnumMemberNames("手动", "斧子", "镐子", "铲子", "锄头")]
 #endif
-    private GatherType gatherType;
+    protected GatherType gatherType;
     public GatherType GatherType
     {
         get
@@ -29,7 +39,7 @@ public class GatheringInformation : ScriptableObject
     }
 
     [SerializeField]
-    private float gatherTime;
+    protected float gatherTime;
     public float GatherTime
     {
         get
@@ -39,7 +49,7 @@ public class GatheringInformation : ScriptableObject
     }
 
     [SerializeField]
-    private float refreshTime;
+    protected float refreshTime;
     public float RefreshTime
     {
         get
@@ -49,7 +59,7 @@ public class GatheringInformation : ScriptableObject
     }
 
     [SerializeField]
-    private List<DropItemInfo> productItems = new List<DropItemInfo>();
+    protected List<DropItemInfo> productItems = new List<DropItemInfo>();
     public List<DropItemInfo> ProductItems
     {
         get
@@ -67,7 +77,6 @@ public class GatheringInformation : ScriptableObject
             return lootPrefab;
         }
     }
-
 }
 public enum GatherType
 {

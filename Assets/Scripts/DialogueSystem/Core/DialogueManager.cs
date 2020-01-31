@@ -213,7 +213,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         {
             if (BackpackManager.Instance.TryLoseItem_Boolean(option.ItemToSubmit))
             {
-                if (option.ItemCanGet && option.ItemCanGet.item)
+                if (option.ItemCanGet && option.ItemCanGet.item)//若可获得物品
                 {
                     BackpackManager.Instance.MBackpack.weightLoad -= option.ItemToSubmit.item.Weight * option.ItemToSubmit.Amount;
                     int leftAmount = BackpackManager.Instance.GetItemAmount(option.ItemToSubmit.item) - option.ItemToSubmit.Amount;
@@ -222,6 +222,8 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
                     {
                         BackpackManager.Instance.MBackpack.weightLoad += option.ItemToSubmit.item.Weight * option.ItemToSubmit.Amount;
                         if (leftAmount == 0) BackpackManager.Instance.MBackpack.backpackSize++;
+                        wordsOptionInstances.Pop();
+                        currentOption = null;
                         return;
                     }
                     else
@@ -234,11 +236,21 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
                 }
                 else BackpackManager.Instance.LoseItem(option.ItemToSubmit.item, option.ItemToSubmit.Amount);
             }
-            else return;
+            else
+            {
+                wordsOptionInstances.Pop();
+                currentOption = null;
+                return;
+            }
         }
         if (option.OptionType == WordsOptionType.OnlyGet && option.IsValid)
         {
-            if (!BackpackManager.Instance.TryGetItem_Boolean(option.ItemCanGet)) return;
+            if (!BackpackManager.Instance.TryGetItem_Boolean(option.ItemCanGet))
+            {
+                wordsOptionInstances.Pop();
+                currentOption = null;
+                return;
+            }
             else BackpackManager.Instance.GetItem(option.ItemCanGet);
         }
         if (option.OptionType == WordsOptionType.Choice && (!option.HasWordsToSay || option.HasWordsToSay && string.IsNullOrEmpty(option.Words)))
@@ -253,7 +265,8 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
             TalkerInformation talkerInfo = null;
             if (optionInstance.runtimeWordsParentIndex > -1 && optionInstance.runtimeWordsParentIndex < currentDialog.Words.Count)
                 talkerInfo = currentDialog.Words[optionInstance.runtimeWordsParentIndex].TalkerInfo;
-            if (option.GoBack) StartOneWords(new DialogueWords(talkerInfo, optionInstance.Words, optionInstance.TalkerType), currentDialog, optionInstance.runtimeIndexToGoBack);
+            if (option.GoBack)
+                StartOneWords(new DialogueWords(talkerInfo, optionInstance.Words, optionInstance.TalkerType), currentDialog, optionInstance.runtimeIndexToGoBack);
             else StartOneWords(new DialogueWords(talkerInfo, optionInstance.Words, optionInstance.TalkerType));
             SayNextWords();
         }
@@ -370,7 +383,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     private void MakeTalkerCmpltQuestOption()
     {
         if (!CurrentTalker.Info.IsQuestGiver) return;
-        ClearOptions(OptionType.Branch);
+        ClearOptions(OptionType.Option);
         foreach (Quest quest in CurrentTalker.QuestInstances)
         {
             if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.IsComplete)
@@ -393,7 +406,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     private void MakeTalkerObjectiveOption()
     {
         int index = 1;
-        ClearOptions(OptionType.Quest, OptionType.Branch);
+        ClearOptions(OptionType.Quest, OptionType.Option);
         foreach (TalkObjective to in CurrentTalker.Data.objectivesTalkToThis)
         {
             if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
@@ -630,7 +643,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
             bool submitAble = true;
             if (parent.CmpltObjctvInOrder)
                 foreach (var o in parent.ObjectiveInstances)
-                    if (o is CollectObjective)
+                    if (o is CollectObjective && (o as CollectObjective).LoseItemAtSbmt)
                         if (o.InOrder && o.IsComplete)
                             if (amount - currentSubmitObj.Amount < o.Amount)
                             {

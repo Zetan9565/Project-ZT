@@ -66,8 +66,8 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
     {
         if (MShop == null || info == null || info.IsInvalid) return;
         if (!MShop.Commodities.Contains(info)) return;
-        long maxAmount = info.SOorENAble ? info.LeftAmount : info.SellPrice > 0 ? BackpackManager.Instance.MBackpack.Money / info.SellPrice : 999;
-        if (info.LeftAmount == 1 && info.SOorENAble)
+        long maxAmount = info.EmptyAble ? info.LeftAmount : info.SellPrice > 0 ? BackpackManager.Instance.MBackpack.Money / info.SellPrice : 999;
+        if (info.LeftAmount == 1 && info.EmptyAble)
         {
             ConfirmManager.Instance.NewConfirm(string.Format("确定购买1个 [{0}] 吗？", info.Item.name), delegate
             {
@@ -98,7 +98,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         if (MShop == null || info == null || info.IsInvalid || amount < 1) return false;
         if (!MShop.Commodities.Contains(info)) return false;
         if (!BackpackManager.Instance.TryGetItem_Boolean(info.Item, amount)) return false;
-        if (info.SOorENAble && amount > info.LeftAmount)
+        if (info.EmptyAble && amount > info.LeftAmount)
         {
             if (!info.IsSoldOut) MessageManager.Instance.NewMessage("该商品数量不足");
             else MessageManager.Instance.NewMessage("该商品暂时缺货");
@@ -108,7 +108,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
             return false;
         BackpackManager.Instance.LoseMoney(amount * info.SellPrice);
         BackpackManager.Instance.GetItem(info.Item, amount);
-        if (info.SOorENAble) info.LeftAmount -= amount;
+        if (info.EmptyAble) info.LeftAmount -= amount;
         MerchandiseAgent ma = GetMerchandiseAgentByInfo(info);
         if (ma) ma.UpdateInfo();
         return true;
@@ -119,8 +119,8 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         if (MShop == null || info == null || info.IsInvalid) return;
         if (!MShop.Acquisitions.Contains(info)) return;
         int backpackAmount = BackpackManager.Instance.GetItemAmount(info.Item);
-        int maxAmount = info.SOorENAble ? (info.LeftAmount > backpackAmount ? backpackAmount : info.LeftAmount) : backpackAmount;
-        if (info.LeftAmount == 1)
+        int maxAmount = info.EmptyAble ? (info.LeftAmount > backpackAmount ? backpackAmount : info.LeftAmount) : backpackAmount;
+        if (info.LeftAmount == 1 && info.EmptyAble)
         {
             ConfirmManager.Instance.NewConfirm(string.Format("确定出售1个 [{0}] 吗？", info.Item.name), delegate
             {
@@ -128,7 +128,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
                     MessageManager.Instance.NewMessage(string.Format("出售了1个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
             });
         }
-        else if (info.IsEnough)
+        else if (info.IsEmpty)
         {
             ConfirmManager.Instance.NewConfirm("这种物品暂无特价收购需求，确定按原价出售吗？", delegate
             {
@@ -201,9 +201,9 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
             MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这种物品");
             return false;
         }
-        if (info.SOorENAble && amount > info.LeftAmount)
+        if (info.EmptyAble && amount > info.LeftAmount)
         {
-            if (!info.IsEnough) MessageManager.Instance.NewMessage("不收够这么多的这种物品");
+            if (!info.IsEmpty) MessageManager.Instance.NewMessage("不收够这么多的这种物品");
             else MessageManager.Instance.NewMessage("这种物品暂无收购需求");
             return false;
         }
@@ -211,7 +211,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         if (!BackpackManager.Instance.TryLoseItem_Boolean(item, amount)) return false;
         BackpackManager.Instance.GetMoney(amount * info.PurchasePrice);
         BackpackManager.Instance.LoseItem(item, amount);
-        if (info.SOorENAble) info.LeftAmount -= amount;
+        if (info.EmptyAble) info.LeftAmount -= amount;
         MerchandiseAgent ma = GetMerchandiseAgentByInfo(info);
         if (ma) ma.UpdateInfo();
         return true;
@@ -219,7 +219,8 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
 
     bool OnPurchase(ItemInfo info, int amount = 1)
     {
-        if (MShop == null || info == null || !info.item || amount < 1) return false;
+        if (MShop == null || info == null || !info.item || amount < 1)
+            return false;
         MItemInfo = null;
         if (!info.item.SellAble)
         {

@@ -70,7 +70,7 @@ public class OptionAgent : MonoBehaviour
             if (branch.IsValid)
                 titleText.text += string.Format("(需[{0}]{1}个)", branch.ItemToSubmit.ItemName, branch.ItemToSubmit.Amount);
         }
-        OptionType = OptionType.Branch;
+        OptionType = OptionType.Option;
         BranchDialogue = branch;
     }
 
@@ -99,7 +99,7 @@ public class OptionAgent : MonoBehaviour
             case OptionType.Continue:
                 DialogueManager.Instance.SayNextWords();
                 break;
-            case OptionType.Branch:
+            case OptionType.Option:
                 DialogueManager.Instance.StartOptionDialogue(BranchDialogue);
                 break;
             default:
@@ -126,5 +126,5 @@ public enum OptionType
     Confirm,
     Back,
     Continue,
-    Branch
+    Option
 }

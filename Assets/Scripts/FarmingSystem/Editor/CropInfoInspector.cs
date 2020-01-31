@@ -11,17 +11,16 @@ public class CropInfoInspector : Editor
     CropInformation crop;
 
     SerializedProperty _ID;
-    SerializedProperty gatheringInfo;
+    SerializedProperty _name;
+    SerializedProperty cropType;
     SerializedProperty plantSeason;
-    SerializedProperty growthTime;
-    SerializedProperty timeUnit;
-    SerializedProperty repeatTimes;
-    SerializedProperty repeatStage;
     SerializedProperty stages;
 
     ReorderableList stageList;
     float lineHeight;
     float lineHeightSpace;
+
+    Dictionary<CropStage, ReorderableList> productItemsLists = new Dictionary<CropStage, ReorderableList>();
 
     private void OnEnable()
     {
@@ -31,12 +30,9 @@ public class CropInfoInspector : Editor
         crop = target as CropInformation;
 
         _ID = serializedObject.FindProperty("_ID");
-        gatheringInfo = serializedObject.FindProperty("gatheringInfo");
+        _name = serializedObject.FindProperty("_name");
+        cropType = serializedObject.FindProperty("cropType");
         plantSeason = serializedObject.FindProperty("plantSeason");
-        growthTime = serializedObject.FindProperty("growthTime");
-        timeUnit = serializedObject.FindProperty("timeUnit");
-        repeatTimes = serializedObject.FindProperty("repeatTimes");
-        repeatStage = serializedObject.FindProperty("repeatStage");
         stages = serializedObject.FindProperty("stages");
         HandlingStageList();
     }
@@ -58,49 +54,19 @@ public class CropInfoInspector : Editor
                 EditorGUI.FocusTextInControl(null);
             }
         }
-        EditorGUILayout.PropertyField(gatheringInfo, new GUIContent("对应采集物"));
-        if (gatheringInfo.objectReferenceValue)
-        {
-            EditorGUILayout.LabelField("作物名称", (gatheringInfo.objectReferenceValue as GatheringInformation).name);
-        }
+        EditorGUILayout.PropertyField(_name, new GUIContent("作物名称"));
+        EditorGUILayout.PropertyField(cropType, new GUIContent("作物类型"));
         EditorGUILayout.PropertyField(plantSeason, new GUIContent("播种季节"));
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.PropertyField(growthTime, new GUIContent("生长时间"));
-        EditorGUILayout.IntPopup(timeUnit, new GUIContent[] { new GUIContent("游戏日"), new GUIContent("游戏月"), new GUIContent("游戏年") }, new int[] { 2, 3, 5 }, new GUIContent(string.Empty));
-        int dayMult = 1;
-        switch (timeUnit.enumValueIndex)
-        {
-            case (int)TimeUnit.Month:
-                dayMult = 30;
-                break;
-            case (int)TimeUnit.Year:
-                dayMult = 360;
-                break;
-        }
-        if (growthTime.intValue * dayMult < stages.arraySize) growthTime.intValue = stages.arraySize / dayMult;
-        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.LabelField("生长周期", crop.Lifespan + "天");
         EditorGUILayout.PropertyField(stages, new GUIContent("生长阶段"), false);
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         if (stages.isExpanded)
         {
             serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            if (stages.arraySize > 4)
-            {
-                EditorGUILayout.PropertyField(repeatTimes, new GUIContent("可收割次数"));
-                if (repeatTimes.intValue < -1) repeatTimes.intValue = -1;
-                if (repeatTimes.intValue > 1)
-                {
-                    EditorGUILayout.IntSlider(repeatStage.FindPropertyRelative("min"), 0, repeatStage.FindPropertyRelative("max").intValue - 1, new GUIContent("收割后重复阶段"));
-                    EditorGUILayout.IntSlider(repeatStage.FindPropertyRelative("max"), repeatStage.FindPropertyRelative("min").intValue + 1, stages.arraySize - 1, new GUIContent("到阶段"));
-                }
-            }
-            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
-            serializedObject.Update();
             stageList.DoLayoutList();
             serializedObject.ApplyModifiedProperties();
         }
-        if (stages.arraySize >= growthTime.intValue * dayMult) stageList.displayAdd = false;
+        if (stages.arraySize >= 10) stageList.displayAdd = false;
         else stageList.displayAdd = true;
     }
 
@@ -110,108 +76,208 @@ public class CropInfoInspector : Editor
 
         stageList.drawElementCallback = (rect, index, isActive, isFocused) =>
         {
+            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
             SerializedProperty cropStage = stages.GetArrayElementAtIndex(index);
-            SerializedProperty stage = cropStage.FindPropertyRelative("stage");
-            SerializedProperty lifespanPer = cropStage.FindPropertyRelative("lifespanPer");
-            SerializedProperty min = lifespanPer.FindPropertyRelative("min");
-            SerializedProperty max = lifespanPer.FindPropertyRelative("max");
+            SerializedProperty lastingDays = cropStage.FindPropertyRelative("lastingDays");
+            SerializedProperty repeatTimes = cropStage.FindPropertyRelative("repeatTimes");
+            SerializedProperty indexToReturn = cropStage.FindPropertyRelative("indexToReturn");
+            SerializedProperty gatherType = cropStage.FindPropertyRelative("gatherType");
+            SerializedProperty gatherTime = cropStage.FindPropertyRelative("gatherTime");
+            SerializedProperty lootPrefab = cropStage.FindPropertyRelative("lootPrefab");
+            SerializedProperty productItems = cropStage.FindPropertyRelative("productItems");
             SerializedProperty graph = cropStage.FindPropertyRelative("graph");
-            int lineCount = 1;
-            string repeat = string.Empty;
-            if (repeatTimes.intValue > 1 && stages.arraySize > 4)
-            {
-                if (index == repeatStage.FindPropertyRelative("min").intValue) repeat = " ←从此开始";
-                if (index == repeatStage.FindPropertyRelative("max").intValue) repeat = " ←到此重复";
-            }
-            string name = "生长阶段";
-            switch (crop.Stages[index].stage)
+            ReorderableList productItemsList = null;
+            string name = "[阶段" + index + "]";
+            switch (crop.Stages[index].Stage)
             {
                 case CropStages.Seed:
-                    name = "种子期";
+                    name += "种子期";
                     break;
                 case CropStages.Seedling:
-                    name = "幼苗期";
+                    name += "幼苗期";
                     break;
                 case CropStages.Growing:
-                    name = "成长期";
+                    name += "成长期";
                     break;
                 case CropStages.Flowering:
-                    name = "开花期";
+                    name += "开花期";
                     break;
                 case CropStages.Bearing:
-                    name = "结果期";
+                    name += "结果期";
                     break;
                 case CropStages.Maturity:
-                    name = "成熟期";
+                    name += "成熟期";
                     break;
                 case CropStages.OverMature:
-                    name = "过熟期";
+                    name += "过熟期";
                     break;
                 case CropStages.Harvested:
-                    name = "收割期";
+                    name += "收割期";
                     break;
                 case CropStages.Withered:
-                    name = "枯萎期";
+                    name += "枯萎期";
                     break;
                 case CropStages.Decay:
-                    name = "腐朽期";
+                    name += "腐朽期";
                     break;
             }
-            EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2 - 8, lineHeight), cropStage, new GUIContent(name + repeat));
-            EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width - 125, rect.y, 125, lineHeight), index == 0 ? "播种后进入该阶段" : ("第 " + min.intValue + " 天进入该阶段"));
+            EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 4 - 8, lineHeight), cropStage, new GUIContent(name));
+            EditorGUI.LabelField(new Rect(rect.x + rect.width - 166, rect.y, 30, lineHeight), "持续");
+            EditorGUI.PropertyField(new Rect(rect.x + rect.width - 138, rect.y, 26, lineHeight), lastingDays, new GUIContent(string.Empty));
+            if (lastingDays.intValue < 1) lastingDays.intValue = 1;
+            EditorGUI.LabelField(new Rect(rect.x + rect.width - 110, rect.y, 16, lineHeight), "天");
+            EditorGUI.LabelField(new Rect(rect.x + rect.width - 86, rect.y, 40, lineHeight), "可收割");
+            EditorGUI.PropertyField(new Rect(rect.x + rect.width - 46, rect.y, 26, lineHeight), repeatTimes, new GUIContent(string.Empty));
+            if (repeatTimes.intValue < 0) repeatTimes.intValue = 0;
+            EditorGUI.LabelField(new Rect(rect.x + rect.width - 18, rect.y, 16, lineHeight), "次");
+            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+            int lineCount = 1;
             if (cropStage.isExpanded)
             {
-                int from = 1;
-                int dayMult = 1;
-                switch (timeUnit.enumValueIndex)
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                if (repeatTimes.intValue > 1 && index > 0)
                 {
-                    case (int)TimeUnit.Month:
-                        dayMult = 30;
-                        break;
-                    case (int)TimeUnit.Year:
-                        dayMult = 360;
-                        break;
+                    EditorGUI.IntSlider(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight),
+                        indexToReturn, 0, index - 1, new GUIContent("收割后返回阶段"));
+                    lineCount++;
                 }
-                int to = growthTime.intValue * dayMult;
-                if (stages.arraySize > 0)
+                if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+                if (repeatTimes.intValue > 0)
                 {
-                    if (index == 0)
+                    serializedObject.Update();
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight), gatherType, new GUIContent("采集方式"));
+                    lineCount++;
+                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight), gatherTime, new GUIContent("采集耗时"));
+                    lineCount++;
+                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight), lootPrefab, new GUIContent("掉落物预制件"));
+                    lineCount++;
+                    EditorGUI.PropertyField(new Rect(rect.x + 16, rect.y + lineHeightSpace * lineCount, rect.width - 16, lineHeight), productItems,
+                        new GUIContent("产出道具" + (productItems.isExpanded ? string.Empty : ("\t\t" + (productItems.arraySize < 1 ? "无" : "数量:" + productItems.arraySize)))));
+                    lineCount++;
+                    if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+                    if (productItems.isExpanded)
                     {
-                        to = 1;
-                    }
-                    if (stages.arraySize > 1)
-                    {
-                        if (index == 0)
+                        productItemsLists.TryGetValue(crop.Stages[index], out productItemsList);
+                        if (productItemsList == null)
                         {
-                            to = stages.GetArrayElementAtIndex(index + 1).FindPropertyRelative("lifespanPer").FindPropertyRelative("min").intValue - 1;
+                            productItemsList = new ReorderableList(cropStage.serializedObject, productItems, true, true, true, true);
+                            productItemsLists.Add(crop.Stages[index], productItemsList);
+
+                            productItemsList.drawElementCallback = (_rect, _index, _isActive, _isForcus) =>
+                            {
+                                cropStage.serializedObject.Update();
+                                SerializedProperty itemInfo = productItems.GetArrayElementAtIndex(_index);
+                                var productItem = crop.Stages[index].ProductItems[_index];
+                                if (productItem != null && productItem.Item != null)
+                                    EditorGUI.PropertyField(new Rect(_rect.x + 8, _rect.y, _rect.width / 2, lineHeight), itemInfo, new GUIContent(productItem.ItemName));
+                                else
+                                    EditorGUI.PropertyField(new Rect(_rect.x + 8, _rect.y, _rect.width / 2, lineHeight), itemInfo, new GUIContent("(空)"));
+                                EditorGUI.BeginChangeCheck();
+                                SerializedProperty item = itemInfo.FindPropertyRelative("item");
+                                SerializedProperty amount = itemInfo.FindPropertyRelative("amount");
+                                SerializedProperty dropRate = itemInfo.FindPropertyRelative("dropRate");
+                                SerializedProperty onlyDropForQuest = itemInfo.FindPropertyRelative("onlyDropForQuest");
+                                SerializedProperty binedQuest = itemInfo.FindPropertyRelative("bindedQuest");
+                                EditorGUI.PropertyField(new Rect(_rect.x + _rect.width / 2f, _rect.y, _rect.width / 2f, lineHeight),
+                                    item, new GUIContent(string.Empty));
+                                if (itemInfo.isExpanded)
+                                {
+                                    int _lineCount = 1;
+                                    EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                        amount, new GUIContent("最大掉落数量"));
+                                    if (amount.intValue < 1) amount.intValue = 1;
+                                    _lineCount++;
+                                    EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                        dropRate, new GUIContent("掉落概率百分比"));
+                                    if (dropRate.floatValue < 0) dropRate.floatValue = 0.0f;
+                                    _lineCount++;
+                                    EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                        onlyDropForQuest, new GUIContent("只在进行任务时产出"));
+                                    _lineCount++;
+                                    if (onlyDropForQuest.boolValue)
+                                    {
+                                        EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                            binedQuest, new GUIContent("相关任务"));
+                                        _lineCount++;
+                                        if (binedQuest.objectReferenceValue)
+                                        {
+                                            EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight), "任务名称",
+                                                (binedQuest.objectReferenceValue as Quest).Title);
+                                            _lineCount++;
+                                        }
+                                    }
+                                }
+                                if (EditorGUI.EndChangeCheck())
+                                    cropStage.serializedObject.ApplyModifiedProperties();
+                            };
+
+                            productItemsList.elementHeightCallback = (int _index) =>
+                            {
+                                int _lineCount = 1;
+                                if (productItems.GetArrayElementAtIndex(_index).isExpanded)
+                                {
+                                    _lineCount += 3;//数量、百分比、只在
+                                    if (crop.Stages[index].ProductItems[_index].OnlyDropForQuest)
+                                    {
+                                        _lineCount++;//任务
+                                        if (crop.Stages[index].ProductItems[_index].BindedQuest)
+                                            _lineCount++;//任务标题
+                                    }
+                                }
+                                return _lineCount * lineHeightSpace;
+                            };
+
+                            productItemsList.onAddCallback = (_list) =>
+                            {
+                                cropStage.serializedObject.Update();
+                                EditorGUI.BeginChangeCheck();
+                                crop.Stages[index].ProductItems.Add(new DropItemInfo() { Amount = 1, DropRate = 100.0f });
+                                if (EditorGUI.EndChangeCheck())
+                                    cropStage.serializedObject.ApplyModifiedProperties();
+                            };
+
+                            productItemsList.onRemoveCallback = (_list) =>
+                            {
+                                cropStage.serializedObject.Update();
+                                EditorGUI.BeginChangeCheck();
+                                if (EditorUtility.DisplayDialog("删除", "确定删除这个产出道具吗？", "确定", "取消"))
+                                {
+                                    crop.Stages[index].ProductItems.RemoveAt(_list.index);
+                                }
+                                if (EditorGUI.EndChangeCheck())
+                                    cropStage.serializedObject.ApplyModifiedProperties();
+                            };
+
+                            productItemsList.drawHeaderCallback = (_rect) =>
+                            {
+                                int notCmpltCount = crop.Stages[index].ProductItems.FindAll(x => !x.Item).Count;
+                                EditorGUI.LabelField(_rect, "产出道具列表", "数量:" + crop.Stages[index].ProductItems.Count + (notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty));
+                            };
+
+                            productItemsList.drawNoneElementCallback = (_rect) =>
+                            {
+                                EditorGUI.LabelField(_rect, "空列表");
+                            };
                         }
-                        else if (index == stages.arraySize - 1)
-                        {
-                            from = stages.GetArrayElementAtIndex(index - 1).FindPropertyRelative("lifespanPer").FindPropertyRelative("min").intValue + 1;
-                        }
-                        else if (index > 0 && index < stages.arraySize - 1)
-                        {
-                            from = stages.GetArrayElementAtIndex(index - 1).FindPropertyRelative("lifespanPer").FindPropertyRelative("min").intValue + 1;
-                            to = stages.GetArrayElementAtIndex(index + 1).FindPropertyRelative("lifespanPer").FindPropertyRelative("min").intValue - 1;
-                        }
+                        cropStage.serializedObject.Update();
+                        productItemsList.DoList(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight * (productItems.arraySize + 1)));
+                        cropStage.serializedObject.ApplyModifiedProperties();
                     }
                 }
-                max.intValue = to;
-                EditorGUI.LabelField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, 16, lineHeight), new GUIContent("第"));
-                EditorGUI.IntSlider(new Rect(rect.x + 24, rect.y + lineHeightSpace * lineCount, rect.width - 106, lineHeight),
-                    min, from, to, new GUIContent(string.Empty));
-                EditorGUI.LabelField(new Rect(rect.x + 24 + rect.width - 106, rect.y + lineHeightSpace * lineCount, 80, lineHeight),
-                    "天起到第" + (max.intValue + 1) + "天前");
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + (productItemsList == null ? 0 : productItemsList.GetHeight()) + lineHeightSpace * lineCount, rect.width - 8, lineHeight),
+                    graph, new GUIContent("此阶段模型"));
                 lineCount++;
-                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight), stage, new GUIContent("数值对应阶段"));
-                lineCount++;
-                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight), graph, new GUIContent("阶段图形"));
-                lineCount++;
+                if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             }
             if (graph.objectReferenceValue)
             {
                 GUI.enabled = false;
-                EditorGUI.ObjectField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, lineHeight * 4f - 8, lineHeight * 4f),
+                EditorGUI.ObjectField(new Rect(rect.x + 8, rect.y + (productItemsList == null ? 0 : productItemsList.GetHeight()) + lineHeightSpace * lineCount, lineHeight * 4f - 8, lineHeight * 4f),
                     new GUIContent(string.Empty), graph.objectReferenceValue as Sprite, typeof(Texture2D), false);
                 GUI.enabled = true;
             }
@@ -219,27 +285,76 @@ public class CropInfoInspector : Editor
 
         stageList.elementHeightCallback = (index) =>
         {
-            float lineMultiples = 1;
+            int lineCount = 1;
+            float listHeight = 0;
             SerializedProperty cropStage = stages.GetArrayElementAtIndex(index);
+            SerializedProperty productItems = cropStage.FindPropertyRelative("productItems");
             if (cropStage.isExpanded)
             {
-                lineMultiples += 3;
+                lineCount++;
+                if (cropStage.FindPropertyRelative("repeatTimes").intValue > 1 && index > 0) lineCount++;
+                if (cropStage.FindPropertyRelative("repeatTimes").intValue > 0)
+                {
+                    lineCount += 4;
+                    if (productItems.isExpanded)
+                        if (productItemsLists.TryGetValue(crop.Stages[index], out var productItemList))
+                            listHeight += productItemList.GetHeight();
+                }
             }
             if (cropStage.FindPropertyRelative("graph").objectReferenceValue)
-                lineMultiples += 3f;
-            return lineHeightSpace * lineMultiples;
+                lineCount += 3;
+            return lineHeightSpace * lineCount + listHeight;
         };
 
-        stageList.onAddCallback = (list) =>
+        stageList.onRemoveCallback = (list) =>
         {
-            serializedObject.Update();
-            if (stages.arraySize == 0)
+            if (crop.Stages.Count < 10)
             {
-                crop.Stages.Add(new CropStage());
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                if (EditorUtility.DisplayDialog("删除", "确定删除这个阶段吗？", "确定", "取消"))
+                    serializedObject.FindProperty("stages").DeleteArrayElementAtIndex(list.index);
+                if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             }
-            else if (stages.arraySize > 0)
+        };
+
+        stageList.onAddDropdownCallback = (_rect, _list) =>
+        {
+            GenericMenu menu = new GenericMenu();
+            if (!crop.Stages.Exists(s => s.Stage == CropStages.Seed)) menu.AddItem(new GUIContent("种子期"), false, OnAddOption, CropStages.Seed);
+            if (!crop.Stages.Exists(s => s.Stage == CropStages.Seedling)) menu.AddItem(new GUIContent("幼苗期"), false, OnAddOption, CropStages.Seedling);
+            if (!crop.Stages.Exists(s => s.Stage == CropStages.Growing)) menu.AddItem(new GUIContent("成长期"), false, OnAddOption, CropStages.Growing);
+            if (!crop.Stages.Exists(s => s.Stage == CropStages.Flowering)) menu.AddItem(new GUIContent("开花期"), false, OnAddOption, CropStages.Flowering);
+            if (!crop.Stages.Exists(s => s.Stage == CropStages.Bearing)) menu.AddItem(new GUIContent("结果期"), false, OnAddOption, CropStages.Bearing);
+            if (!crop.Stages.Exists(s => s.Stage == CropStages.Maturity)) menu.AddItem(new GUIContent("成熟期"), false, OnAddOption, CropStages.Maturity);
+            if (!crop.Stages.Exists(s => s.Stage == CropStages.OverMature)) menu.AddItem(new GUIContent("过熟期"), false, OnAddOption, CropStages.OverMature);
+            if (!crop.Stages.Exists(s => s.Stage == CropStages.Harvested)) menu.AddItem(new GUIContent("收割期"), false, OnAddOption, CropStages.Harvested);
+            if (!crop.Stages.Exists(s => s.Stage == CropStages.Withered)) menu.AddItem(new GUIContent("枯萎期"), false, OnAddOption, CropStages.Withered);
+            if (!crop.Stages.Exists(s => s.Stage == CropStages.Decay)) menu.AddItem(new GUIContent("腐朽期"), false, OnAddOption, CropStages.Decay);
+            menu.DropDown(_rect);
+
+            void OnAddOption(object data)
             {
-                crop.Stages.Add(new CropStage(stages.GetArrayElementAtIndex(stages.arraySize - 1).FindPropertyRelative("lifespanPer").FindPropertyRelative("min").intValue + 1));
+                var cropStage = (CropStages)data;
+                crop.Stages.Add(new CropStage(1, cropStage));
+                Dictionary<CropStage, CropStage> returnStages = new Dictionary<CropStage, CropStage>();
+                for (int i = 0; i < crop.Stages.Count; i++)
+                    returnStages.Add(crop.Stages[i], crop.Stages[crop.Stages[i].IndexToReturn]);
+                crop.Stages.Sort((x, y) =>
+                {
+                    if (x.Stage < y.Stage) return -1;
+                    else if (x.Stage > y.Stage) return 1;
+                    else return 0;
+                });
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                foreach (var returnStage in returnStages)
+                {
+                    SerializedProperty stage = stages.GetArrayElementAtIndex(crop.Stages.IndexOf(returnStage.Key));
+                    stage.FindPropertyRelative("indexToReturn").intValue = crop.Stages.IndexOf(returnStage.Value);
+                }
+                if (EditorGUI.EndChangeCheck())
+                    serializedObject.ApplyModifiedProperties();
             }
         };
 

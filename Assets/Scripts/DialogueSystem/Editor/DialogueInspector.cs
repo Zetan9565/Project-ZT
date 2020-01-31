@@ -467,18 +467,11 @@ public class DialogueInspector : Editor
                                 int type = (int)data;
                                 options.serializedObject.Update();
                                 EditorGUI.BeginChangeCheck();
-                                if (_list.index >= 0 && _list.index < dialogue.Words[index].Options.Count)
-                                {
-                                    if (type == (int)WordsOptionType.Choice && index == dialogWords.arraySize - 1)
-                                        EditorUtility.DisplayDialog("选项类型错误", "最后一句不支持选择型选项。", "确定");
-                                    else dialogue.Words[index].Options.Insert(_list.index, new WordsOption((WordsOptionType)type));
-                                }
-                                else
-                                {
-                                    if (type == (int)WordsOptionType.Choice && index == dialogWords.arraySize - 1)
-                                        EditorUtility.DisplayDialog("选项类型错误", "最后一句不支持选择型选项。", "确定");
-                                    else dialogue.Words[index].Options.Add(new WordsOption((WordsOptionType)type));
-                                }
+                                if (type == (int)WordsOptionType.Choice && index == dialogWords.arraySize - 1)
+                                    EditorUtility.DisplayDialog("选项类型错误", "最后一句不支持选择型选项。", "确定");
+                                else if (_list.index >= 0 && _list.index + 1 < dialogue.Words[index].Options.Count)
+                                    dialogue.Words[index].Options.Insert(_list.index + 1, new WordsOption((WordsOptionType)type));
+                                else dialogue.Words[index].Options.Add(new WordsOption((WordsOptionType)type));
                                 if (EditorGUI.EndChangeCheck())
                                     options.serializedObject.ApplyModifiedProperties();
                             }
@@ -620,7 +613,7 @@ public class DialogueInspector : Editor
         wordsList.elementHeightCallback = (int index) =>
         {
             int lineCount = 1;
-            float totalListHeight = 0.0f;
+            float listHeight = 0.0f;
             SerializedProperty words = dialogWords.GetArrayElementAtIndex(index);
             SerializedProperty options = words.FindPropertyRelative("branches");
             SerializedProperty events = words.FindPropertyRelative("events");
@@ -639,26 +632,26 @@ public class DialogueInspector : Editor
                                 lineCount += 2;//说的话、说的话填写
                         }
                     if (wordsOptionsLists.TryGetValue(dialogue.Words[index], out var optionList))
-                        totalListHeight += optionList.GetHeight();
+                        listHeight += optionList.GetHeight();
                 }
                 lineCount++;//选项
                 if (events.isExpanded)
                 {
                     if (wordsEventsLists.TryGetValue(dialogue.Words[index], out var triggersList))
-                        totalListHeight += triggersList.GetHeight();
+                        listHeight += triggersList.GetHeight();
                 }
-                totalListHeight -= 8;
+                listHeight -= 8;
             }
             else lineCount++;
-            return lineCount * lineHeightSpace + totalListHeight;
+            return lineCount * lineHeightSpace + listHeight;
         };
 
         wordsList.onAddCallback = (list) =>
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            if (list.index >= 0 && list.index < dialogue.Words.Count)
-                dialogue.Words.Insert(list.index, new DialogueWords());
+            if (list.index >= 0 && list.index + 1 < dialogue.Words.Count)
+                dialogue.Words.Insert(list.index + 1, new DialogueWords());
             else dialogue.Words.Add(new DialogueWords());
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();

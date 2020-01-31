@@ -9,6 +9,10 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
     [SerializeField]
     private LootUI UI;
 
+    [SerializeField]
+    private LootAgent defaultLootPrefab;
+    public static LootAgent DefaultLootPrefab => Instance.defaultLootPrefab;
+
     private List<ItemAgent> itemAgents = new List<ItemAgent>();
 
     public LootAgent LootAgent { get; private set; }

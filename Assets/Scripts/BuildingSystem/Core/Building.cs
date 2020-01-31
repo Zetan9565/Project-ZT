@@ -141,9 +141,9 @@ public class Building : MonoBehaviour
     {
         Building[] buildings = FindObjectsOfType<Building>();
         IDTail = string.Empty;
-        for (int i = 1; i < 100000; i++)
+        for (int i = 1; i < 1000; i++)
         {
-            IDTail = i.ToString().PadLeft(5, '0');
+            IDTail = i.ToString().PadLeft(3, '0');
             string newID = IDStarter + IDTail;
             if (!Array.Exists(buildings, x => x.ID == newID && x != this))
                 break;
@@ -153,7 +153,7 @@ public class Building : MonoBehaviour
     #region MonoBehaviour
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Player" && IsBuilt)
+        if (collision.CompareTag("Player") && IsBuilt)
         {
             BuildingManager.Instance.CanDestroy(this);
         }
@@ -161,7 +161,7 @@ public class Building : MonoBehaviour
 
     protected virtual void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.tag == "Player" && IsBuilt)
+        if (collision.CompareTag("Player") && IsBuilt)
         {
             BuildingManager.Instance.CanDestroy(this);
         }
@@ -169,7 +169,7 @@ public class Building : MonoBehaviour
 
     protected virtual void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.tag == "Player" && IsBuilt && BuildingManager.Instance.ToDestroy == this)
+        if (collision.CompareTag("Player") && IsBuilt && BuildingManager.Instance.ToDestroy == this)
         {
             BuildingManager.Instance.CannotDestroy();
         }

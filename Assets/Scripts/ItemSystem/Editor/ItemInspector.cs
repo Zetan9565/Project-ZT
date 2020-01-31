@@ -166,7 +166,7 @@ public class ItemInspector : Editor
         EditorGUILayout.Space();
         if (box)
         {
-            EditorGUILayout.PropertyField(boxItems, new GUIContent("盒内道具\t\t" + (boxItems.arraySize > 0 ? "数量：" + boxItems.arraySize : "无")));
+            EditorGUILayout.PropertyField(boxItems, new GUIContent("盒内道具\t\t" + (boxItems.arraySize > 0 ? "数量：" + boxItems.arraySize : "无")), false);
             if (boxItems.isExpanded)
             {
                 EditorGUILayout.HelpBox("目前只设计8个容量。", MessageType.Info);

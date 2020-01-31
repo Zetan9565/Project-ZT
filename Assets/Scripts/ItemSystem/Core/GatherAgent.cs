@@ -6,13 +6,7 @@ public class GatherAgent : MonoBehaviour
 {
     [SerializeField]
     protected GatheringInformation gatheringInfo;
-    public GatheringInformation GatheringInfo
-    {
-        get
-        {
-            return gatheringInfo;
-        }
-    }
+    public GatheringInformation GatheringInfo => gatheringInfo;
 
     private bool gatherAble = true;
     public bool GatherAble

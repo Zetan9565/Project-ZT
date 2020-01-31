@@ -10,7 +10,7 @@ public class MessageManager : SingletonMonoBehaviour<MessageManager>
     private UnityEngine.UI.VerticalLayoutGroup messageRoot;
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("消息预制体")]
+    [DisplayName("消息预制件")]
 #endif
     private GameObject messagePrefab;
 

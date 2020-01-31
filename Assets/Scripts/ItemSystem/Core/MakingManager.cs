@@ -228,6 +228,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
 
     public void CannotMake()
     {
+        CurrentTool = null;
         UIManager.Instance.EnableInteractive(false);
     }
 

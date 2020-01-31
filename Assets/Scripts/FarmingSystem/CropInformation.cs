@@ -7,23 +7,18 @@ public class CropInformation : ScriptableObject
 {
     [SerializeField]
     private string _ID;
-    public string ID
-    {
-        get
-        {
-            return _ID;
-        }
-    }
+    public string ID => _ID;
 
     [SerializeField]
-    private GatheringInformation gatheringInfo;
-    public GatheringInformation GatheringInfo
-    {
-        get
-        {
-            return gatheringInfo;
-        }
-    }
+    private string _name;
+    public new string name => _name;
+
+    [SerializeField]
+#if UNITY_EDITOR
+    [EnumMemberNames("未定义", "蔬菜", "水果", "材木")]
+#endif
+    private CropType cropType;
+    public CropType CropType => cropType;
 
     [SerializeField]
 #if UNITY_EDITOR
@@ -38,61 +33,26 @@ public class CropInformation : ScriptableObject
         }
     }
 
-    [SerializeField]
-    private int growthTime = 7;
-    public int GrowthTime
+    public int Lifespan
     {
         get
         {
-            return growthTime;
-        }
-    }
-
-    [SerializeField]
-    private TimeUnit timeUnit = TimeUnit.Day;
-    public TimeUnit TimeUnit
-    {
-        get
-        {
-            return timeUnit;
-        }
-    }
-
-    public bool CanRepeat
-    {
-        get
-        {
-            return repeatTimes > 1 && stages.Count > 4;
-        }
-    }
-
-    [SerializeField]
-    private int repeatTimes = 2;
-    public int RepeatTimes
-    {
-        get
-        {
-            return repeatTimes;
-        }
-    }
-
-    [SerializeField]
-    private ScopeInt repeatStage = new ScopeInt(1, 2);
-    public ScopeInt RepeatStage
-    {
-        get
-        {
-            return repeatStage;
+            int value = 0;
+            for (int i = 0; i < stages.Count; i++)
+            {
+                value += stages[i].LastingDays;
+            }
+            return value;
         }
     }
 
     [SerializeField]
     private List<CropStage> stages = new List<CropStage>()
     {
-        new CropStage() { stage = CropStages.Seed },
-        new CropStage(2) { stage = CropStages.Growing },
-        new CropStage(6) { stage = CropStages.Maturity },
-        new CropStage(7) { stage = CropStages.Withered },
+        new CropStage(1, CropStages.Seed ),
+        new CropStage(3, CropStages.Growing),
+        new CropStage(2, CropStages.Maturity),
+        new CropStage(1, CropStages.Withered),
     };
     public List<CropStage> Stages
     {
@@ -106,7 +66,7 @@ public class CropInformation : ScriptableObject
     {
         get
         {
-            return Stages.Count > 0 && GatheringInfo && !Stages.Exists(x => !x.graph);
+            return Stages.Count > 0 && !Stages.Exists(x => !x.graph);
         }
     }
 }
@@ -122,29 +82,69 @@ public enum CropSeason
     Winter,
     WinterAndSpring
 }
-
+public enum CropType
+{
+    Undefined,
+    Vegetable,
+    Fruit,
+    Tree
+}
 [System.Serializable]
 public class CropStage
 {
 #if UNITY_EDITOR
     [EnumMemberNames("种子期", "幼苗期", "成长期", "开花期", "结果期", "成熟期", "过熟期", "收割期", "枯萎期", "腐朽期")]
 #endif
-    public CropStages stage;
     [SerializeField]
-    private ScopeInt lifespanPer;
-    public ScopeFloat LifespanPer
-    {
-        get
-        {
-            return lifespanPer * 0.01f;
-        }
-    }
+    private CropStages stage;
+    public CropStages Stage => stage;
+
+    [SerializeField]
+    private int lastingDays = 1;
+    public int LastingDays => lastingDays;
 
     public Sprite graph;
 
-    public CropStage(int from = 0, int to = 100)
+    [SerializeField]
+#if UNITY_EDITOR
+    [EnumMemberNames("手动", "斧子", "镐子", "铲子", "锄头")]
+#endif
+    protected GatherType gatherType;
+    public GatherType GatherType => gatherType;
+
+    [SerializeField]
+    protected float gatherTime;
+    public float GatherTime => gatherTime;
+
+    [SerializeField]
+    private GameObject lootPrefab;
+    public GameObject LootPrefab => lootPrefab;
+
+    public bool HarvestAble => productItems.Count > 0 && repeatTimes > 0;
+    public bool RepeatAble
     {
-        lifespanPer = new ScopeInt(from, to);
+        get
+        {
+            return repeatTimes > 1;
+        }
+    }
+
+    [SerializeField]
+    private int repeatTimes = 1;
+    public int RepeatTimes => repeatTimes;
+
+    [SerializeField]
+    private int indexToReturn;
+    public int IndexToReturn => indexToReturn;
+
+    [SerializeField]
+    protected List<DropItemInfo> productItems = new List<DropItemInfo>();
+    public List<DropItemInfo> ProductItems => productItems;
+
+    public CropStage(int lastingDays, CropStages stage)
+    {
+        this.lastingDays = lastingDays;
+        this.stage = stage;
     }
 
     public static implicit operator bool(CropStage self)
@@ -152,17 +152,46 @@ public class CropStage
         return self != null;
     }
 }
-
 public enum CropStages
 {
-    Seed,//种子期
-    Seedling,//幼苗期
-    Growing,//成长期
-    Flowering,//开花期
-    Bearing,//结果期
-    Maturity,//成熟期
-    OverMature,//过熟期
-    Harvested,//收割期
-    Withered,//枯萎期
-    Decay//腐朽期
+    /// <summary>
+    /// 种子期
+    /// </summary>
+    Seed,
+    /// <summary>
+    /// 幼苗期
+    /// </summary>
+    Seedling,
+    /// <summary>
+    /// 成长期
+    /// </summary>
+    Growing,
+    /// <summary>
+    /// 开花期
+    /// </summary>
+    Flowering,
+    /// <summary>
+    /// 结果期
+    /// </summary>
+    Bearing,
+    /// <summary>
+    /// 成熟期
+    /// </summary>
+    Maturity,
+    /// <summary>
+    /// 过熟期
+    /// </summary>
+    OverMature,
+    /// <summary>
+    /// 收割期
+    /// </summary>
+    Harvested,
+    /// <summary>
+    /// 枯萎期
+    /// </summary>
+    Withered,
+    /// <summary>
+    /// 腐朽期
+    /// </summary>
+    Decay
 }

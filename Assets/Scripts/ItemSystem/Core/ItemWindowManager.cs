@@ -191,7 +191,7 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
 #if UNITY_ANDROID
                 ZetanUtil.SetActive(UI.buttonsArea, true);
                 ZetanUtil.SetActive(UI.discardButton.gameObject, false);
-                ZetanUtil.SetActive(UI.mulFunButton.gameObject, true);
+                ZetanUtil.SetActive(UI.mulFunButton.gameObject, BackpackManager.Instance.GetItemAmount(MItemInfo.ItemID) > 0);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(SellOrPurchaseCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "出售";

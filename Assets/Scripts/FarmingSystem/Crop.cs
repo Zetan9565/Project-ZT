@@ -2,82 +2,87 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Crop : GatherAgent
+[AddComponentMenu("ZetanStudio/农牧/农作物")]
+public class Crop : MonoBehaviour
 {
+    public string RuntimeID { get; private set; }
+
     public CropInformation Info { get; private set; }
 
-    public int currentHarvestTimes;
-    public float currentGrowthDay;
+    /// <summary>
+    /// 当前收割次数
+    /// </summary>
+    private int currentHarvestTimes;
+    public int totalGrowthDays;
 
     public CropStage currentStage;
     public CropStage nextStage;
+    public int stageGrowthDays;
 
-    private int harvestTimes;
+    public bool Dry { get; private set; }
+    public bool Pest { get; private set; }
 
-    public FieldGrid Parent { get; private set; }
+    public Field Parent { get; private set; }
 
-    private bool harvestAble = false;
-    public bool HarvestAble
+    public bool HarvestAble { get; private set; }
+    [HideInInspector]
+    public UnityEngine.Events.UnityEvent onHarvestFinish = new UnityEngine.Events.UnityEvent();
+
+    public void Plant(CropInformation info, Field parent = null)
     {
-        get
-        {
-            return harvestAble && Info;
-        }
-
-        private set
-        {
-            harvestAble = value;
-        }
-    }
-
-    public void Init(CropInformation info, FieldGrid parent = null)
-    {
-        if (!info || !info.IsValid) return;
-        Info = Instantiate(info);
-        gatheringInfo = info.GatheringInfo;
-        GatherAble = false;
+        Clear();
+        Info = info;
+        HarvestAble = false;
         Parent = parent;
-        currentGrowthDay = 1;
+        totalGrowthDays = 1;
         TimeManager.Instance.OnDayPassed += UpdateDay;
+        GameManager.Crops.TryGetValue(Info, out var crops);
+        if (crops != null)
+        {
+            RuntimeID = Info.ID + "I" + crops.Count.ToString().PadLeft(4);
+            crops.Add(this);
+        }
+        else
+        {
+            RuntimeID = Info.ID + "I0000";
+            GameManager.Crops.Add(Info, new List<Crop>() { this });
+        }
     }
 
     public void UpdateDay()
     {
-        currentGrowthDay++;
+        totalGrowthDays++;
+        stageGrowthDays++;
         HandlingStage();
     }
 
     private void HandlingStage()
     {
-        if (nextStage && currentGrowthDay >= nextStage.LifespanPer.Min && currentGrowthDay < nextStage.LifespanPer.Max)
+        if (nextStage && stageGrowthDays >= nextStage.LastingDays)
         {
             NextStage();
         }
-        if (currentStage.stage == CropStages.Decay && currentGrowthDay >= currentStage.LifespanPer.Max && Parent)//腐败后土壤肥沃
+        if (currentStage.Stage == CropStages.Decay && stageGrowthDays >= currentStage.LastingDays)//腐败后土壤肥沃
         {
-            Parent.fertility++;
-            Parent.Empty();
-            TimeManager.Instance.OnDayPassed -= UpdateDay;
-            DestroyImmediate(gameObject);
+            if (Parent) Parent.fertility++;
+            //Parent.Empty();
+            Recycle();
         }
     }
 
     private void NextStage()
     {
         currentStage = nextStage;
-        if (currentStage.stage == CropStages.Maturity)
-        {
-            harvestTimes++;
+        stageGrowthDays = 0;
+        if (currentStage.HarvestAble)
             HarvestAble = true;
-            GatherAble = true;
-        }
         int currentIndex = Info.Stages.IndexOf(currentStage);
         int nextIndex = -1;
         if (currentIndex < Info.Stages.Count - 1)
         {
-            if (Info.CanRepeat && currentIndex == Info.RepeatStage.Max && (harvestTimes < Info.RepeatTimes || Info.RepeatTimes < 0))
+            if (currentStage.RepeatAble && currentIndex == currentStage.IndexToReturn && (currentHarvestTimes < currentStage.RepeatTimes || currentStage.RepeatTimes < 0))
             {
-                nextIndex = Info.RepeatStage.Min;
+                nextIndex = currentStage.IndexToReturn;
             }
             else nextIndex = currentIndex + 1;
         }
@@ -87,46 +92,73 @@ public class Crop : GatherAgent
 
     private void HarvestDone()
     {
+        currentHarvestTimes++;
         HarvestAble = false;
         NextStage();
-        currentGrowthDay = currentStage.LifespanPer.Min * Info.GrowthTime;
     }
 
-    public override void GatherSuccess()
+    public void OnHarvestSuccess()
     {
-        onGatherFinish?.Invoke();
-        GatherAble = false;
-        if (GatheringInfo.ProductItems.Count > 0)
+        onHarvestFinish?.Invoke();
+        HarvestAble = false;
+        if (currentStage.ProductItems.Count > 0)
         {
             List<ItemInfo> lootItems = new List<ItemInfo>();
-            foreach (DropItemInfo di in GatheringInfo.ProductItems)
+            foreach (DropItemInfo di in currentStage.ProductItems)
                 if (ZetanUtil.Probability(di.DropRate))
                     if (!di.OnlyDropForQuest || (di.OnlyDropForQuest && QuestManager.Instance.HasOngoingQuestWithID(di.BindedQuest.ID)))
                         lootItems.Add(new ItemInfo(di.Item, Random.Range(1, di.Amount + 1)));
             if (lootItems.Count > 0)
             {
-                LootAgent la = ObjectPool.Instance.Get(GatheringInfo.LootPrefab).GetComponent<LootAgent>();
+                LootAgent la = ObjectPool.Instance.Get(currentStage.LootPrefab).GetComponent<LootAgent>();
                 la.Init(lootItems, transform.position);
             }
         }
         HarvestDone();
     }
 
-    protected override void OnTriggerEnter2D(Collider2D collision)
+    private void Clear()
     {
-        if (HarvestAble)
-            base.OnTriggerEnter2D(collision);
+        GameManager.Crops.TryGetValue(Info, out var crops);
+        if (crops != null)
+        {
+            crops.Remove(this);
+            if (crops.Count < 1) GameManager.Crops.Remove(Info);
+        }
+        HarvestAble = false;
+        RuntimeID = string.Empty;
+        Info = null;
+        Parent.Crops.Remove(this);
+        Parent = null;
+        currentStage = null;
+        nextStage = null;
+        currentHarvestTimes = -1;
+        totalGrowthDays = -1;
+        TimeManager.Instance.OnDayPassed -= UpdateDay;
     }
 
-    protected override void OnTriggerStay2D(Collider2D collision)
+    public void Recycle()
     {
-        if (HarvestAble)
-            base.OnTriggerStay2D(collision);
+        Clear();
+        if (ObjectPool.Instance) ObjectPool.Instance.Put(gameObject);
+        else DestroyImmediate(gameObject);
     }
 
-    protected override void OnTriggerExit2D(Collider2D collision)
+    protected void OnTriggerEnter2D(Collider2D collision)
     {
         if (HarvestAble)
-            base.OnTriggerExit2D(collision);
+        { }
+    }
+
+    protected void OnTriggerStay2D(Collider2D collision)
+    {
+        if (HarvestAble)
+        { }
+    }
+
+    protected void OnTriggerExit2D(Collider2D collision)
+    {
+        if (HarvestAble)
+        { }
     }
 }
