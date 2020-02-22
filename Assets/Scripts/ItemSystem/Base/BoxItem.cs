@@ -27,7 +27,8 @@ public class BoxItem : ItemBase
             float newWeight = weight;
             foreach (ItemInfo info in itemsInBox)
             {
-                newWeight += info.item.Weight * info.Amount;
+                if (info.IsValid)
+                    newWeight += info.item.Weight * info.Amount;
             }
             return newWeight;
         }

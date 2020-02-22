@@ -36,7 +36,7 @@ public class GatherAgent : MonoBehaviour
         {
             List<ItemInfo> lootItems = new List<ItemInfo>();
             foreach (DropItemInfo di in GatheringInfo.ProductItems)
-                if (ZetanUtil.Probability(di.DropRate))
+                if (ZetanUtility.Probability(di.DropRate))
                     if (!di.OnlyDropForQuest || (di.OnlyDropForQuest && QuestManager.Instance.HasOngoingQuestWithID(di.BindedQuest.ID)))
                         lootItems.Add(new ItemInfo(di.Item, Random.Range(1, di.Amount + 1)));
             if (lootItems.Count > 0)

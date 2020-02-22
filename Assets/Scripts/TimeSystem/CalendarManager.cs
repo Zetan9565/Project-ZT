@@ -4,7 +4,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/日历管理器")]
-public class CalendarManager : SingletonMonoBehaviour<CalendarManager>, IWindowHandler
+public class CalendarManager : SingletonMonoBehaviour<CalendarManager>, IWindowHandler, IOpenCloseAbleWindow
 {
     [SerializeField]
     private CalendarUI UI;
@@ -15,7 +15,7 @@ public class CalendarManager : SingletonMonoBehaviour<CalendarManager>, IWindowH
 
     public bool IsPausing { get; private set; }
 
-    public Canvas SortCanvas
+    public Canvas CanvasToSort
     {
         get
         {
@@ -76,8 +76,8 @@ public class CalendarManager : SingletonMonoBehaviour<CalendarManager>, IWindowH
         if (IsUIOpen) return;
         IsUIOpen = true;
         UpdateUI();
-        UI.calendarWindow.alpha = 1;
-        UI.calendarWindow.blocksRaycasts = true;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
         WindowsManager.Instance.Push(this);
     }
 
@@ -86,8 +86,8 @@ public class CalendarManager : SingletonMonoBehaviour<CalendarManager>, IWindowH
         if (!UI || !UI.gameObject) return;
         if (IsPausing) return;
         if (!IsUIOpen) return;
-        UI.calendarWindow.alpha = 0;
-        UI.calendarWindow.blocksRaycasts = false;
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
         WindowsManager.Instance.Remove(this);
         IsUIOpen = false;
     }
@@ -106,13 +106,13 @@ public class CalendarManager : SingletonMonoBehaviour<CalendarManager>, IWindowH
         if (!IsUIOpen) return;
         if (IsPausing && !pause)
         {
-            UI.calendarWindow.alpha = 1;
-            UI.calendarWindow.blocksRaycasts = true;
+            UI.window.alpha = 1;
+            UI.window.blocksRaycasts = true;
         }
         else if (!IsPausing && pause)
         {
-            UI.calendarWindow.alpha = 0;
-            UI.calendarWindow.blocksRaycasts = false;
+            UI.window.alpha = 0;
+            UI.window.blocksRaycasts = false;
         }
         IsPausing = pause;
     }

@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 [CustomEditor(typeof(CharacterInformation), true)]
 public class CharacterInfoInspector : Editor
@@ -29,7 +30,6 @@ public class CharacterInfoInspector : Editor
     SerializedProperty isVendor;
     SerializedProperty shop;
 
-    SerializedProperty isQuestGiver;
     SerializedProperty questsStored;
 
     PlayerInformation player;
@@ -45,13 +45,19 @@ public class CharacterInfoInspector : Editor
 
     int barIndex;
 
+    List<TalkerInformation> allTalkers;
+
     private void OnEnable()
     {
         character = target as CharacterInformation;
         enemy = target as EnemyInformation;
         talker = target as TalkerInformation;
         player = target as PlayerInformation;
-
+        if (talker)
+        {
+            allTalkers = Resources.LoadAll<TalkerInformation>("").ToList();
+            allTalkers.Remove(talker);
+        }
         _ID = serializedObject.FindProperty("_ID");
         _Name = serializedObject.FindProperty("_Name");
         sex = serializedObject.FindProperty("sex");
@@ -78,7 +84,6 @@ public class CharacterInfoInspector : Editor
             isVendor = serializedObject.FindProperty("isVendor");
             warehouse = serializedObject.FindProperty("warehouse");
             shop = serializedObject.FindProperty("shop");
-            isQuestGiver = serializedObject.FindProperty("isQuestGiver");
             questsStored = serializedObject.FindProperty("questsStored");
 
             HandlingFavoriteItemList();
@@ -126,8 +131,8 @@ public class CharacterInfoInspector : Editor
                 EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
                 if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID())
                 {
-                    if (!string.IsNullOrEmpty(_ID.stringValue) && ExistsID())
-                        EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
+                    if (!string.IsNullOrEmpty(_ID.stringValue) && ExistsID()) EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
+                    else EditorGUILayout.HelpBox("识别码为空！", MessageType.Error);
                     if (GUILayout.Button("自动生成识别码"))
                     {
                         _ID.stringValue = GetAutoID();
@@ -212,15 +217,15 @@ public class CharacterInfoInspector : Editor
                 EditorGUI.BeginChangeCheck();
                 if (talker)
                 {
-                    if (!isVendor.boolValue) EditorGUILayout.PropertyField(isWarehouseAgent, new GUIContent("是仓库管理员"));
-                    if (isWarehouseAgent.boolValue && !isVendor.boolValue)
+                    EditorGUILayout.PropertyField(isWarehouseAgent, new GUIContent("是仓库管理员"));
+                    if (isWarehouseAgent.boolValue)
                     {
                         SerializedProperty warehouseSize = warehouse.FindPropertyRelative("warehouseSize");
                         warehouseSize.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认仓库容量(格)",
                             warehouseSize.FindPropertyRelative("max").intValue, 50, 150);
                     }
-                    if (!isWarehouseAgent.boolValue) EditorGUILayout.PropertyField(isVendor, new GUIContent("是商贩"));
-                    if (isVendor.boolValue && !isWarehouseAgent.boolValue)
+                    EditorGUILayout.PropertyField(isVendor, new GUIContent("是商贩"));
+                    if (isVendor.boolValue)
                     {
                         EditorGUILayout.PropertyField(shop, new GUIContent("商铺信息"));
                         if (talker.Shop)
@@ -249,24 +254,12 @@ public class CharacterInfoInspector : Editor
                 break;
             case 2:
                 #region case 2
-                serializedObject.Update();
-                EditorGUI.BeginChangeCheck();
                 if (talker)
                 {
                     serializedObject.Update();
-                    EditorGUI.BeginChangeCheck();
-                    EditorGUILayout.PropertyField(isQuestGiver, new GUIContent("是任务代理人"));
-                    if (EditorGUI.EndChangeCheck())
-                        serializedObject.ApplyModifiedProperties();
-                    if (isQuestGiver.boolValue)
-                    {
-                        serializedObject.Update();
-                        questList.DoLayoutList();
-                        serializedObject.ApplyModifiedProperties();
-                    }
-                }
-                if (EditorGUI.EndChangeCheck())
+                    questList.DoLayoutList();
                     serializedObject.ApplyModifiedProperties();
+                }
                 #endregion
                 break;
             case 3:
@@ -590,7 +583,22 @@ public class CharacterInfoInspector : Editor
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             SerializedProperty quest = questsStored.GetArrayElementAtIndex(index);
             EditorGUI.BeginChangeCheck();
+            Quest qBef = quest.objectReferenceValue as Quest;
             EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), quest, new GUIContent(string.Empty));
+            if (qBef != quest.objectReferenceValue as Quest && talker.QuestsStored.Contains(quest.objectReferenceValue))
+            {
+                EditorUtility.DisplayDialog("错误", "已添加该任务。", "确定");
+                quest.objectReferenceValue = qBef;
+            }
+            else
+            {
+                var conflictTalker = allTalkers.Find(x => x.QuestsStored.Count > 0 && x.QuestsStored.Contains(quest.objectReferenceValue as Quest));
+                if (conflictTalker && conflictTalker != talker)
+                {
+                    EditorUtility.DisplayDialog("错误", "[" + conflictTalker.Name + "]已使用该任务，无法添加。", "确定");
+                    quest.objectReferenceValue = qBef;
+                }
+            }
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };

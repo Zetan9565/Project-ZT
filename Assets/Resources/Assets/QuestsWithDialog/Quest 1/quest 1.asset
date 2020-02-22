@@ -18,11 +18,15 @@ MonoBehaviour:
   abandonable: 1
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptConditions:
-  - acceptCondition: 5
+  - acceptCondition: 3
     level: 0
     completeQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
     ownedItem: {fileID: 0}
     triggerName: 
+  questType: 0
+  repeatFrequancy: 0
+  timeUnit: 0
+  conditionRelational: 
   beginDialogue: {fileID: 11400000, guid: 860a800ebd1f57e409389453a7b350e1, type: 2}
   ongoingDialogue: {fileID: 11400000, guid: c9bd66b12bc670d48895c486a701c376, type: 2}
   completeDialogue: {fileID: 11400000, guid: 216422843cfd8d041970f69c4cccd4b4, type: 2}
@@ -44,6 +48,7 @@ MonoBehaviour:
   killObjectives:
   - displayName: "\u51FB\u6740\u9AB7\u9AC5"
     display: 1
+    showMapIcon: 1
     amount: 5
     inOrder: 1
     orderIndex: 1
@@ -55,6 +60,7 @@ MonoBehaviour:
   talkObjectives:
   - displayName: "\u5B89\u6170\u739B\u4E3D\u4E9A"
     display: 1
+    showMapIcon: 1
     amount: 1
     inOrder: 1
     orderIndex: 2
@@ -68,7 +74,7 @@ MonoBehaviour:
   originalQuestHolder:
     info: {fileID: 0}
     currentScene: 
-    currentPostition: {x: 0, y: 0, z: 0}
+    currentPosition: {x: 0, y: 0, z: 0}
     relationshipInstance:
       relationshipValue:
         min: -500
@@ -85,7 +91,7 @@ MonoBehaviour:
   currentQuestHolder:
     info: {fileID: 0}
     currentScene: 
-    currentPostition: {x: 0, y: 0, z: 0}
+    currentPosition: {x: 0, y: 0, z: 0}
     relationshipInstance:
       relationshipValue:
         min: -500

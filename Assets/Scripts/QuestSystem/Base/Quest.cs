@@ -9,11 +9,11 @@ public class Quest : ScriptableObject
     private string _ID;
     public string ID => _ID;
 
-    [SerializeField, TextArea(1, 1)]
+    [SerializeField, TextArea(2, 3)]
     private string title = string.Empty;
     public string Title => title;
 
-    [SerializeField, TextArea(3, 5)]
+    [SerializeField, TextArea(5, 5)]
     private string description;
     public string Description => description;
 
@@ -30,9 +30,26 @@ public class Quest : ScriptableObject
     public List<QuestAcceptCondition> AcceptConditions => acceptConditions;
 
     [SerializeField]
+#if UNITY_EDITOR
+    [EnumMemberNames("普通", "主线", "反复")]
+#endif
+    private QuestType questType;
+    public QuestType QuestType => questType;
+
+    [SerializeField]
+    private int repeatFrequancy = 1;
+    public int RepeatFrequancy => repeatFrequancy;
+
+    [SerializeField]
+#if UNITY_EDITOR
+    [EnumMemberNames("分", "时", "天", "周", "月", "年")]
+#endif
+    private TimeUnit timeUnit = TimeUnit.Day;
+    public TimeUnit TimeUnit => timeUnit;
+
+    [SerializeField]
     private string conditionRelational;
     public string ConditionRelational => conditionRelational;
-
 
     [SerializeField]
     private Dialogue beginDialogue;
@@ -98,7 +115,6 @@ public class Quest : ScriptableObject
     [HideInInspector]
     public TalkerData currentQuestHolder;
 
-    [HideInInspector]
     public bool IsOngoing { get; set; }//任务是否正在执行，在运行时用到
 
     public bool IsComplete
@@ -151,16 +167,18 @@ public class Quest : ScriptableObject
         get
         {
             bool calFailed = false;
-            if (string.IsNullOrEmpty(conditionRelational) || AcceptConditions.Count < 2) calFailed = true;
+            if (string.IsNullOrEmpty(conditionRelational)) return AcceptConditions.TrueForAll(x => x.IsEligible);
+            if (AcceptConditions.Count < 1) calFailed = true;
             else
             {
+                Debug.Log(Title);
                 var cr = conditionRelational.Replace(" ", "").ToCharArray();//删除所有空格才开始计算
                 List<string> RPN = new List<string>();//逆波兰表达式
                 string indexStr = string.Empty;//数字串
                 Stack<char> optStack = new Stack<char>();//运算符栈
                 for (int i = 0; i < cr.Length; i++)
                 {
-                    var c = cr[i];
+                    char c = cr[i];
                     string item;
                     if (c < '0' || c > '9')
                     {
@@ -170,7 +188,7 @@ public class Quest : ScriptableObject
                             indexStr = string.Empty;
                             GetRPNItem(item);
                         }
-                        if (c == '(' || c == ')' || c == '+' || c == '*')
+                        if (c == '(' || c == ')' || c == '+' || c == '*' || c == '~')
                         {
                             item = c + "";
                             GetRPNItem(item);
@@ -197,7 +215,7 @@ public class Quest : ScriptableObject
                 Stack<bool> values = new Stack<bool>();
                 foreach (var item in RPN)
                 {
-                    //Debug.Log(item);
+                    Debug.Log(item);
                     if (int.TryParse(item, out int index))
                     {
                         if (index >= 0 && index < AcceptConditions.Count)
@@ -211,8 +229,10 @@ public class Quest : ScriptableObject
                     else if (values.Count > 1)
                     {
                         if (item == "+") values.Push(values.Pop() | values.Pop());
+                        else if (item == "~") values.Push(!values.Pop());
                         else if (item == "*") values.Push(values.Pop() & values.Pop());
                     }
+                    else if (item == "~") values.Push(!values.Pop());
                 }
                 if (values.Count == 1)
                 {
@@ -223,14 +243,14 @@ public class Quest : ScriptableObject
                 void GetRPNItem(string item)
                 {
                     //Debug.Log(item);
-                    if (item == "+" || item == "*")//遇到运算符
+                    if (item == "+" || item == "*" || item == "~")//遇到运算符
                     {
                         char opt = item[0];
                         if (optStack.Count < 1) optStack.Push(opt);//栈空则直接入栈
                         else while (optStack.Count > 0)//栈不空则出栈所有优先级大于或等于opt的运算符后才入栈opt
                             {
                                 char top = optStack.Peek();
-                                if (top + "" == item || top == '*' && opt == '+')
+                                if (top + "" == item || top == '~' || top == '*' && opt == '+')
                                 {
                                     RPN.Add(optStack.Pop() + "");
                                     if (optStack.Count < 1)
@@ -333,65 +353,42 @@ public class Quest : ScriptableObject
     }
 }
 
+public enum QuestType
+{
+    Normal,
+    Main,
+    Repeated,
+}
+
 #region 任务条件
 /// <summary>
-/// 任务接收条件
+/// 任务接取条件
 /// </summary>
 [System.Serializable]
 public class QuestAcceptCondition
 {
     [SerializeField]
 #if UNITY_EDITOR
-    [EnumMemberNames("等级等于", "等级大于", "等级小于", "等级大于或等于", "等级小于或等于", "完成任务", "拥有道具", "触发器开启", "触发器关闭")]
+    [EnumMemberNames("等级等于", "等级大于", "等级小于", "完成任务", "拥有道具", "触发器开启", "触发器关闭")]
 #endif
-    private QuestCondition acceptCondition = QuestCondition.ComplexQuest;
-    public QuestCondition AcceptCondition
-    {
-        get
-        {
-            return acceptCondition;
-        }
-    }
+    private QuestCondition acceptCondition = QuestCondition.CompleteQuest;
+    public QuestCondition AcceptCondition => acceptCondition;
 
     [SerializeField]
-    private int level;
-    public int Level
-    {
-        get
-        {
-            return level;
-        }
-    }
+    private int level = 1;
+    public int Level => level;
 
     [SerializeField]
     private Quest completeQuest;
-    public Quest CompleteQuest
-    {
-        get
-        {
-            return completeQuest;
-        }
-    }
+    public Quest CompleteQuest => completeQuest;
 
     [SerializeField]
     private ItemBase ownedItem;
-    public ItemBase OwnedItem
-    {
-        get
-        {
-            return ownedItem;
-        }
-    }
+    public ItemBase OwnedItem => ownedItem;
 
     [SerializeField]
     private string triggerName;
-    public string TriggerName
-    {
-        get
-        {
-            return triggerName;
-        }
-    }
+    public string TriggerName => triggerName;
 
     /// <summary>
     /// 是否符合条件
@@ -402,13 +399,13 @@ public class QuestAcceptCondition
         {
             switch (AcceptCondition)
             {
-                case QuestCondition.ComplexQuest: return QuestManager.Instance.HasCompleteQuestWithID(CompleteQuest.ID);
+                case QuestCondition.CompleteQuest: return QuestManager.Instance.HasCompleteQuestWithID(CompleteQuest.ID);
                 case QuestCondition.HasItem: return BackpackManager.Instance.HasItemWithID(OwnedItem.ID);
                 case QuestCondition.LevelEquals: return PlayerManager.Instance.PlayerInfo.level == level;
                 case QuestCondition.LevelLargeThen: return PlayerManager.Instance.PlayerInfo.level > level;
-                case QuestCondition.LevelLargeOrEqualsThen: return PlayerManager.Instance.PlayerInfo.level >= level;
+                //case QuestCondition.LevelLargeOrEqualsThen: return PlayerManager.Instance.PlayerInfo.level >= level;
                 case QuestCondition.LevelLessThen: return PlayerManager.Instance.PlayerInfo.level < level;
-                case QuestCondition.LevelLessOrEqualsThen: return PlayerManager.Instance.PlayerInfo.level <= level;
+                //case QuestCondition.LevelLessOrEqualsThen: return PlayerManager.Instance.PlayerInfo.level <= level;
                 case QuestCondition.TriggerSet:
                     var state = TriggerManager.Instance.GetTriggerState(triggerName);
                     return state != TriggerState.NotExist ? (state == TriggerState.On ? true : false) : false;
@@ -426,9 +423,9 @@ public enum QuestCondition
     LevelEquals,
     LevelLargeThen,
     LevelLessThen,
-    LevelLargeOrEqualsThen,
-    LevelLessOrEqualsThen,
-    ComplexQuest,
+    //LevelLargeOrEqualsThen,
+    //LevelLessOrEqualsThen,
+    CompleteQuest,
     HasItem,
     TriggerSet,
     TriggerReset
@@ -444,13 +441,7 @@ public abstract class Objective
 {
     [SerializeField]
     private string displayName = string.Empty;
-    public string DisplayName
-    {
-        get
-        {
-            return displayName;
-        }
-    }
+    public string DisplayName => displayName;
 
     [SerializeField]
     private bool display = true;
@@ -465,14 +456,12 @@ public abstract class Objective
     }
 
     [SerializeField]
+    private bool showMapIcon = true;
+    public bool ShowMapIcon => this is CollectObjective || this is CustomObjective ? false : showMapIcon;
+
+    [SerializeField]
     private int amount = 1;
-    public int Amount
-    {
-        get
-        {
-            return amount;
-        }
-    }
+    public int Amount => amount;
 
     private int currentAmount;
     public int CurrentAmount
@@ -499,23 +488,11 @@ public abstract class Objective
 
     [SerializeField]
     private bool inOrder;
-    public bool InOrder
-    {
-        get
-        {
-            return inOrder;
-        }
-    }
+    public bool InOrder => inOrder;
 
     [SerializeField]
     private int orderIndex = 1;
-    public int OrderIndex
-    {
-        get
-        {
-            return orderIndex;
-        }
-    }
+    public int OrderIndex => orderIndex;
 
     public bool IsComplete
     {
@@ -620,15 +597,15 @@ public abstract class Objective
     }
 
     /// <summary>
-    /// 可并发
+    /// 可并行？
     /// </summary>
-    public bool Concurrent
+    public bool Parallel
     {
         get
         {
-            if (!InOrder) return true;//不按顺序，说明可以并发执行
-            if (PrevObjective && PrevObjective.OrderIndex == OrderIndex) return true;//有前置目标，而且顺序码与前置目标相同，说明可以并发执行
-            if (NextObjective && NextObjective.OrderIndex == OrderIndex) return true;//有后置目标，而且顺序码与后置目标相同，说明可以并发执行
+            if (!InOrder) return true;//不按顺序，说明可以并行执行
+            if (PrevObjective && PrevObjective.OrderIndex == OrderIndex) return true;//有前置目标，而且顺序码与前置目标相同，说明可以并行执行
+            if (NextObjective && NextObjective.OrderIndex == OrderIndex) return true;//有后置目标，而且顺序码与后置目标相同，说明可以并行执行
             return false;
         }
     }
@@ -881,7 +858,7 @@ public class SubmitObjective : Objective
 
     [SerializeField]
 #if UNITY_EDITOR
-    [EnumMemberNames("提交的NPC", "玩家")]
+    [EnumMemberNames("提交处的NPC", "玩家")]
 #endif
     private TalkerType talkerType;
     public TalkerType TalkerType

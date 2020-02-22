@@ -1,16 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class ItemWindowBaseUI : MonoBehaviour
+public class ItemWindowBaseUI : WindowUI
 {
-    public CanvasGroup itemWindow;
-
-    [HideInInspector]
-    public RectTransform windowsRect;
-
-    [HideInInspector]
-    public Canvas windowCanvas;
-
     public Image icon;
 
     public Text nameText;
@@ -36,14 +28,9 @@ public class ItemWindowBaseUI : MonoBehaviour
     /// </summary>
     public DurabilityAgent durability;
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (!itemWindow.GetComponent<GraphicRaycaster>()) itemWindow.gameObject.AddComponent<GraphicRaycaster>();
-        windowCanvas = itemWindow.GetComponent<Canvas>();
-        windowCanvas.overrideSorting = true;
-        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
-        windowsRect = itemWindow.GetComponent<RectTransform>();
-
+        base.Awake();
         gemstone_1.Clear();
         gemstone_2.Clear();
     }

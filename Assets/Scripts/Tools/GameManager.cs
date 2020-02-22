@@ -83,12 +83,14 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             kvp.Value.RemoveAll(x => !x || !x.gameObject);
         foreach (var talker in FindObjectsOfType<Talker>())
             talker.Init();
+        MessageManager.Instance.Init();
         PlayerManager.Instance.Init();
+        MapManager.Instance.Init();
         GatherManager.Instance.Init();
         if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIRootPrefab);
         UIManager.Instance.Init();
         WindowsManager.Instance.Clear();
-        MapManager.Instance.SetPlayer(PlayerManager.Instance.PlayerController.CharacterController.transform);
+        MapManager.Instance.SetPlayer(PlayerManager.Instance.PlayerTransform);
         MapManager.Instance.RemakeCamera();
     }
 

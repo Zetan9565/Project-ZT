@@ -62,16 +62,16 @@ public class OptionAgent : MonoBehaviour
         SubmitObjective = objective;
     }
 
-    public void Init(string text, WordsOption branch)
+    public void Init(string text, WordsOption option)
     {
         titleText.text = text;
-        if (branch.OptionType == WordsOptionType.SubmitAndGet)
+        if (option.OptionType == WordsOptionType.SubmitAndGet)
         {
-            if (branch.IsValid)
-                titleText.text += string.Format("(需[{0}]{1}个)", branch.ItemToSubmit.ItemName, branch.ItemToSubmit.Amount);
+            if (option.IsValid)
+                titleText.text += string.Format("(需[{0}]{1}个)", option.ItemToSubmit.ItemName, option.ItemToSubmit.Amount);
         }
         OptionType = OptionType.Option;
-        BranchDialogue = branch;
+        BranchDialogue = option;
     }
 
     public void OnClick()

@@ -14,6 +14,9 @@ public class QuestInspector : Editor
     SerializedProperty description;
     SerializedProperty abandonable;
     SerializedProperty group;
+    SerializedProperty questType;
+    SerializedProperty repeatFrequancy;
+    SerializedProperty timeUnit;
     SerializedProperty acceptConditions;
     SerializedProperty conditionRelational;
     SerializedProperty beginDialogue;
@@ -55,11 +58,17 @@ public class QuestInspector : Editor
     TalkerInformation[] npcs;
     string[] npcNames;
 
+    QuestGroup[] groups;
+    string[] groupNames;
+
     private void OnEnable()
     {
         quest = target as Quest;
         npcs = Resources.LoadAll<TalkerInformation>("");
         npcNames = npcs.Select(x => x.Name).ToArray();//Linq分离出NPC名字
+        groups = Resources.LoadAll<QuestGroup>("");
+        groupNames = groups.Select(x => x.Name).ToArray();
+
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 5;
         _ID = serializedObject.FindProperty("_ID");
@@ -67,6 +76,9 @@ public class QuestInspector : Editor
         description = serializedObject.FindProperty("description");
         abandonable = serializedObject.FindProperty("abandonable");
         group = serializedObject.FindProperty("group");
+        questType = serializedObject.FindProperty("questType");
+        repeatFrequancy = serializedObject.FindProperty("repeatFrequancy");
+        timeUnit = serializedObject.FindProperty("timeUnit");
         acceptConditions = serializedObject.FindProperty("acceptConditions");
         conditionRelational = serializedObject.FindProperty("conditionRelational");
         beginDialogue = serializedObject.FindProperty("beginDialogue");
@@ -99,7 +111,7 @@ public class QuestInspector : Editor
             EditorGUILayout.HelpBox("该任务存在未补全信息。", MessageType.Warning);
         else
             EditorGUILayout.HelpBox("该任务信息已完整。", MessageType.Info);
-        barIndex = GUILayout.Toolbar(barIndex, new string[] { "基本信息", "任务奖励", "任务对话", "任务目标" });
+        barIndex = GUILayout.Toolbar(barIndex, new string[] { "基本", "条件", "奖励", "对话", "目标" });
         EditorGUILayout.Space();
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
@@ -123,14 +135,36 @@ public class QuestInspector : Editor
                 EditorGUILayout.PropertyField(title, new GUIContent("标题"));
                 EditorGUILayout.PropertyField(description, new GUIContent("描述"));
                 EditorGUILayout.PropertyField(abandonable, new GUIContent("可放弃"));
+                EditorGUILayout.PropertyField(questType, new GUIContent("任务类型"));
+                if (questType.enumValueIndex == (int)QuestType.Repeated)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.PropertyField(repeatFrequancy, new GUIContent("重复频率"));
+                    EditorGUILayout.PropertyField(timeUnit, new GUIContent(string.Empty));
+                    EditorGUILayout.EndHorizontal();
+                }
                 EditorGUILayout.Space();
-                EditorGUILayout.PropertyField(group, new GUIContent("归属组"));
-                if (quest.Group) EditorGUILayout.LabelField("组名", quest.Group.Name);
-                EditorGUILayout.Space();
-
-                int oIndex = GetNPCIndex(_NPCToSubmit.objectReferenceValue as TalkerInformation) + 1;
+                int oIndex = GetGroupIndex(group.objectReferenceValue as QuestGroup) + 1;
                 List<int> indexes = new List<int>() { 0 };
-                List<string> names = new List<string>() { "接取处NPC" };
+                List<string> names = new List<string>() { "未指定" };
+                for (int i = 1; i <= groupNames.Length; i++)
+                {
+                    indexes.Add(i);
+                    names.Add(groupNames[i - 1]);
+                }
+                oIndex = EditorGUILayout.IntPopup("归属组", oIndex, names.ToArray(), indexes.ToArray());
+                if (oIndex > 0 && oIndex <= groups.Length) group.objectReferenceValue = groups[oIndex - 1];
+                else group.objectReferenceValue = null;
+                if (group.objectReferenceValue)
+                {
+                    GUI.enabled = false;
+                    EditorGUILayout.PropertyField(group, new GUIContent("引用资源"));
+                    GUI.enabled = true;
+                }
+                EditorGUILayout.Space();
+                oIndex = GetNPCIndex(_NPCToSubmit.objectReferenceValue as TalkerInformation) + 1;
+                indexes = new List<int>() { 0 };
+                names = new List<string>() { "接取处NPC" };
                 for (int i = 1; i <= npcNames.Length; i++)
                 {
                     indexes.Add(i);
@@ -146,51 +180,46 @@ public class QuestInspector : Editor
                     GUI.enabled = true;
                 }
                 if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();//这一步一定要在DoLayoutList()之前做！否则无法修改DoList之前的数据
-                EditorGUILayout.Space();
-                EditorGUILayout.PropertyField(acceptConditions,
-                    new GUIContent("接取条件\t\t" + (acceptConditions.isExpanded ? string.Empty : (acceptConditions.arraySize > 0 ? "数量：" + acceptConditions.arraySize : "无"))), false);
-                if (acceptConditions.isExpanded)
-                {
-                    serializedObject.Update();
-                    acceptConditionList.DoLayoutList();
-                    serializedObject.ApplyModifiedProperties();
-                    if (acceptConditions.arraySize > 1)
-                    {
-                        serializedObject.Update();
-                        EditorGUI.BeginChangeCheck();
-                        EditorGUILayout.PropertyField(conditionRelational, new GUIContent("条件关系表达式"));
-                        EditorGUILayout.HelpBox("1、操作数为条件的序号\n2、运算符可使用左右括号、加号（或）、星号（且）" +
-                            "\n3、未对非法输入进行处理，需规范填写\n4、例：(0 + 3) * 2\n5、为空时默认进行“且”运算", MessageType.Info);
-                        if (EditorGUI.EndChangeCheck())
-                            serializedObject.ApplyModifiedProperties();
-                    }
-                }
                 #endregion
                 break;
             case 1:
-                #region case 1 奖励
+                #region case 1 条件
+                serializedObject.Update();
+                acceptConditionList.DoLayoutList();
+                serializedObject.ApplyModifiedProperties();
+                if (acceptConditions.arraySize > 0)
+                {
+                    serializedObject.Update();
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUILayout.PropertyField(conditionRelational, new GUIContent("条件关系表达式"));
+                    GUI.enabled = false;
+                    EditorGUILayout.TextArea("1、操作数为条件的序号\n2、运算符可使用 \"(\"、\")\"、\"+\"(或)、\"*\"(且)、\"~\"(非)" +
+                        "\n3、未对非法输入进行处理，需规范填写\n4、例：(0 + 1) * ~2 表示满足条件0或1且不满足条件2\n5、为空时默认进行相互的“且”运算");
+                    GUI.enabled = true;
+                    if (EditorGUI.EndChangeCheck())
+                        serializedObject.ApplyModifiedProperties();
+                }
+                #endregion
+                break;
+            case 2:
+                #region case 2 奖励
                 EditorGUILayout.PropertyField(rewardMoney, new GUIContent("金钱奖励"));
                 if (rewardMoney.intValue < 0) rewardMoney.intValue = 0;
                 EditorGUILayout.PropertyField(rewardEXP, new GUIContent("经验奖励"));
                 if (rewardEXP.intValue < 0) rewardEXP.intValue = 0;
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
-                EditorGUILayout.PropertyField(rewardItems, new GUIContent("道具奖励\t\t"
-                    + (rewardItems.isExpanded ? string.Empty : (rewardItems.arraySize > 0 ? "数量：" + rewardItems.arraySize : "无"))), false);
-                if (rewardItems.isExpanded)
-                {
-                    EditorGUILayout.HelpBox("目前只设计10个道具奖励。", MessageType.Info);
-                    serializedObject.Update();
-                    rewardItemList.DoLayoutList();
-                    serializedObject.ApplyModifiedProperties();
-                    if (quest.RewardItems.Count >= 10)
-                        rewardItemList.displayAdd = false;
-                    else rewardItemList.displayAdd = true;
-                }
+                EditorGUILayout.HelpBox("目前只设计10个道具奖励。", MessageType.Info);
+                serializedObject.Update();
+                rewardItemList.DoLayoutList();
+                serializedObject.ApplyModifiedProperties();
+                if (quest.RewardItems.Count >= 10)
+                    rewardItemList.displayAdd = false;
+                else rewardItemList.displayAdd = true;
                 #endregion
                 break;
-            case 2:
-                #region case 2 对话
+            case 3:
+                #region case 3 对话
                 EditorGUILayout.PropertyField(beginDialogue, new GUIContent("开始时的对话"));
                 if (quest.BeginDialogue)
                 {
@@ -267,8 +296,8 @@ public class QuestInspector : Editor
                     serializedObject.ApplyModifiedProperties();
                 #endregion
                 break;
-            case 3:
-                #region case 3 目标
+            case 4:
+                #region case 4 目标
                 EditorGUILayout.PropertyField(cmpltObjctvInOrder, new GUIContent("按顺序完成目标"));
                 if (quest.CmpltObjctvInOrder)
                 {
@@ -346,26 +375,35 @@ public class QuestInspector : Editor
             {
                 switch (quest.AcceptConditions[index].AcceptCondition)
                 {
-                    case QuestCondition.ComplexQuest:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "完成任务");
+                    case QuestCondition.CompleteQuest:
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "完成任务");
                         break;
                     case QuestCondition.HasItem:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "拥有道具");
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "拥有道具");
                         break;
-                    case QuestCondition.LevelLargeOrEqualsThen:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "等级大于或等于");
+                    case QuestCondition.LevelEquals:
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级等于");
                         break;
+                    /*case QuestCondition.LevelLargeOrEqualsThen:
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级大于或等于");
+                        break;*/
                     case QuestCondition.LevelLargeThen:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "等级大于");
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级大于");
                         break;
-                    case QuestCondition.LevelLessOrEqualsThen:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "等级小于或等于");
-                        break;
+                    /*case QuestCondition.LevelLessOrEqualsThen:
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级小于或等于");
+                        break;*/
                     case QuestCondition.LevelLessThen:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "等级小于");
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级小于");
+                        break;
+                    case QuestCondition.TriggerSet:
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "触发器开启");
+                        break;
+                    case QuestCondition.TriggerReset:
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "触发器关闭");
                         break;
                     default:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "未定义条件");
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "未定义条件");
                         break;
                 }
             }
@@ -380,7 +418,7 @@ public class QuestInspector : Editor
 
             switch (quest.AcceptConditions[index].AcceptCondition)
             {
-                case QuestCondition.ComplexQuest:
+                case QuestCondition.CompleteQuest:
                     completeQuest = acceptCondition.FindPropertyRelative("completeQuest");
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), completeQuest, new GUIContent("需完成的任务"));
                     if (completeQuest.objectReferenceValue == target) completeQuest.objectReferenceValue = null;
@@ -397,12 +435,19 @@ public class QuestInspector : Editor
                         EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "道具名称", quest.AcceptConditions[index].OwnedItem.name);
                     }
                     break;
-                case QuestCondition.LevelLargeOrEqualsThen:
+                case QuestCondition.LevelEquals:
+                //case QuestCondition.LevelLargeOrEqualsThen:
                 case QuestCondition.LevelLargeThen:
-                case QuestCondition.LevelLessOrEqualsThen:
+                //case QuestCondition.LevelLessOrEqualsThen:
                 case QuestCondition.LevelLessThen:
                     level = acceptCondition.FindPropertyRelative("level");
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), level, new GUIContent("限制的等级"));
+                    if (level.intValue < 1) level.intValue = 1;
+                    break;
+                case QuestCondition.TriggerSet:
+                case QuestCondition.TriggerReset:
+                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight),
+                        acceptCondition.FindPropertyRelative("triggerName"), new GUIContent("触发器名称"));
                     break;
                 default: break;
             }
@@ -415,7 +460,7 @@ public class QuestInspector : Editor
         {
             switch (quest.AcceptConditions[index].AcceptCondition)
             {
-                case QuestCondition.ComplexQuest:
+                case QuestCondition.CompleteQuest:
                     if (quest.AcceptConditions[index].CompleteQuest)
                         return 3 * lineHeightSpace;
                     else return 2 * lineHeightSpace;
@@ -423,10 +468,13 @@ public class QuestInspector : Editor
                     if (quest.AcceptConditions[index].OwnedItem)
                         return 3 * lineHeightSpace;
                     else return 2 * lineHeightSpace;
-                case QuestCondition.LevelLargeOrEqualsThen:
+                case QuestCondition.LevelEquals:
+                //case QuestCondition.LevelLargeOrEqualsThen:
                 case QuestCondition.LevelLargeThen:
-                case QuestCondition.LevelLessOrEqualsThen:
+                //case QuestCondition.LevelLessOrEqualsThen:
                 case QuestCondition.LevelLessThen:
+                case QuestCondition.TriggerSet:
+                case QuestCondition.TriggerReset:
                     return 2 * lineHeightSpace;
                 default: return lineHeightSpace;
             }
@@ -459,7 +507,7 @@ public class QuestInspector : Editor
             {
                 switch (x.AcceptCondition)
                 {
-                    case QuestCondition.ComplexQuest:
+                    case QuestCondition.CompleteQuest:
                         if (x.CompleteQuest) return false;
                         else return true;
                     case QuestCondition.HasItem:
@@ -468,13 +516,13 @@ public class QuestInspector : Editor
                     case QuestCondition.LevelEquals:
                     case QuestCondition.LevelLargeThen:
                     case QuestCondition.LevelLessThen:
-                    case QuestCondition.LevelLargeOrEqualsThen:
-                    case QuestCondition.LevelLessOrEqualsThen:
-                        if (x.Level < 0) return false;
+                        //case QuestCondition.LevelLargeOrEqualsThen:
+                        //case QuestCondition.LevelLessOrEqualsThen:
+                        if (x.Level > 0) return false;
                         else return true;
                     case QuestCondition.TriggerSet:
                     case QuestCondition.TriggerReset:
-                        if (string.IsNullOrEmpty(x.TriggerName)) return false;
+                        if (!string.IsNullOrEmpty(x.TriggerName)) return false;
                         else return true;
                     default: return false;
                 }
@@ -574,20 +622,15 @@ public class QuestInspector : Editor
                             new GUIContent(quest.CollectObjectives[index].DisplayName));
                     else EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width * 3 / 4, lineHeight), objective, new GUIContent("(空标题)"));
                 else
-                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width * 3 / 4, lineHeight), objective, new GUIContent("被隐藏的目标"));
-                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 3 / 4, rect.y, rect.width / 4, lineHeight),
-                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" + orderIndex.intValue : string.Empty);
+                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width * 3 / 4, lineHeight), objective, new GUIContent("(被隐藏的目标)"));
+                EditorGUI.LabelField(new Rect(rect.x + rect.width - 80, rect.y, 80, lineHeight),
+                    (cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" : "显示顺序：") + orderIndex.intValue);
+                if (cmpltObjctvInOrder.boolValue) display.boolValue = EditorGUI.Toggle(new Rect(rect.x + rect.width - 15, rect.y, 10, lineHeight), display.boolValue);
             }
             else EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder)
-                {
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                      display, new GUIContent("显示"));
-                    lineCount++;
-                }
                 if (display.boolValue || !quest.CmpltObjctvInOrder)
                 {
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
@@ -603,13 +646,11 @@ public class QuestInspector : Editor
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                         inOrder, new GUIContent("按顺序"));
                     lineCount++;
-                    if (inOrder.boolValue)
-                    {
-                        orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "顺序码", orderIndex.intValue,
-                        1, collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
-                        lineCount++;
-                    }
                 }
+                orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码" : "显示顺序", orderIndex.intValue, 1,
+                    collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
+                lineCount++;
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                     item, new GUIContent("目标道具"));
                 lineCount++;
@@ -636,14 +677,10 @@ public class QuestInspector : Editor
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder) lineCount += 1;//显示
                 lineCount++;//目标数量
                 if (cmpltObjctvInOrder.boolValue)
-                {
                     lineCount++;// 按顺序
-                    if (objective.FindPropertyRelative("inOrder").boolValue)
-                        lineCount += 1;//顺序码
-                }
+                lineCount += 1;//顺序码
                 if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
                 lineCount += 3;//目标道具、接取时检查、提交时失去
                 if (quest.CollectObjectives[index].Item)
@@ -695,6 +732,7 @@ public class QuestInspector : Editor
             SerializedProperty objective = killObjectives.GetArrayElementAtIndex(index);
             SerializedProperty display = objective.FindPropertyRelative("display");
             SerializedProperty displayName = objective.FindPropertyRelative("displayName");
+            SerializedProperty showMapIcon = objective.FindPropertyRelative("showMapIcon");
             SerializedProperty amount = objective.FindPropertyRelative("amount");
             SerializedProperty inOrder = objective.FindPropertyRelative("inOrder");
             SerializedProperty orderIndex = objective.FindPropertyRelative("orderIndex");
@@ -710,19 +748,14 @@ public class QuestInspector : Editor
                             new GUIContent(quest.KillObjectives[index].DisplayName));
                     else EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("(空标题)"));
                 else
-                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("被隐藏的目标"));
-                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 3 / 4, rect.y, rect.width / 4, lineHeight),
-                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" + orderIndex.intValue : string.Empty);
+                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("(被隐藏的目标)"));
+                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 2 / 3, rect.y, rect.width / 3, lineHeight),
+                    (cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" : "显示顺序：") + orderIndex.intValue);
+                if (cmpltObjctvInOrder.boolValue) display.boolValue = EditorGUI.Toggle(new Rect(rect.x + rect.width - 15, rect.y, 10, lineHeight), display.boolValue);
             }
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder)
-                {
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                      display, new GUIContent("显示"));
-                    lineCount++;
-                }
                 if (display.boolValue || !quest.CmpltObjctvInOrder)
                 {
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
@@ -737,15 +770,12 @@ public class QuestInspector : Editor
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                         inOrder, new GUIContent("按顺序"));
                     lineCount++;
-                    if (inOrder.boolValue)
-                    {
-                        orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "顺序码", orderIndex.intValue,
-                        1, collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
-                        lineCount++;
-                    }
                 }
-                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                    objectiveType, new GUIContent("目标类型"));
+                orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码" : "显示顺序", orderIndex.intValue, 1,
+                    collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
+                lineCount++;
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), objectiveType, new GUIContent("目标类型"));
                 lineCount++;
                 switch (objectiveType.enumValueIndex)
                 {
@@ -772,6 +802,7 @@ public class QuestInspector : Editor
                         }
                         break;
                 }
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), showMapIcon, new GUIContent("显示地图图标"));
             }
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
@@ -783,14 +814,10 @@ public class QuestInspector : Editor
             int lineCount = 1;//头
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder) lineCount += 1;//显示
                 lineCount++;//目标数量
                 if (cmpltObjctvInOrder.boolValue)
-                {
                     lineCount++;//按顺序
-                    if (objective.FindPropertyRelative("inOrder").boolValue)
-                        lineCount += 1;//顺序码
-                }
+                lineCount += 1;//顺序码
                 if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
                 lineCount += 1;//目标类型
                 switch (objective.FindPropertyRelative("objectiveType").enumValueIndex)
@@ -806,6 +833,7 @@ public class QuestInspector : Editor
                             lineCount += 1;//种族名称
                         break;
                 }
+                lineCount++;//图标
             }
             return lineCount * lineHeightSpace;
         };
@@ -853,6 +881,7 @@ public class QuestInspector : Editor
             SerializedProperty objective = talkObjectives.GetArrayElementAtIndex(index);
             SerializedProperty display = objective.FindPropertyRelative("display");
             SerializedProperty displayName = objective.FindPropertyRelative("displayName");
+            SerializedProperty showMapIcon = objective.FindPropertyRelative("showMapIcon");
             SerializedProperty amount = objective.FindPropertyRelative("amount");
             SerializedProperty inOrder = objective.FindPropertyRelative("inOrder");
             SerializedProperty orderIndex = objective.FindPropertyRelative("orderIndex");
@@ -867,20 +896,15 @@ public class QuestInspector : Editor
                             new GUIContent(quest.TalkObjectives[index].DisplayName));
                     else EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("(空标题)"));
                 else
-                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("被隐藏的目标"));
-                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 3 / 4, rect.y, rect.width / 4, lineHeight),
-                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" + orderIndex.intValue : string.Empty);
+                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("(被隐藏的目标)"));
+                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 2 / 3, rect.y, rect.width / 3, lineHeight),
+                    (cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" : "显示顺序：") + orderIndex.intValue);
+                if (cmpltObjctvInOrder.boolValue) display.boolValue = EditorGUI.Toggle(new Rect(rect.x + rect.width - 15, rect.y, 10, lineHeight), display.boolValue);
             }
             else EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder)
-                {
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                      display, new GUIContent("显示"));
-                    lineCount++;
-                }
                 if (display.boolValue || !quest.CmpltObjctvInOrder)
                 {
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
@@ -892,24 +916,31 @@ public class QuestInspector : Editor
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                         inOrder, new GUIContent("按顺序"));
                     lineCount++;
-                    if (inOrder.boolValue)
-                    {
-                        orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "顺序码", orderIndex.intValue,
-                            1, collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
-                        lineCount++;
-                    }
                 }
-                EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, 60, lineHeight), "目标对话人");
-                if (quest.TalkObjectives[index].NPCToTalk)
-                    _NPCToTalk.objectReferenceValue = npcs[EditorGUI.Popup(new Rect(rect.x + 60, rect.y + lineHeightSpace * lineCount, rect.width / 1.5f - 60, lineHeight),
-                        GetNPCIndex(quest.TalkObjectives[index].NPCToTalk), npcNames)];
-                else if (npcs.Length > 0)
-                    _NPCToTalk.objectReferenceValue = npcs[EditorGUI.Popup(new Rect(rect.x + 60, rect.y + lineHeightSpace * lineCount, rect.width / 1.5f - 60, lineHeight), 0, npcNames)];
-                else EditorGUI.Popup(new Rect(rect.x + 60, rect.y + lineHeightSpace * lineCount, rect.width / 1.5f - 60, lineHeight), 0, new string[] { "无可用谈话人" });
-                GUI.enabled = false;
-                EditorGUI.PropertyField(new Rect(rect.x + 2 + rect.width / 1.5f, rect.y + lineHeightSpace * lineCount, rect.width - rect.width / 1.5f, lineHeight), _NPCToTalk, new GUIContent(string.Empty));
-                GUI.enabled = true;
+                orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码" : "显示顺序", orderIndex.intValue, 1,
+                    collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
                 lineCount++;
+                int oIndex = GetNPCIndex(_NPCToTalk.objectReferenceValue as TalkerInformation) + 1;
+                List<int> indexes = new List<int>() { 0 };
+                List<string> names = new List<string>() { "未指定" };
+                for (int i = 1; i <= npcNames.Length; i++)
+                {
+                    indexes.Add(i);
+                    names.Add(npcNames[i - 1]);
+                }
+                oIndex = EditorGUI.IntPopup(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    "与此NPC交谈", oIndex, names.ToArray(), indexes.ToArray());
+                lineCount++;
+                if (oIndex > 0 && oIndex <= npcs.Length) _NPCToTalk.objectReferenceValue = npcs[oIndex - 1];
+                else _NPCToTalk.objectReferenceValue = null;
+                if (_NPCToTalk.objectReferenceValue)
+                {
+                    GUI.enabled = false;
+                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), _NPCToTalk, new GUIContent("引用资源"));
+                    GUI.enabled = true;
+                    lineCount++;
+                }
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                     dialogue, new GUIContent("交谈时的对话"));
                 lineCount++;
@@ -931,6 +962,7 @@ public class QuestInspector : Editor
                     GUI.enabled = true;
                     lineCount++;
                 }
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), showMapIcon, new GUIContent("显示地图图标"));
             }
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
@@ -942,19 +974,17 @@ public class QuestInspector : Editor
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder) lineCount += 1;//显示
                 if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
                 if (cmpltObjctvInOrder.boolValue)
-                {
-                    lineCount += 1;//按顺序
-                    if (objective.FindPropertyRelative("inOrder").boolValue)
-                        lineCount += 1;//顺序码                
-                }
-                lineCount += 2;//目标NPC、交谈时对话
+                    lineCount++;//按顺序
+                lineCount += 2;//顺序码、目标NPC
+                if (objective.FindPropertyRelative("_NPCToTalk").objectReferenceValue) lineCount++;//引用资源
+                lineCount++; //交谈时对话
                 if (quest.TalkObjectives[index].Dialogue && Array.Exists(Quests, x => x != quest && x.TalkObjectives.Exists(y => y.Dialogue == quest.TalkObjectives[index].Dialogue)))
-                    lineCount += 2;
+                    lineCount += 2;//逻辑错误
                 if (quest.TalkObjectives[index].Dialogue && quest.TalkObjectives[index].Dialogue.Words[0] != null)
                     lineCount += 1;//对话的第一句
+                lineCount++;
             }
             return lineCount * lineHeightSpace;
         };
@@ -999,6 +1029,7 @@ public class QuestInspector : Editor
             SerializedProperty objective = moveObjectives.GetArrayElementAtIndex(index);
             SerializedProperty display = objective.FindPropertyRelative("display");
             SerializedProperty displayName = objective.FindPropertyRelative("displayName");
+            SerializedProperty showMapIcon = objective.FindPropertyRelative("showMapIcon");
             SerializedProperty amount = objective.FindPropertyRelative("amount");
             SerializedProperty inOrder = objective.FindPropertyRelative("inOrder");
             SerializedProperty orderIndex = objective.FindPropertyRelative("orderIndex");
@@ -1012,20 +1043,15 @@ public class QuestInspector : Editor
                             new GUIContent(quest.MoveObjectives[index].DisplayName));
                     else EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("(空标题)"));
                 else
-                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("被隐藏的目标"));
-                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 3 / 4, rect.y, rect.width / 4, lineHeight),
-                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" + orderIndex.intValue : string.Empty);
+                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("(被隐藏的目标)"));
+                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 2 / 3, rect.y, rect.width / 3, lineHeight),
+                    (cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" : "显示顺序：") + orderIndex.intValue);
+                if (cmpltObjctvInOrder.boolValue) display.boolValue = EditorGUI.Toggle(new Rect(rect.x + rect.width - 15, rect.y, 10, lineHeight), display.boolValue);
             }
             else EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder)
-                {
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                      display, new GUIContent("显示"));
-                    lineCount++;
-                }
                 if (display.boolValue || !quest.CmpltObjctvInOrder)
                 {
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
@@ -1037,16 +1063,15 @@ public class QuestInspector : Editor
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                         inOrder, new GUIContent("按顺序"));
                     lineCount++;
-                    if (inOrder.boolValue)
-                    {
-                        orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "顺序码", orderIndex.intValue,
-                            1, collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
-                        lineCount++;
-                    }
                 }
+                orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码" : "显示顺序", orderIndex.intValue, 1,
+                    collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
+                lineCount++;
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                     pointID, new GUIContent("目标地点识别码"));
                 lineCount++;
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), showMapIcon, new GUIContent("显示地图图标"));
             }
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
@@ -1058,15 +1083,11 @@ public class QuestInspector : Editor
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder) lineCount += 1;//显示
                 if (cmpltObjctvInOrder.boolValue)
-                {
-                    lineCount += 1;//按顺序
-                    if (objective.FindPropertyRelative("inOrder").boolValue)
-                        lineCount++;//顺序码
-                }
+                    lineCount++;//按顺序
+                lineCount++;//顺序码
                 if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
-                lineCount++;//目标地点
+                lineCount += 2;//目标地点
             }
             return lineCount * lineHeightSpace;
         };
@@ -1114,6 +1135,7 @@ public class QuestInspector : Editor
             SerializedProperty objective = submitObjectives.GetArrayElementAtIndex(index);
             SerializedProperty display = objective.FindPropertyRelative("display");
             SerializedProperty displayName = objective.FindPropertyRelative("displayName");
+            SerializedProperty showMapIcon = objective.FindPropertyRelative("showMapIcon");
             SerializedProperty amount = objective.FindPropertyRelative("amount");
             SerializedProperty inOrder = objective.FindPropertyRelative("inOrder");
             SerializedProperty orderIndex = objective.FindPropertyRelative("orderIndex");
@@ -1130,20 +1152,15 @@ public class QuestInspector : Editor
                             new GUIContent(quest.SubmitObjectives[index].DisplayName));
                     else EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("(空标题)"));
                 else
-                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("被隐藏的目标"));
-                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 3 / 4, rect.y, rect.width / 4, lineHeight),
-                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" + orderIndex.intValue : string.Empty);
+                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("(被隐藏的目标)"));
+                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 2 / 3, rect.y, rect.width / 3, lineHeight),
+                    (cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" : "显示顺序：") + orderIndex.intValue);
+                if (cmpltObjctvInOrder.boolValue) display.boolValue = EditorGUI.Toggle(new Rect(rect.x + rect.width - 15, rect.y, 10, lineHeight), display.boolValue);
             }
             else EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder)
-                {
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                      display, new GUIContent("显示"));
-                    lineCount++;
-                }
                 if (display.boolValue || !quest.CmpltObjctvInOrder)
                 {
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
@@ -1159,20 +1176,29 @@ public class QuestInspector : Editor
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                         inOrder, new GUIContent("按顺序"));
                     lineCount++;
-                    if (inOrder.boolValue)
-                    {
-                        orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "顺序码", orderIndex.intValue,
-                            1, collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
-                        lineCount++;
-                    }
                 }
-                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                    _NPCToSubmit, new GUIContent("向此NPC提交"));
+                orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码" : "显示顺序", orderIndex.intValue, 1,
+                    collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
                 lineCount++;
-                if (quest.SubmitObjectives[index].NPCToSubmit)
+                int oIndex = GetNPCIndex(_NPCToSubmit.objectReferenceValue as TalkerInformation) + 1;
+                List<int> indexes = new List<int>() { 0 };
+                List<string> names = new List<string>() { "未指定" };
+                for (int i = 1; i <= npcNames.Length; i++)
                 {
-                    EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                        "NPC名字", quest.SubmitObjectives[index].NPCToSubmit.Name);
+                    indexes.Add(i);
+                    names.Add(npcNames[i - 1]);
+                }
+                oIndex = EditorGUI.IntPopup(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    "在此NPC处提交", oIndex, names.ToArray(), indexes.ToArray());
+                lineCount++;
+                if (oIndex > 0 && oIndex <= npcs.Length) _NPCToSubmit.objectReferenceValue = npcs[oIndex - 1];
+                else _NPCToSubmit.objectReferenceValue = null;
+                if (_NPCToSubmit.objectReferenceValue)
+                {
+                    GUI.enabled = false;
+                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), _NPCToSubmit, new GUIContent("引用资源"));
+                    GUI.enabled = true;
                     lineCount++;
                 }
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
@@ -1184,7 +1210,8 @@ public class QuestInspector : Editor
                         "道具名称", quest.SubmitObjectives[index].ItemToSubmit.name);
                     lineCount++;
                 }
-                EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), new GUIContent("提交时的说的话"));
+                EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    new GUIContent("提交时的说的话"), new GUIStyle() { fontStyle = FontStyle.Bold });
                 lineCount++;
                 wordsWhenSubmit.stringValue = EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                     wordsWhenSubmit.stringValue);
@@ -1192,6 +1219,7 @@ public class QuestInspector : Editor
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                     talkerType, new GUIContent("谁说这句话"));
                 lineCount++;
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), showMapIcon, new GUIContent("显示地图图标"));
             }
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
@@ -1203,20 +1231,17 @@ public class QuestInspector : Editor
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder) lineCount += 1;//显示
                 lineCount++;//目标数量
                 if (cmpltObjctvInOrder.boolValue)
-                {
                     lineCount++;// 按顺序
-                    if (objective.FindPropertyRelative("inOrder").boolValue)
-                        lineCount += 1;//顺序码
-                }
+                lineCount++;//顺序码、显示顺序
                 if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
                 lineCount += 5;//NPC、目标道具、提交对话、对话人
                 if (quest.SubmitObjectives[index].NPCToSubmit)
                     lineCount += 1;//NPC名字
                 if (quest.SubmitObjectives[index].ItemToSubmit)
                     lineCount += 1;//道具名称
+                lineCount++;
             }
             return lineCount * lineHeightSpace;
         };
@@ -1279,20 +1304,15 @@ public class QuestInspector : Editor
                             new GUIContent(quest.CustomObjectives[index].DisplayName));
                     else EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("(空标题)"));
                 else
-                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("被隐藏的目标"));
-                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 3 / 4, rect.y, rect.width / 4, lineHeight),
-                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" + orderIndex.intValue : string.Empty);
+                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width, lineHeight), objective, new GUIContent("(被隐藏的目标)"));
+                EditorGUI.LabelField(new Rect(rect.x + 8 + rect.width * 2 / 3, rect.y, rect.width / 3, lineHeight),
+                    (cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码：" : "显示顺序：") + orderIndex.intValue);
+                if (cmpltObjctvInOrder.boolValue) display.boolValue = EditorGUI.Toggle(new Rect(rect.x + rect.width - 15, rect.y, 10, lineHeight), display.boolValue);
             }
             else EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder)
-                {
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                      display, new GUIContent("显示"));
-                    lineCount++;
-                }
                 if (display.boolValue || !quest.CmpltObjctvInOrder)
                 {
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
@@ -1304,13 +1324,11 @@ public class QuestInspector : Editor
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                         inOrder, new GUIContent("按顺序"));
                     lineCount++;
-                    if (inOrder.boolValue)
-                    {
-                        orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "顺序码", orderIndex.intValue,
-                            1, collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
-                        lineCount++;
-                    }
                 }
+                orderIndex.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    cmpltObjctvInOrder.boolValue && inOrder.boolValue ? "顺序码" : "显示顺序", orderIndex.intValue, 1,
+                    collectObjectives.arraySize + killObjectives.arraySize + talkObjectives.arraySize + moveObjectives.arraySize + submitObjectives.arraySize + customObjectives.arraySize);
+                lineCount++;
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                     triggerName, new GUIContent("触发器名称"));
                 lineCount++;
@@ -1328,13 +1346,8 @@ public class QuestInspector : Editor
             int lineCount = 1;
             if (objective.isExpanded)
             {
-                if (quest.CmpltObjctvInOrder) lineCount += 1;//显示
-                if (cmpltObjctvInOrder.boolValue)
-                {
-                    lineCount += 1;//按顺序
-                    if (objective.FindPropertyRelative("inOrder").boolValue)
-                        lineCount++;//顺序码
-                }
+                if (cmpltObjctvInOrder.boolValue) lineCount++;//按顺序
+                lineCount++;//顺序码
                 if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
                 lineCount += 2;//触发器、状态
             }
@@ -1402,9 +1415,31 @@ public class QuestInspector : Editor
         bool editComplete = true;
 
         editComplete &= !(string.IsNullOrEmpty(quest.ID) || string.IsNullOrEmpty(quest.Title) || string.IsNullOrEmpty(quest.Description));
+
         editComplete &= !quest.AcceptConditions.Exists(x =>
-                       (x.AcceptCondition == QuestCondition.ComplexQuest && x.CompleteQuest == null) ||
-                       (x.AcceptCondition == QuestCondition.HasItem && x.OwnedItem == null));
+        {
+            switch (x.AcceptCondition)
+            {
+                case QuestCondition.CompleteQuest:
+                    if (x.CompleteQuest) return false;
+                    else return true;
+                case QuestCondition.HasItem:
+                    if (x.OwnedItem) return false;
+                    else return true;
+                case QuestCondition.LevelEquals:
+                case QuestCondition.LevelLargeThen:
+                case QuestCondition.LevelLessThen:
+                    //case QuestCondition.LevelLargeOrEqualsThen:
+                    //case QuestCondition.LevelLessOrEqualsThen:
+                    if (x.Level > 0) return false;
+                    else return true;
+                case QuestCondition.TriggerSet:
+                case QuestCondition.TriggerReset:
+                    if (!string.IsNullOrEmpty(x.TriggerName)) return false;
+                    else return true;
+                default: return false;
+            }
+        });
 
         editComplete &= quest.BeginDialogue && quest.OngoingDialogue && quest.CompleteDialogue;
 
@@ -1426,8 +1461,11 @@ public class QuestInspector : Editor
 
     int GetNPCIndex(TalkerInformation npc)
     {
-        if (npcs.Contains(npc))
-            return Array.IndexOf(npcs, npc);
-        else return -1;
+        return Array.IndexOf(npcs, npc);
+    }
+
+    int GetGroupIndex(QuestGroup group)
+    {
+        return Array.IndexOf(groups, group);
     }
 }

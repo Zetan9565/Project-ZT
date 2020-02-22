@@ -5,7 +5,7 @@ using UnityEngine.Events;
 [DisallowMultipleComponent]
 public class DragableManager : SingletonMonoBehaviour<DragableManager>
 {
-    public IDragable Current { get; private set; }
+    public IDragAble Current { get; private set; }
 
     public bool IsDraging
     {
@@ -50,14 +50,14 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
         }
     }
 
-    public void GetDragable(IDragable dragable, UnityAction cancelDragAction = null, float width = 100, float height = 100)
+    public void GetDragable(IDragAble dragable, UnityAction cancelDragAction = null, float width = 100, float height = 100)
     {
-        if (!dragable.DragableIcon) return;
+        if (!dragable.DragAbleIcon) return;
         iconSortCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         Current = dragable;
-        icon.overrideSprite = dragable.DragableIcon;
+        icon.overrideSprite = dragable.DragAbleIcon;
         icon.color = Color.white;
-        ZetanUtil.SetActive(icon.gameObject, true);
+        ZetanUtility.SetActive(icon.gameObject, true);
         onCancelDrag.RemoveAllListeners();
         if (cancelDragAction != null) onCancelDrag.AddListener(cancelDragAction);
         icon.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
@@ -68,7 +68,7 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
     public void ResetIcon()
     {
         Current = null;
-        ZetanUtil.SetActive(icon.gameObject, false);
+        ZetanUtility.SetActive(icon.gameObject, false);
     }
 
     public void CancelDrag()

@@ -113,7 +113,21 @@ public class ItemInspector : Editor
             }
         }
         EditorGUILayout.PropertyField(_Name, new GUIContent("名称"));
-        HandlingItemType();
+        string typeName = "未定义";
+        switch (item.ItemType)
+        {
+            case ItemType.Weapon: typeName = "武器"; break;
+            case ItemType.Armor: typeName = "防具"; break;
+            case ItemType.Box: typeName = "箱子"; break;
+            case ItemType.Material: typeName = "制作材料"; break;
+            case ItemType.Quest: typeName = "任务道具"; break;
+            case ItemType.Gemstone: typeName = "宝石"; break;
+            case ItemType.Book: typeName = "书籍/图纸"; break;
+            case ItemType.Bag: typeName = "扩张用袋子"; break;
+            case ItemType.Medicine: typeName = "药物"; break;
+            default: break;
+        }
+        EditorGUILayout.LabelField("道具类型", typeName);
         if (item is MaterialItem)
             EditorGUILayout.PropertyField(materialType, new GUIContent("材料类型"));
         if (item.ItemType != ItemType.Quest)
@@ -129,19 +143,16 @@ public class ItemInspector : Editor
             if (sellPrice.intValue < 0) sellPrice.intValue = 0;
         }
         EditorGUILayout.PropertyField(description, new GUIContent("描述"));
-        EditorGUILayout.PropertyField(icon, new GUIContent("图标"));
-        if (item.Icon)
-        {
-            GUI.enabled = false;
-            EditorGUILayout.ObjectField(new GUIContent(string.Empty), item.Icon, typeof(Texture2D), false);
-            GUI.enabled = true;
-        }
         if (!item.IsEquipment && !item.IsBag)
             EditorGUILayout.PropertyField(stackAble, new GUIContent("可叠加"));
         if (!item.IsForQuest) EditorGUILayout.PropertyField(discardAble, new GUIContent("可丢弃"));
         EditorGUILayout.PropertyField(lockAble, new GUIContent("可上锁"));
         if (item.IsForQuest) EditorGUILayout.PropertyField(usable, new GUIContent("可使用"));
         if (item.IsForQuest && item.Usable) EditorGUILayout.PropertyField(inexhaustible, new GUIContent("可无限使用"));
+        icon.objectReferenceValue = EditorGUILayout.ObjectField("图标", item.Icon, typeof(Sprite), false);
+        EditorGUILayout.BeginVertical("Box");
+        EditorGUILayout.LabelField("附加信息", new GUIStyle() { fontStyle = FontStyle.Bold });
+        HandlingItemType();
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
         if (!(item is BoxItem) && !(item is BookItem))
@@ -163,9 +174,9 @@ public class ItemInspector : Editor
                 }
             }
         }
-        EditorGUILayout.Space();
         if (box)
         {
+            EditorGUILayout.Space();
             EditorGUILayout.PropertyField(boxItems, new GUIContent("盒内道具\t\t" + (boxItems.arraySize > 0 ? "数量：" + boxItems.arraySize : "无")), false);
             if (boxItems.isExpanded)
             {
@@ -178,6 +189,7 @@ public class ItemInspector : Editor
                 else boxItemList.displayAdd = true;
             }
         }
+        EditorGUILayout.EndHorizontal();
     }
 
     void HandlingBoxItemList()
@@ -323,21 +335,6 @@ public class ItemInspector : Editor
 
     void HandlingItemType()
     {
-        string typeName = "未定义";
-        switch (item.ItemType)
-        {
-            case ItemType.Weapon: typeName = "武器"; break;
-            case ItemType.Armor: typeName = "防具"; break;
-            case ItemType.Box: typeName = "箱子"; break;
-            case ItemType.Material: typeName = "制作材料"; break;
-            case ItemType.Quest: typeName = "任务道具"; break;
-            case ItemType.Gemstone: typeName = "宝石"; break;
-            case ItemType.Book: typeName = "书籍/图纸"; break;
-            case ItemType.Bag: typeName = "扩张用袋子"; break;
-            case ItemType.Medicine: typeName = "药物"; break;
-            default: break;
-        }
-        EditorGUILayout.LabelField("道具类型", typeName);
         switch (item.ItemType)
         {
             case ItemType.Medicine:

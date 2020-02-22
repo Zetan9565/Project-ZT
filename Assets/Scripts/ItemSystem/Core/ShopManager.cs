@@ -21,7 +21,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
 
     public bool IsPausing { get; private set; }
 
-    public Canvas SortCanvas
+    public Canvas CanvasToSort
     {
         get
         {
@@ -81,7 +81,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         }
         else
         {
-            AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
@@ -137,7 +137,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         }
         else
         {
-            AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
@@ -179,7 +179,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         }
         else
         {
-            AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.item.name), delegate
@@ -250,8 +250,8 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         if (!UI || !UI.gameObject) return;
         if (IsUIOpen) return;
         if (IsPausing) return;
-        UI.shopWindow.alpha = 1;
-        UI.shopWindow.blocksRaycasts = true;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
         WindowsManager.Instance.Push(this);
         IsUIOpen = true;
         UIManager.Instance.EnableJoyStick(false);
@@ -262,8 +262,8 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) return;
         if (IsPausing) return;
-        UI.shopWindow.alpha = 0;
-        UI.shopWindow.blocksRaycasts = false;
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
         IsUIOpen = false;
         IsPausing = false;
         MShop = null;
@@ -275,24 +275,19 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         AmountManager.Instance.Cancel();
     }
 
-    public void OpenCloseWindow()
-    {
-        throw new System.NotImplementedException();
-    }
-
     public void PauseDisplay(bool pause)
     {
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) return;
         if (IsPausing && !pause)
         {
-            UI.shopWindow.alpha = 1;
-            UI.shopWindow.blocksRaycasts = true;
+            UI.window.alpha = 1;
+            UI.window.blocksRaycasts = true;
         }
         else if (!IsPausing && pause)
         {
-            UI.shopWindow.alpha = 0;
-            UI.shopWindow.blocksRaycasts = false;
+            UI.window.alpha = 0;
+            UI.window.blocksRaycasts = false;
         }
         IsPausing = pause;
     }

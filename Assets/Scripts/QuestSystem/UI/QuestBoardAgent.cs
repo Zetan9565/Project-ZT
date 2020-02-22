@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class QuestBoardAgent : MonoBehaviour, UnityEngine.EventSystems.IPointerClickHandler
+public class QuestBoardAgent : MonoBehaviour, IPointerClickHandler
 {
     [HideInInspector]
     public QuestAgent questAgent;
@@ -58,7 +58,7 @@ public class QuestBoardAgent : MonoBehaviour, UnityEngine.EventSystems.IPointerC
     private void OnClick()
     {
         QuestManager.Instance.OpenWindow();
-        if (!questAgent.parent.IsExpanded) questAgent.parent.IsExpanded = true;
+        if (questAgent.parent && !questAgent.parent.IsExpanded) questAgent.parent.IsExpanded = true;
         questAgent.OnClick();
     }
 

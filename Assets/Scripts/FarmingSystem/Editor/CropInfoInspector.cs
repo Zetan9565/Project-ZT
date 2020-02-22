@@ -133,6 +133,17 @@ public class CropInfoInspector : Editor
             EditorGUI.LabelField(new Rect(rect.x + rect.width - 18, rect.y, 16, lineHeight), "次");
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             int lineCount = 1;
+            graph.objectReferenceValue = EditorGUI.ObjectField(new Rect(rect.x - rect.width + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight * 3.5f),
+                string.Empty, graph.objectReferenceValue as Sprite, typeof(Sprite), false);
+            if (repeatTimes.intValue > 0)
+            {
+                EditorGUI.PropertyField(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), gatherType, new GUIContent("采集方式"));
+                lineCount++;
+                EditorGUI.PropertyField(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), gatherTime, new GUIContent("采集耗时(秒)"));
+                lineCount++;
+                EditorGUI.PropertyField(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), lootPrefab, new GUIContent("掉落物预制件"));
+                lineCount++;
+            }
             if (cropStage.isExpanded)
             {
                 serializedObject.Update();
@@ -148,12 +159,6 @@ public class CropInfoInspector : Editor
                 {
                     serializedObject.Update();
                     EditorGUI.BeginChangeCheck();
-                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight), gatherType, new GUIContent("采集方式"));
-                    lineCount++;
-                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight), gatherTime, new GUIContent("采集耗时"));
-                    lineCount++;
-                    EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight), lootPrefab, new GUIContent("掉落物预制件"));
-                    lineCount++;
                     EditorGUI.PropertyField(new Rect(rect.x + 16, rect.y + lineHeightSpace * lineCount, rect.width - 16, lineHeight), productItems,
                         new GUIContent("产出道具" + (productItems.isExpanded ? string.Empty : ("\t\t" + (productItems.arraySize < 1 ? "无" : "数量:" + productItems.arraySize)))));
                     lineCount++;
@@ -267,19 +272,6 @@ public class CropInfoInspector : Editor
                         cropStage.serializedObject.ApplyModifiedProperties();
                     }
                 }
-                serializedObject.Update();
-                EditorGUI.BeginChangeCheck();
-                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y + (productItemsList == null ? 0 : productItemsList.GetHeight()) + lineHeightSpace * lineCount, rect.width - 8, lineHeight),
-                    graph, new GUIContent("此阶段模型"));
-                lineCount++;
-                if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
-            }
-            if (graph.objectReferenceValue)
-            {
-                GUI.enabled = false;
-                EditorGUI.ObjectField(new Rect(rect.x + 8, rect.y + (productItemsList == null ? 0 : productItemsList.GetHeight()) + lineHeightSpace * lineCount, lineHeight * 4f - 8, lineHeight * 4f),
-                    new GUIContent(string.Empty), graph.objectReferenceValue as Sprite, typeof(Texture2D), false);
-                GUI.enabled = true;
             }
         };
 
@@ -289,20 +281,18 @@ public class CropInfoInspector : Editor
             float listHeight = 0;
             SerializedProperty cropStage = stages.GetArrayElementAtIndex(index);
             SerializedProperty productItems = cropStage.FindPropertyRelative("productItems");
+            lineCount += 3;
             if (cropStage.isExpanded)
             {
-                lineCount++;
                 if (cropStage.FindPropertyRelative("repeatTimes").intValue > 1 && index > 0) lineCount++;
                 if (cropStage.FindPropertyRelative("repeatTimes").intValue > 0)
                 {
-                    lineCount += 4;
+                    lineCount += 1;
                     if (productItems.isExpanded)
                         if (productItemsLists.TryGetValue(crop.Stages[index], out var productItemList))
                             listHeight += productItemList.GetHeight();
                 }
             }
-            if (cropStage.FindPropertyRelative("graph").objectReferenceValue)
-                lineCount += 3;
             return lineHeightSpace * lineCount + listHeight;
         };
 

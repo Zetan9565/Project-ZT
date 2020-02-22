@@ -6,7 +6,7 @@ public class ItemWinUIInspector : Editor
 {
     ItemWindowBaseUI UI;
 
-    SerializedProperty itemWindow;
+    SerializedProperty window;
     SerializedProperty icon;
     SerializedProperty nameText;
     SerializedProperty typeText;
@@ -33,7 +33,7 @@ public class ItemWinUIInspector : Editor
     {
         UI = target as ItemWindowBaseUI;
 
-        itemWindow = serializedObject.FindProperty("itemWindow");
+        window = serializedObject.FindProperty("window");
         icon = serializedObject.FindProperty("icon");
         nameText = serializedObject.FindProperty("nameText");
         typeText = serializedObject.FindProperty("typeText");
@@ -65,7 +65,7 @@ public class ItemWinUIInspector : Editor
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginVertical("Box");
-        EditorGUILayout.PropertyField(itemWindow, new GUIContent("物品窗口"));
+        EditorGUILayout.PropertyField(window, new GUIContent("物品窗口"));
         EditorGUILayout.PropertyField(icon, new GUIContent("图标"));
         EditorGUILayout.PropertyField(nameText, new GUIContent("名称文本"));
         EditorGUILayout.PropertyField(typeText, new GUIContent("类型文本"));

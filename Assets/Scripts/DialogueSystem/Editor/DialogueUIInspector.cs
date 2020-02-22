@@ -6,13 +6,13 @@ public class DialogueUIInspector : Editor
 {
     //DialogueUI dialogueUI;
 
-    SerializedProperty dialogueWindow;
+    SerializedProperty window;
     SerializedProperty nameText;
     SerializedProperty wordsText;
     SerializedProperty warehouseButton;
     SerializedProperty shopButton;
     SerializedProperty backButton;
-    SerializedProperty finishButton;
+    SerializedProperty closeButton;
     SerializedProperty optionsParent;
     SerializedProperty optionPrefab;
     SerializedProperty pageUpButton;
@@ -32,13 +32,13 @@ public class DialogueUIInspector : Editor
     {
         //dialogueUI = target as DialogueUI;
 
-        dialogueWindow = serializedObject.FindProperty("dialogueWindow");
+        window = serializedObject.FindProperty("window");
         nameText = serializedObject.FindProperty("nameText");
         wordsText = serializedObject.FindProperty("nameText");
         warehouseButton = serializedObject.FindProperty("warehouseButton");
         shopButton = serializedObject.FindProperty("shopButton");
         backButton = serializedObject.FindProperty("backButton");
-        finishButton = serializedObject.FindProperty("finishButton");
+        closeButton = serializedObject.FindProperty("closeButton");
         optionsParent = serializedObject.FindProperty("optionsParent");
         optionPrefab = serializedObject.FindProperty("optionPrefab");
         pageUpButton = serializedObject.FindProperty("pageUpButton");
@@ -61,13 +61,13 @@ public class DialogueUIInspector : Editor
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.LabelField("对话框相关", new GUIStyle() { fontStyle = FontStyle.Bold });
-        EditorGUILayout.PropertyField(dialogueWindow, new GUIContent("对话框"));
+        EditorGUILayout.PropertyField(window, new GUIContent("对话框"));
         EditorGUILayout.PropertyField(nameText, new GUIContent("说话者名字"));
         EditorGUILayout.PropertyField(wordsText, new GUIContent("语句文字"));
         EditorGUILayout.PropertyField(warehouseButton, new GUIContent("仓库按钮"));
         EditorGUILayout.PropertyField(shopButton, new GUIContent("商店按钮"));
         EditorGUILayout.PropertyField(backButton, new GUIContent("返回按钮"));
-        EditorGUILayout.PropertyField(finishButton, new GUIContent("结束按钮"));
+        EditorGUILayout.PropertyField(closeButton, new GUIContent("结束按钮"));
         EditorGUILayout.PropertyField(textLineHeight, new GUIContent("每行高度"));
         EditorGUILayout.PropertyField(lineAmount, new GUIContent("总行数"));
         EditorGUILayout.EndVertical();

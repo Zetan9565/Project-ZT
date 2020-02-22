@@ -23,7 +23,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
     public bool PickAble { get; private set; }
     public bool IsPicking { get; private set; }
 
-    public Canvas SortCanvas
+    public Canvas CanvasToSort
     {
         get
         {
@@ -61,7 +61,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
             if (info.Amount == 1) OnTake(info, 1);
             else
             {
-                AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
+                AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.NewAmount(delegate
                 {
                     OnTake(info, (int)AmountManager.Instance.Amount);
@@ -133,8 +133,8 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
         if (IsUIOpen) return;
         if (IsPausing) return;
         Init();
-        UI.lootWindow.alpha = 1;
-        UI.lootWindow.blocksRaycasts = true;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
         IsUIOpen = true;
         WindowsManager.Instance.Push(this);
         IsPicking = true;
@@ -145,8 +145,8 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) return;
         if (IsPausing) return;
-        UI.lootWindow.alpha = 0;
-        UI.lootWindow.blocksRaycasts = false;
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
         IsUIOpen = false;
         WindowsManager.Instance.Remove(this);
         IsPicking = false;
@@ -154,20 +154,19 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
         if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();
         ItemWindowManager.Instance.CloseItemWindow();
     }
-    void IWindowHandler.OpenCloseWindow() { }
     public void PauseDisplay(bool pause)
     {
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) return;
         if (IsPausing && !pause)
         {
-            UI.lootWindow.alpha = 1;
-            UI.lootWindow.blocksRaycasts = true;
+            UI.window.alpha = 1;
+            UI.window.blocksRaycasts = true;
         }
         else if (!IsPausing && pause)
         {
-            UI.lootWindow.alpha = 0;
-            UI.lootWindow.blocksRaycasts = false;
+            UI.window.alpha = 0;
+            UI.window.blocksRaycasts = false;
         }
         IsPausing = pause;
     }

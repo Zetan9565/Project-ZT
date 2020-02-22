@@ -26,12 +26,12 @@ public class Dialogue : ScriptableObject
     }
 
     [SerializeField]
-    private bool useTalkerInfo;
-    public bool UseTalkerInfo
+    private bool useCurrentTalkerInfo;
+    public bool UseCurrentTalkerInfo
     {
         get
         {
-            return useTalkerInfo;
+            return useCurrentTalkerInfo;
         }
     }
 
@@ -68,15 +68,16 @@ public class DialogueWords
         get
         {
             if (TalkerType == TalkerType.NPC)
-                if (TalkerInfo)
-                    return TalkerInfo.Name;
-                else return string.Empty;
+                if (TalkerInfo) return TalkerInfo.Name;
+                else return "未知NPC";
+            else if (TalkerType == TalkerType.UnifiedNPC)
+                return "NPC";
             else return "玩家角色";
         }
     }
 
     [SerializeField]
-    private TalkerType talkerType;
+    private TalkerType talkerType = TalkerType.Player;
     public TalkerType TalkerType
     {
         get
@@ -234,7 +235,7 @@ public class WordsOption
     {
         get
         {
-            return hasWordsToSay;
+            return hasWordsToSay && optionType == WordsOptionType.Choice || optionType != WordsOptionType.Choice;
         }
     }
 
@@ -367,7 +368,7 @@ public class WordsOption
         {
             return !(optionType == WordsOptionType.BranchDialogue && (!dialogue || dialogue.Words.Count < 1)
                 || optionType == WordsOptionType.BranchWords && string.IsNullOrEmpty(words)
-                || optionType == WordsOptionType.Choice && HasWordsToSay && string.IsNullOrEmpty(words))
+                || optionType == WordsOptionType.Choice && hasWordsToSay && string.IsNullOrEmpty(words))
                 || optionType == WordsOptionType.SubmitAndGet && (!ItemToSubmit || !ItemToSubmit.item || string.IsNullOrEmpty(words))
                 || optionType == WordsOptionType.OnlyGet && (!ItemCanGet || !ItemCanGet.item || string.IsNullOrEmpty(words));
         }

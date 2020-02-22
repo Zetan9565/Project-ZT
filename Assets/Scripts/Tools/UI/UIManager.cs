@@ -53,10 +53,10 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         MyUtilities.SetActive(JoyStick.gameObject, false);
         MyUtilities.SetActive(JoyStick.KnobBackground.gameObject, false);
 #elif UNITY_ANDROID
-        ZetanUtil.SetActive(JoyStick.gameObject, true);
-        ZetanUtil.SetActive(JoyStick.KnobBackground.gameObject, true);
+        ZetanUtility.SetActive(JoyStick.gameObject, true);
+        ZetanUtility.SetActive(JoyStick.KnobBackground.gameObject, true);
 #endif
-        ZetanUtil.SetActive(InteractiveButton.gameObject, false);
+        ZetanUtility.SetActive(InteractiveButton.gameObject, false);
         questButton.onClick.AddListener(QuestManager.Instance.OpenCloseWindow);
         backpackButton.onClick.AddListener(BackpackManager.Instance.OpenCloseWindow);
         calendarButton.onClick.AddListener(CalendarManager.Instance.OpenCloseWindow);
@@ -83,10 +83,10 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     {
 #if UNITY_ANDROID
         if (!value)
-            ZetanUtil.SetActive(InteractiveButton.gameObject, false);
+            ZetanUtility.SetActive(InteractiveButton.gameObject, false);
         else
         {
-            ZetanUtil.SetActive(InteractiveButton.gameObject, true &&
+            ZetanUtility.SetActive(InteractiveButton.gameObject, true &&
                 ((DialogueManager.Instance.TalkAble &&
                 !WarehouseManager.Instance.IsUIOpen &&
                 !LootManager.Instance.IsUIOpen &&
@@ -117,12 +117,12 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 #endif
         if (!string.IsNullOrEmpty(name) && value)
         {
-            ZetanUtil.SetActive(interactiveName.transform.parent.gameObject, true);
+            ZetanUtility.SetActive(interactiveName.transform.parent.gameObject, true);
             interactiveName.text = name;
         }
         else
         {
-            ZetanUtil.SetActive(interactiveName.transform.parent.gameObject, false);
+            ZetanUtility.SetActive(interactiveName.transform.parent.gameObject, false);
             interactiveName.text = string.Empty;
         }
     }

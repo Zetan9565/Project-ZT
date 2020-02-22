@@ -6,7 +6,7 @@ public class BackpackUIInspector : Editor
 {
     BackpackUI UI;
 
-    SerializedProperty backpackWindow;
+    SerializedProperty window;
     SerializedProperty pageSelector;
     SerializedProperty itemCellPrefab;
     SerializedProperty itemCellsParent;
@@ -26,7 +26,7 @@ public class BackpackUIInspector : Editor
     {
         UI = target as BackpackUI;
 
-        backpackWindow = serializedObject.FindProperty("backpackWindow");
+        window = serializedObject.FindProperty("window");
         pageSelector = serializedObject.FindProperty("pageSelector");
         itemCellPrefab = serializedObject.FindProperty("itemCellPrefab");
         itemCellsParent = serializedObject.FindProperty("itemCellsParent");
@@ -46,7 +46,7 @@ public class BackpackUIInspector : Editor
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginVertical("Box");
-        EditorGUILayout.PropertyField(backpackWindow, new GUIContent("背包窗口"));
+        EditorGUILayout.PropertyField(window, new GUIContent("背包窗口"));
         EditorGUILayout.PropertyField(pageSelector, new GUIContent("换页下拉"));
         EditorGUILayout.PropertyField(itemCellPrefab, new GUIContent("单元格预制件"));
         EditorGUILayout.PropertyField(itemCellsParent, new GUIContent("单元格放置根"));

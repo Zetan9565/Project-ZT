@@ -5,6 +5,8 @@ using UnityEditor;
 [CanEditMultipleObjects]
 public class AStarUnitInspector : Editor
 {
+    AStarUnit unit;
+
     new SerializedProperty target;
     SerializedProperty unitSize;
     SerializedProperty targetFootOffset;
@@ -31,6 +33,7 @@ public class AStarUnitInspector : Editor
 
     private void OnEnable()
     {
+        unit = base.target as AStarUnit;
         unitSize = serializedObject.FindProperty("unitSize");
         target = serializedObject.FindProperty("target");
         targetFootOffset = serializedObject.FindProperty("targetFootOffset");
@@ -91,7 +94,7 @@ public class AStarUnitInspector : Editor
         }
         if (target.objectReferenceValue)
         {
-            if ((target.objectReferenceValue as Transform) != (base.target as AStarUnit).transform)
+            if ((target.objectReferenceValue as Transform) != unit.transform)
             {
                 EditorGUILayout.PropertyField(targetFootOffset, new GUIContent("目标脚部偏移"));
                 EditorGUILayout.PropertyField(targetFollowStartDistance, new GUIContent("目标开始跟随距离"));

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -68,8 +69,8 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     public void Push(IWindowHandler window)
     {
         Windows.Push(window);
-        window.SortCanvas.sortingOrder = TopOrder + 1;
-        TopOrder = window.SortCanvas.sortingOrder;
+        window.CanvasToSort.sortingOrder = TopOrder + 1;
+        TopOrder = window.CanvasToSort.sortingOrder;
     }
 
     public void Remove(IWindowHandler window)
@@ -92,5 +93,23 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
         Windows.Clear();
         topOrder = 0;
         Physics2D.BoxCast(Vector2.one, Vector2.one, 90, Vector2.zero);
+    }
+}
+
+public abstract class WindowUI : MonoBehaviour
+{
+    public CanvasGroup window;
+
+    [HideInInspector]
+    public Canvas windowCanvas;
+
+    public Button closeButton;
+
+    protected virtual void Awake()
+    {
+        if (!window.gameObject.GetComponent<GraphicRaycaster>()) window.gameObject.AddComponent<GraphicRaycaster>();
+        windowCanvas = window.GetComponent<Canvas>();
+        windowCanvas.overrideSorting = true;
+        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
     }
 }

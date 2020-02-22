@@ -7,9 +7,10 @@ public interface IWindowHandler
     /// </summary>
     void OpenWindow();
 
+    /// <summary>
+    /// 需在这个方法中把自身从WindowsManager的窗口栈中出栈
+    /// </summary>
     void CloseWindow();
-
-    void OpenCloseWindow();
 
     /// <summary>
     /// 需在这个方法中对IsPausing进行处理
@@ -27,10 +28,15 @@ public interface IWindowHandler
     /// </summary>
     bool IsPausing { get; }
 
-    Canvas SortCanvas { get; }
+    Canvas CanvasToSort { get; }
 }
 
-public interface IDragable
+public interface IOpenCloseAbleWindow
 {
-    Sprite DragableIcon { get; }
+    void OpenCloseWindow();
+}
+
+public interface IDragAble
+{
+    Sprite DragAbleIcon { get; }
 }

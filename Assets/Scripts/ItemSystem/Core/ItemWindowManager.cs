@@ -42,27 +42,27 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
                     (weapon.Hit > 0 ? "命中+" + weapon.Hit + "\n" : string.Empty);
                 if (weapon.Powerup.IsEffective)
                 {
-                    ZetanUtil.SetActive(UI.mulFunTitle.gameObject, true);
-                    ZetanUtil.SetActive(UI.mulFunText.gameObject, true);
+                    ZetanUtility.SetActive(UI.mulFunTitle.gameObject, true);
+                    ZetanUtility.SetActive(UI.mulFunText.gameObject, true);
                     UI.mulFunTitle.text = "-附加能力";
                     UI.mulFunText.text = weapon.Powerup.ToString();
                 }
                 else
                 {
-                    ZetanUtil.SetActive(UI.mulFunTitle.gameObject, false);
-                    ZetanUtil.SetActive(UI.mulFunText.gameObject, false);
+                    ZetanUtility.SetActive(UI.mulFunTitle.gameObject, false);
+                    ZetanUtility.SetActive(UI.mulFunText.gameObject, false);
                     UI.mulFunTitle.text = string.Empty;
                     UI.mulFunText.text = string.Empty;
                 }
                 if (weapon.GemSlotAmout > 0)
-                    ZetanUtil.SetActive(UI.gemstone_1.gameObject, true);
+                    ZetanUtility.SetActive(UI.gemstone_1.gameObject, true);
                 else
-                    ZetanUtil.SetActive(UI.gemstone_1.gameObject, false);
+                    ZetanUtility.SetActive(UI.gemstone_1.gameObject, false);
                 if (weapon.GemSlotAmout > 1)
-                    ZetanUtil.SetActive(UI.gemstone_2.gameObject, true);
+                    ZetanUtility.SetActive(UI.gemstone_2.gameObject, true);
                 else
-                    ZetanUtil.SetActive(UI.gemstone_2.gameObject, false);
-                ZetanUtil.SetActive(UI.durability.gameObject, true);
+                    ZetanUtility.SetActive(UI.gemstone_2.gameObject, false);
+                ZetanUtility.SetActive(UI.durability.gameObject, true);
                 if (PlayerManager.Instance.PlayerInfo.HasPrimaryWeapon)
                     OpenSubItemWindow(PlayerManager.Instance.PlayerInfo.primaryWeapon);
                 else if (PlayerManager.Instance.PlayerInfo.HasSecondaryWeapon)
@@ -70,17 +70,18 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
                 break;
             case ItemType.Bag:
                 UI.effectText.text = GameManager.BackpackName + "容量+" + (MItemInfo.item as BagItem).ExpandSize;
-                ZetanUtil.SetActive(UI.mulFunTitle.gameObject, false);
-                ZetanUtil.SetActive(UI.mulFunText.gameObject, false);
-                ZetanUtil.SetActive(UI.gemstone_1.gameObject, false);
-                ZetanUtil.SetActive(UI.gemstone_2.gameObject, false);
-                ZetanUtil.SetActive(UI.durability.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunTitle.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunText.gameObject, false);
+                ZetanUtility.SetActive(UI.gemstone_1.gameObject, false);
+                ZetanUtility.SetActive(UI.gemstone_2.gameObject, false);
+                ZetanUtility.SetActive(UI.durability.gameObject, false);
+                CloseSubWindow();
                 break;
             case ItemType.Box:
                 UI.effectText.text = string.Empty;
                 BoxItem box = MItemInfo.item as BoxItem;
                 UI.mulFunTitle.text = "-内含物品";
-                ZetanUtil.SetActive(UI.mulFunTitle.gameObject, true);
+                ZetanUtility.SetActive(UI.mulFunTitle.gameObject, true);
                 System.Text.StringBuilder itemsInfo = new System.Text.StringBuilder();
                 for (int i = 0; i < box.ItemsInBox.Count; i++)
                 {
@@ -88,50 +89,52 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
                     if (i != box.ItemsInBox.Count - 1) itemsInfo.Append("\n");
                 }
                 UI.mulFunText.text = itemsInfo.ToString();
-                ZetanUtil.SetActive(UI.mulFunText.gameObject, true);
-                ZetanUtil.SetActive(UI.gemstone_1.gameObject, false);
-                ZetanUtil.SetActive(UI.gemstone_2.gameObject, false);
-                ZetanUtil.SetActive(UI.durability.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunText.gameObject, true);
+                ZetanUtility.SetActive(UI.gemstone_1.gameObject, false);
+                ZetanUtility.SetActive(UI.gemstone_2.gameObject, false);
+                ZetanUtility.SetActive(UI.durability.gameObject, false);
+                CloseSubWindow();
                 break;
             default:
                 UI.effectText.text = string.Empty;
-                ZetanUtil.SetActive(UI.mulFunTitle.gameObject, false);
-                ZetanUtil.SetActive(UI.mulFunText.gameObject, false);
-                ZetanUtil.SetActive(UI.gemstone_1.gameObject, false);
-                ZetanUtil.SetActive(UI.gemstone_2.gameObject, false);
-                ZetanUtil.SetActive(UI.durability.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunTitle.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunText.gameObject, false);
+                ZetanUtility.SetActive(UI.gemstone_1.gameObject, false);
+                ZetanUtility.SetActive(UI.gemstone_2.gameObject, false);
+                ZetanUtility.SetActive(UI.durability.gameObject, false);
+                CloseSubWindow();
                 break;
         }
-        UI.itemWindow.alpha = 1;
-        UI.itemWindow.blocksRaycasts = false;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = false;
 #if UNITY_ANDROID
-        UI.itemWindow.blocksRaycasts = true;
+        UI.window.blocksRaycasts = true;
         UI.buttonAreaCanvas.alpha = 1;
         UI.buttonAreaCanvas.blocksRaycasts = true;
         UI.mulFunButton.onClick.RemoveAllListeners();
-        ZetanUtil.SetActive(UI.closeButton.gameObject, true);
+        ZetanUtility.SetActive(UI.closeButton.gameObject, true);
 #endif
         switch (itemAgent.agentType)
         {
             case ItemAgentType.Backpack:
                 UI.priceTitle.text = "贩卖价格";
 #if UNITY_ANDROID
-                ZetanUtil.SetActive(UI.buttonsArea, true);
-                ZetanUtil.SetActive(UI.discardButton.gameObject, MItemInfo.item.DiscardAble);
-                ZetanUtil.SetActive(UI.mulFunButton.gameObject, false);
+                ZetanUtility.SetActive(UI.buttonsArea, true);
+                ZetanUtility.SetActive(UI.discardButton.gameObject, MItemInfo.item.DiscardAble);
+                ZetanUtility.SetActive(UI.mulFunButton.gameObject, false);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 if (!WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen)
                 {
                     if (MItemInfo.item.Usable)
                     {
-                        ZetanUtil.SetActive(UI.mulFunButton.gameObject, true);
+                        ZetanUtility.SetActive(UI.mulFunButton.gameObject, true);
                         UI.mulFunButton.GetComponentInChildren<Text>().text = MItemInfo.item.IsEquipment ? "装备" : "使用";
                         UI.mulFunButton.onClick.AddListener(UseCurrenItem);
                     }
                 }
                 else if (WarehouseManager.Instance.IsUIOpen)
                 {
-                    ZetanUtil.SetActive(UI.mulFunButton.gameObject, true);
+                    ZetanUtility.SetActive(UI.mulFunButton.gameObject, true);
                     UI.mulFunButton.GetComponentInChildren<Text>().text = "存入";
                     UI.mulFunButton.onClick.AddListener(StoreCurrentItem);
                 }
@@ -139,20 +142,20 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
                 {
                     if (MItemInfo.item.SellAble)
                     {
-                        ZetanUtil.SetActive(UI.mulFunButton.gameObject, true);
+                        ZetanUtility.SetActive(UI.mulFunButton.gameObject, true);
                         UI.mulFunButton.GetComponentInChildren<Text>().text = "出售";
                         UI.mulFunButton.onClick.AddListener(SellOrPurchaseCurrentItem);
                     }
-                    ZetanUtil.SetActive(UI.discardButton.gameObject, false);
+                    ZetanUtility.SetActive(UI.discardButton.gameObject, false);
                 }
 #endif
                 break;
             case ItemAgentType.Warehouse:
                 UI.priceTitle.text = "贩卖价格";
 #if UNITY_ANDROID
-                ZetanUtil.SetActive(UI.buttonsArea, true);
-                ZetanUtil.SetActive(UI.discardButton.gameObject, false);
-                ZetanUtil.SetActive(UI.mulFunButton.gameObject, true);
+                ZetanUtility.SetActive(UI.buttonsArea, true);
+                ZetanUtility.SetActive(UI.discardButton.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunButton.gameObject, true);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(TakeOutCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "取出";
@@ -161,9 +164,9 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
             case ItemAgentType.Making:
                 UI.priceTitle.text = "贩卖价格";
 #if UNITY_ANDROID
-                ZetanUtil.SetActive(UI.buttonsArea, true);
-                ZetanUtil.SetActive(UI.discardButton.gameObject, false);
-                ZetanUtil.SetActive(UI.mulFunButton.gameObject, MItemInfo.Amount > 0);
+                ZetanUtility.SetActive(UI.buttonsArea, true);
+                ZetanUtility.SetActive(UI.discardButton.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunButton.gameObject, MItemInfo.Amount > 0);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(MakeCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "制作";
@@ -175,9 +178,9 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
                     UI.priceText.text = ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo.SellPrice.ToString() + GameManager.CoinName;
                 else CloseItemWindow();
 #if UNITY_ANDROID
-                ZetanUtil.SetActive(UI.buttonsArea, true);
-                ZetanUtil.SetActive(UI.discardButton.gameObject, false);
-                ZetanUtil.SetActive(UI.mulFunButton.gameObject, true);
+                ZetanUtility.SetActive(UI.buttonsArea, true);
+                ZetanUtility.SetActive(UI.discardButton.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunButton.gameObject, true);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(SellOrPurchaseCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "购买";
@@ -189,9 +192,9 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
                     UI.priceText.text = ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo.PurchasePrice.ToString() + GameManager.CoinName;
                 else CloseItemWindow();
 #if UNITY_ANDROID
-                ZetanUtil.SetActive(UI.buttonsArea, true);
-                ZetanUtil.SetActive(UI.discardButton.gameObject, false);
-                ZetanUtil.SetActive(UI.mulFunButton.gameObject, BackpackManager.Instance.GetItemAmount(MItemInfo.ItemID) > 0);
+                ZetanUtility.SetActive(UI.buttonsArea, true);
+                ZetanUtility.SetActive(UI.discardButton.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunButton.gameObject, BackpackManager.Instance.GetItemAmount(MItemInfo.ItemID) > 0);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(SellOrPurchaseCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "出售";
@@ -200,9 +203,9 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
             case ItemAgentType.Loot:
                 UI.priceTitle.text = "贩卖价格";
 #if UNITY_ANDROID
-                ZetanUtil.SetActive(UI.buttonsArea, true);
-                ZetanUtil.SetActive(UI.discardButton.gameObject, false);
-                ZetanUtil.SetActive(UI.mulFunButton.gameObject, true);
+                ZetanUtility.SetActive(UI.buttonsArea, true);
+                ZetanUtility.SetActive(UI.discardButton.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunButton.gameObject, true);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 UI.mulFunButton.onClick.AddListener(TakeCurrentItem);
                 UI.mulFunButton.GetComponentInChildren<Text>().text = "拾取";
@@ -210,10 +213,10 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
                 break;
             default:
 #if UNITY_ANDROID
-                ZetanUtil.SetActive(UI.closeButton.gameObject, true);
+                ZetanUtility.SetActive(UI.closeButton.gameObject, true);
 #endif
-                ZetanUtil.SetActive(UI.discardButton.gameObject, false);
-                ZetanUtil.SetActive(UI.mulFunButton.gameObject, false);
+                ZetanUtility.SetActive(UI.discardButton.gameObject, false);
+                ZetanUtility.SetActive(UI.mulFunButton.gameObject, false);
                 UI.mulFunButton.onClick.RemoveAllListeners();
                 break;
         }
@@ -241,39 +244,39 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
                     (weapon.Hit > 0 ? "命中+" + weapon.Hit + "\n" : string.Empty);
                 if (weapon.Powerup.IsEffective)
                 {
-                    ZetanUtil.SetActive(subUI.mulFunTitle.gameObject, true);
-                    ZetanUtil.SetActive(subUI.mulFunText.gameObject, true);
+                    ZetanUtility.SetActive(subUI.mulFunTitle.gameObject, true);
+                    ZetanUtility.SetActive(subUI.mulFunText.gameObject, true);
                     subUI.mulFunTitle.text = "-附加能力";
                     subUI.mulFunText.text = weapon.Powerup.ToString();
                 }
                 else
                 {
-                    ZetanUtil.SetActive(subUI.mulFunTitle.gameObject, false);
-                    ZetanUtil.SetActive(subUI.mulFunText.gameObject, false);
+                    ZetanUtility.SetActive(subUI.mulFunTitle.gameObject, false);
+                    ZetanUtility.SetActive(subUI.mulFunText.gameObject, false);
                     subUI.mulFunTitle.text = string.Empty;
                     subUI.mulFunText.text = string.Empty;
                 }
                 if (weapon.GemSlotAmout > 0)
-                    ZetanUtil.SetActive(subUI.gemstone_1.gameObject, true);
+                    ZetanUtility.SetActive(subUI.gemstone_1.gameObject, true);
                 else
-                    ZetanUtil.SetActive(subUI.gemstone_1.gameObject, false);
+                    ZetanUtility.SetActive(subUI.gemstone_1.gameObject, false);
                 if (weapon.GemSlotAmout > 1)
-                    ZetanUtil.SetActive(subUI.gemstone_2.gameObject, true);
+                    ZetanUtility.SetActive(subUI.gemstone_2.gameObject, true);
                 else
-                    ZetanUtil.SetActive(subUI.gemstone_2.gameObject, false);
-                ZetanUtil.SetActive(subUI.durability.gameObject, true);
+                    ZetanUtility.SetActive(subUI.gemstone_2.gameObject, false);
+                ZetanUtility.SetActive(subUI.durability.gameObject, true);
                 break;
             default:
                 subUI.effectText.text = string.Empty;
-                ZetanUtil.SetActive(subUI.mulFunTitle.gameObject, false);
-                ZetanUtil.SetActive(subUI.mulFunText.gameObject, false);
-                ZetanUtil.SetActive(subUI.gemstone_1.gameObject, false);
-                ZetanUtil.SetActive(subUI.gemstone_2.gameObject, false);
-                ZetanUtil.SetActive(subUI.durability.gameObject, false);
+                ZetanUtility.SetActive(subUI.mulFunTitle.gameObject, false);
+                ZetanUtility.SetActive(subUI.mulFunText.gameObject, false);
+                ZetanUtility.SetActive(subUI.gemstone_1.gameObject, false);
+                ZetanUtility.SetActive(subUI.gemstone_2.gameObject, false);
+                ZetanUtility.SetActive(subUI.durability.gameObject, false);
                 break;
         }
-        subUI.itemWindow.alpha = 1;
-        subUI.itemWindow.blocksRaycasts = false;
+        subUI.window.alpha = 1;
+        subUI.window.blocksRaycasts = false;
         subUI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
     }
 
@@ -303,43 +306,43 @@ public class ItemWindowManager : SingletonMonoBehaviour<ItemWindowManager>
 
     public void CloseItemWindow()
     {
-        UI.itemWindow.alpha = 0;
-        UI.itemWindow.blocksRaycasts = false;
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
         MItemInfo = null;
         UI.nameText.text = null;
         UI.descriptionText.text = string.Empty;
         UI.priceText.text = string.Empty;
         UI.descriptionText.text = string.Empty;
-        ZetanUtil.SetActive(UI.durability.gameObject, false);
+        ZetanUtility.SetActive(UI.durability.gameObject, false);
         CloseSubWindow();
 #if UNITY_ANDROID
         UI.buttonAreaCanvas.alpha = 0;
         UI.buttonAreaCanvas.blocksRaycasts = false;
-        ZetanUtil.SetActive(UI.closeButton.gameObject, false);
+        ZetanUtility.SetActive(UI.closeButton.gameObject, false);
 #endif
     }
 
     public void CloseSubWindow()
     {
-        subUI.itemWindow.alpha = 0;
-        subUI.itemWindow.blocksRaycasts = false;
+        subUI.window.alpha = 0;
+        subUI.window.blocksRaycasts = false;
         subUI.nameText.text = null;
         subUI.descriptionText.text = string.Empty;
         subUI.priceText.text = string.Empty;
         subUI.descriptionText.text = string.Empty;
-        ZetanUtil.SetActive(subUI.durability.gameObject, false);
+        ZetanUtility.SetActive(subUI.durability.gameObject, false);
     }
 
     public void UseCurrenItem()
     {
-        BackpackManager.Instance.GetItemAgentByInfo(MItemInfo).UseItem();
+        BackpackManager.Instance.UseItem(MItemInfo);
         CloseItemWindow();
     }
 
     public void DiscardCurrentItem()
     {
         BackpackManager.Instance.DiscardItem(MItemInfo);
-        AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
+        AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
         CloseItemWindow();
     }
 

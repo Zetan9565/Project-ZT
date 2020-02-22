@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1daedce21944fe64f95c5f9988e0ae33, type: 3}
+  m_Name: npc info
+  m_EditorClassIdentifier: 
+  _ID: NPC003
+  _Name: "\u5C0F\u80E1\u5B50"
+  sex: 1
+  defaultDialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
+  isWarehouseAgent: 0
+  warehouse:
+    warehouseSize:
+      min: 0
+      max: 50
+  isVendor: 0
+  shop: {fileID: 0}
+  questsStored: []
+  canDEV_RLAT: 0
+  normalItemDialogue: {fileID: 0}
+  favoriteItemDialogue:
+    level_1: {fileID: 0}
+    level_2: {fileID: 0}
+    level_3: {fileID: 0}
+    level_4: {fileID: 0}
+  hateItemDialogue:
+    level_1: {fileID: 0}
+    level_2: {fileID: 0}
+    level_3: {fileID: 0}
+    level_4: {fileID: 0}
+  favoriteItems: []
+  hateItems: []
+  canMarry: 0

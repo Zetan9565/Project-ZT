@@ -1,18 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class AmountUI : MonoBehaviour
+public class AmountUI : WindowUI
 {
-    public CanvasGroup amountWindow;
-
-    [HideInInspector]
-    public Canvas windowCanvas;
-
     public InputField amount;
 
     public Button max;
     public Button clear;
-    public Button cancel;
     public Button confirm;
     public Button plus;
     public Button minus;
@@ -20,17 +14,14 @@ public class AmountUI : MonoBehaviour
     public Button[] numButtons;
 
     // Start is called before the first frame update
-    void Awake()
+    protected override void Awake()
     {
-        if (!amountWindow.GetComponent<GraphicRaycaster>()) amountWindow.gameObject.AddComponent<GraphicRaycaster>();
-        windowCanvas = amountWindow.GetComponent<Canvas>();
-        windowCanvas.overrideSorting = true;
-        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
+        base.Awake();
         amount.onValueChanged.AddListener(delegate { AmountManager.Instance.FixAmount(); });
         max.onClick.AddListener(AmountManager.Instance.Max);
         clear.onClick.AddListener(AmountManager.Instance.Clear);
         confirm.onClick.AddListener(AmountManager.Instance.Confirm);
-        cancel.onClick.AddListener(AmountManager.Instance.Cancel);
+        closeButton.onClick.AddListener(AmountManager.Instance.Cancel);
         plus.onClick.AddListener(AmountManager.Instance.Plus);
         minus.onClick.AddListener(AmountManager.Instance.Minus);
         amount.characterLimit = 12;

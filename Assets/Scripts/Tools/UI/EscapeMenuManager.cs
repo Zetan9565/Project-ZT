@@ -2,7 +2,7 @@
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/退出菜单管理器")]
-public class EscapeMenuManager : SingletonMonoBehaviour<EscapeMenuManager>, IWindowHandler
+public class EscapeMenuManager : SingletonMonoBehaviour<EscapeMenuManager>, IWindowHandler, IOpenCloseAbleWindow
 {
     [SerializeField]
     private EscapeUI UI;
@@ -10,7 +10,7 @@ public class EscapeMenuManager : SingletonMonoBehaviour<EscapeMenuManager>, IWin
     public bool IsUIOpen { get; private set; }
     public bool IsPausing { get; private set; }
 
-    public Canvas SortCanvas
+    public Canvas CanvasToSort
     {
         get
         {

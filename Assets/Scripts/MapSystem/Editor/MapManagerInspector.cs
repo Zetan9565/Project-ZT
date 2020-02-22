@@ -4,6 +4,8 @@ using UnityEditor;
 [CustomEditor(typeof(MapManager))]
 public class MapManagerInspector : SingletonMonoBehaviourInspector
 {
+    MapManager manager;
+
     SerializedProperty UI;
     SerializedProperty updateMode;
     SerializedProperty player;
@@ -30,6 +32,8 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
 
     private void OnEnable()
     {
+        manager = target as MapManager;
+
         UI = serializedObject.FindProperty("UI");
         updateMode = serializedObject.FindProperty("updateMode");
         player = serializedObject.FindProperty("player");
@@ -67,11 +71,11 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
         EditorGUILayout.PropertyField(player, new GUIContent("跟随目标"));
         EditorGUILayout.PropertyField(offset, new GUIContent("位置偏移量"));
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.PropertyField(use2D, new GUIContent("2D"));
+        EditorGUILayout.PropertyField(use2D, new GUIContent("2D场景"));
         EditorGUILayout.PropertyField(rotateMap, new GUIContent("旋转地图"));
         EditorGUILayout.EndHorizontal();
-        EditorGUILayout.PropertyField(UI);
         EditorGUILayout.PropertyField(updateMode, new GUIContent("更新方式"));
+        EditorGUILayout.PropertyField(UI);
         if (UI.objectReferenceValue)
         {
             int mode = circle.boolValue ? 1 : 0;
@@ -79,56 +83,34 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
             circle.boolValue = index == 0 ? false : true;
             if (!circle.boolValue) EditorGUILayout.PropertyField(edgeSize, new GUIContent("边框厚度"));
             if (circle.boolValue) EditorGUILayout.PropertyField(radius, new GUIContent("半径"));
+
+            if (Application.isPlaying) GUI.enabled = false;
+            playerIcon.objectReferenceValue = EditorGUILayout.ObjectField("主图标", playerIcon.objectReferenceValue as Sprite, typeof(Sprite), false);
+            EditorGUILayout.PropertyField(playerIconSize, new GUIContent("主图标大小"));
+            defaultMarkIcon.objectReferenceValue = EditorGUILayout.ObjectField("默认标记图标", defaultMarkIcon.objectReferenceValue as Sprite, typeof(Sprite), false);
+            EditorGUILayout.PropertyField(defaultMarkSize, new GUIContent("默认标记大小"));
+            EditorGUILayout.PropertyField(mapCamera, new GUIContent("地图相机"));
+            EditorGUILayout.PropertyField(cameraPrefab, new GUIContent("地图相机预制件"));
+            EditorGUILayout.PropertyField(targetTexture, new GUIContent("采样贴图"));
+            if (Application.isPlaying) GUI.enabled = true;
+            EditorGUILayout.PropertyField(mapRenderMask, new GUIContent("地图相机可视层"));
+            if (mapCamera.objectReferenceValue)
+            {
+                Camera cam = (mapCamera.objectReferenceValue as MapCamera).Camera;
+                cam.cullingMask = mapRenderMask.intValue;
+                if (targetTexture.objectReferenceValue && cam.targetTexture != targetTexture.objectReferenceValue)
+                    cam.targetTexture = targetTexture.objectReferenceValue as RenderTexture;
+            }
+            EditorGUILayout.Space();
+            EditorGUILayout.PropertyField(worldEdgeSize, new GUIContent("大地图边框厚度"));
+            EditorGUILayout.PropertyField(dragSensitivity, new GUIContent("大地图拖拽灵敏度"));
+            EditorGUILayout.PropertyField(animationSpeed, new GUIContent("动画速度"));
+            if (Application.isPlaying) GUI.enabled = false;
+            EditorGUILayout.PropertyField(isViewingWorldMap, new GUIContent("当前是大地图模式"));
+            if (Application.isPlaying) GUI.enabled = true;
+            DrawModeInfo(miniModeInfo, true);
+            DrawModeInfo(worldModeInfo, false);
         }
-        if (Application.isPlaying) GUI.enabled = false;
-        EditorGUILayout.PropertyField(playerIcon, new GUIContent("主图标"));
-        EditorGUILayout.PropertyField(playerIconSize, new GUIContent("主图标大小"));
-        EditorGUILayout.PropertyField(defaultMarkIcon, new GUIContent("默认标记图标"));
-        EditorGUILayout.PropertyField(defaultMarkSize, new GUIContent("默认标记大小"));
-        if (Application.isPlaying) GUI.enabled = true;
-        if (playerIcon.objectReferenceValue || defaultMarkIcon.objectReferenceValue)
-        {
-            var rect = EditorGUILayout.GetControlRect();
-            EditorGUI.LabelField(new Rect(rect.x, rect.y + rect.height * 1.5f, rect.width, rect.height), "主图标");
-            EditorGUI.LabelField(new Rect(rect.x + rect.width / 2, rect.y + rect.height * 1.5f, rect.width, rect.height), "默认标记图标");
-            GUI.enabled = false;
-            if (playerIcon.objectReferenceValue) EditorGUI.ObjectField(new Rect(rect.x - rect.width / 2f, rect.y, rect.width, rect.height * 4),
-                 string.Empty, playerIcon.objectReferenceValue as Sprite, typeof(Texture2D), false);
-            if (defaultMarkIcon.objectReferenceValue) EditorGUI.ObjectField(new Rect(rect.x, rect.y, rect.width, rect.height * 4),
-                 string.Empty, defaultMarkIcon.objectReferenceValue as Sprite, typeof(Texture2D), false);
-            GUI.enabled = true;
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-        }
-        if (Application.isPlaying) GUI.enabled = false;
-        EditorGUILayout.PropertyField(mapCamera, new GUIContent("地图相机"));
-        EditorGUILayout.PropertyField(cameraPrefab, new GUIContent("地图相机预制件"));
-        EditorGUILayout.PropertyField(targetTexture, new GUIContent("采样贴图"));
-        if (Application.isPlaying) GUI.enabled = true;
-        EditorGUILayout.PropertyField(mapRenderMask, new GUIContent("地图相机可视层"));
-        if (mapCamera.objectReferenceValue)
-        {
-            Camera cam = (mapCamera.objectReferenceValue as MapCamera).Camera;
-            cam.cullingMask = mapRenderMask.intValue;
-            if (targetTexture.objectReferenceValue && cam.targetTexture != targetTexture.objectReferenceValue)
-                cam.targetTexture = targetTexture.objectReferenceValue as RenderTexture;
-        }
-        EditorGUILayout.Space();
-        EditorGUILayout.PropertyField(worldEdgeSize, new GUIContent("大地图边框厚度"));
-        EditorGUILayout.PropertyField(dragSensitivity, new GUIContent("大地图拖拽灵敏度"));
-        EditorGUILayout.PropertyField(animationSpeed, new GUIContent("动画速度"));
-        if (Application.isPlaying) GUI.enabled = false;
-        EditorGUILayout.PropertyField(isViewingWorldMap, new GUIContent("当前是大地图模式"));
-        if (Application.isPlaying) GUI.enabled = true;
-        DrawModeInfo(miniModeInfo, true);
-        DrawModeInfo(worldModeInfo, false);
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
     }
 
@@ -156,7 +138,7 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
                 {
                     if (mapCamera.objectReferenceValue)
                     {
-                        sizeOfCam.floatValue = (mapCamera.objectReferenceValue as Camera).orthographicSize;
+                        sizeOfCam.floatValue = (mapCamera.objectReferenceValue as MapCamera).Camera.orthographicSize;
                     }
                     windowAnchoreMin.vector2Value = UI.mapWindowRect.anchorMin;
                     windowAnchoreMax.vector2Value = UI.mapWindowRect.anchorMax;
@@ -173,8 +155,8 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
             if (mini && !isViewingWorldMap.boolValue || !mini && isViewingWorldMap.boolValue) GUI.enabled = false;
             if (GUILayout.Button("切换至" + (mini ? "小地图" : "大地图") + "模式"))
             {
-                if (mini) (target as MapManager).ToMiniMap();
-                else (target as MapManager).ToWorldMap();
+                if (mini) manager.ToMiniMap();
+                else manager.ToWorldMap();
             }
             if (mini && !isViewingWorldMap.boolValue || !mini && isViewingWorldMap.boolValue) GUI.enabled = true;
             EditorGUILayout.EndHorizontal();

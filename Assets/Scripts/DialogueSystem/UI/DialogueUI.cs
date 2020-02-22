@@ -1,22 +1,14 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class DialogueUI : MonoBehaviour
+public class DialogueUI : WindowUI
 {
-    public CanvasGroup dialogueWindow;
-
-    [HideInInspector]
-    public Canvas windowCanvas;
-
     public Text nameText;
 
     public Text wordsText;
 
     public Button backButton;
-
-    public Button finishButton;
 
     public Button warehouseButton;
     public Button shopButton;
@@ -48,15 +40,13 @@ public class DialogueUI : MonoBehaviour
     public GameObject rewardCellPrefab;
     public Transform rewardCellsParent;
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (!dialogueWindow.gameObject.GetComponent<GraphicRaycaster>()) dialogueWindow.gameObject.AddComponent<GraphicRaycaster>();
-        windowCanvas = dialogueWindow.GetComponent<Canvas>();
-        windowCanvas.overrideSorting = true;
+        base.Awake();
         warehouseButton.onClick.AddListener(DialogueManager.Instance.OpenTalkerWarehouse);
         shopButton.onClick.AddListener(DialogueManager.Instance.OpenTalkerShop);
         backButton.onClick.AddListener(DialogueManager.Instance.GotoDefault);
-        finishButton.onClick.AddListener(DialogueManager.Instance.CloseWindow);
+        closeButton.onClick.AddListener(DialogueManager.Instance.CloseWindow);
         questButton.onClick.AddListener(DialogueManager.Instance.LoadTalkerQuest);
         pageUpButton.onClick.AddListener(DialogueManager.Instance.OptionPageUp);
         pageDownButton.onClick.AddListener(DialogueManager.Instance.OptionPageDown);

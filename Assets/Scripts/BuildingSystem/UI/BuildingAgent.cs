@@ -22,6 +22,7 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
 
     public void Init(Building building)
     {
+        if (!building) return;
         MBuilding = building;
         MBuilding.buildingAgent = this;
         destoryButton.interactable = MBuilding.IsBuilt;
@@ -40,7 +41,6 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
     public void UpdateUI()
     {
         destoryButton.interactable = MBuilding.IsBuilt;
-        //buildingPosition.text = "位置" + ((Vector2)MBuilding.transform.position).ToString();
         buildingStates.text = MBuilding.IsBuilt ? "已建成" : "建设中[" + MBuilding.leftBuildTime.ToString("F2") + "s]";
     }
 
@@ -51,17 +51,16 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
 
     public void Show()
     {
-        ZetanUtil.SetActive(gameObject, true);
+        ZetanUtility.SetActive(gameObject, true);
     }
 
     public void Hide()
     {
-        ZetanUtil.SetActive(gameObject, false);
+        ZetanUtility.SetActive(gameObject, false);
     }
 
     public void Destroy()
     {
-        BuildingManager.Instance.RequestDestroy(MBuilding);
-        BuildingManager.Instance.DestroyToDestroyBuilding();
+        BuildingManager.Instance.RequestAndDestroy(MBuilding, true);
     }
 }

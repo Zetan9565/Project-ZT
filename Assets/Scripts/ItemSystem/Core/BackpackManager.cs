@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/背包管理器")]
-public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowHandler
+public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowHandler, IOpenCloseAbleWindow
 {
     [SerializeField]
     private BackpackUI UI;
@@ -29,8 +29,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     {
         get
         {
-            if (PlayerManager.Instance) return PlayerManager.Instance.Backpack;
-            else return null;
+            return PlantManager.Instance ? PlayerManager.Instance.Backpack : null;
         }
     }
 
@@ -62,7 +61,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         UI.pageSelector.SetValueWithoutNotify(0);
     }
 
-    #region 道具处理相关
+    #region 道具得失相关
     /// <summary>
     /// 尝试获取道具
     /// </summary>
@@ -102,7 +101,16 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
 
     public bool TryGetItem_Boolean(ItemBase item, int amount = 1)
     {
-        if (MBackpack == null || !item || amount < 1) return false;
+        if (MBackpack == null || !item)
+        {
+            MessageManager.Instance.NewMessage("无效的道具");
+            return false;
+        }
+        if (amount < 1)
+        {
+            if (amount < 0) MessageManager.Instance.NewMessage("无效的数量");
+            return false;
+        }
         if (MBackpack.IsFull)
         {
             MessageManager.Instance.NewMessage(GameManager.BackpackName + "已满");
@@ -214,7 +222,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         if (info.Amount < 2 && info.Amount > 0)
         {
             ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃1个 [{0}] 吗？",
-                ZetanUtil.ColorRichText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
+                ZetanUtility.ColorRichText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
              {
                  if (OnDiscard(info))
                      MessageManager.Instance.NewMessage(string.Format("丢掉了1个 [{0}]", info.ItemName));
@@ -223,7 +231,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         else AmountManager.Instance.NewAmount(delegate
         {
             ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount,
-                ZetanUtil.ColorRichText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
+                ZetanUtility.ColorRichText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
             {
                 if (OnDiscard(info, (int)AmountManager.Instance.Amount))
                     MessageManager.Instance.NewMessage(string.Format("丢掉了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
@@ -299,6 +307,360 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         }
     }
 
+    public bool MakeItem(ItemBase itemToMake, int amount = 1)
+    {
+        if (!itemToMake || amount < 1) return false;
+        foreach (MatertialInfo mi in itemToMake.Materials)
+            if (!TryLoseItem_Boolean(mi.Item, mi.Amount * amount))
+                return false;
+        foreach (MatertialInfo mi in itemToMake.Materials)//模拟空出位置来放制作的道具
+        {
+            MBackpack.weightLoad -= mi.Item.Weight * mi.Amount * amount;
+            if (mi.Item.StackAble && GetItemAmount(mi.Item) - mi.Amount * amount == 0)//可叠加且消耗后用尽，则空出一格
+                MBackpack.backpackSize--;
+            else if (!mi.Item.StackAble)//不可叠加，则消耗多少个就能空出多少格
+                MBackpack.backpackSize -= amount;
+        }
+        if (!TryGetItem_Boolean(itemToMake, amount))
+        {
+            foreach (MatertialInfo mi in itemToMake.Materials)//取消模拟
+            {
+                MBackpack.weightLoad += mi.Item.Weight * mi.Amount * amount;
+                if (mi.Item.StackAble && GetItemAmount(mi.Item) - mi.Amount * amount == 0)
+                    MBackpack.backpackSize++;
+                else if (!mi.Item.StackAble)
+                    MBackpack.backpackSize += amount;
+            }
+            return false;
+        }
+        foreach (MatertialInfo mi in itemToMake.Materials)//取消模拟并确认操作
+        {
+            MBackpack.weightLoad += mi.Item.Weight * mi.Amount * amount;
+            if (mi.Item.StackAble && GetItemAmount(mi.Item) - mi.Amount * amount == 0)
+                MBackpack.backpackSize++;
+            else if (!mi.Item.StackAble)
+                MBackpack.backpackSize += amount;
+            LoseItem(mi.Item, mi.Amount * amount);
+        }
+        GetItem(itemToMake, amount);
+        UpdateUI();
+        return true;
+    }
+    #endregion
+
+    #region 道具使用相关
+    public void UseItem(ItemInfo MItemInfo)
+    {
+        if (!MItemInfo.item.Usable)
+        {
+            MessageManager.Instance.NewMessage("该物品不可使用");
+            return;
+        }
+        if (MItemInfo.item.IsBox) UseBox(MItemInfo);
+        else if (MItemInfo.item.IsEquipment) UseEuipment(MItemInfo);
+        else if (MItemInfo.item.IsBook) UseBook(MItemInfo);
+        else if (MItemInfo.item.IsBag) UseBag(MItemInfo);
+        if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
+    }
+
+    void UseBox(ItemInfo MItemInfo)
+    {
+        BoxItem box = MItemInfo.item as BoxItem;
+        if (TryLoseItem_Boolean(MItemInfo, 1))
+        {
+            MBackpack.weightLoad -= box.Weight;
+            MBackpack.backpackSize--;
+            foreach (ItemInfo info in box.ItemsInBox)
+            {
+                if (!TryGetItem_Boolean(info))
+                {
+                    MBackpack.weightLoad += box.Weight;
+                    MBackpack.backpackSize++;
+                    return;
+                }
+            }
+            MBackpack.weightLoad += box.Weight;
+            MBackpack.backpackSize++;
+            LoseItem(MItemInfo);
+            foreach (ItemInfo info in box.ItemsInBox)
+            {
+                GetItem(info);
+            }
+        }
+    }
+
+    void UseEuipment(ItemInfo MItemInfo)
+    {
+        Equip(MItemInfo);
+    }
+
+    void UseBook(ItemInfo MItemInfo)
+    {
+        BookItem book = MItemInfo.item as BookItem;
+        switch (book.BookType)
+        {
+            case BookType.Building:
+                if (TryLoseItem_Boolean(MItemInfo, 1) && BuildingManager.Instance.Learn(book.BuildingToLearn))
+                {
+                    LoseItem(MItemInfo);
+                    BuildingManager.Instance.Init();
+                }
+                break;
+            case BookType.Making:
+                if (TryLoseItem_Boolean(MItemInfo, 1) && MakingManager.Instance.Learn(book.ItemToLearn))
+                {
+                    LoseItem(MItemInfo);
+                    MakingManager.Instance.Init();
+                }
+                break;
+            case BookType.Skill:
+            default: break;
+        }
+    }
+
+    void UseBag(ItemInfo MItemInfo)
+    {
+        BagItem bag = MItemInfo.item as BagItem;
+        if (TryLoseItem_Boolean(MItemInfo, 1))
+        {
+            if (ExpandSize(bag.ExpandSize))
+                LoseItem(MItemInfo);
+        }
+    }
+    #endregion
+
+    #region 道具装备相关
+    public void Equip(ItemInfo toEquip)
+    {
+        if (toEquip == null || !toEquip.item) return;
+        ItemInfo equiped = null;
+        switch (toEquip.item.ItemType)
+        {
+            case ItemType.Weapon:
+                MBackpack.backpackSize--;//模拟为将要替换出来的武器留出空间
+                if (PlayerManager.Instance.PlayerInfo.HasPrimaryWeapon && (toEquip.item as WeaponItem).IsPrimary)
+                {
+                    equiped = PlayerManager.Instance.PlayerInfo.UnequipWeapon(true);
+                }
+                else if (PlayerManager.Instance.PlayerInfo.HasSecondaryWeapon && !(toEquip.item as WeaponItem).IsPrimary)
+                {
+                    equiped = PlayerManager.Instance.PlayerInfo.UnequipWeapon(false);
+                }
+                if ((equiped && !TryGetItem_Boolean(equiped, 1)) || !PlayerManager.Instance.PlayerInfo.EquipWeapon(toEquip))
+                {
+                    PlayerManager.Instance.PlayerInfo.EquipWeapon(equiped);
+                    MBackpack.backpackSize++;
+                    return;
+                }
+                break;
+            case ItemType.Armor:
+            default: return;
+        }
+        LoseItem(toEquip);
+        MBackpack.weightLoad += toEquip.item.Weight;//装备并不是真正没有了，而是装备在身上，所以负重不变，在此处修正。
+        MessageManager.Instance.NewMessage(string.Format("装备了 [{0}]", toEquip.ItemName));
+        if (equiped)
+        {
+            GetItem(equiped, 1);
+            MBackpack.weightLoad -= equiped.item.Weight;//装备并不是真正重新获得，而是本来就装备在身上，所以负重不变，在此处修正。
+        }
+        UpdateUI();
+    }
+
+    public void Unequip(ItemInfo toUnequip)
+    {
+        if (toUnequip == null) return;
+        ItemInfo equiped = toUnequip;
+        switch (toUnequip.item.ItemType)
+        {
+            case ItemType.Weapon:
+                MBackpack.weightLoad -= equiped.item.Weight;
+                MBackpack.backpackSize--;
+                if (PlayerManager.Instance.PlayerInfo.HasPrimaryWeapon && (equiped.item as WeaponItem).IsPrimary)
+                {
+                    equiped = PlayerManager.Instance.PlayerInfo.UnequipWeapon(true);
+                }
+                else if (PlayerManager.Instance.PlayerInfo.HasSecondaryWeapon && !(equiped.item as WeaponItem).IsPrimary)
+                {
+                    equiped = PlayerManager.Instance.PlayerInfo.UnequipWeapon(false);
+                }
+                break;
+            case ItemType.Armor:
+            default: return;
+        }
+        if (!TryGetItem_Boolean(equiped))
+        {
+            PlayerManager.Instance.PlayerInfo.EquipWeapon(equiped);
+            MBackpack.weightLoad += equiped.item.Weight;
+            MBackpack.backpackSize++;
+            return;
+        }
+        else GetItem(equiped, 1);
+    }
+    #endregion
+
+    #region UI相关
+    public void OpenWindow()
+    {
+        if (!UI || !UI.gameObject) return;
+        if (IsPausing) return;
+        if (DialogueManager.Instance.IsTalking && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen) return;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
+        WindowsManager.Instance.Push(this);
+        IsUIOpen = true;
+        GridMask.raycastTarget = true;
+        ZetanUtility.SetActive(UI.handworkButton.gameObject, !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen);
+    }
+    public void CloseWindow()
+    {
+        if (!UI || !UI.gameObject) return;
+        if (IsPausing) return;
+        foreach (ItemAgent ia in itemAgents)
+            ia.FinishDrag();
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
+        IsUIOpen = false;
+        IsPausing = false;
+        WindowsManager.Instance.Remove(this);
+        AmountManager.Instance.Cancel();
+        ItemWindowManager.Instance.CloseItemWindow();
+        if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
+        if (ShopManager.Instance.IsUIOpen) ShopManager.Instance.CloseWindow();
+    }
+    public void PauseDisplay(bool pause)
+    {
+        if (!UI || !UI.gameObject) return;
+        if (!IsUIOpen) return;
+        if (IsPausing && !pause)
+        {
+            UI.window.alpha = 1;
+            UI.window.blocksRaycasts = true;
+        }
+        else if (!IsPausing && pause)
+        {
+            UI.window.alpha = 0;
+            UI.window.blocksRaycasts = false;
+            ItemWindowManager.Instance.CloseItemWindow();
+        }
+        IsPausing = pause;
+    }
+    public void OpenCloseWindow()
+    {
+        if (!UI || !UI.gameObject) return;
+        if (!IsUIOpen)
+            OpenWindow();
+        else CloseWindow();
+    }
+    public Canvas CanvasToSort
+    {
+        get
+        {
+            if (!UI) return null;
+            return UI.windowCanvas;
+        }
+    }
+
+    public void Sort()
+    {
+        if (!UI || !UI.gameObject) return;
+        MBackpack.Sort();
+        Init();
+        foreach (ItemInfo info in MBackpack.Items)
+            foreach (ItemAgent ia in itemAgents)
+                if (ia.IsEmpty)
+                {
+                    ia.InitItem(info);
+                    break;
+                }
+        ItemWindowManager.Instance.CloseItemWindow();
+        UpdateUI();
+    }
+
+    public void UpdateUI()
+    {
+        if (!UI || !UI.gameObject) return;
+        UI.money.text = MBackpack.Money.ToString() + GameManager.CoinName;
+        UI.weight.text = MBackpack.weightLoad.ToString("F2") + "WL";
+        UI.size.text = MBackpack.backpackSize.ToString();
+        SetPage(currentPage);
+        QuestManager.Instance.UpdateUI();
+        BuildingManager.Instance.UpdateUI();
+        MakingManager.Instance.UpdateUI();
+    }
+
+    public void SetUI(BackpackUI UI)
+    {
+        itemAgents.RemoveAll(x => !x || !x.gameObject);
+        foreach (var ia in itemAgents)
+        {
+            ia.Empty();
+        }
+        IsPausing = false;
+        CloseWindow();
+        this.UI = UI;
+    }
+
+    #region 道具页相关
+    private int currentPage;
+    public void SetPage(int index)
+    {
+        if (!UI || !UI.gameObject) return;
+        currentPage = index;
+        switch (index)
+        {
+            case 1: ShowEquipments(); break;
+            case 2: ShowConsumables(); break;
+            case 3: ShowMaterials(); break;
+            default: ShowAll(); break;
+        }
+    }
+
+    private void ShowAll()
+    {
+        if (!UI || !UI.gameObject) return;
+        foreach (ItemAgent ia in itemAgents)
+        {
+            ZetanUtility.SetActive(ia.gameObject, true);
+        }
+    }
+
+    private void ShowEquipments()
+    {
+        if (!UI || !UI.gameObject) return;
+        foreach (ItemAgent ia in itemAgents)
+        {
+            if (!ia.IsEmpty && ia.MItemInfo.item.IsEquipment)
+                ZetanUtility.SetActive(ia.gameObject, true);
+            else ZetanUtility.SetActive(ia.gameObject, false);
+        }
+    }
+
+    private void ShowConsumables()
+    {
+        if (!UI || !UI.gameObject) return;
+        foreach (ItemAgent ia in itemAgents)
+        {
+            if (!ia.IsEmpty && ia.MItemInfo.item.IsConsumable)
+                ZetanUtility.SetActive(ia.gameObject, true);
+            else ZetanUtility.SetActive(ia.gameObject, false);
+        }
+    }
+
+    private void ShowMaterials()
+    {
+        if (!UI || !UI.gameObject) return;
+        foreach (ItemAgent ia in itemAgents)
+        {
+            if (!ia.IsEmpty && ia.MItemInfo.item.IsMaterial)
+                ZetanUtility.SetActive(ia.gameObject, true);
+            else ZetanUtility.SetActive(ia.gameObject, false);
+        }
+    }
+    #endregion
+    #endregion
+
+    #region 其它
     public void GetMoney(long value)
     {
         if (value < 0) return;
@@ -312,6 +674,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         if (MBackpack.Money < value)
         {
             MessageManager.Instance.NewMessage("钱币不足");
+            return false;
         }
         return true;
     }
@@ -390,167 +753,6 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         MessageManager.Instance.NewMessage(GameManager.BackpackName + "载重增加了");
         return true;
     }
-    #endregion
-
-    #region UI相关
-    public void OpenWindow()
-    {
-        if (!UI || !UI.gameObject) return;
-        if (IsPausing) return;
-        if (DialogueManager.Instance.IsTalking && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen) return;
-        UI.backpackWindow.alpha = 1;
-        UI.backpackWindow.blocksRaycasts = true;
-        WindowsManager.Instance.Push(this);
-        IsUIOpen = true;
-        GridMask.raycastTarget = true;
-        ZetanUtil.SetActive(UI.handworkButton.gameObject, !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen);
-    }
-    public void CloseWindow()
-    {
-        if (!UI || !UI.gameObject) return;
-        if (IsPausing) return;
-        foreach (ItemAgent ia in itemAgents)
-            ia.FinishDrag();
-        UI.backpackWindow.alpha = 0;
-        UI.backpackWindow.blocksRaycasts = false;
-        IsUIOpen = false;
-        IsPausing = false;
-        WindowsManager.Instance.Remove(this);
-        AmountManager.Instance.Cancel();
-        ItemWindowManager.Instance.CloseItemWindow();
-        if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
-        if (ShopManager.Instance.IsUIOpen) ShopManager.Instance.CloseWindow();
-    }
-    public void PauseDisplay(bool pause)
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.backpackWindow.alpha = 1;
-            UI.backpackWindow.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.backpackWindow.alpha = 0;
-            UI.backpackWindow.blocksRaycasts = false;
-            ItemWindowManager.Instance.CloseItemWindow();
-        }
-        IsPausing = pause;
-    }
-    public void OpenCloseWindow()
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen)
-            OpenWindow();
-        else CloseWindow();
-    }
-    public Canvas SortCanvas
-    {
-        get
-        {
-            if (!UI) return null;
-            return UI.windowCanvas;
-        }
-    }
-
-    public void Sort()
-    {
-        if (!UI || !UI.gameObject) return;
-        MBackpack.Sort();
-        Init();
-        foreach (ItemInfo info in MBackpack.Items)
-            foreach (ItemAgent ia in itemAgents)
-                if (ia.IsEmpty)
-                {
-                    ia.InitItem(info);
-                    break;
-                }
-        UpdateUI();
-    }
-
-    public void UpdateUI()
-    {
-        if (!UI || !UI.gameObject) return;
-        UI.money.text = MBackpack.Money.ToString() + GameManager.CoinName;
-        UI.weight.text = MBackpack.weightLoad.ToString("F2") + "WL";
-        UI.size.text = MBackpack.backpackSize.ToString();
-        SetPage(currentPage);
-        QuestManager.Instance.UpdateUI();
-        BuildingManager.Instance.UpdateUI();
-        MakingManager.Instance.UpdateUI();
-    }
-
-    public void SetUI(BackpackUI UI)
-    {
-        itemAgents.RemoveAll(x => !x || !x.gameObject);
-        foreach (var ia in itemAgents)
-        {
-            ia.Empty();
-        }
-        IsPausing = false;
-        CloseWindow();
-        this.UI = UI;
-    }
-
-    #region 道具页相关
-    private int currentPage;
-    public void SetPage(int index)
-    {
-        if (!UI || !UI.gameObject) return;
-        currentPage = index;
-        switch (index)
-        {
-            case 1: ShowEquipments(); break;
-            case 2: ShowConsumables(); break;
-            case 3: ShowMaterials(); break;
-            default: ShowAll(); break;
-        }
-    }
-
-    private void ShowAll()
-    {
-        if (!UI || !UI.gameObject) return;
-        foreach (ItemAgent ia in itemAgents)
-        {
-            ZetanUtil.SetActive(ia.gameObject, true);
-        }
-    }
-
-    private void ShowEquipments()
-    {
-        if (!UI || !UI.gameObject) return;
-        foreach (ItemAgent ia in itemAgents)
-        {
-            if (!ia.IsEmpty && ia.MItemInfo.item.IsEquipment)
-                ZetanUtil.SetActive(ia.gameObject, true);
-            else ZetanUtil.SetActive(ia.gameObject, false);
-        }
-    }
-
-    private void ShowConsumables()
-    {
-        if (!UI || !UI.gameObject) return;
-        foreach (ItemAgent ia in itemAgents)
-        {
-            if (!ia.IsEmpty && ia.MItemInfo.item.IsConsumable)
-                ZetanUtil.SetActive(ia.gameObject, true);
-            else ZetanUtil.SetActive(ia.gameObject, false);
-        }
-    }
-
-    private void ShowMaterials()
-    {
-        if (!UI || !UI.gameObject) return;
-        foreach (ItemAgent ia in itemAgents)
-        {
-            if (!ia.IsEmpty && ia.MItemInfo.item.IsMaterial)
-                ZetanUtil.SetActive(ia.gameObject, true);
-            else ZetanUtil.SetActive(ia.gameObject, false);
-        }
-    }
-    #endregion
-    #endregion
 
     public void LoadData(BackpackData backpackData)
     {
@@ -577,4 +779,5 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         }
         UpdateUI();
     }
+    #endregion
 }

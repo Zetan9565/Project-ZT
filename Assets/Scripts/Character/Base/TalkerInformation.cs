@@ -20,7 +20,7 @@ public class TalkerInformation : CharacterInformation
     {
         get
         {
-            return isWarehouseAgent && !isVendor;
+            return isWarehouseAgent;
         }
     }
     [SerializeField]
@@ -39,7 +39,7 @@ public class TalkerInformation : CharacterInformation
     {
         get
         {
-            return isVendor && !isWarehouseAgent;
+            return isVendor;
         }
     }
     [SerializeField]
@@ -52,15 +52,6 @@ public class TalkerInformation : CharacterInformation
         }
     }
 
-    [SerializeField]
-    private bool isQuestGiver;
-    public bool IsQuestGiver
-    {
-        get
-        {
-            return isQuestGiver;
-        }
-    }
     [SerializeField]
     private List<Quest> questsStored = new List<Quest>();
     public List<Quest> QuestsStored
@@ -112,7 +103,7 @@ public class TalkerInformation : CharacterInformation
     }
 
     [SerializeField]
-    private List<FavoriteItemInfo> favoriteItems;
+    private List<FavoriteItemInfo> favoriteItems = new List<FavoriteItemInfo>();
     public List<FavoriteItemInfo> FavoriteItems
     {
         get
@@ -122,7 +113,7 @@ public class TalkerInformation : CharacterInformation
     }
 
     [SerializeField]
-    private List<HateItemInfo> hateItems;
+    private List<HateItemInfo> hateItems = new List<HateItemInfo>();
     public List<HateItemInfo> HateItems
     {
         get

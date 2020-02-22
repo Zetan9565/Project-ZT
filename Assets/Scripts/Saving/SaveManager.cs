@@ -26,7 +26,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     #region 存档相关
     public bool Save()
     {
-        using (FileStream fs = ZetanUtil.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
+        using (FileStream fs = ZetanUtility.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
         {
             try
             {
@@ -40,9 +40,10 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
                 SaveQuest(data);
                 SaveDialogue(data);
                 SaveTrigger(data);
+                SaveMapMark(data);
 
                 bf.Serialize(fs, data);
-                ZetanUtil.Encrypt(fs, encryptKey);
+                ZetanUtility.Encrypt(fs, encryptKey);
 
                 fs.Close();
 
@@ -70,7 +71,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
             data.backpackData.money = BackpackManager.Instance.MBackpack.Money;
             foreach (ItemInfo info in BackpackManager.Instance.MBackpack.Items)
             {
-                data.backpackData.itemDatas.Add(new ItemData(info, BackpackManager.Instance.GetItemAgentByInfo(info).indexInGrid));
+                data.backpackData.itemDatas.Add(new ItemData(info));
             }
         }
     }
@@ -126,18 +127,24 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
             data.triggerDatas.Add(new TriggerData(trigger.Key, trigger.Value));
         }
     }
+
+    void SaveMapMark(SaveData data)
+    {
+        foreach (var iconWoH in MapManager.Instance.IconsWithoutHolder.Values)
+            if (iconWoH.mapIcon.iconType == MapIconType.Mark) data.markDatas.Add(new MapMarkData(iconWoH));
+    }
     #endregion
 
     #region 读档相关
     public void Load()
     {
-        using (FileStream fs = ZetanUtil.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Open))
+        using (FileStream fs = ZetanUtility.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Open))
         {
             try
             {
                 BinaryFormatter bf = new BinaryFormatter();
 
-                SaveData data = bf.Deserialize(ZetanUtil.Decrypt(fs, encryptKey)) as SaveData;
+                SaveData data = bf.Deserialize(ZetanUtility.Decrypt(fs, encryptKey)) as SaveData;
 
                 fs.Close();
 
@@ -167,12 +174,14 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         LoadQuest(data);
         LoadDialogue(data);
         LoadTrigger(data);
+        LoadMapMark(data);
     }
 
     void LoadPlayer(SaveData data)
     {
         //PlayerInfoManager.Instance.SetPlayerInfo(new PlayerInformation());
         //TODO 读取玩家信息
+        PlayerManager.Instance.PlayerTransform.position = new Vector3(data.playerPosX, data.playerPosY, data.playerPosZ);
     }
 
     void LoadBackpack(SaveData data)
@@ -234,7 +243,10 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     Quest HandlingQuestData(QuestData questData)
     {
         TalkerData questGiver = GameManager.TalkerDatas[questData.originalGiverID];
+        if (!questGiver) return null;
         Quest quest = questGiver.questInstances.Find(x => x.ID == questData.questID);
+        if (!quest) return null;
+        QuestManager.Instance.AcceptQuest(quest, true);
         foreach (ObjectiveData od in questData.objectiveDatas)
         {
             foreach (Objective o in quest.ObjectiveInstances)
@@ -246,7 +258,6 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
                 }
             }
         }
-        QuestManager.Instance.AcceptQuest(quest, true);
         return quest;
     }
 
@@ -265,6 +276,15 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         foreach (TriggerData td in data.triggerDatas)
         {
             TriggerManager.Instance.SetTrigger(td.triggerName, td.triggerState == (int)TriggerState.On);
+        }
+    }
+
+    void LoadMapMark(SaveData data)
+    {
+        MapManager.Instance.ClearMarks();
+        foreach (var md in data.markDatas)
+        {
+            MapManager.Instance.CreateDefaultMark(new Vector3(md.worldPosX, md.worldPosY, md.worldPosZ), md.keepOnMap, md.textToDisplay, md.removeAble);
         }
     }
     #endregion

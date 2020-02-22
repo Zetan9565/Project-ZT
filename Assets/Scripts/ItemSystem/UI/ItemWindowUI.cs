@@ -3,8 +3,6 @@ using UnityEngine.UI;
 
 public class ItemWindowUI : ItemWindowBaseUI
 {
-    public Button closeButton;
-
     public Button mulFunButton;
 
     public Button discardButton;
@@ -14,14 +12,10 @@ public class ItemWindowUI : ItemWindowBaseUI
     [HideInInspector]
     public CanvasGroup buttonAreaCanvas;
 
-    private void Awake()
+    private new void Awake()
     {
-        if (!itemWindow.GetComponent<GraphicRaycaster>()) itemWindow.gameObject.AddComponent<GraphicRaycaster>();
-        windowCanvas = itemWindow.GetComponent<Canvas>();
-        windowCanvas.overrideSorting = true;
-        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
-        windowsRect = itemWindow.GetComponent<RectTransform>();
-        ZetanUtil.SetActive(closeButton.gameObject, false);
+        base.Awake();
+        ZetanUtility.SetActive(closeButton.gameObject, false);
 #if UNITY_STANDALONE
         MyUtilities.SetActive(buttonsArea, false);
 #elif UNITY_ANDROID
@@ -30,7 +24,5 @@ public class ItemWindowUI : ItemWindowBaseUI
         discardButton.onClick.AddListener(ItemWindowManager.Instance.DiscardCurrentItem);
         closeButton.onClick.AddListener(ItemWindowManager.Instance.CloseItemWindow);
 #endif
-        gemstone_1.Clear();
-        gemstone_2.Clear();
     }
 }

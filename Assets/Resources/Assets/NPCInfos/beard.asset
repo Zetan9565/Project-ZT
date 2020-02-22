@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: beard
   m_EditorClassIdentifier: Assembly-CSharp::NPCInfomation
   _ID: NPC002
-  _Name: "\u5927\u80E1\u5B50"
+  _Name: "\u6069\u683C\u65AF"
   sex: 1
-  defaultDialogue: {fileID: 11400000, guid: 982521bacf361f14289d5658a605bca4, type: 2}
+  defaultDialogue: {fileID: 11400000, guid: 1740b858db157dc4080c2efc9a15f9be, type: 2}
   isWarehouseAgent: 1
   warehouse:
     warehouseSize:
@@ -23,7 +23,6 @@ MonoBehaviour:
       max: 50
   isVendor: 0
   shop: {fileID: 0}
-  isQuestGiver: 1
   questsStored:
   - {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
   - {fileID: 11400000, guid: 5288a43013e44284baed8b30be1f92de, type: 2}

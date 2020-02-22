@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
-public class ZetanUtil
+public class ZetanUtility
 {
     public static bool IsMouseInsideScreen => Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height;
 
@@ -71,6 +71,12 @@ public class ZetanUtil
         {
             return null;
         }
+    }
+
+    public static bool PointInsideScreen(Vector3 worldPosition)
+    {
+        Vector3 viewportPoint = Camera.main.WorldToViewportPoint(worldPosition);
+        return viewportPoint.x > 0 && viewportPoint.x < 1 && viewportPoint.y > 0 && viewportPoint.y < 1;
     }
 
     #region Vector相关

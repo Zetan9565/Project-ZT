@@ -2,13 +2,8 @@
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class WarehouseUI : MonoBehaviour
+public class WarehouseUI : WindowUI
 {
-    public CanvasGroup warehouseWindow;
-
-    [HideInInspector]
-    public Canvas windowCanvas;
-
     public Dropdown pageSelector;
 
     public GameObject itemCellPrefab;
@@ -17,16 +12,13 @@ public class WarehouseUI : MonoBehaviour
     public Text money;
     public Text size;
 
-    public Button closeButton;
     public Button sortButton;
 
     public ScrollRect gridRect;
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (!warehouseWindow.gameObject.GetComponent<GraphicRaycaster>()) warehouseWindow.gameObject.AddComponent<GraphicRaycaster>();
-        windowCanvas = warehouseWindow.GetComponent<Canvas>();
-        windowCanvas.overrideSorting = true;
+        base.Awake();
         closeButton.onClick.AddListener(WarehouseManager.Instance.CloseWindow);
         sortButton.onClick.AddListener(WarehouseManager.Instance.Sort);
         pageSelector.onValueChanged.AddListener(WarehouseManager.Instance.SetPage);

@@ -11,7 +11,7 @@ public class DialogueInspector : Editor
     Dialogue dialogue;
     SerializedProperty _ID;
     SerializedProperty useUnifiedNPC;
-    SerializedProperty useTalkerInfo;
+    SerializedProperty useCurrentTalkerInfo;
     SerializedProperty unifiedNPC;
     SerializedProperty dialogWords;
     ReorderableList wordsList;
@@ -36,7 +36,7 @@ public class DialogueInspector : Editor
 
         _ID = serializedObject.FindProperty("_ID");
         useUnifiedNPC = serializedObject.FindProperty("useUnifiedNPC");
-        useTalkerInfo = serializedObject.FindProperty("useTalkerInfo");
+        useCurrentTalkerInfo = serializedObject.FindProperty("useCurrentTalkerInfo");
         unifiedNPC = serializedObject.FindProperty("unifiedNPC");
         dialogWords = serializedObject.FindProperty("words");
 
@@ -45,10 +45,11 @@ public class DialogueInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        if (string.IsNullOrEmpty(dialogue.ID) || useUnifiedNPC.boolValue && !useTalkerInfo.boolValue && !unifiedNPC.objectReferenceValue || dialogue.Words.Exists(w => w && !w.IsValid))
+        if (string.IsNullOrEmpty(dialogue.ID) || useUnifiedNPC.boolValue && !useCurrentTalkerInfo.boolValue && !unifiedNPC.objectReferenceValue || dialogue.Words.Exists(w => w && !w.IsValid))
         {
             EditorGUILayout.HelpBox("该对话存在未补全信息。", MessageType.Warning);
         }
+        else if (dialogue.Words.Count < 1) EditorGUILayout.HelpBox("无效的空对话。", MessageType.Error);
         else EditorGUILayout.HelpBox("该对话已完整。", MessageType.Info);
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
@@ -66,8 +67,8 @@ public class DialogueInspector : Editor
         EditorGUILayout.PropertyField(useUnifiedNPC, new GUIContent("使用统一的NPC"));
         if (useUnifiedNPC.boolValue)
         {
-            EditorGUILayout.PropertyField(useTalkerInfo, new GUIContent("统一为当前对话人"));
-            if (!useTalkerInfo.boolValue)
+            EditorGUILayout.PropertyField(useCurrentTalkerInfo, new GUIContent("统一为当前对话人"));
+            if (!useCurrentTalkerInfo.boolValue)
             {
                 EditorGUILayout.BeginHorizontal();
                 if (dialogue.UnifiedNPC) unifiedNPC.objectReferenceValue = npcs[EditorGUILayout.Popup(GetNPCIndex(dialogue.UnifiedNPC), npcNames)];
@@ -108,10 +109,10 @@ public class DialogueInspector : Editor
             {
                 if (!useUnifiedNPC.boolValue)
                     talkerName = dialogue.Words[index] == null ? "(空)" : !dialogue.Words[index].TalkerInfo ? "(空谈话人)" : (dialogue.Words[index].TalkerName + "说");
-                else talkerName = !dialogue.UnifiedNPC ? "(空)" : (useTalkerInfo.boolValue ? "NPC说" : dialogue.UnifiedNPC.Name + "说");
+                else talkerName = !dialogue.UnifiedNPC ? "(空)" : (useCurrentTalkerInfo.boolValue ? "NPC说" : dialogue.UnifiedNPC.Name + "说");
             }
             else talkerName = "玩家说";
-            EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width * 0.5f, lineHeight), words, new GUIContent(talkerName));
+            EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2, lineHeight), words, new GUIContent(talkerName));
             if (!words.isExpanded)
             {
                 int os = options.arraySize;
@@ -123,7 +124,7 @@ public class DialogueInspector : Editor
                     label.Append(os > 0 && ts > 0 ? ", " : string.Empty);
                     label.Append(ts > 0 ? ts + "个事件" : string.Empty);
                     label.Append(')');
-                    EditorGUI.LabelField(new Rect(rect.x + rect.width * 0.42f, rect.y, rect.width, lineHeight), label.ToString());
+                    EditorGUI.LabelField(new Rect(rect.width / 2, rect.y, rect.width / 2, lineHeight), label.ToString());
                 }
             }
             int oIndex = talkerType.enumValueIndex == 1 ? 0 : (useUnifiedNPC.boolValue ? 1 : (GetNPCIndex(talkerInfo.objectReferenceValue as TalkerInformation) + 1));
@@ -184,8 +185,6 @@ public class DialogueInspector : Editor
                     //仅在选择型选项大于1个时才支持选取正确选项
                     if (dialogue.Words[index].Options.FindAll(x => x.OptionType == WordsOptionType.Choice).Count > 1)
                     {
-                        /*indexOfCorrectOption.intValue = EditorGUI.IntSlider(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
-                            "正确选项序号", indexOfCorrectOption.intValue, 0, options.arraySize - 1);*/
                         List<int> choiceIndexes = new List<int>() { -1 };
                         List<string> choiceIndexStrings = new List<string>() { "不指定" };
                         var wordsOptions = dialogue.Words[index].Options;
@@ -297,12 +296,12 @@ public class DialogueInspector : Editor
                                                     EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                                         "道具名称", this.dialogue.Words[index].Options[_index].ItemToSubmit.ItemName);
                                                     _lineCount++;
+                                                    SerializedProperty amounts = itemToSubmit.FindPropertyRelative("amount");
+                                                    EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                                        amounts, new GUIContent("需提交的数量"));
+                                                    _lineCount++;
+                                                    if (amounts.intValue < 1) amounts.intValue = 1;
                                                 }
-                                                SerializedProperty amounts = itemToSubmit.FindPropertyRelative("amount");
-                                                EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                                    amounts, new GUIContent("需提交的数量"));
-                                                _lineCount++;
-                                                if (amounts.intValue < 1) amounts.intValue = 1;
                                             }
                                             EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                                 itemCanGet.FindPropertyRelative("item"), new GUIContent("可获得的道具"));
@@ -312,12 +311,12 @@ public class DialogueInspector : Editor
                                                 EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                                     "道具名称", this.dialogue.Words[index].Options[_index].ItemCanGet.ItemName);
                                                 _lineCount++;
+                                                SerializedProperty amountg = itemCanGet.FindPropertyRelative("amount");
+                                                EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
+                                                    amountg, new GUIContent("可获得的数量"));
+                                                _lineCount++;
+                                                if (amountg.intValue < 1) amountg.intValue = 1;
                                             }
-                                            SerializedProperty amountg = itemCanGet.FindPropertyRelative("amount");
-                                            EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                                amountg, new GUIContent("可获得的数量"));
-                                            _lineCount++;
-                                            if (amountg.intValue < 1) amountg.intValue = 1;
                                             if (optionType.intValue == (int)WordsOptionType.OnlyGet)
                                             {
                                                 EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
@@ -349,11 +348,11 @@ public class DialogueInspector : Editor
                                         }
                                         string b_talkerName;
                                         if (b_talkerType.enumValueIndex == (int)TalkerType.NPC)
-                                            b_talkerName = this.dialogue.Words[index].TalkerName + "说";
+                                            b_talkerName = (this.dialogue.UseUnifiedNPC ? this.dialogue.UnifiedNPC.Name : this.dialogue.Words[index].TalkerName) + "说";
                                         else b_talkerName = "玩家说";
                                         EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight), b_talkerName);
-                                        EditorGUI.PropertyField(new Rect(_rect.x + _rect.width / 2, _rect.y + lineHeightSpace * _lineCount, _rect.width / 2, lineHeight),
-                                            b_talkerType, new GUIContent(string.Empty));
+                                        b_talkerType.enumValueIndex = EditorGUI.IntPopup(new Rect(_rect.x + _rect.width / 2, _rect.y + lineHeightSpace * _lineCount, _rect.width / 2, lineHeight),
+                                          b_talkerType.enumValueIndex, new string[] { "NPC", "玩家" }, new int[] { 0, 1 });
                                         _lineCount++;
                                         b_words.stringValue = EditorGUI.TextField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                             b_words.stringValue);
@@ -415,13 +414,11 @@ public class DialogueInspector : Editor
                                             {
                                                 _lineCount++;//需提交
                                                 if (this.dialogue.Words[index].Options[_index].ItemToSubmit.item)
-                                                    _lineCount++;//道具名称
-                                                _lineCount++;//数量
+                                                    _lineCount += 2;//道具名称、数量
                                             }
                                             _lineCount++;//可获得
                                             if (this.dialogue.Words[index].Options[_index].ItemCanGet.item)
-                                                _lineCount++;//道具名称
-                                            _lineCount++;//可获得数量
+                                                _lineCount += 2;//道具名称、可获得数量
                                             if (optionType.intValue == (int)WordsOptionType.OnlyGet)
                                                 _lineCount++; //只在未持有
                                             if (option.FindPropertyRelative("showOnlyWhenNotHave").boolValue || optionType.intValue == (int)WordsOptionType.SubmitAndGet)
@@ -661,7 +658,12 @@ public class DialogueInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            if (EditorUtility.DisplayDialog("删除", "确定删除这句话吗？", "确定", "取消")) dialogue.Words.RemoveAt(list.index);
+            if (EditorUtility.DisplayDialog("删除", "确定删除这句话吗？", "确定", "取消"))
+            {
+                if (dialogue.Words.Count > 1 && list.index == dialogue.Words.Count - 1 && dialogue.Words[dialogue.Words.Count - 2].Options.Exists(x => x && x.OptionType == WordsOptionType.Choice))
+                    EditorUtility.DisplayDialog("错误", "上一句存在选择型选项，无法删除该句。", "确定");
+                else dialogue.Words.RemoveAt(list.index);
+            }
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         };
 
@@ -680,9 +682,7 @@ public class DialogueInspector : Editor
 
     int GetNPCIndex(TalkerInformation npc)
     {
-        if (npcs.Contains(npc))
-            return Array.IndexOf(npcs, npc);
-        else return -1;
+        return Array.IndexOf(npcs, npc);
     }
 
     string GetAutoID()

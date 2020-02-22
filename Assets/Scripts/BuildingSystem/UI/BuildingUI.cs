@@ -1,13 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class BuildingUI : MonoBehaviour
+public class BuildingUI : WindowUI
 {
-    public CanvasGroup buildingWindow;
-
-    [HideInInspector]
-    public Canvas windowCanvas;
-
     public GameObject buildingInfoCellPrefab;
     public Transform buildingInfoCellsParent;
 
@@ -15,8 +10,6 @@ public class BuildingUI : MonoBehaviour
     public Transform buildingCellsParent;
 
     public ScrollRect cellsRect;
-
-    public Button closeButton;
 
     public Button destroyButton;
 
@@ -29,14 +22,11 @@ public class BuildingUI : MonoBehaviour
     public CanvasGroup listWindow;
     public Button closeList;
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (!buildingWindow.GetComponent<GraphicRaycaster>()) buildingWindow.gameObject.AddComponent<GraphicRaycaster>();
-        windowCanvas = buildingWindow.GetComponent<Canvas>();
-        windowCanvas.overrideSorting = true;
-        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
+        base.Awake();
         closeButton.onClick.AddListener(BuildingManager.Instance.CloseWindow);
-        destroyButton.onClick.AddListener(BuildingManager.Instance.DestroyToDestroyBuilding);
+        destroyButton.onClick.AddListener(BuildingManager.Instance.DestroyBuildingToDestroy);
         closeList.onClick.AddListener(BuildingManager.Instance.HideBuiltList);
     }
 }

@@ -9,6 +9,10 @@ public class SaveData
 
     public DateTime saveDate;
 
+    public float playerPosX;
+    public float playerPosY;
+    public float playerPosZ;
+
     public BackpackData backpackData;
 
     public BuildingSystemData buildingSystemData;
@@ -22,10 +26,16 @@ public class SaveData
 
     public List<TriggerData> triggerDatas;
 
+    public List<MapMarkData> markDatas;
+
     public SaveData()
     {
         sceneName = SceneManager.GetActiveScene().name;
         saveDate = DateTime.Now;
+        var playerPos = PlayerManager.Instance.PlayerTransform.position;
+        playerPosX = playerPos.x;
+        playerPosY = playerPos.y;
+        playerPosZ = playerPos.z;
         backpackData = new BackpackData();
         buildingSystemData = new BuildingSystemData();
         warehouseDatas = new List<WarehouseData>();
@@ -33,6 +43,7 @@ public class SaveData
         completeQuestDatas = new List<QuestData>();
         dialogueDatas = new List<DialogueData>();
         triggerDatas = new List<TriggerData>();
+        markDatas = new List<MapMarkData>();
     }
 }
 
@@ -85,11 +96,11 @@ public class ItemData
 
     public int indexInGrid;
 
-    public ItemData(ItemInfo itemInfo, int index = -1)
+    public ItemData(ItemInfo itemInfo)
     {
         itemID = itemInfo.ItemID;
         amount = itemInfo.Amount;
-        indexInGrid = index;
+        indexInGrid = itemInfo.indexInGrid;
     }
 }
 #endregion
@@ -226,5 +237,26 @@ public class TriggerData
     {
         this.triggerName = triggerName;
         this.triggerState = (int)triggerState;
+    }
+}
+
+[Serializable]
+public class MapMarkData
+{
+    public float worldPosX;
+    public float worldPosY;
+    public float worldPosZ;
+    public bool keepOnMap;
+    public bool removeAble;
+    public string textToDisplay;
+
+    public MapMarkData(MapManager.MapIconWithoutHolder iconWoH)
+    {
+        worldPosX = iconWoH.worldPosition.x;
+        worldPosY = iconWoH.worldPosition.y;
+        worldPosZ = iconWoH.worldPosition.z;
+        keepOnMap = iconWoH.keepOnMap;
+        removeAble = iconWoH.removeAble;
+        textToDisplay = iconWoH.textToDisplay;
     }
 }

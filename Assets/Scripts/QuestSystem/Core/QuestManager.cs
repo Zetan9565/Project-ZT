@@ -5,7 +5,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/任务管理器")]
-public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
+public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler, IOpenCloseAbleWindow
 {
     [SerializeField]
     private QuestUI UI;
@@ -13,7 +13,10 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
     public bool IsPausing { get; private set; }
     public bool IsUIOpen { get; private set; }
 
-    public Canvas SortCanvas => UI.windowCanvas;
+    public Canvas CanvasToSort => UI.windowCanvas;
+
+    public QuestFlagsAgent QuestFlagsPrefab => UI ? UI.questFlagsPrefab : null;
+    public Transform QuestFlagsPanel => UI ? UI.questFlagsPanel : null;
 
     private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
     private readonly List<QuestAgent> questAgents = new List<QuestAgent>();
@@ -23,6 +26,8 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
     private readonly List<QuestBoardAgent> questBoardAgents = new List<QuestBoardAgent>();
     private readonly Dictionary<Objective, MapIcon> questIcons = new Dictionary<Objective, MapIcon>();
 
+    public delegate void QuestStatusListener();
+    public event QuestStatusListener OnQuestStatusChange;
 
     [SerializeField, Header("任务列表")]
 #if UNITY_EDITOR
@@ -88,6 +93,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
         questBoardAgents.Add(qba);
         foreach (Objective o in quest.ObjectiveInstances)
         {
+            o.OnStateChangeEvent += OnObjectiveStateChange;
             if (o is CollectObjective)
             {
                 CollectObjective co = o as CollectObjective;
@@ -131,7 +137,6 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                 if (cuo.CheckStateAtAcpt && state != TriggerState.NotExist)
                     TriggerManager.Instance.SetTrigger(cuo.TriggerName, state == TriggerState.On ? true : false);
             }
-            o.OnStateChangeEvent += OnObjectiveStateChange;
         }
         quest.IsOngoing = true;
         QuestsOngoing.Add(quest);
@@ -147,6 +152,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
         UpdateUI();
         Objective firstObj = quest.ObjectiveInstances[0];
         CreateObjectiveIcon(firstObj);
+        OnQuestStatusChange?.Invoke();
         return true;
     }
     /// <summary>
@@ -217,8 +223,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                     cuo.CurrentAmount = 0;
                     TriggerManager.Instance.DeleteTriggerEvent(cuo.UpdateTriggerState);
                 }
-                questIcons.TryGetValue(o, out MapIcon icon);
-                if (icon) MapManager.Instance.RemoveMapIcon(icon);
+                RemoveObjectiveIcon(o);
             }
             if (quest.NPCToSubmit)
                 quest.originalQuestHolder.TransferQuestToThis(quest);
@@ -227,10 +232,12 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                 UI.questBoard.alpha = 0;
                 UI.questBoard.blocksRaycasts = false;
             }
+            OnQuestStatusChange?.Invoke();
             return true;
         }
         else if (!quest.Abandonable)
             ConfirmManager.Instance.NewConfirm("该任务无法放弃。");
+        OnQuestStatusChange?.Invoke();
         return false;
     }
     /// <summary>
@@ -262,21 +269,19 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
             if (!loadMode)
             {
                 foreach (ItemInfo rwi in quest.RewardItems)
-                    if (!BackpackManager.Instance.TryGetItem_Boolean(rwi))
-                        return false;
+                    if (!BackpackManager.Instance.TryGetItem_Boolean(rwi)) return false;
                 List<Quest> questsReqThisQuestItem = new List<Quest>();
                 foreach (Objective o in quest.ObjectiveInstances)
                 {
                     if (o is CollectObjective)
                     {
                         CollectObjective co = o as CollectObjective;
-                        questsReqThisQuestItem = QuestsRequiredItem(co.Item,
-                            BackpackManager.Instance.GetItemAmount(co.Item) - o.Amount).ToList();
+                        questsReqThisQuestItem = QuestsRequiredItem(co.Item, BackpackManager.Instance.GetItemAmount(co.Item) - o.Amount).ToList();
                     }
                     if (questsReqThisQuestItem.Contains(quest) && questsReqThisQuestItem.Count > 1)
                     //需要道具的任务群包含该任务且数量多于一个，说明有其他任务对该任务需提交的道具存在依赖
                     {
-                        MessageManager.Instance.NewMessage("提交失败！其他任务对该任务需提交物品有需求");
+                        MessageManager.Instance.NewMessage("提交失败！其他任务对该任务需提交物品存在依赖");
                         return false;
                     }
                 }
@@ -363,8 +368,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                     CustomObjective cuo = o as CustomObjective;
                     TriggerManager.Instance.DeleteTriggerEvent(cuo.UpdateTriggerState);
                 }
-                questIcons.TryGetValue(o, out MapIcon icon);
-                if (icon) MapManager.Instance.RemoveMapIcon(icon);
+                RemoveObjectiveIcon(o);
             }
             if (!loadMode)
             {
@@ -382,8 +386,10 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                 UI.questBoard.alpha = 0;
                 UI.questBoard.blocksRaycasts = false;
             }
+            OnQuestStatusChange?.Invoke();
             return true;
         }
+        OnQuestStatusChange?.Invoke();
         return false;
     }
 
@@ -409,24 +415,24 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
             {
                 Vector3 destination = default;
                 Objective currentObj = null;
-                List<Objective> concurrentObj = new List<Objective>();
+                List<Objective> parallelObj = new List<Objective>();
                 while (objectiveEnum.MoveNext())
                 {
                     currentObj = objectiveEnum.Current;
                     if (!currentObj.IsComplete)
                     {
-                        if (currentObj.Concurrent && currentObj.AllPrevObjCmplt)
+                        if (currentObj.Parallel && currentObj.AllPrevObjCmplt)
                         {
                             if (!(currentObj is CollectObjective))
-                                concurrentObj.Add(currentObj);
+                                parallelObj.Add(currentObj);
                         }
                         else break;
                     }
                 }
-                if (concurrentObj.Count > 0)
+                if (parallelObj.Count > 0)
                 {
-                    int index = Random.Range(0, concurrentObj.Count);//如果目标可以同时进行，则随机选一个
-                    currentObj = concurrentObj[index];
+                    int index = Random.Range(0, parallelObj.Count);//如果目标可以同时进行，则随机选一个
+                    currentObj = parallelObj[index];
                 }
                 if (currentObj is TalkObjective)
                 {
@@ -434,7 +440,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                     GameManager.TalkerDatas.TryGetValue(to.NPCToTalk.ID, out TalkerData talkerFound);
                     if (talkerFound)
                     {
-                        destination = talkerFound.currentPostition;
+                        destination = talkerFound.currentPosition;
                         SetDestination();
                     }
                 }
@@ -468,7 +474,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                     GameManager.TalkerDatas.TryGetValue(so.NPCToSubmit.ID, out TalkerData talkerFound);
                     if (talkerFound)
                     {
-                        destination = talkerFound.currentPostition;
+                        destination = talkerFound.currentPosition;
                         SetDestination();
                     }
                 }
@@ -484,47 +490,49 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
 
     private void OnObjectiveStateChange(Objective objective, bool stateBef)
     {
-        Objective nextToDo = null;
-        Quest quest = objective.runtimeParent;
-        List<Objective> concurrentObj = new List<Objective>();
-        for (int i = 0; i < quest.ObjectiveInstances.Count - 1; i++)
+        if (!stateBef && objective.IsComplete)
         {
-            if (quest.ObjectiveInstances[i] == objective)
+            //Debug.Log("\"" + objective.DisplayName + "\"" + "从没完成变成完成");
+            Objective nextToDo = null;
+            Quest quest = objective.runtimeParent;
+            List<Objective> parallelObj = new List<Objective>();
+            for (int i = 0; i < quest.ObjectiveInstances.Count - 1; i++)
             {
-                for (int j = i - 1; j > -1; j--)//往前找可以并发的目标
+                if (quest.ObjectiveInstances[i] == objective)
                 {
-                    Objective prevObj = quest.ObjectiveInstances[j];
-                    if (!prevObj.Concurrent) break;//只要碰到一个不能并发的，就中断
-                    else concurrentObj.Add(prevObj);
-                }
-                for (int j = i + 1; j < quest.ObjectiveInstances.Count; j++)//往后找可以并发的目标
-                {
-                    Objective nextObj = quest.ObjectiveInstances[j];
-                    if (!nextObj.Concurrent)//只要碰到一个不能并发的，就中断
+                    for (int j = i - 1; j > -1; j--)//往前找可以并行的目标
                     {
-                        if (nextObj.AllPrevObjCmplt)
-                            nextToDo = nextObj;//同时，若该不能并发目标的所有前置目标都完成了，那么它就是下一个要做的目标
-                        break;
+                        Objective prevObj = quest.ObjectiveInstances[j];
+                        if (!prevObj.Parallel) break;//只要碰到一个不能并行的，就中断
+                        else parallelObj.Add(prevObj);
                     }
-                    else concurrentObj.Add(nextObj);
+                    for (int j = i + 1; j < quest.ObjectiveInstances.Count; j++)//往后找可以并行的目标
+                    {
+                        Objective nextObj = quest.ObjectiveInstances[j];
+                        if (!nextObj.Parallel)//只要碰到一个不能并行的，就中断
+                        {
+                            if (nextObj.AllPrevObjCmplt)
+                                nextToDo = nextObj;//同时，若该不能并行目标的所有前置目标都完成了，那么它就是下一个要做的目标
+                            break;
+                        }
+                        else parallelObj.Add(nextObj);
+                    }
+                    break;
                 }
-                break;
             }
-        }
-        if (!nextToDo)//当目标不能并发时此变量才不为空，所以此时表示所有后置目标都是可并发的，或者不存在后置目标
-        {
-            concurrentObj.RemoveAll(x => x.IsComplete);//把所有已完成的可并发目标去掉
-            if (concurrentObj.Count > 0)//若还剩下可并发目标，则随机选一个作为下一个要做的目标
+            if (!nextToDo)//当目标不能并行时此变量才不为空，所以此时表示所有后置目标都是可并行的，或者不存在后置目标
             {
-                int index = Random.Range(0, concurrentObj.Count);
-                nextToDo = concurrentObj[index];
+                parallelObj.RemoveAll(x => x.IsComplete);//把所有已完成的可并行目标去掉
+                /*if (parallelObj.Count > 0)//剩下未完成的可并行目标，则随机选一个作为下一个要做的目标
+                    nextToDo = parallelObj[Random.Range(0, parallelObj.Count)];*/
+                foreach (var obj in parallelObj)
+                    CreateObjectiveIcon(obj);
             }
-        }
-        if (!stateBef && objective.IsComplete)//从没完成变为完成
-        {
+            else CreateObjectiveIcon(nextToDo);
             RemoveObjectiveIcon(objective);
-            CreateObjectiveIcon(nextToDo);
+            OnQuestStatusChange?.Invoke();
         }
+        //else Debug.Log("无操作");
     }
     #endregion
 
@@ -622,8 +630,8 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                     break;
                 }
             }
-        ZetanUtil.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
-        ZetanUtil.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
+        ZetanUtility.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Abandonable);
+        ZetanUtility.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = true;
         ItemWindowManager.Instance.CloseItemWindow();
@@ -648,8 +656,8 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
         if (IsUIOpen) return;
         if (IsPausing) return;
         if (DialogueManager.Instance.IsTalking) return;
-        UI.questsWindow.alpha = 1;
-        UI.questsWindow.blocksRaycasts = true;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
         DialogueManager.Instance.HideQuestDescription();
         WindowsManager.Instance.Push(this);
         IsUIOpen = true;
@@ -661,8 +669,8 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) return;
         if (IsPausing) return;
-        UI.questsWindow.alpha = 0;
-        UI.questsWindow.blocksRaycasts = false;
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
         HideDescription();
         WindowsManager.Instance.Remove(this);
         IsUIOpen = false;
@@ -682,16 +690,114 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
         if (!IsUIOpen) return;
         if (IsPausing && !pause)
         {
-            UI.questsWindow.alpha = 1;
-            UI.questsWindow.blocksRaycasts = true;
+            UI.window.alpha = 1;
+            UI.window.blocksRaycasts = true;
         }
         else if (!IsPausing && pause)
         {
-            UI.questsWindow.alpha = 0;
-            UI.questsWindow.blocksRaycasts = false;
+            UI.window.alpha = 0;
+            UI.window.blocksRaycasts = false;
             HideDescription();
         }
         IsPausing = pause;
+    }
+
+    private void CreateObjectiveIcon(Objective objective)
+    {
+        if (!objective || !objective.ShowMapIcon) return;
+        //Debug.Log("Create icon for " + objective.DisplayName);
+        Vector3 destination;
+        if (objective is TalkObjective)
+        {
+            TalkObjective to = objective as TalkObjective;
+            GameManager.TalkerDatas.TryGetValue(to.NPCToTalk.ID, out TalkerData talkerFound);
+            if (talkerFound)
+            {
+                destination = talkerFound.currentPosition;
+                CreateIcon();
+            }
+        }
+        else if (objective is KillObjective)
+        {
+            KillObjective ko = objective as KillObjective;
+            GameManager.Enemies.TryGetValue(ko.Enemy.ID, out List<Enemy> enemiesFound);
+            if (enemiesFound != null && enemiesFound.Count > 0)
+            {
+                Enemy enemy = enemiesFound.FirstOrDefault();
+                if (enemy)
+                {
+                    destination = enemy.transform.position;
+                    CreateIcon();
+                }
+            }
+        }
+        else if (objective is MoveObjective)
+        {
+            MoveObjective mo = objective as MoveObjective;
+            GameManager.QuestPoints.TryGetValue(mo.PointID, out QuestPoint pointFound);
+            if (pointFound)
+            {
+                destination = pointFound.transform.position;
+                CreateIcon();
+            }
+        }
+        else if (objective is SubmitObjective)
+        {
+            SubmitObjective so = objective as SubmitObjective;
+            GameManager.TalkerDatas.TryGetValue(so.NPCToSubmit.ID, out TalkerData talkerFound);
+            if (talkerFound)
+            {
+                destination = talkerFound.currentPosition;
+                CreateIcon();
+            }
+        }
+
+        void CreateIcon()
+        {
+            var icon = UI.questIcon ? (objective is KillObjective ?
+                MapManager.Instance.CreateMapIcon(UI.questIcon, new Vector2(48, 48), destination, true, 144f, MapIconType.Objective, false, objective.DisplayName) :
+                MapManager.Instance.CreateMapIcon(UI.questIcon, new Vector2(48, 48), destination, true, MapIconType.Objective, false, objective.DisplayName)) :
+                MapManager.Instance.CreateDefaultMark(destination, true, objective.DisplayName, false);
+            if (icon)
+            {
+                questIcons.TryGetValue(objective, out MapIcon iconExist);
+                if (iconExist)
+                {
+                    MapManager.Instance.RemoveMapIcon(iconExist, true);
+                    questIcons[objective] = icon;
+                }
+                else questIcons.Add(objective, icon);
+            }
+        }
+    }
+    private void RemoveObjectiveIcon(Objective objective)
+    {
+        if (!objective) return;
+        //Debug.Log("Try remove icon for " + objective.DisplayName);
+        questIcons.TryGetValue(objective, out MapIcon icon);
+        if (icon) MapManager.Instance.RemoveMapIcon(icon, true);
+        //else Debug.Log("remove failed for " + objective.DisplayName);
+    }
+
+    public void SetUI(QuestUI UI)
+    {
+        foreach (var qa in questAgents)
+        {
+            if (qa) qa.Recycle();
+        }
+        questAgents.Clear();
+        foreach (var qba in questBoardAgents)
+        {
+            if (qba)
+            {
+                qba.questAgent = null;
+                ObjectPool.Instance.Put(qba.gameObject);
+            }
+        }
+        questBoardAgents.Clear();
+        IsPausing = false;
+        CloseWindow();
+        this.UI = UI;
     }
     #endregion
 
@@ -754,106 +860,6 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
     private IEnumerable<Quest> QuestsRequiredItem(ItemBase item, int leftAmount)
     {
         return QuestsOngoing.FindAll(x => x.RequiredItem(item, leftAmount)).AsEnumerable();
-    }
-
-    private void CreateObjectiveIcon(Objective objective)
-    {
-        if (!objective) return;
-        Vector3 destination;
-        if (objective is TalkObjective)
-        {
-            TalkObjective to = objective as TalkObjective;
-            GameManager.TalkerDatas.TryGetValue(to.NPCToTalk.ID, out TalkerData talkerFound);
-            if (talkerFound)
-            {
-                destination = talkerFound.currentPostition;
-                CreateIcon();
-            }
-        }
-        else if (objective is KillObjective)
-        {
-            KillObjective ko = objective as KillObjective;
-            GameManager.Enemies.TryGetValue(ko.Enemy.ID, out List<Enemy> enemiesFound);
-            if (enemiesFound != null && enemiesFound.Count > 0)
-            {
-                Enemy enemy = enemiesFound.FirstOrDefault();
-                if (enemy)
-                {
-                    destination = enemy.transform.position;
-                    CreateIcon();
-                }
-            }
-        }
-        else if (objective is MoveObjective)
-        {
-            MoveObjective mo = objective as MoveObjective;
-            GameManager.QuestPoints.TryGetValue(mo.PointID, out QuestPoint pointFound);
-            if (pointFound)
-            {
-                destination = pointFound.transform.position;
-                CreateIcon();
-            }
-        }
-        else if (objective is SubmitObjective)
-        {
-            SubmitObjective so = objective as SubmitObjective;
-            GameManager.TalkerDatas.TryGetValue(so.NPCToSubmit.ID, out TalkerData talkerFound);
-            if (talkerFound)
-            {
-                destination = talkerFound.currentPostition;
-                CreateIcon();
-            }
-        }
-
-        void CreateIcon()
-        {
-            var icon = MapManager.Instance.CreateMark(destination, true);
-            if (icon)
-            {
-                questIcons.TryGetValue(objective, out MapIcon iconExist);
-                if (iconExist)
-                {
-                    MapManager.Instance.RemoveMapIcon(iconExist);
-                    questIcons[objective] = icon;
-                }
-                else questIcons.Add(objective, icon);
-            }
-        }
-    }
-    private void RemoveObjectiveIcon(Objective objective)
-    {
-        if (!objective) return;
-        questIcons.TryGetValue(objective, out MapIcon icon);
-        if (icon) MapManager.Instance.RemoveMapIcon(icon);
-        Quest quest = objective.runtimeParent;
-        if (quest.IsValid && quest.IsComplete && !quest.IsFinished)
-        {
-            if (quest.NPCToSubmit)
-                MapManager.Instance.CreateMark(GameManager.TalkerDatas[quest.originalQuestHolder.TalkerID].currentPostition, true);
-            else
-                MapManager.Instance.CreateMark(GameManager.TalkerDatas[quest.currentQuestHolder.TalkerID].currentPostition, true);
-        }
-    }
-
-    public void SetUI(QuestUI UI)
-    {
-        foreach (var qa in questAgents)
-        {
-            if (qa) qa.Recycle();
-        }
-        questAgents.Clear();
-        foreach (var qba in questBoardAgents)
-        {
-            if (qba)
-            {
-                qba.questAgent = null;
-                ObjectPool.Instance.Put(qba.gameObject);
-            }
-        }
-        questBoardAgents.Clear();
-        IsPausing = false;
-        CloseWindow();
-        this.UI = UI;
     }
     #endregion
 }

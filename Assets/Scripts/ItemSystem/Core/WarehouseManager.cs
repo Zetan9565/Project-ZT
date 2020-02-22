@@ -20,7 +20,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
 
     public bool StoreAble { get; private set; }
 
-    public Canvas SortCanvas
+    public Canvas CanvasToSort
     {
         get
         {
@@ -37,7 +37,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             itemAgents.Add(ia);
             ia.Init(ItemAgentType.Warehouse, itemAgents.IndexOf(ia), UI.gridRect);
             ia.Empty();
-            ZetanUtil.SetActive(ia.gameObject, false);
+            ZetanUtility.SetActive(ia.gameObject, false);
         }
     }
 
@@ -88,7 +88,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
                 MessageManager.Instance.NewMessage(string.Format("存入了1个 [{0}]", info.ItemName));
             else
             {
-                AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
+                AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.NewAmount(delegate
                 {
                     if (OnStore(info, (int)AmountManager.Instance.Amount))
@@ -165,7 +165,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
                 MessageManager.Instance.NewMessage(string.Format("取出了1个 [{0}]", info.ItemName));
             else
             {
-                AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
+                AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.NewAmount(delegate
                 {
                     if (OnTakeOut(info, (int)AmountManager.Instance.Amount))
@@ -226,8 +226,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         if (!UI || !UI.gameObject) return;
         if (IsUIOpen) return;
         Init(MWarehouse);
-        UI.warehouseWindow.alpha = 1;
-        UI.warehouseWindow.blocksRaycasts = true;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
         IsUIOpen = true;
         WindowsManager.Instance.Push(this);
         BackpackManager.Instance.OpenWindow();
@@ -239,8 +239,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
     {
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) return;
-        UI.warehouseWindow.alpha = 0;
-        UI.warehouseWindow.blocksRaycasts = false;
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
         IsUIOpen = false;
         IsPausing = false;
         MWarehouse = null;
@@ -249,7 +249,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         {
             ia.FinishDrag();
             ia.Empty();
-            ZetanUtil.SetActive(ia.gameObject, false);
+            ZetanUtility.SetActive(ia.gameObject, false);
         }
         if (BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.CloseWindow();
         ItemWindowManager.Instance.CloseItemWindow();
@@ -258,21 +258,19 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         UIManager.Instance.EnableJoyStick(true);
     }
 
-    void IWindowHandler.OpenCloseWindow() { }
-
     public void PauseDisplay(bool pause)
     {
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) return;
         if (IsPausing && !pause)
         {
-            UI.warehouseWindow.alpha = 1;
-            UI.warehouseWindow.blocksRaycasts = true;
+            UI.window.alpha = 1;
+            UI.window.blocksRaycasts = true;
         }
         else if (!IsPausing && pause)
         {
-            UI.warehouseWindow.alpha = 0;
-            UI.warehouseWindow.blocksRaycasts = false;
+            UI.window.alpha = 0;
+            UI.window.blocksRaycasts = false;
         }
         IsPausing = pause;
     }
@@ -355,7 +353,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         if (!UI || !UI.gameObject || !MWarehouse) return;
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
-            ZetanUtil.SetActive(itemAgents[i].gameObject, true);
+            ZetanUtility.SetActive(itemAgents[i].gameObject, true);
         }
     }
 
@@ -365,8 +363,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsEquipment)
-                ZetanUtil.SetActive(itemAgents[i].gameObject, true);
-            else ZetanUtil.SetActive(itemAgents[i].gameObject, false);
+                ZetanUtility.SetActive(itemAgents[i].gameObject, true);
+            else ZetanUtility.SetActive(itemAgents[i].gameObject, false);
         }
     }
 
@@ -376,8 +374,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsConsumable)
-                ZetanUtil.SetActive(itemAgents[i].gameObject, true);
-            else ZetanUtil.SetActive(itemAgents[i].gameObject, false);
+                ZetanUtility.SetActive(itemAgents[i].gameObject, true);
+            else ZetanUtility.SetActive(itemAgents[i].gameObject, false);
         }
     }
 
@@ -387,8 +385,8 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsMaterial)
-                ZetanUtil.SetActive(itemAgents[i].gameObject, true);
-            else ZetanUtil.SetActive(itemAgents[i].gameObject, false);
+                ZetanUtility.SetActive(itemAgents[i].gameObject, true);
+            else ZetanUtility.SetActive(itemAgents[i].gameObject, false);
         }
     }
     #endregion

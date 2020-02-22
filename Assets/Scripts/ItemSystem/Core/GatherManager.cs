@@ -78,7 +78,7 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
     {
         while (doneAgent)
         {
-            if (Vector3.Distance(PlayerManager.Instance.PlayerController.transform.position, doneAgent.transform.position) >= lootInvaildDistance)
+            if (Vector3.Distance(PlayerManager.Instance.PlayerTransform.position, doneAgent.transform.position) >= lootInvaildDistance)
             {
                 doneAgent = null;
                 yield break;

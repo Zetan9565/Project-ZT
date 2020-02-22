@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 [DisallowMultipleComponent]
-public class ItemAgent : MonoBehaviour, IDragable,
+public class ItemAgent : MonoBehaviour, IDragAble,
     IPointerDownHandler, IPointerUpHandler, IPointerClickHandler,
     IPointerEnterHandler, IPointerExitHandler,
     IBeginDragHandler, IDragHandler, IEndDragHandler
@@ -29,7 +29,7 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     public Color currentQualityColor { get { return qualityEdge.color; } }
 
-    public Sprite DragableIcon
+    public Sprite DragAbleIcon
     {
         get
         {
@@ -49,88 +49,6 @@ public class ItemAgent : MonoBehaviour, IDragable,
     private ScrollRect parentScrollRect;
 
     public bool IsEmpty { get { return MItemInfo == null || !MItemInfo.item; } }
-
-    #region 道具使用相关
-    public void UseItem()
-    {
-        if (IsEmpty) return;
-        if (!MItemInfo.item.Usable)
-        {
-            MessageManager.Instance.NewMessage("该物品不可使用");
-            return;
-        }
-        if (MItemInfo.item.IsBox) UseBox();
-        else if (MItemInfo.item.IsEquipment) UseEuipment();
-        else if (MItemInfo.item.IsBook) UseBook();
-        else if (MItemInfo.item.IsBag) UseBag();
-        if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
-    }
-
-    void UseBox()
-    {
-        BoxItem box = MItemInfo.item as BoxItem;
-        if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo, 1))
-        {
-            BackpackManager.Instance.MBackpack.weightLoad -= box.Weight;
-            BackpackManager.Instance.MBackpack.backpackSize--;
-            foreach (ItemInfo info in box.ItemsInBox)
-            {
-                if (!BackpackManager.Instance.TryGetItem_Boolean(info))
-                {
-                    BackpackManager.Instance.MBackpack.weightLoad += box.Weight;
-                    BackpackManager.Instance.MBackpack.backpackSize++;
-                    return;
-                }
-            }
-            BackpackManager.Instance.MBackpack.weightLoad += box.Weight;
-            BackpackManager.Instance.MBackpack.backpackSize++;
-            BackpackManager.Instance.LoseItem(MItemInfo);
-            foreach (ItemInfo info in box.ItemsInBox)
-            {
-                BackpackManager.Instance.GetItem(info);
-            }
-        }
-    }
-
-    void UseEuipment()
-    {
-        PlayerManager.Instance.Equip(MItemInfo);
-    }
-
-    void UseBook()
-    {
-        BookItem book = MItemInfo.item as BookItem;
-        switch (book.BookType)
-        {
-            case BookType.Building:
-                if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo, 1) && BuildingManager.Instance.Learn(book.BuildingToLearn))
-                {
-                    BackpackManager.Instance.LoseItem(MItemInfo);
-                    BuildingManager.Instance.Init();
-                }
-                break;
-            case BookType.Making:
-                if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo, 1) && MakingManager.Instance.Learn(book.ItemToLearn))
-                {
-                    BackpackManager.Instance.LoseItem(MItemInfo);
-                    MakingManager.Instance.Init();
-                }
-                break;
-            case BookType.Skill:
-            default: break;
-        }
-    }
-
-    void UseBag()
-    {
-        BagItem bag = MItemInfo.item as BagItem;
-        if (BackpackManager.Instance.TryLoseItem_Boolean(MItemInfo, 1))
-        {
-            if (BackpackManager.Instance.ExpandSize(bag.ExpandSize))
-                BackpackManager.Instance.LoseItem(MItemInfo);
-        }
-    }
-    #endregion
 
     #region 操作相关
     public void Init(ItemAgentType agentType = ItemAgentType.None, int index = -1, ScrollRect parent = null)
@@ -155,12 +73,12 @@ public class ItemAgent : MonoBehaviour, IDragable,
 
     public void Show()
     {
-        ZetanUtil.SetActive(gameObject, true);
+        ZetanUtility.SetActive(gameObject, true);
     }
 
     public void Hide()
     {
-        ZetanUtil.SetActive(gameObject, false);
+        ZetanUtility.SetActive(gameObject, false);
     }
 
     public void UpdateInfo()
@@ -176,7 +94,8 @@ public class ItemAgent : MonoBehaviour, IDragable,
     public void OnRightClick()
     {
         if (!DragableManager.Instance.IsDraging)
-            if (agentType == ItemAgentType.Backpack && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen) UseItem();
+            if (agentType == ItemAgentType.Backpack && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen)
+                BackpackManager.Instance.UseItem(MItemInfo);
             else if (WarehouseManager.Instance.IsUIOpen)
             {
                 if (agentType == ItemAgentType.Warehouse)

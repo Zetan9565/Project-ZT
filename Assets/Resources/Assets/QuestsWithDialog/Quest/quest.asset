@@ -18,7 +18,10 @@ MonoBehaviour:
   abandonable: 1
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptConditions: []
-  conditionRelational: 0 * (1 + 2)
+  questType: 0
+  repeatFrequancy: 0
+  timeUnit: 0
+  conditionRelational: 
   beginDialogue: {fileID: 11400000, guid: 751fe4671932886419688231ec9e5518, type: 2}
   ongoingDialogue: {fileID: 11400000, guid: 3dd42e42c554ed947a725a4b4ca24641, type: 2}
   completeDialogue: {fileID: 11400000, guid: 4590ede6f624ae34883291bfd21fa8a5, type: 2}
@@ -48,6 +51,7 @@ MonoBehaviour:
   collectObjectives:
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5251"
     display: 1
+    showMapIcon: 0
     amount: 5
     inOrder: 1
     orderIndex: 3
@@ -58,6 +62,7 @@ MonoBehaviour:
     loseItemAtSbmt: 0
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5200"
     display: 1
+    showMapIcon: 0
     amount: 5
     inOrder: 1
     orderIndex: 3
@@ -69,6 +74,7 @@ MonoBehaviour:
   killObjectives:
   - displayName: "\u6D88\u706D\u9AB7\u9AC5"
     display: 1
+    showMapIcon: 1
     amount: 5
     inOrder: 1
     orderIndex: 3
@@ -79,6 +85,7 @@ MonoBehaviour:
     race: {fileID: 0}
   - displayName: "\u6D88\u706D\u50F5\u5C38"
     display: 1
+    showMapIcon: 1
     amount: 5
     inOrder: 1
     orderIndex: 3
@@ -90,6 +97,7 @@ MonoBehaviour:
   talkObjectives:
   - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
     display: 1
+    showMapIcon: 1
     amount: 1
     inOrder: 1
     orderIndex: 1
@@ -100,6 +108,7 @@ MonoBehaviour:
   moveObjectives:
   - displayName: "\u53BB\u5230\u6751\u5B50\u5317\u90E8\u8C03\u67E5"
     display: 1
+    showMapIcon: 1
     amount: 1
     inOrder: 1
     orderIndex: 2
@@ -111,7 +120,7 @@ MonoBehaviour:
   originalQuestHolder:
     info: {fileID: 0}
     currentScene: 
-    currentPostition: {x: 0, y: 0, z: 0}
+    currentPosition: {x: 0, y: 0, z: 0}
     relationshipInstance:
       relationshipValue:
         min: -500
@@ -128,7 +137,7 @@ MonoBehaviour:
   currentQuestHolder:
     info: {fileID: 0}
     currentScene: 
-    currentPostition: {x: 0, y: 0, z: 0}
+    currentPosition: {x: 0, y: 0, z: 0}
     relationshipInstance:
       relationshipValue:
         min: -500

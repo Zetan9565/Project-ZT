@@ -17,7 +17,7 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         get
         {
             if (!UI || !UI.gameObject) return false;
-            else if (UI.amountWindow.alpha > 0) return true;
+            else if (UI.window.alpha > 0) return true;
             else return false;
         }
     }
@@ -42,8 +42,8 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         onConfirm.RemoveAllListeners();
         if (confirmAction != null) onConfirm.AddListener(confirmAction);
         UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
-        UI.amountWindow.alpha = 1;
-        UI.amountWindow.blocksRaycasts = true;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
     }
 
     public void Number(int num)
@@ -99,25 +99,25 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
 
     public void Confirm()
     {
-        UI.amountWindow.alpha = 0;
-        UI.amountWindow.blocksRaycasts = false;
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
         onConfirm?.Invoke();
     }
 
     public void Cancel()
     {
-        UI.amountWindow.alpha = 0;
-        UI.amountWindow.blocksRaycasts = false;
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
     }
 
     public void SetPosition(Vector2 target, Vector2 offset)
     {
-        UI.amountWindow.GetComponent<RectTransform>().position = target + offset;
+        UI.window.GetComponent<RectTransform>().position = target + offset;
     }
 
     public void SetPosition(Vector2 target)
     {
-        UI.amountWindow.GetComponent<RectTransform>().position = target + defaultOffset;
+        UI.window.GetComponent<RectTransform>().position = target + defaultOffset;
     }
 
     public void FixAmount()

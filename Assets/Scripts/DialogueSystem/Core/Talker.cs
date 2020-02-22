@@ -1,19 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-
-[DisallowMultipleComponent]
+[DisallowMultipleComponent, RequireComponent(typeof(MapIconHolder))]
 public class Talker : MonoBehaviour
 {
     [SerializeField]
     private TalkerInformation info;
-    public TalkerInformation Info
-    {
-        get
-        {
-            return info;
-        }
-    }
+    public TalkerInformation Info => info;
 
     public string TalkerID
     {
@@ -33,22 +26,22 @@ public class Talker : MonoBehaviour
         }
     }
 
+    public Vector3 questFlagsOffset;
+    private QuestFlagsAgent flagsAgent;
+
     public TalkerData Data { get; private set; }
 
-    public List<Quest> QuestInstances
-    {
-        get
-        {
-            return Data.questInstances;
-        }
-    }
+    public List<Quest> QuestInstances => Data.questInstances;
 
-    public virtual void OnTalkBegin()
+    [SerializeField]
+    private MapIconHolder iconHolder;
+
+    public void OnTalkBegin()
     {
         Data.OnTalkBegin();
     }
 
-    public virtual void OnTalkFinished()
+    public void OnTalkFinished()
     {
         Data.OnTalkFinished();
     }
@@ -83,8 +76,44 @@ public class Talker : MonoBehaviour
         }
         else Data = dataFound;
         Data.currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-        Data.currentPostition = transform.position;
+        Data.currentPosition = transform.position;
         if (Info.IsVendor && !ShopManager.Vendors.Contains(Data)) ShopManager.Vendors.Add(Data);
+        flagsAgent = ObjectPool.Instance.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject,
+            QuestManager.Instance.QuestFlagsPanel ? QuestManager.Instance.QuestFlagsPanel : UIManager.Instance.transform).GetComponent<QuestFlagsAgent>();
+        flagsAgent.Init(this);
+    }
+
+    private void ShowNameAtMousePosition()
+    {
+        int time = -1;
+#if UNITY_ANDROID
+        time = 2;
+#endif
+        TipsManager.Instance.ShowText(Input.mousePosition, GetMapIconName(), time);
+    }
+
+    private void HideNameImmediately()
+    {
+        TipsManager.Instance.HideText();
+    }
+
+    private string GetMapIconName()
+    {
+        System.Text.StringBuilder name = new System.Text.StringBuilder(TalkerName);
+        if (info.IsVendor && info.Shop || info.IsWarehouseAgent && info.Warehouse)
+        {
+            name.Append("<");
+            if (info.IsVendor) name.Append(info.Shop.ShopName);
+            if (info.IsVendor && info.IsWarehouseAgent) name.Append(",");
+            if (info.IsWarehouseAgent) name.Append("仓库");
+            name.Append(">");
+        }
+        return name.ToString();
+    }
+
+    private void Update()
+    {
+        if (Data) Data.currentPosition = transform.position;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -122,6 +151,30 @@ public class Talker : MonoBehaviour
         if (other.CompareTag("Player") && DialogueManager.Instance.CurrentTalker == this)
             DialogueManager.Instance.CannotTalk();
     }*/
+
+    private void OnValidate()
+    {
+        iconHolder = GetComponent<MapIconHolder>();
+        if (iconHolder) iconHolder.textToDisplay = GetMapIconName();
+        iconHolder.iconEvents.onFingerClick.AddListener(ShowNameAtMousePosition);
+        iconHolder.iconEvents.onMouseEnter.AddListener(ShowNameAtMousePosition);
+        iconHolder.iconEvents.onMouseExit.AddListener(HideNameImmediately);
+    }
+
+    private void Awake()
+    {
+        iconHolder = GetComponent<MapIconHolder>();
+        if (iconHolder) iconHolder.textToDisplay = GetMapIconName();
+        iconHolder.iconEvents.RemoveAllListner();
+        iconHolder.iconEvents.onFingerClick.AddListener(ShowNameAtMousePosition);
+        iconHolder.iconEvents.onMouseEnter.AddListener(ShowNameAtMousePosition);
+        iconHolder.iconEvents.onMouseExit.AddListener(HideNameImmediately);
+    }
+
+    private void OnDestroy()
+    {
+        if (flagsAgent) flagsAgent.Recycle();
+    }
 }
 
 [System.Serializable]
@@ -147,7 +200,7 @@ public class TalkerData
     }
 
     public string currentScene;
-    public Vector3 currentPostition;
+    public Vector3 currentPosition;
 
     public Relationship relationshipInstance;
 
@@ -202,17 +255,17 @@ public class TalkerData
             {
                 Quest questInstance = Object.Instantiate(quest);
                 foreach (CollectObjective co in questInstance.CollectObjectives)
-                    questInstance.ObjectiveInstances.Add(co);
+                    if (co.IsValid) questInstance.ObjectiveInstances.Add(co);
                 foreach (KillObjective ko in questInstance.KillObjectives)
-                    questInstance.ObjectiveInstances.Add(ko);
+                    if (ko.IsValid) questInstance.ObjectiveInstances.Add(ko);
                 foreach (TalkObjective to in questInstance.TalkObjectives)
-                    questInstance.ObjectiveInstances.Add(to);
+                    if (to.IsValid) questInstance.ObjectiveInstances.Add(to);
                 foreach (MoveObjective mo in questInstance.MoveObjectives)
-                    questInstance.ObjectiveInstances.Add(mo);
+                    if (mo.IsValid) questInstance.ObjectiveInstances.Add(mo);
                 foreach (SubmitObjective so in questInstance.SubmitObjectives)
-                    questInstance.ObjectiveInstances.Add(so);
+                    if (so.IsValid) questInstance.ObjectiveInstances.Add(so);
                 foreach (CustomObjective cuo in questInstance.CustomObjectives)
-                    questInstance.ObjectiveInstances.Add(cuo);
+                    if (cuo.IsValid) questInstance.ObjectiveInstances.Add(cuo);
                 questInstance.ObjectiveInstances.Sort((x, y) =>
                 {
                     if (x.OrderIndex > y.OrderIndex) return 1;

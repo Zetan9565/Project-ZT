@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System.Linq;
+using System;
 
 [CustomEditor(typeof(Talker), true)]
 public class TalkerInspector : Editor
@@ -7,26 +9,39 @@ public class TalkerInspector : Editor
     Talker talker;
 
     SerializedProperty info;
+    SerializedProperty questFlagsOffset;
+
+    TalkerInformation[] npcs;
+    string[] npcNames;
 
     private void OnEnable()
     {
+        npcs = Resources.LoadAll<TalkerInformation>("");
+        npcNames = npcs.Select(x => x.Name).ToArray();//Linq分离出NPC名字
+
         talker = target as Talker;
         info = serializedObject.FindProperty("info");
+        questFlagsOffset = serializedObject.FindProperty("questFlagsOffset");
     }
 
     public override void OnInspectorGUI()
     {
-        if (talker.Info)
+        if (info.objectReferenceValue)
         {
             EditorGUILayout.BeginVertical("Box");
-            EditorGUILayout.LabelField("NPC名字：" + talker.TalkerName);
             EditorGUILayout.LabelField("NPC识别码：" + talker.TalkerID);
             EditorGUILayout.EndVertical();
         }
         else EditorGUILayout.HelpBox("NPC信息为空！", MessageType.Error);
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(info, new GUIContent("信息"));
+        if (talker.Info) info.objectReferenceValue = npcs[EditorGUILayout.Popup("NPC信息", GetNPCIndex(talker.Info), npcNames)];
+        else if (npcs.Length > 0) info.objectReferenceValue = npcs[EditorGUILayout.Popup("NPC信息", 0, npcNames)];
+        else EditorGUILayout.Popup(0, new string[] { "无可用谈话人" });
+        GUI.enabled = false;
+        EditorGUILayout.PropertyField(info, new GUIContent("引用资源"));
+        GUI.enabled = true;
+        EditorGUILayout.PropertyField(questFlagsOffset, new GUIContent("任务状态器位置偏移"));
         if (Application.isPlaying)
         {
             EditorGUILayout.BeginVertical("Box");
@@ -36,5 +51,12 @@ public class TalkerInspector : Editor
             EditorGUILayout.EndVertical();
         }
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+    }
+
+    int GetNPCIndex(TalkerInformation npc)
+    {
+        if (npcs.Contains(npc))
+            return Array.IndexOf(npcs, npc);
+        else return -1;
     }
 }

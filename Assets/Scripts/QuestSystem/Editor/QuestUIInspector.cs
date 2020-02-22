@@ -6,8 +6,8 @@ public class QuestUIInspector : Editor
 {
     //QuestUI UI;
 
-    SerializedProperty questsWindow;
-    SerializedProperty closeWindow;
+    SerializedProperty window;
+    SerializedProperty closeButton;
     SerializedProperty questPrefab;
     SerializedProperty questGroupPrefab;
     SerializedProperty questList;
@@ -20,7 +20,7 @@ public class QuestUIInspector : Editor
     SerializedProperty descriptionText;
     SerializedProperty abandonButton;
     SerializedProperty traceButton;
-    SerializedProperty closeDescription;
+    SerializedProperty desCloseButton;
     SerializedProperty moneyText;
     SerializedProperty EXPText;
     SerializedProperty rewardCellPrefab;
@@ -28,13 +28,15 @@ public class QuestUIInspector : Editor
     SerializedProperty questBoard;
     SerializedProperty boardQuestPrefab;
     SerializedProperty questBoardArea;
-
+    SerializedProperty questIcon;
+    SerializedProperty questFlagsPrefab;
+    SerializedProperty questFlagsPanel;
     private void OnEnable()
     {
         //UI = target as QuestUI;
 
-        questsWindow = serializedObject.FindProperty("questsWindow");
-        closeWindow = serializedObject.FindProperty("closeWindow");
+        window = serializedObject.FindProperty("window");
+        closeButton = serializedObject.FindProperty("closeButton");
         questPrefab = serializedObject.FindProperty("questPrefab");
         questGroupPrefab = serializedObject.FindProperty("questGroupPrefab");
         questList = serializedObject.FindProperty("questList");
@@ -47,7 +49,7 @@ public class QuestUIInspector : Editor
         descriptionText = serializedObject.FindProperty("descriptionText");
         abandonButton = serializedObject.FindProperty("abandonButton");
         traceButton = serializedObject.FindProperty("traceButton");
-        closeDescription = serializedObject.FindProperty("closeDescription");
+        desCloseButton = serializedObject.FindProperty("desCloseButton");
         moneyText = serializedObject.FindProperty("moneyText");
         EXPText = serializedObject.FindProperty("EXPText");
         rewardCellPrefab = serializedObject.FindProperty("rewardCellPrefab");
@@ -55,6 +57,9 @@ public class QuestUIInspector : Editor
         questBoard = serializedObject.FindProperty("questBoard");
         boardQuestPrefab = serializedObject.FindProperty("boardQuestPrefab");
         questBoardArea = serializedObject.FindProperty("questBoardArea");
+        questIcon = serializedObject.FindProperty("questIcon");
+        questFlagsPrefab = serializedObject.FindProperty("questFlagsPrefab");
+        questFlagsPanel = serializedObject.FindProperty("questFlagsPanel");
     }
 
     public override void OnInspectorGUI()
@@ -63,8 +68,8 @@ public class QuestUIInspector : Editor
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.LabelField("任务窗口相关", new GUIStyle() { fontStyle = FontStyle.Bold });
-        EditorGUILayout.PropertyField(questsWindow, new GUIContent("任务窗口"));
-        EditorGUILayout.PropertyField(closeWindow, new GUIContent("关闭任务窗口"));
+        EditorGUILayout.PropertyField(window, new GUIContent("任务窗口"));
+        EditorGUILayout.PropertyField(closeButton, new GUIContent("关闭按钮"));
         EditorGUILayout.PropertyField(questPrefab, new GUIContent("任务载体预制件"));
         EditorGUILayout.PropertyField(questGroupPrefab, new GUIContent("任务组载体预制件"));
         EditorGUILayout.PropertyField(questListParent, new GUIContent("进行中任务放置根"));
@@ -81,7 +86,7 @@ public class QuestUIInspector : Editor
         EditorGUILayout.PropertyField(descriptionText, new GUIContent("任务描述文字"));
         EditorGUILayout.PropertyField(abandonButton, new GUIContent("放弃按钮"));
         EditorGUILayout.PropertyField(traceButton, new GUIContent("追踪按钮"));
-        EditorGUILayout.PropertyField(closeDescription, new GUIContent("关闭详情窗口"));
+        EditorGUILayout.PropertyField(desCloseButton, new GUIContent("详情关闭按钮"));
         EditorGUILayout.PropertyField(moneyText, new GUIContent("金钱奖励文本"));
         EditorGUILayout.PropertyField(EXPText, new GUIContent("经验奖励文本"));
         EditorGUILayout.PropertyField(rewardCellPrefab, new GUIContent("道具奖励格预制件"), true);
@@ -94,6 +99,9 @@ public class QuestUIInspector : Editor
         EditorGUILayout.PropertyField(boardQuestPrefab, new GUIContent("栏任务载体预制件"));
         EditorGUILayout.PropertyField(questBoardArea, new GUIContent("任务栏放置根"), true);
         EditorGUILayout.EndVertical();
+        EditorGUILayout.PropertyField(questIcon, new GUIContent("任务图标"));
+        EditorGUILayout.PropertyField(questFlagsPrefab, new GUIContent("状态器预制件"));
+        EditorGUILayout.PropertyField(questFlagsPanel, new GUIContent("状态器显示面板"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
     }

@@ -55,7 +55,7 @@ public class Building : MonoBehaviour
         }
         IsUnderBuilding = true;
         StartCoroutine(Build());
-        if (buildingFlag) ZetanUtil.SetActive(buildingFlag.gameObject, true);
+        if (buildingFlag) ZetanUtility.SetActive(buildingFlag.gameObject, true);
         return true;
     }
 
@@ -76,13 +76,13 @@ public class Building : MonoBehaviour
             }
             IsUnderBuilding = true;
             StartCoroutine(Build());
-            if (buildingFlag) ZetanUtil.SetActive(buildingFlag.gameObject, true);
+            if (buildingFlag) ZetanUtility.SetActive(buildingFlag.gameObject, true);
         }
         else
         {
             IsUnderBuilding = false;
             IsBuilt = true;
-            if (buildingFlag) ZetanUtil.SetActive(buildingFlag.gameObject, false);
+            if (buildingFlag) ZetanUtility.SetActive(buildingFlag.gameObject, false);
         }
         if (buildingAgent) buildingAgent.UpdateUI();
     }
@@ -120,10 +120,10 @@ public class Building : MonoBehaviour
     private IEnumerator WaitToHideFlag()
     {
         yield return new WaitForSeconds(2);
-        if (buildingFlag) ZetanUtil.SetActive(buildingFlag.gameObject, false);
+        if (buildingFlag) ZetanUtility.SetActive(buildingFlag.gameObject, false);
     }
 
-    public virtual void TryDestroy()
+    public virtual void AskDestroy()
     {
         onDestroy?.Invoke();
         ConfirmManager.Instance.NewConfirm(string.Format("确定拆除{0}{1}吗？", name, (Vector2)transform.position),

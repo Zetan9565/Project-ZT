@@ -26,7 +26,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
     public bool IsUIOpen { get; private set; }
     public bool IsPausing { get; private set; }
 
-    public Canvas SortCanvas
+    public Canvas CanvasToSort
     {
         get
         {
@@ -86,8 +86,6 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
         WindowsManager.Instance.Remove(this);
         IsUIOpen = false;
     }
-
-    void IWindowHandler.OpenCloseWindow() { }
 
     public void PauseDisplay(bool pause)
     {

@@ -18,16 +18,20 @@ MonoBehaviour:
   abandonable: 1
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptConditions:
-  - acceptCondition: 5
+  - acceptCondition: 3
     level: 0
     completeQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
     ownedItem: {fileID: 0}
     triggerName: 
-  - acceptCondition: 5
+  - acceptCondition: 3
     level: 0
     completeQuest: {fileID: 11400000, guid: 5288a43013e44284baed8b30be1f92de, type: 2}
     ownedItem: {fileID: 0}
     triggerName: 
+  questType: 0
+  repeatFrequancy: 0
+  timeUnit: 2
+  conditionRelational: 
   beginDialogue: {fileID: 11400000, guid: 4d22d898b3b93fd4a9f8b4e6fbf2bf6b, type: 2}
   ongoingDialogue: {fileID: 11400000, guid: 9a228683692d7504f96d6a13ae0aaf89, type: 2}
   completeDialogue: {fileID: 11400000, guid: e6ac29e35c65fda4a9cc0756740de01f, type: 2}
@@ -35,37 +39,51 @@ MonoBehaviour:
   rewardEXP: 150
   rewardItems: []
   _NPCToSubmit: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-  cmpltObjctvInOrder: 0
+  cmpltObjctvInOrder: 1
   collectObjectives:
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5251"
     display: 1
+    showMapIcon: 0
     amount: 5
-    inOrder: 0
-    orderIndex: 0
+    inOrder: 1
+    orderIndex: 1
     runtimeID: 
     runtimeParent: {fileID: 0}
     item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    checkBagAtAcpt: 1
-    loseItemAtSbmt: 1
+    checkBagAtStart: 1
+    loseItemAtSbmt: 0
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5200"
     display: 1
+    showMapIcon: 0
     amount: 5
-    inOrder: 0
-    orderIndex: 0
+    inOrder: 1
+    orderIndex: 1
     runtimeID: 
     runtimeParent: {fileID: 0}
     item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
-    checkBagAtAcpt: 1
-    loseItemAtSbmt: 1
+    checkBagAtStart: 1
+    loseItemAtSbmt: 0
   killObjectives: []
   talkObjectives: []
   moveObjectives: []
-  submitObjectives: []
+  submitObjectives:
+  - displayName: "\u4E0A\u4EA4\u7834\u65E7\u7684\u5251"
+    display: 1
+    showMapIcon: 1
+    amount: 1
+    inOrder: 1
+    orderIndex: 3
+    runtimeID: 
+    runtimeParent: {fileID: 0}
+    _NPCToSubmit: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+    itemToSubmit: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+    wordsWhenSubmit: "\u8FD9\u662F\u4EC0\u4E48\u4E1C\u897F\uFF0C\u54EA\u6765\u7684\uFF1F"
+    talkerType: 0
   customObjectives: []
   originalQuestHolder:
     info: {fileID: 0}
     currentScene: 
-    currentPostition: {x: 0, y: 0, z: 0}
+    currentPosition: {x: 0, y: 0, z: 0}
     relationshipInstance:
       relationshipValue:
         min: -500
@@ -82,7 +100,7 @@ MonoBehaviour:
   currentQuestHolder:
     info: {fileID: 0}
     currentScene: 
-    currentPostition: {x: 0, y: 0, z: 0}
+    currentPosition: {x: 0, y: 0, z: 0}
     relationshipInstance:
       relationshipValue:
         min: -500

@@ -14,7 +14,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
 
     public bool IsPausing { get; private set; }
 
-    public Canvas SortCanvas
+    public Canvas CanvasToSort
     {
         get
         {
@@ -59,62 +59,22 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         {
             ConfirmManager.Instance.NewConfirm(string.Format("确定制作1个 [{0}] 吗？", currentItem.name), delegate
             {
-                if (OnMake(currentItem))
+                if (BackpackManager.Instance.MakeItem(currentItem))
                     MessageManager.Instance.NewMessage(string.Format("制作了1个 [{0}]", currentItem.name));
             });
         }
         else
         {
-            AmountManager.Instance.SetPosition(ZetanUtil.ScreenCenter, Vector2.zero);
+            AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
             AmountManager.Instance.NewAmount(delegate
             {
                 ConfirmManager.Instance.NewConfirm(string.Format("确定制作{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, currentItem.name), delegate
                 {
-                    if (OnMake(currentItem, (int)AmountManager.Instance.Amount))
+                    if (BackpackManager.Instance.MakeItem(currentItem, (int)AmountManager.Instance.Amount))
                         MessageManager.Instance.NewMessage(string.Format("制作了{0}个 [{1}]", currentItem.name, (int)AmountManager.Instance.Amount));
                 });
             }, amountCanMake);
         }
-    }
-
-    private bool OnMake(ItemBase item, int amount = 1)
-    {
-        if (!item || amount < 1 || !currentItem) return false;
-        foreach (MatertialInfo mi in item.Materials)
-            if (!BackpackManager.Instance.TryLoseItem_Boolean(mi.Item, mi.Amount * amount))
-                return false;
-        foreach (MatertialInfo mi in item.Materials)//模拟空出位置来放制作的道具
-        {
-            BackpackManager.Instance.MBackpack.weightLoad -= mi.Item.Weight * mi.Amount * amount;
-            if (mi.Item.StackAble && BackpackManager.Instance.GetItemAmount(mi.Item) - mi.Amount * amount == 0)//可叠加且消耗后用尽，则空出一格
-                BackpackManager.Instance.MBackpack.backpackSize--;
-            else if (!mi.Item.StackAble)//不可叠加，则消耗多少个就能空出多少格
-                BackpackManager.Instance.MBackpack.backpackSize -= amount;
-        }
-        if (!BackpackManager.Instance.TryGetItem_Boolean(currentItem, amount))
-        {
-            foreach (MatertialInfo mi in item.Materials)//取消模拟
-            {
-                BackpackManager.Instance.MBackpack.weightLoad += mi.Item.Weight * mi.Amount * amount;
-                if (mi.Item.StackAble && BackpackManager.Instance.GetItemAmount(mi.Item) - mi.Amount * amount == 0)
-                    BackpackManager.Instance.MBackpack.backpackSize++;
-                else if (!mi.Item.StackAble)
-                    BackpackManager.Instance.MBackpack.backpackSize += amount;
-            }
-            return false;
-        }
-        foreach (MatertialInfo mi in item.Materials)//取消模拟并确认操作
-        {
-            BackpackManager.Instance.MBackpack.weightLoad += mi.Item.Weight * mi.Amount * amount;
-            if (mi.Item.StackAble && BackpackManager.Instance.GetItemAmount(mi.Item) - mi.Amount * amount == 0)
-                BackpackManager.Instance.MBackpack.backpackSize++;
-            else if (!mi.Item.StackAble)
-                BackpackManager.Instance.MBackpack.backpackSize += amount;
-            BackpackManager.Instance.LoseItem(mi.Item, mi.Amount * amount);
-        }
-        BackpackManager.Instance.GetItem(item, amount);
-        UpdateUI();
-        return true;
     }
 
     public bool Learn(ItemBase item)
@@ -143,8 +103,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         if (IsUIOpen) return;
         if (IsPausing) return;
         Init();
-        UI.makingWindow.alpha = 1;
-        UI.makingWindow.blocksRaycasts = true;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
         IsUIOpen = true;
         WindowsManager.Instance.Push(this);
         UI.pageSelector.SetValueWithoutNotify(0);
@@ -156,8 +116,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) return;
         if (IsPausing) return;
-        UI.makingWindow.alpha = 0;
-        UI.makingWindow.blocksRaycasts = false;
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
         IsUIOpen = false;
         WindowsManager.Instance.Remove(this);
         CurrentTool = null;
@@ -167,21 +127,19 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         ItemWindowManager.Instance.CloseItemWindow();
     }
 
-    void IWindowHandler.OpenCloseWindow() { }
-
     public void PauseDisplay(bool pause)
     {
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) return;
         if (IsPausing && !pause)
         {
-            UI.makingWindow.alpha = 1;
-            UI.makingWindow.blocksRaycasts = true;
+            UI.window.alpha = 1;
+            UI.window.blocksRaycasts = true;
         }
         else if (!IsPausing && pause)
         {
-            UI.makingWindow.alpha = 0;
-            UI.makingWindow.blocksRaycasts = false;
+            UI.window.alpha = 0;
+            UI.window.blocksRaycasts = false;
         }
         IsPausing = pause;
     }
@@ -252,7 +210,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         if (!UI || !UI.gameObject) return;
         foreach (MakingAgent ia in MakingAgents)
         {
-            ZetanUtil.SetActive(ia.gameObject, true);
+            ZetanUtility.SetActive(ia.gameObject, true);
         }
     }
 
@@ -261,8 +219,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         foreach (MakingAgent ia in MakingAgents)
         {
             if (ia.MItem.IsEquipment)
-                ZetanUtil.SetActive(ia.gameObject, true);
-            else ZetanUtil.SetActive(ia.gameObject, false);
+                ZetanUtility.SetActive(ia.gameObject, true);
+            else ZetanUtility.SetActive(ia.gameObject, false);
         }
     }
 
@@ -271,8 +229,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         foreach (MakingAgent ia in MakingAgents)
         {
             if (ia.MItem.IsConsumable)
-                ZetanUtil.SetActive(ia.gameObject, true);
-            else ZetanUtil.SetActive(ia.gameObject, false);
+                ZetanUtility.SetActive(ia.gameObject, true);
+            else ZetanUtility.SetActive(ia.gameObject, false);
         }
     }
 
@@ -281,8 +239,8 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         foreach (MakingAgent ia in MakingAgents)
         {
             if (ia.MItem.IsMaterial)
-                ZetanUtil.SetActive(ia.gameObject, true);
-            else ZetanUtil.SetActive(ia.gameObject, false);
+                ZetanUtility.SetActive(ia.gameObject, true);
+            else ZetanUtility.SetActive(ia.gameObject, false);
         }
     }
     #endregion

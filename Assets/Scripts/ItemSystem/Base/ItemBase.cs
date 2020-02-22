@@ -511,7 +511,7 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
         get
         {
             if (item) return item.name;
-            else return string.Empty;
+            else return "(无效道具)";
         }
     }
 
@@ -553,7 +553,7 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
         }
     }
 
-    public bool IsValid => item && amount > 1;
+    public bool IsValid => item && Amount >= 1;
 
     public ItemInfo(ItemBase item, int amount = 1)
     {
