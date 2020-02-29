@@ -1,7 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -20,7 +20,8 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     public DialogueType CurrentType { get; private set; } = DialogueType.Normal;
 
     private readonly Queue<DialogueWords> WordsToSay = new Queue<DialogueWords>();
-    public Dictionary<string, DialogueData> DialogueDatas { get; private set; } = new Dictionary<string, DialogueData>();
+
+    private readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
 
     private int page = 1;
     public int Page
@@ -39,7 +40,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     private int MaxPage = 1;
 
     private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
-    private List<OptionAgent> optionAgents = new List<OptionAgent>();
+    private readonly List<OptionAgent> optionAgents = new List<OptionAgent>();
 
     public int OptionsCount => optionAgents.Count;
     public OptionAgent FirstOption
@@ -101,7 +102,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         StopAllCoroutines();
         if (dialogue.Words.Count < 1 || !dialogue) return;
         currentDialog = dialogue;
-        if (!DialogueDatas.ContainsKey(dialogue.ID)) DialogueDatas.Add(dialogue.ID, new DialogueData(dialogue));
+        if (!dialogueDatas.ContainsKey(dialogue.ID)) dialogueDatas.Add(dialogue.ID, new DialogueData(dialogue));
         IsTalking = true;
         WordsToSay.Clear();
         if (startIndex < 0) startIndex = 0;
@@ -133,7 +134,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         if (!UI) return;
         CurrentTalker = talker;
         CurrentType = DialogueType.Normal;
-        if (talker.QuestInstances.FindAll(q => q.AcceptAble).Count > 0)
+        if (talker.QuestInstances.FindAll(q => QuestManager.Instance.QuestIsAcceptAble(q)).Count > 0)
             ZetanUtility.SetActive(UI.questButton.gameObject, true);
         else ZetanUtility.SetActive(UI.questButton.gameObject, false);
         ZetanUtility.SetActive(UI.warehouseButton.gameObject, talker.Info.IsWarehouseAgent);
@@ -211,31 +212,8 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         currentOption = option;
         if (option.OptionType == WordsOptionType.SubmitAndGet && option.IsValid)
         {
-            if (BackpackManager.Instance.TryLoseItem_Boolean(option.ItemToSubmit))
-            {
-                if (option.ItemCanGet && option.ItemCanGet.item)//若可获得物品
-                {
-                    BackpackManager.Instance.MBackpack.weightLoad -= option.ItemToSubmit.item.Weight * option.ItemToSubmit.Amount;
-                    int leftAmount = BackpackManager.Instance.GetItemAmount(option.ItemToSubmit.item) - option.ItemToSubmit.Amount;
-                    if (leftAmount == 0) BackpackManager.Instance.MBackpack.backpackSize--;
-                    if (!BackpackManager.Instance.TryGetItem_Boolean(option.ItemCanGet))
-                    {
-                        BackpackManager.Instance.MBackpack.weightLoad += option.ItemToSubmit.item.Weight * option.ItemToSubmit.Amount;
-                        if (leftAmount == 0) BackpackManager.Instance.MBackpack.backpackSize++;
-                        wordsOptionInstances.Pop();
-                        currentOption = null;
-                        return;
-                    }
-                    else
-                    {
-                        BackpackManager.Instance.MBackpack.weightLoad += option.ItemToSubmit.item.Weight * option.ItemToSubmit.Amount;
-                        if (leftAmount == 0) BackpackManager.Instance.MBackpack.backpackSize++;
-                        BackpackManager.Instance.LoseItem(option.ItemToSubmit.item, option.ItemToSubmit.Amount);
-                        BackpackManager.Instance.GetItem(option.ItemCanGet);
-                    }
-                }
-                else BackpackManager.Instance.LoseItem(option.ItemToSubmit.item, option.ItemToSubmit.Amount);
-            }
+            if (BackpackManager.Instance.TryLoseItem_Boolean(option.ItemToSubmit, option.ItemCanGet))
+                BackpackManager.Instance.LoseItem(option.ItemToSubmit, option.ItemCanGet);
             else
             {
                 wordsOptionInstances.Pop();
@@ -351,7 +329,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         ClearOptions();
         foreach (Quest quest in CurrentTalker.QuestInstances)
         {
-            if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.AcceptAble && quest.IsValid)
+            if (!QuestManager.Instance.HasCompleteQuest(quest) && QuestManager.Instance.QuestIsAcceptAble(quest) && QuestManager.Instance.QuestIsValid(quest))
             {
                 OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(quest.Title + (quest.IsComplete ? "(完成)" : quest.IsOngoing ? "(进行中)" : string.Empty), quest);
@@ -460,7 +438,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     {
         if (WordsToSay.Count < 1 || WordsToSay.Peek().Options.Count < 1) return;
         DialogueWords currentWords = WordsToSay.Peek();
-        DialogueDatas.TryGetValue(currentDialog.ID, out DialogueData dialogDataFound);
+        dialogueDatas.TryGetValue(currentDialog.ID, out DialogueData dialogDataFound);
         if (CurrentType == DialogueType.Normal) ClearOptions(OptionType.Quest, OptionType.Objective);
         else ClearOptions();
         bool isLastWords = currentDialog.IndexOfWords(WordsToSay.Peek()) == currentDialog.Words.Count - 1;
@@ -768,11 +746,11 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
                     foreach (WordsOption option in topWordsParent.Options)
                     {
                         string parentID = topOptionInstance.runtimeDialogParent.ID;
-                        DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
+                        DialogueWordsData _find = dialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
                         if (_find == null)
                         {
-                            DialogueDatas.Add(parentID, new DialogueData(option.runtimeDialogParent));
-                            _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
+                            dialogueDatas.Add(parentID, new DialogueData(option.runtimeDialogParent));
+                            _find = dialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
                         }
                         int indexOfBranch = topWordsParent.IndexOfOption(option);
                         _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
@@ -786,11 +764,11 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
                 {
                     int indexOfWords = topOptionInstance.runtimeDialogParent.IndexOfWords(topWordsParent);
                     string parentID = topOptionInstance.runtimeDialogParent.ID;
-                    DialogueWordsData _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWords);
+                    DialogueWordsData _find = dialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWords);
                     if (_find == null)
                     {
-                        DialogueDatas.Add(parentID, new DialogueData(topOptionInstance.runtimeDialogParent));
-                        _find = DialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWords);
+                        dialogueDatas.Add(parentID, new DialogueData(topOptionInstance.runtimeDialogParent));
+                        _find = dialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWords);
                     }
                     int indexOfBranch = topWordsParent.IndexOfOption(currentOption);
                     _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
@@ -908,7 +886,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
             {
                 if (rw.IsEmpty)
                 {
-                    rw.InitItem(info);
+                    rw.SetItem(info);
                     break;
                 }
             }
@@ -988,7 +966,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         OpenGiftWindow();
     }
 
-    public void LoadTalkerQuest()
+    public void ShowTalkerQuest()
     {
         if (CurrentTalker == null) return;
         ZetanUtility.SetActive(UI.questButton.gameObject, false);
@@ -1001,7 +979,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
 
     public void Skip()
     {
-        DialogueDatas.TryGetValue(currentDialog.ID, out DialogueData find);
+        dialogueDatas.TryGetValue(currentDialog.ID, out DialogueData find);
         if (find != null)
             for (int i = 0; i < currentDialog.Words.Count; i++)
                 for (int j = 0; j < currentDialog.Words[i].Options.Count; j++)
@@ -1022,7 +1000,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
 
     public bool AllOptionComplete()
     {
-        DialogueDatas.TryGetValue(currentDialog.ID, out DialogueData dialogDataFound);
+        dialogueDatas.TryGetValue(currentDialog.ID, out DialogueData dialogDataFound);
         if (dialogDataFound == null) return false;
         for (int i = 0; i < currentDialog.Words.Count; i++)
         {
@@ -1039,7 +1017,23 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     public void RemoveDialogueData(Dialogue dialogue)
     {
         if (!dialogue) return;
-        DialogueDatas.Remove(dialogue.ID);
+        dialogueDatas.Remove(dialogue.ID);
+    }
+
+    public void SaveData(SaveData data)
+    {
+        foreach (KeyValuePair<string, DialogueData> kvpDialog in dialogueDatas)
+        {
+            data.dialogueDatas.Add(kvpDialog.Value);
+        }
+    }
+    public void LoadData(SaveData data)
+    {
+        dialogueDatas.Clear();
+        foreach (DialogueData dd in data.dialogueDatas)
+        {
+            dialogueDatas.Add(dd.dialogID, dd);
+        }
     }
     #endregion
 }

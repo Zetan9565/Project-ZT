@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -23,9 +23,9 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
         }
     }
 
-    public List<ItemBase> ItemLearned { get; private set; } = new List<ItemBase>();
+    private readonly List<ItemBase> learnedItems = new List<ItemBase>();
 
-    public List<MakingAgent> MakingAgents { get; private set; } = new List<MakingAgent>();
+    private readonly List<MakingAgent> makingAgents = new List<MakingAgent>();
 
     public MakingTool CurrentTool { get; private set; }
 
@@ -33,23 +33,23 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
 
     public void Init()
     {
-        foreach (MakingAgent ma in MakingAgents)
+        foreach (MakingAgent ma in makingAgents)
             ma.Clear(true);
-        MakingAgents.Clear();
+        makingAgents.Clear();
         if (CurrentTool)
-            foreach (ItemBase item in ItemLearned)
+            foreach (ItemBase item in learnedItems)
                 if (item.MakingTool == CurrentTool.ToolType)
                 {
                     MakingAgent ma = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<MakingAgent>();
                     ma.Init(item);
-                    MakingAgents.Add(ma);
+                    makingAgents.Add(ma);
                 }
     }
 
     public void MakeCurrent()
     {
         if (!CurrentTool || !currentItem) return;
-        int amountCanMake = currentItem.GetMakeAmount(BackpackManager.Instance.MBackpack);
+        int amountCanMake = BackpackManager.Instance.GetAmountCanMake(currentItem.Materials);
         if (amountCanMake < 1)
         {
             MessageManager.Instance.NewMessage("材料不足");
@@ -85,12 +85,12 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
             MessageManager.Instance.NewMessage("无效的道具");
             return false;
         }
-        if (ItemLearned.Contains(item))
+        if (learnedItems.Contains(item))
         {
             MessageManager.Instance.NewMessage("已经学会制作 [" + item.name + "]");
             return false;
         }
-        ItemLearned.Add(item);
+        learnedItems.Add(item);
         MessageManager.Instance.NewMessage(string.Format("学会了 [{0}] 的制作方法!", item.name));
         return true;
     }
@@ -148,14 +148,14 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
     {
         if (!item) return;
         currentItem = item;
-        List<string> info = currentItem.GetMaterialsInfo(BackpackManager.Instance.MBackpack).ToList();
+        List<string> info = BackpackManager.Instance.GetMaterialsInfo(currentItem.Materials).ToList();
         StringBuilder materials = new StringBuilder("<b>持有数量：</b>" + BackpackManager.Instance.GetItemAmount(item));
         materials.Append("\n<b>制作材料：</b>\n");
         for (int i = 0; i < info.Count; i++)
             materials.Append(info[i] + (i == info.Count - 1 ? string.Empty : "\n"));
         UI.description.text = materials.ToString();
-        int makeAmount = currentItem.GetMakeAmount(BackpackManager.Instance.MBackpack);
-        UI.icon.InitItem(new ItemInfo(currentItem, makeAmount));
+        int makeAmount = BackpackManager.Instance.GetAmountCanMake(currentItem.Materials);
+        UI.icon.SetItem(new ItemInfo(currentItem, makeAmount));
         UI.makeButton.interactable = makeAmount > 0;
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = true;
@@ -208,7 +208,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
     private void ShowAll()
     {
         if (!UI || !UI.gameObject) return;
-        foreach (MakingAgent ia in MakingAgents)
+        foreach (MakingAgent ia in makingAgents)
         {
             ZetanUtility.SetActive(ia.gameObject, true);
         }
@@ -216,7 +216,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
 
     private void ShowEquipments()
     {
-        foreach (MakingAgent ia in MakingAgents)
+        foreach (MakingAgent ia in makingAgents)
         {
             if (ia.MItem.IsEquipment)
                 ZetanUtility.SetActive(ia.gameObject, true);
@@ -226,7 +226,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
 
     private void ShowConsumables()
     {
-        foreach (MakingAgent ia in MakingAgents)
+        foreach (MakingAgent ia in makingAgents)
         {
             if (ia.MItem.IsConsumable)
                 ZetanUtility.SetActive(ia.gameObject, true);
@@ -236,7 +236,7 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
 
     private void ShowMaterials()
     {
-        foreach (MakingAgent ia in MakingAgents)
+        foreach (MakingAgent ia in makingAgents)
         {
             if (ia.MItem.IsMaterial)
                 ZetanUtility.SetActive(ia.gameObject, true);
@@ -247,10 +247,27 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, IWindowHandl
 
     public void SetUI(MakingUI UI)
     {
-        MakingAgents.RemoveAll(x => !x || !x.gameObject);
+        makingAgents.RemoveAll(x => !x || !x.gameObject);
         IsPausing = false;
         CloseWindow();
         this.UI = UI;
     }
     #endregion
+
+    public void SaveData(SaveData data)
+    {
+        foreach (var item in learnedItems)
+        {
+            data.makingDatas.Add(item.ID);
+        }
+    }
+
+    public void LoadData(SaveData data)
+    {
+        learnedItems.Clear();
+        foreach (var md in data.makingDatas)
+        {
+            learnedItems.Add(GameManager.GetItemByID(md));
+        }
+    }
 }

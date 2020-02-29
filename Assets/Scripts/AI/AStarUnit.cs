@@ -67,6 +67,12 @@ public class AStarUnit : MonoBehaviour
     [SerializeField]
     private bool drawGizmos;
 
+    [SerializeField]
+    private Color lineColor = Color.green;
+
+    [SerializeField]
+    private Color pointColor = new Color(Color.cyan.r, Color.cyan.g, Color.cyan.b, 0.5f);
+
     private Seeker seeker;
     public Seeker Seeker
     {
@@ -203,7 +209,7 @@ public class AStarUnit : MonoBehaviour
         if (newPath == null || !AStarManager.Instance) return;
         ResetPath();
         IsFollowingPath = followImmediate;
-        GetResult(newPath, true);
+        GetResult(newPath);
     }
 
     public void ResetPath()
@@ -220,12 +226,12 @@ public class AStarUnit : MonoBehaviour
     private void RequestPath(Vector3 destination)
     {
         if (!AStarManager.Instance || destination == OffsetPosition) return;
-        else AStarManager.Instance.FindPath(new PathRequest(OffsetPosition, destination, Seeker, unitSize, OnPathFound));
+        else AStarManager.Instance.RequestPath(new PathRequest(OffsetPosition, destination, Seeker, unitSize, OnPathFound));
     }
 
-    private void GetResult(IEnumerable<Vector3> newPath, bool findSuccessfully)
+    private void GetResult(IEnumerable<Vector3> newPath)
     {
-        if (findSuccessfully && newPath != null && newPath.Count() > 0)
+        if (newPath != null && newPath.Count() > 0)
         {
             path = newPath.ToArray();
             if (pathRenderer)
@@ -243,16 +249,16 @@ public class AStarUnit : MonoBehaviour
         }
     }
 
-    private void OnPathFound(Path newPath)
+    private void OnPathFound(Path p)
     {
-        if (newPath.CompleteState == PathCompleteState.Complete || newPath.CompleteState == PathCompleteState.Partial)
+        if (p.CompleteState == PathCompleteState.Complete || p.CompleteState == PathCompleteState.Partial)
         {
-            GetResult(AStarManager.Instance.SimplifyPath(unitSize, newPath.path), true);
+            GetResult(AStarManager.Instance.SimplifyPath(unitSize, p.path));
         }
         else
         {
-            if (!target) GetResult(null, false);
-            else GetResult(new Vector3[] { TargetPosition }, true);
+            if (!target) GetResult(null);
+            else GetResult(new Vector3[] { TargetPosition });
         }
     }
 
@@ -449,6 +455,7 @@ public class AStarUnit : MonoBehaviour
         transform = base.transform;
 
         Seeker.drawGizmos = false;
+        Seeker.hideFlags = HideFlags.NotEditable;
 
         if (controller && moveMode == UnitMoveMode.MoveController) controller.slopeLimit = slopeLimit;
 
@@ -494,10 +501,12 @@ public class AStarUnit : MonoBehaviour
             if (path != null)
                 for (int i = targetWaypointIndex; i >= 0 && i < path.Length; i++)
                 {
-                    if (i != path.Length - 1) Gizmos.color = new Color(Color.cyan.r, Color.cyan.g, Color.cyan.b, 0.5f);
-                    else Gizmos.color = new Color(Color.green.r, Color.green.g, Color.green.b, 0.5f);
-                    Gizmos.DrawSphere(path[i], 0.25f);
+                    if (i != path.Length - 1) Gizmos.color = pointColor;
+                    else Gizmos.color = new Color(Color.green.r, Color.green.g, Color.green.b, pointColor.a);
+                    if (AStarManager.Instance.ThreeD) Gizmos.DrawSphere(path[i], 0.25f);
+                    else ZetanUtility.DrawGizmosCircle(path[i], 0.25f, Vector3.forward, Gizmos.color);
 
+                    Gizmos.color = lineColor;
                     if (i == targetWaypointIndex)
                         Gizmos.DrawLine(OffsetPosition, path[i]);
                     else Gizmos.DrawLine(path[i - 1], path[i]);

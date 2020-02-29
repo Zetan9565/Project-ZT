@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -10,10 +9,13 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
     private LootUI UI;
 
     [SerializeField]
+    private int slotCount;
+
+    [SerializeField]
     private LootAgent defaultLootPrefab;
     public static LootAgent DefaultLootPrefab => Instance.defaultLootPrefab;
 
-    private List<ItemAgent> itemAgents = new List<ItemAgent>();
+    private readonly List<ItemAgent> itemAgents = new List<ItemAgent>();
 
     public LootAgent LootAgent { get; private set; }
 
@@ -23,32 +25,30 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
     public bool PickAble { get; private set; }
     public bool IsPicking { get; private set; }
 
-    public Canvas CanvasToSort
-    {
-        get
-        {
-            if (!UI) return null;
-            return UI.windowCanvas;
-        }
-    }
+    public Canvas CanvasToSort => UI ? UI.windowCanvas : null;
 
     private void Init()
     {
         foreach (var ia in itemAgents)
             ia.Empty();
         int befCount = itemAgents.Count;
-        for (int i = 0; i < 10 - befCount; i++)
-        {
-            ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-            ia.Init(ItemAgentType.Loot);
-            itemAgents.Add(ia);
-        }
+        if (slotCount >= befCount)
+            for (int i = 0; i < slotCount - befCount; i++)
+            {
+                ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+                ia.Init(ItemAgentType.Loot);
+                itemAgents.Add(ia);
+            }
+        else for (int i = 0; i < befCount - slotCount; i++)
+            {
+
+            }
         if (LootAgent)
             foreach (ItemInfo li in LootAgent.lootItems)
                 foreach (ItemAgent ia in itemAgents)
                     if (ia.IsEmpty)
                     {
-                        ia.InitItem(li);
+                        ia.SetItem(li);
                         break;
                     }
     }
@@ -74,7 +74,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
     {
         if (!LootAgent) return;
         if (!LootAgent.lootItems.Contains(item)) return;
-        int takeAmount = BackpackManager.Instance.TryGetItem_Integer(item.item, amount);
+        int takeAmount = BackpackManager.Instance.TryGetItem_Integer(item, amount);
         if (BackpackManager.Instance.GetItem(item.item, takeAmount))
             item.Amount -= takeAmount;
         if (item.Amount < 1) LootAgent.lootItems.Remove(item);

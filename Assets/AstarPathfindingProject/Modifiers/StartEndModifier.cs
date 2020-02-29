@@ -199,7 +199,7 @@ namespace Pathfinding {
 			case Exactness.NodeConnection:
 				Vector3 relevantPoint;
 				if (start) {
-					relevantPoint = adjustStartPoint != null ? adjustStartPoint() : path.originalStartPoint;
+					relevantPoint = adjustStartPoint != null? adjustStartPoint () : path.originalStartPoint;
 				} else {
 					relevantPoint = path.originalEndPoint;
 				}

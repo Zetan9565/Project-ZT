@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
+using UnityEngine;
 
 [System.Serializable]
 public class Backpack
@@ -27,14 +27,16 @@ public class Backpack
 
     public bool IsFull { get { return backpackSize.IsMax; } }
 
-    public ItemInfo Latest
-    {
-        get
-        {
-            if (Items.Count < 1) return null;
-            return Items[Items.Count - 1];
-        }
-    }
+    /// <summary>
+    /// 负重上限
+    /// </summary>
+    public float LimitWeightload => weightLoad.Max;
+    /// <summary>
+    /// 开始导致减速的负重
+    /// </summary>
+    public float NormalWeightload => weightLoad.Max / 1.5f;
+
+    public ItemInfo LatestInfo => Items.Count < 1 ? null : Items[Items.Count - 1];
 
     public List<ItemInfo> Items { get; } = new List<ItemInfo>();
 
@@ -162,6 +164,8 @@ public class Backpack
     {
         Items.Sort((x, y) =>
         {
+            x.indexInGrid = -1;
+            y.indexInGrid = -1;
             if (x.item.ItemType == y.item.ItemType)
             {
                 if (x.item.Quality < y.item.Quality)
@@ -194,10 +198,17 @@ public class Backpack
                 else if (y.item.ItemType == ItemType.Quest) return 1;
                 else if (x.item.ItemType == ItemType.Material) return -1;
                 else if (y.item.ItemType == ItemType.Material) return 1;
+                else if (x.item.ItemType == ItemType.Seed) return -1;
+                else if (y.item.ItemType == ItemType.Seed) return 1;
                 else if (x.item.ItemType == ItemType.Other) return -1;
                 else if (y.item.ItemType == ItemType.Other) return 1;
                 else return 0;
             }
         });
+    }
+
+    public static implicit operator bool(Backpack self)
+    {
+        return self != null;
     }
 }

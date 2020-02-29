@@ -24,7 +24,7 @@ public class PlantManager : SingletonMonoBehaviour<PlantManager>, IWindowHandler
     {
         if (!UI || !UI.gameObject) return;
         CurrentField = field;
-        var seeds = BackpackManager.Instance.MBackpack.Items.FindAll(x => x.item is SeedItem).Select(x => x.item).ToList();
+        var seeds = BackpackManager.Instance.Seeds.Select(x => x.item).ToList();
         while (seeds.Count > SeedAgents.Count)
         {
             SeedAgent sa = ObjectPool.Instance.Get(UI.seedCellPrefab, UI.seedCellsParent).GetComponent<SeedAgent>();

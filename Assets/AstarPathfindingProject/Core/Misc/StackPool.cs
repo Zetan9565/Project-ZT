@@ -20,7 +20,7 @@ namespace Pathfinding.Util {
 	/// \since Version 3.2
 	/// See: Pathfinding.Util.ListPool
 	/// </summary>
-	public static class StackPool<T>{
+	public static class StackPool<T> {
 		/// <summary>Internal pool</summary>
 		static readonly List<Stack<T> > pool;
 

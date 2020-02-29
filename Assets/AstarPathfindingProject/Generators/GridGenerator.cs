@@ -1256,7 +1256,7 @@ namespace Pathfinding {
 			}
 
 			// Return the list to the pool
-			Pathfinding.Util.ListPool<GraphNode>.Release(ref nodesInRect);
+			Pathfinding.Util.ListPool<GraphNode>.Release (ref nodesInRect);
 		}
 
 		/// <summary>
@@ -1511,7 +1511,7 @@ namespace Pathfinding {
 			// for large graphs. However just checking if any mesh needs to be updated is relatively fast. So we just store
 			// a hash together with the mesh and rebuild the mesh when necessary.
 			const int chunkWidth = 32;
-			GridNodeBase[] allNodes = ArrayPool<GridNodeBase>.Claim(chunkWidth*chunkWidth*LayerCount);
+			GridNodeBase[] allNodes = ArrayPool<GridNodeBase>.Claim (chunkWidth*chunkWidth*LayerCount);
 			for (int cx = width/chunkWidth; cx >= 0; cx--) {
 				for (int cz = depth/chunkWidth; cz >= 0; cz--) {
 					Profiler.BeginSample("Hash");
@@ -1542,7 +1542,7 @@ namespace Pathfinding {
 					}
 				}
 			}
-			ArrayPool<GridNodeBase>.Release(ref allNodes);
+			ArrayPool<GridNodeBase>.Release (ref allNodes);
 
 			if (active.showUnwalkableNodes) DrawUnwalkableNodes(nodeSize * 0.3f);
 		}
@@ -1567,8 +1567,8 @@ namespace Pathfinding {
 			var verticesPerNode = 3*trianglesPerNode;
 
 			// Get arrays that have room for all vertices/colors (the array might be larger)
-			var vertices = ArrayPool<Vector3>.Claim(walkable*verticesPerNode);
-			var colors = ArrayPool<Color>.Claim(walkable*verticesPerNode);
+			var vertices = ArrayPool<Vector3>.Claim (walkable*verticesPerNode);
+			var colors = ArrayPool<Color>.Claim (walkable*verticesPerNode);
 			int baseIndex = 0;
 
 			for (int i = 0; i < nodeCount; i++) {
@@ -1656,8 +1656,8 @@ namespace Pathfinding {
 
 			if (showMeshSurface) helper.DrawTriangles(vertices, colors, baseIndex*trianglesPerNode/verticesPerNode);
 
-			ArrayPool<Vector3>.Release(ref vertices);
-			ArrayPool<Color>.Release(ref colors);
+			ArrayPool<Vector3>.Release (ref vertices);
+			ArrayPool<Color>.Release (ref colors);
 		}
 
 		/// <summary>
@@ -1738,11 +1738,11 @@ namespace Pathfinding {
 			var rect = GetRectFromBounds(bounds);
 
 			if (nodes == null || !rect.IsValid() || nodes.Length != width*depth) {
-				return ListPool<GraphNode>.Claim();
+				return ListPool<GraphNode>.Claim ();
 			}
 
 			// Get a buffer we can use
-			var inArea = ListPool<GraphNode>.Claim(rect.Width*rect.Height);
+			var inArea = ListPool<GraphNode>.Claim (rect.Width*rect.Height);
 
 			// Loop through all nodes in the rectangle
 			for (int x = rect.xmin; x <= rect.xmax; x++) {
@@ -1771,10 +1771,10 @@ namespace Pathfinding {
 
 			rect = IntRect.Intersection(rect, gridRect);
 
-			if (nodes == null || !rect.IsValid() || nodes.Length != width*depth) return ListPool<GraphNode>.Claim(0);
+			if (nodes == null || !rect.IsValid() || nodes.Length != width*depth) return ListPool<GraphNode>.Claim (0);
 
 			// Get a buffer we can use
-			var inArea = ListPool<GraphNode>.Claim(rect.Width*rect.Height);
+			var inArea = ListPool<GraphNode>.Claim (rect.Width*rect.Height);
 
 
 			for (int z = rect.ymin; z <= rect.ymax; z++) {

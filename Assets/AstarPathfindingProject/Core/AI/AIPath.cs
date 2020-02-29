@@ -359,7 +359,7 @@ namespace Pathfinding {
 				// How fast to move depending on the distance to the destination.
 				// Move slower as the character gets closer to the destination.
 				// This is always a value between 0 and 1.
-				slowdown = distanceToEnd < slowdownDistance ? Mathf.Sqrt(distanceToEnd / slowdownDistance) : 1;
+				slowdown = distanceToEnd < slowdownDistance? Mathf.Sqrt (distanceToEnd / slowdownDistance) : 1;
 
 				if (reachedEndOfPath && whenCloseToDestination == CloseToDestinationMode.Stop) {
 					// Slow down as quickly as possible

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -36,6 +35,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
                 SaveBag(data);
                 SaveBuilding(data);
+                SaveMaking(data);
                 SaveWarehouse(data);
                 SaveQuest(data);
                 SaveDialogue(data);
@@ -52,6 +52,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
             }
             catch (Exception ex)
             {
+                throw ex;
                 Debug.LogWarning(ex.Message);
                 if (fs != null) fs.Close();
                 MessageManager.Instance.NewMessage("保存失败！");
@@ -62,27 +63,17 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void SaveBag(SaveData data)
     {
-        if (BackpackManager.Instance.MBackpack != null)
-        {
-            data.backpackData.currentSize = (int)BackpackManager.Instance.MBackpack.backpackSize;
-            data.backpackData.maxSize = BackpackManager.Instance.MBackpack.backpackSize.Max;
-            data.backpackData.currentWeight = (float)BackpackManager.Instance.MBackpack.weightLoad;
-            data.backpackData.maxWeightLoad = BackpackManager.Instance.MBackpack.weightLoad.Max;
-            data.backpackData.money = BackpackManager.Instance.MBackpack.Money;
-            foreach (ItemInfo info in BackpackManager.Instance.MBackpack.Items)
-            {
-                data.backpackData.itemDatas.Add(new ItemData(info));
-            }
-        }
+        BackpackManager.Instance.SaveData(data);
     }
 
     void SaveBuilding(SaveData data)
     {
-        data.buildingSystemData.learneds = BuildingManager.Instance.BuildingsLearned.Select(x => x.IDStarter).ToArray();
-        foreach (Building b in FindObjectsOfType<Building>())
-        {
-            data.buildingSystemData.buildingDatas.Add(new BuildingData(b));
-        }
+        BuildingManager.Instance.SaveData(data);
+    }
+
+    void SaveMaking(SaveData data)
+    {
+        MakingManager.Instance.SaveData(data);
     }
 
     void SaveWarehouse(SaveData data)
@@ -102,36 +93,22 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void SaveQuest(SaveData data)
     {
-        foreach (Quest quest in QuestManager.Instance.QuestsOngoing)
-        {
-            data.ongoingQuestDatas.Add(new QuestData(quest));
-        }
-        foreach (Quest quest in QuestManager.Instance.QuestsComplete)
-        {
-            data.completeQuestDatas.Add(new QuestData(quest));
-        }
+        QuestManager.Instance.SaveData(data);
     }
 
     void SaveDialogue(SaveData data)
     {
-        foreach (KeyValuePair<string, DialogueData> kvpDialog in DialogueManager.Instance.DialogueDatas)
-        {
-            data.dialogueDatas.Add(kvpDialog.Value);
-        }
+        DialogueManager.Instance.SaveData(data);
     }
 
     void SaveTrigger(SaveData data)
     {
-        foreach (var trigger in TriggerManager.Instance.Triggers)
-        {
-            data.triggerDatas.Add(new TriggerData(trigger.Key, trigger.Value));
-        }
+        TriggerManager.Instance.SaveData(data);
     }
 
     void SaveMapMark(SaveData data)
     {
-        foreach (var iconWoH in MapManager.Instance.IconsWithoutHolder.Values)
-            if (iconWoH.mapIcon.iconType == MapIconType.Mark) data.markDatas.Add(new MapMarkData(iconWoH));
+        MapManager.Instance.SaveData(data);
     }
     #endregion
 
@@ -167,9 +144,10 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         yield return new WaitUntil(() => { return ao.isDone; });
         GameManager.Init();
         LoadPlayer(data);
-        yield return new WaitUntil(() => { return BackpackManager.Instance.MBackpack != null; });
+        yield return new WaitUntil(() => { return PlayerManager.Instance.Backpack != null; });
         LoadBackpack(data);
         LoadBuilding(data);
+        LoadMaking(data);
         LoadWarehouse(data);
         LoadQuest(data);
         LoadDialogue(data);
@@ -193,6 +171,11 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     {
         BuildingManager.Instance.Init();
         BuildingManager.Instance.LoadData(data.buildingSystemData);
+    }
+
+    void LoadMaking(SaveData data)
+    {
+        MakingManager.Instance.LoadData(data);
     }
 
     void LoadWarehouse(SaveData data)
@@ -227,65 +210,22 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void LoadQuest(SaveData data)
     {
-        QuestManager.Instance.QuestsOngoing.Clear();
-        foreach (QuestData questData in data.ongoingQuestDatas)
-        {
-            HandlingQuestData(questData);
-            QuestManager.Instance.UpdateUI();
-        }
-        QuestManager.Instance.QuestsComplete.Clear();
-        foreach (QuestData questData in data.completeQuestDatas)
-        {
-            Quest quest = HandlingQuestData(questData);
-            QuestManager.Instance.CompleteQuest(quest, true);
-        }
-    }
-    Quest HandlingQuestData(QuestData questData)
-    {
-        TalkerData questGiver = GameManager.TalkerDatas[questData.originalGiverID];
-        if (!questGiver) return null;
-        Quest quest = questGiver.questInstances.Find(x => x.ID == questData.questID);
-        if (!quest) return null;
-        QuestManager.Instance.AcceptQuest(quest, true);
-        foreach (ObjectiveData od in questData.objectiveDatas)
-        {
-            foreach (Objective o in quest.ObjectiveInstances)
-            {
-                if (o.runtimeID == od.objectiveID)
-                {
-                    o.CurrentAmount = od.currentAmount;
-                    break;
-                }
-            }
-        }
-        return quest;
+        QuestManager.Instance.LoadQuest(data);
     }
 
     void LoadDialogue(SaveData data)
     {
-        DialogueManager.Instance.DialogueDatas.Clear();
-        foreach (DialogueData dd in data.dialogueDatas)
-        {
-            DialogueManager.Instance.DialogueDatas.Add(dd.dialogID, dd);
-        }
+        DialogueManager.Instance.LoadData(data);
     }
 
     void LoadTrigger(SaveData data)
     {
-        TriggerManager.Instance.Triggers.Clear();
-        foreach (TriggerData td in data.triggerDatas)
-        {
-            TriggerManager.Instance.SetTrigger(td.triggerName, td.triggerState == (int)TriggerState.On);
-        }
+        TriggerManager.Instance.LoadData(data);
     }
 
     void LoadMapMark(SaveData data)
     {
-        MapManager.Instance.ClearMarks();
-        foreach (var md in data.markDatas)
-        {
-            MapManager.Instance.CreateDefaultMark(new Vector3(md.worldPosX, md.worldPosY, md.worldPosZ), md.keepOnMap, md.textToDisplay, md.removeAble);
-        }
+        MapManager.Instance.LoadData(data);
     }
     #endregion
 }

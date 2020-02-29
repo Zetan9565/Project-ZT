@@ -377,11 +377,11 @@ namespace Pathfinding {
 			position = internalInfo.clampedPosition;
 		}
 
-		public static explicit operator Vector3 (NNInfo ob) {
+		public static explicit operator Vector3(NNInfo ob) {
 			return ob.position;
 		}
 
-		public static explicit operator GraphNode (NNInfo ob) {
+		public static explicit operator GraphNode(NNInfo ob) {
 			return ob.node;
 		}
 	}
@@ -578,7 +578,7 @@ namespace Pathfinding {
 		/// <param name="node">The node to save fields for. If null, nothing will be done</param>
 		public virtual void WillUpdateNode (GraphNode node) {
 			if (trackChangedNodes && node != null) {
-				if (changedNodes == null) { changedNodes = ListPool<GraphNode>.Claim(); backupData = ListPool<uint>.Claim(); backupPositionData = ListPool<Int3>.Claim(); }
+				if (changedNodes == null) { changedNodes = ListPool<GraphNode>.Claim (); backupData = ListPool<uint>.Claim (); backupPositionData = ListPool<Int3>.Claim (); }
 				changedNodes.Add(node);
 				backupPositionData.Add(node.position);
 				backupData.Add(node.Penalty);
@@ -627,9 +627,9 @@ namespace Pathfinding {
 					changedNodes[i].SetConnectivityDirty();
 				}
 
-				ListPool<GraphNode>.Release(ref changedNodes);
-				ListPool<uint>.Release(ref backupData);
-				ListPool<Int3>.Release(ref backupPositionData);
+				ListPool<GraphNode>.Release (ref changedNodes);
+				ListPool<uint>.Release (ref backupData);
+				ListPool<Int3>.Release (ref backupPositionData);
 			} else {
 				throw new System.InvalidOperationException("Changed nodes have not been tracked, cannot revert from backup. Please set trackChangedNodes to true before applying the update.");
 			}

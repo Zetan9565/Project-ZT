@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 [Serializable]
@@ -13,20 +13,22 @@ public class SaveData
     public float playerPosY;
     public float playerPosZ;
 
-    public BackpackData backpackData;
+    public BackpackData backpackData = new BackpackData();
 
-    public BuildingSystemData buildingSystemData;
+    public List<string> makingDatas = new List<string>();
 
-    public List<WarehouseData> warehouseDatas;
+    public BuildingSystemData buildingSystemData = new BuildingSystemData();
 
-    public List<QuestData> ongoingQuestDatas;
-    public List<QuestData> completeQuestDatas;
+    public List<WarehouseData> warehouseDatas = new List<WarehouseData>();
 
-    public List<DialogueData> dialogueDatas;
+    public List<QuestData> ongoingQuestDatas = new List<QuestData>();
+    public List<QuestData> completeQuestDatas = new List<QuestData>();
 
-    public List<TriggerData> triggerDatas;
+    public List<DialogueData> dialogueDatas = new List<DialogueData>();
 
-    public List<MapMarkData> markDatas;
+    public List<TriggerData> triggerDatas = new List<TriggerData>();
+
+    public List<MapMarkData> markDatas = new List<MapMarkData>();
 
     public SaveData()
     {
@@ -36,14 +38,6 @@ public class SaveData
         playerPosX = playerPos.x;
         playerPosY = playerPos.y;
         playerPosZ = playerPos.z;
-        backpackData = new BackpackData();
-        buildingSystemData = new BuildingSystemData();
-        warehouseDatas = new List<WarehouseData>();
-        ongoingQuestDatas = new List<QuestData>();
-        completeQuestDatas = new List<QuestData>();
-        dialogueDatas = new List<DialogueData>();
-        triggerDatas = new List<TriggerData>();
-        markDatas = new List<MapMarkData>();
     }
 }
 
@@ -111,12 +105,7 @@ public class BuildingSystemData
 {
     public string[] learneds;
 
-    public List<BuildingData> buildingDatas;
-
-    public BuildingSystemData()
-    {
-        buildingDatas = new List<BuildingData>();
-    }
+    public List<BuildingData> buildingDatas = new List<BuildingData>();
 }
 
 [Serializable]
@@ -183,19 +172,13 @@ public class ObjectiveData
 [Serializable]
 public class DialogueData
 {
-    public string dialogID { get; private set; }
+    public string dialogID;
 
-    public List<DialogueWordsData> wordsDatas;
-
-    public DialogueData()
-    {
-        wordsDatas = new List<DialogueWordsData>();
-    }
+    public List<DialogueWordsData> wordsDatas = new List<DialogueWordsData>();
 
     public DialogueData(Dialogue dialogue)
     {
         dialogID = dialogue.ID;
-        wordsDatas = new List<DialogueWordsData>();
         for (int i = 0; i < dialogue.Words.Count; i++)
             wordsDatas.Add(new DialogueWordsData() { wordsIndex = i });
     }
@@ -226,6 +209,7 @@ public class DialogueWordsData
 }
 #endregion
 
+#region 其它
 [Serializable]
 public class TriggerData
 {
@@ -260,3 +244,4 @@ public class MapMarkData
         textToDisplay = iconWoH.textToDisplay;
     }
 }
+#endregion

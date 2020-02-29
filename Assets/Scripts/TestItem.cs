@@ -6,6 +6,6 @@ public class TestItem : MonoBehaviour
 
     public void OnClick()
     {
-        BackpackManager.Instance.GetItem(item);
+        BackpackManager.Instance.GetItem(item, 1);
     }
 }

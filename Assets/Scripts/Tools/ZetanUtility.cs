@@ -22,9 +22,9 @@ public class ZetanUtility
         return UnityEngine.Random.Range(100, 10001) / 100.0f <= probability;
     }
 
-    public static string ColorRichText(string origin, Color color)
+    public static string ColorText(string text, Color color)
     {
-        return string.Format("<color=#{0}>{1}</color>", ColorUtility.ToHtmlStringRGB(color), origin);
+        return string.Format("<color=#{0}>{1}</color>", ColorUtility.ToHtmlStringRGB(color), text);
     }
 
     public static void SetActive(GameObject gameObject, bool value)
@@ -41,23 +41,45 @@ public class ZetanUtility
         return new Rect(x, y, size.x, size.y);
     }
 
-    public static void DrawGizmosCircle(Vector3 center, float radius, float delta, Color color, bool horizontal)
+    public static void DrawGizmosCircle(Vector3 center, float radius, Vector3 rotateAxis)
     {
+        float delta = radius / 1000f;
+        if (delta < 0.0001f) delta = 0.0001f;
+        Vector3 firstPoint = Vector3.zero;
+        Vector3 fromPoint = Vector3.zero;
+        Vector3 yAxis = rotateAxis.normalized;
+        Vector3 xAxis = Vector3.ProjectOnPlane(Vector3.right, yAxis).normalized;
+        Vector3 zAxis = Vector3.Cross(xAxis, yAxis).normalized;
+        for (float perimeter = 0; perimeter < 2 * Mathf.PI; perimeter += delta)
+        {
+            Vector3 toPoint = new Vector3(radius * Mathf.Cos(perimeter), 0, radius * Mathf.Sin(perimeter));
+            toPoint = center + toPoint.x * xAxis + toPoint.y * yAxis + toPoint.z * zAxis;
+            if (perimeter == 0) firstPoint = toPoint;
+            else Gizmos.DrawLine(fromPoint, toPoint);
+            fromPoint = toPoint;
+        }
+        Gizmos.DrawLine(firstPoint, fromPoint);
+    }
+    public static void DrawGizmosCircle(Vector3 center, float radius, Vector3 rotateAxis, Color color)
+    {
+        float delta = radius / 1000f;
         if (delta < 0.0001f) delta = 0.0001f;
         Color colorBef = Gizmos.color;
         Gizmos.color = color;
-        Vector3 first = Vector3.zero;
-        Vector3 from = Vector3.zero;
+        Vector3 firstPoint = Vector3.zero;
+        Vector3 fromPoint = Vector3.zero;
+        Vector3 yAxis = rotateAxis.normalized;
+        Vector3 xAxis = Vector3.ProjectOnPlane(Vector3.right, yAxis).normalized;
+        Vector3 zAxis = Vector3.Cross(xAxis, yAxis).normalized;
         for (float perimeter = 0; perimeter < 2 * Mathf.PI; perimeter += delta)
         {
-            float x = center.x + radius * Mathf.Cos(perimeter);
-            float yz = horizontal ? center.z : center.y + radius * Mathf.Sin(perimeter);
-            Vector3 to = new Vector3(x, horizontal ? 0 : yz, horizontal ? yz : 0);
-            if (perimeter == 0) first = to;
-            else Gizmos.DrawLine(from, to);
-            from = to;
+            Vector3 toPoint = new Vector3(radius * Mathf.Cos(perimeter), 0, radius * Mathf.Sin(perimeter));
+            toPoint = center + toPoint.x * xAxis + toPoint.z * zAxis;
+            if (perimeter == 0) firstPoint = toPoint;
+            else Gizmos.DrawLine(fromPoint, toPoint);
+            fromPoint = toPoint;
         }
-        Gizmos.DrawLine(first, from);
+        Gizmos.DrawLine(firstPoint, fromPoint);
         Gizmos.color = colorBef;
     }
 
@@ -424,6 +446,9 @@ public class ScopeInt
         Current = Max;
     }
 
+    /// <summary>
+    /// 余下的部分
+    /// </summary>
     public int Rest { get { return Max - Current; } }
     /// <summary>
     /// 四分之一
@@ -773,7 +798,7 @@ public class ScopeFloat
     }
 
     /// <summary>
-    /// 余下部分
+    /// 余下的部分
     /// </summary>
     public float Rest { get { return Max - Current; } }
 

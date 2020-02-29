@@ -102,8 +102,9 @@ MonoBehaviour:
   buildingFlag: {fileID: 569891246857769377}
   buildingAgent: {fileID: 0}
   leftBuildTime: 0
-  maxSize: 0
+  space: 0
   fertility: 0
+  Humidity: 0
 --- !u!61 &8480943704564243532
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -142,7 +143,7 @@ GameObject:
   - component: {fileID: 770442692049214697}
   - component: {fileID: 569891246857769377}
   - component: {fileID: 5976636704000974089}
-  m_Layer: 10
+  m_Layer: 8
   m_Name: Flag
   m_TagString: Untagged
   m_Icon: {fileID: 0}

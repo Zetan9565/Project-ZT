@@ -17,7 +17,7 @@ public class ItemWindowUI : ItemWindowBaseUI
         base.Awake();
         ZetanUtility.SetActive(closeButton.gameObject, false);
 #if UNITY_STANDALONE
-        MyUtilities.SetActive(buttonsArea, false);
+        ZetanUtility.SetActive(buttonsArea, false);
 #elif UNITY_ANDROID
         if (!buttonsArea.GetComponent<CanvasGroup>()) buttonAreaCanvas = buttonsArea.AddComponent<CanvasGroup>();
         buttonAreaCanvas.ignoreParentGroups = true;

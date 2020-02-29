@@ -64,7 +64,7 @@ namespace Pathfinding {
 
 		/// <summary>Returns the state of the path in the pathfinding pipeline</summary>
 		public PathState PipelineState { get; private set; }
-		System.Object stateLock = new object ();
+		System.Object stateLock = new object();
 
 		/// <summary>
 		/// Provides additional traversal information to a path request.
@@ -487,8 +487,8 @@ namespace Pathfinding {
 		/// Warning: Do not call this function manually.
 		/// </summary>
 		protected virtual void OnEnterPool () {
-			if (vectorPath != null) Pathfinding.Util.ListPool<Vector3>.Release(ref vectorPath);
-			if (path != null) Pathfinding.Util.ListPool<GraphNode>.Release(ref path);
+			if (vectorPath != null) Pathfinding.Util.ListPool<Vector3>.Release (ref vectorPath);
+			if (path != null) Pathfinding.Util.ListPool<GraphNode>.Release (ref path);
 			// Clear the callback to remove a potential memory leak
 			// while the path is in the pool (which it could be for a long time).
 			callback = null;
@@ -525,8 +525,8 @@ namespace Pathfinding {
 			errorLog = "";
 			completeState = PathCompleteState.NotCalculated;
 
-			path = Pathfinding.Util.ListPool<GraphNode>.Claim();
-			vectorPath = Pathfinding.Util.ListPool<Vector3>.Claim();
+			path = Pathfinding.Util.ListPool<GraphNode>.Claim ();
+			vectorPath = Pathfinding.Util.ListPool<Vector3>.Claim ();
 
 			currentR = null;
 

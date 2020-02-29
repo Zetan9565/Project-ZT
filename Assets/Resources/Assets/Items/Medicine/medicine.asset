@@ -24,7 +24,8 @@ MonoBehaviour:
   description: "\u6548\u679C\u8F83\u5DEE\u7684\u6B62\u8840\u7528\u836F\u3002"
   stackAble: 1
   discardAble: 1
-  useable: 1
+  lockAble: 1
+  usable: 1
   inexhaustible: 0
   maxDurability: 100
   makingMethod: 1

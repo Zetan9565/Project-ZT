@@ -47,12 +47,13 @@ namespace Pathfinding {
 		/// <param name="node2">Node which should have a valid path to node1. All nodes should be walkable or false will be returned.</param>
 		/// <param name="alwaysRevert">If true, reverts the graphs to the old state even if no blocking occurred</param>
 		public static bool UpdateGraphsNoBlock (GraphUpdateObject guo, GraphNode node1, GraphNode node2, bool alwaysRevert = false) {
-			List<GraphNode> buffer = ListPool<GraphNode>.Claim();
+			List<GraphNode> buffer = ListPool<GraphNode>.Claim ();
+
 			buffer.Add(node1);
 			buffer.Add(node2);
 
 			bool worked = UpdateGraphsNoBlock(guo, buffer, alwaysRevert);
-			ListPool<GraphNode>.Release(ref buffer);
+			ListPool<GraphNode>.Release (ref buffer);
 			return worked;
 		}
 

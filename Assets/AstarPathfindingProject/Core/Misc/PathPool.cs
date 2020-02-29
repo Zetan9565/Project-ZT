@@ -46,6 +46,7 @@ namespace Pathfinding {
 		/// <summary>Number of pooled instances of a path of the specified type</summary>
 		public static int GetSize (Type type) {
 			Stack<Path> poolStack;
+
 			if (pool.TryGetValue(type, out poolStack)) {
 				return poolStack.Count;
 			} else {

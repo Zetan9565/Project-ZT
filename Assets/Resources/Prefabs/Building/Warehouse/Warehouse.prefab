@@ -50,6 +50,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -163,11 +164,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: 98257547e249f5b4c9219ef5f1bee434, type: 3}
   iconSize: {x: 48, y: 48}
+  offset: {x: 0, y: 0}
   drawOnWorldMap: 1
-  keepInMap: 1
-  maxShowDistance: 30
-  distanceSqr: 0
+  keepOnMap: 1
+  maxValidDistance: -1
+  forceHided: 0
+  removeAble: 0
+  showRange: 0
+  rangeColor: {r: 1, g: 1, b: 1, a: 0.5}
+  rangeSize: 144
+  iconType: 0
   iconInstance: {fileID: 0}
+  gizmos: 1
+  textToDisplay: 
+  iconEvents:
+    onFingerClick:
+      m_PersistentCalls:
+        m_Calls: []
+    onMouseClick:
+      m_PersistentCalls:
+        m_Calls: []
+    onMouseEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onMouseExit:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!1 &1722366801990457662
 GameObject:
   m_ObjectHideFlags: 0
@@ -180,7 +202,7 @@ GameObject:
   - component: {fileID: 4850653016182257497}
   - component: {fileID: 6682389346588124544}
   - component: {fileID: 2068769405001086069}
-  m_Layer: 10
+  m_Layer: 8
   m_Name: Flag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -215,6 +237,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

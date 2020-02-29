@@ -263,7 +263,7 @@ namespace Pathfinding {
 		/// </summary>
 		public bool ProcessWorkItems (bool force) {
 			if (workItemsInProgressRightNow) throw new System.Exception("Processing work items recursively. Please do not wait for other work items to be completed inside work items. " +
-					"If you think this is not caused by any of your scripts, this might be a bug.");
+				"If you think this is not caused by any of your scripts, this might be a bug.");
 
 			workItemsInProgressRightNow = true;
 			astar.data.LockGraphStructure(true);

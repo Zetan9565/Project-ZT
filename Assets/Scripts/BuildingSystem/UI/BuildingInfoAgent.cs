@@ -62,7 +62,7 @@ public class BuildingInfoAgent : MonoBehaviour,
 
     void TryBuild()
     {
-        if (!MBuildingInfo.CheckMaterialsEnough(BackpackManager.Instance.MBackpack))
+        if (!BackpackManager.Instance.CheckMaterialsEnough(MBuildingInfo.Materials))
         {
             MessageManager.Instance.NewMessage("耗材不足");
             return;

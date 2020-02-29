@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -53,7 +53,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
     /// <param name="loadMode">是否读档模式</param>
     public bool AcceptQuest(Quest quest, bool loadMode = false)
     {
-        if (!quest || !quest.IsValid)
+        if (!quest || !QuestIsValid(quest))
         {
             MessageManager.Instance.NewMessage("无效任务");
             return false;
@@ -155,6 +155,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
         OnQuestStatusChange?.Invoke();
         return true;
     }
+
     /// <summary>
     /// 放弃任务
     /// </summary>
@@ -250,7 +251,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
         {
             if (AbandonQuest(selectedQuest))
             {
-                RemoveQuestAgentByQuest(selectedQuest);
+                RemoveUIElementByQuest(selectedQuest);
                 HideDescription();
             }
         });
@@ -276,7 +277,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                     if (o is CollectObjective)
                     {
                         CollectObjective co = o as CollectObjective;
-                        questsReqThisQuestItem = QuestsRequiredItem(co.Item, BackpackManager.Instance.GetItemAmount(co.Item) - o.Amount).ToList();
+                        questsReqThisQuestItem = QuestsRequireItem(co.Item, BackpackManager.Instance.GetItemAmount(co.Item) - o.Amount).ToList();
                     }
                     if (questsReqThisQuestItem.Contains(quest) && questsReqThisQuestItem.Count > 1)
                     //需要道具的任务群包含该任务且数量多于一个，说明有其他任务对该任务需提交的道具存在依赖
@@ -288,7 +289,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
             }
             quest.IsOngoing = false;
             QuestsOngoing.Remove(quest);
-            RemoveQuestAgentByQuest(quest);
+            RemoveUIElementByQuest(quest);
             quest.currentQuestHolder.questInstances.Remove(quest);
             QuestsComplete.Add(quest);
             QuestAgent cqa;
@@ -403,7 +404,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
 
     public void TraceQuest(Quest quest)
     {
-        if (!quest || !quest.IsValid || !AStarManager.Instance || !PlayerManager.Instance.PlayerController.Unit) return;
+        if (!quest || !QuestIsValid(quest) || !AStarManager.Instance || !PlayerManager.Instance.PlayerController.Unit) return;
         if (quest.IsComplete && GameManager.Talkers[quest.currentQuestHolder.TalkerID])
         {
             PlayerManager.Instance.PlayerController.Unit.IsFollowingTarget = false;
@@ -431,7 +432,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                 }
                 if (parallelObj.Count > 0)
                 {
-                    int index = Random.Range(0, parallelObj.Count);//如果目标可以同时进行，则随机选一个
+                    int index = UnityEngine.Random.Range(0, parallelObj.Count);//如果目标可以同时进行，则随机选一个
                     currentObj = parallelObj[index];
                 }
                 if (currentObj is TalkObjective)
@@ -488,10 +489,11 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
             }
     }
 
-    private void OnObjectiveStateChange(Objective objective, bool stateBef)
+    private void OnObjectiveStateChange(Objective objective, bool befCmplt)
     {
-        if (!stateBef && objective.IsComplete)
+        if (!befCmplt && objective.IsComplete)
         {
+            UpdateNextCollectObjectives(objective);
             //Debug.Log("\"" + objective.DisplayName + "\"" + "从没完成变成完成");
             Objective nextToDo = null;
             Quest quest = objective.runtimeParent;
@@ -511,7 +513,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
                         Objective nextObj = quest.ObjectiveInstances[j];
                         if (!nextObj.Parallel)//只要碰到一个不能并行的，就中断
                         {
-                            if (nextObj.AllPrevObjCmplt)
+                            if (nextObj.AllPrevObjCmplt && !nextObj.IsComplete)
                                 nextToDo = nextObj;//同时，若该不能并行目标的所有前置目标都完成了，那么它就是下一个要做的目标
                             break;
                         }
@@ -626,7 +628,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
             {
                 if (rwc.IsEmpty)
                 {
-                    rwc.InitItem(info);
+                    rwc.SetItem(info);
                     break;
                 }
             }
@@ -815,12 +817,12 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
     {
         return QuestsComplete.Contains(quest);
     }
-    public bool HasCompleteQuestWithID(string questID)
+    private bool HasCompleteQuestWithID(string questID)
     {
         return QuestsComplete.Exists(x => x.ID == questID);
     }
 
-    private void RemoveQuestAgentByQuest(Quest quest)
+    private void RemoveUIElementByQuest(Quest quest)
     {
         QuestAgent qa = questAgents.Find(x => x.MQuest == quest);
         if (qa)
@@ -848,6 +850,210 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
     }
 
     /// <summary>
+    /// 更新某个收集类任务目标，用于在其他前置目标完成时，更新后置收集类目标
+    /// </summary>
+    private void UpdateNextCollectObjectives(Objective NextObjective)
+    {
+        Objective tempObj = NextObjective;
+        CollectObjective co;
+        while (tempObj != null)
+        {
+            if (!(tempObj is CollectObjective) && tempObj.InOrder && tempObj.NextObjective != null && tempObj.NextObjective.InOrder && tempObj.OrderIndex < tempObj.NextObjective.OrderIndex)
+            {
+                //若相邻后置目标不是收集类目标，该后置目标按顺序执行，其相邻后置也按顺序执行，且两者不可同时执行，则说明无法继续更新后置的收集类目标
+                return;
+            }
+            if (tempObj is CollectObjective)
+            {
+                co = tempObj as CollectObjective;
+                if (co.CheckBagAtStart) co.CurrentAmount = BackpackManager.Instance.GetItemAmount(co.Item.ID);
+            }
+            tempObj = tempObj.NextObjective;
+        }
+    }
+
+    public bool QuestIsAcceptAble(Quest quest)
+    {
+        bool calFailed = false;
+        if (string.IsNullOrEmpty(quest.ConditionRelational)) return quest.AcceptConditions.TrueForAll(x => EligibleCondition(x));
+        if (quest.AcceptConditions.Count < 1) calFailed = true;
+        else
+        {
+            //Debug.Log(quest.Title);
+            var cr = quest.ConditionRelational.Replace(" ", "").ToCharArray();//删除所有空格才开始计算
+            List<string> RPN = new List<string>();//逆波兰表达式
+            string indexStr = string.Empty;//数字串
+            Stack<char> optStack = new Stack<char>();//运算符栈
+            for (int i = 0; i < cr.Length; i++)
+            {
+                char c = cr[i];
+                string item;
+                if (c < '0' || c > '9')
+                {
+                    if (!string.IsNullOrEmpty(indexStr))
+                    {
+                        item = indexStr;
+                        indexStr = string.Empty;
+                        GetRPNItem(item);
+                    }
+                    if (c == '(' || c == ')' || c == '+' || c == '*' || c == '~')
+                    {
+                        item = c + "";
+                        GetRPNItem(item);
+                    }
+                    else
+                    {
+                        calFailed = true;
+                        break;
+                    }//既不是数字也不是运算符，直接放弃计算
+                }
+                else
+                {
+                    indexStr += c;//拼接数字
+                    if (i + 1 >= cr.Length)
+                    {
+                        item = indexStr;
+                        indexStr = string.Empty;
+                        GetRPNItem(item);
+                    }
+                }
+            }
+            while (optStack.Count > 0)
+                RPN.Add(optStack.Pop() + "");
+            Stack<bool> values = new Stack<bool>();
+            foreach (var item in RPN)
+            {
+                Debug.Log(item);
+                if (int.TryParse(item, out int index))
+                {
+                    if (index >= 0 && index < quest.AcceptConditions.Count)
+                        values.Push(EligibleCondition(quest.AcceptConditions[index]));
+                    else
+                    {
+                        //Debug.Log("return 1");
+                        return true;
+                    }
+                }
+                else if (values.Count > 1)
+                {
+                    if (item == "+") values.Push(values.Pop() | values.Pop());
+                    else if (item == "~") values.Push(!values.Pop());
+                    else if (item == "*") values.Push(values.Pop() & values.Pop());
+                }
+                else if (item == "~") values.Push(!values.Pop());
+            }
+            if (values.Count == 1)
+            {
+                //Debug.Log("return 2");
+                return values.Pop();
+            }
+
+            void GetRPNItem(string item)
+            {
+                //Debug.Log(item);
+                if (item == "+" || item == "*" || item == "~")//遇到运算符
+                {
+                    char opt = item[0];
+                    if (optStack.Count < 1) optStack.Push(opt);//栈空则直接入栈
+                    else while (optStack.Count > 0)//栈不空则出栈所有优先级大于或等于opt的运算符后才入栈opt
+                        {
+                            char top = optStack.Peek();
+                            if (top + "" == item || top == '~' || top == '*' && opt == '+')
+                            {
+                                RPN.Add(optStack.Pop() + "");
+                                if (optStack.Count < 1)
+                                {
+                                    optStack.Push(opt);
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                optStack.Push(opt);
+                                break;
+                            }
+                        }
+                }
+                else if (item == "(") optStack.Push('(');
+                else if (item == ")")
+                {
+                    while (optStack.Count > 0)
+                    {
+                        char opt = optStack.Pop();
+                        if (opt == '(') break;
+                        else RPN.Add(opt + "");
+                    }
+                }
+                else if (int.TryParse(item, out _)) RPN.Add(item);//遇到数字
+            }
+        }
+        if (!calFailed)
+        {
+            //Debug.Log("return 3");
+            return true;
+        }
+        else
+        {
+            foreach (QuestAcceptCondition qac in quest.AcceptConditions)
+                if (!EligibleCondition(qac))
+                {
+                    //Debug.Log("return 4");
+                    return false;
+                }
+            //Debug.Log("return 5");
+            return true;
+        }
+    }
+
+    public bool QuestIsValid(Quest quest)
+    {
+        if (quest.ObjectiveInstances.Count < 1) return false;
+        if (string.IsNullOrEmpty(quest.ID) || string.IsNullOrEmpty(quest.Title)) return false;
+        if (quest.NPCToSubmit && !GameManager.TalkerDatas.ContainsKey(quest.NPCToSubmit.ID)) return false;
+        foreach (var co in quest.CollectObjectives)
+            if (!co.IsValid) return false;
+        foreach (var ko in quest.KillObjectives)
+            if (!ko.IsValid) return false;
+            else if (!GameManager.Enemies.ContainsKey(ko.Enemy.ID)) return false;
+        foreach (var to in quest.TalkObjectives)
+            if (!to.IsValid) return false;
+            else if (!GameManager.TalkerDatas.ContainsKey(to.NPCToTalk.ID)) return false;
+        foreach (var mo in quest.MoveObjectives)
+            if (!mo.IsValid) return false;
+            else if (!GameManager.QuestPoints.ContainsKey(mo.PointID)) return false;
+        foreach (var so in quest.SubmitObjectives)
+            if (!so.IsValid) return false;
+            else if (!GameManager.TalkerDatas.ContainsKey(so.NPCToSubmit.ID)) return false;
+        foreach (var cuo in quest.CustomObjectives)
+            if (!cuo.IsValid) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// 是否符合条件
+    /// </summary>
+    private bool EligibleCondition(QuestAcceptCondition condition)
+    {
+        switch (condition.AcceptCondition)
+        {
+            case QuestCondition.CompleteQuest: return QuestManager.Instance.HasCompleteQuestWithID(condition.CompleteQuest.ID);
+            case QuestCondition.HasItem: return BackpackManager.Instance.HasItemWithID(condition.OwnedItem.ID);
+            case QuestCondition.LevelEquals: return PlayerManager.Instance.PlayerInfo.level == condition.Level;
+            case QuestCondition.LevelLargeThen: return PlayerManager.Instance.PlayerInfo.level > condition.Level;
+            //case QuestCondition.LevelLargeOrEqualsThen: return PlayerManager.Instance.PlayerInfo.level >= level;
+            case QuestCondition.LevelLessThen: return PlayerManager.Instance.PlayerInfo.level < condition.Level;
+            //case QuestCondition.LevelLessOrEqualsThen: return PlayerManager.Instance.PlayerInfo.level <= level;
+            case QuestCondition.TriggerSet:
+                var state = TriggerManager.Instance.GetTriggerState(condition.TriggerName);
+                return state != TriggerState.NotExist ? (state == TriggerState.On ? true : false) : false;
+            case QuestCondition.TriggerReset:
+                state = TriggerManager.Instance.GetTriggerState(condition.TriggerName);
+                return state != TriggerState.NotExist ? (state == TriggerState.Off ? true : false) : false;
+            default: return true;
+        }
+    }
+
+    /// <summary>
     /// 判定是否有某个任务需要某数量的某个道具
     /// </summary>
     /// <param name="item">要判定的道具ID</param>
@@ -855,11 +1061,59 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>, IWindowHandler
     /// <returns>是否需要该道具</returns>
     public bool HasQuestRequiredItem(ItemBase item, int leftAmount)
     {
-        return QuestsRequiredItem(item, leftAmount).Count() > 0;
+        return QuestsRequireItem(item, leftAmount).Count() > 0;
     }
-    private IEnumerable<Quest> QuestsRequiredItem(ItemBase item, int leftAmount)
+    private IEnumerable<Quest> QuestsRequireItem(ItemBase item, int leftAmount)
     {
-        return QuestsOngoing.FindAll(x => x.RequiredItem(item, leftAmount)).AsEnumerable();
+        return QuestsOngoing.FindAll(x => BackpackManager.Instance.QuestRequireItem(x, item, leftAmount)).AsEnumerable();
+    }
+
+    public void SaveData(SaveData data)
+    {
+        foreach (Quest quest in QuestsOngoing)
+        {
+            data.ongoingQuestDatas.Add(new QuestData(quest));
+        }
+        foreach (Quest quest in QuestsComplete)
+        {
+            data.completeQuestDatas.Add(new QuestData(quest));
+        }
+    }
+
+    public void LoadQuest(SaveData data)
+    {
+        QuestsOngoing.Clear();
+        foreach (QuestData questData in data.ongoingQuestDatas)
+        {
+            HandlingQuestData(questData);
+            UpdateUI();
+        }
+        QuestsComplete.Clear();
+        foreach (QuestData questData in data.completeQuestDatas)
+        {
+            Quest quest = HandlingQuestData(questData);
+            CompleteQuest(quest, true);
+        }
+    }
+    private Quest HandlingQuestData(QuestData questData)
+    {
+        TalkerData questGiver = GameManager.TalkerDatas[questData.originalGiverID];
+        if (!questGiver) return null;
+        Quest quest = questGiver.questInstances.Find(x => x.ID == questData.questID);
+        if (!quest) return null;
+        AcceptQuest(quest, true);
+        foreach (ObjectiveData od in questData.objectiveDatas)
+        {
+            foreach (Objective o in quest.ObjectiveInstances)
+            {
+                if (o.runtimeID == od.objectiveID)
+                {
+                    o.CurrentAmount = od.currentAmount;
+                    break;
+                }
+            }
+        }
+        return quest;
     }
     #endregion
 }

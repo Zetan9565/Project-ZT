@@ -23,6 +23,8 @@ public class AStarUnitInspector : Editor
     SerializedProperty slopeLimit;
     SerializedProperty stopDistance;
     SerializedProperty drawGizmos;
+    SerializedProperty lineColor;
+    SerializedProperty pointColor;
     SerializedProperty pathRenderer;
     SerializedProperty animator;
     SerializedProperty animaHorizontal;
@@ -50,6 +52,8 @@ public class AStarUnitInspector : Editor
         stopDistance = serializedObject.FindProperty("stopDistance");
         repathRate = serializedObject.FindProperty("repathRate");
         drawGizmos = serializedObject.FindProperty("drawGizmos");
+        lineColor = serializedObject.FindProperty("lineColor");
+        pointColor = serializedObject.FindProperty("pointColor");
         pathRenderer = serializedObject.FindProperty("pathRenderer");
         animator = serializedObject.FindProperty("animator");
         animaHorizontal = serializedObject.FindProperty("animaHorizontal");
@@ -193,6 +197,11 @@ public class AStarUnitInspector : Editor
         EditorGUILayout.PropertyField(pathRenderer, new GUIContent("路线渲染器(可选)"));
         EditorGUILayout.Space();
         EditorGUILayout.PropertyField(drawGizmos, new GUIContent("绘制Gizmos"));
+        if (drawGizmos.boolValue)
+        {
+            EditorGUILayout.PropertyField(lineColor, new GUIContent("连线颜色"));
+            EditorGUILayout.PropertyField(pointColor, new GUIContent("折点颜色"));
+        }
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
     }

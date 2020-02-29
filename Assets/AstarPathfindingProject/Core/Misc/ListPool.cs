@@ -23,7 +23,7 @@ namespace Pathfinding.Util {
 	/// \since Version 3.2
 	/// See: Pathfinding.Util.StackPool
 	/// </summary>
-	public static class ListPool<T>{
+	public static class ListPool<T> {
 		/// <summary>Internal pool</summary>
 		static readonly List<List<T> > pool = new List<List<T> >();
 
@@ -71,6 +71,7 @@ namespace Pathfinding.Util {
 			// then allocate a new one with the desired capacity
 			List<T> list = null;
 			int listIndex = -1;
+
 			for (int i = 0; i < pool.Count && i < MaxCapacitySearchLength; i++) {
 				// ith last item
 				var candidate = pool[pool.Count-1-i];

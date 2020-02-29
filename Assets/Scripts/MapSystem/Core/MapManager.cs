@@ -563,7 +563,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         if (circle && !isViewingWorldMap)
         {
             float radius = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) / 2 * this.radius;
-            ZetanUtility.DrawGizmosCircle(ZetanUtility.CenterBetween(corners[0], corners[2]), radius, radius / 1000, Color.white, false);
+            //ZetanUtility.DrawGizmosCircle(ZetanUtility.CenterBetween(corners[0], corners[2]), radius, radius / 1000, Color.white, false);
+            ZetanUtility.DrawGizmosCircle(ZetanUtility.CenterBetween(corners[0], corners[2]), radius, Vector3.forward);
         }
         else
         {
@@ -609,6 +610,19 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             default:
                 return null;
         }
+    }
+
+    public void SaveData(SaveData data)
+    {
+        foreach (var iconWoH in IconsWithoutHolder.Values)
+            if (iconWoH.mapIcon.iconType == MapIconType.Mark) data.markDatas.Add(new MapMarkData(iconWoH));
+    }
+
+    public void LoadData(SaveData data)
+    {
+        ClearMarks();
+        foreach (var md in data.markDatas)
+            CreateDefaultMark(new Vector3(md.worldPosX, md.worldPosY, md.worldPosZ), md.keepOnMap, md.textToDisplay, md.removeAble);
     }
 
     public class MapIconWithoutHolder

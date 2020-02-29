@@ -19,7 +19,6 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
     }
 
-
     [SerializeField]
     private PlayerController2D playerController;
     public PlayerController2D PlayerController

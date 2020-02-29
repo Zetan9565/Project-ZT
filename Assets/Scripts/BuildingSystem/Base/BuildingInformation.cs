@@ -67,32 +67,12 @@ public class BuildingInformation : ScriptableObject
     }
 
     [SerializeField]
-    private List<MatertialInfo> materials = new List<MatertialInfo>();
-    public virtual List<MatertialInfo> Materials
+    private List<MaterialInfo> materials = new List<MaterialInfo>();
+    public virtual List<MaterialInfo> Materials
     {
         get
         {
             return materials;
         }
-    }
-
-
-    public IEnumerable<string> GetMaterialsInfo(Backpack backpack)
-    {
-        List<string> info = new List<string>();
-        using (var makingInfo = materials.GetEnumerator())
-            while (makingInfo.MoveNext())
-                info.Add(string.Format("{0}\t[{1}/{2}]", makingInfo.Current.ItemName, backpack.GetItemAmount(makingInfo.Current.Item), makingInfo.Current.Amount));
-        return info.AsEnumerable();
-    }
-    public bool CheckMaterialsEnough(Backpack backpack)
-    {
-        var materialEnum = materials.GetEnumerator();
-        while (materialEnum.MoveNext())
-        {
-            if (backpack.GetItemAmount(materialEnum.Current.Item) < materialEnum.Current.Amount)
-                return false;
-        }
-        return true;
     }
 }

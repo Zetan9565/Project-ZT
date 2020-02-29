@@ -64,8 +64,8 @@ namespace Pathfinding {
 		/// <param name="convex">If true, the convex hull of the points will be calculated.</param>
 		/// <param name="matrix">local to world space matrix for the points. The matrix determines the up direction of the shape.</param>
 		/// <param name="minimumHeight">If the points would be in the XZ plane only, the shape would not have a height and then it might not
-		///         include any points inside it (as testing for inclusion is done in 3D space when updating graphs). This ensures
-		///          that the shape has at least the minimum height (in the up direction that the matrix specifies).</param>
+		/// 		include any points inside it (as testing for inclusion is done in 3D space when updating graphs). This ensures
+		/// 		 that the shape has at least the minimum height (in the up direction that the matrix specifies).</param>
 		public GraphUpdateShape (Vector3[] points, bool convex, Matrix4x4 matrix, float minimumHeight) {
 			this.convex = convex;
 			this.points = points;
@@ -77,7 +77,7 @@ namespace Pathfinding {
 		}
 
 		void CalculateConvexHull () {
-			_convexPoints = points != null ? Polygon.ConvexHullXZ(points) : null;
+			_convexPoints = points != null? Polygon.ConvexHullXZ (points) : null;
 		}
 
 		/// <summary>World space bounding box of this shape</summary>
@@ -136,7 +136,7 @@ namespace Pathfinding {
 				}
 				return true;
 			} else {
-				return _points != null && Polygon.ContainsPointXZ (_points, localSpacePoint);
+				return _points != null && Polygon.ContainsPointXZ(_points, localSpacePoint);
 			}
 		}
 	}

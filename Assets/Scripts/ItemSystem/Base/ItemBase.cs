@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 [Serializable]
@@ -9,126 +8,54 @@ public abstract class ItemBase : ScriptableObject
     #region 基本信息
     [SerializeField]
     protected string _ID;
-    public virtual string ID
-    {
-        get
-        {
-            return _ID;
-        }
-    }
+    public virtual string ID => _ID;
 
     [SerializeField]
     protected string _Name;
-    public new virtual string name
-    {
-        get
-        {
-            return _Name;
-        }
-    }
+    public new virtual string name => _Name;
 
     [SerializeField]
     protected ItemType itemType = ItemType.Other;
-    public virtual ItemType ItemType
-    {
-        get
-        {
-            return itemType;
-        }
-    }
+    public virtual ItemType ItemType => itemType;
 
     [SerializeField]
 #if UNITY_EDITOR
     [EnumMemberNames("凡品", "精品", "珍品", "极品", "绝品")]
 #endif
     protected ItemQuality quality;
-    public virtual ItemQuality Quality
-    {
-        get
-        {
-            return quality;
-        }
-    }
+    public virtual ItemQuality Quality => quality;
 
     [SerializeField]
     protected float weight;
-    public virtual float Weight
-    {
-        get
-        {
-            return weight;
-        }
-    }
+    public virtual float Weight => weight;
 
     [SerializeField]
     protected bool sellAble = true;
-    public virtual bool SellAble
-    {
-        get
-        {
-            return sellAble;
-        }
-    }
+    public virtual bool SellAble => sellAble;
 
     [SerializeField]
     protected int sellPrice;
-    public virtual int SellPrice
-    {
-        get
-        {
-            return sellPrice;
-        }
-    }
+    public virtual int SellPrice => sellPrice;
 
     [SerializeField]
     protected int buyPrice;
-    public virtual int BuyPrice
-    {
-        get
-        {
-            return buyPrice;
-        }
-    }
+    public virtual int BuyPrice => buyPrice;
 
     [SerializeField]
     protected Sprite icon;
-    public virtual Sprite Icon
-    {
-        get
-        {
-            return icon;
-        }
-    }
+    public virtual Sprite Icon => icon;
 
     [SerializeField, TextArea]
     protected string description;
-    public virtual string Description
-    {
-        get
-        {
-            return description;
-        }
-    }
+    public virtual string Description => description;
 
     [SerializeField]
     protected bool stackAble = true;
-    public virtual bool StackAble
-    {
-        get
-        {
-            return stackAble;
-        }
-    }
+    public virtual bool StackAble => stackAble;
 
     [SerializeField]
     protected bool discardAble = true;
-    public virtual bool DiscardAble
-    {
-        get
-        {
-            return discardAble;
-        }
-    }
+    public virtual bool DiscardAble => discardAble;
 
     [SerializeField]
     protected bool lockAble = true;
@@ -136,33 +63,18 @@ public abstract class ItemBase : ScriptableObject
 
     [SerializeField]
     protected bool usable = true;
-    public virtual bool Usable
-    {
-        get
-        {
-            return usable;
-        }
-    }
+    public virtual bool Usable => usable;
 
     [SerializeField]
     protected bool inexhaustible;//用之不竭
-    public virtual bool Inexhaustible
-    {
-        get
-        {
-            return inexhaustible;
-        }
-    }
+    /// <summary>
+    /// 是否用之不竭
+    /// </summary>
+    public virtual bool Inexhaustible => inexhaustible;
 
     [SerializeField]
     private int maxDurability = 100;
-    public virtual int MaxDurability
-    {
-        get
-        {
-            return maxDurability;
-        }
-    }
+    public virtual int MaxDurability => maxDurability;
     #endregion
 
     #region 制作相关
@@ -171,23 +83,11 @@ public abstract class ItemBase : ScriptableObject
     [EnumMemberNames("不可制作", "手工", "冶炼", "锻造", "织布", "裁缝", "烹饪", "炼丹", "制药", "晾晒", "研磨")]
 #endif
     protected MakingMethod makingMethod;
-    public virtual MakingMethod MakingMethod
-    {
-        get
-        {
-            return makingMethod;
-        }
-    }
+    public virtual MakingMethod MakingMethod => makingMethod;
 
     [SerializeField]
-    protected List<MatertialInfo> materials = new List<MatertialInfo>();
-    public virtual List<MatertialInfo> Materials
-    {
-        get
-        {
-            return materials;
-        }
-    }
+    protected List<MaterialInfo> materials = new List<MaterialInfo>();
+    public virtual List<MaterialInfo> Materials => materials;
 
     public MakingToolType MakingTool
     {
@@ -218,106 +118,35 @@ public abstract class ItemBase : ScriptableObject
             }
         }
     }
-    public IEnumerable<string> GetMaterialsInfo(Backpack backpack)
-    {
-        List<string> info = new List<string>();
-        using (var makingInfo = materials.GetEnumerator())
-            while (makingInfo.MoveNext())
-                info.Add(string.Format("{0}\t[{1}/{2}]", makingInfo.Current.ItemName, backpack.GetItemAmount(makingInfo.Current.Item), makingInfo.Current.Amount));
-        return info.AsEnumerable();
-    }
-    public int GetMakeAmount(Backpack backpack)
-    {
-        if (backpack == null) return 0;
-        if (Materials.Count < 1) return 0;
-        List<int> amounts = new List<int>();
-        using (var makingInfo = materials.GetEnumerator())
-            while (makingInfo.MoveNext())
-                amounts.Add(backpack.GetItemAmount(makingInfo.Current.Item) / makingInfo.Current.Amount);
-        return amounts.Min();
-    }
+
+    public bool DIYAble => MakingTool != MakingToolType.None && !Materials.TrueForAll(x => x.MakingType == MakingType.SingleItem);
     #endregion
 
     #region 类型判断相关
-    public bool IsWeapon
-    {
-        get
-        {
-            return this is WeaponItem;
-        }
-    }
+    public bool IsWeapon => this is WeaponItem;
 
-    public bool IsBox
-    {
-        get
-        {
-            return this is BoxItem;
-        }
-    }
+    public bool IsBox => this is BoxItem;
 
-    public bool IsBag
-    {
-        get
-        {
-            return this is BagItem;
-        }
-    }
+    public bool IsBag => this is BagItem;
 
-    public bool IsMaterial
-    {
-        get
-        {
-            return this is MaterialItem;
-        }
-    }
+    public bool IsSeed => this is SeedItem;
 
-    public bool IsGemstone
-    {
-        get
-        {
-            return this is GemItem;
-        }
-    }
+    public bool IsMaterial => this is MaterialItem;
 
-    public bool IsForQuest
-    {
-        get
-        {
-            return this is QuestItem;
-        }
-    }
+    public bool IsGemstone => this is GemItem;
 
-    public bool IsBook
-    {
-        get
-        {
-            return this is BookItem;
-        }
-    }
+    public bool IsForQuest => this is QuestItem;
 
-    public bool IsMedicine
-    {
-        get
-        {
-            return this is MedicineItem;
-        }
-    }
+    public bool IsBook => this is BookItem;
 
-    public bool IsEquipment
-    {
-        get
-        {
-            return this is WeaponItem || this is ArmorItem;
-        }
-    }
+    public bool IsMedicine => this is MedicineItem;
 
-    public bool IsConsumable//是消耗品
-    {
-        get
-        {
-            return this is BoxItem || this is BagItem || this is MedicineItem;
-        }
-    }
+    public bool IsEquipment => this is WeaponItem || this is ArmorItem;
+
+    /// <summary>
+    /// 是消耗品
+    /// </summary>
+    public bool IsConsumable => this is BoxItem || this is BagItem || this is MedicineItem;
     #endregion
 }
 
@@ -363,6 +192,11 @@ public enum ItemType
     /// 盒子、箱子
     /// </summary>
     Box,
+
+    /// <summary>
+    /// 种子
+    /// </summary>
+    Seed,
 
     /// <summary>
     /// 加工材料
@@ -680,7 +514,7 @@ public class DropItemInfo
 }
 
 [Serializable]
-public class MatertialInfo
+public class MaterialInfo
 {
     public string ItemID
     {
@@ -702,70 +536,37 @@ public class MatertialInfo
 
     [SerializeField]
     private ItemBase item;
-    public ItemBase Item
-    {
-        get
-        {
-            return item;
-        }
-
-        set
-        {
-            item = value;
-        }
-    }
+    public ItemBase Item => item;
 
     [SerializeField]
-    private int amount;
-    public int Amount
-    {
-        get
-        {
-            return amount;
-        }
-
-        set
-        {
-            if (value < 0) amount = 0;
-            else amount = value;
-        }
-    }
+    private int amount = 1;
+    public int Amount => amount;
 
     [SerializeField]
 #if UNITY_EDITOR
     [EnumMemberNames("单种材料", "同类材料")]
 #endif
     private MakingType makingType;
-    public MakingType MakingType
-    {
-        get
-        {
-            return makingType;
-        }
-    }
+    public MakingType MakingType => makingType;
 
     [SerializeField]
 #if UNITY_EDITOR
     [EnumMemberNames("未定义", "矿石", "金属", "植物", "布料", "肉类", "皮毛", "水果")]
 #endif
     private MaterialType materialType;
-    public MaterialType MaterialType
-    {
-        get
-        {
-            return materialType;
-        }
-    }
+    public MaterialType MaterialType => materialType;
 
     public bool IsInvalid
     {
         get
         {
-            return !(makingType == MakingType.SingleItem && item || makingType == MakingType.SameType);
+            return !(makingType == MakingType.SingleItem && Item || makingType == MakingType.SameType);
         }
     }
 
-    public static implicit operator bool(MatertialInfo self)
+    public ItemInfo ItemInfo => new ItemInfo(item, amount);
+
+    public static implicit operator bool(MaterialInfo self)
     {
         return self != null;
     }

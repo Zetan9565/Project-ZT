@@ -51,7 +51,7 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
                     DialogueManager.Instance.BeginNewDialogue();
                 else if (DialogueManager.Instance.CurrentType == DialogueType.Normal && DialogueManager.Instance.OptionsCount < 1
                     && DialogueManager.Instance.NPCHasNotAcptQuests)
-                    DialogueManager.Instance.LoadTalkerQuest();
+                    DialogueManager.Instance.ShowTalkerQuest();
                 else if (DialogueManager.Instance.OptionsCount > 0)
                     DialogueManager.Instance.FirstOption.OnClick();
             }

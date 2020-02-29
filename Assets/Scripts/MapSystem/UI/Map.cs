@@ -14,7 +14,7 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
         if (!MapManager.Instance) return;
 #if UNITY_STANDALONE
         if (eventData.clickCount > 1)
-            MapManager.Instance.CreateMarkByMousePosition(eventData.position);
+            MapManager.Instance.CreateDefaultMarkAtMousePos(eventData.position);
 #elif UNITY_ANDROID
         if (eventData.button == PointerEventData.InputButton.Left)
         {

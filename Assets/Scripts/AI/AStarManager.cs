@@ -10,8 +10,6 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
     #region Gizmos相关
     [SerializeField]
     private bool gizmosPriview = true;
-    [SerializeField]
-    private Color priviewColor = new Color(Color.white.r, Color.white.g, Color.white.b, 0.15f);
 
     [SerializeField]
     private bool gizmosEdge = true;
@@ -20,6 +18,8 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
 
     [SerializeField]
     private bool gizmosGrid = true;
+    [SerializeField]
+    private Vector2Int gizmosUnitSize = new Vector2Int(1, 1);
     [SerializeField]
     private Color gridColor = new Color(Color.white.r, Color.white.g, Color.white.b, 0.15f);
 
@@ -33,23 +33,11 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
 
     [SerializeField]
     private bool threeD;
-    public bool ThreeD
-    {
-        get
-        {
-            return threeD;
-        }
-    }
+    public bool ThreeD => threeD;
 
     [SerializeField, Range(0.2f, 2f)]
     private float baseCellSize = 1;
-    public float BaseCellSize
-    {
-        get
-        {
-            return baseCellSize;
-        }
-    }
+    public float BaseCellSize => baseCellSize;
 
     [SerializeField, Tooltip("以单元格倍数为单位，至少是 1 倍，2D空间下 Y 数值无效")]
     private Vector2Int[] unitSizes = new Vector2Int[] { Vector2Int.one };
@@ -63,13 +51,10 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
     [SerializeField]
     private LayerMask unwalkableLayer;
 
-    [SerializeField, Tooltip("以单元格倍数为单位"), Range(0.25f, 0.5f)]
+    [SerializeField, Tooltip("以单元格倍数为单位"), Range(0.25f, 0.4899f)]
     private float castRadiusMultiple = 0.5f;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("球形", "胶囊体", "点射线")]
-#endif
     private ColliderType castCheckType = ColliderType.Capsule;
 
     [SerializeField]
@@ -118,8 +103,9 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
         gridGragh.collision.type = castCheckType;
         if (ThreeD)
         {
+            gridGragh.collision.rayDirection = RayDirection.Both;
             gridGragh.collision.fromHeight = worldHeight;
-            gridGragh.collision.height = unitSize.y * BaseCellSize;
+            gridGragh.collision.height = (unitSize.y - castCheckType == ColliderType.Capsule ? 1 : 0) * BaseCellSize;
             gridGragh.collision.heightMask = groundLayer;
             gridGragh.collision.heightCheck = true;
         }
@@ -141,13 +127,13 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
     #endregion
 
     #region 路径相关函数
-    public void FindPath(PathRequest request)
+    public void RequestPath(PathRequest request)
     {
         if (!graphs.ContainsKey(request.unitSize))
         {
             CreateGraph(request.unitSize);
         }
-        request.seeker.StartPath(request.start, request.goal, request.pathCallback, GraphMask.FromGraph(graphs[request.unitSize]));
+        request.seeker.StartPath(request.start, request.goal, request.callback, GraphMask.FromGraph(graphs[request.unitSize]));
     }
 
     public List<Vector3> SimplifyPath(Vector2Int unitSize, List<GraphNode> path)
@@ -273,7 +259,6 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
     {
         if (gizmosPriview)
         {
-            Vector2Int gridSize = Vector2Int.RoundToInt(worldSize / BaseCellSize);
             Vector3 nodeWorldPos;
             Vector3 axisOrigin;
             if (!ThreeD)
@@ -283,69 +268,72 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
                 axisOrigin = new Vector3Int(Mathf.RoundToInt(transform.position.x), 0, Mathf.RoundToInt(transform.position.z))
                     - Vector3.right * (worldSize.x / 2) - Vector3.forward * (worldSize.y / 2);
 
-            for (int x = 0; x < gridSize.x; x++)
-                for (int y = 0; y < gridSize.y; y++)
+            if (gizmosGrid)
+            {
+                float cellSize = BaseCellSize * gizmosUnitSize.x;
+                Vector2Int gridSize = Vector2Int.RoundToInt(worldSize / cellSize);
+                for (int x = 0; x < gridSize.x; x++)
+                    for (int y = 0; y < gridSize.y; y++)
+                    {
+                        if (!ThreeD)
+                        {
+                            nodeWorldPos = axisOrigin + Vector3.right * (x + 0.5f) * cellSize + Vector3.up * (y + 0.5f) * cellSize;
+                            if (CheckPointWalkable(nodeWorldPos))
+                            {
+                                Gizmos.color = gridColor;
+                                Gizmos.DrawWireCube(nodeWorldPos, Vector2.one * cellSize);
+                            }
+                            else
+                            {
+                                Gizmos.color = new Color(Color.red.r, Color.red.g, Color.red.b, gridColor.a);
+                                Gizmos.DrawCube(nodeWorldPos, Vector2.one * cellSize);
+                            }
+                        }
+                        else
+                        {
+                            nodeWorldPos = axisOrigin + Vector3.right * (x + 0.5f) * cellSize + Vector3.forward * (y + 0.5f) * cellSize;
+                            float height;
+                            if (Physics.Raycast(nodeWorldPos + Vector3.up * (worldHeight + 0.01f), Vector3.down, out RaycastHit hit, worldHeight + 0.01f, groundLayer, QueryTriggerInteraction.Ignore))
+                                height = hit.point.y;
+                            else height = worldHeight + 0.01f;
+                            nodeWorldPos += Vector3.up * height;
+                            if (CheckPointWalkable(nodeWorldPos)) Gizmos.color = new Color(gridColor.r, gridColor.g, gridColor.b, gridColor.a * 2f);
+                            else Gizmos.color = new Color(Color.red.r, Color.red.g, Color.red.b, gridColor.a * 2f);
+                            Gizmos.DrawCube(nodeWorldPos, new Vector3(cellSize, cellSize * gizmosUnitSize.y, cellSize) * 0.95f);
+                        }
+                    }
+
+                bool CheckPointWalkable(Vector3 worldPosition)
                 {
                     if (!ThreeD)
                     {
-                        Gizmos.color = priviewColor;
-                        nodeWorldPos = axisOrigin + Vector3.right * (x + 0.5f) * BaseCellSize + Vector3.up * (y + 0.5f) * BaseCellSize;
-                        bool hitUnwkbl;
                         switch (castCheckType)
                         {
                             case ColliderType.Sphere:
                             case ColliderType.Capsule:
-                                hitUnwkbl = Physics2D.OverlapCircle(nodeWorldPos, BaseCellSize * castRadiusMultiple, unwalkableLayer);
-                                break;
+                                return Physics2D.OverlapCircle(worldPosition, cellSize * castRadiusMultiple, unwalkableLayer) == null;
                             case ColliderType.Ray:
-                                hitUnwkbl = Physics2D.Raycast(nodeWorldPos, Vector2.zero, 0, unwalkableLayer);
-                                break;
-                            default:
-                                hitUnwkbl = false;
-                                break;
-                        }
-                        if (!hitUnwkbl) Gizmos.DrawWireCube(nodeWorldPos, new Vector3(1, 1, 0) * BaseCellSize);
-                        else
-                        {
-                            Gizmos.color = new Color(Color.red.r, Color.red.g, Color.red.b, priviewColor.a);
-                            Gizmos.DrawCube(nodeWorldPos, Vector2.one * BaseCellSize);
+                            default: return Physics2D.OverlapPoint(worldPosition, unwalkableLayer) == null;
                         }
                     }
                     else
                     {
-                        Gizmos.color = new Color(priviewColor.r, priviewColor.g, priviewColor.b, priviewColor.a * 2f);
-                        nodeWorldPos = axisOrigin + Vector3.right * (x + 0.5f) * BaseCellSize + Vector3.forward * (y + 0.5f) * BaseCellSize;
-                        float height;
-                        if (Physics.Raycast(nodeWorldPos + Vector3.up * (worldHeight + 0.01f), Vector3.down, out RaycastHit hit, worldHeight + 0.01f, groundLayer, QueryTriggerInteraction.Ignore))
-                            height = hit.point.y;
-                        else height = worldHeight + 0.01f;
-                        if (height > worldHeight) Gizmos.color = new Color(Color.red.r, Color.red.g, Color.red.b, priviewColor.a);
-                        nodeWorldPos += Vector3.up * height;
-                        bool hitUnwkbl;
+                        if (worldPosition.y > worldHeight) return false;
+                        float cellHeight = cellSize * gizmosUnitSize.y;
                         switch (castCheckType)
                         {
                             case ColliderType.Sphere:
-                                hitUnwkbl = Physics.CheckSphere(nodeWorldPos, BaseCellSize * castRadiusMultiple, unwalkableLayer, QueryTriggerInteraction.Ignore);
-                                break;
+                                return !Physics.CheckSphere(worldPosition, cellSize * castRadiusMultiple, unwalkableLayer, QueryTriggerInteraction.Ignore);
                             case ColliderType.Capsule:
-                                hitUnwkbl = Physics.CheckCapsule(nodeWorldPos, nodeWorldPos + Vector3.up * (worldHeight - nodeWorldPos.y),
-                                    BaseCellSize * castRadiusMultiple, unwalkableLayer, QueryTriggerInteraction.Ignore);
-                                break;
+                                return !Physics.CheckCapsule(worldPosition, worldPosition + Vector3.up * cellSize * (gizmosUnitSize.y - 1), cellSize * castRadiusMultiple, unwalkableLayer, QueryTriggerInteraction.Ignore);
                             case ColliderType.Ray:
-                                hitUnwkbl = Physics.Raycast(nodeWorldPos + Vector3.up * worldHeight, Vector3.down, worldHeight, unwalkableLayer, QueryTriggerInteraction.Ignore);
-                                break;
                             default:
-                                hitUnwkbl = false;
-                                break;
-                        }
-                        if (!hitUnwkbl) Gizmos.DrawCube(nodeWorldPos, Vector3.one * BaseCellSize * 0.95f);
-                        else
-                        {
-                            Gizmos.color = new Color(Color.red.r, Color.red.g, Color.red.b, priviewColor.a * 2f);
-                            Gizmos.DrawCube(nodeWorldPos, Vector3.one * BaseCellSize * 0.95f);
+                                return !Physics.Raycast(worldPosition, Vector3.up, cellHeight, unwalkableLayer, QueryTriggerInteraction.Ignore)
+                               && !Physics.Raycast(worldPosition + Vector3.up * cellHeight, Vector3.down, cellHeight, unwalkableLayer, QueryTriggerInteraction.Ignore);
                         }
                     }
                 }
+            }
             if (gizmosEdge)
             {
                 Gizmos.color = edgeColor;
@@ -357,13 +345,13 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
     #endregion
 }
 
-public struct PathRequest
+public class PathRequest
 {
     public readonly Vector3 start;
     public readonly Vector3 goal;
     public readonly Seeker seeker;
     public readonly Vector2Int unitSize;
-    public readonly OnPathDelegate pathCallback;
+    public readonly OnPathDelegate callback;
 
     public PathRequest(Vector3 start, Vector3 goal, Seeker seeker, Vector2Int unitSize, OnPathDelegate callback)
     {
@@ -371,6 +359,6 @@ public struct PathRequest
         this.goal = goal;
         this.seeker = seeker;
         this.unitSize = unitSize;
-        this.pathCallback = callback;
+        this.callback = callback;
     }
 }

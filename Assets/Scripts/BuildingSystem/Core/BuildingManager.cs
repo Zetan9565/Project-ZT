@@ -1,27 +1,20 @@
-﻿using System.Collections;
+﻿using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
-using System.Linq;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/建筑管理器")]
 public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowHandler, IOpenCloseAbleWindow
 {
+    [SerializeField]
+    private BuildingUI UI;
+
     public bool IsUIOpen { get; private set; }
     public bool IsPausing { get; private set; }
 
-    public Canvas CanvasToSort
-    {
-        get
-        {
-            if (!UI) return null;
-            return UI.windowCanvas;
-        }
-    }
-
-    [SerializeField]
-    private BuildingUI UI;
+    public Canvas CanvasToSort => UI ? UI.windowCanvas : null;
 
     [HideInInspector]
     public BuildingInformation currentInfo;
@@ -32,13 +25,13 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
     [Range(1, 2)]
     public int gridSize = 1;
 
-    public List<BuildingInformation> BuildingsLearned { get; private set; } = new List<BuildingInformation>();
+    private readonly List<BuildingInformation> buildingsLearned = new List<BuildingInformation>();
 
-    private List<BuildingInfoAgent> buildingInfoAgents = new List<BuildingInfoAgent>();
+    private readonly List<BuildingInfoAgent> buildingInfoAgents = new List<BuildingInfoAgent>();
 
-    private List<BuildingAgent> buildingAgents = new List<BuildingAgent>();
+    private readonly List<BuildingAgent> buildingAgents = new List<BuildingAgent>();
 
-    private Dictionary<BuildingInformation, List<Building>> buildings = new Dictionary<BuildingInformation, List<Building>>();
+    private readonly Dictionary<BuildingInformation, List<Building>> buildings = new Dictionary<BuildingInformation, List<Building>>();
 
     public GameObject CancelArea { get { return UI.cancelArea; } }
 
@@ -60,7 +53,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
             if (ba) ba.Clear(true);
         }
         buildingInfoAgents.RemoveAll(x => !x || !x.gameObject.activeSelf || !x.gameObject);
-        foreach (BuildingInformation bi in BuildingsLearned)
+        foreach (BuildingInformation bi in buildingsLearned)
         {
             BuildingInfoAgent ba = ObjectPool.Instance.Get(UI.buildingInfoCellPrefab, UI.buildingInfoCellsParent).GetComponent<BuildingInfoAgent>();
             ba.Init(bi, UI.cellsRect);
@@ -68,15 +61,24 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
         }
     }
 
+    public void SaveData(SaveData data)
+    {
+        data.buildingSystemData.learneds = buildingsLearned.Select(x => x.IDStarter).ToArray();
+        foreach (Building b in FindObjectsOfType<Building>())
+        {
+            data.buildingSystemData.buildingDatas.Add(new BuildingData(b));
+        }
+    }
+
     public bool Learn(BuildingInformation buildingInfo)
     {
         if (!buildingInfo) return false;
-        if (BuildingsLearned.Contains(buildingInfo))
+        if (buildingsLearned.Contains(buildingInfo))
         {
             MessageManager.Instance.NewMessage("这种设施已经学会建造");
             return false;
         }
-        BuildingsLearned.Add(buildingInfo);
+        buildingsLearned.Add(buildingInfo);
         MessageManager.Instance.NewMessage(string.Format("学会了 [{0}] 的建造方法!", buildingInfo.Name));
         return true;
     }
@@ -150,55 +152,53 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
         if (!currentInfo) return;
         if (BuildAble)
         {
-            if (currentInfo.CheckMaterialsEnough(BackpackManager.Instance.MBackpack))
+            if (BackpackManager.Instance.CheckMaterialsEnough(currentInfo.Materials))
             {
                 Building building = Instantiate(currentInfo.Prefab);
                 if (building.StarBuild(currentInfo, preview.Position))
                 {
-                    foreach (MatertialInfo m in currentInfo.Materials)
+                    foreach (MaterialInfo m in currentInfo.Materials)
                     {
-                        if (!BackpackManager.Instance.TryLoseItem_Boolean(m.Item, m.Amount))
+                        if (!BackpackManager.Instance.TryLoseItem_Boolean(m.ItemInfo))
                         {
                             FinishPreview();
                             return;
                         }
                     }
-                    foreach (MatertialInfo m in currentInfo.Materials)
+                    foreach (MaterialInfo m in currentInfo.Materials)
                     {
-                        BackpackManager.Instance.LoseItem(m.Item, m.Amount);
+                        BackpackManager.Instance.LoseItem(m.ItemInfo);
                     }
                     if (!buildings.ContainsKey(currentInfo))
                         buildings.Add(currentInfo, new List<Building>());
                     buildings[currentInfo].Add(building);
                     if (AStarManager.Instance)
                     {
-                        var colliders = building.GetComponentsInChildren<Collider>();
-                        if (colliders.Length > 0)
+                        var collider2Ds = building.GetComponentsInChildren<Collider2D>();
+                        if (collider2Ds.Length > 0)
                         {
-                            Vector3 min = colliders[0].bounds.min;
-                            Vector3 max = colliders[0].bounds.max;
-                            for (int i = 1; i < colliders.Length; i++)
+                            Vector3 min = collider2Ds[0].bounds.min;
+                            Vector3 max = collider2Ds[0].bounds.max;
+                            for (int i = 1; i < collider2Ds.Length; i++)
                             {
-                                if (ZetanUtility.Vector3LessThan(colliders[i].bounds.min, min))
-                                    min = colliders[i].bounds.min;
-                                if (ZetanUtility.Vector3LargeThan(colliders[i].bounds.max, max))
-                                    max = colliders[i].bounds.max;
+                                if (ZetanUtility.Vector3LessThan(collider2Ds[i].bounds.min, min))
+                                    min = collider2Ds[i].bounds.min;
+                                if (ZetanUtility.Vector3LargeThan(collider2Ds[i].bounds.max, max))
+                                    max = collider2Ds[i].bounds.max;
                             }
                             AStarManager.Instance.UpdateGraphs(min, max);
                         }
                         else
                         {
-                            var collider2Ds = building.GetComponentsInChildren<Collider2D>();
-                            if (collider2Ds.Length > 0)
+                            var colliders = building.GetComponentsInChildren<Collider>();
+                            if (colliders.Length > 0)
                             {
-                                Vector3 min = collider2Ds[0].bounds.min;
-                                Vector3 max = collider2Ds[0].bounds.max;
-                                for (int i = 1; i < collider2Ds.Length; i++)
+                                Vector3 min = colliders[0].bounds.min;
+                                Vector3 max = colliders[0].bounds.max;
+                                for (int i = 1; i < colliders.Length; i++)
                                 {
-                                    if (ZetanUtility.Vector3LessThan(collider2Ds[i].bounds.min, min))
-                                        min = collider2Ds[i].bounds.min;
-                                    if (ZetanUtility.Vector3LargeThan(collider2Ds[i].bounds.max, max))
-                                        max = collider2Ds[i].bounds.max;
+                                    if (ZetanUtility.Vector3LessThan(colliders[i].bounds.min, min)) min = colliders[i].bounds.min;
+                                    if (ZetanUtility.Vector3LargeThan(colliders[i].bounds.max, max)) max = colliders[i].bounds.max;
                                 }
                                 AStarManager.Instance.UpdateGraphs(min, max);
                             }
@@ -220,12 +220,12 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
 
     public void LoadData(BuildingSystemData buildingSystemData)
     {
-        BuildingsLearned.Clear();
+        buildingsLearned.Clear();
         BuildingInformation[] buildingInfos = Resources.LoadAll<BuildingInformation>("");
         foreach (string learned in buildingSystemData.learneds)
         {
             BuildingInformation find = Array.Find(buildingInfos, x => x.IDStarter == learned);
-            if (find) BuildingsLearned.Add(find);
+            if (find) buildingsLearned.Add(find);
         }
         foreach (BuildingData buildingData in buildingSystemData.buildingDatas)
         {
@@ -388,7 +388,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
     {
         if (buildingInfo == null) return;
         currentInfo = buildingInfo;
-        List<string> materialsInfo = buildingInfo.GetMaterialsInfo(BackpackManager.Instance.MBackpack).ToList();
+        List<string> materialsInfo = BackpackManager.Instance.GetMaterialsInfo(buildingInfo.Materials).ToList();
         string materials = string.Empty;
         int lineCount = materialsInfo.Count;
         for (int i = 0; i < materialsInfo.Count; i++)
@@ -400,7 +400,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
         UI.desciptionText.text = string.Format("<b>描述</b>\n{0}\n<b>耗时: </b>{1}\n<b>耗材{2}</b>\n{3}",
             buildingInfo.Description,
             buildingInfo.BuildTime > 0 ? buildingInfo.BuildTime.ToString("F2") + 's' : "立即",
-            buildingInfo.CheckMaterialsEnough(BackpackManager.Instance.MBackpack) ? "<color=green>(可建造)</color>" : "<color=red>(耗材不足)</color>",
+            BackpackManager.Instance.CheckMaterialsEnough(buildingInfo.Materials) ? "<color=green>(可建造)</color>" : "<color=red>(耗材不足)</color>",
             materials);
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = false;

@@ -40,7 +40,7 @@ public class MerchandiseAgent : MonoBehaviour, IPointerClickHandler
         merchandiseType = type;
         if (type == MerchandiseType.SellToPlayer) itemAgentSon.Init(ItemAgentType.Selling);
         else itemAgentSon.Init(ItemAgentType.Purchasing);
-        itemAgentSon.InitItem(new ItemInfo(info.Item));
+        itemAgentSon.SetItem(new ItemInfo(info.Item));
         UpdateInfo();
     }
 
@@ -53,7 +53,7 @@ public class MerchandiseAgent : MonoBehaviour, IPointerClickHandler
         if (merchandiseInfo.EmptyAble)
         {
             if (merchandiseType == MerchandiseType.BuyFromPlayer) amountText.text = merchandiseInfo.IsEmpty ? "暂无需求" : merchandiseInfo.LeftAmount + "/" + merchandiseInfo.MaxAmount;
-            else amountText.text = merchandiseInfo.IsSoldOut ? "售罄" : merchandiseInfo.LeftAmount + "/" + merchandiseInfo.MaxAmount;
+            else amountText.text = merchandiseInfo.IsEmpty ? "售罄" : merchandiseInfo.LeftAmount + "/" + merchandiseInfo.MaxAmount;
         }
         else
         {

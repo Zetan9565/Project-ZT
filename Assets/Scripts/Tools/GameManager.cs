@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/游戏管理器")]
@@ -83,11 +83,11 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             kvp.Value.RemoveAll(x => !x || !x.gameObject);
         foreach (var talker in FindObjectsOfType<Talker>())
             talker.Init();
-        MessageManager.Instance.Init();
         PlayerManager.Instance.Init();
+        if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIRootPrefab);
+        MessageManager.Instance.Init();
         MapManager.Instance.Init();
         GatherManager.Instance.Init();
-        if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIRootPrefab);
         UIManager.Instance.Init();
         WindowsManager.Instance.Clear();
         MapManager.Instance.SetPlayer(PlayerManager.Instance.PlayerTransform);

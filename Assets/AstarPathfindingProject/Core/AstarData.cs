@@ -108,10 +108,10 @@ namespace Pathfinding {
 					data = upgradeData;
 					upgradeData = null;
 				}
-				return dataString != null ? System.Convert.FromBase64String(dataString) : null;
+				return dataString != null? System.Convert.FromBase64String (dataString) : null;
 			}
 			set {
-				dataString = value != null ? System.Convert.ToBase64String(value) : null;
+				dataString = value != null? System.Convert.ToBase64String (value) : null;
 			}
 		}
 

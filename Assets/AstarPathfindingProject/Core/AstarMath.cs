@@ -1169,7 +1169,7 @@ namespace Pathfinding {
 		public static Vector3[] ConvexHullXZ (Vector3[] points) {
 			if (points.Length == 0) return new Vector3[0];
 
-			var hull = Pathfinding.Util.ListPool<Vector3>.Claim();
+			var hull = Pathfinding.Util.ListPool<Vector3>.Claim ();
 
 			int pointOnHull = 0;
 			for (int i = 1; i < points.Length; i++) if (points[i].x < points[pointOnHull].x) pointOnHull = i;
@@ -1194,7 +1194,7 @@ namespace Pathfinding {
 			var result = hull.ToArray();
 
 			// Return to pool
-			Pathfinding.Util.ListPool<Vector3>.Release(hull);
+			Pathfinding.Util.ListPool<Vector3>.Release (hull);
 			return result;
 		}
 
@@ -1420,10 +1420,11 @@ namespace Pathfinding {
 		/// <param name="outTriangles">Triangles of the output mesh.</param>
 		public static void CompressMesh (List<Int3> vertices, List<int> triangles, out Int3[] outVertices, out int[] outTriangles) {
 			Dictionary<Int3, int> firstVerts = cached_Int3_int_dict;
+
 			firstVerts.Clear();
 
 			// Use cached array to reduce memory allocations
-			int[] compressedPointers = ArrayPool<int>.Claim(vertices.Count);
+			int[] compressedPointers = ArrayPool<int>.Claim (vertices.Count);
 
 			// Map positions to the first index they were encountered at
 			int count = 0;
@@ -1457,7 +1458,7 @@ namespace Pathfinding {
 			for (int i = 0; i < count; i++)
 				outVertices[i] = vertices[i];
 
-			ArrayPool<int>.Release(ref compressedPointers);
+			ArrayPool<int>.Release (ref compressedPointers);
 		}
 
 		/// <summary>
@@ -1474,8 +1475,8 @@ namespace Pathfinding {
 			// we need to start these at the beginning of the chain.
 			// Then iterate over all the loops of the outline.
 			// Since they are loops, we can start at any point.
-			var obstacleVertices = ListPool<int>.Claim();
-			var outlineKeys = ListPool<int>.Claim();
+			var obstacleVertices = ListPool<int>.Claim ();
+			var outlineKeys = ListPool<int>.Claim ();
 
 			outlineKeys.AddRange(outline.Keys);
 			for (int k = 0; k <= 1; k++) {
@@ -1511,8 +1512,8 @@ namespace Pathfinding {
 				}
 			}
 
-			ListPool<int>.Release(ref outlineKeys);
-			ListPool<int>.Release(ref obstacleVertices);
+			ListPool<int>.Release (ref outlineKeys);
+			ListPool<int>.Release (ref obstacleVertices);
 		}
 
 		/// <summary>Divides each segment in the list into subSegments segments and fills the result list with the new points</summary>

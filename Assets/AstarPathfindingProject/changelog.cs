@@ -2,6 +2,9 @@
 /// \page changelog Changelog
 /// \order{-10}
 ///
+/// - 4.2.12 (2020-02-20)
+/// 	- Fixed "Not allowed to access vertices on mesh" error which some users are seeing after upgrading to Unity 2019.3.
+///
 /// - 4.2.11 (2019-11-28)
 /// 	- Fixed animations for the agent character were missing in the example scenes in some newer versions of Unity. This could cause exceptions to be thrown in some example scenes.
 /// 	- Removed some stray uses of the old and deprecated GUIText component. This could cause descriptions for some example scenes not to show up in newer versions of Unity.

@@ -26,7 +26,7 @@ using Thread = System.Threading.Thread;
 [HelpURL("http://arongranberg.com/astar/docs/class_astar_path.php")]
 public class AstarPath : VersionedMonoBehaviour {
 	/// <summary>The version number for the A* %Pathfinding Project</summary>
-	public static readonly System.Version Version = new System.Version(4, 2, 11);
+	public static readonly System.Version Version = new System.Version(4, 2, 12);
 
 	/// <summary>Information about where the package was downloaded</summary>
 	public enum AstarDistribution { WebsiteDownload, AssetStore };
@@ -688,7 +688,7 @@ public class AstarPath : VersionedMonoBehaviour {
 	/// </summary>
 	public static string[] FindTagNames () {
 		FindAstarPath();
-		return active != null ? active.GetTagNames() : new string[1] { "There is no AstarPath component in the scene" };
+		return active != null? active.GetTagNames () : new string[1] { "There is no AstarPath component in the scene" };
 	}
 
 	/// <summary>Returns the next free path ID</summary>

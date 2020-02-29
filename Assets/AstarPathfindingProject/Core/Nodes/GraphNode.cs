@@ -610,7 +610,7 @@ namespace Pathfinding {
 				}
 			}
 
-			ArrayPool<Connection>.Release(ref connections, true);
+			ArrayPool<Connection>.Release (ref connections, true);
 			AstarPath.active.hierarchicalGraph.AddDirtyNode(this);
 		}
 
@@ -687,7 +687,7 @@ namespace Pathfinding {
 			// Create new arrays which include the new connection
 			int connLength = connections != null ? connections.Length : 0;
 
-			var newconns = ArrayPool<Connection>.ClaimWithExactLength(connLength+1);
+			var newconns = ArrayPool<Connection>.ClaimWithExactLength (connLength+1);
 			for (int i = 0; i < connLength; i++) {
 				newconns[i] = connections[i];
 			}
@@ -695,7 +695,7 @@ namespace Pathfinding {
 			newconns[connLength] = new Connection(node, cost, (byte)shapeEdge);
 
 			if (connections != null) {
-				ArrayPool<Connection>.Release(ref connections, true);
+				ArrayPool<Connection>.Release (ref connections, true);
 			}
 
 			connections = newconns;
@@ -719,7 +719,7 @@ namespace Pathfinding {
 					// Create new arrays which have the specified node removed
 					int connLength = connections.Length;
 
-					var newconns = ArrayPool<Connection>.ClaimWithExactLength(connLength-1);
+					var newconns = ArrayPool<Connection>.ClaimWithExactLength (connLength-1);
 					for (int j = 0; j < i; j++) {
 						newconns[j] = connections[j];
 					}
@@ -728,7 +728,7 @@ namespace Pathfinding {
 					}
 
 					if (connections != null) {
-						ArrayPool<Connection>.Release(ref connections, true);
+						ArrayPool<Connection>.Release (ref connections, true);
 					}
 
 					connections = newconns;
@@ -796,7 +796,7 @@ namespace Pathfinding {
 			if (count == -1) {
 				connections = null;
 			} else {
-				connections = ArrayPool<Connection>.ClaimWithExactLength(count);
+				connections = ArrayPool<Connection>.ClaimWithExactLength (count);
 
 				for (int i = 0; i < count; i++) {
 					connections[i] = new Connection(

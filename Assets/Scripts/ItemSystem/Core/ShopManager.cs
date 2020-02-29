@@ -21,13 +21,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
 
     public bool IsPausing { get; private set; }
 
-    public Canvas CanvasToSort
-    {
-        get
-        {
-            return UI.windowCanvas;
-        }
-    }
+    public Canvas CanvasToSort => UI ? UI.windowCanvas : null;
 
     private void Update()
     {
@@ -62,11 +56,15 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
     }
 
     #region 货物处理相关
+    /// <summary>
+    /// 向玩家卖出道具
+    /// </summary>
+    /// <param name="info">商品信息</param>
     public void SellItem(MerchandiseInfo info)
     {
-        if (MShop == null || info == null || info.IsInvalid) return;
+        if (MShop == null || info == null || !info.IsValid) return;
         if (!MShop.Commodities.Contains(info)) return;
-        long maxAmount = info.EmptyAble ? info.LeftAmount : info.SellPrice > 0 ? BackpackManager.Instance.MBackpack.Money / info.SellPrice : 999;
+        long maxAmount = info.EmptyAble ? info.LeftAmount : info.SellPrice > 0 ? BackpackManager.Instance.Money / info.SellPrice : 999;
         if (info.LeftAmount == 1 && info.EmptyAble)
         {
             ConfirmManager.Instance.NewConfirm(string.Format("确定购买1个 [{0}] 吗？", info.Item.name), delegate
@@ -75,7 +73,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
                     MessageManager.Instance.NewMessage(string.Format("购买了1个 [{0}]", info.Item.name));
             });
         }
-        else if (info.IsSoldOut)
+        else if (info.IsEmpty)
         {
             ConfirmManager.Instance.NewConfirm("该商品暂时缺货");
         }
@@ -95,12 +93,12 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
 
     bool OnSell(MerchandiseInfo info, int amount = 1)
     {
-        if (MShop == null || info == null || info.IsInvalid || amount < 1) return false;
+        if (MShop == null || info == null || !info.IsValid || amount < 1) return false;
         if (!MShop.Commodities.Contains(info)) return false;
         if (!BackpackManager.Instance.TryGetItem_Boolean(info.Item, amount)) return false;
         if (info.EmptyAble && amount > info.LeftAmount)
         {
-            if (!info.IsSoldOut) MessageManager.Instance.NewMessage("该商品数量不足");
+            if (!info.IsEmpty) MessageManager.Instance.NewMessage("该商品数量不足");
             else MessageManager.Instance.NewMessage("该商品暂时缺货");
             return false;
         }
@@ -109,14 +107,18 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         BackpackManager.Instance.LoseMoney(amount * info.SellPrice);
         BackpackManager.Instance.GetItem(info.Item, amount);
         if (info.EmptyAble) info.LeftAmount -= amount;
-        MerchandiseAgent ma = GetMerchandiseAgentByInfo(info);
+        MerchandiseAgent ma = merchandiseAgents.Find(x => x.merchandiseInfo == info);
         if (ma) ma.UpdateInfo();
         return true;
     }
 
+    /// <summary>
+    /// 从玩家那里购入道具
+    /// </summary>
+    /// <param name="info">商品信息</param>
     public void PurchaseItem(MerchandiseInfo info)
     {
-        if (MShop == null || info == null || info.IsInvalid) return;
+        if (MShop == null || info == null || !info.IsValid) return;
         if (!MShop.Acquisitions.Contains(info)) return;
         int backpackAmount = BackpackManager.Instance.GetItemAmount(info.Item);
         int maxAmount = info.EmptyAble ? (info.LeftAmount > backpackAmount ? backpackAmount : info.LeftAmount) : backpackAmount;
@@ -148,7 +150,37 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
             }, maxAmount);
         }
     }
+    bool OnPurchase(MerchandiseInfo info, int amount = 1)
+    {
+        if (MShop == null || info == null || !info.IsValid || amount < 1) return false;
+        if (!MShop.Acquisitions.Contains(info)) return false;
+        var itemAgents = BackpackManager.Instance.GetItemAgentsByItem(info.Item).ToArray();
+        if (itemAgents.Length < 1)
+        {
+            MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这种物品");
+            return false;
+        }
+        if (info.EmptyAble && amount > info.LeftAmount)
+        {
+            if (!info.IsEmpty) MessageManager.Instance.NewMessage("不收够这么多的这种物品");
+            else MessageManager.Instance.NewMessage("这种物品暂无收购需求");
+            return false;
+        }
+        ItemBase item = itemAgents[0].MItemInfo.item;
+        if (!BackpackManager.Instance.TryLoseItem_Boolean(item, amount)) return false;
+        BackpackManager.Instance.GetMoney(amount * info.PurchasePrice);
+        BackpackManager.Instance.LoseItem(item, amount);
+        if (info.EmptyAble) info.LeftAmount -= amount;
+        MerchandiseAgent ma = merchandiseAgents.Find(x => x.merchandiseInfo == info);
+        if (ma) ma.UpdateInfo();
+        return true;
+    }
 
+    /// <summary>
+    /// 从玩家那里购入道具
+    /// </summary>
+    /// <param name="info">道具信息</param>
+    /// <param name="force">强制购入</param>
     public void PurchaseItem(ItemInfo info, bool force = false)
     {
         if (MShop == null || info == null || !info.item) return;
@@ -164,7 +196,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         }
         MItemInfo = info;
         MerchandiseInfo find = MShop.Acquisitions.Find(x => x.Item == info.item);
-        if (find != null && !force)
+        if (find != null && !force)//采购品列表里没有该道具，说明没有特殊购价
         {
             PurchaseItem(find);
             return;
@@ -190,33 +222,6 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
             }, BackpackManager.Instance.GetItemAmount(info.item));
         }
     }
-
-    bool OnPurchase(MerchandiseInfo info, int amount = 1)
-    {
-        if (MShop == null || info == null || info.IsInvalid || amount < 1) return false;
-        if (!MShop.Acquisitions.Contains(info)) return false;
-        var itemAgents = BackpackManager.Instance.GetItemAgentsByItem(info.Item).ToArray();
-        if (itemAgents.Length < 1)
-        {
-            MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这种物品");
-            return false;
-        }
-        if (info.EmptyAble && amount > info.LeftAmount)
-        {
-            if (!info.IsEmpty) MessageManager.Instance.NewMessage("不收够这么多的这种物品");
-            else MessageManager.Instance.NewMessage("这种物品暂无收购需求");
-            return false;
-        }
-        ItemBase item = itemAgents[0].MItemInfo.item;
-        if (!BackpackManager.Instance.TryLoseItem_Boolean(item, amount)) return false;
-        BackpackManager.Instance.GetMoney(amount * info.PurchasePrice);
-        BackpackManager.Instance.LoseItem(item, amount);
-        if (info.EmptyAble) info.LeftAmount -= amount;
-        MerchandiseAgent ma = GetMerchandiseAgentByInfo(info);
-        if (ma) ma.UpdateInfo();
-        return true;
-    }
-
     bool OnPurchase(ItemInfo info, int amount = 1)
     {
         if (MShop == null || info == null || !info.item || amount < 1)
@@ -316,7 +321,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
                     ma.Clear();
                 foreach (MerchandiseInfo mi in MShop.Commodities)
                     foreach (MerchandiseAgent ma in merchandiseAgents)
-                        if (ma.IsEmpty && !mi.IsInvalid)
+                        if (ma.IsEmpty && !mi.IsValid)
                         {
                             ma.Init(mi, MerchandiseType.SellToPlayer);
                             break;
@@ -324,7 +329,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
                 break;
             case 1:
                 originalSize = merchandiseAgents.Count;
-                int acqCount = MShop.Acquisitions.FindAll(x => !x.IsInvalid && x.Item.SellAble).Count;
+                int acqCount = MShop.Acquisitions.FindAll(x => x.IsValid && x.Item.SellAble).Count;
                 if (acqCount >= originalSize)
                     for (int i = 0; i < acqCount - originalSize; i++)
                     {
@@ -342,7 +347,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
                     ma.Clear();
                 foreach (MerchandiseInfo mi in MShop.Acquisitions)
                     foreach (MerchandiseAgent ma in merchandiseAgents)
-                        if (ma.IsEmpty && !mi.IsInvalid && mi.Item.SellAble)
+                        if (ma.IsEmpty && !mi.IsValid && mi.Item.SellAble)
                         {
                             ma.Init(mi, MerchandiseType.BuyFromPlayer);
                             break;
@@ -365,11 +370,6 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         this.UI = UI;
     }
     #endregion
-
-    public MerchandiseAgent GetMerchandiseAgentByInfo(MerchandiseInfo info)
-    {
-        return merchandiseAgents.Find(x => x.merchandiseInfo == info);
-    }
 
     public MerchandiseAgent GetMerchandiseAgentByItem(ItemInfo info)
     {

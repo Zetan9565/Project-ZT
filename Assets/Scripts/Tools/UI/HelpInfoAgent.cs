@@ -15,11 +15,11 @@ public class HelpInfoAgent : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        //if (!string.IsNullOrEmpty(infoToShow)) TipsManager.Instance.ShowText(transform.position, infoToShow);
+        if (!string.IsNullOrEmpty(infoToShow)) TipsManager.Instance.ShowText(transform.position, infoToShow);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        //if (!string.IsNullOrEmpty(infoToShow)) TipsManager.Instance.HideText();
+        if (!string.IsNullOrEmpty(infoToShow)) TipsManager.Instance.HideText();
     }
 }

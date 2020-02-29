@@ -6,39 +6,21 @@ public class ShopInformation : ScriptableObject
 {
     [SerializeField]
     private string shopName;
-    public string ShopName
-    {
-        get
-        {
-            return shopName;
-        }
-    }
+    public string ShopName => shopName;
 
     [SerializeField]
+    private List<MerchandiseInfo> commodities = new List<MerchandiseInfo>();
     /// <summary>
     /// 在出售的东西
     /// </summary>
-    private List<MerchandiseInfo> commodities = new List<MerchandiseInfo>();
-    public List<MerchandiseInfo> Commodities
-    {
-        get
-        {
-            return commodities;
-        }
-    }
+    public List<MerchandiseInfo> Commodities => commodities;
 
     [SerializeField]
+    private List<MerchandiseInfo> acquisitions = new List<MerchandiseInfo>();
     /// <summary>
     /// 在收购的东西
     /// </summary>
-    private List<MerchandiseInfo> acquisitions = new List<MerchandiseInfo>();
-    public List<MerchandiseInfo> Acquisitions
-    {
-        get
-        {
-            return acquisitions;
-        }
-    }
+    public List<MerchandiseInfo> Acquisitions => acquisitions;
 
     public void Init()
     {
@@ -93,13 +75,7 @@ public class MerchandiseInfo
 {
     [SerializeField]
     private ItemBase item;
-    public ItemBase Item
-    {
-        get
-        {
-            return item;
-        }
-    }
+    public ItemBase Item => item;
 
     [HideInInspector]
     private int leftAmount;
@@ -119,106 +95,38 @@ public class MerchandiseInfo
 
     [SerializeField]
     private int maxAmount = 1;
-    public int MaxAmount
-    {
-        get
-        {
-            return maxAmount;
-        }
-    }
+    public int MaxAmount => maxAmount;
 
     [SerializeField]
     private float priceMultiple = 1;
-    public float PriceMultiple
-    {
-        get
-        {
-            return priceMultiple;
-        }
-    }
+    public float PriceMultiple => priceMultiple;
 
     [SerializeField]
     private bool emptyAble;
-    public bool EmptyAble
-    {
-        get
-        {
-            return emptyAble;
-        }
-    }//Able to sold out Or purchase Enough?
+    public bool EmptyAble => emptyAble;//Able to sold out Or purchase Enough?
 
     [HideInInspector]
     public float leftRefreshTime;
 
     [SerializeField]
     private float refreshTime = 300.0f;//小于0表示永久限购
-    public float RefreshTime
-    {
-        get
-        {
-            return refreshTime;
-        }
-    }
+    public float RefreshTime => refreshTime;
 
     [SerializeField]
     private int minRefreshAmount = 1;
-    public int MinRefreshAmount
-    {
-        get
-        {
-            return minRefreshAmount;
-        }
-    }
+    public int MinRefreshAmount => minRefreshAmount;
 
     [SerializeField]
     private int maxRefreshAmount = 1;//每次刷新最大补充量
-    public int MaxRefreshAmount
-    {
-        get
-        {
-            return maxRefreshAmount;
-        }
-    }
+    public int MaxRefreshAmount => maxRefreshAmount;
 
-    public int SellPrice
-    {
-        get
-        {
-            return (int)priceMultiple * item.BuyPrice;
-        }
-    }
+    public int SellPrice => (int)priceMultiple * item.BuyPrice;
 
-    public int PurchasePrice
-    {
-        get
-        {
-            return (int)priceMultiple * item.SellPrice;
-        }
-    }
+    public int PurchasePrice => (int)priceMultiple * item.SellPrice;
 
-    public bool IsInvalid
-    {
-        get
-        {
-            return !Item;
-        }
-    }
+    public bool IsValid => !Item;
 
-    public bool IsSoldOut
-    {
-        get
-        {
-            return EmptyAble && leftAmount <= 0;
-        }
-    }
-
-    public bool IsEmpty
-    {
-        get
-        {
-            return EmptyAble && leftAmount <= 0;
-        }
-    }
+    public bool IsEmpty => EmptyAble && leftAmount <= 0;
 
     public static implicit operator bool(MerchandiseInfo self)
     {

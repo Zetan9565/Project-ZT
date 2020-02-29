@@ -304,7 +304,7 @@ public class ItemInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            item.Materials.Add(new MatertialInfo() { Amount = 1 });
+            item.Materials.Add(new MaterialInfo());
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };

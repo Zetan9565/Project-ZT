@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6e0a1f3f2f4c5ec47a308df4438d8644, type: 3}
-  m_Name: player info
+  m_Name: player info 1
   m_EditorClassIdentifier: 
   _ID: PLAY001
   _Name: "\u674E\u9A81"
@@ -122,3 +122,4 @@ MonoBehaviour:
   _DEF: 0
   hit: 0
   dodge: 0
+  level: 0

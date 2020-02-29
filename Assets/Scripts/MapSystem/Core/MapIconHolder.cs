@@ -129,7 +129,8 @@ public class MapIconHolder : MonoBehaviour
                 var rect = ZetanUtility.GetScreenSpaceRect(MapManager.Instance.MapMaskRect);
                 Gizmos.DrawCube(MapManager.Instance.MapMaskRect.position, iconSize * rect.width / MapManager.Instance.MapMaskRect.rect.width);
                 if (showRange)
-                    ZetanUtility.DrawGizmosCircle(MapManager.Instance.MapMaskRect.position, rangeSize * rect.width / MapManager.Instance.MapMaskRect.rect.width, 0.1f, rangeColor, false);
+                    ZetanUtility.DrawGizmosCircle(MapManager.Instance.MapMaskRect.position, rangeSize * rect.width / MapManager.Instance.MapMaskRect.rect.width,
+                        Vector3.forward, rangeColor);
             }
         }
     }

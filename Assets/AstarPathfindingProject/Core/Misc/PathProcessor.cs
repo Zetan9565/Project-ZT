@@ -137,7 +137,7 @@ namespace Pathfinding {
 			/// </summary>
 			public bool Held {
 				get {
-					return pathProcessor != null && pathProcessor.locks.Contains (id);
+					return pathProcessor != null && pathProcessor.locks.Contains(id);
 				}
 			}
 

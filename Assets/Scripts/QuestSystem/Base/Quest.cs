@@ -81,9 +81,7 @@ public class Quest : ScriptableObject
     private bool cmpltObjctvInOrder = false;
     public bool CmpltObjctvInOrder => cmpltObjctvInOrder;
 
-    [System.NonSerialized]
-    private List<Objective> objectiveInstances = new List<Objective>();//存储所有目标，在运行时用到，初始化时自动填，不用人为干预，详见QuestGiver类
-    public List<Objective> ObjectiveInstances => objectiveInstances;
+    public List<Objective> ObjectiveInstances { get; } = new List<Objective>();
 
     [SerializeField]
     private List<CollectObjective> collectObjectives = new List<CollectObjective>();
@@ -127,229 +125,12 @@ public class Quest : ScriptableObject
         }
     }
 
-    public bool IsValid
-    {
-        get
-        {
-            if (ObjectiveInstances.Count < 1) return false;
-            if (string.IsNullOrEmpty(ID) || string.IsNullOrEmpty(Title)) return false;
-            if (NPCToSubmit && !GameManager.TalkerDatas.ContainsKey(NPCToSubmit.ID)) return false;
-            foreach (var co in CollectObjectives)
-                if (!co.IsValid) return false;
-            foreach (var ko in KillObjectives)
-                if (!ko.IsValid) return false;
-                else if (!GameManager.Enemies.ContainsKey(ko.Enemy.ID)) return false;
-            foreach (var to in TalkObjectives)
-                if (!to.IsValid) return false;
-                else if (!GameManager.TalkerDatas.ContainsKey(to.NPCToTalk.ID)) return false;
-            foreach (var mo in MoveObjectives)
-                if (!mo.IsValid) return false;
-                else if (!GameManager.QuestPoints.ContainsKey(mo.PointID)) return false;
-            foreach (var so in SubmitObjectives)
-                if (!so.IsValid) return false;
-                else if (!GameManager.TalkerDatas.ContainsKey(so.NPCToSubmit.ID)) return false;
-            foreach (var cuo in CustomObjectives)
-                if (!cuo.IsValid) return false;
-            return true;
-        }
-    }
-
     public bool IsFinished
     {
         get
         {
             return IsComplete && !IsOngoing;
         }
-    }
-
-    public bool AcceptAble
-    {
-        get
-        {
-            bool calFailed = false;
-            if (string.IsNullOrEmpty(conditionRelational)) return AcceptConditions.TrueForAll(x => x.IsEligible);
-            if (AcceptConditions.Count < 1) calFailed = true;
-            else
-            {
-                Debug.Log(Title);
-                var cr = conditionRelational.Replace(" ", "").ToCharArray();//删除所有空格才开始计算
-                List<string> RPN = new List<string>();//逆波兰表达式
-                string indexStr = string.Empty;//数字串
-                Stack<char> optStack = new Stack<char>();//运算符栈
-                for (int i = 0; i < cr.Length; i++)
-                {
-                    char c = cr[i];
-                    string item;
-                    if (c < '0' || c > '9')
-                    {
-                        if (!string.IsNullOrEmpty(indexStr))
-                        {
-                            item = indexStr;
-                            indexStr = string.Empty;
-                            GetRPNItem(item);
-                        }
-                        if (c == '(' || c == ')' || c == '+' || c == '*' || c == '~')
-                        {
-                            item = c + "";
-                            GetRPNItem(item);
-                        }
-                        else
-                        {
-                            calFailed = true;
-                            break;
-                        }//既不是数字也不是运算符，直接放弃计算
-                    }
-                    else
-                    {
-                        indexStr += c;//拼接数字
-                        if (i + 1 >= cr.Length)
-                        {
-                            item = indexStr;
-                            indexStr = string.Empty;
-                            GetRPNItem(item);
-                        }
-                    }
-                }
-                while (optStack.Count > 0)
-                    RPN.Add(optStack.Pop() + "");
-                Stack<bool> values = new Stack<bool>();
-                foreach (var item in RPN)
-                {
-                    Debug.Log(item);
-                    if (int.TryParse(item, out int index))
-                    {
-                        if (index >= 0 && index < AcceptConditions.Count)
-                            values.Push(AcceptConditions[index].IsEligible);
-                        else
-                        {
-                            //Debug.Log("return 1");
-                            return true;
-                        }
-                    }
-                    else if (values.Count > 1)
-                    {
-                        if (item == "+") values.Push(values.Pop() | values.Pop());
-                        else if (item == "~") values.Push(!values.Pop());
-                        else if (item == "*") values.Push(values.Pop() & values.Pop());
-                    }
-                    else if (item == "~") values.Push(!values.Pop());
-                }
-                if (values.Count == 1)
-                {
-                    //Debug.Log("return 2");
-                    return values.Pop();
-                }
-
-                void GetRPNItem(string item)
-                {
-                    //Debug.Log(item);
-                    if (item == "+" || item == "*" || item == "~")//遇到运算符
-                    {
-                        char opt = item[0];
-                        if (optStack.Count < 1) optStack.Push(opt);//栈空则直接入栈
-                        else while (optStack.Count > 0)//栈不空则出栈所有优先级大于或等于opt的运算符后才入栈opt
-                            {
-                                char top = optStack.Peek();
-                                if (top + "" == item || top == '~' || top == '*' && opt == '+')
-                                {
-                                    RPN.Add(optStack.Pop() + "");
-                                    if (optStack.Count < 1)
-                                    {
-                                        optStack.Push(opt);
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    optStack.Push(opt);
-                                    break;
-                                }
-                            }
-                    }
-                    else if (item == "(") optStack.Push('(');
-                    else if (item == ")")
-                    {
-                        while (optStack.Count > 0)
-                        {
-                            char opt = optStack.Pop();
-                            if (opt == '(') break;
-                            else RPN.Add(opt + "");
-                        }
-                    }
-                    else if (int.TryParse(item, out _)) RPN.Add(item);//遇到数字
-                }
-            }
-            if (!calFailed)
-            {
-                //Debug.Log("return 3");
-                return true;
-            }
-            else
-            {
-                foreach (QuestAcceptCondition qac in AcceptConditions)
-                    if (!qac.IsEligible)
-                    {
-                        //Debug.Log("return 4");
-                        return false;
-                    }
-                //Debug.Log("return 5");
-                return true;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 判断该任务是否需要某个道具，用于丢弃某个道具时，判断能不能丢
-    /// </summary>
-    /// <param name="item">所需判定的道具</param>
-    /// <param name="leftAmount">所需判定的数量</param>
-    /// <returns>是否需要</returns>
-    public bool RequiredItem(ItemBase item, int leftAmount)
-    {
-        if (CmpltObjctvInOrder)
-        {
-            foreach (Objective o in ObjectiveInstances)
-            {
-                //当目标是收集类目标且在提交任务同时会失去相应道具时，才进行判断
-                if (o is CollectObjective && item == (o as CollectObjective).Item && (o as CollectObjective).LoseItemAtSbmt)
-                {
-                    if (o.IsComplete && o.InOrder)
-                    {
-                        //如果剩余的道具数量不足以维持该目标完成状态
-                        if (o.Amount > leftAmount)
-                        {
-                            Objective tempObj = o.NextObjective;
-                            while (tempObj != null)
-                            {
-                                //则判断是否有后置目标在进行，以保证在打破该目标的完成状态时，后置目标不受影响
-                                if (tempObj.CurrentAmount > 0 && tempObj.OrderIndex > o.OrderIndex)
-                                {
-                                    //Debug.Log("Required");
-                                    return true;
-                                }
-                                tempObj = tempObj.NextObjective;
-                            }
-                        }
-                        //Debug.Log("NotRequired3");
-                        return false;
-                    }
-                    //Debug.Log("NotRequired2");
-                    return false;
-                }
-            }
-        }
-        //Debug.Log("NotRequired1");
-        return false;
-    }
-
-    /// <summary>
-    /// 是否在收集某个道具
-    /// </summary>
-    /// <param name="itemID">许判断的道具</param>
-    /// <returns>是否在收集</returns>
-    public bool CollectingItem(ItemBase item)
-    {
-        return collectObjectives.Exists(x => x.Item == item && !x.IsComplete);
     }
 }
 
@@ -389,33 +170,6 @@ public class QuestAcceptCondition
     [SerializeField]
     private string triggerName;
     public string TriggerName => triggerName;
-
-    /// <summary>
-    /// 是否符合条件
-    /// </summary>
-    public bool IsEligible
-    {
-        get
-        {
-            switch (AcceptCondition)
-            {
-                case QuestCondition.CompleteQuest: return QuestManager.Instance.HasCompleteQuestWithID(CompleteQuest.ID);
-                case QuestCondition.HasItem: return BackpackManager.Instance.HasItemWithID(OwnedItem.ID);
-                case QuestCondition.LevelEquals: return PlayerManager.Instance.PlayerInfo.level == level;
-                case QuestCondition.LevelLargeThen: return PlayerManager.Instance.PlayerInfo.level > level;
-                //case QuestCondition.LevelLargeOrEqualsThen: return PlayerManager.Instance.PlayerInfo.level >= level;
-                case QuestCondition.LevelLessThen: return PlayerManager.Instance.PlayerInfo.level < level;
-                //case QuestCondition.LevelLessOrEqualsThen: return PlayerManager.Instance.PlayerInfo.level <= level;
-                case QuestCondition.TriggerSet:
-                    var state = TriggerManager.Instance.GetTriggerState(triggerName);
-                    return state != TriggerState.NotExist ? (state == TriggerState.On ? true : false) : false;
-                case QuestCondition.TriggerReset:
-                    state = TriggerManager.Instance.GetTriggerState(triggerName);
-                    return state != TriggerState.NotExist ? (state == TriggerState.Off ? true : false) : false;
-                default: return true;
-            }
-        }
-    }
 }
 
 public enum QuestCondition
@@ -423,8 +177,6 @@ public enum QuestCondition
     LevelEquals,
     LevelLargeThen,
     LevelLessThen,
-    //LevelLargeOrEqualsThen,
-    //LevelLessOrEqualsThen,
     CompleteQuest,
     HasItem,
     TriggerSet,
@@ -480,8 +232,6 @@ public abstract class Objective
                 currentAmount = 0;
             }
             else currentAmount = amount;
-            if (!befCmplt && IsComplete)
-                UpdateNextCollectObjectives();
             OnStateChangeEvent?.Invoke(this, befCmplt);
         }
     }
@@ -535,9 +285,7 @@ public abstract class Objective
         }
     }
 
-    [System.NonSerialized]
     public Objective PrevObjective;
-    [System.NonSerialized]
     public Objective NextObjective;
 
     [HideInInspector]
@@ -607,29 +355,6 @@ public abstract class Objective
             if (PrevObjective && PrevObjective.OrderIndex == OrderIndex) return true;//有前置目标，而且顺序码与前置目标相同，说明可以并行执行
             if (NextObjective && NextObjective.OrderIndex == OrderIndex) return true;//有后置目标，而且顺序码与后置目标相同，说明可以并行执行
             return false;
-        }
-    }
-
-    /// <summary>
-    /// 更新某个收集类任务目标，用于在其他前置目标完成时，更新后置收集类目标
-    /// </summary>
-    void UpdateNextCollectObjectives()
-    {
-        Objective tempObj = NextObjective;
-        CollectObjective co;
-        while (tempObj != null)
-        {
-            if (!(tempObj is CollectObjective) && tempObj.InOrder && tempObj.NextObjective != null && tempObj.NextObjective.InOrder && tempObj.OrderIndex < tempObj.NextObjective.OrderIndex)
-            {
-                //若相邻后置目标不是收集类目标，该后置目标按顺序执行，其相邻后置也按顺序执行，且两者不可同时执行，则说明无法继续更新后置的收集类目标
-                return;
-            }
-            if (tempObj is CollectObjective)
-            {
-                co = tempObj as CollectObjective;
-                if (co.CheckBagAtStart) co.CurrentAmount = BackpackManager.Instance.GetItemAmount(co.Item.ID);
-            }
-            tempObj = tempObj.NextObjective;
         }
     }
 

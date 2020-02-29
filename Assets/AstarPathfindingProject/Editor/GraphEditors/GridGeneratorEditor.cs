@@ -370,8 +370,8 @@ namespace Pathfinding {
 			if (graph.erodeIterations > 0) {
 				EditorGUI.indentLevel++;
 				graph.erosionUseTags = EditorGUILayout.Toggle(new GUIContent("Erosion Uses Tags", "Instead of making nodes unwalkable, " +
-						"nodes will have their tag set to a value corresponding to their erosion level, " +
-						"which is a quite good measurement of their distance to the closest wall.\nSee online documentation for more info."),
+					"nodes will have their tag set to a value corresponding to their erosion level, " +
+					"which is a quite good measurement of their distance to the closest wall.\nSee online documentation for more info."),
 					graph.erosionUseTags);
 				if (graph.erosionUseTags) {
 					EditorGUI.indentLevel++;

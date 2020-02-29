@@ -44,7 +44,8 @@ namespace Pathfinding {
 		/// [Open online documentation to see images]
 		/// </summary>
 		public static List<Vector3> GetContours (NavGraph graph) {
-			List<Vector3> result = ListPool<Vector3>.Claim();
+			List<Vector3> result = ListPool<Vector3>.Claim ();
+
 			if (graph is INavmesh) {
 				GetContours(graph as INavmesh, (vertices, cycle) => {
 					for (int j = cycle ? vertices.Count - 1 : 0, i = 0; i < vertices.Count; j = i, i++) {
@@ -159,6 +160,7 @@ namespace Pathfinding {
 		public static void GetContours (GridGraph grid, System.Action<Vector3[]> callback, float yMergeThreshold, GridNodeBase[] nodes = null) {
 			// Set of all allowed nodes or null if all nodes are allowed
 			HashSet<GridNodeBase> nodeSet = nodes != null ? new HashSet<GridNodeBase>(nodes) : null;
+
 			// Use all nodes if the nodes parameter is null
 			nodes = nodes ?? grid.nodes;
 			int[] neighbourXOffsets = grid.neighbourXOffsets;
@@ -167,7 +169,7 @@ namespace Pathfinding {
 			var offsetMultiplier = grid.neighbours == NumNeighbours.Six ? 1/3f : 0.5f;
 
 			if (nodes != null) {
-				var trace = ListPool<Vector3>.Claim();
+				var trace = ListPool<Vector3>.Claim ();
 				var seenStates = new HashSet<int>();
 
 				for (int i = 0; i < nodes.Length; i++) {
@@ -260,7 +262,7 @@ namespace Pathfinding {
 					}
 				}
 
-				ListPool<Vector3>.Release(ref trace);
+				ListPool<Vector3>.Release (ref trace);
 			}
 		}
 #endif

@@ -36,21 +36,6 @@ public class Talker : MonoBehaviour
     [SerializeField]
     private MapIconHolder iconHolder;
 
-    public void OnTalkBegin()
-    {
-        Data.OnTalkBegin();
-    }
-
-    public void OnTalkFinished()
-    {
-        Data.OnTalkFinished();
-    }
-
-    public void OnGetGift(ItemBase gift)
-    {
-        Data.OnGetGift(gift);
-    }
-
     public void Init()
     {
         if (!GameManager.Talkers.ContainsKey(TalkerID)) GameManager.Talkers.Add(TalkerID, this);
@@ -83,6 +68,22 @@ public class Talker : MonoBehaviour
         flagsAgent.Init(this);
     }
 
+    public void OnTalkBegin()
+    {
+        Data.OnTalkBegin();
+    }
+
+    public void OnTalkFinished()
+    {
+        Data.OnTalkFinished();
+    }
+
+    public void OnGetGift(ItemBase gift)
+    {
+        Data.OnGetGift(gift);
+    }
+
+    #region UI相关
     private void ShowNameAtMousePosition()
     {
         int time = -1;
@@ -91,12 +92,10 @@ public class Talker : MonoBehaviour
 #endif
         TipsManager.Instance.ShowText(Input.mousePosition, GetMapIconName(), time);
     }
-
     private void HideNameImmediately()
     {
         TipsManager.Instance.HideText();
     }
-
     private string GetMapIconName()
     {
         System.Text.StringBuilder name = new System.Text.StringBuilder(TalkerName);
@@ -110,12 +109,55 @@ public class Talker : MonoBehaviour
         }
         return name.ToString();
     }
+    #endregion
+
+    #region MonoBehaviour
+    private void Awake()
+    {
+        iconHolder = GetComponent<MapIconHolder>();
+        if (iconHolder)
+        {
+            iconHolder.textToDisplay = GetMapIconName();
+            iconHolder.iconEvents.RemoveAllListner();
+            iconHolder.iconEvents.onFingerClick.AddListener(ShowNameAtMousePosition);
+            iconHolder.iconEvents.onMouseEnter.AddListener(ShowNameAtMousePosition);
+            iconHolder.iconEvents.onMouseExit.AddListener(HideNameImmediately);
+        }
+    }
 
     private void Update()
     {
         if (Data) Data.currentPosition = transform.position;
     }
 
+    private void OnValidate()
+    {
+        iconHolder = GetComponent<MapIconHolder>();
+        if (iconHolder)
+        {
+            iconHolder.textToDisplay = GetMapIconName();
+            iconHolder.iconEvents.onFingerClick.AddListener(ShowNameAtMousePosition);
+            iconHolder.iconEvents.onMouseEnter.AddListener(ShowNameAtMousePosition);
+            iconHolder.iconEvents.onMouseExit.AddListener(HideNameImmediately);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (flagsAgent) flagsAgent.Recycle();
+    }
+
+    private void OnMouseEnter()
+    {
+        ShowNameAtMousePosition();
+    }
+
+    private void OnMouseExit()
+    {
+        HideNameImmediately();
+    }
+
+    #region 触发器相关
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player") && !DialogueManager.Instance.IsTalking)
@@ -130,7 +172,7 @@ public class Talker : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && DialogueManager.Instance.CurrentTalker == this)
+        if (collision.CompareTag("Player") && DialogueManager.Instance.CurrentTalker != null && DialogueManager.Instance.CurrentTalker == this)
             DialogueManager.Instance.CannotTalk();
     }
 
@@ -148,33 +190,11 @@ public class Talker : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player") && DialogueManager.Instance.CurrentTalker == this)
+        if (other.CompareTag("Player") && DialogueManager.Instance.CurrentTalker != null && DialogueManager.Instance.CurrentTalker == this)
             DialogueManager.Instance.CannotTalk();
     }*/
-
-    private void OnValidate()
-    {
-        iconHolder = GetComponent<MapIconHolder>();
-        if (iconHolder) iconHolder.textToDisplay = GetMapIconName();
-        iconHolder.iconEvents.onFingerClick.AddListener(ShowNameAtMousePosition);
-        iconHolder.iconEvents.onMouseEnter.AddListener(ShowNameAtMousePosition);
-        iconHolder.iconEvents.onMouseExit.AddListener(HideNameImmediately);
-    }
-
-    private void Awake()
-    {
-        iconHolder = GetComponent<MapIconHolder>();
-        if (iconHolder) iconHolder.textToDisplay = GetMapIconName();
-        iconHolder.iconEvents.RemoveAllListner();
-        iconHolder.iconEvents.onFingerClick.AddListener(ShowNameAtMousePosition);
-        iconHolder.iconEvents.onMouseEnter.AddListener(ShowNameAtMousePosition);
-        iconHolder.iconEvents.onMouseExit.AddListener(HideNameImmediately);
-    }
-
-    private void OnDestroy()
-    {
-        if (flagsAgent) flagsAgent.Recycle();
-    }
+    #endregion
+    #endregion
 }
 
 [System.Serializable]

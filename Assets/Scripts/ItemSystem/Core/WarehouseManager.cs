@@ -63,11 +63,11 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             foreach (ItemInfo info in MWarehouse.Items)
             {
                 if (info.indexInGrid > 0 && info.indexInGrid < itemAgents.Count)
-                    itemAgents[info.indexInGrid].InitItem(info);
+                    itemAgents[info.indexInGrid].SetItem(info);
                 else for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
                         if (itemAgents[i].IsEmpty)
                         {
-                            itemAgents[i].InitItem(info);
+                            itemAgents[i].SetItem(info);
                             break;
                         }
             }
@@ -133,7 +133,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             else
             {
                 ia = itemAgents.Find(x => x.IsEmpty);
-                if (ia) ia.InitItem(MWarehouse.Latest);
+                if (ia) ia.SetItem(MWarehouse.Latest);
                 else
                 {
                     MessageManager.Instance.NewMessage("发生内部错误！");
@@ -147,7 +147,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
                 foreach (ItemAgent ia in itemAgents)
                     if (ia.IsEmpty)
                     {
-                        ia.InitItem(MWarehouse.Latest);
+                        ia.SetItem(MWarehouse.Latest);
                         break;
                     }
             }
@@ -296,7 +296,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             {
                 if (ia.IsEmpty)
                 {
-                    ia.InitItem(ii);
+                    ia.SetItem(ii);
                     break;
                 }
             }

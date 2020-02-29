@@ -59,7 +59,7 @@ public class ItemAgent : MonoBehaviour, IDragAble,
         parentScrollRect = parent;
     }
 
-    public void InitItem(ItemInfo info)
+    public void SetItem(ItemInfo info)
     {
         if (info == null) return;
         MItemInfo = info;
@@ -220,14 +220,14 @@ public class ItemAgent : MonoBehaviour, IDragAble,
             if (target.agentType == agentType && (agentType == ItemAgentType.Backpack || agentType == ItemAgentType.Warehouse))
                 if (target.IsEmpty)
                 {
-                    target.InitItem(MItemInfo);
+                    target.SetItem(MItemInfo);
                     Empty(); ;
                 }
                 else
                 {
                     ItemInfo targetInfo = target.MItemInfo;
-                    target.InitItem(MItemInfo);
-                    InitItem(targetInfo);
+                    target.SetItem(MItemInfo);
+                    SetItem(targetInfo);
                 }
             else if (target.agentType == ItemAgentType.Warehouse && agentType == ItemAgentType.Backpack)
                 WarehouseManager.Instance.StoreItem(MItemInfo);

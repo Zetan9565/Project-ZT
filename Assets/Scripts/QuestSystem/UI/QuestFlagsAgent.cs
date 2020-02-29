@@ -53,7 +53,7 @@ public class QuestFlagsAgent : MonoBehaviour
         }
         foreach (var quest in questHolder.QuestInstances)
         {
-            if (!quest.IsComplete && !quest.IsOngoing && quest.AcceptAble)//只要有一个没接取
+            if (!quest.IsComplete && !quest.IsOngoing && QuestManager.Instance.QuestIsAcceptAble(quest))//只要有一个没接取
             {
                 icon.overrideSprite = notAccepted;
                 mapIcon.iconImage.overrideSprite = notAccepted;
