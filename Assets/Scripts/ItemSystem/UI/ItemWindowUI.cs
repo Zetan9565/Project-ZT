@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class ItemWindowUI : ItemWindowBaseUI
 {
+    public ItemWindowBaseUI subUI;
+
     public Button mulFunButton;
 
     public Button discardButton;
@@ -10,7 +12,7 @@ public class ItemWindowUI : ItemWindowBaseUI
     public GameObject buttonsArea;
 
     [HideInInspector]
-    public CanvasGroup buttonAreaCanvas;
+    private CanvasGroup buttonAreaCanvas;
 
     private new void Awake()
     {
@@ -22,7 +24,7 @@ public class ItemWindowUI : ItemWindowBaseUI
         if (!buttonsArea.GetComponent<CanvasGroup>()) buttonAreaCanvas = buttonsArea.AddComponent<CanvasGroup>();
         buttonAreaCanvas.ignoreParentGroups = true;
         discardButton.onClick.AddListener(ItemWindowManager.Instance.DiscardCurrentItem);
-        closeButton.onClick.AddListener(ItemWindowManager.Instance.CloseItemWindow);
+        closeButton.onClick.AddListener(ItemWindowManager.Instance.CloseWindow);
 #endif
     }
 }

@@ -25,6 +25,7 @@ public class ItemWinUIInspector : Editor
     SerializedProperty descriptionText;
     SerializedProperty closeButton;
 
+    SerializedProperty subUI;
     SerializedProperty mulFunButton;
     SerializedProperty discardButton;
     SerializedProperty buttonsArea;
@@ -52,8 +53,8 @@ public class ItemWinUIInspector : Editor
 
         if (UI is ItemWindowUI)
         {
+            subUI = serializedObject.FindProperty("subUI");
             closeButton = serializedObject.FindProperty("closeButton");
-
             mulFunButton = serializedObject.FindProperty("mulFunButton");
             discardButton = serializedObject.FindProperty("discardButton");
             buttonsArea = serializedObject.FindProperty("buttonsArea");
@@ -85,6 +86,7 @@ public class ItemWinUIInspector : Editor
             EditorGUILayout.PropertyField(mulFunButton, new GUIContent("多功能按钮"));
             EditorGUILayout.PropertyField(discardButton, new GUIContent("丢弃按钮"));
             EditorGUILayout.PropertyField(buttonsArea, new GUIContent("按钮区域"));
+            EditorGUILayout.PropertyField(subUI, new GUIContent("子窗口"));
         }
         EditorGUILayout.EndVertical();
         if (EditorGUI.EndChangeCheck())

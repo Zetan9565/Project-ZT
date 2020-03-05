@@ -27,15 +27,7 @@ public class ItemAgent : MonoBehaviour, IDragAble,
 #endif
     private Image qualityEdge;
 
-    public Color currentQualityColor { get { return qualityEdge.color; } }
-
-    public Sprite DragAbleIcon
-    {
-        get
-        {
-            return icon.overrideSprite;
-        }
-    }
+    public Sprite DragAbleIcon => icon.overrideSprite;
 
     [HideInInspector]
     public ItemInfo MItemInfo { get; private set; }
@@ -63,7 +55,7 @@ public class ItemAgent : MonoBehaviour, IDragAble,
     {
         if (info == null) return;
         MItemInfo = info;
-        MItemInfo.indexInGrid = indexInGrid;
+        if (agentType == ItemAgentType.Warehouse || agentType == ItemAgentType.Backpack) MItemInfo.indexInGrid = indexInGrid;
         if (GameManager.QualityColors.Count >= 5)
         {
             qualityEdge.color = GameManager.QualityColors[(int)info.item.Quality];
@@ -94,18 +86,19 @@ public class ItemAgent : MonoBehaviour, IDragAble,
     public void OnRightClick()
     {
         if (!DragableManager.Instance.IsDraging)
-            if (agentType == ItemAgentType.Backpack && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen)
+        {
+            if (agentType == ItemAgentType.Backpack && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen && !ItemSelectionManager.Instance.IsUIOpen)
                 BackpackManager.Instance.UseItem(MItemInfo);
             else if (WarehouseManager.Instance.IsUIOpen)
             {
                 if (agentType == ItemAgentType.Warehouse)
                 {
-                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
+                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
                     WarehouseManager.Instance.TakeOutItem(MItemInfo, true);
                 }
                 else if (agentType == ItemAgentType.Backpack)
                 {
-                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
+                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
                     WarehouseManager.Instance.StoreItem(MItemInfo, true);
                 }
             }
@@ -113,12 +106,12 @@ public class ItemAgent : MonoBehaviour, IDragAble,
             {
                 if (agentType == ItemAgentType.Selling && ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo))
                 {
-                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
+                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
                     ShopManager.Instance.SellItem(ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo);
                 }
                 else if (agentType == ItemAgentType.Backpack)
                 {
-                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
+                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
                     ShopManager.Instance.PurchaseItem(MItemInfo);
                 }
             }
@@ -126,10 +119,19 @@ public class ItemAgent : MonoBehaviour, IDragAble,
             {
                 if (agentType == ItemAgentType.Loot)
                 {
-                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
+                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
                     LootManager.Instance.TakeItem(MItemInfo, true);
                 }
             }
+            else if (ItemSelectionManager.Instance.IsUIOpen)
+            {
+                if (agentType == ItemAgentType.Backpack)
+                    ItemSelectionManager.Instance.Place(MItemInfo);
+                else if (agentType == ItemAgentType.Selection)
+                    ItemSelectionManager.Instance.TakeOut(MItemInfo);
+            }
+            ItemWindowManager.Instance.CloseWindow();
+        }
     }
 
     public void Empty()
@@ -175,13 +177,13 @@ public class ItemAgent : MonoBehaviour, IDragAble,
         }
     }
 
-    WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
+    readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
     Coroutine pressCoroutine;
+    float touchTime = 0;
     IEnumerator Press()
     {
-        float touchTime = 0;
-        bool isPress = true;
-        while (isPress)
+        touchTime = 0;
+        while (true)
         {
             touchTime += Time.fixedDeltaTime;
             if (touchTime >= 0.5f)
@@ -235,21 +237,61 @@ public class ItemAgent : MonoBehaviour, IDragAble,
                 WarehouseManager.Instance.TakeOutItem(MItemInfo);
             else if (target.agentType == ItemAgentType.Backpack && agentType == ItemAgentType.Selling)
                 ShopManager.Instance.SellItem(ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo);
+            else if (target.agentType == ItemAgentType.Selection && agentType == ItemAgentType.Backpack)
+                ItemSelectionManager.Instance.Place(MItemInfo);
         }
         FinishDrag();
     }
 
     private void BeginDrag()
     {
-        icon.color = Color.grey;
+        if (agentType == ItemAgentType.Selection) return;
+        if (ItemSelectionManager.Instance.IsUIOpen && ItemSelectionManager.Instance.SelectionType == ItemSelectionType.Discard && !MItemInfo.item.DiscardAble) return;
         DragableManager.Instance.GetDragable(this, FinishDrag, icon.rectTransform.rect.width, icon.rectTransform.rect.height);
-        ItemWindowManager.Instance.PauseShowing(true);
+        ItemWindowManager.Instance.CloseWindow();
+        Dark();
     }
     public void FinishDrag()
     {
-        icon.color = Color.white;
+        if (!DragableManager.Instance.IsDraging) return;
+        Light();
         DragableManager.Instance.ResetIcon();
-        ItemWindowManager.Instance.PauseShowing(false);
+        ItemWindowManager.Instance.CloseWindow();
+    }
+
+    public void Select()
+    {
+        if (isDark)
+        {
+            icon.color = (Color.yellow + Color.grey) / 2;
+        }
+        else
+        {
+            icon.color = Color.yellow;
+        }
+    }
+    public void DeSelect()
+    {
+        if (isDark)
+        {
+            Dark();
+        }
+        else
+        {
+            Light();
+        }
+    }
+
+    private bool isDark;
+    public void Dark()
+    {
+        icon.color = Color.grey;
+        isDark = true;
+    }
+    public void Light()
+    {
+        icon.color = Color.white;
+        isDark = false;
     }
     #endregion
 
@@ -258,16 +300,15 @@ public class ItemAgent : MonoBehaviour, IDragAble,
     {
         if (eventData.button == PointerEventData.InputButton.Left && agentType == ItemAgentType.Making)
         {
-            ItemWindowManager.Instance.OpenItemWindow(this);
+            ItemWindowManager.Instance.SetItemAndOpenWindow(this);
             return;
         }
 #if UNITY_STANDALONE
         if (eventData.button == PointerEventData.InputButton.Left)
-            if (DragableManager.Instance.IsDraging)
+            if (DragableManager.Instance.IsDraging && (agentType == ItemAgentType.Backpack || agentType == ItemAgentType.Warehouse))
             {
                 ItemAgent source = DragableManager.Instance.Current as ItemAgent;
-                if (source)
-                    source.SwapInfoTo(this);
+                if (source) source.SwapInfoTo(this);
             }
             else
             {
@@ -278,10 +319,8 @@ public class ItemAgent : MonoBehaviour, IDragAble,
 #elif UNITY_ANDROID
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (clickCount < 1)
-                isClick = true;
-            if (clickTime <= 0.2f)
-                clickCount++;
+            if (clickCount < 1) isClick = true;
+            if (clickTime <= 0.2f) clickCount++;
             if (!IsEmpty)
             {
                 if (clickCount > 1)
@@ -291,9 +330,9 @@ public class ItemAgent : MonoBehaviour, IDragAble,
                     clickCount = 0;
                     clickTime = 0;
                 }
-                else if (clickCount == 1)
+                else if (clickCount == 1 && touchTime < 0.5f)
                 {
-                    ItemWindowManager.Instance.OpenItemWindow(this);
+                    ItemWindowManager.Instance.SetItemAndOpenWindow(this);
                 }
             }
         }
@@ -320,7 +359,7 @@ public class ItemAgent : MonoBehaviour, IDragAble,
 #endif
     }
 
-    public void OnPointerEnter(PointerEventData eventData)//用于PC
+    public void OnPointerEnter(PointerEventData eventData)//用于PC悬停
     {
 #if UNITY_STANDALONE
         ItemWindowManager.Instance.OpenItemWindow(this);
@@ -332,7 +371,7 @@ public class ItemAgent : MonoBehaviour, IDragAble,
 #endif
     }
 
-    public void OnPointerExit(PointerEventData eventData)//用于安卓拖拽、PC
+    public void OnPointerExit(PointerEventData eventData)//用于安卓拖拽、PC悬停
     {
 #if UNITY_STANDALONE
         if (!ItemWindowManager.Instance.IsHeld) ItemWindowManager.Instance.CloseItemWindow();
@@ -350,6 +389,7 @@ public class ItemAgent : MonoBehaviour, IDragAble,
 #if UNITY_ANDROID
         if (parentScrollRect) parentScrollRect.OnBeginDrag(eventData);//修复ScrollRect冲突
         if (pressCoroutine != null) StopCoroutine(pressCoroutine);
+        if (agentType == ItemAgentType.None) return;
         isClick = false;
 #endif
     }
@@ -369,18 +409,20 @@ public class ItemAgent : MonoBehaviour, IDragAble,
 
     public void OnEndDrag(PointerEventData eventData)//用于安卓拖拽
     {
-        if (agentType == ItemAgentType.None) return;
 #if UNITY_ANDROID
         if (parentScrollRect) parentScrollRect.OnEndDrag(eventData);//修复ScrollRect冲突
+        if (agentType == ItemAgentType.None) return;
         if (!IsEmpty && eventData.button == PointerEventData.InputButton.Left && DragableManager.Instance.IsDraging && eventData.pointerCurrentRaycast.gameObject)
         {
             ItemAgent target = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<ItemAgent>();
             if (target) SwapInfoTo(target);
-            else if (eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<DiscardArea>() == BackpackManager.Instance.DiscardArea && agentType == ItemAgentType.Backpack)
+            else if (eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<DiscardButton>() == BackpackManager.Instance.DiscardArea && agentType == ItemAgentType.Backpack)
             {
                 BackpackManager.Instance.DiscardItem(MItemInfo);
                 AmountManager.Instance.SetPosition(eventData.position);
             }
+            else if (eventData.pointerCurrentRaycast.gameObject == ItemSelectionManager.Instance.PlacementArea && agentType == ItemAgentType.Backpack)
+                ItemSelectionManager.Instance.Place(MItemInfo);
         }
 #endif
         FinishDrag();
@@ -396,5 +438,6 @@ public enum ItemAgentType
     Making,//带制作按钮
     Selling,//带购买按钮
     Purchasing,//带出售按钮
-    Loot//带拾取按钮
+    Loot,//带拾取按钮
+    Selection//带取出按钮
 }

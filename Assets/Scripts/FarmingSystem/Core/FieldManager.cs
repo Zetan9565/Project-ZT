@@ -3,46 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("ZetanStudio/管理器/农田管理器")]
-public class FieldManager : SingletonMonoBehaviour<FieldManager>, IWindowHandler
+public class FieldManager : WindowHandler<FieldUI, FieldManager>
 {
-    [SerializeField]
-    private FieldUI UI;
-
     public Field CurrentField { get; private set; }
 
     private readonly List<CropAgent> cropAgents = new List<CropAgent>();
 
-    public bool IsUIOpen { get; private set; }
-
-    public bool IsPausing { get; private set; }
-
-    public Canvas CanvasToSort => UI ? UI.windowCanvas : null;
-
     public bool ManageAble { get; private set; }
 
-    public void CloseWindow()
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing) return;
-        UI.window.alpha = 0;
-        UI.window.blocksRaycasts = false;
-        IsUIOpen = false;
-        WindowsManager.Instance.Remove(this);
-    }
-
-    public void OpenWindow()
+    public override void OpenWindow()
     {
         if (!CurrentField) return;
-        if (!UI || !UI.gameObject) return;
-        if (IsUIOpen) return;
-        if (IsPausing) return;
+        base.OpenWindow();
         UpdateCropsArea();
         UpdateUI();
-        UI.window.alpha = 1;
-        UI.window.blocksRaycasts = true;
-        IsUIOpen = true;
-        WindowsManager.Instance.Push(this);
         UIManager.Instance.EnableJoyStick(false);
         UIManager.Instance.EnableInteractive(false);
     }
@@ -55,23 +29,6 @@ public class FieldManager : SingletonMonoBehaviour<FieldManager>, IWindowHandler
             PlantManager.Instance.OpenWindow();
         }
         else PlantManager.Instance.CloseWindow();
-    }
-
-    public void PauseDisplay(bool pause)
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.window.alpha = 1;
-            UI.window.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.window.alpha = 0;
-            UI.window.blocksRaycasts = false;
-        }
-        IsPausing = pause;
     }
 
     public void CanManage(Field field)

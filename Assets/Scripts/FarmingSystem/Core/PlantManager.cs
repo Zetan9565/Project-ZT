@@ -3,22 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("ZetanStudio/管理器/种植管理器")]
-public class PlantManager : SingletonMonoBehaviour<PlantManager>, IWindowHandler
+public class PlantManager : WindowHandler<PlantUI, PlantManager>
 {
-    [SerializeField]
-    private PlantUI UI;
-
     public List<SeedAgent> SeedAgents { get; private set; } = new List<SeedAgent>();
 
     public Field CurrentField { get; private set; }
 
     public bool PlantAble { get; private set; }
-
-    public bool IsUIOpen { get; private set; }
-
-    public bool IsPausing { get; private set; }
-
-    public Canvas CanvasToSort => UI && UI.gameObject ? UI.windowCanvas : null;
 
     public void Init(Field field)
     {
@@ -84,50 +75,21 @@ public class PlantManager : SingletonMonoBehaviour<PlantManager>, IWindowHandler
 
     }
 
-    public void OpenWindow()
+    public override void OpenWindow()
     {
         if (!CurrentField) return;
-        if (!UI || !UI.gameObject) return;
-        if (IsUIOpen) return;
-        if (IsPausing) return;
-        UI.window.alpha = 1;
-        UI.window.blocksRaycasts = true;
-        IsUIOpen = true;
-        WindowsManager.Instance.Push(this);
+        base.OpenWindow();
         UIManager.Instance.EnableJoyStick(false);
         UIManager.Instance.EnableInteractive(false);
         UI.pageSelector.SetValueWithoutNotify(0);
         SetPage(0);
     }
 
-    public void CloseWindow()
+    public override void CloseWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing) return;
-        UI.window.alpha = 0;
-        UI.window.blocksRaycasts = false;
-        IsUIOpen = false;
-        WindowsManager.Instance.Remove(this);
+        base.CloseWindow();
         UI.searchInput.text = string.Empty;
         HideDescription();
-    }
-
-    public void PauseDisplay(bool pause)
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.window.alpha = 1;
-            UI.window.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.window.alpha = 0;
-            UI.window.blocksRaycasts = false;
-        }
-        IsPausing = pause;
     }
 
     public void ShowDescription(SeedItem seed)

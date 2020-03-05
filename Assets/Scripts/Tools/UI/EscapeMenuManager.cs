@@ -2,76 +2,32 @@
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/退出菜单管理器")]
-public class EscapeMenuManager : SingletonMonoBehaviour<EscapeMenuManager>, IWindowHandler, IOpenCloseAbleWindow
+public class EscapeMenuManager : WindowHandler<EscapeUI, EscapeMenuManager>, IOpenCloseAbleWindow
 {
-    [SerializeField]
-    private EscapeUI UI;
-
-    public bool IsUIOpen { get; private set; }
-    public bool IsPausing { get; private set; }
-
-    public Canvas CanvasToSort
+    public override void OpenWindow()
     {
-        get
-        {
-            return UI.menuCanvas;
-        }
-    }
-
-    public void OpenWindow()
-    {
-        if (!UI || !UI.gameObject) return;
-        if (IsUIOpen) return;
-        if (IsPausing) return;
-        UI.escapeMenu.alpha = 1;
-        UI.escapeMenu.blocksRaycasts = true;
-        WindowsManager.Instance.Push(this);
-        IsUIOpen = true;
+        base.OpenWindow();
         WindowsManager.Instance.PauseAll(true, this);
     }
 
-    public void CloseWindow()
+    public override void CloseWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing) return;
-        UI.escapeMenu.alpha = 0;
-        UI.escapeMenu.blocksRaycasts = false;
-        WindowsManager.Instance.Remove(this);
-        IsUIOpen = false;
+        base.CloseWindow();
         WindowsManager.Instance.PauseAll(false);
     }
 
     public void OpenCloseWindow()
     {
         if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen)
-            OpenWindow();
+        if (!IsUIOpen) OpenWindow();
         else CloseWindow();
     }
 
-    public void PauseDisplay(bool pause)
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.escapeMenu.alpha = 1;
-            UI.escapeMenu.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.escapeMenu.alpha = 0;
-            UI.escapeMenu.blocksRaycasts = false;
-        }
-        IsPausing = pause;
-    }
-
-    public void SetUI(EscapeUI UI)
+    public override void SetUI(EscapeUI UI)
     {
         IsPausing = false;
         CloseWindow();
-        this.UI = UI;
+        base.SetUI(UI);
     }
 
     public void Exit()

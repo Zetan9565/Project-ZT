@@ -24,13 +24,14 @@ MonoBehaviour:
   description: "\u53EF\u7528\u4E8E\u5236\u4F5C\u94C1\u5668\u3002"
   stackAble: 1
   discardAble: 1
-  useable: 0
+  lockAble: 1
+  usable: 0
   inexhaustible: 0
   maxDurability: 100
   makingMethod: 1
+  materialType: 2
   materials:
   - item: {fileID: 11400000, guid: eb68c8a7b1bbeb8408eed1d2af6b8ad6, type: 2}
     amount: 1
-    makingType: 0
-    materialType: 0
-  materialType: 2
+    makingType: 1
+    materialType: 1

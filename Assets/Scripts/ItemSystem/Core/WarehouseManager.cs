@@ -4,38 +4,24 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/仓库管理器")]
-public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindowHandler
+public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
 {
-    [SerializeField]
-    private WarehouseUI UI;
-
     public Transform CellsParent { get { return UI.itemCellsParent; } }
 
-    private List<ItemAgent> itemAgents = new List<ItemAgent>();
+    private readonly List<ItemAgent> itemAgents = new List<ItemAgent>();
 
     public Warehouse MWarehouse { get; private set; }
 
-    public bool IsUIOpen { get; private set; }
-    public bool IsPausing { get; private set; }
-
     public bool StoreAble { get; private set; }
-
-    public Canvas CanvasToSort
-    {
-        get
-        {
-            return UI.windowCanvas;
-        }
-    }
 
     private void Awake()
     {
         if (!UI || !UI.gameObject) return;
-        for (int i = 0; i < 150; i++)
+        for (int i = 0; i < 100; i++)
         {
             ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
             itemAgents.Add(ia);
-            ia.Init(ItemAgentType.Warehouse, itemAgents.IndexOf(ia), UI.gridRect);
+            ia.Init(ItemAgentType.Warehouse, itemAgents.Count - 1, UI.gridRect);
             ia.Empty();
             ZetanUtility.SetActive(ia.gameObject, false);
         }
@@ -48,17 +34,17 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
             MWarehouse = warehouse;
             foreach (ItemAgent ia in itemAgents)
                 ia.Empty();
+            while (itemAgents.Count < MWarehouse.warehouseSize.Max)//格子不够用，新建
+            {
+                ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+                itemAgents.Add(ia);
+                ia.Empty();
+                ia.Init(ItemAgentType.Warehouse, itemAgents.Count - 1, UI.gridRect);
+            }
             int originalSize = itemAgents.Count;
-            if (MWarehouse.warehouseSize.Max >= originalSize)
-                for (int i = 0; i < MWarehouse.warehouseSize.Max - originalSize; i++)
-                {
-                    ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-                    itemAgents.Add(ia);
-                    ia.Init(ItemAgentType.Warehouse, itemAgents.IndexOf(ia), UI.gridRect);
-                }
-            else for (int i = MWarehouse.warehouseSize.Max; i < originalSize - MWarehouse.warehouseSize.Max; i++)//用不到的格子隐藏
-                    itemAgents[i].Hide();
-            for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+            for (int i = MWarehouse.warehouseSize.Max; i < originalSize - MWarehouse.warehouseSize.Max; i++)//用不到的格子隐藏
+                itemAgents[i].Hide();
+            for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)//用得到的格子显示
                 itemAgents[i].Show();
             foreach (ItemInfo info in MWarehouse.Items)
             {
@@ -81,10 +67,10 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
     public void StoreItem(ItemInfo info, bool all = false)
     {
         if (MWarehouse == null || info == null || !info.item) return;
-        ItemWindowManager.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseWindow();
         if (!all)
         {
-            if (info.Amount == 1 && OnStore(info))
+            if (info.Amount == 1 && OnStore(info, 1))
                 MessageManager.Instance.NewMessage(string.Format("存入了1个 [{0}]", info.ItemName));
             else
             {
@@ -104,27 +90,27 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         }
     }
 
-    public bool OnStore(ItemInfo info, int amount = 1)
+    private bool OnStore(ItemInfo info, int amount)
     {
         if (MWarehouse == null || info == null || !info.item || amount < 1) return false;
         int finalGet = info.Amount < amount ? info.Amount : amount;
         return GetItem(info, finalGet);
     }
 
-    public bool GetItem(ItemInfo info, int amount = 1)
+    private bool GetItem(ItemInfo info, int amount)
     {
         if (MWarehouse == null || info == null || !info.item || amount < 1) return false;
-        if (MWarehouse.IsFull)
+        if (!BackpackManager.Instance.TryLoseItem_Boolean(info, amount)) return false;
+        if (!info.item.StackAble && MWarehouse.IsFull)
         {
             MessageManager.Instance.NewMessage("仓库已满");
             return false;
         }
-        if (!info.item.StackAble)
-            if (amount > MWarehouse.warehouseSize.Rest)
-            {
-                MessageManager.Instance.NewMessage(string.Format("请至少留出{0}个仓库空间", amount));
-                return false;
-            }
+        if (!info.item.StackAble && amount > MWarehouse.warehouseSize.Rest)
+        {
+            MessageManager.Instance.NewMessage(string.Format("请多留出至少{0}个仓库空间", amount - MWarehouse.warehouseSize.Rest));
+            return false;
+        }
         if (info.item.StackAble)
         {
             MWarehouse.GetItemSimple(info, amount);
@@ -137,7 +123,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
                 else
                 {
                     MessageManager.Instance.NewMessage("发生内部错误！");
-                    Debug.Log("[Store Item Error] ID: " + info.ItemID + "[" + DateTime.Now.ToString() + "]");
+                    Debug.Log("[Store Item Error: Can't find ItemAgent] ID: " + info.ItemID + "[" + DateTime.Now.ToString() + "]");
                 }
             }
         }
@@ -159,9 +145,9 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
     public void TakeOutItem(ItemInfo info, bool all = false)
     {
         if (MWarehouse == null || info == null || !info.item) return;
-        ItemWindowManager.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseWindow();
         if (!all)
-            if (info.Amount == 1 && OnTakeOut(info))
+            if (info.Amount == 1 && OnTakeOut(info, 1))
                 MessageManager.Instance.NewMessage(string.Format("取出了1个 [{0}]", info.ItemName));
             else
             {
@@ -180,14 +166,14 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         }
     }
 
-    bool OnTakeOut(ItemInfo info, int amount = 1)
+    private bool OnTakeOut(ItemInfo info, int amount)
     {
         if (MWarehouse == null || info == null || !info.item || amount < 1) return false;
         int finalLose = info.Amount < amount ? info.Amount : amount;
         return LoseItem(info, finalLose);
     }
 
-    public bool LoseItem(ItemInfo info, int amount = 1)
+    private bool LoseItem(ItemInfo info, int amount)
     {
         if (MWarehouse == null || info == null || !info.item || amount < 1) return false;
         if (!BackpackManager.Instance.TryGetItem_Boolean(info, amount)) return false;
@@ -221,58 +207,30 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
     #endregion
 
     #region UI相关
-    public void OpenWindow()
+    public override void OpenWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (IsUIOpen) return;
+        base.OpenWindow();
         Init(MWarehouse);
-        UI.window.alpha = 1;
-        UI.window.blocksRaycasts = true;
-        IsUIOpen = true;
-        WindowsManager.Instance.Push(this);
         BackpackManager.Instance.OpenWindow();
         UIManager.Instance.EnableJoyStick(false);
         UIManager.Instance.EnableInteractive(false);
     }
 
-    public void CloseWindow()
+    public override void CloseWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        UI.window.alpha = 0;
-        UI.window.blocksRaycasts = false;
-        IsUIOpen = false;
-        IsPausing = false;
+        base.CloseWindow();
         MWarehouse = null;
-        WindowsManager.Instance.Remove(this);
         foreach (ItemAgent ia in itemAgents)
         {
             ia.FinishDrag();
             ia.Empty();
-            ZetanUtility.SetActive(ia.gameObject, false);
+            ia.Hide();
         }
         if (BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.CloseWindow();
-        ItemWindowManager.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseWindow();
         if (DialogueManager.Instance.IsUIOpen) DialogueManager.Instance.PauseDisplay(false);
         AmountManager.Instance.Cancel();
         UIManager.Instance.EnableJoyStick(true);
-    }
-
-    public void PauseDisplay(bool pause)
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.window.alpha = 1;
-            UI.window.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.window.alpha = 0;
-            UI.window.blocksRaycasts = false;
-        }
-        IsPausing = pause;
     }
 
     public void UpdateUI()
@@ -304,7 +262,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
         UpdateUI();
     }
 
-    public void SetUI(WarehouseUI UI)
+    public override void SetUI(WarehouseUI UI)
     {
         itemAgents.RemoveAll(x => !x || !x.gameObject);
         foreach (var ia in itemAgents)
@@ -328,7 +286,7 @@ public class WarehouseManager : SingletonMonoBehaviour<WarehouseManager>, IWindo
     public void CannotStore()
     {
         CloseWindow();
-        ItemWindowManager.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseWindow();
         StoreAble = false;
         if (!(DialogueManager.Instance.TalkAble || DialogueManager.Instance.IsUIOpen)) UIManager.Instance.EnableInteractive(false);
     }

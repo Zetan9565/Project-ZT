@@ -8,23 +8,9 @@ public class Talker : MonoBehaviour
     private TalkerInformation info;
     public TalkerInformation Info => info;
 
-    public string TalkerID
-    {
-        get
-        {
-            if (info) return info.ID;
-            return string.Empty;
-        }
-    }
+    public string TalkerID => info ? info.ID : string.Empty;
 
-    public string TalkerName
-    {
-        get
-        {
-            if (info) return info.Name;
-            return string.Empty;
-        }
-    }
+    public string TalkerName => info ? info.Name : string.Empty;
 
     public Vector3 questFlagsOffset;
     private QuestFlagsAgent flagsAgent;
@@ -94,7 +80,7 @@ public class Talker : MonoBehaviour
     }
     private void HideNameImmediately()
     {
-        TipsManager.Instance.HideText();
+        TipsManager.Instance.Hide();
     }
     private string GetMapIconName()
     {
@@ -145,16 +131,6 @@ public class Talker : MonoBehaviour
     private void OnDestroy()
     {
         if (flagsAgent) flagsAgent.Recycle();
-    }
-
-    private void OnMouseEnter()
-    {
-        ShowNameAtMousePosition();
-    }
-
-    private void OnMouseExit()
-    {
-        HideNameImmediately();
     }
 
     #region 触发器相关
@@ -252,16 +228,16 @@ public class TalkerData
         if (info.FavoriteItems.Exists(x => x.Item.ID == gift.ID))
         {
             FavoriteItemInfo find = info.FavoriteItems.Find(x => x.Item.ID == gift.ID);
-            relationshipInstance.RelationshipValue += (int)find.FavoriteLevel;
+            relationshipInstance.RelationshipValue.Current += (int)find.FavoriteLevel;
         }
         else if (info.HateItems.Exists(x => x.Item.ID == gift.ID))
         {
             HateItemInfo find = info.HateItems.Find(x => x.Item.ID == gift.ID);
-            relationshipInstance.RelationshipValue -= (int)find.HateLevel;
+            relationshipInstance.RelationshipValue.Current -= (int)find.HateLevel;
         }
         else
         {
-            relationshipInstance.RelationshipValue += 5;
+            relationshipInstance.RelationshipValue.Current += 5;
         }
     }
 

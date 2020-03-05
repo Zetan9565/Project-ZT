@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e78b4014cdea93940b7b338dbf3343d6, type: 3}
-  m_Name: quest item
+  m_Name: quest item 1
   m_EditorClassIdentifier: 
-  _ID: QSTI001
-  _Name: "\u6D4B\u8BD5\u9053\u5177"
+  _ID: QSTI002
+  _Name: "\u590D\u4F4D\u89E6\u53D1\u5668"
   itemType: 10
   quality: 0
   weight: 0
@@ -21,11 +21,15 @@ MonoBehaviour:
   sellPrice: 0
   buyPrice: 0
   icon: {fileID: 21300000, guid: 92042bc197ea09b4597415b7a9e4d8c7, type: 3}
-  description: "\u4EFB\u52A1\u9053\u5177\u3002"
+  description: "\u7528\u4E8E\u6D4B\u8BD5\u89E6\u53D1\u5668\u3002\u6548\u679C\uFF1A\u9690\u85CF\u90A3\u68F5\u8349\u3002"
   stackAble: 1
   discardAble: 0
-  useable: 1
+  lockAble: 1
+  usable: 1
   inexhaustible: 0
-  maxDurability: 1
+  maxDurability: 100
   makingMethod: 0
+  materialType: 0
   materials: []
+  triggerName: qwe
+  stateToSet: 0

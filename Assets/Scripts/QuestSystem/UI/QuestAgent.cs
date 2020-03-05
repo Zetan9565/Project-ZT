@@ -40,16 +40,15 @@ public class QuestAgent : MonoBehaviour
         Deselect();
         UpdateStatus();
     }
-    /// <summary>
-    /// 回收
-    /// </summary>
+
     public void Recycle()
     {
         MQuest = null;
         TitleText.text = string.Empty;
         Deselect();
         belongToCmplt = false;
-        ObjectPool.Instance.Put(gameObject);
+        if (ObjectPool.Instance) ObjectPool.Instance.Put(gameObject);
+        else DestroyImmediate(gameObject);
     }
 
     public void UpdateStatus()

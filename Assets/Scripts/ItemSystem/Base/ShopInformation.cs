@@ -109,7 +109,7 @@ public class MerchandiseInfo
     public float leftRefreshTime;
 
     [SerializeField]
-    private float refreshTime = 300.0f;//小于0表示永久限购
+    private float refreshTime = 300.0f;//小于0表示永久限购或限售
     public float RefreshTime => refreshTime;
 
     [SerializeField]
@@ -124,7 +124,7 @@ public class MerchandiseInfo
 
     public int PurchasePrice => (int)priceMultiple * item.SellPrice;
 
-    public bool IsValid => !Item;
+    public bool IsValid => Item;
 
     public bool IsEmpty => EmptyAble && leftAmount <= 0;
 

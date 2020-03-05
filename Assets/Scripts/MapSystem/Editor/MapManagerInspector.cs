@@ -119,7 +119,8 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
         MapUI UI = this.UI.objectReferenceValue as MapUI;
         if (UI)
         {
-            SerializedProperty sizeOfCam = modeInfo.FindPropertyRelative("sizeOfCam");
+            SerializedProperty defaultSizeOfCam = modeInfo.FindPropertyRelative("defaultSizeOfCam");
+            SerializedProperty currentSizeOfCam = modeInfo.FindPropertyRelative("currentSizeOfCam");
             SerializedProperty minZoomOfCam = modeInfo.FindPropertyRelative("minZoomOfCam");
             SerializedProperty maxZoomOfCam = modeInfo.FindPropertyRelative("maxZoomOfCam");
             SerializedProperty windowAnchoreMin = modeInfo.FindPropertyRelative("windowAnchoreMin");
@@ -138,7 +139,8 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
                 {
                     if (mapCamera.objectReferenceValue)
                     {
-                        sizeOfCam.floatValue = (mapCamera.objectReferenceValue as MapCamera).Camera.orthographicSize;
+                        defaultSizeOfCam.floatValue = (mapCamera.objectReferenceValue as MapCamera).Camera.orthographicSize;
+                        currentSizeOfCam.floatValue = (mapCamera.objectReferenceValue as MapCamera).Camera.orthographicSize;
                     }
                     windowAnchoreMin.vector2Value = UI.mapWindowRect.anchorMin;
                     windowAnchoreMax.vector2Value = UI.mapWindowRect.anchorMax;
@@ -163,9 +165,10 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
             EditorGUILayout.PropertyField(modeInfo, new GUIContent(mini ? "小地图模式信息" : "大地图模式信息"), false);
             if (modeInfo.isExpanded)
             {
-                EditorGUILayout.PropertyField(sizeOfCam, new GUIContent("地图相机视野大小"));
-                EditorGUILayout.Slider(minZoomOfCam, mini ? 1 : miniModeInfo.FindPropertyRelative("sizeOfCam").floatValue, sizeOfCam.floatValue, new GUIContent("相机视野大小下限"));
-                EditorGUILayout.Slider(maxZoomOfCam, sizeOfCam.floatValue, mini ? worldModeInfo.FindPropertyRelative("sizeOfCam").floatValue : 255, new GUIContent("相机视野大小上限"));
+                EditorGUILayout.PropertyField(defaultSizeOfCam, new GUIContent("地图相机视野大小"));                
+                EditorGUILayout.LabelField("当前相机视野", currentSizeOfCam.floatValue.ToString());
+                EditorGUILayout.Slider(minZoomOfCam, mini ? 1 : miniModeInfo.FindPropertyRelative("defaultSizeOfCam").floatValue, defaultSizeOfCam.floatValue, new GUIContent("相机视野大小下限"));
+                EditorGUILayout.Slider(maxZoomOfCam, defaultSizeOfCam.floatValue, mini ? worldModeInfo.FindPropertyRelative("defaultSizeOfCam").floatValue : 255, new GUIContent("相机视野大小上限"));
                 EditorGUILayout.PropertyField(windowAnchoreMin, new GUIContent("窗口锚点最小值"));
                 EditorGUILayout.PropertyField(windowAnchoreMax, new GUIContent("窗口锚点最大值"));
                 EditorGUILayout.PropertyField(mapAnchoreMin, new GUIContent("地图锚点最小值"));

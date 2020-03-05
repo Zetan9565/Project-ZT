@@ -57,14 +57,13 @@ public class Backpack
             if (Items.Exists(x => x.item != null && (x.item == item || x.ItemID == item.ID)))
             {
                 Items.Find(x => x.item == item || x.ItemID == item.ID).Amount += amount;
-                weightLoad += item.Weight * amount;
             }
             else
             {
                 Items.Add(new ItemInfo(item, amount));
                 backpackSize++;
-                weightLoad += item.Weight * amount;
             }
+            weightLoad.Current += item.Weight * amount;
         }
         else
         {
@@ -72,7 +71,7 @@ public class Backpack
             {
                 Items.Add(new ItemInfo(item));
                 backpackSize++;
-                weightLoad += item.Weight;
+                weightLoad.Current += item.Weight;
             }
         }
     }
@@ -84,7 +83,6 @@ public class Backpack
             if (Items.Exists(x => x.item != null && (x.item == info.item || x.ItemID == info.ItemID)))
             {
                 Items.Find(x => x.item == info.item || x.ItemID == info.ItemID).Amount += amount;
-                weightLoad += info.item.Weight;
             }
             else
             {
@@ -92,8 +90,8 @@ public class Backpack
                 newInfo.Amount = amount;
                 Items.Add(newInfo);
                 backpackSize++;
-                weightLoad += info.item.Weight * amount;
             }
+            weightLoad.Current += info.item.Weight * amount;
         }
         else
         {
@@ -103,20 +101,21 @@ public class Backpack
                 newInfo.Amount = 1;
                 Items.Add(newInfo);
                 backpackSize++;
-                weightLoad += info.item.Weight;
+                weightLoad.Current += info.item.Weight;
             }
         }
     }
 
     public void LoseItemSimple(ItemInfo info, int amount = 1)
     {
+        if (!Items.Contains(info)) return;
         info.Amount -= amount;
-        weightLoad -= info.item.Weight * amount;
         if (info.Amount <= 0)
         {
             Items.Remove(info);
             backpackSize--;
         }
+        weightLoad.Current -= info.item.Weight * amount;
     }
 
     public ItemInfo Find(string itemID)

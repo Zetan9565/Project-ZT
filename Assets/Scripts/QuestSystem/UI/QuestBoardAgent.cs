@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class QuestBoardAgent : MonoBehaviour, IPointerClickHandler
+public class QuestBoardAgent : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
 {
     [HideInInspector]
     public QuestAgent questAgent;
@@ -73,30 +74,16 @@ public class QuestBoardAgent : MonoBehaviour, IPointerClickHandler
         UpdateStatus();
     }
 
-#if UNITY_ANDROID
-    private float clickTime;
-    private int clickCount;
-    private bool isClick;
-
-    private void FixedUpdate()
+    public void Recycle()
     {
-        if (isClick)
-        {
-            clickTime += Time.fixedDeltaTime;
-            if (clickTime > 0.2f)
-            {
-                isClick = false;
-                clickCount = 0;
-                clickTime = 0;
-            }
-        }
+        questAgent = null;
+        if (ObjectPool.Instance) ObjectPool.Instance.Put(gameObject);
+        else DestroyImmediate(gameObject);
     }
-#endif
 
     public void OnPointerClick(PointerEventData eventData)
     {
-#if UNITY_STANDALONE
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (eventData.button == PointerEventData.InputButton.Left && touchTime < 0.5f)
         {
             OnClick();
         }
@@ -104,23 +91,41 @@ public class QuestBoardAgent : MonoBehaviour, IPointerClickHandler
         {
             RightClick();
         }
-#elif UNITY_ANDROID
+    }
+
+    public void OnPointerDown(PointerEventData eventData)//用于安卓追踪
+    {
+#if UNITY_ANDROID
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (clickCount < 1) isClick = true;
-            if (clickTime <= 0.2f) clickCount++;
-            if (clickCount > 1)
-            {
-                RightClick();
-                isClick = false;
-                clickCount = 0;
-                clickTime = 0;
-            }
-            else if (clickCount == 1)
-            {
-                OnClick();
-            }
+            if (pressCoroutine != null) StopCoroutine(pressCoroutine);
+            pressCoroutine = StartCoroutine(Press());
         }
 #endif
+    }
+    public void OnPointerUp(PointerEventData eventData)//用于安卓追踪
+    {
+#if UNITY_ANDROID
+        if (pressCoroutine != null) StopCoroutine(pressCoroutine);
+#endif
+    }
+
+    readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
+    Coroutine pressCoroutine;
+    float touchTime = 0;
+    IEnumerator Press()
+    {
+        touchTime = 0;
+        bool isPress = true;
+        while (isPress)
+        {
+            touchTime += Time.fixedDeltaTime;
+            if (touchTime >= 0.5f)
+            {
+                RightClick();
+                yield break;
+            }
+            yield return WaitForFixedUpdate;
+        }
     }
 }

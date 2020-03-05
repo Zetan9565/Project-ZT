@@ -76,7 +76,7 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
             }
             iconImage.raycastTarget = true;
             RemoveAble = true;
-            if (!string.IsNullOrEmpty(TextToDisplay)) TipsManager.Instance.HideText();
+            if (!string.IsNullOrEmpty(TextToDisplay)) TipsManager.Instance.Hide();
             TextToDisplay = string.Empty;
             if (iconRange) ObjectPool.Instance.Put(iconRange.gameObject);
             iconRange = null;
@@ -128,8 +128,8 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (holder) holder.OnMouseEnter?.Invoke();
 #if UNITY_STANDALONE
+        if (holder) holder.OnMouseEnter?.Invoke();
         if(!string.IsNullOrEmpty(textToDisplay)) TipsManager.Instance.ShowText(transform.position, textToDisplay);
 #endif
     }
@@ -139,8 +139,8 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
 #if UNITY_ANDROID
         if (pressCoroutine != null) StopCoroutine(pressCoroutine);
 #endif
-        if (holder) holder.OnMouseExit?.Invoke();
 #if UNITY_STANDALONE
+        if (holder) holder.OnMouseExit?.Invoke();
         if(!string.IsNullOrEmpty(textToDisplay)) TipsManager.Instance.HideText();
 #endif
     }

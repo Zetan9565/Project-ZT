@@ -16,6 +16,7 @@ public class MakingUI : WindowUI
     public ItemAgent icon;
 
     public Button makeButton;
+    public Toggle loopToggle;
 
     public Text description;
 

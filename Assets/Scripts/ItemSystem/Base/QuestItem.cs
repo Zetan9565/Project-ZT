@@ -4,6 +4,14 @@
 [System.Serializable]
 public class QuestItem : ItemBase
 {
+    [SerializeField]
+    private string triggerName;
+    public string TriggerName => triggerName;
+
+    [SerializeField]
+    private bool stateToSet;
+    public bool StateToSet => stateToSet;
+
     public QuestItem()
     {
         itemType = ItemType.Quest;

@@ -26,9 +26,11 @@ public class SaveData
 
     public List<DialogueData> dialogueDatas = new List<DialogueData>();
 
-    public List<TriggerData> triggerDatas = new List<TriggerData>();
-
     public List<MapMarkData> markDatas = new List<MapMarkData>();
+
+    public List<ActionData> actionDatas = new List<ActionData>();
+
+    public TriggerData triggerData = new TriggerData();
 
     public SaveData()
     {
@@ -213,14 +215,54 @@ public class DialogueWordsData
 [Serializable]
 public class TriggerData
 {
+    public List<TriggerStateData> stateDatas = new List<TriggerStateData>();
+    public List<TriggerHolderData> holderDatas = new List<TriggerHolderData>();
+}
+[Serializable]
+public class TriggerHolderData
+{
+    public string ID;
+    public bool isSetAtFirst;
+
+    public TriggerHolderData(TriggerHolder holder)
+    {
+        ID = holder.ID;
+        isSetAtFirst = holder.isSetAtFirst;
+    }
+}
+[Serializable]
+public class TriggerStateData
+{
     public string triggerName;
 
     public int triggerState;
 
-    public TriggerData(string triggerName, TriggerState triggerState)
+    public TriggerStateData(string triggerName, TriggerState triggerState)
     {
         this.triggerName = triggerName;
         this.triggerState = (int)triggerState;
+    }
+}
+
+[Serializable]
+public class ActionData
+{
+    public string ID;
+
+    public bool isExecuting;
+    public float executionTime;
+
+    public bool isDone;
+
+    public int actionType;
+
+    public ActionData(ActionStackData stackElement)
+    {
+        ID = stackElement. executor.ID;
+        isExecuting = stackElement.executor.IsExecuting;
+        executionTime = stackElement. executor.ExecutionTime;
+        isDone = stackElement. executor.IsDone;
+        actionType = (int)stackElement.actionType;
     }
 }
 

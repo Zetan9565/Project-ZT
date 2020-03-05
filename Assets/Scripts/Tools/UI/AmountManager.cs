@@ -1,5 +1,4 @@
-﻿using UnityEngine.UI;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 public class AmountManager : SingletonMonoBehaviour<AmountManager>
@@ -23,6 +22,7 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
     }
 
     private readonly UnityEvent onConfirm = new UnityEvent();
+    private readonly UnityEvent onCancel = new UnityEvent();
 
     private long min;
     private long max;
@@ -44,18 +44,29 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         UI.window.alpha = 1;
         UI.window.blocksRaycasts = true;
+        ZetanUtility.KeepInsideScreen(UI.windowRect);
     }
 
-    public void Number(int num)
+    public void ClickNumber(int num)
     {
-        long.TryParse(UI.amount.text, out long current);
         if (UI.amount.text.Length < UI.amount.characterLimit - 1)
         {
-            current = current * 10 + num;
+            UI.amount.text += num;
+            long.TryParse(UI.amount.text, out long current);
             if (current < min) current = min;
             else if (current > max) current = max;
+            Amount = current;
+            UI.amount.text = Amount.ToString();
         }
-        else current = Amount;
+        UI.amount.MoveTextEnd(false);
+    }
+
+    public void Back()
+    {
+        UI.amount.text = UI.amount.text.Remove(UI.amount.text.Length - 1);
+        long.TryParse(UI.amount.text, out long current);
+        if (current < min) current = min;
+        else if (current > max) current = max;
         Amount = current;
         UI.amount.text = Amount.ToString();
         UI.amount.MoveTextEnd(false);
@@ -64,9 +75,9 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
     public void Plus()
     {
         long.TryParse(UI.amount.text, out long current);
-        if (current < max && UI.amount.text.Length < UI.amount.characterLimit - 1)
-            current++;
-        else current = max;
+        if (UI.amount.text.Length <= UI.amount.characterLimit - 1)
+            if (current < max) current++;
+            else current = max;
         Amount = current;
         UI.amount.text = Amount.ToString();
         UI.amount.MoveTextEnd(false);
@@ -75,8 +86,7 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
     public void Minus()
     {
         long.TryParse(UI.amount.text, out long current);
-        if (current > min && UI.amount.text.Length < UI.amount.characterLimit - 1)
-            current--;
+        if (current > min && UI.amount.text.Length < UI.amount.characterLimit - 1) current--;
         else current = min;
         Amount = current;
         UI.amount.text = Amount.ToString();
@@ -102,32 +112,38 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         UI.window.alpha = 0;
         UI.window.blocksRaycasts = false;
         onConfirm?.Invoke();
+        onConfirm.RemoveAllListeners();
+        onCancel.RemoveAllListeners();
     }
 
     public void Cancel()
     {
         UI.window.alpha = 0;
         UI.window.blocksRaycasts = false;
+        onCancel?.Invoke();
+        onConfirm.RemoveAllListeners();
+        onCancel.RemoveAllListeners();
     }
 
-    public void SetPosition(Vector2 target, Vector2 offset)
+    public void SetPosition(Vector2 targetPos, Vector2 offset)
     {
-        UI.window.GetComponent<RectTransform>().position = target + offset;
+        UI.windowRect.position = targetPos + offset;
+        ZetanUtility.KeepInsideScreen(UI.windowRect);
     }
 
     public void SetPosition(Vector2 target)
     {
         UI.window.GetComponent<RectTransform>().position = target + defaultOffset;
+        ZetanUtility.KeepInsideScreen(UI.windowRect);
     }
 
     public void FixAmount()
     {
         UI.amount.text = System.Text.RegularExpressions.Regex.Replace(UI.amount.text, @"[^0-9]+", "");
         long.TryParse(UI.amount.text, out long current);
-        if (!(current <= max && UI.amount.text.Length < UI.amount.characterLimit - 1))
-            current = max;
-        else if (!(current >= min && UI.amount.text.Length < UI.amount.characterLimit - 1))
-            current = min;
+        if (UI.amount.text.Length <= UI.amount.characterLimit - 1)
+            if (current > max) current = max;
+            else if (current < min) current = min;
         Amount = current;
         UI.amount.text = Amount.ToString();
         UI.amount.MoveTextEnd(false);

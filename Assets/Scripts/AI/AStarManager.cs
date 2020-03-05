@@ -122,7 +122,7 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
 
     public void UpdateGraphs(Vector3 fromPoint, Vector3 toPoint)
     {
-        PathFinder.UpdateGraphs(new Bounds(ZetanUtility.CenterBetween(fromPoint, toPoint), ZetanUtility.SizeBetween(fromPoint, toPoint) / 2));
+        PathFinder.UpdateGraphs(new Bounds(ZetanUtility.CenterBetween(fromPoint, toPoint), ZetanUtility.SizeBetween(fromPoint, toPoint) * 0.5f));
     }
     #endregion
 
@@ -263,10 +263,10 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
             Vector3 axisOrigin;
             if (!ThreeD)
                 axisOrigin = new Vector3(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y), 0)
-                    - Vector3.right * (worldSize.x / 2) - Vector3.up * (worldSize.y / 2);
+                    - Vector3.right * (worldSize.x * 0.5f) - Vector3.up * (worldSize.y * 0.5f);
             else
                 axisOrigin = new Vector3Int(Mathf.RoundToInt(transform.position.x), 0, Mathf.RoundToInt(transform.position.z))
-                    - Vector3.right * (worldSize.x / 2) - Vector3.forward * (worldSize.y / 2);
+                    - Vector3.right * (worldSize.x * 0.5f) - Vector3.forward * (worldSize.y * 0.5f);
 
             if (gizmosGrid)
             {
@@ -337,7 +337,7 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
             if (gizmosEdge)
             {
                 Gizmos.color = edgeColor;
-                if (ThreeD) Gizmos.DrawWireCube(transform.position + Vector3.up * worldHeight / 2, new Vector3(worldSize.x, worldHeight, worldSize.y));
+                if (ThreeD) Gizmos.DrawWireCube(transform.position + Vector3.up * worldHeight * 0.5f, new Vector3(worldSize.x, worldHeight, worldSize.y));
                 else Gizmos.DrawWireCube(transform.position, new Vector3(worldSize.x, worldSize.y, 0));
             }
         }

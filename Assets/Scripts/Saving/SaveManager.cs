@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -40,6 +41,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
                 SaveQuest(data);
                 SaveDialogue(data);
                 SaveTrigger(data);
+                SaveActions(data);
                 SaveMapMark(data);
 
                 bf.Serialize(fs, data);
@@ -101,6 +103,12 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         DialogueManager.Instance.SaveData(data);
     }
 
+    void SaveActions(SaveData data)
+    {
+        foreach (var action in ActionStack.ToArray().Reverse())
+            data.actionDatas.Add(new ActionData(action));
+    }
+
     void SaveTrigger(SaveData data)
     {
         TriggerManager.Instance.SaveData(data);
@@ -142,7 +150,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         yield return new WaitUntil(() => { return ao.progress >= 0.9f; });
         ao.allowSceneActivation = true;
         yield return new WaitUntil(() => { return ao.isDone; });
-        GameManager.Init();
+        GameManager.InitGame(typeof(TriggerHolder));
         LoadPlayer(data);
         yield return new WaitUntil(() => { return PlayerManager.Instance.Backpack != null; });
         LoadBackpack(data);
@@ -151,8 +159,9 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         LoadWarehouse(data);
         LoadQuest(data);
         LoadDialogue(data);
-        LoadTrigger(data);
         LoadMapMark(data);
+        LoadActions(data);
+        LoadTrigger(data);
     }
 
     void LoadPlayer(SaveData data)
@@ -216,6 +225,15 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     void LoadDialogue(SaveData data)
     {
         DialogueManager.Instance.LoadData(data);
+    }
+
+    void LoadActions(SaveData data)
+    {
+        var actions = FindObjectsOfType<ActionExecutor>();
+        foreach (var ad in data.actionDatas)
+            foreach (var action in actions)
+                if (action.ID == ad.ID)
+                    ActionStack.Push(action, (ActionType)ad.actionType, ad.executionTime);
     }
 
     void LoadTrigger(SaveData data)

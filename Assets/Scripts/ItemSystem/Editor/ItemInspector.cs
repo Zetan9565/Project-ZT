@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using UnityEditor;
-using System.Collections.Generic;
-using System;
-using UnityEditorInternal;
+﻿using System;
 using System.Text.RegularExpressions;
+using UnityEditor;
+using UnityEngine;
+using UnityEditorInternal;
 
 [CustomEditor(typeof(ItemBase), true)]
 [CanEditMultipleObjects]
@@ -11,7 +10,6 @@ public class ItemInspector : Editor
 {
     protected ItemBase item;
     BoxItem box;
-    MaterialItem material;
 
     ReorderableList boxItemList;
     ReorderableList materialList;
@@ -75,9 +73,7 @@ public class ItemInspector : Editor
             HandlingBoxItemList();
         }
 
-        material = target as MaterialItem;
-        if (material)
-            materialType = serializedObject.FindProperty("materialType");
+        materialType = serializedObject.FindProperty("materialType");
 
         FixType();
     }
@@ -128,8 +124,7 @@ public class ItemInspector : Editor
             default: break;
         }
         EditorGUILayout.LabelField("道具类型", typeName);
-        if (item is MaterialItem)
-            EditorGUILayout.PropertyField(materialType, new GUIContent("材料类型"));
+        EditorGUILayout.PropertyField(materialType, new GUIContent("作为材料时的类型"));
         if (item.ItemType != ItemType.Quest)
             EditorGUILayout.PropertyField(quality, new GUIContent("道具品质"));
         EditorGUILayout.PropertyField(weight, new GUIContent("道具重量"));
@@ -403,6 +398,10 @@ public class ItemInspector : Editor
             case ItemType.Bag:
                 serializedObject.FindProperty("expandSize").intValue = EditorGUILayout.IntSlider(new GUIContent("背包扩张数量"), serializedObject.FindProperty("expandSize").intValue, 1, 192);
                 break;
+            case ItemType.Quest:
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("triggerName"), new GUIContent("触发器名称"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("stateToSet"), new GUIContent("触发器状态"));
+                break;
             default: break;
         }
         if (item.IsEquipment)
@@ -442,6 +441,10 @@ public class ItemInspector : Editor
         {
             itemType.enumValueIndex = (int)ItemType.Medicine;
         }
+        else if (item.IsSeed && item.ItemType != ItemType.Seed)
+        {
+            itemType.enumValueIndex = (int)ItemType.Seed;
+        }
     }
 
     bool CheckEditComplete()
@@ -453,7 +456,8 @@ public class ItemInspector : Editor
             ExistsID() || string.IsNullOrEmpty(Regex.Replace(item.ID, @"[^0-9]+", "")) || !Regex.IsMatch(item.ID, @"(\d+)$") ||
             (item.IsBook && (item as BookItem).BookType == BookType.Building && !(item as BookItem).BuildingToLearn) ||
             (item.IsBook && (item as BookItem).BookType == BookType.Making && (!(item as BookItem).ItemToLearn ||
-            (item as BookItem).ItemToLearn.MakingMethod == MakingMethod.None))
+            (item as BookItem).ItemToLearn.MakingMethod == MakingMethod.None)) ||
+            (item.IsSeed && (item as SeedItem).Crop == null)
             );
 
         if (box)
@@ -500,6 +504,9 @@ public class ItemInspector : Editor
                 case ItemType.Medicine:
                     newID = "MADC" + i.ToString().PadLeft(3, '0');
                     break;
+                case ItemType.Seed:
+                    newID = "SEED" + i.ToString().PadLeft(3, '0');
+                    break;
                 default:
                     newID = "ITEM" + i.ToString().PadLeft(3, '0');
                     break;
@@ -512,15 +519,11 @@ public class ItemInspector : Editor
 
     bool ExistsID()
     {
-        List<ItemBase> items = new List<ItemBase>();
-        foreach (ItemBase item in Resources.LoadAll<ItemBase>(""))
-        {
-            items.Add(item);
-        }
+        var items = Resources.LoadAll<ItemBase>("");
 
-        ItemBase find = items.Find(x => x.ID == _ID.stringValue);
+        ItemBase find = Array.Find(items, x => x.ID == _ID.stringValue);
         if (!find) return false;//若没有找到，则ID可用
         //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
-        return find != item || (find == item && items.FindAll(x => x.ID == _ID.stringValue).Count > 1);
+        return find != item || (find == item && Array.FindAll(items, x => x.ID == _ID.stringValue).Length > 1);
     }
 }

@@ -3,12 +3,14 @@ using UnityEngine.UI;
 
 public class TipsUI : MonoBehaviour
 {
-    public RectTransform textTips;
-    public ContentSizeFitter textTipsFitter;
-    public Text textTipsText;
-    public Button textTipsCloseBtn;
+    public RectTransform tipBackground;
+    public ContentSizeFitter tipsFitter;
+    public Text tipsContent;
 
     private Canvas tipsCanvas;
+
+    public TipsButton buttonPrefab;
+    public GridLayoutGroup buttonParent;
 
     private void Awake()
     {
@@ -17,6 +19,5 @@ public class TipsUI : MonoBehaviour
         tipsCanvas.sortingLayerName = "UI";
         tipsCanvas.overrideSorting = true;
         tipsCanvas.sortingOrder = 998;
-        textTipsCloseBtn.onClick.AddListener(TipsManager.Instance.HideText);
     }
 }

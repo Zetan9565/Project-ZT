@@ -20,6 +20,13 @@ public class MakingTool : MonoBehaviour
             toolType = value;
         }
     }
+
+    [SerializeField]
+#if UNITY_EDITOR
+    [DisplayName("制作耗时")]
+#endif
+    private float makingTime = 5f;
+    public float MakingTime => makingTime;
 }
 
 public enum MakingToolType

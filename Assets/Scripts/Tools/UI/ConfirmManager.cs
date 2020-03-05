@@ -16,12 +16,12 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
     [SerializeField]
     private Button yes;
 
-    private UnityEvent onYesClick = new UnityEvent();
+    private UnityAction onYesClick;
 
     [SerializeField]
     private Button no;
 
-    private UnityEvent onNoClick = new UnityEvent();
+    private UnityAction onNoClick;
 
     public bool IsUIOpen { get; private set; }
     public bool IsPausing { get; private set; }
@@ -41,29 +41,55 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
         if (!confirmWindow.GetComponent<GraphicRaycaster>()) confirmWindow.gameObject.AddComponent<GraphicRaycaster>();
         windowCanvas = confirmWindow.GetComponent<Canvas>();
         windowCanvas.overrideSorting = true;
+        WindowsManager.Instance.OnPushWindow.AddListener(Top);
     }
 
-    public void NewConfirm(string dialog, UnityAction yesAction = null, UnityAction noAction = null)
+    private void OnDestroy()
+    {
+        if (WindowsManager.Instance) WindowsManager.Instance.OnPushWindow.RemoveListener(Top);
+    }
+
+    public void NewConfirm(string dialog)
     {
         dialogText.text = dialog;
-        onYesClick.RemoveAllListeners();
-        onNoClick.RemoveAllListeners();
-        if (yesAction != null) onYesClick.AddListener(yesAction);
-        if (noAction != null) onNoClick.AddListener(noAction);
+        onYesClick = null;
+        onNoClick = null;
+        ZetanUtility.SetActive(no.gameObject, false);
         (this as IWindowHandler).OpenWindow();
+    }
+
+    public void NewConfirm(string dialog, UnityAction yesAction)
+    {
+        dialogText.text = dialog;
+        onYesClick = yesAction;
+        onNoClick = null;
+        ZetanUtility.SetActive(no.gameObject, true);
+        (this as IWindowHandler).OpenWindow();
+    }
+
+    public void NewConfirm(string dialog, UnityAction yesAction, UnityAction noAction)
+    {
+        dialogText.text = dialog;
+        onYesClick = yesAction;
+        onNoClick = noAction;
+        ZetanUtility.SetActive(no.gameObject, true);
+        (this as IWindowHandler).OpenWindow();
+    }
+
+    private void Top()
+    {
+        if (IsUIOpen) WindowsManager.Instance.PushToTop(this);
     }
 
     public void Confirm()
     {
         onYesClick?.Invoke();
-        onYesClick.RemoveAllListeners();
         CloseWindow();
     }
 
     public void Cancel()
     {
         onNoClick?.Invoke();
-        onNoClick.RemoveAllListeners();
         CloseWindow();
     }
 
@@ -81,6 +107,8 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
     {
         if (!IsUIOpen) return;
         if (IsPausing) return;
+        onYesClick = null;
+        onNoClick = null;
         confirmWindow.alpha = 0;
         confirmWindow.blocksRaycasts = false;
         WindowsManager.Instance.Remove(this);

@@ -170,22 +170,18 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
     }
 
-    public MapIcon CreateDefaultMark(Vector3 worldPosition, bool keepOnMap, bool removeAble = true)
-    {
-        return CreateMapIcon(defaultMarkIcon, defaultMarkSize, worldPosition, keepOnMap, MapIconType.Mark, removeAble);
-    }
-    public MapIcon CreateDefaultMark(Vector3 worldPosition, bool keepOnMap, string textToDisplay, bool removeAble = true)
+    public MapIcon CreateDefaultMark(Vector3 worldPosition, bool keepOnMap, bool removeAble, string textToDisplay = "")
     {
         return CreateMapIcon(defaultMarkIcon, defaultMarkSize, worldPosition, keepOnMap, MapIconType.Mark, removeAble, textToDisplay);
     }
-    public MapIcon CreateDefaultMarkAtMousePos(Vector3 mousePosition, bool removeAble = true)
+    public MapIcon CreateDefaultMarkAtMousePos(Vector3 mousePosition)
     {
-        return CreateDefaultMark(MapPointToWorldPoint(mousePosition), removeAble);
+        return CreateDefaultMark(MapPointToWorldPoint(mousePosition), true, true);
     }
 
     public void RemoveMapIcon(MapIconHolder holder, bool force = false)
     {
-        if (!holder || !holder.removeAble && !force) return;
+        if (!holder || !holder.removeAble && !force) { Debug.Log("return1"); return; }
         //Debug.Log("remove");
         iconsWithHolder.TryGetValue(holder, out MapIcon iconFound);
         if (!iconFound && holder.iconInstance) iconFound = holder.iconInstance;
@@ -194,7 +190,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     }
     public void RemoveMapIcon(MapIcon icon, bool force = false)
     {
-        if (!icon.RemoveAble && !force) return;
+        if (!icon || !icon.RemoveAble && !force) return; 
         if (icon.holder) RemoveMapIcon(icon.holder);
         else
         {
@@ -207,7 +203,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         foreach (var iconWoH in IconsWithoutHolder.Values)
             if (iconWoH.worldPosition == worldPosition && (iconWoH.removeAble || force))
             {
-                iconWoH.mapIcon.Recycle();
+                if (iconWoH.mapIcon) iconWoH.mapIcon.Recycle();
                 iconWoH.mapIcon = null;
             }
         //iconsWithoutHolder.RemoveAll(x => !x.mapIcon);
@@ -228,7 +224,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             {
                 if (holder.showRange && !iconKvp.Value.iconRange)
                     iconKvp.Value.iconRange = ObjectPool.Instance.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
-                holder.ShowIcon(IsViewingWorldMap ? (worldModeInfo.sizeOfCam / Camera.orthographicSize) : (miniModeInfo.sizeOfCam / Camera.orthographicSize));
+                holder.ShowIcon(IsViewingWorldMap ? (worldModeInfo.currentSizeOfCam / Camera.orthographicSize) : (miniModeInfo.currentSizeOfCam / Camera.orthographicSize));
                 DrawMapIcon(holder.transform.position + new Vector3(holder.offset.x, use2D ? holder.offset.y : 0, use2D ? 0 : holder.offset.y), iconKvp.Value, holder.keepOnMap);
                 if (!IsViewingWorldMap && sqrDistance > holder.DistanceSqr * 0.81f && sqrDistance < holder.DistanceSqr)
                     iconKvp.Value.ImageCanvas.alpha = (holder.DistanceSqr - sqrDistance) / (holder.DistanceSqr * 0.19f);
@@ -241,7 +237,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     }
     private void DrawMapIcon(Vector3 worldPosition, MapIcon icon, bool keepOnMap)
     {
-        if (!UI || !UI.gameObject) return;
+        if (!icon || !UI || !UI.gameObject) return;
         //把相机视野内的世界坐标归一化为一个裁剪正方体中的坐标，其边长为1，就是说所有视野内的坐标都变成了x、z、y分量都在(0,1)以内的裁剪坐标
         Vector3 viewportPoint = Camera.WorldToViewportPoint(worldPosition);
         //这一步用于修正UI因设备分辨率不一样，在进行缩放后实际Rect信息变了而产生的问题
@@ -258,7 +254,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         {
             //以遮罩的Rect为范围基准而不是地图的
             screenSpaceRect = ZetanUtility.GetScreenSpaceRect(MapMaskRect);
-            float size = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) / 2;//地图的一半尺寸
+            float size = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) * 0.5f;//地图的一半尺寸
             UI.mapWindowRect.GetWorldCorners(corners);
             if (circle && !isViewingWorldMap)
             {
@@ -335,7 +331,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         switchTime += Time.deltaTime * animationSpeed;
         if (isViewingWorldMap)//从小向大切换
         {
-            if (!AnimaComplete(true))
+            if (!IsAnimaComplete(true))
             {
                 AnimateTo(worldModeInfo);
             }
@@ -343,7 +339,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
         else
         {
-            if (!AnimaComplete(false))
+            if (!IsAnimaComplete(false))
             {
                 Vector3 newCamPos = new Vector3(player.position.x, use2D ? player.position.y : Camera.transform.position.y, use2D ? Camera.transform.position.z : player.position.z);
                 Camera.transform.position = Vector3.Lerp(startPosOfCamForMap, newCamPos, switchTime);
@@ -355,15 +351,14 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private void AnimateTo(MapModeInfo modeInfo)
     {
         if (!UI || !UI.gameObject) return;
-        Camera.orthographicSize = Mathf.Lerp(startSizeOfCamForMap, modeInfo.sizeOfCam, switchTime);
+        Camera.orthographicSize = Mathf.Lerp(startSizeOfCamForMap, modeInfo.currentSizeOfCam, switchTime);
         UI.mapWindowRect.anchoredPosition = Vector3.Lerp(startPositionOfMap, modeInfo.anchoredPosition, switchTime);
         UI.mapRect.sizeDelta = Vector2.Lerp(startSizeOfMap, modeInfo.sizeOfMap, switchTime);
         UI.mapWindowRect.sizeDelta = Vector2.Lerp(startSizeOfMapWindow, modeInfo.sizeOfWindow, switchTime);
     }
-    private bool AnimaComplete(bool toWorldMode)
+    private bool IsAnimaComplete(bool toWorldMode)
     {
-        if (toWorldMode)
-            return UI.mapRect.sizeDelta.x >= worldModeInfo.sizeOfMap.x && UI.mapRect.sizeDelta.y >= worldModeInfo.sizeOfMap.y;
+        if (toWorldMode) return UI.mapRect.sizeDelta.x >= worldModeInfo.sizeOfMap.x && UI.mapRect.sizeDelta.y >= worldModeInfo.sizeOfMap.y;
         else return UI.mapRect.sizeDelta.x <= miniModeInfo.sizeOfMap.x && UI.mapRect.sizeDelta.y <= miniModeInfo.sizeOfMap.y;
     }
 
@@ -388,7 +383,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private void SetInfoFrom(MapModeInfo modeInfo)
     {
         if (!UI || !UI.gameObject) return;
-        Camera.orthographicSize = modeInfo.sizeOfCam;
+        Camera.orthographicSize = modeInfo.currentSizeOfCam;
         zoomLimit.x = modeInfo.minZoomOfCam;
         zoomLimit.y = modeInfo.maxZoomOfCam;
         UI.mapWindowRect.anchorMin = modeInfo.windowAnchoreMin;
@@ -403,18 +398,38 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void SetCurrentAsMiniMap()
     {
         if (!UI || !UI.gameObject || isViewingWorldMap) return;
-        if (Camera) miniModeInfo.sizeOfCam = Camera.orthographicSize;
+        if (Camera)
+        {
+            miniModeInfo.defaultSizeOfCam = Camera.orthographicSize;
+            miniModeInfo.currentSizeOfCam = Camera.orthographicSize;
+        }
         else Debug.LogError("地图相机不存在！");
-        if (UI && UI.mapWindowRect) CopyInfoTo(miniModeInfo);
-        else Debug.LogError("地图UI不存在或未编辑完整！");
+        try
+        {
+            CopyInfoTo(miniModeInfo);
+        }
+        catch
+        {
+            Debug.LogError("地图UI不存在或UI存在空缺！");
+        }
     }
     public void SetCurrentAsWorldMap()
     {
         if (!UI || !UI.gameObject || !isViewingWorldMap) return;
-        if (Camera) worldModeInfo.sizeOfCam = Camera.orthographicSize;
+        if (Camera)
+        {
+            worldModeInfo.defaultSizeOfCam = Camera.orthographicSize;
+            worldModeInfo.currentSizeOfCam = Camera.orthographicSize;
+        }
         else Debug.LogError("地图相机不存在！");
-        if (UI && UI.mapWindowRect) CopyInfoTo(worldModeInfo);
-        else Debug.LogError("地图UI不存在或未编辑完整！");
+        try
+        {
+            CopyInfoTo(worldModeInfo);
+        }
+        catch
+        {
+            Debug.LogError("地图UI不存在或UI存在空缺！");
+        }
     }
     private void CopyInfoTo(MapModeInfo modeInfo)
     {
@@ -501,24 +516,29 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         Rect screenSpaceRect = ZetanUtility.GetScreenSpaceRect(UI.mapRect);
         Vector3[] corners = new Vector3[4];
         UI.mapRect.GetWorldCorners(corners);
-        Vector2 viewportPoint = new Vector2((mousePosition.x - corners[0].x) / screenSpaceRect.width, (mousePosition.y - corners[0].y) / screenSpaceRect.height);
-        Vector3 worldPosition = Camera.ViewportToWorldPoint(viewportPoint);
+        Vector2 mapViewportPoint = new Vector2((mousePosition.x - corners[0].x) / screenSpaceRect.width, (mousePosition.y - corners[0].y) / screenSpaceRect.height);
+        Vector3 worldPosition = Camera.ViewportToWorldPoint(mapViewportPoint);
         return use2D ? new Vector3(worldPosition.x, worldPosition.y) : worldPosition;
     }
 
     public void DragWorldMap(Vector2 direction)
     {
         if (!isViewingWorldMap || isSwitching) return;
+        if (direction == default) return;
         isMovingCamera = false;
         cameraMovingTime = 0;
         float mag = new Vector2(Screen.width, Screen.height).magnitude;
-        direction = new Vector2(direction.x * 1000 / mag, direction.y * 1000 / mag) * (Camera.orthographicSize / worldModeInfo.sizeOfCam);
+        direction = new Vector2(direction.x * 1000 / mag, direction.y * 1000 / mag) * (Camera.orthographicSize / worldModeInfo.currentSizeOfCam);
+        //direction = new Vector2(direction.x / Screen.dpi, direction.y / Screen.dpi) * (Camera.orthographicSize / worldModeInfo.currentSizeOfCam);
         Camera.transform.Translate(new Vector3(direction.x, use2D ? direction.y : 0, use2D ? 0 : direction.y) * dragSensitivity);
     }
 
-    public void ZoomMap(float value)
+    public void Zoom(float value)
     {
+        if (isSwitching || value == 0) return;
         Camera.orthographicSize = Mathf.Clamp(Camera.orthographicSize - value, zoomLimit.x, zoomLimit.y);
+        if (IsViewingWorldMap) worldModeInfo.currentSizeOfCam = Camera.orthographicSize;
+        else miniModeInfo.currentSizeOfCam = Camera.orthographicSize;
     }
     #endregion
 
@@ -562,7 +582,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         UI.mapMaskRect.GetWorldCorners(corners);
         if (circle && !isViewingWorldMap)
         {
-            float radius = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) / 2 * this.radius;
+            float radius = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) * 0.5f * this.radius;
             //ZetanUtility.DrawGizmosCircle(ZetanUtility.CenterBetween(corners[0], corners[2]), radius, radius / 1000, Color.white, false);
             ZetanUtility.DrawGizmosCircle(ZetanUtility.CenterBetween(corners[0], corners[2]), radius, Vector3.forward);
         }
@@ -582,10 +602,12 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         InitPlayerIcon();
         Camera.targetTexture = targetTexture;
         UI.mapImage.texture = targetTexture;
+        miniModeInfo.currentSizeOfCam = miniModeInfo.defaultSizeOfCam;
+        worldModeInfo.currentSizeOfCam = worldModeInfo.defaultSizeOfCam;
         ToMiniMap();
     }
 
-    public void ClearMarks()
+    private void ClearMarks()
     {
         MapIconWithoutHolder[] iconWoHs = new MapIconWithoutHolder[IconsWithoutHolder.Count];
         IconsWithoutHolder.Values.CopyTo(iconWoHs, 0);
@@ -622,7 +644,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         ClearMarks();
         foreach (var md in data.markDatas)
-            CreateDefaultMark(new Vector3(md.worldPosX, md.worldPosY, md.worldPosZ), md.keepOnMap, md.textToDisplay, md.removeAble);
+            CreateDefaultMark(new Vector3(md.worldPosX, md.worldPosY, md.worldPosZ), md.keepOnMap, md.removeAble, md.textToDisplay);
     }
 
     public class MapIconWithoutHolder
@@ -646,7 +668,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     [Serializable]
     public class MapModeInfo
     {
-        public float sizeOfCam;
+        public float defaultSizeOfCam;
+        public float currentSizeOfCam;
         public float minZoomOfCam;
         public float maxZoomOfCam;
         public Vector2 windowAnchoreMin;

@@ -5,21 +5,15 @@ using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/背包管理器")]
-public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowHandler, IOpenCloseAbleWindow
+public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpenCloseAbleWindow
 {
-    [SerializeField]
-    private BackpackUI UI;
-
     [SerializeField]
     private Color overColor = Color.yellow;
     [SerializeField]
     private Color maxColor = Color.red;
 
-    public bool IsPausing { get; private set; }
-    public bool IsUIOpen { get; private set; }
-
 #if UNITY_ANDROID
-    public DiscardArea DiscardArea { get { return UI.discardArea; } }
+    public DiscardButton DiscardArea { get { return UI.discardArea; } }
 #endif
 
     public Image GridMask { get { return UI.gridMask; } }
@@ -30,13 +24,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
 
     public List<ItemAgent> itemAgents = new List<ItemAgent>();
 
-    private Backpack Backpack
-    {
-        get
-        {
-            return PlantManager.Instance ? PlayerManager.Instance.Backpack : null;
-        }
-    }
+    private Backpack Backpack => PlantManager.Instance ? PlayerManager.Instance.Backpack : null;
 
     public List<ItemInfo> Seeds => Backpack ? Backpack.Items.FindAll(x => x.item.IsSeed) : null;
 
@@ -49,12 +37,11 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         {
             foreach (ItemAgent ia in itemAgents)
                 ia.Empty();
-            int befCount = itemAgents.Count;
             while (Backpack.backpackSize.Max > itemAgents.Count)
             {
                 ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
                 itemAgents.Add(ia);
-                ia.Init(ItemAgentType.Backpack, itemAgents.IndexOf(ia), UI.gridRect);
+                ia.Init(ItemAgentType.Backpack, itemAgents.Count - 1, UI.gridScrollRect);
             }
             while (Backpack.backpackSize.Max < itemAgents.Count)
             {
@@ -76,7 +63,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     public int TryGetItem_Integer(ItemBase item, int amount = 1)
     {
         if (Backpack == null || !item || amount < 1) return 0;
-        if (Backpack.IsFull)
+        if (!item.StackAble && Backpack.IsFull)
         {
             return 0;
         }
@@ -86,11 +73,11 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
             if (amount > Backpack.backpackSize.Rest)
                 finalGet = Backpack.backpackSize.Rest;
         }
-        if (Backpack.weightLoad.Rest + finalGet * item.Weight > Backpack.weightLoad.Max)
-            for (int i = 0; i < Backpack.backpackSize.Rest; i++)
+        if (Backpack.weightLoad + finalGet * item.Weight > Backpack.weightLoad.Max)
+            for (int i = 0; i <= finalGet; i++)
             {
-                if (Backpack.weightLoad.Rest + i * item.Weight <= Backpack.weightLoad.Max &&
-                    Backpack.weightLoad.Rest + (i + 1) * item.Weight > Backpack.weightLoad.Max)
+                if (Backpack.weightLoad + i * item.Weight <= Backpack.weightLoad.Max &&
+                    Backpack.weightLoad + (i + 1) * item.Weight > Backpack.weightLoad.Max)
                 {
                     finalGet = i;
                     break;
@@ -143,7 +130,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
             if (HasItemToLose())
                 foreach (var info in simulLoseItems)
                 {
-                    if (!TryLoseItem_Boolean(info, info.Amount)) return false;//有一个要失去的道具不能失去，则直接不能获取该道具
+                    if (!TryLoseItem_Boolean(info.item, info.Amount)) return false;//有一个要失去的道具不能失去，则直接不能获取该道具
                     if (info.item.StackAble && info.Amount - GetItemAmount(info.item) == 0)//只要该可叠加道具会全部失去，则能留出一个位置
                         vacateSize++;
                     else if (!info.item.StackAble)//若该道具不可叠加，则失去多少个就能空出多少位置
@@ -151,7 +138,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
                 }
             if (amount > Backpack.backpackSize.Rest + vacateSize)//如果留出位置还不能放下
             {
-                MessageManager.Instance.NewMessage(string.Format("请多留出至少{0}个{1}空间", Backpack.backpackSize.Rest + vacateSize - amount, GameManager.BackpackName));
+                MessageManager.Instance.NewMessage(string.Format("请多留出至少{0}个{1}空间", amount - Backpack.backpackSize.Rest - vacateSize, GameManager.BackpackName));
                 return false;
             }
         }
@@ -159,7 +146,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         if (HasItemToLose())
             foreach (var info in simulLoseItems)
             {
-                if (!TryLoseItem_Boolean(info, info.Amount)) return false;
+                if (!TryLoseItem_Boolean(info.item, info.Amount)) return false;
                 vacateWeightload += info.item.Weight * info.Amount;
             }
         if (Backpack.weightLoad - vacateWeightload + amount * item.Weight > Backpack.LimitWeightload)//如果留出负重还不能放下
@@ -243,6 +230,16 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         return true;
     }
     /// <summary>
+    /// 获取道具
+    /// </summary>
+    /// <param name="info">道具信息（包括数量）</param>
+    /// <param name="simulLoseItems">会同时失去的道具</param>
+    /// <returns>是否成功</returns>
+    public bool GetItem(ItemInfo info, params ItemInfo[] simulLoseItems)
+    {
+        return GetItem(info.item, info.Amount, simulLoseItems);
+    }
+    /// <summary>
     /// 仓库、装备专用获取道具
     /// </summary>
     /// <param name="info">道具信息</param>
@@ -286,76 +283,6 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         UpdateUI();
         return true;
     }
-    /// <summary>
-    /// 获取道具
-    /// </summary>
-    /// <param name="info">道具信息（包括数量）</param>
-    /// <param name="simulLoseItems">会同时失去的道具</param>
-    /// <returns>是否成功</returns>
-    public bool GetItem(ItemInfo info, params ItemInfo[] simulLoseItems)
-    {
-        return GetItem(info, info.Amount, simulLoseItems);
-    }
-
-    /// <summary>
-    /// 制作道具，用于根据已知配方直接消耗材料来制作道具的玩法
-    /// </summary>
-    /// <param name="itemToMake"></param>
-    /// <param name="amount"></param>
-    /// <returns>是否成功制作</returns>
-    public bool MakeItem(ItemBase itemToMake, int amount = 1)
-    {
-        if (!itemToMake || itemToMake.Materials.Count < 1 || amount < 1) return false;
-        /*foreach (MaterialInfo mi in itemToMake.Materials)
-            if (!TryLoseItem_Boolean(mi.Item, mi.Amount * amount))
-                return false;
-        foreach (MaterialInfo mi in itemToMake.Materials)//模拟空出位置来放制作的道具
-        {
-            MBackpack.weightLoad -= mi.Item.Weight * mi.Amount * amount;
-            if (mi.Item.StackAble && GetItemAmount(mi.Item) - mi.Amount * amount == 0)//可叠加且消耗后用尽，则空出一格
-                MBackpack.backpackSize--;
-            else if (!mi.Item.StackAble)//不可叠加，则消耗多少个就能空出多少格
-                MBackpack.backpackSize -= amount;
-        }
-        if (!TryGetItem_Boolean(itemToMake, amount))
-        {
-            foreach (MaterialInfo mi in itemToMake.Materials)//取消模拟
-            {
-                MBackpack.weightLoad += mi.Item.Weight * mi.Amount * amount;
-                if (mi.Item.StackAble && GetItemAmount(mi.Item) - mi.Amount * amount == 0)
-                    MBackpack.backpackSize++;
-                else if (!mi.Item.StackAble)
-                    MBackpack.backpackSize += amount;
-            }
-            return false;
-        }
-        foreach (MaterialInfo mi in itemToMake.Materials)//取消模拟并确认操作
-        {
-            MBackpack.weightLoad += mi.Item.Weight * mi.Amount * amount;
-            if (mi.Item.StackAble && GetItemAmount(mi.Item) - mi.Amount * amount == 0)
-                MBackpack.backpackSize++;
-            else if (!mi.Item.StackAble)
-                MBackpack.backpackSize += amount;
-            LoseItem(mi.Item, mi.Amount * amount);
-        }*/
-        List<ItemInfo> materials = new List<ItemInfo>();
-        foreach (var m in itemToMake.Materials)
-        {
-            materials.Add(new ItemInfo(m.Item, amount * m.Amount));
-        }
-        return GetItem(itemToMake, amount, materials.ToArray());
-        /*UpdateUI();
-        return true;*/
-    }
-    /// <summary>
-    /// 制作道具，用于自己放入材料来组合新道具的玩法
-    /// </summary>
-    /// <param name="materials">材料列表</param>
-    /// <returns>制作出来的道具</returns>
-    public ItemInfo MakeItem(params ItemInfo[] materials)
-    {
-        return new ItemInfo();
-    }
     #endregion
 
     #region 道具失去相关
@@ -385,16 +312,18 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         return true;
     }
     /// <summary>
-    /// 尝试可否失去道具
+    /// 尝试可否失去道具（精确到背包中的道具）
     /// </summary>
-    /// <param name="info">道具信息</param>
+    /// <param name="info">背包中的道具信息</param>
     /// <param name="amount">失去数量</param>
     /// <param name="simulGetItems">会同时获得的道具</param>
     /// <returns>可否失去</returns>
     public bool TryLoseItem_Boolean(ItemInfo info, int amount, params ItemInfo[] simulGetItems)
     {
         if (!info) return false;
-        return TryLoseItem_Boolean(info.item, amount, simulGetItems);
+        if (Backpack.Items.Contains(info))
+            return TryLoseItem_Boolean(info.item, amount, simulGetItems);
+        else return false;
     }
     /// <summary>
     /// 尝试可否失去道具
@@ -404,7 +333,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     /// <returns>可否失去</returns>
     public bool TryLoseItem_Boolean(ItemInfo info, params ItemInfo[] simulGetItems)
     {
-        return TryLoseItem_Boolean(info, info.Amount, simulGetItems);
+        return TryLoseItem_Boolean(info.item, info.Amount, simulGetItems);
     }
 
     /// <summary>
@@ -441,7 +370,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         }
     }
     /// <summary>
-    /// 失去道具
+    /// 失去道具（精确到个例）
     /// </summary>
     /// <param name="info">道具信息</param>
     /// <param name="amount">失去数量</param>
@@ -458,7 +387,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         ItemAgent ia = itemAgents.Find(x => x.MItemInfo == info);
         if (ia) ia.UpdateInfo();
         OnLoseItemEvent?.Invoke(info.item, GetItemAmount(info.item));
-        if (ItemWindowManager.Instance.MItemInfo == info && info.Amount < 1) ItemWindowManager.Instance.CloseItemWindow();
+        if (ItemWindowManager.Instance.MItemInfo == info && info.Amount < 1) ItemWindowManager.Instance.CloseWindow();
         if (simulGetItems != null)
             foreach (var si in simulGetItems)
                 GetItem(si);
@@ -483,6 +412,11 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     public void DiscardItem(ItemInfo info)
     {
         if (Backpack == null || info == null || !info.item) return;
+        if (!Backpack.Items.Contains(info))
+        {
+            MessageManager.Instance.NewMessage("该物品已经不在" + GameManager.BackpackName + "中了");
+            return;
+        }
         if (!info.item.DiscardAble)
         {
             MessageManager.Instance.NewMessage("该物品不可丢弃");
@@ -514,11 +448,8 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     public void DiscardItems(IEnumerable<ItemInfo> items)
     {
         if (items == null) return;
-        ConfirmManager.Instance.NewConfirm("确定丢掉这些道具吗？", delegate
-        {
-            foreach (var item in items)
-                LoseItem(item);
-        });
+        foreach (var item in items)
+            LoseItem(item);
     }
     #endregion
 
@@ -534,13 +465,14 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         else if (MItemInfo.item.IsEquipment) UseEuipment(MItemInfo);
         else if (MItemInfo.item.IsBook) UseBook(MItemInfo);
         else if (MItemInfo.item.IsBag) UseBag(MItemInfo);
-        if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseItemWindow();
+        else if (MItemInfo.item.IsForQuest) UseQuest(MItemInfo);
+        if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
     }
 
     void UseBox(ItemInfo MItemInfo)
     {
         BoxItem box = MItemInfo.item as BoxItem;
-        LoseItem(box, 1, box.ItemsInBox.ToArray());
+        LoseItem(MItemInfo, 1, box.ItemsInBox.ToArray());
     }
 
     void UseEuipment(ItemInfo MItemInfo)
@@ -581,6 +513,14 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
                 LoseItem(MItemInfo, 1);
         }
     }
+
+    void UseQuest(ItemInfo MItemInfo)
+    {
+        if (!TryLoseItem_Boolean(MItemInfo)) return;
+        QuestItem item = MItemInfo.item as QuestItem;
+        TriggerManager.Instance.SetTrigger(item.TriggerName, item.StateToSet);
+        LoseItem(MItemInfo);
+    }
     #endregion
 
     #region 道具装备相关
@@ -611,12 +551,12 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
             default: return;
         }
         LoseItem(toEquip, 1);
-        Backpack.weightLoad += toEquip.item.Weight;//装备并不是真正没有了，而是装备在身上，所以负重不变，在此处修正。
+        Backpack.weightLoad.Current += toEquip.item.Weight;//装备并不是真正没有了，而是装备在身上，所以负重不变，在此处修正。
         MessageManager.Instance.NewMessage(string.Format("装备了 [{0}]", toEquip.ItemName));
         if (equiped)
         {
             GetItem(equiped, 1);
-            Backpack.weightLoad -= equiped.item.Weight;//装备并不是真正重新获得，而是本来就装备在身上，所以负重不变，在此处修正。
+            Backpack.weightLoad.Current -= equiped.item.Weight;//装备并不是真正重新获得，而是本来就装备在身上，所以负重不变，在此处修正。
         }
         UpdateUI();
     }
@@ -628,7 +568,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         switch (toUnequip.item.ItemType)
         {
             case ItemType.Weapon:
-                Backpack.weightLoad -= equiped.item.Weight;
+                Backpack.weightLoad.Current -= equiped.item.Weight;
                 Backpack.backpackSize--;
                 if (PlayerManager.Instance.PlayerInfo.HasPrimaryWeapon && (equiped.item as WeaponItem).IsPrimary)
                 {
@@ -645,7 +585,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         if (!TryGetItem_Boolean(equiped))
         {
             PlayerManager.Instance.PlayerInfo.EquipWeapon(equiped);
-            Backpack.weightLoad += equiped.item.Weight;
+            Backpack.weightLoad.Current += equiped.item.Weight;
             Backpack.backpackSize++;
             return;
         }
@@ -654,50 +594,27 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     #endregion
 
     #region UI相关
-    public void OpenWindow()
+    public override void OpenWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (IsPausing) return;
         if (DialogueManager.Instance.IsTalking && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen) return;
-        UI.window.alpha = 1;
-        UI.window.blocksRaycasts = true;
-        WindowsManager.Instance.Push(this);
-        IsUIOpen = true;
+        base.OpenWindow();
         GridMask.raycastTarget = true;
-        ZetanUtility.SetActive(UI.handworkButton.gameObject, !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen);
+        ZetanUtility.SetActive(UI.handworkButton.gameObject, !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !ItemSelectionManager.Instance.IsUIOpen);
     }
-    public void CloseWindow()
+    public override void CloseWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (IsPausing) return;
+        base.CloseWindow();
         foreach (ItemAgent ia in itemAgents)
             ia.FinishDrag();
-        UI.window.alpha = 0;
-        UI.window.blocksRaycasts = false;
-        IsUIOpen = false;
-        IsPausing = false;
-        WindowsManager.Instance.Remove(this);
         AmountManager.Instance.Cancel();
-        ItemWindowManager.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseWindow();
         if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
         if (ShopManager.Instance.IsUIOpen) ShopManager.Instance.CloseWindow();
     }
-    public void PauseDisplay(bool pause)
+    public override void PauseDisplay(bool pause)
     {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.window.alpha = 1;
-            UI.window.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.window.alpha = 0;
-            UI.window.blocksRaycasts = false;
-            ItemWindowManager.Instance.CloseItemWindow();
-        }
-        IsPausing = pause;
+        base.PauseDisplay(pause);
+        if (!IsPausing && pause) ItemWindowManager.Instance.CloseWindow();
     }
     public void OpenCloseWindow()
     {
@@ -706,13 +623,20 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
             OpenWindow();
         else CloseWindow();
     }
-    public Canvas CanvasToSort
+
+    public void OpenDiscardWindow()
     {
-        get
+        foreach (var ia in itemAgents)
         {
-            if (!UI) return null;
-            return UI.windowCanvas;
+            if (!ia.IsEmpty && !ia.MItemInfo.item.DiscardAble) ia.Dark();
         }
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Discard, "丢弃物品", "确定要丢掉这些道具吗？", DiscardItems, delegate
+        {
+            foreach (var ia in itemAgents)
+            {
+                if (!ia.IsEmpty) ia.Light();
+            }
+        });
     }
 
     public void Sort()
@@ -722,7 +646,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         Init();
         for (int i = 0; i < Backpack.Items.Count; i++)
             itemAgents[i].SetItem(Backpack.Items[i]);
-        ItemWindowManager.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseWindow();
         UpdateUI();
     }
 
@@ -745,7 +669,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         MakingManager.Instance.UpdateUI();
     }
 
-    public void SetUI(BackpackUI UI)
+    public override void SetUI(BackpackUI UI)
     {
         itemAgents.RemoveAll(x => !x || !x.gameObject);
         foreach (var ia in itemAgents)
@@ -754,7 +678,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         }
         IsPausing = false;
         CloseWindow();
-        this.UI = UI;
+        base.SetUI(UI);
     }
 
     #region 道具页相关
@@ -817,13 +741,54 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     #endregion
 
     #region 其它
+    #region 材料相关
     public bool CheckMaterialsEnough(IEnumerable<MaterialInfo> materials)
     {
+        if (materials == null) return false;
+        if (materials.Count() < 1) return true;
         var materialEnum = materials.GetEnumerator();
         while (materialEnum.MoveNext())
         {
-            if (Backpack.GetItemAmount(materialEnum.Current.Item) < materialEnum.Current.Amount)
-                return false;
+            if (materialEnum.Current.MakingType == MakingType.SingleItem)
+            {
+                if (Backpack.GetItemAmount(materialEnum.Current.Item) < materialEnum.Current.Amount) return false;
+            }
+            else
+            {
+                int amount = Backpack.Items.FindAll(x => x.item.MaterialType == materialEnum.Current.MaterialType).Select(x => x.Amount).Sum();
+                if (amount < materialEnum.Current.Amount) return false;
+            }
+        }
+        return true;
+    }
+    public bool CheckMaterialsEnough(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<ItemInfo> materials)
+    {
+        if (itemMaterials == null || itemMaterials.Count() < 1 || materials == null || materials.Count() < 1 || itemMaterials.Count() != materials.Count()) return false;
+        foreach (var material in itemMaterials)
+        {
+            if (material.MakingType == MakingType.SingleItem)
+            {
+                ItemInfo find = materials.FirstOrDefault(x => x.ItemID == material.ItemID);
+                if (!find) return false;//所提供的材料中没有这种材料
+                if (find.Amount != material.Amount) return false;//若材料数量不符合，则无法制作
+                else if (GetItemAmount(find.ItemID) < material.Amount) return false;//背包中材料数量不足
+            }
+            else
+            {
+                var finds = materials.Where(x => x.item.MaterialType == material.MaterialType);//找到种类相同的道具
+                if (finds.Count() > 0)
+                {
+                    if (finds.Select(x => x.Amount).Sum() != material.Amount) return false;//若材料总数不符合，则无法制作
+                    foreach (var find in finds)
+                    {
+                        if (GetItemAmount(find.item) < find.Amount || QuestManager.Instance.HasQuestRequiredItem(find.item, GetItemAmount(find.item) - find.Amount))
+                        {
+                            return false;
+                        }//若任意一个相应数量的材料无法失去（包括数量不足），则会导致总数量不符合，所以无法制作
+                    }
+                }
+                else return false;//材料不足
+            }
         }
         return true;
     }
@@ -831,21 +796,76 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     public IEnumerable<string> GetMaterialsInfo(IEnumerable<MaterialInfo> materials)
     {
         List<string> info = new List<string>();
-        using (var makingInfo = materials.GetEnumerator())
-            while (makingInfo.MoveNext())
-                info.Add(string.Format("{0}\t[{1}/{2}]", makingInfo.Current.ItemName, Backpack.GetItemAmount(makingInfo.Current.Item), makingInfo.Current.Amount));
+        using (var materialEnum = materials.GetEnumerator())
+            while (materialEnum.MoveNext())
+                if (materialEnum.Current.MakingType == MakingType.SingleItem)
+                    info.Add(string.Format("{0}\t[{1}/{2}]", materialEnum.Current.ItemName, Backpack.GetItemAmount(materialEnum.Current.Item), materialEnum.Current.Amount));
+                else
+                {
+                    var finds = Backpack.Items.FindAll(x => x.item.MaterialType == materialEnum.Current.MaterialType);
+                    int amount = 0;
+                    foreach (var item in finds)
+                        amount += item.Amount;
+                    info.Add(string.Format("{0}\t[{1}/{2}]", MaterialItem.GetMaterialTypeString(materialEnum.Current.MaterialType), amount, materialEnum.Current.Amount));
+                }
         return info.AsEnumerable();
     }
-    public int GetAmountCanMake(IEnumerable<MaterialInfo> Materials)
+
+    public int GetAmountCanMake(IEnumerable<MaterialInfo> materials)
     {
         if (Backpack == null) return 0;
-        if (Materials.Count() < 1) return 0;
+        if (materials.Count() < 1) return 1;
         List<int> amounts = new List<int>();
-        using (var makingInfo = Materials.GetEnumerator())
-            while (makingInfo.MoveNext())
-                amounts.Add(Backpack.GetItemAmount(makingInfo.Current.Item) / makingInfo.Current.Amount);
+        using (var materialEnum = materials.GetEnumerator())
+            while (materialEnum.MoveNext())
+            {
+                if (materialEnum.Current.MakingType == MakingType.SingleItem)
+                    amounts.Add(Backpack.GetItemAmount(materialEnum.Current.Item) / materialEnum.Current.Amount);
+                else
+                {
+                    var finds = Backpack.Items.FindAll(x => x.item.MaterialType == materialEnum.Current.MaterialType);
+                    int amount = 0;
+                    foreach (var item in finds)
+                        amount += item.Amount;
+                    amounts.Add(amount / materialEnum.Current.Amount);
+                }
+            }
         return amounts.Min();
     }
+    public int GetAmountCanMake(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<ItemInfo> materials)
+    {
+        if (materials == null || materials.Count() < 1 || itemMaterials == null || itemMaterials.Count() < 1 || itemMaterials.Count() != materials.Count()) return 0;
+        List<int> amounts = new List<int>();
+        foreach (var material in itemMaterials)
+        {
+            if (material.MakingType == MakingType.SingleItem)
+            {
+                ItemInfo find = materials.FirstOrDefault(x => x.ItemID == material.ItemID);
+                if (!find) return 0;//所提供的材料中没有这种材料
+                if (find.Amount != material.Amount) return 0;//若材料数量不符合，则无法制作
+                amounts.Add(GetItemAmount(find.ItemID) / material.Amount);
+            }
+            else
+            {
+                var finds = materials.Where(x => x.item.MaterialType == material.MaterialType);//找到种类相同的道具
+                if (finds.Count() > 0)
+                {
+                    if (finds.Select(x => x.Amount).Sum() != material.Amount) return 0;//若材料总数不符合，则无法制作
+                    foreach (var find in finds)
+                    {
+                        int amount = GetItemAmount(find.ItemID);
+                        if (QuestManager.Instance.HasQuestRequiredItem(find.item, GetItemAmount(find.item) - find.Amount))
+                            return 0;//若任意一个相应数量的材料无法失去，则会导致总数量不符合，所以无法制作
+                        amounts.Add(amount / find.Amount);
+                    }
+                }
+                else return 0;//材料不足
+            }
+        }
+
+        return amounts.Min();
+    }
+    #endregion
 
     public void GetMoney(long value)
     {
@@ -881,6 +901,15 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         return Backpack.GetItemAmount(item);
     }
 
+    public ItemInfo GetItem(string id)
+    {
+        return Backpack.Find(id);
+    }
+    public ItemInfo GetItem(ItemBase item)
+    {
+        return Backpack.Find(item);
+    }
+
     public bool HasItemWithID(string id)
     {
         return GetItemAmount(id) > 0;
@@ -914,7 +943,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
         {
             ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
             itemAgents.Add(ia);
-            ia.Init(ItemAgentType.Backpack, itemAgents.IndexOf(ia), UI.gridRect);
+            ia.Init(ItemAgentType.Backpack, itemAgents.Count - 1, UI.gridScrollRect);
         }
         MessageManager.Instance.NewMessage(GameManager.BackpackName + "空间增加了");
         return true;
@@ -943,7 +972,7 @@ public class BackpackManager : SingletonMonoBehaviour<BackpackManager>, IWindowH
     /// <param name="item">所需判定的道具</param>
     /// <param name="leftAmount">所需判定的数量</param>
     /// <returns>是否需要</returns>
-    public bool QuestRequireItem(Quest quest, ItemBase item, int leftAmount)
+    public bool DoQuestRequireItem(Quest quest, ItemBase item, int leftAmount)
     {
         if (quest.CmpltObjctvInOrder)
         {

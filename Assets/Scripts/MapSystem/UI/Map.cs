@@ -19,7 +19,7 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             if (clickCount < 1) isClick = true;
-            if (clickTime <= 0.2f) clickCount++;
+            if (clickTime <= 0.2f && Input.touchCount < 2) clickCount++;
             if (clickCount > 1)
             {
                 if (MapManager.Instance.IsViewingWorldMap) MapManager.Instance.CreateDefaultMarkAtMousePos(eventData.position);
@@ -48,7 +48,7 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
 
     private void Update()
     {
-        if (canZoom) MapManager.Instance.ZoomMap(Input.mouseScrollDelta.y);
+        if (canZoom) MapManager.Instance.Zoom(Input.mouseScrollDelta.y);
     }
 
 #if UNITY_ANDROID

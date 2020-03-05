@@ -4,24 +4,15 @@ using System.Linq;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/商铺管理器")]
-public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
+public class ShopManager : WindowHandler<ShopUI, ShopManager>
 {
-    [SerializeField]
-    private ShopUI UI;
-
     public static List<TalkerData> Vendors { get; } = new List<TalkerData>();
 
-    private List<MerchandiseAgent> merchandiseAgents = new List<MerchandiseAgent>();
+    private readonly List<MerchandiseAgent> merchandiseAgents = new List<MerchandiseAgent>();
 
     public ShopInformation MShop { get; private set; }
 
     public ItemInfo MItemInfo { get; private set; }
-
-    public bool IsUIOpen { get; private set; }
-
-    public bool IsPausing { get; private set; }
-
-    public Canvas CanvasToSort => UI ? UI.windowCanvas : null;
 
     private void Update()
     {
@@ -250,51 +241,22 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
     #endregion
 
     #region UI相关
-    public void OpenWindow()
+    public override void OpenWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (IsUIOpen) return;
-        if (IsPausing) return;
-        UI.window.alpha = 1;
-        UI.window.blocksRaycasts = true;
-        WindowsManager.Instance.Push(this);
-        IsUIOpen = true;
+        if (!MShop) return;
+        base.OpenWindow();
         UIManager.Instance.EnableJoyStick(false);
     }
 
-    public void CloseWindow()
+    public override void CloseWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing) return;
-        UI.window.alpha = 0;
-        UI.window.blocksRaycasts = false;
-        IsUIOpen = false;
-        IsPausing = false;
+        base.CloseWindow();
         MShop = null;
         MItemInfo = null;
-        WindowsManager.Instance.Remove(this);
         if (BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.CloseWindow();
-        ItemWindowManager.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseWindow();
         if (DialogueManager.Instance.IsUIOpen) DialogueManager.Instance.PauseDisplay(false);
         AmountManager.Instance.Cancel();
-    }
-
-    public void PauseDisplay(bool pause)
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.window.alpha = 1;
-            UI.window.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.window.alpha = 0;
-            UI.window.blocksRaycasts = false;
-        }
-        IsPausing = pause;
     }
 
     public void SetPage(int page)
@@ -321,7 +283,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
                     ma.Clear();
                 foreach (MerchandiseInfo mi in MShop.Commodities)
                     foreach (MerchandiseAgent ma in merchandiseAgents)
-                        if (ma.IsEmpty && !mi.IsValid)
+                        if (ma.IsEmpty && mi.IsValid)
                         {
                             ma.Init(mi, MerchandiseType.SellToPlayer);
                             break;
@@ -347,7 +309,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
                     ma.Clear();
                 foreach (MerchandiseInfo mi in MShop.Acquisitions)
                     foreach (MerchandiseAgent ma in merchandiseAgents)
-                        if (ma.IsEmpty && !mi.IsValid && mi.Item.SellAble)
+                        if (ma.IsEmpty && mi.IsValid && mi.Item.SellAble)
                         {
                             ma.Init(mi, MerchandiseType.BuyFromPlayer);
                             break;
@@ -355,10 +317,10 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
                 break;
             default: break;
         }
-        ItemWindowManager.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseWindow();
     }
 
-    public void SetUI(ShopUI UI)
+    public override void SetUI(ShopUI UI)
     {
         foreach (var ma in merchandiseAgents)
         {
@@ -367,7 +329,7 @@ public class ShopManager : SingletonMonoBehaviour<ShopManager>, IWindowHandler
         merchandiseAgents.Clear();
         IsPausing = false;
         CloseWindow();
-        this.UI = UI;
+        base.SetUI(UI);
     }
     #endregion
 

@@ -1,28 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/日历管理器")]
-public class CalendarManager : SingletonMonoBehaviour<CalendarManager>, IWindowHandler, IOpenCloseAbleWindow
+public class CalendarManager : WindowHandler<CalendarUI, CalendarManager>, IOpenCloseAbleWindow
 {
-    [SerializeField]
-    private CalendarUI UI;
-
     private readonly List<DateAgent> dateAgents = new List<DateAgent>();
-
-    public bool IsUIOpen { get; private set; }
-
-    public bool IsPausing { get; private set; }
-
-    public Canvas CanvasToSort
-    {
-        get
-        {
-            if (UI) return UI.windowCanvas;
-            else return null;
-        }
-    }
 
     public void Init()
     {
@@ -69,59 +52,24 @@ public class CalendarManager : SingletonMonoBehaviour<CalendarManager>, IWindowH
         if (todayIndex > -1 && todayIndex < dateAgents.Count) dateAgents[todayIndex].SetToday(true);
     }
 
-    public void OpenWindow()
+    public override void OpenWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (IsPausing) return;
-        if (IsUIOpen) return;
-        IsUIOpen = true;
+        base.OpenWindow();
         UpdateUI();
-        UI.window.alpha = 1;
-        UI.window.blocksRaycasts = true;
-        WindowsManager.Instance.Push(this);
-    }
-
-    public void CloseWindow()
-    {
-        if (!UI || !UI.gameObject) return;
-        if (IsPausing) return;
-        if (!IsUIOpen) return;
-        UI.window.alpha = 0;
-        UI.window.blocksRaycasts = false;
-        WindowsManager.Instance.Remove(this);
-        IsUIOpen = false;
     }
 
     public void OpenCloseWindow()
     {
         if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen)
-            OpenWindow();
+        if (!IsUIOpen) OpenWindow();
         else CloseWindow();
     }
 
-    public void PauseDisplay(bool pause)
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.window.alpha = 1;
-            UI.window.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.window.alpha = 0;
-            UI.window.blocksRaycasts = false;
-        }
-        IsPausing = pause;
-    }
-
-    public void SetUI(CalendarUI UI)
+    public override void SetUI(CalendarUI UI)
     {
         dateAgents.RemoveAll(x => !x || !x.gameObject);
         CloseWindow();
-        this.UI = UI;
+        base.SetUI(UI);
         Init();
     }
 }

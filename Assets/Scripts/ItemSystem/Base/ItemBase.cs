@@ -51,7 +51,7 @@ public abstract class ItemBase : ScriptableObject
 
     [SerializeField]
     protected bool stackAble = true;
-    public virtual bool StackAble => stackAble;
+    public virtual bool StackAble => Inexhaustible ? false : stackAble;
 
     [SerializeField]
     protected bool discardAble = true;
@@ -84,6 +84,19 @@ public abstract class ItemBase : ScriptableObject
 #endif
     protected MakingMethod makingMethod;
     public virtual MakingMethod MakingMethod => makingMethod;
+
+    [SerializeField]
+#if UNITY_EDITOR
+    [EnumMemberNames("未定义", "矿石", "金属", "植物", "布料", "肉类", "皮毛", "水果", "图纸", "调料")]
+#endif
+    protected MaterialType materialType;
+    public MaterialType MaterialType
+    {
+        get
+        {
+            return materialType;
+        }
+    }
 
     [SerializeField]
     protected List<MaterialInfo> materials = new List<MaterialInfo>();
@@ -120,6 +133,8 @@ public abstract class ItemBase : ScriptableObject
     }
 
     public bool DIYAble => MakingTool != MakingToolType.None && !Materials.TrueForAll(x => x.MakingType == MakingType.SingleItem);
+
+    public bool Makable => MakingMethod != MakingMethod.None && Materials != null && Materials.Count > 0;
     #endregion
 
     #region 类型判断相关
@@ -148,6 +163,30 @@ public abstract class ItemBase : ScriptableObject
     /// </summary>
     public bool IsConsumable => this is BoxItem || this is BagItem || this is MedicineItem;
     #endregion
+
+    public static string GetItemTypeString(ItemType itemType)
+    {
+        switch (itemType)
+        {
+            case ItemType.Weapon:
+            case ItemType.Armor:
+            case ItemType.Jewelry:
+            case ItemType.Tool:
+                return "装备";
+            case ItemType.Quest:
+            case ItemType.Valuables:
+                return "特殊";
+            case ItemType.Material:
+                return "材料";
+            case ItemType.Box:
+            case ItemType.Bag:
+            case ItemType.Medicine:
+            case ItemType.Elixir:
+            case ItemType.Cuisine:
+                return "消耗品";
+            default: return "普通";
+        }
+    }
 }
 
 #region 道具种类相关
@@ -194,11 +233,6 @@ public enum ItemType
     Box,
 
     /// <summary>
-    /// 种子
-    /// </summary>
-    Seed,
-
-    /// <summary>
     /// 加工材料
     /// </summary>
     Material,
@@ -231,7 +265,12 @@ public enum ItemType
     /// <summary>
     /// 袋子
     /// </summary>
-    Bag
+    Bag,
+
+    /// <summary>
+    /// 种子
+    /// </summary>
+    Seed
 }
 
 public enum ItemQuality

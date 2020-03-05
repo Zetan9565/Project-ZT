@@ -16,8 +16,8 @@ public class BackpackUI : WindowUI
     public Button sortButton;
     public MakingTool handworkButton;
 
-    public DiscardArea discardArea;
-    public ScrollRect gridRect;
+    public DiscardButton discardArea;
+    public ScrollRect gridScrollRect;
     public Image gridMask;
 
     protected override void Awake()

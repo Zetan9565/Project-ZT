@@ -46,6 +46,11 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     [SerializeField]
     [Tooltip("现实中的 1 秒折合游戏中的多少分钟？")]
     private float multiples = 1;
+    public float Multiples
+    {
+        get => multiples;
+        set { multiples = value; }
+    }
 
     private float Scale => multiples / 60;
 
@@ -111,7 +116,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
                     string GetMoment()
                     {
                         float dec = timeline - (int)timeline;
-                        dec = ((int)timeline % 2 == 0 ? 1 + dec : dec) / 2;
+                        dec = ((int)timeline % 2 == 0 ? 1 + dec : dec) * 0.5f;
                         int moment = (int)(dec * 8) % 8;
                         switch (moment)
                         {

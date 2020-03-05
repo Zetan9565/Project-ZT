@@ -3,11 +3,8 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/拾取管理器")]
-public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
+public class LootManager : WindowHandler<LootUI, LootManager>
 {
-    [SerializeField]
-    private LootUI UI;
-
     [SerializeField]
     private int slotCount;
 
@@ -19,30 +16,24 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
 
     public LootAgent LootAgent { get; private set; }
 
-    public bool IsUIOpen { get; private set; }
-    public bool IsPausing { get; private set; }
-
     public bool PickAble { get; private set; }
     public bool IsPicking { get; private set; }
-
-    public Canvas CanvasToSort => UI ? UI.windowCanvas : null;
 
     private void Init()
     {
         foreach (var ia in itemAgents)
             ia.Empty();
-        int befCount = itemAgents.Count;
-        if (slotCount >= befCount)
-            for (int i = 0; i < slotCount - befCount; i++)
-            {
-                ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-                ia.Init(ItemAgentType.Loot);
-                itemAgents.Add(ia);
-            }
-        else for (int i = 0; i < befCount - slotCount; i++)
-            {
-
-            }
+        while (itemAgents.Count < slotCount)
+        {
+            ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+            ia.Init(ItemAgentType.Loot);
+            itemAgents.Add(ia);
+        }
+        while (itemAgents.Count > slotCount)
+        {
+            itemAgents[itemAgents.Count - 1].Clear(true);
+            itemAgents.RemoveAt(itemAgents.Count - 1);
+        }
         if (LootAgent)
             foreach (ItemInfo li in LootAgent.lootItems)
                 foreach (ItemAgent ia in itemAgents)
@@ -56,7 +47,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
     public void TakeItem(ItemInfo info, bool all = false)
     {
         if (!LootAgent || info == null || !info.item) return;
-        ItemWindowManager.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseWindow();
         if (!all)
             if (info.Amount == 1) OnTake(info, 1);
             else
@@ -75,8 +66,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
         if (!LootAgent) return;
         if (!LootAgent.lootItems.Contains(item)) return;
         int takeAmount = BackpackManager.Instance.TryGetItem_Integer(item, amount);
-        if (BackpackManager.Instance.GetItem(item.item, takeAmount))
-            item.Amount -= takeAmount;
+        if (BackpackManager.Instance.GetItem(item.item, takeAmount)) item.Amount -= takeAmount;
         if (item.Amount < 1) LootAgent.lootItems.Remove(item);
         ItemAgent ia = GetItemAgentByInfo(item);
         if (ia) ia.UpdateInfo();
@@ -93,8 +83,7 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
         foreach (ItemInfo item in LootAgent.lootItems)
         {
             int takeAmount = BackpackManager.Instance.TryGetItem_Integer(item);
-            if (BackpackManager.Instance.GetItem(item.item, takeAmount))
-                item.Amount -= takeAmount;
+            if (BackpackManager.Instance.GetItem(item.item, takeAmount)) item.Amount -= takeAmount;
             ItemAgent ia = GetItemAgentByInfo(item);
             if (ia) ia.UpdateInfo();
         }
@@ -127,48 +116,24 @@ public class LootManager : SingletonMonoBehaviour<LootManager>, IWindowHandler
         CloseWindow();
     }
 
-    public void OpenWindow()
+    public override void OpenWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (IsUIOpen) return;
-        if (IsPausing) return;
+        base.OpenWindow();
         Init();
-        UI.window.alpha = 1;
-        UI.window.blocksRaycasts = true;
-        IsUIOpen = true;
-        WindowsManager.Instance.Push(this);
-        IsPicking = true;
         UIManager.Instance.EnableInteractive(false);
+
+        IsPicking = true;
     }
-    public void CloseWindow()
+    public override void CloseWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing) return;
-        UI.window.alpha = 0;
-        UI.window.blocksRaycasts = false;
-        IsUIOpen = false;
-        WindowsManager.Instance.Remove(this);
-        IsPicking = false;
-        CannotPick();
+        base.CloseWindow();
+        LootAgent = null;
+        PickAble = false;
         if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();
-        ItemWindowManager.Instance.CloseItemWindow();
-    }
-    public void PauseDisplay(bool pause)
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.window.alpha = 1;
-            UI.window.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.window.alpha = 0;
-            UI.window.blocksRaycasts = false;
-        }
-        IsPausing = pause;
+        ItemWindowManager.Instance.CloseWindow();
+        UIManager.Instance.EnableInteractive(false);
+
+        IsPicking = false;
     }
     #endregion
 }

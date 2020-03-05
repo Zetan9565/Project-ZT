@@ -99,7 +99,7 @@ public class QuestUIInspector : Editor
         EditorGUILayout.PropertyField(boardQuestPrefab, new GUIContent("栏任务载体预制件"));
         EditorGUILayout.PropertyField(questBoardArea, new GUIContent("任务栏放置根"), true);
         EditorGUILayout.EndVertical();
-        EditorGUILayout.PropertyField(questIcon, new GUIContent("任务图标"));
+        EditorGUILayout.PropertyField(questIcon, new GUIContent("任务目标图标"));
         EditorGUILayout.PropertyField(questFlagsPrefab, new GUIContent("状态器预制件"));
         EditorGUILayout.PropertyField(questFlagsPanel, new GUIContent("状态器显示面板"));
         if (EditorGUI.EndChangeCheck())

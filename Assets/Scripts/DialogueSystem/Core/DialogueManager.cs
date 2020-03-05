@@ -7,11 +7,8 @@ using UnityEngine.Events;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/对话管理器")]
-public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowHandler
+public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 {
-    [SerializeField]
-    private DialogueUI UI;
-
     [HideInInspector]
     public UnityEvent OnBeginDialogueEvent = new UnityEvent();
     [HideInInspector]
@@ -75,19 +72,6 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
 
     public int IndexToGoBack { get; private set; } = -1;
 
-    public bool IsUIOpen { get; private set; }
-
-    public bool IsPausing { get; private set; }
-
-    public Canvas CanvasToSort
-    {
-        get
-        {
-            if (!UI) return null;
-            return UI.windowCanvas;
-        }
-    }
-
     #region 开始新对话
     public void BeginNewDialogue()
     {
@@ -134,7 +118,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         if (!UI) return;
         CurrentTalker = talker;
         CurrentType = DialogueType.Normal;
-        if (talker.QuestInstances.FindAll(q => QuestManager.Instance.QuestIsAcceptAble(q)).Count > 0)
+        if (talker.QuestInstances.FindAll(q => QuestManager.Instance.IsQuestAcceptable(q)).Count > 0)
             ZetanUtility.SetActive(UI.questButton.gameObject, true);
         else ZetanUtility.SetActive(UI.questButton.gameObject, false);
         ZetanUtility.SetActive(UI.warehouseButton.gameObject, talker.Info.IsWarehouseAgent);
@@ -329,7 +313,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         ClearOptions();
         foreach (Quest quest in CurrentTalker.QuestInstances)
         {
-            if (!QuestManager.Instance.HasCompleteQuest(quest) && QuestManager.Instance.QuestIsAcceptAble(quest) && QuestManager.Instance.QuestIsValid(quest))
+            if (!QuestManager.Instance.HasCompleteQuest(quest) && QuestManager.Instance.IsQuestAcceptable(quest) && QuestManager.Instance.IsQuestValid(quest))
             {
                 OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(quest.Title + (quest.IsComplete ? "(完成)" : quest.IsOngoing ? "(进行中)" : string.Empty), quest);
@@ -803,28 +787,18 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
     #endregion
 
     #region UI相关
-    public void OpenWindow()
+    public override void OpenWindow()
     {
-        if (!UI || !UI.gameObject) return;
         if (!TalkAble) return;
-        if (IsPausing) return;
-        if (IsUIOpen) return;
-        UI.window.alpha = 1;
-        UI.window.blocksRaycasts = true;
-        WindowsManager.Instance.PauseAll(true, this, WarehouseManager.Instance);
-        WindowsManager.Instance.Push(this);
-        IsUIOpen = true;
+        base.OpenWindow();
+        if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
+        WindowsManager.Instance.PauseAll(true, this);
         UIManager.Instance.EnableJoyStick(false);
         UIManager.Instance.EnableInteractive(false);
     }
-    public void CloseWindow()
+    public override void CloseWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        UI.window.alpha = 0;
-        UI.window.blocksRaycasts = false;
-        IsUIOpen = false;
-        IsPausing = false;
+        base.CloseWindow();
         CurrentType = DialogueType.Normal;
         CurrentTalker = null;
         CurrentQuest = null;
@@ -837,29 +811,11 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         HideQuestDescription();
         IsTalking = false;
         if (!BuildingManager.Instance.IsPreviewing) WindowsManager.Instance.PauseAll(false);
-        WindowsManager.Instance.Remove(this);
         if (WarehouseManager.Instance.IsPausing) WarehouseManager.Instance.PauseDisplay(false);
         WarehouseManager.Instance.CloseWindow();
         if (ShopManager.Instance.IsPausing) ShopManager.Instance.PauseDisplay(false);
         ShopManager.Instance.CloseWindow();
         UIManager.Instance.EnableJoyStick(true);
-    }
-
-    public void PauseDisplay(bool pause)
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.window.alpha = 1;
-            UI.window.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.window.alpha = 0;
-            UI.window.blocksRaycasts = false;
-        }
-        IsPausing = pause;
     }
 
     public void ShowQuestDescription(Quest quest)
@@ -898,7 +854,7 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, IWindowH
         CurrentQuest = null;
         UI.descriptionWindow.alpha = 0;
         UI.descriptionWindow.blocksRaycasts = false;
-        ItemWindowManager.Instance.CloseItemWindow();
+        ItemWindowManager.Instance.CloseWindow();
     }
 
     public void OpenTalkerWarehouse()

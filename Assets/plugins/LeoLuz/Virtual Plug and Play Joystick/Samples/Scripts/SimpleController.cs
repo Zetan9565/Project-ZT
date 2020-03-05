@@ -35,7 +35,7 @@ namespace LeoLuz.PlugAndPlayJoystick
         {
             rb.velocity = new Vector2(Input.GetAxis("Horizontal") * velocity, rb.velocity.y);
 
-            if (grounded && Input.GetButtonDown(JumpAxis))
+            if (grounded && Input.GetButton(JumpAxis))
             {
                 rb.velocity = new Vector2(rb.velocity.x, 10f);
                 grounded = false;

@@ -380,7 +380,10 @@ public class CollectObjective : Objective
     }
 
     [SerializeField]
-    private bool checkBagAtStart = true;//用于标识是否在目标开始执行时检查背包道具看是否满足目标，否则目标重头开始计数
+    private bool checkBagAtStart = true;
+    /// <summary>
+    /// 是否在目标开始执行时检查背包道具看是否满足目标，否则目标重头开始计数
+    /// </summary>
     public bool CheckBagAtStart
     {
         get
@@ -388,8 +391,12 @@ public class CollectObjective : Objective
             return checkBagAtStart;
         }
     }
+
     [SerializeField]
-    private bool loseItemAtSbmt = true;//用于标识是否在提交任务时失去相应道具
+    private bool loseItemAtSbmt = true;
+    /// <summary>
+    /// 是否在提交任务时失去相应道具
+    /// </summary>
     public bool LoseItemAtSbmt
     {
         get
@@ -428,16 +435,6 @@ public class CollectObjective : Objective
 [System.Serializable]
 public class KillObjective : Objective
 {
-    //[SerializeField]
-    //private string enemyID;
-    //public string EnemyID
-    //{
-    //    get
-    //    {
-    //        return enemyID;
-    //    }
-    //}
-
     [SerializeField]
 #if UNITY_EDITOR
     [EnumMemberNames("特定敌人", "特定种群", "任意敌人")]

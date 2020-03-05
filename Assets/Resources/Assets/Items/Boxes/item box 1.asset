@@ -24,10 +24,12 @@ MonoBehaviour:
   description: "\u5916\u8868\u5F88\u666E\u901A\u7684\u7BB1\u5B50\u3002"
   stackAble: 0
   discardAble: 1
-  useable: 1
+  lockAble: 1
+  usable: 1
   inexhaustible: 0
   maxDurability: 100
   makingMethod: 0
+  materialType: 0
   materials: []
   itemsInBox:
   - item: {fileID: 11400000, guid: eb68c8a7b1bbeb8408eed1d2af6b8ad6, type: 2}
@@ -59,6 +61,15 @@ MonoBehaviour:
     gemstone2: {fileID: 0}
   - item: {fileID: 11400000, guid: a7d72e2d91b0a664392e7855e2e4d192, type: 2}
     amount: 5
+    indexInGrid: 0
+    durability:
+      min: 0
+      max: 1
+    gemSlotAmount: 0
+    gemstone1: {fileID: 0}
+    gemstone2: {fileID: 0}
+  - item: {fileID: 11400000, guid: 86c44e849927e8c41a0769cd6a0d9376, type: 2}
+    amount: 1
     indexInGrid: 0
     durability:
       min: 0

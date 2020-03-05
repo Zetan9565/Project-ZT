@@ -23,7 +23,10 @@ public class Input : MonoBehaviour
     public static bool stylusTouchSupported { get { return UnityEngine.Input.stylusTouchSupported; } }
     public static bool touchSupported { get { return UnityEngine.Input.touchSupported; } }
     public static bool multiTouchEnabled { get { return UnityEngine.Input.multiTouchEnabled; } set { UnityEngine.Input.multiTouchEnabled = value; } }
-    public static LocationService location { get { return UnityEngine.Input.location; } }
+    public static LocationService location { get { 
+        Debug.Log("api's Input.location command is disabled so unity does not automatically generate an AndroidManifest.xml. To enable it uncomment the line below, and comment out this log line."); return null;
+        //return UnityEngine.Input.location; 
+        } }
     public static Compass compass { get { return UnityEngine.Input.compass; } }
     public static DeviceOrientation deviceOrientation { get { return UnityEngine.Input.deviceOrientation; } }
     public static IMECompositionMode imeCompositionMode { get { return UnityEngine.Input.imeCompositionMode; } }
@@ -123,7 +126,7 @@ public class Input : MonoBehaviour
     }
     public static bool GetKey(KeyCode key)
     {
-        return UnityEngine.Input.GetKey(key);
+        return UnityEngine.Input.GetKeyUp(key);
     }
     public static bool GetKeyDown(string key)
     {
@@ -164,13 +167,12 @@ public class Input : MonoBehaviour
 
         return UnityEngine.Input.IsJoystickPreconfigured(joystickName);
     }
+
+#endif
     public static void ResetInputAxes()
     {
-
         UnityEngine.Input.ResetInputAxes();
-
     }
-#endif
     #endregion
     #region Debug
     //	void OnGUI(){

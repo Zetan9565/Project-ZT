@@ -19,7 +19,7 @@ public class ZetanUtility
     public static bool Probability(float probability)
     {
         if (probability < 0) return false;
-        return UnityEngine.Random.Range(100, 10001) / 100.0f <= probability;
+        return UnityEngine.Random.Range(100, 10001) * 0.01f <= probability;
     }
 
     public static string ColorText(string text, Color color)
@@ -32,6 +32,11 @@ public class ZetanUtility
         if (!gameObject) return;
         if (gameObject.activeSelf != value) gameObject.SetActive(value);
     }
+    public static void SetActive(Component component, bool value)
+    {
+        if (!component) return;
+        SetActive(component.gameObject, value);
+    }
 
     public static Rect GetScreenSpaceRect(RectTransform rectTransform)
     {
@@ -43,7 +48,7 @@ public class ZetanUtility
 
     public static void DrawGizmosCircle(Vector3 center, float radius, Vector3 rotateAxis)
     {
-        float delta = radius / 1000f;
+        float delta = radius * 0.001f;
         if (delta < 0.0001f) delta = 0.0001f;
         Vector3 firstPoint = Vector3.zero;
         Vector3 fromPoint = Vector3.zero;
@@ -62,7 +67,7 @@ public class ZetanUtility
     }
     public static void DrawGizmosCircle(Vector3 center, float radius, Vector3 rotateAxis, Color color)
     {
-        float delta = radius / 1000f;
+        float delta = radius * 0.001f;
         if (delta < 0.0001f) delta = 0.0001f;
         Color colorBef = Gizmos.color;
         Gizmos.color = color;
@@ -95,14 +100,27 @@ public class ZetanUtility
         }
     }
 
-    public static bool PointInsideScreen(Vector3 worldPosition)
+    public static void KeepInsideScreen(RectTransform rectTransform, bool left = true, bool right = true, bool top = true, bool bottom = true)
+    {
+        Rect fixedRect = GetScreenSpaceRect(rectTransform);
+        float leftWidth = rectTransform.pivot.x * fixedRect.width;
+        float rightWidth = fixedRect.width - leftWidth;
+        float bottomHeight = rectTransform.pivot.y * fixedRect.height;
+        float topHeight = fixedRect.height - bottomHeight;
+        if (left && rectTransform.position.x - leftWidth < 0) rectTransform.position += Vector3.right * (leftWidth - rectTransform.position.x);
+        if (right && rectTransform.position.x + rightWidth > Screen.width) rectTransform.position -= Vector3.right * (rectTransform.position.x + rightWidth - Screen.width);
+        if (bottom && rectTransform.position.y - bottomHeight < 0) rectTransform.position += Vector3.up * (bottomHeight - rectTransform.position.y);
+        if (top && rectTransform.position.y + topHeight > Screen.height) rectTransform.position -= Vector3.up * (rectTransform.position.y + topHeight - Screen.height);//保证顶部显示
+    }
+
+    public static bool IsPointInsideScreen(Vector3 worldPosition)
     {
         Vector3 viewportPoint = Camera.main.WorldToViewportPoint(worldPosition);
         return viewportPoint.x > 0 && viewportPoint.x < 1 && viewportPoint.y > 0 && viewportPoint.y < 1;
     }
 
     #region Vector相关
-    public static Vector2 ScreenCenter => new Vector2(Screen.width / 2, Screen.height / 2);
+    public static Vector2 ScreenCenter => new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
 
     public static Vector3 MousePositionAsWorld => Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
@@ -146,9 +164,9 @@ public class ZetanUtility
 
     public static Vector3 CenterBetween(Vector3 point1, Vector3 point2)
     {
-        float x = point1.x - (point1.x - point2.x) / 2;
-        float y = point1.y - (point1.y - point2.y) / 2;
-        float z = point1.z - (point1.z - point2.z) / 2;
+        float x = point1.x - (point1.x - point2.x) * 0.5f;
+        float y = point1.y - (point1.y - point2.y) * 0.5f;
+        float z = point1.z - (point1.z - point2.z) * 0.5f;
         return new Vector3(x, y, z);
     }
 
@@ -453,9 +471,9 @@ public class ScopeInt
     /// <summary>
     /// 四分之一
     /// </summary>
-    public int Quarter { get { return Max / 4; } }
+    public int Quarter { get { return (int)(Max * 0.25f); } }
 
-    public int Half { get { return Max / 2; } }
+    public int Half { get { return (int)(Max * 0.5f); } }
 
     /// <summary>
     /// 四分之三
@@ -469,21 +487,21 @@ public class ScopeInt
 
     #region 运算符重载
     #region 加减乘除
-    public static ScopeInt operator +(ScopeInt left, int right)
+    public static int operator +(ScopeInt left, int right)
     {
-        return new ScopeInt(left.Min, left.Max) { Current = left.Current + right };
+        return left.Current + right;
     }
-    public static ScopeInt operator -(ScopeInt left, int right)
+    public static int operator -(ScopeInt left, int right)
     {
-        return new ScopeInt(left.Min, left.Max) { Current = left.Current - right };
+        return left.Current - right;
     }
-    public static ScopeInt operator +(ScopeInt left, float right)
+    public static float operator +(ScopeInt left, float right)
     {
-        return new ScopeInt(left.Min, left.Max) { Current = (int)(left.Current + right) };
+        return (int)(left.Current + right);
     }
-    public static ScopeInt operator -(ScopeInt left, float right)
+    public static float operator -(ScopeInt left, float right)
     {
-        return new ScopeInt(left.Min, left.Max) { Current = (int)(left.Current - right) };
+        return (int)(left.Current - right);
     }
     public static int operator +(int left, ScopeInt right)
     {
@@ -831,21 +849,21 @@ public class ScopeFloat
 
     #region 运算符重载
     #region 加减乘除
-    public static ScopeFloat operator +(ScopeFloat left, int right)
+    public static int operator +(ScopeFloat left, int right)
     {
-        return new ScopeFloat(left.Min, left.Max) { Current = left.Current + right };
+        return (int)left.Current + right;
     }
-    public static ScopeFloat operator -(ScopeFloat left, int right)
+    public static int operator -(ScopeFloat left, int right)
     {
-        return new ScopeFloat(left.Min, left.Max) { Current = left.Current - right };
+        return (int)left.Current - right;
     }
-    public static ScopeFloat operator +(ScopeFloat left, float right)
+    public static float operator +(ScopeFloat left, float right)
     {
-        return new ScopeFloat(left.Min, left.Max) { Current = left.Current + right };
+        return left.Current + right;
     }
-    public static ScopeFloat operator -(ScopeFloat left, float right)
+    public static float operator -(ScopeFloat left, float right)
     {
-        return new ScopeFloat(left.Min, left.Max) { Current = left.Current - right };
+        return left.Current - right;
     }
     public static int operator +(int left, ScopeFloat right)
     {
@@ -1172,7 +1190,7 @@ public class Heap<T> where T : class, IHeapItem<T>
 
     private void SortUpForm(T item)
     {
-        int parentIndex = (item.HeapIndex - 1) / 2;
+        int parentIndex = (int)((item.HeapIndex - 1) * 0.5f);
         while (true)
         {
             T parent = items[parentIndex];
@@ -1183,7 +1201,7 @@ public class Heap<T> where T : class, IHeapItem<T>
                     return;//交换不成功则退出，防止死循环
             }
             else return;
-            parentIndex = (item.HeapIndex - 1) / 2;
+            parentIndex = (int)((item.HeapIndex - 1) * 0.5f);
         }
     }
 

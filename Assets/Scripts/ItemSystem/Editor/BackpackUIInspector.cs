@@ -19,7 +19,7 @@ public class BackpackUIInspector : Editor
     SerializedProperty handworkButton;
 
     SerializedProperty discardArea;
-    SerializedProperty gridRect;
+    SerializedProperty gridScrollRect;
     SerializedProperty gridMask;
 
     private void OnEnable()
@@ -37,7 +37,7 @@ public class BackpackUIInspector : Editor
         sortButton = serializedObject.FindProperty("sortButton");
         handworkButton = serializedObject.FindProperty("handworkButton");
         discardArea = serializedObject.FindProperty("discardArea");
-        gridRect = serializedObject.FindProperty("gridRect");
+        gridScrollRect = serializedObject.FindProperty("gridScrollRect");
         gridMask = serializedObject.FindProperty("gridMask");
     }
 
@@ -56,9 +56,9 @@ public class BackpackUIInspector : Editor
         EditorGUILayout.PropertyField(closeButton, new GUIContent("关闭按钮"));
         EditorGUILayout.PropertyField(sortButton, new GUIContent("整理按钮"));
         EditorGUILayout.PropertyField(handworkButton, new GUIContent("制作按钮"));
-        EditorGUILayout.PropertyField(discardArea, new GUIContent("丢弃区域"));
+        EditorGUILayout.PropertyField(discardArea, new GUIContent("丢弃按钮"));
         EditorGUILayout.PropertyField(gridMask, new GUIContent("滚动视图遮罩"));
-        EditorGUILayout.PropertyField(gridRect, new GUIContent("滚动视图"));
+        EditorGUILayout.PropertyField(gridScrollRect, new GUIContent("滚动视图"));
         EditorGUILayout.EndVertical();
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();

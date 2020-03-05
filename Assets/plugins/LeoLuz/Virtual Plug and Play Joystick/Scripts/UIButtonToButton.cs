@@ -51,25 +51,22 @@ namespace LeoLuz.PlugAndPlayJoystick
         {
             if (pressed)
                 Input.PressButtonMobile(ButtonName);
-
-            //print("Update>" + Time.frameCount);
         }
 
         public void FixedUpdate()
         {
             if (pressed)
-                Input.PressButtonMobile(ButtonName);
-
-            //print("FixedUpdate>" + Time.frameCount);
+                Input.PressButtonMobile(ButtonName);    
         }
 
         void LateUpdate()
         {
-            //print("LateUpdate>" + Time.frameCount);
+       
         }
 
         public virtual void OnPointerDown(PointerEventData data)
         {
+            pressed = true;
             Input.PressButtonDownMobile(ButtonName);
         }
 

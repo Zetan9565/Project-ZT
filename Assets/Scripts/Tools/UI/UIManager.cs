@@ -23,24 +23,12 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     private Button settingButton;
 
     [SerializeField]
-    private AnalogicKnob joyStick;
-    public AnalogicKnob JoyStick
-    {
-        get
-        {
-            return joyStick;
-        }
-    }
+    private Joystick joyStick;
+    public Joystick JoyStick => joyStick;
 
     [SerializeField]
     private UIButtonToButton interactiveButton;
-    public UIButtonToButton InteractiveButton
-    {
-        get
-        {
-            return interactiveButton;
-        }
-    }
+    public UIButtonToButton InteractiveButton => interactiveButton;
 
     [SerializeField]
     private Text interactiveName;
@@ -54,7 +42,6 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         ZetanUtility.SetActive(JoyStick.KnobBackground.gameObject, false);
 #elif UNITY_ANDROID
         ZetanUtility.SetActive(JoyStick.gameObject, true);
-        ZetanUtility.SetActive(JoyStick.KnobBackground.gameObject, true);
 #endif
         ZetanUtility.SetActive(InteractiveButton.gameObject, false);
         questButton.onClick.AddListener(QuestManager.Instance.OpenCloseWindow);
@@ -77,13 +64,13 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     {
         JoyStick.enabled = value && !(DialogueManager.Instance.IsUIOpen || ShopManager.Instance.IsUIOpen ||
             WarehouseManager.Instance.IsUIOpen || QuestManager.Instance.IsUIOpen || BuildingManager.Instance.IsPreviewing);
+        if (!JoyStick.enabled) JoyStick.Stop();
     }
 
     public void EnableInteractive(bool value, string name = null)
     {
 #if UNITY_ANDROID
-        if (!value)
-            ZetanUtility.SetActive(InteractiveButton.gameObject, false);
+        if (!value) ZetanUtility.SetActive(InteractiveButton.gameObject, false);
         else
         {
             ZetanUtility.SetActive(InteractiveButton.gameObject, true &&
@@ -139,6 +126,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         canvasGroup.alpha = 0;
         canvasGroup.blocksRaycasts = false;
         JoyStick.enabled = false;
+        JoyStick.Stop();
     }
 
     public void Init()
@@ -146,16 +134,22 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         WindowsManager.Instance.CloseAll();
 
         DragableManager.Instance.ResetIcon();
-        ProgressBar.Instance.CancelWithoutEvent();
+        ProgressBar.Instance.Cancel();
 
-        QuestManager.Instance.SetUI(FindObjectOfType<QuestUI>());
         BackpackManager.Instance.SetUI(FindObjectOfType<BackpackUI>());
         BackpackManager.Instance.Init();
-        WarehouseManager.Instance.SetUI(FindObjectOfType<WarehouseUI>());
-        DialogueManager.Instance.SetUI(FindObjectOfType<DialogueUI>());
         BuildingManager.Instance.SetUI(FindObjectOfType<BuildingUI>());
-        ShopManager.Instance.SetUI(FindObjectOfType<ShopUI>());
-        EscapeMenuManager.Instance.SetUI(FindObjectOfType<EscapeUI>());
         CalendarManager.Instance.SetUI(FindObjectOfType<CalendarUI>());
+        DialogueManager.Instance.SetUI(FindObjectOfType<DialogueUI>());
+        EscapeMenuManager.Instance.SetUI(FindObjectOfType<EscapeUI>());
+        FieldManager.Instance.SetUI(FindObjectOfType<FieldUI>());
+        ItemSelectionManager.Instance.SetUI(FindObjectOfType<ItemSeletionUI>());
+        ItemWindowManager.Instance.SetUI(FindObjectOfType<ItemWindowUI>());
+        LootManager.Instance.SetUI(FindObjectOfType<LootUI>());
+        MakingManager.Instance.SetUI(FindObjectOfType<MakingUI>());
+        PlantManager.Instance.SetUI(FindObjectOfType<PlantUI>());
+        QuestManager.Instance.SetUI(FindObjectOfType<QuestUI>());
+        ShopManager.Instance.SetUI(FindObjectOfType<ShopUI>());
+        WarehouseManager.Instance.SetUI(FindObjectOfType<WarehouseUI>());
     }
 }

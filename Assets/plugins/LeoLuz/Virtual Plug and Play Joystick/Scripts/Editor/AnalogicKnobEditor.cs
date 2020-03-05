@@ -22,14 +22,8 @@ namespace LeoLuz.PlugAndPlayJoystick
             analogicKnob.AnchoredAreaBounds = new Bounds(new Vector2(analogicKnob.NormalizedAnchoredAreaBounds.center.x * CanvasRect.sizeDelta.x, analogicKnob.NormalizedAnchoredAreaBounds.center.y * CanvasRect.sizeDelta.y)
                 , new Vector2(analogicKnob.NormalizedAnchoredAreaBounds.size.x * CanvasRect.sizeDelta.x, analogicKnob.NormalizedAnchoredAreaBounds.size.y * CanvasRect.sizeDelta.y));
 
-            var _OldNormalAnchoredAreaBounds = analogicKnob.NormalizedAnchoredAreaBounds;
-            var _oldTurnLimit = analogicKnob.TurnLimit;
-
             EditorGUI.BeginChangeCheck();
 
-            float worldWidth = CanvasRect.sizeDelta.x * CanvasRect.lossyScale.x;
-            float worldHeight = CanvasRect.sizeDelta.y * CanvasRect.lossyScale.y;
-            // Vector3 InitialPoint = KnobRect.transform.position * );
 
             if (analogicKnob.AnchoredAreaBounds.size == Vector3.zero)
             {

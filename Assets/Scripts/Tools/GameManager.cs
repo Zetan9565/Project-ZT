@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -12,8 +13,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     {
         get
         {
-            if (Instance)
-                return Instance.backpackName;
+            if (Instance) return Instance.backpackName;
             else return "背包";
         }
     }
@@ -24,8 +24,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     {
         get
         {
-            if (Instance)
-                return Instance.coinName;
+            if (Instance) return Instance.coinName;
             else return "铜币";
         }
     }
@@ -61,7 +60,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     private void Start()
     {
-        Init();
+        InitGame();
     }
 
     public static Dictionary<CropInformation, List<Crop>> Crops { get; } = new Dictionary<CropInformation, List<Crop>>();
@@ -73,27 +72,40 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     public static Dictionary<string, QuestPoint> QuestPoints { get; } = new Dictionary<string, QuestPoint>();
 
-    public static void Init()
+    public static void InitGame(params Type[] exceptions)
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
+        ActionStack.Clear();
         Crops.Clear();
-        Talkers.Clear();
-        TalkerDatas.Clear();
-        foreach (var kvp in Enemies)
-            kvp.Value.RemoveAll(x => !x || !x.gameObject);
-        foreach (var talker in FindObjectsOfType<Talker>())
-            talker.Init();
+        foreach (var enemykvp in Enemies)
+            enemykvp.Value.RemoveAll(x => !x || !x.gameObject);
+        if (exceptions == null || !exceptions.Contains(typeof(Talker)))
+        {
+            Talkers.Clear();
+            TalkerDatas.Clear();
+            foreach (var talker in FindObjectsOfType<Talker>())
+                talker.Init();
+        }
+        if (exceptions == null || !exceptions.Contains(typeof(TriggerHolder)))
+            foreach (var tholder in FindObjectsOfType<TriggerHolder>())
+                tholder.Init();
         PlayerManager.Instance.Init();
         if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIRootPrefab);
+        UIManager.Instance.Init();
+        QuestManager.Instance.Init();
         MessageManager.Instance.Init();
         MapManager.Instance.Init();
-        GatherManager.Instance.Init();
-        UIManager.Instance.Init();
-        WindowsManager.Instance.Clear();
         MapManager.Instance.SetPlayer(PlayerManager.Instance.PlayerTransform);
         MapManager.Instance.RemakeCamera();
+        GatherManager.Instance.Init();
+        WindowsManager.Instance.Clear();
     }
 
+    /// <summary>
+    /// 尝试获取道具（非新的实例）
+    /// </summary>
+    /// <param name="id">道具ID</param>
+    /// <returns>获得的道具</returns>
     public static ItemBase GetItemByID(string id)
     {
         ItemBase[] items = Resources.LoadAll<ItemBase>("");

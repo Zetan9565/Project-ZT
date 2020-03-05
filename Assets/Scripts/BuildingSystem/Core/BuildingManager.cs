@@ -6,16 +6,8 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/建筑管理器")]
-public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowHandler, IOpenCloseAbleWindow
+public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpenCloseAbleWindow
 {
-    [SerializeField]
-    private BuildingUI UI;
-
-    public bool IsUIOpen { get; private set; }
-    public bool IsPausing { get; private set; }
-
-    public Canvas CanvasToSort => UI ? UI.windowCanvas : null;
-
     [HideInInspector]
     public BuildingInformation currentInfo;
 
@@ -333,27 +325,15 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
     }
 
     #region UI相关
-    public void OpenWindow()
+    public override void OpenWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (IsUIOpen) return;
-        if (IsPausing) return;
-        if (DialogueManager.Instance.IsTalking) return;
+        if (DialogueManager.Instance && DialogueManager.Instance.IsTalking) return;
+        base.OpenWindow();
         Init();
-        UI.window.alpha = 1;
-        UI.window.blocksRaycasts = true;
-        WindowsManager.Instance.Push(this);
-        IsUIOpen = true;
     }
-    public void CloseWindow()
+    public override void CloseWindow()
     {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing) return;
-        UI.window.alpha = 0;
-        UI.window.blocksRaycasts = false;
-        WindowsManager.Instance.Remove(this);
-        IsUIOpen = false;
+        base.CloseWindow();
         FinishPreview();
         HideDescription();
         HideBuiltList();
@@ -366,7 +346,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
         if (IsUIOpen) CloseWindow();
         else OpenWindow();
     }
-    public void PauseDisplay(bool pause)
+    /*public void PauseDisplay(bool pause)
     {
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) return;
@@ -382,7 +362,7 @@ public class BuildingManager : SingletonMonoBehaviour<BuildingManager>, IWindowH
             ZetanUtility.SetActive(UI.destroyButton.gameObject, false);
         }
         IsPausing = pause;
-    }
+    }*/
 
     public void ShowDescription(BuildingInformation buildingInfo)
     {
