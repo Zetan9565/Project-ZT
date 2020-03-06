@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("ZetanStudio/管理器/农田管理器")]
@@ -19,6 +18,14 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
         UpdateUI();
         UIManager.Instance.EnableJoyStick(false);
         UIManager.Instance.EnableInteractive(false);
+    }
+
+    public override void CloseWindow()
+    {
+        base.CloseWindow();
+        ManageAble = false;
+        CurrentField = null;
+        UIManager.Instance.EnableJoyStick(true);
     }
 
     public void OpenClosePlantWindow()
@@ -76,6 +83,6 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
     public void DestroyCurrentField()
     {
         if (!CurrentField) return;
-        CurrentField.AskDestroy();
+        BuildingManager.Instance.RequestAndDestroy(CurrentField);
     }
 }

@@ -38,7 +38,6 @@ public class Field : Building
 
     public override void AskDestroy()
     {
-        onDestroy?.Invoke();
         ConfirmManager.Instance.NewConfirm("耕地内的作物不会保留，确定退耕吗？",
             BuildingManager.Instance.ConfirmDestroy,
             delegate

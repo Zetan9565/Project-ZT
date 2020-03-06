@@ -61,6 +61,6 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
 
     public void Destroy()
     {
-        BuildingManager.Instance.RequestAndDestroy(MBuilding, true);
+        BuildingManager.Instance.RequestAndDestroy(MBuilding);
     }
 }

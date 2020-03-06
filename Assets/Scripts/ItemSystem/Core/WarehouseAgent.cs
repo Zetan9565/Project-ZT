@@ -5,17 +5,10 @@ public class WarehouseAgent : Building
 {
     [SerializeField]
     private Warehouse warehouse = new Warehouse(50);
-    public Warehouse MWarehouse
-    {
-        get
-        {
-            return warehouse;
-        }
-    }
+    public Warehouse MWarehouse => warehouse;
 
     public override void AskDestroy()
     {
-        onDestroy?.Invoke();
         ConfirmManager.Instance.NewConfirm(string.Format("{0}{1}\n内的东西不会保留，确定拆除吗？", name, ((Vector2)transform.position).ToString()),
             BuildingManager.Instance.ConfirmDestroy,
             delegate
@@ -49,6 +42,14 @@ public class WarehouseAgent : Building
     {
         base.OnTriggerExit2D(collision);
         if (collision.CompareTag("Player") && WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled && IsBuilt)
+        {
+            WarehouseManager.Instance.CannotStore();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if(WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled && IsBuilt)
         {
             WarehouseManager.Instance.CannotStore();
         }

@@ -14413,10 +14413,10 @@ RectTransform:
   m_Father: {fileID: 1815651159}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 72.89796, y: -25.42857}
+  m_SizeDelta: {x: 105.79591, y: 30.857141}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &507537279
 MonoBehaviour:
@@ -31062,6 +31062,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 1346819061}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!212 &1122635835
@@ -48627,6 +48630,8 @@ GameObject:
   - component: {fileID: 1815651159}
   - component: {fileID: 1815651161}
   - component: {fileID: 1815651160}
+  - component: {fileID: 1815651163}
+  - component: {fileID: 1815651162}
   m_Layer: 5
   m_Name: InteractiveObjectName
   m_TagString: Untagged
@@ -48651,8 +48656,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -49.429688}
-  m_SizeDelta: {x: 250, y: 60}
+  m_AnchoredPosition: {x: 0, y: -50}
+  m_SizeDelta: {x: 145.79591, y: 50.85714}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1815651160
 MonoBehaviour:
@@ -48690,6 +48695,45 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1815651158}
   m_CullTransparentMesh: 0
+--- !u!114 &1815651162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1815651158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 2
+  m_VerticalFit: 2
+--- !u!114 &1815651163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1815651158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 20
+    m_Right: 20
+    m_Top: 10
+    m_Bottom: 10
+  m_ChildAlignment: 4
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 1
+  m_ChildScaleHeight: 1
 --- !u!1 &1827293512
 GameObject:
   m_ObjectHideFlags: 0
@@ -62668,6 +62712,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389347435307807}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002828392461103
@@ -62686,6 +62733,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389347649829281}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002828468995200
@@ -62704,6 +62754,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389347560689166}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002828597143307
@@ -62722,6 +62775,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389347697061253}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002828619173524
@@ -62740,6 +62796,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389347742123034}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002828693519603
@@ -62758,6 +62817,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346879272573}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002828779277306
@@ -62776,6 +62838,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346794537332}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002828846744539
@@ -62794,6 +62859,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346998389077}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002828893082669
@@ -62812,6 +62880,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346952322723}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002828995168462
@@ -62830,6 +62901,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389347052339776}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002829099273962
@@ -62848,6 +62922,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389347282732132}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002829181775963
@@ -62866,6 +62943,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389347197106901}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002829203568790
@@ -62884,6 +62964,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346290315800}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002829308001530
@@ -62902,6 +62985,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346252207732}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002829549780742
@@ -62920,6 +63006,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346493822344}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002829569381961
@@ -62938,6 +63027,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346544458951}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002829575552541
@@ -62956,6 +63048,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346517070995}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002829585951102
@@ -62974,6 +63069,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346527896560}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002829763864081
@@ -62992,6 +63090,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389345809968287}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002830026746688
@@ -63010,6 +63111,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346071110094}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002830124265337
@@ -63028,6 +63132,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346170725879}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!114 &8733002830232206563
@@ -63046,6 +63153,9 @@ MonoBehaviour:
   IDTail: 
   name: 
   buildingFlag: {fileID: 6682389346134095469}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 10
 --- !u!61 &8761270116917298138

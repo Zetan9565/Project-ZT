@@ -141,7 +141,7 @@ public class Crop : MonoBehaviour
     {
         Clear();
         if (ObjectPool.Instance) ObjectPool.Instance.Put(gameObject);
-        else DestroyImmediate(gameObject);
+        else Destroy(gameObject);
     }
 
     protected void OnTriggerEnter2D(Collider2D collision)

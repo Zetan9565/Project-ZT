@@ -242,6 +242,8 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     public void DestroyBuildingToDestroy()
     {
         if (!ToDestroy) return;
+        if (destroyConroutine != null) StopCoroutine(destroyConroutine);
+        confirmDestroy = false;
         destroyConroutine = StartCoroutine(WaitToDestroy(ToDestroy));
         ToDestroy.AskDestroy();
     }
@@ -249,10 +251,10 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     public Building ToDestroy { get; private set; }
     bool confirmDestroy;
 
-    public void RequestAndDestroy(Building building, bool destroyImmediately = false)
+    public void RequestAndDestroy(Building building)
     {
         ToDestroy = building;
-        if (destroyImmediately) DestroyBuildingToDestroy();
+        DestroyBuildingToDestroy();
     }
 
     public void ConfirmDestroy()
@@ -295,7 +297,6 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
                         if (ZetanUtility.Vector3LargeThan(colliders[i].bounds.max, max))
                             max = colliders[i].bounds.max;
                     }
-                    DestroyImmediate(building.gameObject);
                     AStarManager.Instance.UpdateGraphs(min, max);
                 }
                 else
@@ -312,13 +313,11 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
                             if (ZetanUtility.Vector3LargeThan(collider2Ds[i].bounds.max, max))
                                 max = collider2Ds[i].bounds.max;
                         }
-                        DestroyImmediate(building.gameObject);
                         AStarManager.Instance.UpdateGraphs(min, max);
                     }
-                    else Destroy(building.gameObject);
                 }
             }
-            else Destroy(building.gameObject);
+            building.Destroy();
         }
         confirmDestroy = false;
         CannotDestroy();
@@ -453,7 +452,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         if (destroyConroutine != null) StopCoroutine(destroyConroutine);
     }
 
-    public void SetUI(BuildingUI UI)
+    public override void SetUI(BuildingUI UI)
     {
         buildingInfoAgents.RemoveAll(x => !x || !x.gameObject);
         buildingAgents.RemoveAll(x => !x || !x.gameObject);

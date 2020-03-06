@@ -30,7 +30,7 @@ public class Talker : MonoBehaviour
             GameManager.Talkers.Remove(TalkerID);
             GameManager.Talkers.Add(TalkerID, this);
         }
-        else DestroyImmediate(gameObject);
+        else Destroy(gameObject);
         GameManager.TalkerDatas.TryGetValue(TalkerID, out TalkerData dataFound);
         if (!dataFound)
         {

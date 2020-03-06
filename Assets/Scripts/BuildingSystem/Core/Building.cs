@@ -26,6 +26,7 @@ public class Building : MonoBehaviour
     private List<MonoBehaviour> components = new List<MonoBehaviour>();
     private List<bool> componentStates = new List<bool>();
 
+    [SerializeField]
     protected UnityEvent onDestroy = new UnityEvent();
 
     public BuildingAgent buildingAgent;
@@ -125,7 +126,6 @@ public class Building : MonoBehaviour
 
     public virtual void AskDestroy()
     {
-        onDestroy?.Invoke();
         ConfirmManager.Instance.NewConfirm(string.Format("确定拆除{0}{1}吗？", name, (Vector2)transform.position),
             BuildingManager.Instance.ConfirmDestroy,
             delegate
@@ -148,6 +148,12 @@ public class Building : MonoBehaviour
             if (!Array.Exists(buildings, x => x.ID == newID && x != this))
                 break;
         }
+    }
+
+    public void Destroy()
+    {
+        onDestroy?.Invoke();
+        Destroy(gameObject);
     }
 
     #region MonoBehaviour

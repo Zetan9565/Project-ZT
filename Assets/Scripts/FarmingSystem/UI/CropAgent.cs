@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class CropAgent : MonoBehaviour
@@ -36,15 +34,19 @@ public class CropAgent : MonoBehaviour
         ZetanUtility.SetActive(dryIcon.gameObject, false);
         ZetanUtility.SetActive(pestIcon.gameObject, false);
         ZetanUtility.SetActive(matureIcon.gameObject, false);
-        if (recycle) ObjectPool.Instance.Put(gameObject);
+        if (recycle)
+        {
+            if (ObjectPool.Instance) ObjectPool.Instance.Put(gameObject);
+            else DestroyImmediate(gameObject);
+        }
     }
 
     public void DestroyCrop()
     {
         ConfirmManager.Instance.NewConfirm("销毁作物不会有任何产物，确定销毁吗？", delegate
          {
-             MCrop.Recycle();
-             Clear();
+             if (MCrop) MCrop.Recycle();
+             Clear(true);
          });
     }
 }
