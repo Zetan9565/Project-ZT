@@ -49,11 +49,6 @@ public class MapIconHolder : MonoBehaviour
     public UnityEvent OnMouseEnter => iconEvents.onMouseEnter;
     public UnityEvent OnMouseExit => iconEvents.onMouseExit;
 
-    void Start()
-    {
-        CreateIcon();
-    }
-
     public void SetIconValidDistance(float distance)
     {
         maxValidDistance = distance;
@@ -114,6 +109,11 @@ public class MapIconHolder : MonoBehaviour
     }
 
     #region MonoBehaviour
+    void Start()
+    {
+        CreateIcon();
+    }
+
     private void Awake()
     {
         DistanceSqr = maxValidDistance * maxValidDistance;

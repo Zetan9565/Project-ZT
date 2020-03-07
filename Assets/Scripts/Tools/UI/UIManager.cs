@@ -23,12 +23,33 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     private Button settingButton;
 
     [SerializeField]
+    private Transform questFlagParent;
+    [SerializeField]
+    private Transform buildingFlagParent;
+
+    [SerializeField]
     private Joystick joyStick;
     public Joystick JoyStick => joyStick;
 
     [SerializeField]
     private UIButtonToButton interactiveButton;
     public UIButtonToButton InteractiveButton => interactiveButton;
+
+    public Transform QuestFlagParent
+    {
+        get
+        {
+            return questFlagParent ? questFlagParent : transform;
+        }
+    }
+
+    public Transform BuildingFlagParent
+    {
+        get
+        {
+            return buildingFlagParent ? buildingFlagParent : transform;
+        }
+    }
 
     [SerializeField]
     private Text interactiveName;
@@ -78,27 +99,38 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
                 !WarehouseManager.Instance.IsUIOpen &&
                 !LootManager.Instance.IsUIOpen &&
                 !GatherManager.Instance.IsGathering &&
-                !PlantManager.Instance.IsUIOpen) ||//对话时无法激活
+                !PlantManager.Instance.IsUIOpen &&
+                !MakingManager.Instance.IsUIOpen) ||//对话时无法激活
                 (WarehouseManager.Instance.StoreAble &&
                 !DialogueManager.Instance.IsUIOpen &&
                 !LootManager.Instance.IsUIOpen &&
                 !GatherManager.Instance.IsGathering &&
-                !PlantManager.Instance.IsUIOpen) ||//使用仓库时无法激活
+                !PlantManager.Instance.IsUIOpen &&
+                !MakingManager.Instance.IsUIOpen) ||//使用仓库时无法激活
                 (LootManager.Instance.PickAble &&
                 !DialogueManager.Instance.IsUIOpen &&
                 !WarehouseManager.Instance.IsUIOpen &&
                 !GatherManager.Instance.IsGathering &&
-                !PlantManager.Instance.IsUIOpen) ||//拾取时无法激活
+                !PlantManager.Instance.IsUIOpen &&
+                !MakingManager.Instance.IsUIOpen) ||//拾取时无法激活
                 (GatherManager.Instance.GatherAble &&
                 !DialogueManager.Instance.TalkAble &&
                 !WarehouseManager.Instance.IsUIOpen &&
                 !LootManager.Instance.IsUIOpen &&
-                !PlantManager.Instance.IsUIOpen) ||//采集时无法激活
+                !PlantManager.Instance.IsUIOpen &&
+                !MakingManager.Instance.IsUIOpen) ||//采集时无法激活
                 ((FieldManager.Instance.ManageAble || PlantManager.Instance.PlantAble) &&
                 !DialogueManager.Instance.TalkAble &&
                 !WarehouseManager.Instance.IsUIOpen &&
                 !LootManager.Instance.IsUIOpen &&
-                !GatherManager.Instance.IsGathering)//种植时无法激活
+                !GatherManager.Instance.IsGathering &&
+                !MakingManager.Instance.IsUIOpen) ||//种植时无法激活
+                (MakingManager.Instance.MakeAble &&
+                !GatherManager.Instance.GatherAble &&
+                !DialogueManager.Instance.TalkAble &&
+                !WarehouseManager.Instance.IsUIOpen &&
+                !LootManager.Instance.IsUIOpen &&
+                !PlantManager.Instance.IsUIOpen)//制作时无法激活
                 ));
         }
 #endif

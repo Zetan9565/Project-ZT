@@ -59,6 +59,8 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
                 WarehouseManager.Instance.OpenWindow();
             else if (FieldManager.Instance.ManageAble)
                 FieldManager.Instance.OpenWindow();
+            else if (MakingManager.Instance.MakeAble)
+                MakingManager.Instance.OpenWindow();
         }
         if (Input.GetButtonDown("Cancel") || Input.GetButtonDownMobile("Cancel"))
         {

@@ -191,6 +191,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
         }
     }
 
+#if UNITY_EDITOR
     [UnityEditor.MenuItem("ZetanStudio/添加对象池")]
     private static void MakePool()
     {
@@ -201,4 +202,5 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
         }
         new GameObject("ObjectPool").AddComponent<ObjectPool>();
     }
+#endif
 }

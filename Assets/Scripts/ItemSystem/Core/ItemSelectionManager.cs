@@ -29,6 +29,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         onCancel = cancelCallback;
         dialog = string.Empty;
         OpenWindow();
+        BackpackManager.Instance.EnableHandwork(false);
     }
 
     public void StartSelection(ItemSelectionType selectionType, string title, string confirmDialog, UnityAction<List<ItemInfo>> confirmCallback, UnityAction cancelCallback = null)
@@ -40,6 +41,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         onCancel = cancelCallback;
         dialog = confirmDialog;
         OpenWindow();
+        BackpackManager.Instance.EnableHandwork(false);
     }
 
     public void Confirm()
@@ -148,6 +150,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen) return;
         foreach (var ia in itemAgents)
             ia.Clear(true);
         itemAgents.Clear();
@@ -155,6 +158,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         dialog = string.Empty;
         SelectionType = ItemSelectionType.None;
         onCancel?.Invoke();
+        BackpackManager.Instance.EnableHandwork(true);
     }
 }
 public enum ItemSelectionType

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: book 3
   m_EditorClassIdentifier: 
   _ID: BOOK004
-  _Name: "\u94C1\u5757\u5236\u4F5C\u6307\u5357"
+  _Name: "\u953B\u9020\u53F0\u5236\u4F5C\u6307\u5357"
   itemType: 13
   quality: 4
   weight: 0
@@ -21,7 +21,7 @@ MonoBehaviour:
   sellPrice: 0
   buyPrice: 0
   icon: {fileID: 21300000, guid: fe2f1500bcba49b4b833b547eec8be6d, type: 3}
-  description: "\u8BB0\u8F7D\u7740\u94C1\u5757\u7684\u505A\u6CD5\u7684\u6307\u5357\u4E66\u3002"
+  description: "\u8BB0\u8F7D\u7740\u953B\u9020\u53F0\u7684\u505A\u6CD5\u7684\u6307\u5357\u4E66\u3002"
   stackAble: 1
   discardAble: 1
   lockAble: 1
@@ -29,8 +29,10 @@ MonoBehaviour:
   inexhaustible: 0
   maxDurability: 100
   makingMethod: 0
+  minYield: 1
+  maxYield: 1
   materialType: 0
   materials: []
-  bookType: 2
-  buildingToLearn: {fileID: 0}
+  bookType: 1
+  buildingToLearn: {fileID: 11400000, guid: cf2c91d5cd286ec4e9e007678f95ae73, type: 2}
   itemToLearn: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}

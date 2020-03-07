@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Image), typeof(CanvasGroup))]
-public class QuestFlagsAgent : MonoBehaviour
+public class QuestFlag : MonoBehaviour
 {
     private Image icon;
     private CanvasGroup canvasGroup;
@@ -81,6 +81,8 @@ public class QuestFlagsAgent : MonoBehaviour
     {
         icon = GetComponent<Image>();
         canvasGroup = GetComponent<CanvasGroup>();
+        if (!canvasGroup) canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        canvasGroup.blocksRaycasts = false;
     }
 
     void Update()
@@ -89,7 +91,8 @@ public class QuestFlagsAgent : MonoBehaviour
         {
             Vector3 viewportPoint = Camera.main.WorldToViewportPoint(questHolder.transform.position + questHolder.questFlagsOffset);
             float sqrDistance = Vector3.SqrMagnitude(Camera.main.transform.position - questHolder.transform.position);
-            if (viewportPoint.x > 1 || viewportPoint.x < 0 || viewportPoint.y > 1 || viewportPoint.y < 0 || questHolder.QuestInstances.Count < 1 && !hasObjective || sqrDistance > 900f)
+            if (viewportPoint.z <= 0 || viewportPoint.x > 1 || viewportPoint.x < 0 || viewportPoint.y > 1 || viewportPoint.y < 0 || 
+                questHolder.QuestInstances.Count < 1 && !hasObjective || sqrDistance > 900f)
             {
                 if (icon.enabled) icon.enabled = false;
                 if (questHolder.QuestInstances.Count < 1 && !hasObjective) mapIcon.Hide();

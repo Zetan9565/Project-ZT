@@ -11,9 +11,13 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
 
     private readonly List<MakingAgent> makingAgents = new List<MakingAgent>();
 
+    private ItemBase currentItem;
+
+    private bool backpackOpenBef;
+
     public MakingTool CurrentTool { get; private set; }
 
-    private ItemBase currentItem;
+    public bool MakeAble { get; private set; }
 
     public bool IsMaking { get; private set; }
 
@@ -158,6 +162,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
     public void DIY()
     {
         ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", DIYMake);
+        HideDescription();
     }
     public void DIYMake(List<ItemInfo> materials)
     {
@@ -364,6 +369,10 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         Init();
         UI.pageSelector.SetValueWithoutNotify(0);
         SetPage(0);
+        UIManager.Instance.EnableInteractive(false);
+        backpackOpenBef = BackpackManager.Instance.IsUIOpen;
+        if (!BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.OpenWindow();
+        BackpackManager.Instance.EnableHandwork(false);
     }
 
     public override void CloseWindow()
@@ -371,11 +380,23 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         base.CloseWindow();
         if (IsUIOpen) return;
         IsMaking = false;
+        MakeAble = false;
+        CurrentTool = null;
         currentItem = null;
         HideDescription();
         AmountManager.Instance.Cancel();
         ItemWindowManager.Instance.CloseWindow();
         if (ItemSelectionManager.Instance.SelectionType == ItemSelectionType.Making) ItemSelectionManager.Instance.CloseWindow();
+        if (BackpackManager.Instance.IsUIOpen && !backpackOpenBef) BackpackManager.Instance.CloseWindow();
+        else if (backpackOpenBef) BackpackManager.Instance.EnableHandwork(true);
+    }
+
+    public override void PauseDisplay(bool pause)
+    {
+        bool pauseBef = IsPausing;
+        base.PauseDisplay(pause);
+        if (pauseBef && !IsPausing) BackpackManager.Instance.OpenWindow();
+        else if (!pauseBef && IsPausing) BackpackManager.Instance.CloseWindow();
     }
 
     public void ShowDescription(ItemBase item)
@@ -416,9 +437,11 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
 
     public void CanMake(MakingTool tool)
     {
-        if (!tool) return;
+        if (!tool || tool.ToolType == MakingToolType.None) return;
+        if (IsMaking || IsUIOpen) return;
         CurrentTool = tool;
-        UIManager.Instance.EnableInteractive(true);
+        MakeAble = true;
+        UIManager.Instance.EnableInteractive(true, MakingTool.ToolTypeToString(tool.ToolType));
     }
 
     public void CannotMake()

@@ -20,7 +20,7 @@ public class WarehouseAgentInspector : BuildingInspector
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.LabelField("识别码", agent.ID);
-        SerializedProperty warehouseSize = warehouse.FindPropertyRelative("warehouseSize");
+        SerializedProperty warehouseSize = warehouse.FindPropertyRelative("size");
         warehouseSize.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认仓库容量(格)",
             warehouseSize.FindPropertyRelative("max").intValue, 30, 150);
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();

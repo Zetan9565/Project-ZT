@@ -67,7 +67,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         if (!buildingInfo) return false;
         if (HadLearned(buildingInfo))
         {
-            MessageManager.Instance.New("这种设施已经学会建造");
+            ConfirmManager.Instance.New("这种设施已经学会建造。");
             return false;
         }
         buildingsLearned.Add(buildingInfo);
@@ -167,6 +167,8 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
                     if (!buildings.ContainsKey(currentInfo))
                         buildings.Add(currentInfo, new List<Building>());
                     buildings[currentInfo].Add(building);
+                    var bf = ObjectPool.Get(UI.buildingFlagPrefab, UIManager.Instance.BuildingFlagParent).GetComponent<BuildingFlag>();
+                    bf.Init(building);
                     if (AStarManager.Instance)
                     {
                         var collider2Ds = building.GetComponentsInChildren<Collider2D>();
@@ -230,6 +232,8 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
                 Building building = Instantiate(find.Prefab);
                 building.LoadBuild(buildingData.IDStarter, buildingData.IDTail, find.Name, buildingData.leftBuildTime,
                     new Vector3(buildingData.posX, buildingData.posY, buildingData.posZ));
+                var bf = ObjectPool.Get(UI.buildingFlagPrefab, UIManager.Instance.BuildingFlagParent).GetComponent<BuildingFlag>();
+                bf.Init(building);
             }
         }
         AStarManager.Instance.UpdateGraphs();

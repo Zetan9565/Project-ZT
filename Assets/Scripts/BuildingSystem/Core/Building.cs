@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Events;
-using System;
 
 public class Building : MonoBehaviour
 {
@@ -17,14 +17,14 @@ public class Building : MonoBehaviour
     public bool IsUnderBuilding { get; private set; }
 
     [SerializeField]
-    private TextMesh buildingFlag;
+    private Vector3 buildingFlagOffset;
+    public Vector3 BuildingFlagOffset => buildingFlagOffset;
 
     public bool IsBuilt { get; private set; }
 
     public BuildingInformation MBuildingInfo { get; private set; }
 
-    private List<MonoBehaviour> components = new List<MonoBehaviour>();
-    private List<bool> componentStates = new List<bool>();
+    private Dictionary<Behaviour, bool> components = new Dictionary<Behaviour, bool>();
 
     [SerializeField]
     protected UnityEvent onDestroy = new UnityEvent();
@@ -48,15 +48,17 @@ public class Building : MonoBehaviour
             if (buildingAgent) buildingAgent.Clear(true);
             Destroy(gameObject);
         }
-        foreach (MonoBehaviour mb in GetComponentsInChildren<MonoBehaviour>())
+        foreach (var b in GetComponentsInChildren<Behaviour>())
         {
-            componentStates.Add(mb.enabled);
-            components.Add(mb);
-            if (mb != this) mb.enabled = false;
+            var c2d = b as Collider2D;
+            if (c2d && !c2d.isTrigger) continue;
+            var c = b as Component as Collider;
+            if (c && !c.isTrigger) continue;
+            components.Add(b, b.enabled);
+            if (b != this) b.enabled = false;
         }
         IsUnderBuilding = true;
         StartCoroutine(Build());
-        if (buildingFlag) ZetanUtility.SetActive(buildingFlag.gameObject, true);
         return true;
     }
 
@@ -69,37 +71,32 @@ public class Building : MonoBehaviour
         leftBuildTime = buildTime;
         if (leftBuildTime > 0)
         {
-            foreach (MonoBehaviour mb in GetComponentsInChildren<MonoBehaviour>())
+            foreach (var b in GetComponentsInChildren<Behaviour>())
             {
-                componentStates.Add(mb.enabled);
-                components.Add(mb);
-                if (mb != this) mb.enabled = false;
+                components.Add(b, b.enabled);
+                if (b != this) b.enabled = false;
             }
             IsUnderBuilding = true;
             StartCoroutine(Build());
-            if (buildingFlag) ZetanUtility.SetActive(buildingFlag.gameObject, true);
         }
         else
         {
             IsUnderBuilding = false;
             IsBuilt = true;
-            if (buildingFlag) ZetanUtility.SetActive(buildingFlag.gameObject, false);
         }
         if (buildingAgent) buildingAgent.UpdateUI();
     }
 
     private void BuildComplete()
     {
-        for (int i = 0; i < components.Count; i++)
+        foreach (var b in components)
         {
-            components[i].enabled = componentStates[i];
+            b.Key.enabled = b.Value;
         }
         IsUnderBuilding = false;
         IsBuilt = true;
-        if (buildingFlag) buildingFlag.text = "建造完成！";
         MessageManager.Instance.New("[" + name + "] 建造完成了");
         if (buildingAgent) buildingAgent.UpdateUI();
-        StartCoroutine(WaitToHideFlag());
     }
 
     private IEnumerator Build()
@@ -107,7 +104,6 @@ public class Building : MonoBehaviour
         while (IsUnderBuilding)
         {
             leftBuildTime -= Time.deltaTime;
-            if (buildingFlag) buildingFlag.text = "建造中[" + leftBuildTime.ToString("F2") + "s]";
             if (leftBuildTime <= 0)
             {
                 BuildComplete();
@@ -116,12 +112,6 @@ public class Building : MonoBehaviour
             if (buildingAgent) buildingAgent.UpdateUI();
             yield return null;
         }
-    }
-
-    private IEnumerator WaitToHideFlag()
-    {
-        yield return new WaitForSeconds(2);
-        if (buildingFlag) ZetanUtility.SetActive(buildingFlag.gameObject, false);
     }
 
     public virtual void AskDestroy()

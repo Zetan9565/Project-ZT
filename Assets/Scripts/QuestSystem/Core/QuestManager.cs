@@ -7,8 +7,7 @@ using UnityEngine;
 [AddComponentMenu("ZetanStudio/管理器/任务管理器")]
 public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAbleWindow
 {
-    public QuestFlagsAgent QuestFlagsPrefab => UI ? UI.questFlagsPrefab : null;
-    public Transform QuestFlagsPanel => UI ? UI.questFlagsPanel : null;
+    public QuestFlag QuestFlagsPrefab => UI ? UI.questFlagsPrefab : null;
 
     private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
     private readonly List<QuestAgent> questAgents = new List<QuestAgent>();

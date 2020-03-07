@@ -7,14 +7,16 @@ public class BuildingInspector : Editor
     SerializedProperty IDStarter;
     SerializedProperty IDTail;
     new SerializedProperty name;
-    SerializedProperty buildingFlag;
+    SerializedProperty buildingFlagOffset;
+    SerializedProperty onDestroy;
 
     protected virtual void OnEnable()
     {
         IDStarter = serializedObject.FindProperty("IDStarter");
         IDTail = serializedObject.FindProperty("IDTail");
         name = serializedObject.FindProperty("name");
-        buildingFlag = serializedObject.FindProperty("buildingFlag");
+        buildingFlagOffset = serializedObject.FindProperty("buildingFlagOffset");
+        onDestroy = serializedObject.FindProperty("onDestroy");
     }
 
     public override void OnInspectorGUI()
@@ -24,7 +26,8 @@ public class BuildingInspector : Editor
         EditorGUILayout.LabelField("ID前缀", IDStarter.stringValue);
         EditorGUILayout.LabelField("ID后缀", IDTail.stringValue);
         EditorGUILayout.LabelField("名称", name.stringValue);
-        EditorGUILayout.PropertyField(buildingFlag, new GUIContent("状态显示器"));
+        EditorGUILayout.PropertyField(buildingFlagOffset, new GUIContent("状态显示器偏移"));
+        EditorGUILayout.PropertyField(onDestroy, new GUIContent("销毁时"));
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
     }
 }

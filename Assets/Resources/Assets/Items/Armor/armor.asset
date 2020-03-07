@@ -28,7 +28,7 @@ MonoBehaviour:
   usable: 1
   inexhaustible: 0
   maxDurability: 100
-  makingMethod: 1
+  makingMethod: 3
   minYield: 1
   maxYield: 1
   materialType: 0

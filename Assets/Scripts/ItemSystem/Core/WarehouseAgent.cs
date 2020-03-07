@@ -23,7 +23,7 @@ public class WarehouseAgent : Building
     protected override void OnTriggerEnter2D(Collider2D collision)
     {
         base.OnTriggerEnter2D(collision);
-        if (collision.CompareTag("Player") && isActiveAndEnabled && IsBuilt)
+        if (collision.CompareTag("Player") && IsBuilt)
         {
             WarehouseManager.Instance.CanStore(this);
         }
@@ -32,7 +32,7 @@ public class WarehouseAgent : Building
     protected override void OnTriggerStay2D(Collider2D collision)
     {
         base.OnTriggerStay2D(collision);
-        if (collision.CompareTag("Player") && !WarehouseManager.Instance.IsUIOpen && isActiveAndEnabled && IsBuilt)
+        if (collision.CompareTag("Player") && !WarehouseManager.Instance.IsUIOpen && IsBuilt)
         {
             WarehouseManager.Instance.CanStore(this);
         }
@@ -41,7 +41,7 @@ public class WarehouseAgent : Building
     protected override void OnTriggerExit2D(Collider2D collision)
     {
         base.OnTriggerExit2D(collision);
-        if (collision.CompareTag("Player") && WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled && IsBuilt)
+        if (collision.CompareTag("Player") && WarehouseManager.Instance.MWarehouse == MWarehouse && IsBuilt)
         {
             WarehouseManager.Instance.CannotStore();
         }

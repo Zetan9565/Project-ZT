@@ -1710,6 +1710,8 @@ MonoBehaviour:
   buildingCellPrefab: {fileID: 8185927733410415245, guid: c0e4e26a20f762a4ba8c6a441d057919,
     type: 3}
   buildingCellsParent: {fileID: 230935215}
+  buildingFlagPrefab: {fileID: 6043513742972319158, guid: d8fa9ba7b45f47f4e852a5a0931d303f,
+    type: 3}
   cellsRect: {fileID: 1419597512}
   destroyButton: {fileID: 57363304}
   cancelArea: {fileID: 609841096}
@@ -1950,7 +1952,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1620773115}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
@@ -15207,7 +15209,6 @@ MonoBehaviour:
   questIcon: {fileID: 21300000, guid: d7e626b430cfda24ea47c259db76dade, type: 3}
   questFlagsPrefab: {fileID: 936108245830383460, guid: 02f764c1e3fc6ef44851c7289caefd98,
     type: 3}
-  questFlagsPanel: {fileID: 172871111}
 --- !u!224 &528181993
 RectTransform:
   m_ObjectHideFlags: 0
@@ -15415,7 +15416,7 @@ RectTransform:
   m_Children:
   - {fileID: 398428578}
   m_Father: {fileID: 1620773115}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -23873,6 +23874,41 @@ RectTransform:
   m_AnchoredPosition: {x: 0.0024795532, y: -0.000015258789}
   m_SizeDelta: {x: -0.0050507, y: 50}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!1 &843418179
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 843418180}
+  m_Layer: 5
+  m_Name: BuildingFlagParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &843418180
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 843418179}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1620773115}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &847316732
 GameObject:
   m_ObjectHideFlags: 0
@@ -26992,7 +27028,7 @@ RectTransform:
   - {fileID: 746803988}
   - {fileID: 1487435319}
   m_Father: {fileID: 1620773115}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -27501,7 +27537,7 @@ RectTransform:
   m_Children:
   - {fileID: 1891626379}
   m_Father: {fileID: 1620773115}
-  m_RootOrder: 10
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
@@ -31489,7 +31525,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 1346819061}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -35560,7 +35596,7 @@ RectTransform:
   m_Children:
   - {fileID: 1490904991}
   m_Father: {fileID: 1620773115}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
@@ -39514,7 +39550,7 @@ RectTransform:
   m_Children:
   - {fileID: 1255039265}
   m_Father: {fileID: 1620773115}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
@@ -44032,6 +44068,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 172871111}
+  - {fileID: 843418180}
   - {fileID: 2029332520}
   - {fileID: 8170153792255807838}
   - {fileID: 58275894}
@@ -49081,7 +49118,7 @@ RectTransform:
   m_Children:
   - {fileID: 507537278}
   m_Father: {fileID: 1620773115}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
@@ -54112,7 +54149,7 @@ RectTransform:
   - {fileID: 1416131094}
   - {fileID: 1412767805}
   m_Father: {fileID: 1620773115}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -54484,7 +54521,7 @@ RectTransform:
   m_Children:
   - {fileID: 1736625247}
   m_Father: {fileID: 1620773115}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
@@ -60473,6 +60510,8 @@ MonoBehaviour:
   calendarButton: {fileID: 965726387}
   buildingButton: {fileID: 2045575989}
   settingButton: {fileID: 1001667607}
+  questFlagParent: {fileID: 172871111}
+  buildingFlagParent: {fileID: 843418180}
   joyStick: {fileID: 8170153792255807835}
   interactiveButton: {fileID: 58275895}
   interactiveName: {fileID: 507537279}
@@ -63048,7 +63087,7 @@ RectTransform:
   m_Children:
   - {fileID: 8170153793375376576}
   m_Father: {fileID: 1620773115}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -63163,7 +63202,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389347435307807}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63184,7 +63223,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389347649829281}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63205,7 +63244,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389347560689166}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63226,7 +63265,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389347697061253}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63247,7 +63286,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389347742123034}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63268,7 +63307,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346879272573}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63289,7 +63328,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346794537332}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63310,7 +63349,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346998389077}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63331,7 +63370,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346952322723}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63352,7 +63391,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389347052339776}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63373,7 +63412,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389347282732132}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63394,7 +63433,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389347197106901}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63415,7 +63454,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346290315800}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63436,7 +63475,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346252207732}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63457,7 +63496,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346493822344}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63478,7 +63517,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346544458951}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63499,7 +63538,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346517070995}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63520,7 +63559,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346527896560}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63541,7 +63580,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389345809968287}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63562,7 +63601,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346071110094}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63583,7 +63622,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346170725879}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -63604,7 +63643,7 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 6682389346134095469}
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []

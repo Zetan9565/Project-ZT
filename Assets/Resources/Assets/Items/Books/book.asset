@@ -24,10 +24,14 @@ MonoBehaviour:
   description: "\u8BB0\u8F7D\u7740\u4ED3\u5E93\u5236\u9020\u65B9\u6CD5\u7684\u56FE\u7EB8\u3002"
   stackAble: 1
   discardAble: 1
-  useable: 1
+  lockAble: 1
+  usable: 1
   inexhaustible: 0
   maxDurability: 100
   makingMethod: 0
+  minYield: 1
+  maxYield: 1
+  materialType: 0
   materials: []
   bookType: 1
   buildingToLearn: {fileID: 11400000, guid: 7874646e9bc32c04ea7ec82e1ae6fd42, type: 2}

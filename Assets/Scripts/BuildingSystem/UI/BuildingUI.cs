@@ -9,6 +9,8 @@ public class BuildingUI : WindowUI
     public GameObject buildingCellPrefab;
     public Transform buildingCellsParent;
 
+    public GameObject buildingFlagPrefab;
+
     public ScrollRect cellsRect;
 
     public Button destroyButton;

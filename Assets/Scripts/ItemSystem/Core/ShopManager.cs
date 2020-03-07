@@ -324,10 +324,8 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
 
     public override void SetUI(ShopUI UI)
     {
-        foreach (var ma in merchandiseAgents)
-        {
-            if (ma && ma.gameObject) ma.Clear(true);
-        }
+        foreach (var ma in merchandiseAgents.Where(x => x && x.gameObject))
+            ma.Clear(true);
         merchandiseAgents.Clear();
         IsPausing = false;
         CloseWindow();

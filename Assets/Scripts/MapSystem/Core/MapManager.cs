@@ -236,7 +236,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             {
                 if (holder.showRange && !iconKvp.Value.iconRange)
                     iconKvp.Value.iconRange = ObjectPool.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
-                holder.ShowIcon(IsViewingWorldMap ? (worldModeInfo.currentSizeOfCam / Camera.orthographicSize) : (miniModeInfo.currentSizeOfCam / Camera.orthographicSize));
+                holder.ShowIcon(CameraZoom);
                 DrawMapIcon(holder.transform.position + new Vector3(holder.offset.x, use2D ? holder.offset.y : 0, use2D ? 0 : holder.offset.y), iconKvp.Value, holder.keepOnMap);
                 if (!IsViewingWorldMap && sqrDistance > holder.DistanceSqr * 0.81f && sqrDistance < holder.DistanceSqr)
                     iconKvp.Value.ImageCanvas.alpha = (holder.DistanceSqr - sqrDistance) / (holder.DistanceSqr * 0.19f);
@@ -541,8 +541,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         cameraMovingTime = 0;
         float mag = new Vector2(Screen.width, Screen.height).magnitude;
         direction = new Vector2(direction.x * 1000 / mag, direction.y * 1000 / mag) * (Camera.orthographicSize / worldModeInfo.currentSizeOfCam);
-        //direction = new Vector2(direction.x / Screen.dpi, direction.y / Screen.dpi) * (Camera.orthographicSize / worldModeInfo.currentSizeOfCam);
-        Camera.transform.Translate(new Vector3(direction.x, use2D ? direction.y : 0, use2D ? 0 : direction.y) * dragSensitivity);
+        Camera.transform.Translate(new Vector3(direction.x, use2D ? direction.y : 0, use2D ? 0 : direction.y) * dragSensitivity / CameraZoom);
     }
 
     public void Zoom(float value)
@@ -552,6 +551,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         if (IsViewingWorldMap) worldModeInfo.currentSizeOfCam = Camera.orthographicSize;
         else miniModeInfo.currentSizeOfCam = Camera.orthographicSize;
     }
+
+    public float CameraZoom => IsViewingWorldMap ? (worldModeInfo.defaultSizeOfCam / Camera.orthographicSize) : (miniModeInfo.defaultSizeOfCam / Camera.orthographicSize);
     #endregion
 
     #region MonoBehaviour

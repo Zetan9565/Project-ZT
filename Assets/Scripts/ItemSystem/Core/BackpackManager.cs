@@ -600,7 +600,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         base.OpenWindow();
         if (!IsUIOpen) return;
         GridMask.raycastTarget = true;
-        ZetanUtility.SetActive(UI.handworkButton.gameObject, !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !ItemSelectionManager.Instance.IsUIOpen);
+        EnableHandwork(true);
     }
     public override void CloseWindow()
     {
@@ -612,17 +612,23 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         ItemWindowManager.Instance.CloseWindow();
         if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
         if (ShopManager.Instance.IsUIOpen) ShopManager.Instance.CloseWindow();
+        if (MakingManager.Instance.IsUIOpen && !MakingManager.Instance.IsMaking) MakingManager.Instance.CloseWindow();
+        if (ItemSelectionManager.Instance.IsUIOpen) ItemSelectionManager.Instance.CloseWindow();
     }
     public override void PauseDisplay(bool pause)
     {
         base.PauseDisplay(pause);
         if (!IsPausing && pause) ItemWindowManager.Instance.CloseWindow();
     }
+    public void EnableHandwork(bool value)
+    {
+        ZetanUtility.SetActive(UI.handworkButton.gameObject,
+            value ? !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !ItemSelectionManager.Instance.IsUIOpen && !MakingManager.Instance.IsUIOpen : false);
+    }
     public void OpenCloseWindow()
     {
         if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen)
-            OpenWindow();
+        if (!IsUIOpen) OpenWindow();
         else CloseWindow();
     }
 

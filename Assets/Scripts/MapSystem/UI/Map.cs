@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
     public void OnDrag(PointerEventData eventData)
     {
-        if ((Application.platform == RuntimePlatform.Android) || eventData.button == PointerEventData.InputButton.Right)
+        if (touchCount < 2 && ((Application.platform == RuntimePlatform.Android) || eventData.button == PointerEventData.InputButton.Right))
             MapManager.Instance.DragWorldMap(-eventData.delta);
     }
 
@@ -48,7 +48,28 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
 
     private void Update()
     {
-        if (canZoom) MapManager.Instance.Zoom(Input.mouseScrollDelta.y);
+        if (touchCount > 1 && Input.touchCount > 1)
+        {
+            var first = Input.GetTouch(0);
+            var second = Input.GetTouch(1);
+
+            var firstPrePos = (Vector2)Camera.main.WorldToViewportPoint(first.position - first.deltaPosition);
+            var secondPrePos = (Vector2)Camera.main.WorldToViewportPoint(second.position - second.deltaPosition);
+
+            var firstPos = (Vector2)Camera.main.WorldToViewportPoint(first.position);
+            var secondPos = (Vector2)Camera.main.WorldToViewportPoint(second.position);
+
+            var preDis = (firstPrePos - secondPrePos).magnitude;
+            var curDis = (firstPos - secondPos).magnitude;
+
+            var zoomValue = curDis - preDis;
+
+            MapManager.Instance.Zoom(zoomValue);
+        }
+        else if (canZoom)
+        {
+            MapManager.Instance.Zoom(Input.mouseScrollDelta.y);
+        }
     }
 
 #if UNITY_ANDROID
@@ -68,6 +89,17 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
                 clickTime = 0;
             }
         }
+    }
+
+    private int touchCount;
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (touchCount < 2) touchCount++;
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (touchCount > 0) touchCount--;
     }
 #endif
 }
