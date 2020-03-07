@@ -18,7 +18,7 @@ MonoBehaviour:
   defaultDialogue: {fileID: 11400000, guid: 1740b858db157dc4080c2efc9a15f9be, type: 2}
   isWarehouseAgent: 1
   warehouse:
-    warehouseSize:
+    size:
       min: 0
       max: 50
   isVendor: 0

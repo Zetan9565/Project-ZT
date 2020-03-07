@@ -67,31 +67,23 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
 
     public void Recycle()
     {
-        if (ObjectPool.Instance)
+        if (holder)
         {
-            if (holder)
-            {
-                holder.iconInstance = null;
-                holder = null;
-            }
-            iconImage.raycastTarget = true;
-            RemoveAble = true;
-            if (!string.IsNullOrEmpty(TextToDisplay)) TipsManager.Instance.Hide();
-            TextToDisplay = string.Empty;
-            if (iconRange) ObjectPool.Instance.Put(iconRange.gameObject);
-            iconRange = null;
-            ObjectPool.Instance.Put(gameObject);
+            holder.iconInstance = null;
+            holder = null;
         }
-        else
-        {
-            if (iconRange) DestroyImmediate(iconRange.gameObject);
-            if (this) DestroyImmediate(gameObject);
-        }
+        iconImage.raycastTarget = true;
+        RemoveAble = true;
+        if (!string.IsNullOrEmpty(TextToDisplay)) TipsManager.Instance.Hide();
+        TextToDisplay = string.Empty;
+        if (iconRange) ObjectPool.Put(iconRange.gameObject);
+        iconRange = null;
+        ObjectPool.Put(gameObject);
     }
 
     private void OnRightClick()
     {
-        if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(this);
+        if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(this, false);
     }
 
     public void OnPointerClick(PointerEventData eventData)

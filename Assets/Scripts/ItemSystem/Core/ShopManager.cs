@@ -58,25 +58,25 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         long maxAmount = info.EmptyAble ? info.LeftAmount : info.SellPrice > 0 ? BackpackManager.Instance.Money / info.SellPrice : 999;
         if (info.LeftAmount == 1 && info.EmptyAble)
         {
-            ConfirmManager.Instance.NewConfirm(string.Format("确定购买1个 [{0}] 吗？", info.Item.name), delegate
+            ConfirmManager.Instance.New(string.Format("确定购买1个 [{0}] 吗？", info.Item.name), delegate
             {
                 if (OnSell(info))
-                    MessageManager.Instance.NewMessage(string.Format("购买了1个 [{0}]", info.Item.name));
+                    MessageManager.Instance.New(string.Format("购买了1个 [{0}]", info.Item.name));
             });
         }
         else if (info.IsEmpty)
         {
-            ConfirmManager.Instance.NewConfirm("该商品暂时缺货");
+            ConfirmManager.Instance.New("该商品暂时缺货");
         }
         else
         {
             AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
-            AmountManager.Instance.NewAmount(delegate
+            AmountManager.Instance.New(delegate
             {
-                ConfirmManager.Instance.NewConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
+                ConfirmManager.Instance.New(string.Format("确定购买{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
                 {
                     if (OnSell(info, (int)AmountManager.Instance.Amount))
-                        MessageManager.Instance.NewMessage(string.Format("购买了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
+                        MessageManager.Instance.New(string.Format("购买了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
                 });
             }, maxAmount);
         }
@@ -89,8 +89,8 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         if (!BackpackManager.Instance.TryGetItem_Boolean(info.Item, amount)) return false;
         if (info.EmptyAble && amount > info.LeftAmount)
         {
-            if (!info.IsEmpty) MessageManager.Instance.NewMessage("该商品数量不足");
-            else MessageManager.Instance.NewMessage("该商品暂时缺货");
+            if (!info.IsEmpty) MessageManager.Instance.New("该商品数量不足");
+            else MessageManager.Instance.New("该商品暂时缺货");
             return false;
         }
         if (!BackpackManager.Instance.TryLoseMoney(amount * info.SellPrice))
@@ -115,15 +115,15 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         int maxAmount = info.EmptyAble ? (info.LeftAmount > backpackAmount ? backpackAmount : info.LeftAmount) : backpackAmount;
         if (info.LeftAmount == 1 && info.EmptyAble)
         {
-            ConfirmManager.Instance.NewConfirm(string.Format("确定出售1个 [{0}] 吗？", info.Item.name), delegate
+            ConfirmManager.Instance.New(string.Format("确定出售1个 [{0}] 吗？", info.Item.name), delegate
             {
                 if (OnPurchase(info, (int)AmountManager.Instance.Amount))
-                    MessageManager.Instance.NewMessage(string.Format("出售了1个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
+                    MessageManager.Instance.New(string.Format("出售了1个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
             });
         }
         else if (info.IsEmpty)
         {
-            ConfirmManager.Instance.NewConfirm("这种物品暂无特价收购需求，确定按原价出售吗？", delegate
+            ConfirmManager.Instance.New("这种物品暂无特价收购需求，确定按原价出售吗？", delegate
             {
                 PurchaseItem(MItemInfo, true);
             });
@@ -131,12 +131,12 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         else
         {
             AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
-            AmountManager.Instance.NewAmount(delegate
+            AmountManager.Instance.New(delegate
             {
-                ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
+                ConfirmManager.Instance.New(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.Item.name), delegate
                 {
                     if (OnPurchase(info, (int)AmountManager.Instance.Amount))
-                        MessageManager.Instance.NewMessage(string.Format("出售了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
+                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
                 });
             }, maxAmount);
         }
@@ -148,13 +148,13 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         var itemAgents = BackpackManager.Instance.GetItemAgentsByItem(info.Item).ToArray();
         if (itemAgents.Length < 1)
         {
-            MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这种物品");
+            MessageManager.Instance.New(GameManager.BackpackName + "中没有这种物品");
             return false;
         }
         if (info.EmptyAble && amount > info.LeftAmount)
         {
-            if (!info.IsEmpty) MessageManager.Instance.NewMessage("不收够这么多的这种物品");
-            else MessageManager.Instance.NewMessage("这种物品暂无收购需求");
+            if (!info.IsEmpty) MessageManager.Instance.New("不收够这么多的这种物品");
+            else MessageManager.Instance.New("这种物品暂无收购需求");
             return false;
         }
         ItemBase item = itemAgents[0].MItemInfo.item;
@@ -177,12 +177,12 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         if (MShop == null || info == null || !info.item) return;
         if (!info.item.SellAble)
         {
-            MessageManager.Instance.NewMessage("这种物品不可出售");
+            MessageManager.Instance.New("这种物品不可出售");
             return;
         }
         if (info.gemstone1 != null || info.gemstone2 != null)
         {
-            MessageManager.Instance.NewMessage("镶嵌宝石的物品不可出售");
+            MessageManager.Instance.New("镶嵌宝石的物品不可出售");
             return;
         }
         MItemInfo = info;
@@ -194,21 +194,21 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         }
         if (info.Amount == 1)
         {
-            ConfirmManager.Instance.NewConfirm(string.Format("确定出售1个 [{0}] 吗？", info.item.name), delegate
+            ConfirmManager.Instance.New(string.Format("确定出售1个 [{0}] 吗？", info.item.name), delegate
             {
                 if (OnPurchase(info))
-                    MessageManager.Instance.NewMessage(string.Format("出售了1个 [{1}]", (int)AmountManager.Instance.Amount, info.item.name));
+                    MessageManager.Instance.New(string.Format("出售了1个 [{1}]", (int)AmountManager.Instance.Amount, info.item.name));
             });
         }
         else
         {
             AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
-            AmountManager.Instance.NewAmount(delegate
+            AmountManager.Instance.New(delegate
             {
-                ConfirmManager.Instance.NewConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.item.name), delegate
+                ConfirmManager.Instance.New(string.Format("确定出售{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount, info.item.name), delegate
                 {
                     if (OnPurchase(info, (int)AmountManager.Instance.Amount))
-                        MessageManager.Instance.NewMessage(string.Format("出售了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.item.name));
+                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.item.name));
                 });
             }, BackpackManager.Instance.GetItemAmount(info.item));
         }
@@ -220,17 +220,17 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         MItemInfo = null;
         if (!info.item.SellAble)
         {
-            MessageManager.Instance.NewMessage("这种物品不可出售");
+            MessageManager.Instance.New("这种物品不可出售");
             return false;
         }
         if (BackpackManager.Instance.GetItemAmount(info.item) < 1)
         {
-            MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这种物品");
+            MessageManager.Instance.New(GameManager.BackpackName + "中没有这种物品");
             return false;
         }
         if (amount > info.Amount)
         {
-            MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这么多的这种物品");
+            MessageManager.Instance.New(GameManager.BackpackName + "中没有这么多的这种物品");
             return false;
         }
         if (!BackpackManager.Instance.TryLoseItem_Boolean(info, amount)) return false;
@@ -245,12 +245,14 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
     {
         if (!MShop) return;
         base.OpenWindow();
+        if (!IsUIOpen) return;
         UIManager.Instance.EnableJoyStick(false);
     }
 
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen) return;
         MShop = null;
         MItemInfo = null;
         if (BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.CloseWindow();
@@ -269,7 +271,7 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
                 if (MShop.Commodities.Count >= originalSize)
                     for (int i = 0; i < MShop.Commodities.Count - originalSize; i++)
                     {
-                        MerchandiseAgent ma = ObjectPool.Instance.Get(UI.merchandiseCellPrefab, UI.merchandiseCellsParent).GetComponent<MerchandiseAgent>();
+                        MerchandiseAgent ma = ObjectPool.Get(UI.merchandiseCellPrefab, UI.merchandiseCellsParent).GetComponent<MerchandiseAgent>();
                         ma.Clear();
                         merchandiseAgents.Add(ma);
                     }
@@ -295,7 +297,7 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
                 if (acqCount >= originalSize)
                     for (int i = 0; i < acqCount - originalSize; i++)
                     {
-                        MerchandiseAgent ma = ObjectPool.Instance.Get(UI.merchandiseCellPrefab, UI.merchandiseCellsParent).GetComponent<MerchandiseAgent>();
+                        MerchandiseAgent ma = ObjectPool.Get(UI.merchandiseCellPrefab, UI.merchandiseCellsParent).GetComponent<MerchandiseAgent>();
                         ma.Clear();
                         merchandiseAgents.Add(ma);
                     }

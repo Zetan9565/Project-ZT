@@ -6,6 +6,7 @@ public class AmountUI : WindowUI
     [HideInInspector]
     public RectTransform windowRect;
 
+    public Text title;
     public InputField amount;
 
     public Button max;

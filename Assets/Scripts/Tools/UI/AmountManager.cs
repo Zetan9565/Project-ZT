@@ -27,7 +27,29 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
     private long min;
     private long max;
 
-    public void NewAmount(UnityAction confirmAction, long max, long min = 0)
+    public void New(UnityAction confirmAction, long max, string title = "")
+    {
+        if (max < min)
+        {
+            max = max + min;
+            min = max - min;
+            max = max - min;
+        }
+        this.max = max;
+        min = 0;
+        Amount = max >= 0 ? 0 : min;
+        UI.amount.text = Amount.ToString();
+        onConfirm.RemoveAllListeners();
+        if (confirmAction != null) onConfirm.AddListener(confirmAction);
+        UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
+        if (string.IsNullOrEmpty(title)) UI.title.text = "输入数量";
+        else UI.title.text = title;
+        ZetanUtility.KeepInsideScreen(UI.windowRect);
+    }
+
+    public void New(UnityAction confirmAction, long max, long min, string title = "")
     {
         if (max < min)
         {
@@ -44,6 +66,8 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         UI.window.alpha = 1;
         UI.window.blocksRaycasts = true;
+        if (string.IsNullOrEmpty(title)) UI.title.text = "输入数量";
+        else UI.title.text = title;
         ZetanUtility.KeepInsideScreen(UI.windowRect);
     }
 

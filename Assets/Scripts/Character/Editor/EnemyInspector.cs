@@ -19,7 +19,7 @@ public class EnemyInspector : Editor
         if (enemy.Info)
         {
             EditorGUILayout.BeginVertical("Box");
-            EditorGUILayout.LabelField("敌人名称：" + enemy.Info.Name);
+            EditorGUILayout.LabelField("敌人名称：" + enemy.Info.name);
             EditorGUILayout.LabelField("敌人识别码：" + enemy.Info.ID);
             EditorGUILayout.LabelField("掉落物品数量：" + enemy.Info.DropItems.Count);
             EditorGUILayout.EndVertical();

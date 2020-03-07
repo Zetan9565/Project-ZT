@@ -65,9 +65,9 @@ public class QuestInspector : Editor
     {
         quest = target as Quest;
         npcs = Resources.LoadAll<TalkerInformation>("");
-        npcNames = npcs.Select(x => x.Name).ToArray();//Linq分离出NPC名字
+        npcNames = npcs.Select(x => x.name).ToArray();//Linq分离出NPC名字
         groups = Resources.LoadAll<QuestGroup>("");
-        groupNames = groups.Select(x => x.Name).ToArray();
+        groupNames = groups.Select(x => x.name).ToArray();
 
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 5;
@@ -786,7 +786,7 @@ public class QuestInspector : Editor
                         if (quest.KillObjectives[index].Enemy)
                         {
                             EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                                "敌人名称", quest.KillObjectives[index].Enemy.Name);
+                                "敌人名称", quest.KillObjectives[index].Enemy.name);
                             lineCount++;
                         }
                         break;

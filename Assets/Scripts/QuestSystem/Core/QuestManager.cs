@@ -47,12 +47,12 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     {
         if (!quest || !IsQuestValid(quest))
         {
-            MessageManager.Instance.NewMessage("无效任务");
+            MessageManager.Instance.New("无效任务");
             return false;
         }
         if (HasOngoingQuest(quest))
         {
-            MessageManager.Instance.NewMessage("已经在执行");
+            MessageManager.Instance.New("已经在执行");
             return false;
         }
         QuestAgent qa;
@@ -61,26 +61,26 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             QuestGroupAgent qga = questGroupAgents.Find(x => x.questGroup == quest.Group);
             if (qga)
             {
-                qa = ObjectPool.Instance.Get(UI.questPrefab, qga.questListParent).GetComponent<QuestAgent>();
+                qa = ObjectPool.Get(UI.questPrefab, qga.questListParent).GetComponent<QuestAgent>();
                 qa.parent = qga;
                 qga.questAgents.Add(qa);
             }
             else
             {
-                qga = ObjectPool.Instance.Get(UI.questGroupPrefab, UI.questListParent).GetComponent<QuestGroupAgent>();
+                qga = ObjectPool.Get(UI.questGroupPrefab, UI.questListParent).GetComponent<QuestGroupAgent>();
                 qga.questGroup = quest.Group;
                 qga.IsExpanded = true;
                 questGroupAgents.Add(qga);
 
-                qa = ObjectPool.Instance.Get(UI.questPrefab, qga.questListParent).GetComponent<QuestAgent>();
+                qa = ObjectPool.Get(UI.questPrefab, qga.questListParent).GetComponent<QuestAgent>();
                 qa.parent = qga;
                 qga.questAgents.Add(qa);
             }
         }
-        else qa = ObjectPool.Instance.Get(UI.questPrefab, UI.questListParent).GetComponent<QuestAgent>();
+        else qa = ObjectPool.Get(UI.questPrefab, UI.questListParent).GetComponent<QuestAgent>();
         qa.Init(quest);
         questAgents.Add(qa);
-        QuestBoardAgent qba = ObjectPool.Instance.Get(UI.boardQuestPrefab, UI.questBoardArea).GetComponent<QuestBoardAgent>();
+        QuestBoardAgent qba = ObjectPool.Get(UI.boardQuestPrefab, UI.questBoardArea).GetComponent<QuestBoardAgent>();
         qba.Init(qa);
         questBoardAgents.Add(qba);
         foreach (Objective o in quest.ObjectiveInstances)
@@ -135,7 +135,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         if (quest.NPCToSubmit)
             GameManager.TalkerDatas[quest.NPCToSubmit.ID].TransferQuestToThis(quest);
         if (!loadMode)
-            MessageManager.Instance.NewMessage("接取了任务 [" + quest.Title + "]");
+            MessageManager.Instance.New("接取了任务 [" + quest.Title + "]");
         if (QuestsOngoing.Count > 0)
         {
             UI.questBoard.alpha = 1;
@@ -173,7 +173,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     if (questsReqThisQuestItem.Contains(quest) && questsReqThisQuestItem.Count > 1)
                     //需要道具的任务群包含该任务且数量多于一个，说明有其他任务对该任务需提交的道具存在依赖
                     {
-                        MessageManager.Instance.NewMessage("提交失败！其他任务对该任务需提交物品存在依赖");
+                        MessageManager.Instance.New("提交失败！其他任务对该任务需提交物品存在依赖");
                         return false;
                     }
                 }
@@ -189,25 +189,25 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 QuestGroupAgent cqga = cmpltQuestGroupAgents.Find(x => x.questGroup == quest.Group);
                 if (cqga)
                 {
-                    cqa = ObjectPool.Instance.Get(UI.questPrefab, cqga.questListParent).GetComponent<QuestAgent>();
+                    cqa = ObjectPool.Get(UI.questPrefab, cqga.questListParent).GetComponent<QuestAgent>();
                     cqa.parent = cqga;
                     cqga.questAgents.Add(cqa);
                     cqga.UpdateStatus();
                 }
                 else
                 {
-                    cqga = ObjectPool.Instance.Get(UI.questGroupPrefab, UI.cmpltQuestListParent).GetComponent<QuestGroupAgent>();
+                    cqga = ObjectPool.Get(UI.questGroupPrefab, UI.cmpltQuestListParent).GetComponent<QuestGroupAgent>();
                     cqga.questGroup = quest.Group;
                     cqga.IsExpanded = true;
                     cmpltQuestGroupAgents.Add(cqga);
 
-                    cqa = ObjectPool.Instance.Get(UI.questPrefab, cqga.questListParent).GetComponent<QuestAgent>();
+                    cqa = ObjectPool.Get(UI.questPrefab, cqga.questListParent).GetComponent<QuestAgent>();
                     cqa.parent = cqga;
                     cqga.questAgents.Add(cqa);
                     cqga.UpdateStatus();
                 }
             }
-            else cqa = ObjectPool.Instance.Get(UI.questPrefab, UI.cmpltQuestListParent).GetComponent<QuestAgent>();
+            else cqa = ObjectPool.Get(UI.questPrefab, UI.cmpltQuestListParent).GetComponent<QuestAgent>();
             cqa.Init(quest, true);
             completeQuestAgents.Add(cqa);
             foreach (Objective o in quest.ObjectiveInstances)
@@ -270,7 +270,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 {
                     BackpackManager.Instance.GetItem(info);
                 }
-                MessageManager.Instance.NewMessage("提交了任务 [" + quest.Title + "]");
+                MessageManager.Instance.New("提交了任务 [" + quest.Title + "]");
             }
             HideDescription();
             if (QuestsOngoing.Count < 1)
@@ -365,7 +365,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             OnQuestStatusChange?.Invoke();
             return true;
         }
-        else if (!quest.Abandonable) ConfirmManager.Instance.NewConfirm("该任务无法放弃。");
+        else if (!quest.Abandonable) ConfirmManager.Instance.New("该任务无法放弃。");
         OnQuestStatusChange?.Invoke();
         return false;
     }
@@ -375,7 +375,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     public void AbandonSelectedQuest()
     {
         if (!selectedQuest) return;
-        ConfirmManager.Instance.NewConfirm("已消耗的道具不会退回，确定放弃此任务吗？", delegate
+        ConfirmManager.Instance.New("已消耗的道具不会退回，确定放弃此任务吗？", delegate
         {
             if (AbandonQuest(selectedQuest))
             {
@@ -607,7 +607,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         int befCount = rewardCells.Count;
         for (int i = 0; i < 10 - befCount; i++)
         {
-            ItemAgent rwc = ObjectPool.Instance.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemAgent>();
+            ItemAgent rwc = ObjectPool.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemAgent>();
             rwc.Init();
             rewardCells.Add(rwc);
         }
@@ -646,6 +646,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     {
         if (DialogueManager.Instance.IsTalking) return;
         base.OpenWindow();
+        if (!IsUIOpen) return;
         DialogueManager.Instance.HideQuestDescription();
         UIManager.Instance.EnableJoyStick(false);
         TriggerManager.Instance.SetTrigger("Open Quest", true);
@@ -653,6 +654,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen) return;
         HideDescription();
         UIManager.Instance.EnableJoyStick(true);
     }
@@ -678,7 +680,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             {
                 qba.questAgent = null;
                 questBoardAgents.Remove(qba);
-                ObjectPool.Instance.Put(qba.gameObject);
+                ObjectPool.Put(qba.gameObject);
             }
             QuestGroupAgent qga = questGroupAgents.Find(x => x.questAgents.Contains(qa));
             if (qga)

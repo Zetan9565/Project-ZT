@@ -74,8 +74,7 @@ public class QuestFlagsAgent : MonoBehaviour
     {
         questHolder = null;
         if (mapIcon) mapIcon.Recycle();
-        if (ObjectPool.Instance) ObjectPool.Instance.Put(gameObject);
-        else DestroyImmediate(gameObject);
+        ObjectPool.Put(gameObject);
     }
 
     void Awake()
@@ -120,7 +119,7 @@ public class QuestFlagsAgent : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(mapIcon, true);
+        if (MapManager.Instance) MapManager.Instance.DestroyMapIcon(mapIcon);
         if (QuestManager.Instance) QuestManager.Instance.OnQuestStatusChange -= UpdateUI;
     }
 }

@@ -77,8 +77,7 @@ public class QuestBoardAgent : MonoBehaviour, IPointerClickHandler, IPointerDown
     public void Recycle()
     {
         questAgent = null;
-        if (ObjectPool.Instance) ObjectPool.Instance.Put(gameObject);
-        else DestroyImmediate(gameObject);
+        ObjectPool.Put(gameObject);
     }
 
     public void OnPointerClick(PointerEventData eventData)

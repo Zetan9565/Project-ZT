@@ -55,6 +55,7 @@ public class CalendarManager : WindowHandler<CalendarUI, CalendarManager>, IOpen
     public override void OpenWindow()
     {
         base.OpenWindow();
+        if (!IsUIOpen) return;
         UpdateUI();
     }
 

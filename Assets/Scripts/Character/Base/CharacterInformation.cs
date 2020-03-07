@@ -15,7 +15,7 @@ public class CharacterInformation : ScriptableObject
 
     [SerializeField]
     protected string _Name;
-    public string Name
+    public new string name
     {
         get
         {

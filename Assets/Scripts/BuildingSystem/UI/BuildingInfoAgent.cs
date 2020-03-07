@@ -26,7 +26,7 @@ public class BuildingInfoAgent : MonoBehaviour,
     {
         nameText.text = string.Empty;
         MBuildingInfo = null;
-        if (recycle) ObjectPool.Instance.Put(gameObject);
+        if (recycle) ObjectPool.Put(gameObject);
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -62,9 +62,9 @@ public class BuildingInfoAgent : MonoBehaviour,
 
     void TryBuild()
     {
-        if (!BackpackManager.Instance.CheckMaterialsEnough(MBuildingInfo.Materials))
+        if (!BackpackManager.Instance.IsMaterialsEnough(MBuildingInfo.Materials))
         {
-            MessageManager.Instance.NewMessage("耗材不足");
+            MessageManager.Instance.New("耗材不足");
             return;
         }
         else BuildingManager.Instance.CreatPreview(MBuildingInfo);

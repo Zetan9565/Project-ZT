@@ -74,8 +74,8 @@ public class WarehouseData
     {
         handlerID = id;
         money = warehouse.Money;
-        currentSize = (int)warehouse.warehouseSize;
-        maxSize = warehouse.warehouseSize.Max;
+        currentSize = (int)warehouse.size;
+        maxSize = warehouse.size.Max;
         foreach (ItemInfo info in warehouse.Items)
         {
             itemDatas.Add(new ItemData(info));

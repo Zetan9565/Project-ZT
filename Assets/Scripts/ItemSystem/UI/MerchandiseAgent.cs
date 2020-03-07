@@ -73,7 +73,7 @@ public class MerchandiseAgent : MonoBehaviour, IPointerClickHandler
         if (recycle)
         {
             itemAgentSon.Empty();
-            ObjectPool.Instance.Put(gameObject);
+            ObjectPool.Put(gameObject);
         }
     }
 

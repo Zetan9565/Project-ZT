@@ -35,7 +35,7 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
         if (MBuilding) MBuilding.buildingAgent = null;
         MBuilding = null;
         buildingPosition.text = string.Empty;
-        if (recycle) ObjectPool.Instance.Put(gameObject);
+        if (recycle) ObjectPool.Put(gameObject);
     }
 
     public void UpdateUI()

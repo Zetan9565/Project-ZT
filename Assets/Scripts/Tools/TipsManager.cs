@@ -73,7 +73,7 @@ public class TipsManager : SingletonMonoBehaviour<TipsManager>
         TipsButton tb = buttons.Find(x => x.IsHiding && x.name != name);
         if (!tb)
         {
-            tb = ObjectPool.Instance.Get(UI.buttonPrefab.gameObject, UI.buttonParent.transform).GetComponent<TipsButton>();
+            tb = ObjectPool.Get(UI.buttonPrefab.gameObject, UI.buttonParent.transform).GetComponent<TipsButton>();
             buttons.Add(tb);
         }
         tb.Show(name, clickAction);

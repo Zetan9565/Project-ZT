@@ -29,6 +29,8 @@ MonoBehaviour:
   inexhaustible: 0
   maxDurability: 100
   makingMethod: 1
+  minYield: 1
+  maxYield: 1
   materialType: 2
   materials:
   - item: {fileID: 11400000, guid: eb68c8a7b1bbeb8408eed1d2af6b8ad6, type: 2}

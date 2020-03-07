@@ -19,7 +19,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         if (!UI || !UI.gameObject) return;
         for (int i = 0; i < 100; i++)
         {
-            ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+            ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
             itemAgents.Add(ia);
             ia.Init(ItemAgentType.Warehouse, itemAgents.Count - 1, UI.gridRect);
             ia.Empty();
@@ -34,23 +34,23 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
             MWarehouse = warehouse;
             foreach (ItemAgent ia in itemAgents)
                 ia.Empty();
-            while (itemAgents.Count < MWarehouse.warehouseSize.Max)//格子不够用，新建
+            while (itemAgents.Count < MWarehouse.size.Max)//格子不够用，新建
             {
-                ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+                ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
                 itemAgents.Add(ia);
                 ia.Empty();
                 ia.Init(ItemAgentType.Warehouse, itemAgents.Count - 1, UI.gridRect);
             }
             int originalSize = itemAgents.Count;
-            for (int i = MWarehouse.warehouseSize.Max; i < originalSize - MWarehouse.warehouseSize.Max; i++)//用不到的格子隐藏
+            for (int i = MWarehouse.size.Max; i < originalSize - MWarehouse.size.Max; i++)//用不到的格子隐藏
                 itemAgents[i].Hide();
-            for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)//用得到的格子显示
+            for (int i = 0; i < MWarehouse.size.Max; i++)//用得到的格子显示
                 itemAgents[i].Show();
             foreach (ItemInfo info in MWarehouse.Items)
             {
                 if (info.indexInGrid > 0 && info.indexInGrid < itemAgents.Count)
                     itemAgents[info.indexInGrid].SetItem(info);
-                else for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+                else for (int i = 0; i < MWarehouse.size.Max; i++)
                         if (itemAgents[i].IsEmpty)
                         {
                             itemAgents[i].SetItem(info);
@@ -71,14 +71,14 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         if (!all)
         {
             if (info.Amount == 1 && OnStore(info, 1))
-                MessageManager.Instance.NewMessage(string.Format("存入了1个 [{0}]", info.ItemName));
+                MessageManager.Instance.New(string.Format("存入了1个 [{0}]", info.ItemName));
             else
             {
                 AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
-                AmountManager.Instance.NewAmount(delegate
+                AmountManager.Instance.New(delegate
                 {
                     if (OnStore(info, (int)AmountManager.Instance.Amount))
-                        MessageManager.Instance.NewMessage(string.Format("存入了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
+                        MessageManager.Instance.New(string.Format("存入了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
                 }, info.Amount);
             }
         }
@@ -86,7 +86,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         {
             int amountBef = GetItemAmount(info.ItemID);
             if (OnStore(info, info.Amount))
-                MessageManager.Instance.NewMessage(string.Format("存入了{0}个 [{1}]", GetItemAmount(info.ItemID) - amountBef, info.ItemName));
+                MessageManager.Instance.New(string.Format("存入了{0}个 [{1}]", GetItemAmount(info.ItemID) - amountBef, info.ItemName));
         }
     }
 
@@ -103,12 +103,12 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         if (!BackpackManager.Instance.TryLoseItem_Boolean(info, amount)) return false;
         if (!info.item.StackAble && MWarehouse.IsFull)
         {
-            MessageManager.Instance.NewMessage("仓库已满");
+            MessageManager.Instance.New("仓库已满");
             return false;
         }
-        if (!info.item.StackAble && amount > MWarehouse.warehouseSize.Rest)
+        if (!info.item.StackAble && amount > MWarehouse.size.Rest)
         {
-            MessageManager.Instance.NewMessage(string.Format("请多留出至少{0}个仓库空间", amount - MWarehouse.warehouseSize.Rest));
+            MessageManager.Instance.New(string.Format("请多留出至少{0}个仓库空间", amount - MWarehouse.size.Rest));
             return false;
         }
         if (info.item.StackAble)
@@ -122,7 +122,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
                 if (ia) ia.SetItem(MWarehouse.Latest);
                 else
                 {
-                    MessageManager.Instance.NewMessage("发生内部错误！");
+                    MessageManager.Instance.New("发生内部错误！");
                     Debug.Log("[Store Item Error: Can't find ItemAgent] ID: " + info.ItemID + "[" + DateTime.Now.ToString() + "]");
                 }
             }
@@ -148,21 +148,21 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         ItemWindowManager.Instance.CloseWindow();
         if (!all)
             if (info.Amount == 1 && OnTakeOut(info, 1))
-                MessageManager.Instance.NewMessage(string.Format("取出了1个 [{0}]", info.ItemName));
+                MessageManager.Instance.New(string.Format("取出了1个 [{0}]", info.ItemName));
             else
             {
                 AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
-                AmountManager.Instance.NewAmount(delegate
+                AmountManager.Instance.New(delegate
                 {
                     if (OnTakeOut(info, (int)AmountManager.Instance.Amount))
-                        MessageManager.Instance.NewMessage(string.Format("取出了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
+                        MessageManager.Instance.New(string.Format("取出了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
                 }, info.Amount);
             }
         else
         {
             int amountBef = GetItemAmount(info.ItemID);
             if (OnTakeOut(info, info.Amount))
-                MessageManager.Instance.NewMessage(string.Format("取出了{0}个 [{1}]", amountBef - GetItemAmount(info.ItemID), info.ItemName));
+                MessageManager.Instance.New(string.Format("取出了{0}个 [{1}]", amountBef - GetItemAmount(info.ItemID), info.ItemName));
         }
     }
 
@@ -210,6 +210,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
     public override void OpenWindow()
     {
         base.OpenWindow();
+        if (!IsUIOpen) return;
         Init(MWarehouse);
         BackpackManager.Instance.OpenWindow();
         UIManager.Instance.EnableJoyStick(false);
@@ -219,6 +220,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen) return;
         MWarehouse = null;
         foreach (ItemAgent ia in itemAgents)
         {
@@ -236,7 +238,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
     public void UpdateUI()
     {
         UI.money.text = MWarehouse.Money.ToString();
-        UI.size.text = MWarehouse.warehouseSize.ToString();
+        UI.size.text = MWarehouse.size.ToString();
         SetPage(currentPage);
     }
 
@@ -309,7 +311,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
     private void ShowAll()
     {
         if (!UI || !UI.gameObject || !MWarehouse) return;
-        for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+        for (int i = 0; i < MWarehouse.size.Max; i++)
         {
             ZetanUtility.SetActive(itemAgents[i].gameObject, true);
         }
@@ -318,7 +320,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
     private void ShowEquipments()
     {
         if (!UI || !UI.gameObject || !MWarehouse) return;
-        for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+        for (int i = 0; i < MWarehouse.size.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsEquipment)
                 ZetanUtility.SetActive(itemAgents[i].gameObject, true);
@@ -329,7 +331,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
     private void ShowConsumables()
     {
         if (!UI || !UI.gameObject || !MWarehouse) return;
-        for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+        for (int i = 0; i < MWarehouse.size.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsConsumable)
                 ZetanUtility.SetActive(itemAgents[i].gameObject, true);
@@ -340,7 +342,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
     private void ShowMaterials()
     {
         if (!UI || !UI.gameObject || !MWarehouse) return;
-        for (int i = 0; i < MWarehouse.warehouseSize.Max; i++)
+        for (int i = 0; i < MWarehouse.size.Max; i++)
         {
             if (!itemAgents[i].IsEmpty && itemAgents[i].MItemInfo.item.IsMaterial)
                 ZetanUtility.SetActive(itemAgents[i].gameObject, true);

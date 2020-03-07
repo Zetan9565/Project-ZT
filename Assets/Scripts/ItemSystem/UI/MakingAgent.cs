@@ -27,6 +27,6 @@ public class MakingAgent : MonoBehaviour
     {
         nameText.text = string.Empty;
         MItem = null;
-        if (recycle) ObjectPool.Instance.Put(gameObject);
+        if (recycle) ObjectPool.Put(gameObject);
     }
 }

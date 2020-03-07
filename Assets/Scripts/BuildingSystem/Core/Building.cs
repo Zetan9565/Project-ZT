@@ -44,7 +44,7 @@ public class Building : MonoBehaviour
         GetIDTail();
         if (string.IsNullOrEmpty(IDTail))
         {
-            MessageManager.Instance.NewMessage(name + "已经达到最大建设数量");
+            MessageManager.Instance.New(name + "已经达到最大建设数量");
             if (buildingAgent) buildingAgent.Clear(true);
             Destroy(gameObject);
         }
@@ -97,7 +97,7 @@ public class Building : MonoBehaviour
         IsUnderBuilding = false;
         IsBuilt = true;
         if (buildingFlag) buildingFlag.text = "建造完成！";
-        MessageManager.Instance.NewMessage("[" + name + "] 建造完成了");
+        MessageManager.Instance.New("[" + name + "] 建造完成了");
         if (buildingAgent) buildingAgent.UpdateUI();
         StartCoroutine(WaitToHideFlag());
     }
@@ -126,7 +126,7 @@ public class Building : MonoBehaviour
 
     public virtual void AskDestroy()
     {
-        ConfirmManager.Instance.NewConfirm(string.Format("确定拆除{0}{1}吗？", name, (Vector2)transform.position),
+        ConfirmManager.Instance.New(string.Format("确定拆除{0}{1}吗？", name, (Vector2)transform.position),
             BuildingManager.Instance.ConfirmDestroy,
             delegate
             {

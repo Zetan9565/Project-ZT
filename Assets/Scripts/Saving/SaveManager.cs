@@ -49,7 +49,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
                 fs.Close();
 
-                MessageManager.Instance.NewMessage("保存成功！");
+                MessageManager.Instance.New("保存成功！");
                 return true;
             }
             catch (Exception ex)
@@ -57,7 +57,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
                 throw ex;
                 Debug.LogWarning(ex.Message);
                 if (fs != null) fs.Close();
-                MessageManager.Instance.NewMessage("保存失败！");
+                MessageManager.Instance.New("保存失败！");
                 return false;
             }
         }
@@ -202,7 +202,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
             }
             if (warehouse != null)
             {
-                warehouse.warehouseSize = new ScopeInt(wd.maxSize) { Current = wd.currentSize };
+                warehouse.size = new ScopeInt(wd.maxSize) { Current = wd.currentSize };
                 warehouse.Items.Clear();
                 foreach (ItemData id in wd.itemDatas)
                 {

@@ -7,12 +7,14 @@ public class EscapeMenuManager : WindowHandler<EscapeUI, EscapeMenuManager>, IOp
     public override void OpenWindow()
     {
         base.OpenWindow();
+        if (!IsUIOpen) return;
         WindowsManager.Instance.PauseAll(true, this);
     }
 
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen) return;
         WindowsManager.Instance.PauseAll(false);
     }
 
@@ -32,6 +34,6 @@ public class EscapeMenuManager : WindowHandler<EscapeUI, EscapeMenuManager>, IOp
 
     public void Exit()
     {
-        ConfirmManager.Instance.NewConfirm("确定退出" + Application.productName + "吗？", Application.Quit);
+        ConfirmManager.Instance.New("确定退出" + Application.productName + "吗？", Application.Quit);
     }
 }

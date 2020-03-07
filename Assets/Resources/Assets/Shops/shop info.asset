@@ -34,8 +34,8 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
     maxAmount: 1
     priceMultiple: 1
-    emptyAble: 0
+    emptyAble: 1
     leftRefreshTime: 0
     refreshTime: 300
-    minRefreshAmount: 1
+    minRefreshAmount: 0
     maxRefreshAmount: 1

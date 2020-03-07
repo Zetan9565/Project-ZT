@@ -15,7 +15,7 @@ public class QuestGroup : ScriptableObject
 
     [SerializeField]
     private string _Name;
-    public string Name
+    public new string name
     {
         get
         {

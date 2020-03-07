@@ -41,7 +41,7 @@ public class GatherAgent : MonoBehaviour
                         lootItems.Add(new ItemInfo(di.Item, Random.Range(1, di.Amount + 1)));
             if (lootItems.Count > 0)
             {
-                LootAgent la = ObjectPool.Instance.Get(GatheringInfo.LootPrefab).GetComponent<LootAgent>();
+                LootAgent la = ObjectPool.Get(GatheringInfo.LootPrefab).GetComponent<LootAgent>();
                 la.Init(lootItems, transform.position);
             }
         }

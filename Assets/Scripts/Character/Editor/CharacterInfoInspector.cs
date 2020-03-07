@@ -100,7 +100,7 @@ public class CharacterInfoInspector : Editor
     {
         if (enemy)
         {
-            if (string.IsNullOrEmpty(enemy.Name) || string.IsNullOrEmpty(enemy.ID) || enemy.DropItems.Exists(x => !x.Item))
+            if (string.IsNullOrEmpty(enemy.name) || string.IsNullOrEmpty(enemy.ID) || enemy.DropItems.Exists(x => !x.Item))
                 EditorGUILayout.HelpBox("该敌人信息未补全。", MessageType.Warning);
             else EditorGUILayout.HelpBox("该敌人信息已完整。", MessageType.Info);
         }
@@ -108,7 +108,7 @@ public class CharacterInfoInspector : Editor
         {
             if (talker.FavoriteItems.Exists(x => x.Item && talker.HateItems.Exists(y => y.Item && x.Item == y.Item)))
                 EditorGUILayout.HelpBox("喜爱道具与讨厌道具存在冲突。", MessageType.Warning);
-            else if (string.IsNullOrEmpty(talker.Name) || string.IsNullOrEmpty(talker.ID) || !talker.DefaultDialogue ||
+            else if (string.IsNullOrEmpty(talker.name) || string.IsNullOrEmpty(talker.ID) || !talker.DefaultDialogue || talker.IsVendor && !talker.Shop ||
                 talker.CanDEV_RLAT && (!talker.NormalItemDialogue ||
                 (talker.FavoriteItems.Count > 0 && (!talker.FavoriteItemDialogue.Level_1 || !talker.FavoriteItemDialogue.Level_2 || !talker.FavoriteItemDialogue.Level_3 || !talker.FavoriteItemDialogue.Level_4)) ||
                 (talker.HateItems.Count > 0 && (!talker.HateItemDialogue.Level_1 || !talker.HateItemDialogue.Level_2 || !talker.HateItemDialogue.Level_3 || !talker.HateItemDialogue.Level_4)) ||
@@ -116,7 +116,7 @@ public class CharacterInfoInspector : Editor
                 EditorGUILayout.HelpBox("该NPC信息未补全。", MessageType.Warning);
             else EditorGUILayout.HelpBox("该NPC信息已完整。", MessageType.Info);
         }
-        else if (string.IsNullOrEmpty(character.Name) || string.IsNullOrEmpty(character.ID))
+        else if (string.IsNullOrEmpty(character.name) || string.IsNullOrEmpty(character.ID))
             EditorGUILayout.HelpBox("该角色信息未补全。", MessageType.Warning);
         else EditorGUILayout.HelpBox("该角色信息已完整。", MessageType.Info);
         if (talker)
@@ -175,10 +175,10 @@ public class CharacterInfoInspector : Editor
                     serializedObject.Update();
                     EditorGUI.BeginChangeCheck();
                     EditorGUILayout.LabelField("背包信息");
-                    SerializedProperty backpackSize = backpack.FindPropertyRelative("backpackSize");
-                    SerializedProperty weightLoad = backpack.FindPropertyRelative("weightLoad");
-                    backpackSize.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认容量(格)", backpackSize.FindPropertyRelative("max").intValue, 30, 200);
-                    weightLoad.FindPropertyRelative("max").floatValue = EditorGUILayout.Slider("默认负重(WL)", weightLoad.FindPropertyRelative("max").floatValue, 100, 1000);
+                    SerializedProperty size = backpack.FindPropertyRelative("size");
+                    SerializedProperty weight = backpack.FindPropertyRelative("weight");
+                    size.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认容量(格)", size.FindPropertyRelative("max").intValue, 30, 200);
+                    weight.FindPropertyRelative("max").floatValue = EditorGUILayout.Slider("默认负重(WL)", weight.FindPropertyRelative("max").floatValue, 100, 1000);
                     if (EditorGUI.EndChangeCheck())
                         serializedObject.ApplyModifiedProperties();
                 }
@@ -220,9 +220,9 @@ public class CharacterInfoInspector : Editor
                     EditorGUILayout.PropertyField(isWarehouseAgent, new GUIContent("是仓库管理员"));
                     if (isWarehouseAgent.boolValue)
                     {
-                        SerializedProperty warehouseSize = warehouse.FindPropertyRelative("warehouseSize");
-                        warehouseSize.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认仓库容量(格)",
-                            warehouseSize.FindPropertyRelative("max").intValue, 50, 150);
+                        SerializedProperty size = warehouse.FindPropertyRelative("size");
+                        size.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认仓库容量(格)",
+                            size.FindPropertyRelative("max").intValue, 50, 150);
                     }
                     EditorGUILayout.PropertyField(isVendor, new GUIContent("是商贩"));
                     if (isVendor.boolValue)
@@ -595,7 +595,7 @@ public class CharacterInfoInspector : Editor
                 var conflictTalker = allTalkers.Find(x => x.QuestsStored.Count > 0 && x.QuestsStored.Contains(quest.objectReferenceValue as Quest));
                 if (conflictTalker && conflictTalker != talker)
                 {
-                    EditorUtility.DisplayDialog("错误", "[" + conflictTalker.Name + "]已使用该任务，无法添加。", "确定");
+                    EditorUtility.DisplayDialog("错误", "[" + conflictTalker.name + "]已使用该任务，无法添加。", "确定");
                     quest.objectReferenceValue = qBef;
                 }
             }

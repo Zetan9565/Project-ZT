@@ -18,7 +18,7 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
         var seeds = BackpackManager.Instance.Seeds.Select(x => x.item).ToList();
         while (seeds.Count > SeedAgents.Count)
         {
-            SeedAgent sa = ObjectPool.Instance.Get(UI.seedCellPrefab, UI.seedCellsParent).GetComponent<SeedAgent>();
+            SeedAgent sa = ObjectPool.Get(UI.seedCellPrefab, UI.seedCellsParent).GetComponent<SeedAgent>();
             SeedAgents.Add(sa);
         }
         while (seeds.Count < SeedAgents.Count)
@@ -79,6 +79,7 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
     {
         if (!CurrentField) return;
         base.OpenWindow();
+        if (!IsUIOpen) return;
         UIManager.Instance.EnableJoyStick(false);
         UIManager.Instance.EnableInteractive(false);
         UI.pageSelector.SetValueWithoutNotify(0);
@@ -88,6 +89,7 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen) return;
         UI.searchInput.text = string.Empty;
         HideDescription();
     }

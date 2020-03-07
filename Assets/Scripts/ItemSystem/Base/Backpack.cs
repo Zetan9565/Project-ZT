@@ -6,10 +6,10 @@ using UnityEngine;
 public class Backpack
 {
     [HideInInspector]
-    public ScopeInt backpackSize = new ScopeInt(50);
+    public ScopeInt size = new ScopeInt(50);
 
     [HideInInspector]
-    public ScopeFloat weightLoad = new ScopeFloat(150);
+    public ScopeFloat weight = new ScopeFloat(150);
 
     private long money;
     public long Money
@@ -25,16 +25,16 @@ public class Backpack
         }
     }
 
-    public bool IsFull { get { return backpackSize.IsMax; } }
+    public bool IsFull { get { return size.IsMax; } }
 
     /// <summary>
     /// 负重上限
     /// </summary>
-    public float LimitWeightload => weightLoad.Max;
+    public float WeightLimit => weight.Max;
     /// <summary>
     /// 开始导致减速的负重
     /// </summary>
-    public float NormalWeightload => weightLoad.Max / 1.5f;
+    public float WeightOver => weight.Max / 1.5f;
 
     public ItemInfo LatestInfo => Items.Count < 1 ? null : Items[Items.Count - 1];
 
@@ -61,17 +61,17 @@ public class Backpack
             else
             {
                 Items.Add(new ItemInfo(item, amount));
-                backpackSize++;
+                size++;
             }
-            weightLoad.Current += item.Weight * amount;
+            weight.Current += item.Weight * amount;
         }
         else
         {
             for (int i = 0; i < amount; i++)
             {
                 Items.Add(new ItemInfo(item));
-                backpackSize++;
-                weightLoad.Current += item.Weight;
+                size++;
+                weight.Current += item.Weight;
             }
         }
     }
@@ -89,9 +89,9 @@ public class Backpack
                 ItemInfo newInfo = info.Cloned;
                 newInfo.Amount = amount;
                 Items.Add(newInfo);
-                backpackSize++;
+                size++;
             }
-            weightLoad.Current += info.item.Weight * amount;
+            weight.Current += info.item.Weight * amount;
         }
         else
         {
@@ -100,8 +100,8 @@ public class Backpack
                 ItemInfo newInfo = info.Cloned;
                 newInfo.Amount = 1;
                 Items.Add(newInfo);
-                backpackSize++;
-                weightLoad.Current += info.item.Weight;
+                size++;
+                weight.Current += info.item.Weight;
             }
         }
     }
@@ -113,9 +113,9 @@ public class Backpack
         if (info.Amount <= 0)
         {
             Items.Remove(info);
-            backpackSize--;
+            size--;
         }
-        weightLoad.Current -= info.item.Weight * amount;
+        weight.Current -= info.item.Weight * amount;
     }
 
     public ItemInfo Find(string itemID)

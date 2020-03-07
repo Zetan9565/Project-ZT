@@ -154,7 +154,7 @@ public class ItemAgent : MonoBehaviour, IDragAble,
         if (recycle)
         {
             agentType = ItemAgentType.None;
-            ObjectPool.Instance.Put(gameObject);
+            ObjectPool.Put(gameObject);
         }
     }
 

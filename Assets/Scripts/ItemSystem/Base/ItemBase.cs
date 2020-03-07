@@ -86,6 +86,14 @@ public abstract class ItemBase : ScriptableObject
     public virtual MakingMethod MakingMethod => makingMethod;
 
     [SerializeField]
+    protected int minYield = 1;
+    public virtual int MinYield => minYield;
+
+    [SerializeField]
+    protected int maxYield = 1;
+    public virtual int MaxYield => maxYield;
+
+    [SerializeField]
 #if UNITY_EDITOR
     [EnumMemberNames("未定义", "矿石", "金属", "植物", "布料", "肉类", "皮毛", "水果", "图纸", "调料")]
 #endif

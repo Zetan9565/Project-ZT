@@ -19,7 +19,7 @@ public class SeedAgent : MonoBehaviour
     {
         nameText.text = string.Empty;
         Seed = null;
-        if (recycle) ObjectPool.Instance.Put(gameObject);
+        if (recycle) ObjectPool.Put(gameObject);
     }
 
     public void OnClick()

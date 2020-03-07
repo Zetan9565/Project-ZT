@@ -245,22 +245,25 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
         }
     }
 
-    private void OpenSubItemWindow(ItemInfo equiped)
+    private void OpenSubItemWindow(ItemInfo equipped)
     {
-        if (equiped == null || !equiped.item || IsPausing) return;
-        UI.subUI.icon.overrideSprite = equiped.item.Icon;
-        UI.subUI.nameText.text = equiped.ItemName;
-        if (GameManager.QualityColors.Count >= 5) UI.subUI.nameText.color = GameManager.QualityColors[(int)equiped.item.Quality];
-        UI.subUI.typeText.text = ItemBase.GetItemTypeString(equiped.item.ItemType);
+        if (equipped == null || !equipped.item || IsPausing) return;
+        UI.subUI.icon.overrideSprite = equipped.item.Icon;
+        UI.subUI.nameText.text = equipped.ItemName;
+        UI.subUI.nameText.color = GameManager.QualityToColor(equipped.item.Quality);
+        UI.subUI.typeText.text = ItemBase.GetItemTypeString(equipped.item.ItemType);
         UI.subUI.priceTitle.text = "贩卖价格";
-        UI.subUI.priceText.text = equiped.item.SellAble ? equiped.item.SellPrice + GameManager.CoinName : "不可出售";
-        UI.subUI.weightText.text = "重量：" + equiped.item.Weight.ToString("F2") + "WL";
-        UI.subUI.descriptionText.text = equiped.item.Description;
-        switch (equiped.item.ItemType)
+        UI.subUI.priceText.text = equipped.item.SellAble ? equipped.item.SellPrice + GameManager.CoinName : "不可出售";
+        UI.subUI.weightText.text = "重量：" + equipped.item.Weight.ToString("F2") + "WL";
+        UI.subUI.descriptionText.text = equipped.item.Description;
+
+        switch (equipped.item.ItemType)
         {
             case ItemType.Weapon:
-                WeaponItem weapon = equiped.item as WeaponItem;
-                UI.subUI.effectText.text = (weapon.CutATK > 0 ? "攻击力+" + weapon.CutATK + "\n" : string.Empty) +
+                WeaponItem weapon = equipped.item as WeaponItem;
+                UI.subUI.effectText.text = (weapon.CutATK > 0 ? "斩击攻击力+" + weapon.CutATK + "\n" : string.Empty) +
+                    (weapon.PunATK > 0 ? "刺击攻击力+" + weapon.PunATK + "\n" : string.Empty) +
+                    (weapon.BluATK > 0 ? "钝击攻击力+" + weapon.BluATK + "\n" : string.Empty) +
                     (weapon.DEF > 0 ? "防御力力+" + weapon.DEF + "\n" : string.Empty) +
                     (weapon.Hit > 0 ? "命中+" + weapon.Hit + "\n" : string.Empty);
                 if (weapon.Powerup.IsEffective)

@@ -19,9 +19,9 @@ public class Warehouse
     }
 
     [HideInInspector]
-    public ScopeInt warehouseSize = new ScopeInt(50);
+    public ScopeInt size = new ScopeInt(50);
 
-    public bool IsFull { get { return warehouseSize.IsMax; } }
+    public bool IsFull { get { return size.IsMax; } }
 
     public ItemInfo Latest
     {
@@ -36,7 +36,7 @@ public class Warehouse
 
     public Warehouse(int size = 50)
     {
-        warehouseSize = new ScopeInt(size);
+        this.size = new ScopeInt(size);
         Items = new List<ItemInfo>();
     }
 
@@ -52,7 +52,7 @@ public class Warehouse
             {
                 Items.Add(info.Cloned);
                 Latest.Amount = amount;
-                warehouseSize++;
+                size++;
             }
         }
         else
@@ -60,7 +60,7 @@ public class Warehouse
             for (int i = 0; i < amount; i++)
             {
                 Items.Add(info.Cloned);
-                warehouseSize++;
+                size++;
             }
         }
     }
@@ -71,7 +71,7 @@ public class Warehouse
         if (info.Amount <= 0)
         {
             Items.Remove(info);
-            warehouseSize--;
+            size--;
         }
     }
 

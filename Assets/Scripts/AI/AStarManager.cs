@@ -343,6 +343,17 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
         }
     }
     #endregion
+
+    [UnityEditor.MenuItem("ZetanStudio/添加寻路管理器")]
+    private static void MakeAStar()
+    {
+        if (Instance)
+        {
+            Debug.Log("已存在寻路管理器");
+            return;
+        }
+        new GameObject("ObjectPool").AddComponent<AStarManager>();
+    }
 }
 
 public class PathRequest

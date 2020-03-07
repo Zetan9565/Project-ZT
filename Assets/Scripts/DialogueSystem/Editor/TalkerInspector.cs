@@ -17,7 +17,7 @@ public class TalkerInspector : Editor
     private void OnEnable()
     {
         npcs = Resources.LoadAll<TalkerInformation>("");
-        npcNames = npcs.Select(x => x.Name).ToArray();//Linq分离出NPC名字
+        npcNames = npcs.Select(x => x.name).ToArray();//Linq分离出NPC名字
 
         talker = target as Talker;
         info = serializedObject.FindProperty("info");

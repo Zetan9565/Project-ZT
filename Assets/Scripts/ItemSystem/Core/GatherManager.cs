@@ -53,7 +53,7 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
 
     private void GatherStart()
     {
-        ProgressBar.Instance.NewProgress(GatherAgent.GatheringInfo.GatherTime, GatherDone, GatherCancel, "采集中");
+        ProgressBar.Instance.New(GatherAgent.GatheringInfo.GatherTime, GatherDone, GatherCancel, "采集中");
         IsGathering = true;
         UIManager.Instance.EnableInteractive(false);
         doneAgent = null;

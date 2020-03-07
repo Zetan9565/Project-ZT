@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/地图管理器")]
@@ -102,7 +103,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void CreateMapIcon(MapIconHolder holder)
     {
         if (!UI || !UI.gameObject || !holder.icon) return;
-        MapIcon icon = ObjectPool.Instance.Get(UI.iconPrefab.gameObject, SelectParent(holder.iconType)).GetComponent<MapIcon>();
+        MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(holder.iconType)).GetComponent<MapIcon>();
         InitIcon();
         iconsWithHolder.TryGetValue(holder, out MapIcon iconFound);
         if (iconFound != null)
@@ -122,14 +123,14 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             icon.RemoveAble = holder.removeAble;
             holder.iconInstance = icon;
             icon.holder = holder;
-            if (holder.showRange) icon.iconRange = ObjectPool.Instance.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
+            if (holder.showRange) icon.iconRange = ObjectPool.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
         }
     }
     public MapIcon CreateMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap,
         MapIconType iconType, bool removeAble, string textToDisplay = "")
     {
         if (!UI || !UI.gameObject || !iconSprite) return null;
-        MapIcon icon = ObjectPool.Instance.Get(UI.iconPrefab.gameObject, SelectParent(iconType)).GetComponent<MapIcon>();
+        MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(iconType)).GetComponent<MapIcon>();
         InitIcon();
         IconsWithoutHolder.Add(icon, new MapIconWithoutHolder(worldPosition, icon, keepOnMap, removeAble, textToDisplay));
         return icon;
@@ -148,7 +149,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         MapIconType iconType, bool removeAble, string textToDisplay = "")
     {
         if (!UI || !UI.gameObject || !iconSprite) return null;
-        MapIcon icon = ObjectPool.Instance.Get(UI.iconPrefab.gameObject, SelectParent(iconType)).GetComponent<MapIcon>();
+        MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(iconType)).GetComponent<MapIcon>();
         InitIcon();
         IconsWithoutHolder.Add(icon, new MapIconWithoutHolder(worldPosition, icon, keepOnMap, removeAble, textToDisplay));
         return icon;
@@ -161,7 +162,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             icon.iconType = iconType;
             if (rangeSize > 0)
             {
-                icon.iconRange = ObjectPool.Instance.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
+                icon.iconRange = ObjectPool.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
                 ZetanUtility.SetActive(icon.iconRange.gameObject, true);
                 icon.iconRange.RectTransform.sizeDelta = new Vector2(rangeSize, rangeSize);
             }
@@ -188,9 +189,9 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         if (iconFound) iconFound.Recycle();
         iconsWithHolder.Remove(holder);
     }
-    public void RemoveMapIcon(MapIcon icon, bool force = false)
+    public void RemoveMapIcon(MapIcon icon, bool force)
     {
-        if (!icon || !icon.RemoveAble && !force) return; 
+        if (!icon || !icon.RemoveAble && !force) return;
         if (icon.holder) RemoveMapIcon(icon.holder);
         else
         {
@@ -200,13 +201,24 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     }
     public void RemoveMapIcon(Vector3 worldPosition, bool force = false)
     {
-        foreach (var iconWoH in IconsWithoutHolder.Values)
+        foreach (var iconWoH in IconsWithoutHolder.Values.ToList())
             if (iconWoH.worldPosition == worldPosition && (iconWoH.removeAble || force))
             {
+                IconsWithoutHolder.Remove(iconWoH.mapIcon);
                 if (iconWoH.mapIcon) iconWoH.mapIcon.Recycle();
                 iconWoH.mapIcon = null;
             }
-        //iconsWithoutHolder.RemoveAll(x => !x.mapIcon);
+    }
+    public void DestroyMapIcon(MapIcon icon)
+    {
+        if (!icon) return;
+        if (icon.holder) RemoveMapIcon(icon.holder);
+        else
+        {
+            if (!icon.holder) IconsWithoutHolder.Remove(icon);
+            else iconsWithHolder.Remove(icon.holder);
+            Destroy(icon);
+        }
     }
 
     private void DrawMapIcons()
@@ -223,7 +235,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
                || holder.AutoHide && holder.DistanceSqr >= sqrDistance)))
             {
                 if (holder.showRange && !iconKvp.Value.iconRange)
-                    iconKvp.Value.iconRange = ObjectPool.Instance.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
+                    iconKvp.Value.iconRange = ObjectPool.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
                 holder.ShowIcon(IsViewingWorldMap ? (worldModeInfo.currentSizeOfCam / Camera.orthographicSize) : (miniModeInfo.currentSizeOfCam / Camera.orthographicSize));
                 DrawMapIcon(holder.transform.position + new Vector3(holder.offset.x, use2D ? holder.offset.y : 0, use2D ? 0 : holder.offset.y), iconKvp.Value, holder.keepOnMap);
                 if (!IsViewingWorldMap && sqrDistance > holder.DistanceSqr * 0.81f && sqrDistance < holder.DistanceSqr)
@@ -277,7 +289,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private void InitPlayerIcon()
     {
         if (playerIconInstance) return;
-        playerIconInstance = ObjectPool.Instance.Get(UI.iconPrefab.gameObject, SelectParent(MapIconType.Main)).GetComponent<MapIcon>();
+        playerIconInstance = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(MapIconType.Main)).GetComponent<MapIcon>();
         playerIconInstance.iconImage.overrideSprite = playerIcon;
         playerIconInstance.iconImage.rectTransform.sizeDelta = playerIconSize;
         playerIconInstance.iconType = MapIconType.Main;

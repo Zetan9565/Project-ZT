@@ -54,7 +54,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
             onConfirm?.Invoke(infos);
             CloseWindow();
         }
-        else ConfirmManager.Instance.NewConfirm(dialog, delegate
+        else ConfirmManager.Instance.New(dialog, delegate
         {
             onConfirm?.Invoke(infos);
             CloseWindow();
@@ -80,7 +80,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
             {
                 if (info.item.DiscardAble && !itemAgents.Exists(x => x.MItemInfo == info) && BackpackManager.Instance.TryLoseItem_Boolean(info))
                 {
-                    ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+                    ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
                     ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
                     itemAgents.Add(ia);
                     ia.SetItem(info);
@@ -94,7 +94,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
                 {
                     if (BackpackManager.Instance.TryLoseItem_Boolean(info) && !itemAgents.Exists(x => x.MItemInfo == info || x.MItemInfo.item == info.item))
                     {
-                        ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+                        ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
                         ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
                         itemAgents.Add(ia);
                         ia.SetItem(info);
@@ -104,7 +104,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
                 }
                 else
                 {
-                    AmountManager.Instance.NewAmount(delegate
+                    AmountManager.Instance.New(delegate
                     {
                         if (BackpackManager.Instance.TryLoseItem_Boolean(info, (int)AmountManager.Instance.Amount))
                         {
@@ -112,7 +112,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
                             if (ia) ia.MItemInfo.Amount = (int)AmountManager.Instance.Amount;
                             else
                             {
-                                ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+                                ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
                                 ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
                                 itemAgents.Add(ia);
                                 ia.SetItem(new ItemInfo(info.item, (int)AmountManager.Instance.Amount));
@@ -127,7 +127,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         else if ((SelectionType != ItemSelectionType.Discard || SelectionType == ItemSelectionType.Discard && info.item.DiscardAble)
             && !itemAgents.Exists(x => x.MItemInfo == info) && BackpackManager.Instance.TryLoseItem_Boolean(info))
         {
-            ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+            ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
             ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
             itemAgents.Add(ia);
             ia.SetItem(info);

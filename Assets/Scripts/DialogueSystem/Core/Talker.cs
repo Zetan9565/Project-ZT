@@ -10,7 +10,7 @@ public class Talker : MonoBehaviour
 
     public string TalkerID => info ? info.ID : string.Empty;
 
-    public string TalkerName => info ? info.Name : string.Empty;
+    public string TalkerName => info ? info.name : string.Empty;
 
     public Vector3 questFlagsOffset;
     private QuestFlagsAgent flagsAgent;
@@ -40,7 +40,7 @@ public class Talker : MonoBehaviour
                 Data.shop = Instantiate(Info.Shop);
                 Data.shop.Init();
             }
-            else if (Info.IsWarehouseAgent) Data.warehouse = new Warehouse(Info.Warehouse.warehouseSize.Max);
+            else if (Info.IsWarehouseAgent) Data.warehouse = new Warehouse(Info.Warehouse.size.Max);
             Data.info = Info;
             Data.InitQuest(Info.QuestsStored);
             GameManager.TalkerDatas.Add(TalkerID, Data);
@@ -49,7 +49,7 @@ public class Talker : MonoBehaviour
         Data.currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         Data.currentPosition = transform.position;
         if (Info.IsVendor && !ShopManager.Vendors.Contains(Data)) ShopManager.Vendors.Add(Data);
-        flagsAgent = ObjectPool.Instance.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject,
+        flagsAgent = ObjectPool.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject,
             QuestManager.Instance.QuestFlagsPanel ? QuestManager.Instance.QuestFlagsPanel : UIManager.Instance.transform).GetComponent<QuestFlagsAgent>();
         flagsAgent.Init(this);
     }
@@ -190,7 +190,7 @@ public class TalkerData
     {
         get
         {
-            if (info) return info.Name;
+            if (info) return info.name;
             return string.Empty;
         }
     }

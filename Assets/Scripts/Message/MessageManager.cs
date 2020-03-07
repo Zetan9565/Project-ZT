@@ -20,9 +20,17 @@ public class MessageManager : SingletonMonoBehaviour<MessageManager>
 
     private readonly List<MessageAgent> messages = new List<MessageAgent>();
 
-    public void NewMessage(string message, float lifeTime = 2.0f)
+    public void New(string message)
     {
-        MessageAgent ma = ObjectPool.Instance.Get(messagePrefab, messageRoot.transform).GetComponent<MessageAgent>();
+        MessageAgent ma = ObjectPool.Get(messagePrefab, messageRoot.transform).GetComponent<MessageAgent>();
+        ma.messageText.text = message;
+        messages.Add(ma);
+        StartCoroutine(RecycleMessageDelay(ma, 2));
+    }
+
+    public void New(string message, float lifeTime)
+    {
+        MessageAgent ma = ObjectPool.Get(messagePrefab, messageRoot.transform).GetComponent<MessageAgent>();
         ma.messageText.text = message;
         messages.Add(ma);
         StartCoroutine(RecycleMessageDelay(ma, lifeTime));
@@ -41,12 +49,8 @@ public class MessageManager : SingletonMonoBehaviour<MessageManager>
     {
         yield return new WaitForSeconds(lifeTime);
         messages.Remove(message);
-        if (ObjectPool.Instance)
-        {
-            message.messageText.text = string.Empty;
-            ObjectPool.Instance.Put(message.gameObject);
-        }
-        else DestroyImmediate(message.gameObject);
+        message.messageText.text = string.Empty;
+        ObjectPool.Put(message.gameObject);
     }
 
     public void Init()
@@ -55,12 +59,10 @@ public class MessageManager : SingletonMonoBehaviour<MessageManager>
         foreach (var message in messages)
         {
             if (message && message.gameObject)
-                if (ObjectPool.Instance)
                 {
                     message.messageText.text = string.Empty;
-                    ObjectPool.Instance.Put(message.gameObject);
+                    ObjectPool.Put(message.gameObject);
                 }
-                else DestroyImmediate(message.gameObject);
         }
         messages.Clear();
     }

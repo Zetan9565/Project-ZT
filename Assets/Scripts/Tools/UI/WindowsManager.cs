@@ -134,7 +134,7 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
     public virtual void CloseWindow()
     {
         if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
+        if (!IsUIOpen) return ;
         if (IsPausing) return;
         UI.window.alpha = 0;
         UI.window.blocksRaycasts = false;

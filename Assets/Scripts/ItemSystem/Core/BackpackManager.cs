@@ -37,13 +37,13 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         {
             foreach (ItemAgent ia in itemAgents)
                 ia.Empty();
-            while (Backpack.backpackSize.Max > itemAgents.Count)
+            while (Backpack.size.Max > itemAgents.Count)
             {
-                ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+                ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
                 itemAgents.Add(ia);
                 ia.Init(ItemAgentType.Backpack, itemAgents.Count - 1, UI.gridScrollRect);
             }
-            while (Backpack.backpackSize.Max < itemAgents.Count)
+            while (Backpack.size.Max < itemAgents.Count)
             {
                 itemAgents[itemAgents.Count - 1].Clear(true);
                 itemAgents.RemoveAt(itemAgents.Count - 1);
@@ -70,14 +70,14 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         int finalGet = amount;
         if (!item.StackAble)
         {
-            if (amount > Backpack.backpackSize.Rest)
-                finalGet = Backpack.backpackSize.Rest;
+            if (amount > Backpack.size.Rest)
+                finalGet = Backpack.size.Rest;
         }
-        if (Backpack.weightLoad + finalGet * item.Weight > Backpack.weightLoad.Max)
+        if (Backpack.weight + finalGet * item.Weight > Backpack.weight.Max)
             for (int i = 0; i <= finalGet; i++)
             {
-                if (Backpack.weightLoad + i * item.Weight <= Backpack.weightLoad.Max &&
-                    Backpack.weightLoad + (i + 1) * item.Weight > Backpack.weightLoad.Max)
+                if (Backpack.weight + i * item.Weight <= Backpack.weight.Max &&
+                    Backpack.weight + (i + 1) * item.Weight > Backpack.weight.Max)
                 {
                     finalGet = i;
                     break;
@@ -116,12 +116,12 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     {
         if (Backpack == null || !item)
         {
-            MessageManager.Instance.NewMessage("无效的道具");
+            MessageManager.Instance.New("无效的道具");
             return false;
         }
         if (amount < 1)
         {
-            if (amount < 0) MessageManager.Instance.NewMessage("无效的数量");
+            if (amount < 0) MessageManager.Instance.New("无效的数量");
             return false;
         }
         if (!item.StackAble)//不可叠加，则看剩余空间是否足够放下
@@ -136,9 +136,9 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                     else if (!info.item.StackAble)//若该道具不可叠加，则失去多少个就能空出多少位置
                         vacateSize += info.Amount;
                 }
-            if (amount > Backpack.backpackSize.Rest + vacateSize)//如果留出位置还不能放下
+            if (amount > Backpack.size.Rest + vacateSize)//如果留出位置还不能放下
             {
-                MessageManager.Instance.NewMessage(string.Format("请多留出至少{0}个{1}空间", amount - Backpack.backpackSize.Rest - vacateSize, GameManager.BackpackName));
+                MessageManager.Instance.New(string.Format("请多留出至少{0}个{1}空间", amount - Backpack.size.Rest - vacateSize, GameManager.BackpackName));
                 return false;
             }
         }
@@ -149,9 +149,9 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 if (!TryLoseItem_Boolean(info.item, info.Amount)) return false;
                 vacateWeightload += info.item.Weight * info.Amount;
             }
-        if (Backpack.weightLoad - vacateWeightload + amount * item.Weight > Backpack.LimitWeightload)//如果留出负重还不能放下
+        if (Backpack.weight - vacateWeightload + amount * item.Weight > Backpack.WeightLimit)//如果留出负重还不能放下
         {
-            MessageManager.Instance.NewMessage("这些物品太重了");
+            MessageManager.Instance.New("这些物品太重了");
             return false;
         }
         return true;
@@ -210,7 +210,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 if (ia) ia.SetItem(Backpack.LatestInfo);
                 else
                 {
-                    MessageManager.Instance.NewMessage("发生内部错误！");
+                    MessageManager.Instance.New("发生内部错误！");
                     Debug.Log("[Get Item Error: Can't find ItemAgent] ID: " + item.ID + "[" + System.DateTime.Now.ToString() + "]");
                 }
             }
@@ -264,7 +264,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 if (ia) ia.SetItem(Backpack.LatestInfo);
                 else
                 {
-                    MessageManager.Instance.NewMessage("发生内部错误！");
+                    MessageManager.Instance.New("发生内部错误！");
                     Debug.Log("[Get Item Error] ID: " + info.item.ID + "[" + System.DateTime.Now.ToString() + "]");
                 }
             }
@@ -298,15 +298,15 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (Backpack == null || !item || amount < 1) return false;
         if (simulGetItems != null)
             foreach (var si in simulGetItems)
-                if (!TryGetItem_Boolean(si)) return false;
+                if (!TryGetItem_Boolean(si, new ItemInfo(item, amount))) return false;
         if (GetItemAmount(item) < amount)
         {
-            MessageManager.Instance.NewMessage(GameManager.BackpackName + "中没有这么多的 [" + item.name + "]");
+            MessageManager.Instance.New(GameManager.BackpackName + "中没有这么多的 [" + item.name + "]");
             return false;
         }
         if (QuestManager.Instance.HasQuestRequiredItem(item, GetItemAmount(item) - amount))
         {
-            MessageManager.Instance.NewMessage(string.Format("[{0}] 为任务所需", item.name));
+            MessageManager.Instance.New(string.Format("[{0}] 为任务所需", item.name));
             return false;
         }
         return true;
@@ -353,11 +353,11 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         {
             if (simulGetItems != null)
                 foreach (var si in simulGetItems)
-                    if (!TryGetItem_Boolean(si)) return false;
+                    if (!TryGetItem_Boolean(si, new ItemInfo(item, amount))) return false;
             ItemInfo[] finds = Backpack.FindAll(item).ToArray();
             if (finds.Length < 1)
             {
-                MessageManager.Instance.NewMessage("该物品不在" + GameManager.BackpackName + "中");
+                MessageManager.Instance.New("该物品已不在" + GameManager.BackpackName + "中");
                 return false;
             }
             for (int i = 0; i < amount; i++)
@@ -382,7 +382,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (!TryLoseItem_Boolean(info, amount)) return false;
         if (simulGetItems != null)
             foreach (var si in simulGetItems)
-                if (!TryGetItem_Boolean(si)) return false;
+                if (!TryGetItem_Boolean(si, new ItemInfo(info.item, amount))) return false;
         Backpack.LoseItemSimple(info, amount);
         ItemAgent ia = itemAgents.Find(x => x.MItemInfo == info);
         if (ia) ia.UpdateInfo();
@@ -414,30 +414,30 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (Backpack == null || info == null || !info.item) return;
         if (!Backpack.Items.Contains(info))
         {
-            MessageManager.Instance.NewMessage("该物品已经不在" + GameManager.BackpackName + "中了");
+            MessageManager.Instance.New("该物品已不在" + GameManager.BackpackName + "中");
             return;
         }
         if (!info.item.DiscardAble)
         {
-            MessageManager.Instance.NewMessage("该物品不可丢弃");
+            MessageManager.Instance.New("该物品不可丢弃");
             return;
         }
         if (info.Amount < 2 && info.Amount > 0)
         {
-            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃1个 [{0}] 吗？",
+            ConfirmManager.Instance.New(string.Format("确定丢弃1个 [{0}] 吗？",
                 ZetanUtility.ColorText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
                 {
                     if (LoseItem(info, 1))
-                        MessageManager.Instance.NewMessage(string.Format("丢掉了1个 [{0}]", info.ItemName));
+                        MessageManager.Instance.New(string.Format("丢掉了1个 [{0}]", info.ItemName));
                 });
         }
-        else AmountManager.Instance.NewAmount(delegate
+        else AmountManager.Instance.New(delegate
         {
-            ConfirmManager.Instance.NewConfirm(string.Format("确定丢弃{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount,
+            ConfirmManager.Instance.New(string.Format("确定丢弃{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount,
                 ZetanUtility.ColorText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
                 {
                     if (LoseItem(info, (int)AmountManager.Instance.Amount))
-                        MessageManager.Instance.NewMessage(string.Format("丢掉了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
+                        MessageManager.Instance.New(string.Format("丢掉了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
                 });
         }, info.Amount);
     }
@@ -458,7 +458,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     {
         if (!MItemInfo.item.Usable)
         {
-            MessageManager.Instance.NewMessage("该物品不可使用");
+            MessageManager.Instance.New("该物品不可使用");
             return;
         }
         if (MItemInfo.item.IsBox) UseBox(MItemInfo);
@@ -531,7 +531,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         switch (toEquip.item.ItemType)
         {
             case ItemType.Weapon:
-                Backpack.backpackSize--;//模拟为将要替换出来的武器留出空间
+                Backpack.size--;//模拟为将要替换出来的武器留出空间
                 if (PlayerManager.Instance.PlayerInfo.HasPrimaryWeapon && (toEquip.item as WeaponItem).IsPrimary)
                 {
                     equiped = PlayerManager.Instance.PlayerInfo.UnequipWeapon(true);
@@ -543,7 +543,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 if ((equiped && !TryGetItem_Boolean(equiped, 1)) || !PlayerManager.Instance.PlayerInfo.EquipWeapon(toEquip))
                 {
                     PlayerManager.Instance.PlayerInfo.EquipWeapon(equiped);
-                    Backpack.backpackSize++;
+                    Backpack.size++;
                     return;
                 }
                 break;
@@ -551,12 +551,12 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             default: return;
         }
         LoseItem(toEquip, 1);
-        Backpack.weightLoad.Current += toEquip.item.Weight;//装备并不是真正没有了，而是装备在身上，所以负重不变，在此处修正。
-        MessageManager.Instance.NewMessage(string.Format("装备了 [{0}]", toEquip.ItemName));
+        Backpack.weight.Current += toEquip.item.Weight;//装备并不是真正没有了，而是装备在身上，所以负重不变，在此处修正。
+        MessageManager.Instance.New(string.Format("装备了 [{0}]", toEquip.ItemName));
         if (equiped)
         {
             GetItem(equiped, 1);
-            Backpack.weightLoad.Current -= equiped.item.Weight;//装备并不是真正重新获得，而是本来就装备在身上，所以负重不变，在此处修正。
+            Backpack.weight.Current -= equiped.item.Weight;//装备并不是真正重新获得，而是本来就装备在身上，所以负重不变，在此处修正。
         }
         UpdateUI();
     }
@@ -568,8 +568,8 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         switch (toUnequip.item.ItemType)
         {
             case ItemType.Weapon:
-                Backpack.weightLoad.Current -= equiped.item.Weight;
-                Backpack.backpackSize--;
+                Backpack.weight.Current -= equiped.item.Weight;
+                Backpack.size--;
                 if (PlayerManager.Instance.PlayerInfo.HasPrimaryWeapon && (equiped.item as WeaponItem).IsPrimary)
                 {
                     equiped = PlayerManager.Instance.PlayerInfo.UnequipWeapon(true);
@@ -585,8 +585,8 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (!TryGetItem_Boolean(equiped))
         {
             PlayerManager.Instance.PlayerInfo.EquipWeapon(equiped);
-            Backpack.weightLoad.Current += equiped.item.Weight;
-            Backpack.backpackSize++;
+            Backpack.weight.Current += equiped.item.Weight;
+            Backpack.size++;
             return;
         }
         else GetItem(equiped, 1);
@@ -598,12 +598,14 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     {
         if (DialogueManager.Instance.IsTalking && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen) return;
         base.OpenWindow();
+        if (!IsUIOpen) return;
         GridMask.raycastTarget = true;
         ZetanUtility.SetActive(UI.handworkButton.gameObject, !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !ItemSelectionManager.Instance.IsUIOpen);
     }
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen) return;
         foreach (ItemAgent ia in itemAgents)
             ia.FinishDrag();
         AmountManager.Instance.Cancel();
@@ -655,14 +657,14 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (!UI || !UI.gameObject) return;
         UI.money.text = Backpack.Money.ToString() + GameManager.CoinName;
         Color color = UI.weight.color;
-        float mul = Backpack.weightLoad.Current / Backpack.NormalWeightload;
+        float mul = Backpack.weight.Current / Backpack.WeightOver;
         if (mul > 1 && mul <= 1.5f) color = overColor;
         else if (mul > 1.5f) color = maxColor;
-        UI.weight.text = ZetanUtility.ColorText(Backpack.weightLoad.Current.ToString("F2") + "/" + Backpack.NormalWeightload.ToString("F2") + "WL", color);
+        UI.weight.text = ZetanUtility.ColorText(Backpack.weight.Current.ToString("F2") + "/" + Backpack.WeightOver.ToString("F2") + "WL", color);
         color = UI.size.color;
-        if (Backpack.backpackSize.Rest < 5 && Backpack.backpackSize.Rest > 0) color = overColor;
-        else if (Backpack.backpackSize.Rest < 1) color = maxColor;
-        UI.size.text = ZetanUtility.ColorText(Backpack.backpackSize.ToString(), color);
+        if (Backpack.size.Rest < 5 && Backpack.size.Rest > 0) color = overColor;
+        else if (Backpack.size.Rest < 1) color = maxColor;
+        UI.size.text = ZetanUtility.ColorText(Backpack.size.ToString(), color);
         SetPage(currentPage);
         QuestManager.Instance.UpdateUI();
         BuildingManager.Instance.UpdateUI();
@@ -742,7 +744,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
 
     #region 其它
     #region 材料相关
-    public bool CheckMaterialsEnough(IEnumerable<MaterialInfo> materials)
+    public bool IsMaterialsEnough(IEnumerable<MaterialInfo> materials)
     {
         if (materials == null) return false;
         if (materials.Count() < 1) return true;
@@ -761,7 +763,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         }
         return true;
     }
-    public bool CheckMaterialsEnough(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<ItemInfo> materials)
+    public bool IsMaterialsEnough(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<ItemInfo> materials)
     {
         if (itemMaterials == null || itemMaterials.Count() < 1 || materials == null || materials.Count() < 1 || itemMaterials.Count() != materials.Count()) return false;
         foreach (var material in itemMaterials)
@@ -878,7 +880,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (value < 0) return false;
         if (Backpack.Money < value)
         {
-            MessageManager.Instance.NewMessage("钱币不足");
+            MessageManager.Instance.New("钱币不足");
             return false;
         }
         return true;
@@ -932,20 +934,20 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     public bool ExpandSize(int size)
     {
         if (size < 1) return false;
-        if (Backpack.backpackSize.Max >= 192)
+        if (Backpack.size.Max >= 192)
         {
-            MessageManager.Instance.NewMessage(GameManager.BackpackName + "已经达到最大容量了");
+            MessageManager.Instance.New(GameManager.BackpackName + "已经达到最大容量了");
             return false;
         }
-        int finallyExpand = Backpack.backpackSize.Max + size > 192 ? 192 - Backpack.backpackSize.Max : size;
-        Backpack.backpackSize.Max += finallyExpand;
+        int finallyExpand = Backpack.size.Max + size > 192 ? 192 - Backpack.size.Max : size;
+        Backpack.size.Max += finallyExpand;
         for (int i = 0; i < finallyExpand; i++)
         {
-            ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+            ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
             itemAgents.Add(ia);
             ia.Init(ItemAgentType.Backpack, itemAgents.Count - 1, UI.gridScrollRect);
         }
-        MessageManager.Instance.NewMessage(GameManager.BackpackName + "空间增加了");
+        MessageManager.Instance.New(GameManager.BackpackName + "空间增加了");
         return true;
     }
     /// <summary>
@@ -956,13 +958,13 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     public bool ExpandWeightLoad(float weightLoad)
     {
         if (weightLoad < 0.01f) return false;
-        if (Backpack.weightLoad.Max >= 1500.0f * 1.5f)
+        if (Backpack.weight.Max >= 1500.0f * 1.5f)
         {
-            MessageManager.Instance.NewMessage(GameManager.BackpackName + "已经达到最大扩展载重了");
+            MessageManager.Instance.New(GameManager.BackpackName + "已经达到最大扩展载重了");
             return false;
         }
-        Backpack.weightLoad.Max += Backpack.weightLoad.Max + weightLoad > 1500.0f * 1.5f ? 1500.0f * 1.5f - Backpack.weightLoad.Max : weightLoad;
-        MessageManager.Instance.NewMessage(GameManager.BackpackName + "载重增加了");
+        Backpack.weight.Max += Backpack.weight.Max + weightLoad > 1500.0f * 1.5f ? 1500.0f * 1.5f - Backpack.weight.Max : weightLoad;
+        MessageManager.Instance.New(GameManager.BackpackName + "载重增加了");
         return true;
     }
 
@@ -1014,10 +1016,10 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     {
         if (Backpack != null)
         {
-            data.backpackData.currentSize = (int)Backpack.backpackSize;
-            data.backpackData.maxSize = Backpack.backpackSize.Max;
-            data.backpackData.currentWeight = (float)Backpack.weightLoad;
-            data.backpackData.maxWeightLoad = Backpack.weightLoad.Max;
+            data.backpackData.currentSize = (int)Backpack.size;
+            data.backpackData.maxSize = Backpack.size.Max;
+            data.backpackData.currentWeight = (float)Backpack.weight;
+            data.backpackData.maxWeightLoad = Backpack.weight.Max;
             data.backpackData.money = Backpack.Money;
             foreach (ItemInfo info in Backpack.Items)
             {
@@ -1032,8 +1034,8 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             if (!GameManager.GetItemByID(id.itemID)) return;
         Backpack.LoseMoneySimple(Backpack.Money);
         Backpack.GetMoneySimple(backpackData.money);
-        Backpack.backpackSize = new ScopeInt(backpackData.maxSize) { Current = backpackData.currentSize };
-        Backpack.weightLoad = new ScopeFloat(backpackData.maxWeightLoad) { Current = backpackData.currentSize };
+        Backpack.size = new ScopeInt(backpackData.maxSize) { Current = backpackData.currentSize };
+        Backpack.weight = new ScopeFloat(backpackData.maxWeightLoad) { Current = backpackData.currentSize };
         Backpack.Items.Clear();
         Init();
         foreach (ItemData id in backpackData.itemDatas)

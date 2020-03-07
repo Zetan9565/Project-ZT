@@ -45,7 +45,7 @@ public class QuestGroupAgent : MonoBehaviour
     public void UpdateStatus()
     {
         if (questGroup)
-            nameText.text = questGroup.Name + (IsExpanded ? "<" : ">");
+            nameText.text = questGroup.name + (IsExpanded ? "<" : ">");
     }
 
     public void Recycle()
@@ -53,6 +53,6 @@ public class QuestGroupAgent : MonoBehaviour
         questAgents.Clear();
         questGroup = null;
         nameText.text = string.Empty;
-        ObjectPool.Instance.Put(gameObject);
+        ObjectPool.Put(gameObject);
     }
 }

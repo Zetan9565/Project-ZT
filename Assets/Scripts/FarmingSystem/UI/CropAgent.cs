@@ -34,16 +34,12 @@ public class CropAgent : MonoBehaviour
         ZetanUtility.SetActive(dryIcon.gameObject, false);
         ZetanUtility.SetActive(pestIcon.gameObject, false);
         ZetanUtility.SetActive(matureIcon.gameObject, false);
-        if (recycle)
-        {
-            if (ObjectPool.Instance) ObjectPool.Instance.Put(gameObject);
-            else DestroyImmediate(gameObject);
-        }
+        if (recycle) ObjectPool.Put(gameObject);
     }
 
     public void DestroyCrop()
     {
-        ConfirmManager.Instance.NewConfirm("销毁作物不会有任何产物，确定销毁吗？", delegate
+        ConfirmManager.Instance.New("销毁作物不会有任何产物，确定销毁吗？", delegate
          {
              if (MCrop) MCrop.Recycle();
              Clear(true);

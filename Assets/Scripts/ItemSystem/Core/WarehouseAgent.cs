@@ -9,7 +9,7 @@ public class WarehouseAgent : Building
 
     public override void AskDestroy()
     {
-        ConfirmManager.Instance.NewConfirm(string.Format("{0}{1}\n内的东西不会保留，确定拆除吗？", name, ((Vector2)transform.position).ToString()),
+        ConfirmManager.Instance.New(string.Format("{0}{1}\n内的东西不会保留，确定拆除吗？", name, ((Vector2)transform.position).ToString()),
             BuildingManager.Instance.ConfirmDestroy,
             delegate
             {

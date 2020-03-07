@@ -13,6 +13,8 @@ public class Quest : ScriptableObject
     private string title = string.Empty;
     public string Title => title;
 
+    public new string name => title;
+
     [SerializeField, TextArea(5, 5)]
     private string description;
     public string Description => description;
@@ -305,10 +307,10 @@ public abstract class Objective
         if (CurrentAmount > 0)
         {
             string message = DisplayName + (IsComplete ? "(完成)" : "[" + currentAmount + "/" + Amount + "]");
-            MessageManager.Instance.NewMessage(message);
+            MessageManager.Instance.New(message);
         }
         if (runtimeParent.IsComplete)
-            MessageManager.Instance.NewMessage("[任务]" + runtimeParent.Title + "(已完成)");
+            MessageManager.Instance.New("[任务]" + runtimeParent.Title + "(已完成)");
     }
 
     public bool AllPrevObjCmplt//判定所有前置目标是否都完成
@@ -415,10 +417,10 @@ public class CollectObjective : Objective
             if (CurrentAmount > 0)
             {
                 string message = DisplayName + (IsComplete ? "(完成)" : "[" + CurrentAmount + "/" + Amount + "]");
-                MessageManager.Instance.NewMessage(message);
+                MessageManager.Instance.New(message);
             }
             if (runtimeParent.IsComplete)
-                MessageManager.Instance.NewMessage("[任务]" + runtimeParent.Title + "(已完成)");
+                MessageManager.Instance.New("[任务]" + runtimeParent.Title + "(已完成)");
         }
     }
 

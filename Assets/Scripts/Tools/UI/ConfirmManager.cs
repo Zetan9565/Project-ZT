@@ -49,7 +49,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
         if (WindowsManager.Instance) WindowsManager.Instance.OnPushWindow.RemoveListener(Top);
     }
 
-    public void NewConfirm(string dialog)
+    public void New(string dialog)
     {
         dialogText.text = dialog;
         onYesClick = null;
@@ -58,7 +58,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
         (this as IWindowHandler).OpenWindow();
     }
 
-    public void NewConfirm(string dialog, UnityAction yesAction)
+    public void New(string dialog, UnityAction yesAction)
     {
         dialogText.text = dialog;
         onYesClick = yesAction;
@@ -67,7 +67,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
         (this as IWindowHandler).OpenWindow();
     }
 
-    public void NewConfirm(string dialog, UnityAction yesAction, UnityAction noAction)
+    public void New(string dialog, UnityAction yesAction, UnityAction noAction)
     {
         dialogText.text = dialog;
         onYesClick = yesAction;

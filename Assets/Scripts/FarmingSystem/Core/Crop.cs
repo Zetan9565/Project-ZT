@@ -110,7 +110,7 @@ public class Crop : MonoBehaviour
                         lootItems.Add(new ItemInfo(di.Item, Random.Range(1, di.Amount + 1)));
             if (lootItems.Count > 0)
             {
-                LootAgent la = ObjectPool.Instance.Get(currentStage.LootPrefab).GetComponent<LootAgent>();
+                LootAgent la = ObjectPool.Get(currentStage.LootPrefab).GetComponent<LootAgent>();
                 la.Init(lootItems, transform.position);
             }
         }
@@ -140,8 +140,7 @@ public class Crop : MonoBehaviour
     public void Recycle()
     {
         Clear();
-        if (ObjectPool.Instance) ObjectPool.Instance.Put(gameObject);
-        else Destroy(gameObject);
+        ObjectPool.Put(gameObject);
     }
 
     protected void OnTriggerEnter2D(Collider2D collision)

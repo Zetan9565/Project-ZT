@@ -47,8 +47,7 @@ public class QuestAgent : MonoBehaviour
         TitleText.text = string.Empty;
         Deselect();
         belongToCmplt = false;
-        if (ObjectPool.Instance) ObjectPool.Instance.Put(gameObject);
-        else DestroyImmediate(gameObject);
+        ObjectPool.Put(gameObject);
     }
 
     public void UpdateStatus()

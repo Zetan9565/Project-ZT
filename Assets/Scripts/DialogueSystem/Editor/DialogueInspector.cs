@@ -27,7 +27,7 @@ public class DialogueInspector : Editor
     private void OnEnable()
     {
         npcs = Resources.LoadAll<TalkerInformation>("");
-        npcNames = npcs.Select(x => x.Name).ToArray();//Linq分离出NPC名字
+        npcNames = npcs.Select(x => x.name).ToArray();//Linq分离出NPC名字
 
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 5;
@@ -109,7 +109,7 @@ public class DialogueInspector : Editor
             {
                 if (!useUnifiedNPC.boolValue)
                     talkerName = dialogue.Words[index] == null ? "(空)" : !dialogue.Words[index].TalkerInfo ? "(空谈话人)" : (dialogue.Words[index].TalkerName + "说");
-                else talkerName = !dialogue.UnifiedNPC ? "(空)" : (useCurrentTalkerInfo.boolValue ? "NPC说" : dialogue.UnifiedNPC.Name + "说");
+                else talkerName = !dialogue.UnifiedNPC ? "(空)" : (useCurrentTalkerInfo.boolValue ? "NPC说" : dialogue.UnifiedNPC.name + "说");
             }
             else talkerName = "玩家说";
             EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2, lineHeight), words, new GUIContent(talkerName));
@@ -348,7 +348,7 @@ public class DialogueInspector : Editor
                                         }
                                         string b_talkerName;
                                         if (b_talkerType.enumValueIndex == (int)TalkerType.NPC)
-                                            b_talkerName = (this.dialogue.UseUnifiedNPC ? this.dialogue.UnifiedNPC.Name : this.dialogue.Words[index].TalkerName) + "说";
+                                            b_talkerName = (this.dialogue.UseUnifiedNPC ? this.dialogue.UnifiedNPC.name : this.dialogue.Words[index].TalkerName) + "说";
                                         else b_talkerName = "玩家说";
                                         EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight), b_talkerName);
                                         b_talkerType.enumValueIndex = EditorGUI.IntPopup(new Rect(_rect.x + _rect.width / 2, _rect.y + lineHeightSpace * _lineCount, _rect.width / 2, lineHeight),

@@ -25,7 +25,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
             ia.Empty();
         while (itemAgents.Count < slotCount)
         {
-            ItemAgent ia = ObjectPool.Instance.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
+            ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
             ia.Init(ItemAgentType.Loot);
             itemAgents.Add(ia);
         }
@@ -53,7 +53,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
             else
             {
                 AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
-                AmountManager.Instance.NewAmount(delegate
+                AmountManager.Instance.New(delegate
                 {
                     OnTake(info, (int)AmountManager.Instance.Amount);
                 }, info.Amount);
@@ -119,6 +119,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
     public override void OpenWindow()
     {
         base.OpenWindow();
+        if (!IsUIOpen) return;
         Init();
         UIManager.Instance.EnableInteractive(false);
 
@@ -127,6 +128,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen) return;
         LootAgent = null;
         PickAble = false;
         if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();

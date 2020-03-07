@@ -47,7 +47,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         buildingInfoAgents.RemoveAll(x => !x || !x.gameObject.activeSelf || !x.gameObject);
         foreach (BuildingInformation bi in buildingsLearned)
         {
-            BuildingInfoAgent ba = ObjectPool.Instance.Get(UI.buildingInfoCellPrefab, UI.buildingInfoCellsParent).GetComponent<BuildingInfoAgent>();
+            BuildingInfoAgent ba = ObjectPool.Get(UI.buildingInfoCellPrefab, UI.buildingInfoCellsParent).GetComponent<BuildingInfoAgent>();
             ba.Init(bi, UI.cellsRect);
             buildingInfoAgents.Add(ba);
         }
@@ -65,16 +65,19 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     public bool Learn(BuildingInformation buildingInfo)
     {
         if (!buildingInfo) return false;
-        if (buildingsLearned.Contains(buildingInfo))
+        if (HadLearned(buildingInfo))
         {
-            MessageManager.Instance.NewMessage("这种设施已经学会建造");
+            MessageManager.Instance.New("这种设施已经学会建造");
             return false;
         }
         buildingsLearned.Add(buildingInfo);
-        MessageManager.Instance.NewMessage(string.Format("学会了 [{0}] 的建造方法!", buildingInfo.Name));
+        ConfirmManager.Instance.New(string.Format("学会了 [{0}] 的建造方法!", buildingInfo.Name));
         return true;
     }
-
+    public bool HadLearned(BuildingInformation buildingInfo)
+    {
+        return buildingsLearned.Contains(buildingInfo);
+    }
     public void CreatPreview(BuildingInformation info)
     {
         if (info == null) return;
@@ -144,7 +147,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         if (!currentInfo) return;
         if (BuildAble)
         {
-            if (BackpackManager.Instance.CheckMaterialsEnough(currentInfo.Materials))
+            if (BackpackManager.Instance.IsMaterialsEnough(currentInfo.Materials))
             {
                 Building building = Instantiate(currentInfo.Prefab);
                 if (building.StarBuild(currentInfo, preview.Position))
@@ -198,12 +201,12 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
                     }
                 }
             }
-            else MessageManager.Instance.NewMessage("耗材不足");
+            else MessageManager.Instance.New("耗材不足");
             FinishPreview();
         }
         else
         {
-            MessageManager.Instance.NewMessage("空间不足");
+            MessageManager.Instance.New("空间不足");
 #if UNITY_ANDROID
             FinishPreview();
 #endif
@@ -328,11 +331,13 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     {
         if (DialogueManager.Instance && DialogueManager.Instance.IsTalking) return;
         base.OpenWindow();
+        if (!IsUIOpen) return;
         Init();
     }
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen) return;
         FinishPreview();
         HideDescription();
         HideBuiltList();
@@ -376,10 +381,10 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
             materials += materialsInfo[i] + endLine;
         }
         UI.nameText.text = buildingInfo.Name;
-        UI.desciptionText.text = string.Format("<b>描述</b>\n{0}\n<b>耗时: </b>{1}\n<b>耗材{2}</b>\n{3}",
+        UI.desciptionText.text = string.Format("<b>描述</b>\n{0}\n<b>耗时: </b>{1}\n<b>建造材料：{2}</b>\n{3}",
             buildingInfo.Description,
             buildingInfo.BuildTime > 0 ? buildingInfo.BuildTime.ToString("F2") + 's' : "立即",
-            BackpackManager.Instance.CheckMaterialsEnough(buildingInfo.Materials) ? "<color=green>(可建造)</color>" : "<color=red>(耗材不足)</color>",
+            BackpackManager.Instance.IsMaterialsEnough(buildingInfo.Materials) ? "<color=green>(可建造)</color>" : "<color=red>(耗材不足)</color>",
             materials);
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = false;
@@ -402,7 +407,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         }
         while (buildings.Count > buildingAgents.Count)
         {
-            BuildingAgent ba = ObjectPool.Instance.Get(UI.buildingCellPrefab, UI.buildingCellsParent).GetComponent<BuildingAgent>();
+            BuildingAgent ba = ObjectPool.Get(UI.buildingCellPrefab, UI.buildingCellsParent).GetComponent<BuildingAgent>();
             ba.Hide();
             buildingAgents.Add(ba);
         }

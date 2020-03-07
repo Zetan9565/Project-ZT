@@ -34,6 +34,8 @@ public class ItemInspector : Editor
     SerializedProperty inexhaustible;
     SerializedProperty maxDurability;
     SerializedProperty makingMethod;
+    SerializedProperty minYield;
+    SerializedProperty maxYield;
     SerializedProperty materials;
 
     SerializedProperty boxItems;
@@ -64,6 +66,8 @@ public class ItemInspector : Editor
         maxDurability = serializedObject.FindProperty("maxDurability");
         materials = serializedObject.FindProperty("materials");
         makingMethod = serializedObject.FindProperty("makingMethod");
+        minYield = serializedObject.FindProperty("minYield");
+        maxYield = serializedObject.FindProperty("maxYield");
         HandlingMaterialItemList();
 
         box = target as BoxItem;
@@ -80,12 +84,7 @@ public class ItemInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        if (item.Materials.Exists(x => (x.MakingType == MakingType.SingleItem && item.Materials.FindAll(y => y.MakingType == MakingType.SingleItem && y.Item == x.Item).Count > 1) ||
-                                       (x.MakingType == MakingType.SameType && item.Materials.FindAll(y => y.MakingType == MakingType.SameType && y.MaterialType == x.MaterialType).Count > 1)))
-        {
-            EditorGUILayout.HelpBox("制作材料存在重复。", MessageType.Warning);
-        }
-        else if (!CheckEditComplete())
+        if (!CheckEditComplete())
             EditorGUILayout.HelpBox("该道具存在未补全信息。", MessageType.Warning);
         else
         {
@@ -148,17 +147,28 @@ public class ItemInspector : Editor
         EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.LabelField("附加信息", new GUIStyle() { fontStyle = FontStyle.Bold });
         HandlingItemType();
-        if (EditorGUI.EndChangeCheck())
-            serializedObject.ApplyModifiedProperties();
+        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         if (!(item is BoxItem) && !(item is BookItem))
         {
             EditorGUILayout.Space();
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(makingMethod, new GUIContent("制作方法"));
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-            if (makingMethod.enumValueIndex != 0)
+            if (makingMethod.enumValueIndex != (int)MakingMethod.None)
+            {
+                minYield.intValue = EditorGUILayout.IntSlider("最小产量", minYield.intValue, 1, maxYield.intValue);
+                EditorGUILayout.PropertyField(maxYield, new GUIContent("最大产量"));
+            }
+            if (minYield.intValue < 1) minYield.intValue = 1;
+            if (maxYield.intValue < 1) maxYield.intValue = 1;
+            if (minYield.intValue > maxYield.intValue) minYield.intValue = maxYield.intValue;
+            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+            if (item.Materials.Exists(x => (x.MakingType == MakingType.SingleItem && item.Materials.FindAll(y => y.MakingType == MakingType.SingleItem && y.Item == x.Item).Count > 1) ||
+                               (x.MakingType == MakingType.SameType && item.Materials.FindAll(y => y.MakingType == MakingType.SameType && y.MaterialType == x.MaterialType).Count > 1)))
+            {
+                EditorGUILayout.HelpBox("制作材料存在重复。", MessageType.Error);
+            }
+            if (makingMethod.enumValueIndex != (int)MakingMethod.None)
             {
                 EditorGUILayout.PropertyField(materials, new GUIContent("制作材料\t\t" + (materials.arraySize > 0 ? "数量：" + materials.arraySize : "无")), false);
                 if (materials.isExpanded)
@@ -171,7 +181,6 @@ public class ItemInspector : Editor
         }
         if (box)
         {
-            EditorGUILayout.Space();
             EditorGUILayout.PropertyField(boxItems, new GUIContent("盒内道具\t\t" + (boxItems.arraySize > 0 ? "数量：" + boxItems.arraySize : "无")), false);
             if (boxItems.isExpanded)
             {
@@ -464,7 +473,12 @@ public class ItemInspector : Editor
             editComplete &= !box.ItemsInBox.Exists(x => x.item == null);
 
         if (item.MakingMethod != MakingMethod.None)
+        {
             editComplete &= !item.Materials.Exists(x => x.MakingType == MakingType.SingleItem && x.Item == null);
+            editComplete &= !item.Materials.Exists(x => (x.MakingType == MakingType.SingleItem && item.Materials.FindAll(y => y.MakingType == MakingType.SingleItem && y.Item == x.Item).Count > 1) ||
+                                (x.MakingType == MakingType.SameType && item.Materials.FindAll(y => y.MakingType == MakingType.SameType && y.MaterialType == x.MaterialType).Count > 1));
+
+        }
 
         return editComplete;
     }

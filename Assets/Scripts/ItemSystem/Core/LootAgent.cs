@@ -40,7 +40,7 @@ public class LootAgent : MonoBehaviour
     public void Recycle()
     {
         lootItems.Clear();
-        ObjectPool.Instance.Put(gameObject);
+        ObjectPool.Put(gameObject);
         if (recycleRoutine != null) StopCoroutine(recycleRoutine);
         recycleRoutine = null;
     }

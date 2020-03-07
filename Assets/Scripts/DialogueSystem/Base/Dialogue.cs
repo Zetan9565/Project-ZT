@@ -68,7 +68,7 @@ public class DialogueWords
         get
         {
             if (TalkerType == TalkerType.NPC)
-                if (TalkerInfo) return TalkerInfo.Name;
+                if (TalkerInfo) return TalkerInfo.name;
                 else return "未知NPC";
             else if (TalkerType == TalkerType.UnifiedNPC)
                 return "NPC";
@@ -186,7 +186,7 @@ public class DialogueWords
     public override string ToString()
     {
         if (TalkerType == TalkerType.NPC && talkerInfo)
-            return "[" + talkerInfo.Name + "]说：" + words;
+            return "[" + talkerInfo.name + "]说：" + words;
         else if (TalkerType == TalkerType.Player)
             return "[玩家]说：" + words;
         else return "[Unnamed]说：" + words;

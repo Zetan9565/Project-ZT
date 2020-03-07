@@ -14,6 +14,7 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
     {
         if (!CurrentField) return;
         base.OpenWindow();
+        if (!IsUIOpen) return;
         UpdateCropsArea();
         UpdateUI();
         UIManager.Instance.EnableJoyStick(false);
@@ -23,6 +24,7 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen) return;
         ManageAble = false;
         CurrentField = null;
         UIManager.Instance.EnableJoyStick(true);
@@ -68,7 +70,7 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
         if (!IsUIOpen) return;
         while (cropAgents.Count < CurrentField.Crops.Count)
         {
-            CropAgent ca = ObjectPool.Instance.Get(UI.cropPrefab, UI.cropCellsParent).GetComponent<CropAgent>();
+            CropAgent ca = ObjectPool.Get(UI.cropPrefab, UI.cropCellsParent).GetComponent<CropAgent>();
             cropAgents.Add(ca);
         }
         while (cropAgents.Count > CurrentField.Crops.Count)

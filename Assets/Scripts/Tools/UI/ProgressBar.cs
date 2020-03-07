@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 
+[DisallowMultipleComponent]
 public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
 {
     [SerializeField]
@@ -13,6 +14,9 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
 
     [SerializeField]
     private Image fillArea;
+
+    [SerializeField]
+    private Button cancel;
 
     [SerializeField]
     private Text actionText;
@@ -36,9 +40,10 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         barCanvas = GetComponent<Canvas>();
         barCanvas.overrideSorting = true;
         barCanvas.sortingLayerID = SortingLayer.NameToID("UI");
+        cancel.onClick.AddListener(Cancel);
     }
 
-    public void NewProgress(float seconds, UnityAction doneAction, UnityAction cancelAction, string actionName = null)
+    public void New(float seconds, UnityAction doneAction, UnityAction cancelAction, string actionName = null, bool displayCancel = false)
     {
         if (seconds <= 0) return;
         if (progressCoroutine != null)
@@ -62,12 +67,13 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         }
         loopTimes = 0;
         ZetanUtility.SetActive(bar, true);
+        ZetanUtility.SetActive(cancel, displayCancel);
         barCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         if (progressCoroutine != null) StopCoroutine(progressCoroutine);
         progressCoroutine = StartCoroutine(Progress());
     }
 
-    public void NewProgress(float seconds, int loopTimes, UnityAction breakAction, UnityAction doneAction, UnityAction cancelAction, string actionName = null)
+    public void New(float seconds, int loopTimes, UnityAction doneAction, UnityAction cancelAction, string actionName = null, bool displayCancel = false)
     {
         if (seconds <= 0 || loopTimes < 0) return;
         if (progressCoroutine != null)
@@ -77,7 +83,8 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         }
         onDone = doneAction;
         onCancel = cancelAction;
-        this.breakAction = breakAction;
+        breakCondition = null;
+        breakAction = null;
         targetTime = seconds;
         isProgressing = true;
         this.loopTimes = loopTimes;
@@ -92,12 +99,14 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
             }
         }
         ZetanUtility.SetActive(bar, true);
+        ZetanUtility.SetActive(cancel, displayCancel);
         barCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         breakCondition = null;
         progressCoroutine = StartCoroutine(Progress());
     }
 
-    public void NewProgress(float seconds, int loopTimes, Func<bool> breakCondition, UnityAction breakAction, UnityAction doneAction, UnityAction cancelAction, string actionName = null)
+    public void New(float seconds, Func<bool> breakCondition, UnityAction breakAction,
+        UnityAction doneAction, UnityAction cancelAction, string actionName = null, bool displayCancel = false)
     {
         if (seconds <= 0 || loopTimes < 0) return;
         if (progressCoroutine != null)
@@ -109,7 +118,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         onCancel = cancelAction;
         this.breakAction = breakAction;
         targetTime = seconds;
-        this.loopTimes = loopTimes;
+        loopTimes = 0;
         isProgressing = true;
         if (actionText)
         {
@@ -122,6 +131,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
             }
         }
         ZetanUtility.SetActive(bar, true);
+        ZetanUtility.SetActive(cancel, displayCancel);
         barCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         this.breakCondition = breakCondition;
         progressCoroutine = StartCoroutine(Progress());
@@ -133,10 +143,8 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         isProgressing = false;
         ZetanUtility.SetActive(bar, false);
         onDone?.Invoke();
-        if (loopTimes > 0 && (breakCondition == null || !breakCondition.Invoke()))
-        {
-            NewProgress(targetTime, --loopTimes, breakCondition, breakAction, onDone, onCancel, actionText.text);
-        }
+        if (breakCondition != null && !breakCondition.Invoke()) New(targetTime, breakCondition, breakAction, onDone, onCancel, actionText.text, cancel.gameObject.activeSelf);
+        else if (breakCondition == null && loopTimes > 0) New(targetTime, --loopTimes, onDone, onCancel, actionText.text, cancel.gameObject.activeSelf);
         else
         {
             breakAction?.Invoke();

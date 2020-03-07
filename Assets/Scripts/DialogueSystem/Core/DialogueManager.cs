@@ -161,7 +161,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                         if (amount - submitObj.Amount < o.Amount)
                         {
                             submitAble = false;
-                            MessageManager.Instance.NewMessage("该物品为其它目标所需");
+                            MessageManager.Instance.New("该物品为其它目标所需");
                             break;
                         }
         submitAble &= BackpackManager.Instance.TryLoseItem_Boolean(submitObj.ItemToSubmit, submitObj.Amount);
@@ -287,7 +287,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             //如果还有话没说完，弹出一个“继续”按钮
             if (!oa)
             {
-                oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
+                oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.InitContinue("继续");
                 if (!optionAgents.Contains(oa))
                 {
@@ -299,7 +299,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             //如果话说完了，这是最后一句，则把“继续”按钮去掉
             optionAgents.Remove(oa);
-            ObjectPool.Instance.Put(oa.gameObject);
+            ObjectPool.Put(oa.gameObject);
         }
         CheckPages();
         //当“继续”选项出现时，总没有其他选项出现，因此不必像下面一样还要处理一下页数，除非自己作死把行数写满让“继续”按钮没法显示
@@ -315,7 +315,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             if (!QuestManager.Instance.HasCompleteQuest(quest) && QuestManager.Instance.IsQuestAcceptable(quest) && QuestManager.Instance.IsQuestValid(quest))
             {
-                OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
+                OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(quest.Title + (quest.IsComplete ? "(完成)" : quest.IsOngoing ? "(进行中)" : string.Empty), quest);
                 if (quest.IsComplete)
                 {
@@ -371,7 +371,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.IsComplete)
             {
-                OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
+                OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(quest.Title + "(完成)", quest);
                 optionAgents.Add(oa);
             }
@@ -394,7 +394,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
             {
-                OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
+                OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(to.runtimeParent.Title, to);
                 optionAgents.Add(oa);
                 if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) ZetanUtility.SetActive(oa.gameObject, false);//第一页以外隐藏
@@ -406,7 +406,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             if (so.AllPrevObjCmplt && !so.HasNextObjOngoing)
             {
-                OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
+                OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(so.DisplayName, so);
                 optionAgents.Add(oa);
                 if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) ZetanUtility.SetActive(oa.gameObject, false);//第一页以外隐藏
@@ -443,7 +443,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 else if (option.OptionType == WordsOptionType.SubmitAndGet && option.OnlyForQuest && option.BindedQuest
                     && !QuestManager.Instance.HasOngoingQuestWithID(option.BindedQuest.ID))
                     continue;//若需当前选项需任务驱动但任务未接取，则跳过创建
-                OptionAgent oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
+                OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(option.Title, option);
                 optionAgents.Add(oa);
             }
@@ -557,9 +557,9 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (WordsToSay.Count == 1) HandlingLastWords();//因为Dequeue之后，话就没了，Words.Count就不是1了，而是0，所以要在Dequeue之前做这一步，意思是倒数第二句做这一步
         if (WordsToSay.Count >= 1)
         {
-            string talkerName = currentDialog.UseUnifiedNPC ? (currentDialog.UseCurrentTalkerInfo ? CurrentTalker.Info.Name : currentDialog.UnifiedNPC.Name) : WordsToSay.Peek().TalkerName;
+            string talkerName = currentDialog.UseUnifiedNPC ? (currentDialog.UseCurrentTalkerInfo ? CurrentTalker.Info.name : currentDialog.UnifiedNPC.name) : WordsToSay.Peek().TalkerName;
             if (WordsToSay.Peek().TalkerType == TalkerType.Player && PlayerManager.Instance.PlayerInfo)
-                talkerName = PlayerManager.Instance.PlayerInfo.Name;
+                talkerName = PlayerManager.Instance.PlayerInfo.name;
             UI.nameText.text = talkerName;
             UI.wordsText.text = WordsToSay.Peek().Words;
             var words = WordsToSay.Dequeue();
@@ -631,7 +631,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                             if (amount - currentSubmitObj.Amount < o.Amount)
                             {
                                 submitAble = false;
-                                MessageManager.Instance.NewMessage("该物品为其它目标所需");
+                                MessageManager.Instance.New("该物品为其它目标所需");
                                 break;
                             }
             submitAble &= BackpackManager.Instance.TryLoseItem_Boolean(currentSubmitObj.ItemToSubmit, currentSubmitObj.Amount);
@@ -654,7 +654,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 //若该目标是任务的最后一个目标，则可以直接提交任务
                 if (parent.IsComplete && parent.ObjectiveInstances.IndexOf(currentSubmitObj) == parent.ObjectiveInstances.Count - 1)
                 {
-                    oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
+                    oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
                     oa.Init("继续", parent);
                     optionAgents.Add(oa);
                 }
@@ -680,7 +680,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 Quest parent = currentTalkObj.runtimeParent;
                 if (parent.IsComplete && parent.ObjectiveInstances.IndexOf(currentSubmitObj) == parent.ObjectiveInstances.Count - 1)
                 {
-                    oa = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
+                    oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
                     oa.Init("继续", parent);
                     optionAgents.Add(oa);
                 }
@@ -699,12 +699,12 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             ClearOptions();
             //若是任务对话的最后一句，则根据任务情况弹出确认按钮
-            OptionAgent yes = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
+            OptionAgent yes = ObjectPool.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
             yes.InitConfirm(CurrentQuest.IsComplete ? "完成" : "接受");
             optionAgents.Add(yes);
             if (!CurrentQuest.IsComplete)
             {
-                OptionAgent no = ObjectPool.Instance.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
+                OptionAgent no = ObjectPool.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
                 no.InitBack("拒绝");
                 optionAgents.Add(no);
             }
@@ -791,6 +791,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         if (!TalkAble) return;
         base.OpenWindow();
+        if(!IsUIOpen)return;
         if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
         WindowsManager.Instance.PauseAll(true, this);
         UIManager.Instance.EnableJoyStick(false);
@@ -799,6 +800,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     public override void CloseWindow()
     {
         base.CloseWindow();
+        if (IsUIOpen)return;
         CurrentType = DialogueType.Normal;
         CurrentTalker = null;
         CurrentQuest = null;
@@ -809,12 +811,12 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         wordsOptionInstances.Clear();
         ClearOptions();
         HideQuestDescription();
-        IsTalking = false;
         if (!BuildingManager.Instance.IsPreviewing) WindowsManager.Instance.PauseAll(false);
         if (WarehouseManager.Instance.IsPausing) WarehouseManager.Instance.PauseDisplay(false);
-        WarehouseManager.Instance.CloseWindow();
+        if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
         if (ShopManager.Instance.IsPausing) ShopManager.Instance.PauseDisplay(false);
-        ShopManager.Instance.CloseWindow();
+        if (ShopManager.Instance.IsUIOpen) ShopManager.Instance.CloseWindow();
+        IsTalking = false;
         UIManager.Instance.EnableJoyStick(true);
     }
 
@@ -831,7 +833,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         int befCount = rewardCells.Count;
         for (int i = 0; i < 10 - befCount; i++)
         {
-            ItemAgent rwc = ObjectPool.Instance.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemAgent>();
+            ItemAgent rwc = ObjectPool.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemAgent>();
             rwc.Init();
             rewardCells.Add(rwc);
         }

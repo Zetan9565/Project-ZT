@@ -29,20 +29,13 @@ MonoBehaviour:
   inexhaustible: 0
   maxDurability: 100
   makingMethod: 0
+  minYield: 1
+  maxYield: 1
   materialType: 0
   materials: []
   itemsInBox:
   - item: {fileID: 11400000, guid: eb68c8a7b1bbeb8408eed1d2af6b8ad6, type: 2}
     amount: 5
-    indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
-  - item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
-    amount: 3
     indexInGrid: 0
     durability:
       min: 0

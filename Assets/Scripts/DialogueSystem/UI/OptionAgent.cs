@@ -115,7 +115,7 @@ public class OptionAgent : MonoBehaviour
         MQuest = null;
         BranchDialogue = null;
         OptionType = OptionType.None;
-        ObjectPool.Instance.Put(gameObject);
+        ObjectPool.Put(gameObject);
     }
 }
 public enum OptionType

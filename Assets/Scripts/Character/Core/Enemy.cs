@@ -13,7 +13,7 @@ public class Enemy : MonoBehaviour
 
     public string EnemyName
     {
-        get { return info.Name; }
+        get { return info.name; }
     }
 
     [SerializeField]
@@ -49,7 +49,7 @@ public class Enemy : MonoBehaviour
                         lootItems.Add(new ItemInfo(di.Item, Random.Range(1, di.Amount + 1)));
             if (lootItems.Count > 0)
             {
-                LootAgent la = ObjectPool.Instance.Get(info.LootPrefab).GetComponent<LootAgent>();
+                LootAgent la = ObjectPool.Get(info.LootPrefab).GetComponent<LootAgent>();
                 la.Init(lootItems, transform.position);
             }
         }
