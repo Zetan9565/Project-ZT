@@ -83,22 +83,13 @@ public class PlayerController2D : MonoBehaviour
         if (updateMode == UpdateMode.FixedUpdate) Control();
     }
 
-    float horizontal;
-    public float Horizontal => horizontal;
-
-    float vertical;
-    public float Vertical => vertical;
-
-    Vector2 input;
-    public Vector2 InputVector => input;
     private void Control()
     {
         if (!controlAble) return;
-        horizontal = Input.GetAxisRaw("Horizontal");
-        vertical = Input.GetAxisRaw("Vertical");
-        input = new Vector2(horizontal, vertical);
-        input.Normalize();
-        characterController.Move(input);
+        var horizontal = Input.GetAxisRaw("Horizontal");
+        var vertical = Input.GetAxisRaw("Vertical");
+        var input = new Vector2(horizontal, vertical);
+        characterController.Move(input.normalized);
         if (Unit)
         {
             if (input.magnitude > 0 || Unit.IsStop)

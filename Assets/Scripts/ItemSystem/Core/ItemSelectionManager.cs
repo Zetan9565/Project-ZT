@@ -56,6 +56,11 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
 
     public void Confirm()
     {
+        if (itemAgents.Count < 1)
+        {
+            MessageManager.Instance.New("未选择任何道具");
+            return;
+        }
         List<ItemInfo> infos = new List<ItemInfo>();
         foreach (var ia in itemAgents)
         {

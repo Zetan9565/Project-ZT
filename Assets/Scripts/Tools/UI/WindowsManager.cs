@@ -146,7 +146,7 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
         if (!IsUIOpen) return;
         if (IsPausing) return;
         if (!animated) UI.window.alpha = 0;
-        else ZetanUtility.FadeTo(0, 0.05f, this);
+        else ZetanUtility.FadeTo(0, 0.04f, this);
         UI.window.blocksRaycasts = false;
         WindowsManager.Instance.Remove(this);
         IsUIOpen = false;
@@ -171,7 +171,7 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
         if (IsUIOpen) return;
         if (IsPausing) return;
         if(!animated) UI.window.alpha = 1;
-        else ZetanUtility.FadeTo(1, 0.05f, this);
+        else ZetanUtility.FadeTo(1, 0.04f, this);
         UI.window.blocksRaycasts = true;
         WindowsManager.Instance.Push(this);
         IsUIOpen = true;

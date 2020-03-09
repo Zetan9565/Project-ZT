@@ -21,7 +21,7 @@ MonoBehaviour:
   sellPrice: 0
   buyPrice: 0
   icon: {fileID: 21300000, guid: 92042bc197ea09b4597415b7a9e4d8c7, type: 3}
-  description: "\u7528\u4E8E\u6D4B\u8BD5\u89E6\u53D1\u5668\u3002\u6548\u679C\uFF1A\u9690\u85CF\u90A3\u68F5\u8349\u3002"
+  description: "\u7528\u4E8E\u6D4B\u8BD5\u89E6\u53D1\u5668\u3002\u6548\u679C\uFF1A5\u79D2\u540E\u9690\u85CF\u90A3\u68F5\u8349\u3002"
   stackAble: 1
   discardAble: 0
   lockAble: 1
@@ -29,6 +29,8 @@ MonoBehaviour:
   inexhaustible: 0
   maxDurability: 100
   makingMethod: 0
+  minYield: 1
+  maxYield: 1
   materialType: 0
   materials: []
   triggerName: qwe

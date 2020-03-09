@@ -6,30 +6,33 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
 {
     #region 静态属性
     /// <summary>
-    /// 一个游戏分在现实中的耗时
+    /// 一个游戏分在现实中的耗时(秒)
     /// </summary>
     public static float OneMinute => Instance ? Instance.Multiples : 1;
     /// <summary>
-    /// 一个游戏时在现实中的耗时
+    /// 一个游戏时在现实中的耗时(秒)
     /// </summary>
     public static float OneHour => OneMinute * 60;
     /// <summary>
-    /// 一个游戏日在现实中的耗时
+    /// 一个游戏日在现实中的耗时(秒)
     /// </summary>
     public static float OneDay => OneHour * 24;
     /// <summary>
-    /// 一个游戏月在现实中的耗时
+    /// 一个游戏月在现实中的耗时(秒)
     /// </summary>
     public static float OneMonth => OneDay * 30;
     /// <summary>
-    /// 一个游戏季在现实中的耗时
+    /// 一个游戏季在现实中的耗时(秒)
     /// </summary>
     public static float OneSeason => OneMonth * 3;
     /// <summary>
-    /// 一个游戏年在现实中的耗时
+    /// 一个游戏年在现实中的耗时(秒)
     /// </summary>
     public static float OneYear => OneSeason * 4;
     #endregion
+
+    [SerializeField]
+    private TimeUI UI;
 
     [SerializeField]
     private float timeline = 8;
@@ -73,7 +76,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     public delegate void DayPassedListner();
     public event DayPassedListner OnDayPassed;
 
-    public string Time
+    public string TimeString
     {
         get
         {
@@ -146,11 +149,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     }
 
     [SerializeField]
-    private TimeUI UI;
-
-    [SerializeField]
     private Month currentMonth = Month.January;
-    //public DayOfTheWeek DayOfWeekOfFirstDayOfCurrentMonth { get; private set; } = DayOfTheWeek.Sunday;
     public DayOfTheWeek WeekDayOfTheFirstDayOfCurrentMonth
     {
         get
@@ -201,11 +200,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     public int DaysOfYear => daysOfYear;
     public int Days
     {
-        get
-        {
-            return days;
-        }
-
+        get => days;
         private set
         {
             days = value;
@@ -220,23 +215,12 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     }//从1开始计
     public int Weeks
     {
-        get
-        {
-            return weeks;
-        }
-
-        private set
-        {
-            weeks = value;
-        }
+        get => weeks;
+        private set => weeks = value;
     }//从1开始计
     public int Months//从1开始计
     {
-        get
-        {
-            return months;
-        }
-
+        get => months;
         set
         {
             months = value;
@@ -245,11 +229,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     }
     public int Years
     {
-        get
-        {
-            return years;
-        }
-
+        get => years;
         private set
         {
             if (UI && UI.years) UI.years.text = "第" + Years + "年";
@@ -257,15 +237,20 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         }
     }//从1开始计
 
-    public float TotalTime { get; private set; }
+    private float totalTime;
+    public float TotalTime
+    {
+        get => totalTime;
+        set
+        {
+            totalTime = value;
+            SetTime(totalTime);
+        }
+    }
 
     public Month CurrentMonth
     {
-        get
-        {
-            return currentMonth;
-        }
-
+        get => currentMonth;
         private set
         {
             currentMonth = value;
@@ -278,7 +263,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     private void Awake()
     {
         UpdateUI();
-        TotalTime += timeline * OneHour;
+        totalTime += timeline * OneHour;
         Date.month = CurrentMonth;
         Date.daysOfMonth = DaysOfMonth;
         Date.dayOfTheWeek = DayOfTheWeek;
@@ -310,10 +295,10 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
             NextDay();
         float rawTimeline = (timeline + realSecond * Scale);
         timeline = rawTimeline % 24;
-        if (UI && UI.time) UI.time.text = Time;
+        if (UI && UI.time) UI.time.text = TimeString;
         if (timelineBef > timeline) NextDay();
         OnTimePassed?.Invoke(realSecond);
-        TotalTime += realSecond * multiples;
+        totalTime += realSecond * multiples;
     }
 
     private void NextDayWithoutNotify()
@@ -343,7 +328,6 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
             Years++;
         }
     }
-
     private void NextDay()
     {
         NextDayWithoutNotify();
@@ -356,17 +340,21 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     }
     public void LoadData(SaveData data)
     {
-        ResetTime();
-        TimePase(data.totalTime);
+        SetTime(data.totalTime);
     }
 
-    public void ResetTime()
+    private void SetTime(float totalTime)
+    {
+        ResetTime();
+        TimePase(totalTime);
+    }
+    private void ResetTime()
     {
         Days = 1;
         Weeks = 1;
         Months = 1;
         Years = 1;
-        TotalTime = 0;
+        totalTime = 0;
         timeline = 0;
         UpdateUI();
     }

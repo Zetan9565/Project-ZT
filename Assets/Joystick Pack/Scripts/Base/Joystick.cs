@@ -62,6 +62,7 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (eventData.button != PointerEventData.InputButton.Left) return;
         cam = null;
         if (canvas.renderMode == RenderMode.ScreenSpaceCamera)
             cam = canvas.worldCamera;
@@ -86,7 +87,6 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         else
             input = Vector2.zero;
     }
-
 
     private void FormatInput()
     {

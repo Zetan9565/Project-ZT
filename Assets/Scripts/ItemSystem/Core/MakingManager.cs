@@ -86,6 +86,11 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                         ProgressBar.Instance.New(CurrentTool.MakingTime, amount - 1,
                             delegate
                             {
+                                IsMaking = false;
+                                PauseDisplay(false);
+                            },
+                            delegate
+                            {
                                 int amoutBef = BackpackManager.Instance.GetItemAmount(currentItem.ID);
                                 if (MakeItem(currentItem))
                                     MessageManager.Instance.New(string.Format("制作了 {0} 个 [{1}]", BackpackManager.Instance.GetItemAmount(currentItem.ID) - amoutBef,
@@ -258,8 +263,8 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                     }
                     //否则加入消耗列表
                     if (find.item.StackAble) //可叠加，则find是克隆出来的新实例
-                        find = BackpackManager.Instance.GetItem(find.ItemID);//需从背包中找到相应道具
-                    itemsToLose.Add(find, find.Amount);
+                        itemsToLose.Add(BackpackManager.Instance.GetItemInfo(find.ItemID), find.Amount);//需从背包中找到相应道具
+                    else itemsToLose.Add(find, find.Amount);
                 }
                 else
                 {
@@ -282,7 +287,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                             {
                                 //否则加入消耗列表
                                 if (find.item.StackAble)//可叠加，则find是克隆出来的新实例
-                                    itemsToLose.Add(BackpackManager.Instance.GetItem(find.ItemID), find.Amount);//需从背包中找到相应道具
+                                    itemsToLose.Add(BackpackManager.Instance.GetItemInfo(find.ItemID), find.Amount);//需从背包中找到相应道具
                                 else itemsToLose.Add(find, find.Amount);
                             }
                         }

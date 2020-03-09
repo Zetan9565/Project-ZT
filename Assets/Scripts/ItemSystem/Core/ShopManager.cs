@@ -12,8 +12,6 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
 
     public ShopInformation MShop { get; private set; }
 
-    public ItemInfo MItemInfo { get; private set; }
-
     private void Update()
     {
         RefreshAll(Time.deltaTime);
@@ -117,15 +115,15 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         {
             ConfirmManager.Instance.New(string.Format("确定出售1个 [{0}] 吗？", info.Item.name), delegate
             {
-                if (OnPurchase(info, (int)AmountManager.Instance.Amount))
-                    MessageManager.Instance.New(string.Format("出售了1个 [{1}]", (int)AmountManager.Instance.Amount, info.Item.name));
+                if (OnPurchase(info, 1))
+                    MessageManager.Instance.New(string.Format("出售了1个 [{1}]", 1, info.Item.name));
             });
         }
         else if (info.IsEmpty)
         {
             ConfirmManager.Instance.New("这种物品暂无特价收购需求，确定按原价出售吗？", delegate
             {
-                PurchaseItem(MItemInfo, true);
+                PurchaseItem(BackpackManager.Instance.GetItemInfo(info.Item), true);
             });
         }
         else
@@ -174,7 +172,11 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
     /// <param name="force">强制购入</param>
     public void PurchaseItem(ItemInfo info, bool force = false)
     {
-        if (MShop == null || info == null || !info.item) return;
+        if (MShop == null || info == null || !info.item)
+        {
+            Debug.Log(info);
+            return;
+        }
         if (!info.item.SellAble)
         {
             MessageManager.Instance.New("这种物品不可出售");
@@ -185,9 +187,8 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
             MessageManager.Instance.New("镶嵌宝石的物品不可出售");
             return;
         }
-        MItemInfo = info;
         MerchandiseInfo find = MShop.Acquisitions.Find(x => x.Item == info.item);
-        if (find != null && !force)//采购品列表里没有该道具，说明没有特殊购价
+        if (find != null && !force)//采购品列表里有该道具，说明对该道具有特殊购价
         {
             PurchaseItem(find);
             return;
@@ -217,7 +218,6 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
     {
         if (MShop == null || info == null || !info.item || amount < 1)
             return false;
-        MItemInfo = null;
         if (!info.item.SellAble)
         {
             MessageManager.Instance.New("这种物品不可出售");
@@ -254,7 +254,6 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         base.CloseWindow();
         if (IsUIOpen) return;
         MShop = null;
-        MItemInfo = null;
         if (BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.CloseWindow();
         ItemWindowManager.Instance.CloseWindow();
         if (DialogueManager.Instance.IsUIOpen) DialogueManager.Instance.PauseDisplay(false);

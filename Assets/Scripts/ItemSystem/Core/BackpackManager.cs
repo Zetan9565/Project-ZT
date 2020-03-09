@@ -140,7 +140,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 }
             if (amount > Backpack.size.Rest + vacateSize)//如果留出位置还不能放下
             {
-                MessageManager.Instance.New(string.Format("请多留出至少{0}个{1}空间", amount - Backpack.size.Rest - vacateSize, GameManager.BackpackName));
+                MessageManager.Instance.New(string.Format("请至少多留出{0}个{1}空间", amount - Backpack.size.Rest - vacateSize, GameManager.BackpackName));
                 return false;
             }
         }
@@ -910,11 +910,11 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         return Backpack.GetItemAmount(item);
     }
 
-    public ItemInfo GetItem(string id)
+    public ItemInfo GetItemInfo(string id)
     {
         return Backpack.Find(id);
     }
-    public ItemInfo GetItem(ItemBase item)
+    public ItemInfo GetItemInfo(ItemBase item)
     {
         return Backpack.Find(item);
     }

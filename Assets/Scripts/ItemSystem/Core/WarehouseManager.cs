@@ -126,7 +126,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         }
         if (!info.item.StackAble && amount > MWarehouse.size.Rest)
         {
-            MessageManager.Instance.New(string.Format("请多留出至少{0}个仓库空间", amount - MWarehouse.size.Rest));
+            MessageManager.Instance.New(string.Format("请至少多留出{0}个仓库空间", amount - MWarehouse.size.Rest));
             return false;
         }
         if (info.item.StackAble)

@@ -73,7 +73,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         progressCoroutine = StartCoroutine(Progress());
     }
 
-    public void New(float seconds, int loopTimes, UnityAction doneAction, UnityAction cancelAction, string actionName = null, bool displayCancel = false)
+    public void New(float seconds, int loopTimes, UnityAction breakAction, UnityAction doneAction, UnityAction cancelAction, string actionName = null, bool displayCancel = false)
     {
         if (seconds <= 0 || loopTimes < 0) return;
         if (progressCoroutine != null)
@@ -84,7 +84,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         onDone = doneAction;
         onCancel = cancelAction;
         breakCondition = null;
-        breakAction = null;
+        this.breakAction = breakAction;
         targetTime = seconds;
         isProgressing = true;
         this.loopTimes = loopTimes;
@@ -144,7 +144,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         ZetanUtility.SetActive(bar, false);
         onDone?.Invoke();
         if (breakCondition != null && !breakCondition.Invoke()) New(targetTime, breakCondition, breakAction, onDone, onCancel, actionText.text, cancel.gameObject.activeSelf);
-        else if (breakCondition == null && loopTimes > 0) New(targetTime, --loopTimes, onDone, onCancel, actionText.text, cancel.gameObject.activeSelf);
+        else if (breakCondition == null && loopTimes > 0) New(targetTime, --loopTimes, breakAction, onDone, onCancel, actionText.text, cancel.gameObject.activeSelf);
         else
         {
             breakAction?.Invoke();

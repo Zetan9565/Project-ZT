@@ -69,7 +69,7 @@ public class TimeManagerInspector : SingletonMonoBehaviourInspector
         currentMonth.enumValueIndex = monthIndex - 1;
 
         EditorGUILayout.BeginVertical("Box");
-        EditorGUILayout.LabelField("时间", TimeManager.Instance.DateString + " " + TimeManager.Instance.Time);
+        EditorGUILayout.LabelField("时间", TimeManager.Instance.DateString + " " + TimeManager.Instance.TimeString);
         //EditorGUILayout.PropertyField(days, new GUIContent("天数"));
         //if (days.intValue < 1) days.intValue = 1;
         EditorGUILayout.LabelField("总天数", "第 " + days.intValue + " 天");
