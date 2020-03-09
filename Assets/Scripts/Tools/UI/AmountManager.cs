@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 
 public class AmountManager : SingletonMonoBehaviour<AmountManager>
 {
@@ -21,13 +21,13 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         }
     }
 
-    private readonly UnityEvent onConfirm = new UnityEvent();
-    private readonly UnityEvent onCancel = new UnityEvent();
+    private Action onConfirm;
+    private Action onCancel;
 
     private long min;
     private long max;
 
-    public void New(UnityAction confirmAction, long max, string title = "")
+    public void New(Action confirmAction, long max, string title = "")
     {
         if (max < min)
         {
@@ -39,8 +39,8 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         min = 0;
         Amount = max >= 0 ? 0 : min;
         UI.amount.text = Amount.ToString();
-        onConfirm.RemoveAllListeners();
-        if (confirmAction != null) onConfirm.AddListener(confirmAction);
+        onConfirm = confirmAction;
+        onCancel = null;
         UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         UI.window.alpha = 1;
         UI.window.blocksRaycasts = true;
@@ -49,7 +49,7 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         ZetanUtility.KeepInsideScreen(UI.windowRect);
     }
 
-    public void New(UnityAction confirmAction, long max, long min, string title = "")
+    public void New(Action confirmAction, long max, long min, string title = "")
     {
         if (max < min)
         {
@@ -61,8 +61,52 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         this.min = min;
         Amount = max >= 0 ? 0 : min;
         UI.amount.text = Amount.ToString();
-        onConfirm.RemoveAllListeners();
-        if (confirmAction != null) onConfirm.AddListener(confirmAction);
+        onConfirm = confirmAction;
+        onCancel = null;
+        UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
+        if (string.IsNullOrEmpty(title)) UI.title.text = "输入数量";
+        else UI.title.text = title;
+        ZetanUtility.KeepInsideScreen(UI.windowRect);
+    }
+
+    public void New(Action confirmAction, Action cancelAction, long max, string title = "")
+    {
+        if (max < min)
+        {
+            max = max + min;
+            min = max - min;
+            max = max - min;
+        }
+        this.max = max;
+        min = 0;
+        Amount = max >= 0 ? 0 : min;
+        UI.amount.text = Amount.ToString();
+        onConfirm = confirmAction;
+        onCancel = cancelAction;
+        UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
+        UI.window.alpha = 1;
+        UI.window.blocksRaycasts = true;
+        if (string.IsNullOrEmpty(title)) UI.title.text = "输入数量";
+        else UI.title.text = title;
+        ZetanUtility.KeepInsideScreen(UI.windowRect);
+    }
+
+    public void New(Action confirmAction, Action cancelAction, long max, long min, string title = "")
+    {
+        if (max < min)
+        {
+            max = max + min;
+            min = max - min;
+            max = max - min;
+        }
+        this.max = max;
+        this.min = min;
+        Amount = max >= 0 ? 0 : min;
+        UI.amount.text = Amount.ToString();
+        onConfirm = confirmAction;
+        onCancel = cancelAction;
         UI.windowCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         UI.window.alpha = 1;
         UI.window.blocksRaycasts = true;
@@ -136,8 +180,6 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         UI.window.alpha = 0;
         UI.window.blocksRaycasts = false;
         onConfirm?.Invoke();
-        onConfirm.RemoveAllListeners();
-        onCancel.RemoveAllListeners();
     }
 
     public void Cancel()
@@ -145,8 +187,6 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         UI.window.alpha = 0;
         UI.window.blocksRaycasts = false;
         onCancel?.Invoke();
-        onConfirm.RemoveAllListeners();
-        onCancel.RemoveAllListeners();
     }
 
     public void SetPosition(Vector2 targetPos, Vector2 offset)

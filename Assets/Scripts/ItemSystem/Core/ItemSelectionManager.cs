@@ -1,8 +1,6 @@
-﻿using System.Linq;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 [DisallowMultipleComponent]
 public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionManager>
@@ -15,12 +13,24 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
 
     public ItemSelectionType SelectionType { get; private set; }
 
-    private UnityAction<List<ItemInfo>> onConfirm;
-    private UnityAction onCancel;
+    private Action<List<ItemInfo>> onConfirm;
+    private Action onCancel;
 
     private string dialog;
 
-    public void StartSelection(ItemSelectionType selectionType, string title, UnityAction<List<ItemInfo>> confirmCallback, UnityAction cancelCallback = null)
+    public void StartSelection(ItemSelectionType selectionType, string title, string confirmDialog, Action<List<ItemInfo>> confirmCallback, Action cancelCallback = null)
+    {
+        if (selectionType == ItemSelectionType.None) return;
+        SelectionType = selectionType;
+        UI.windowTitle.text = title;
+        onConfirm = confirmCallback;
+        onCancel = cancelCallback;
+        dialog = confirmDialog;
+        OpenWindow();
+        BackpackManager.Instance.EnableHandwork(false);
+    }
+    
+    public void StartSelection(ItemSelectionType selectionType, string title, Action<List<ItemInfo>> confirmCallback, Action cancelCallback = null)
     {
         if (selectionType == ItemSelectionType.None) return;
         SelectionType = selectionType;
@@ -32,14 +42,14 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         BackpackManager.Instance.EnableHandwork(false);
     }
 
-    public void StartSelection(ItemSelectionType selectionType, string title, string confirmDialog, UnityAction<List<ItemInfo>> confirmCallback, UnityAction cancelCallback = null)
+    public void StartSelection(ItemSelectionType selectionType, Action<List<ItemInfo>> confirmCallback, Action cancelCallback = null)
     {
         if (selectionType == ItemSelectionType.None) return;
         SelectionType = selectionType;
-        UI.windowTitle.text = title;
+        UI.windowTitle.text = "选择物品";
         onConfirm = confirmCallback;
         onCancel = cancelCallback;
-        dialog = confirmDialog;
+        dialog = string.Empty;
         OpenWindow();
         BackpackManager.Instance.EnableHandwork(false);
     }
@@ -145,6 +155,13 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         itemAgent.Clear(true);
         itemAgents.Remove(itemAgent);
         if (itemAgents.Count < 1) ZetanUtility.SetActive(UI.tips, true);
+    }
+
+    public override void OpenWindow()
+    {
+        base.OpenWindow();
+        if (!IsUIOpen) return;
+        if (ItemWindowManager.Instance.IsUIOpen) ItemWindowManager.Instance.CloseWindow();
     }
 
     public override void CloseWindow()

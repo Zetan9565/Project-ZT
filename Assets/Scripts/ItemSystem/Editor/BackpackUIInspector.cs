@@ -4,8 +4,6 @@ using UnityEngine;
 [CustomEditor(typeof(BackpackUI))]
 public class BackpackUIInspector : Editor
 {
-    BackpackUI UI;
-
     SerializedProperty window;
     SerializedProperty pageSelector;
     SerializedProperty itemCellPrefab;
@@ -18,14 +16,15 @@ public class BackpackUIInspector : Editor
     SerializedProperty sortButton;
     SerializedProperty handworkButton;
 
-    SerializedProperty discardArea;
+    SerializedProperty discardButton;
     SerializedProperty gridScrollRect;
     SerializedProperty gridMask;
 
+    SerializedProperty searchInput;
+    SerializedProperty searchButton;
+
     private void OnEnable()
     {
-        UI = target as BackpackUI;
-
         window = serializedObject.FindProperty("window");
         pageSelector = serializedObject.FindProperty("pageSelector");
         itemCellPrefab = serializedObject.FindProperty("itemCellPrefab");
@@ -36,9 +35,11 @@ public class BackpackUIInspector : Editor
         closeButton = serializedObject.FindProperty("closeButton");
         sortButton = serializedObject.FindProperty("sortButton");
         handworkButton = serializedObject.FindProperty("handworkButton");
-        discardArea = serializedObject.FindProperty("discardArea");
+        discardButton = serializedObject.FindProperty("discardButton");
         gridScrollRect = serializedObject.FindProperty("gridScrollRect");
         gridMask = serializedObject.FindProperty("gridMask");
+        searchInput = serializedObject.FindProperty("searchInput");
+        searchButton = serializedObject.FindProperty("searchButton");
     }
 
     public override void OnInspectorGUI()
@@ -56,11 +57,12 @@ public class BackpackUIInspector : Editor
         EditorGUILayout.PropertyField(closeButton, new GUIContent("关闭按钮"));
         EditorGUILayout.PropertyField(sortButton, new GUIContent("整理按钮"));
         EditorGUILayout.PropertyField(handworkButton, new GUIContent("制作按钮"));
-        EditorGUILayout.PropertyField(discardArea, new GUIContent("丢弃按钮"));
+        EditorGUILayout.PropertyField(discardButton, new GUIContent("丢弃按钮"));
+        EditorGUILayout.PropertyField(searchInput, new GUIContent("查找输入"));
+        EditorGUILayout.PropertyField(searchButton, new GUIContent("查找按钮"));
         EditorGUILayout.PropertyField(gridMask, new GUIContent("滚动视图遮罩"));
         EditorGUILayout.PropertyField(gridScrollRect, new GUIContent("滚动视图"));
         EditorGUILayout.EndVertical();
-        if (EditorGUI.EndChangeCheck())
-            serializedObject.ApplyModifiedProperties();
+        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
     }
 }

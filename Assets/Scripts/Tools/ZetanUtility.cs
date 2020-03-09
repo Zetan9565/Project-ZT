@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Linq;
-using UnityEngine;
+using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 public class ZetanUtility
 {
@@ -117,6 +117,17 @@ public class ZetanUtility
     {
         Vector3 viewportPoint = Camera.main.WorldToViewportPoint(worldPosition);
         return viewportPoint.x > 0 && viewportPoint.x < 1 && viewportPoint.y > 0 && viewportPoint.y < 1;
+    }
+
+    public static void FadeTo<T>(float alpha, float duration, IFadeAble<T> fader) where T : MonoBehaviour
+    {
+        if (fader.FadeCoroutine != null) fader.MonoBehaviour.StopCoroutine(fader.FadeCoroutine);
+        fader.FadeCoroutine = fader.MonoBehaviour.StartCoroutine(fader.Fade(alpha, duration));
+    }
+    public static void ScaleTo<T>(Vector3 scale, float duration, IScaleAble<T> scaler) where T : MonoBehaviour
+    {
+        if (scaler.ScaleCoroutine != null) scaler.MonoBehaviour.StopCoroutine(scaler.ScaleCoroutine);
+        scaler.ScaleCoroutine = scaler.MonoBehaviour.StartCoroutine(scaler.Scale(scale, duration));
     }
 
     #region Vector相关
@@ -372,6 +383,12 @@ public class ZetanUtility
         }
     }
     #endregion
+}
+public enum UpdateMode
+{
+    Update,
+    LateUpdate,
+    FixedUpdate
 }
 
 [Serializable]

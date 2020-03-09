@@ -24,9 +24,17 @@ MonoBehaviour:
   description: "\u53EF\u4EE5\u6269\u5F20\u5C11\u91CF\u80CC\u5305\u5BB9\u91CF\u3002"
   stackAble: 0
   discardAble: 1
-  useable: 1
+  lockAble: 1
+  usable: 1
   inexhaustible: 0
   maxDurability: 100
-  processMethod: 0
-  materials: []
-  expandSize: 5
+  makingMethod: 1
+  minYield: 1
+  maxYield: 1
+  materialType: 0
+  materials:
+  - item: {fileID: 11400000, guid: 6dd284fcfbbd47f45902a74655b20192, type: 2}
+    amount: 5
+    makingType: 0
+    materialType: 0
+  expandSize: 1

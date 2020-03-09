@@ -165,8 +165,8 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
             EditorGUILayout.PropertyField(modeInfo, new GUIContent(mini ? "小地图模式信息" : "大地图模式信息"), false);
             if (modeInfo.isExpanded)
             {
-                EditorGUILayout.PropertyField(defaultSizeOfCam, new GUIContent("地图相机视野大小"));                
-                EditorGUILayout.LabelField("当前相机视野", currentSizeOfCam.floatValue.ToString());
+                EditorGUILayout.PropertyField(defaultSizeOfCam, new GUIContent("默认相机视野大小"));                
+                EditorGUILayout.LabelField("当前相机视野大小", currentSizeOfCam.floatValue.ToString());
                 EditorGUILayout.Slider(minZoomOfCam, mini ? 1 : miniModeInfo.FindPropertyRelative("defaultSizeOfCam").floatValue, defaultSizeOfCam.floatValue, new GUIContent("相机视野大小下限"));
                 EditorGUILayout.Slider(maxZoomOfCam, defaultSizeOfCam.floatValue, mini ? worldModeInfo.FindPropertyRelative("defaultSizeOfCam").floatValue : 255, new GUIContent("相机视野大小上限"));
                 EditorGUILayout.PropertyField(windowAnchoreMin, new GUIContent("窗口锚点最小值"));

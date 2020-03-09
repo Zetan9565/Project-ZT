@@ -29,8 +29,7 @@ public class QuestUIInspector : Editor
     SerializedProperty boardQuestPrefab;
     SerializedProperty questBoardArea;
     SerializedProperty questIcon;
-    SerializedProperty questFlagsPrefab;
-    SerializedProperty questFlagsPanel;
+    SerializedProperty questFlagPrefab;
     private void OnEnable()
     {
         //UI = target as QuestUI;
@@ -58,8 +57,7 @@ public class QuestUIInspector : Editor
         boardQuestPrefab = serializedObject.FindProperty("boardQuestPrefab");
         questBoardArea = serializedObject.FindProperty("questBoardArea");
         questIcon = serializedObject.FindProperty("questIcon");
-        questFlagsPrefab = serializedObject.FindProperty("questFlagsPrefab");
-        questFlagsPanel = serializedObject.FindProperty("questFlagsPanel");
+        questFlagPrefab = serializedObject.FindProperty("questFlagPrefab");
     }
 
     public override void OnInspectorGUI()
@@ -100,8 +98,7 @@ public class QuestUIInspector : Editor
         EditorGUILayout.PropertyField(questBoardArea, new GUIContent("任务栏放置根"), true);
         EditorGUILayout.EndVertical();
         EditorGUILayout.PropertyField(questIcon, new GUIContent("任务目标图标"));
-        EditorGUILayout.PropertyField(questFlagsPrefab, new GUIContent("状态器预制件"));
-        EditorGUILayout.PropertyField(questFlagsPanel, new GUIContent("状态器显示面板"));
+        EditorGUILayout.PropertyField(questFlagPrefab, new GUIContent("状态器预制件"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
     }

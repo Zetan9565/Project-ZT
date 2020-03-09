@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public interface IWindowHandler
 {
@@ -34,6 +35,26 @@ public interface IWindowHandler
 public interface IOpenCloseAbleWindow
 {
     void OpenCloseWindow();
+}
+
+public interface IFadeAble<T> where T : MonoBehaviour
+{
+    T MonoBehaviour { get; }
+
+    Coroutine FadeCoroutine { get; set; }
+
+    IEnumerator Fade(float alpha, float duration);
+}
+
+public interface IScaleAble<T> where T : MonoBehaviour
+{
+    T MonoBehaviour { get; }
+
+    Vector3 OriginalScale { get; }
+
+    Coroutine ScaleCoroutine { get; set; }
+
+    IEnumerator Scale(Vector3 scale, float duration);
 }
 
 public interface IDragAble

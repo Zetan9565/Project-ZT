@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Field : Building
@@ -39,13 +38,6 @@ public class Field : Building
     public override void AskDestroy()
     {
         ConfirmManager.Instance.New("耕地内的作物不会保留，确定退耕吗？",
-            BuildingManager.Instance.ConfirmDestroy,
-            delegate
-            {
-                if (IsBuilt && BuildingManager.Instance.ToDestroy == this)
-                {
-                    BuildingManager.Instance.CannotDestroy();
-                }
-            });
+            delegate { BuildingManager.Instance.DestroyBuilding(this); });
     }
 }

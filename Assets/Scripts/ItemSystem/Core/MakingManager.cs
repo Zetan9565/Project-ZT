@@ -369,9 +369,10 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         Init();
         UI.pageSelector.SetValueWithoutNotify(0);
         SetPage(0);
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
         backpackOpenBef = BackpackManager.Instance.IsUIOpen;
         if (!BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.OpenWindow();
+        if (ItemWindowManager.Instance.IsUIOpen) ItemWindowManager.Instance.CloseWindow();
         BackpackManager.Instance.EnableHandwork(false);
     }
 
@@ -441,7 +442,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         if (IsMaking || IsUIOpen) return;
         CurrentTool = tool;
         MakeAble = true;
-        UIManager.Instance.EnableInteractive(true, MakingTool.ToolTypeToString(tool.ToolType));
+        UIManager.Instance.EnableInteract(true, MakingTool.ToolTypeToString(tool.ToolType));
     }
 
     public void CannotMake()
@@ -449,7 +450,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         CurrentTool = null;
         if (IsMaking) ProgressBar.Instance.Cancel();
         CloseWindow();
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
     }
 
     #region 道具页相关

@@ -8,6 +8,9 @@ public class GatherAgent : MonoBehaviour
     protected GatheringInformation gatheringInfo;
     public GatheringInformation GatheringInfo => gatheringInfo;
 
+    [SerializeField]
+    private new Collider2D collider;
+
     private bool gatherAble = true;
     public bool GatherAble
     {
@@ -19,6 +22,7 @@ public class GatherAgent : MonoBehaviour
         protected set
         {
             gatherAble = value;
+            collider.enabled = gatherAble;
         }
     }
 
@@ -96,7 +100,7 @@ public class GatherAgent : MonoBehaviour
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!GatherAble || !GatheringInfo) return;
+        if (!GatherAble) return;
         if (collision.CompareTag("Player") && !GatherManager.Instance.IsGathering)
         {
             GatherManager.Instance.CanGather(this);
@@ -104,7 +108,7 @@ public class GatherAgent : MonoBehaviour
     }
     protected virtual void OnTriggerStay2D(Collider2D collision)
     {
-        if (!GatherAble || !GatheringInfo) return;
+        if (!GatherAble) return;
         if (collision.CompareTag("Player") && !GatherManager.Instance.IsGathering)
         {
             GatherManager.Instance.CanGather(this);

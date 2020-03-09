@@ -3,22 +3,14 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
+public delegate void DialogueListner();
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/对话管理器")]
 public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 {
-    [HideInInspector]
-    public UnityEvent OnBeginDialogueEvent = new UnityEvent();
-    [HideInInspector]
-    public UnityEvent OnFinishDialogueEvent = new UnityEvent();
-
-    public DialogueType CurrentType { get; private set; } = DialogueType.Normal;
-
-    private readonly Queue<DialogueWords> WordsToSay = new Queue<DialogueWords>();
-
-    private readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
+    public event DialogueListner OnBeginDialogueEvent;
+    public event DialogueListner OnFinishDialogueEvent;
 
     private int page = 1;
     public int Page
@@ -36,9 +28,8 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     private int MaxPage = 1;
 
-    private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
+    #region 选项相关
     private readonly List<OptionAgent> optionAgents = new List<OptionAgent>();
-
     public int OptionsCount => optionAgents.Count;
     public OptionAgent FirstOption
     {
@@ -48,16 +39,28 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             return optionAgents[0];
         }
     }
+    #endregion
 
     public Talker CurrentTalker { get; private set; }
+
+    #region 任务相关
     private TalkObjective currentTalkObj;
     private SubmitObjective currentSubmitObj;
     public Quest CurrentQuest { get; private set; }
+    private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
+    #endregion
 
     private Dialogue currentDialog;
     private DialogueWords currentWords;
     private WordsOption currentOption;
     private readonly Stack<WordsOption> wordsOptionInstances = new Stack<WordsOption>();
+
+    public DialogueType CurrentType { get; private set; } = DialogueType.Normal;
+
+    private readonly Queue<DialogueWords> wordsToSay = new Queue<DialogueWords>();
+
+    private readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
+
     public bool NPCHasNotAcptQuests
     {
         get
@@ -70,7 +73,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     public bool IsTalking { get; private set; }
     public bool TalkAble { get; private set; }
 
-    public int IndexToGoBack { get; private set; } = -1;
+    private int indexToGoBack = -1;
 
     #region 开始新对话
     public void BeginNewDialogue()
@@ -88,11 +91,11 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         currentDialog = dialogue;
         if (!dialogueDatas.ContainsKey(dialogue.ID)) dialogueDatas.Add(dialogue.ID, new DialogueData(dialogue));
         IsTalking = true;
-        WordsToSay.Clear();
+        wordsToSay.Clear();
         if (startIndex < 0) startIndex = 0;
         else if (startIndex > dialogue.Words.Count - 1) startIndex = dialogue.Words.Count - 1;
         for (int i = startIndex; i < dialogue.Words.Count; i++)
-            WordsToSay.Enqueue(dialogue.Words[i]);
+            wordsToSay.Enqueue(dialogue.Words[i]);
         if (sayImmediately) SayNextWords();
         else MakeContinueOption(true);
         ZetanUtility.SetActive(UI.wordsText.gameObject, true);
@@ -259,8 +262,8 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             return;
         }
         IsTalking = true;
-        WordsToSay.Clear();
-        WordsToSay.Enqueue(words);
+        wordsToSay.Clear();
+        wordsToSay.Enqueue(words);
         MakeContinueOption(true);
         ZetanUtility.SetActive(UI.wordsText.gameObject, true);
         SetPageArea(false, false, false);
@@ -268,7 +271,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             if (waitToGoBackRoutine != null) StopCoroutine(waitToGoBackRoutine);
             currentDialog = dialogToGoBack;
-            IndexToGoBack = indexToGoBack;
+            this.indexToGoBack = indexToGoBack;
             waitToGoBackRoutine = StartCoroutine(WaitToGoBack());
         }
     }
@@ -282,7 +285,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         ClearOptions(OptionType.Continue);
         OptionAgent oa = optionAgents.Find(x => x.OptionType == OptionType.Continue);
-        if (WordsToSay.Count > 1 || force)
+        if (wordsToSay.Count > 1 || force)
         {
             //如果还有话没说完，弹出一个“继续”按钮
             if (!oa)
@@ -420,12 +423,12 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     /// </summary>
     private void MakeWordsOptionOption()
     {
-        if (WordsToSay.Count < 1 || WordsToSay.Peek().Options.Count < 1) return;
-        DialogueWords currentWords = WordsToSay.Peek();
+        if (wordsToSay.Count < 1 || wordsToSay.Peek().Options.Count < 1) return;
+        DialogueWords currentWords = wordsToSay.Peek();
         dialogueDatas.TryGetValue(currentDialog.ID, out DialogueData dialogDataFound);
         if (CurrentType == DialogueType.Normal) ClearOptions(OptionType.Quest, OptionType.Objective);
         else ClearOptions();
-        bool isLastWords = currentDialog.IndexOfWords(WordsToSay.Peek()) == currentDialog.Words.Count - 1;
+        bool isLastWords = currentDialog.IndexOfWords(wordsToSay.Peek()) == currentDialog.Words.Count - 1;
         foreach (WordsOption option in currentWords.Options)
         {
             if (option.OptionType == WordsOptionType.Choice && dialogDataFound != null)
@@ -545,24 +548,24 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     /// </summary>
     public void SayNextWords()
     {
-        if (WordsToSay.Count < 1) return;
+        if (wordsToSay.Count < 1) return;
         MakeContinueOption();
-        if (WordsToSay.Count > 0 && WordsToSay.Peek().Options.Count > 0)
+        if (wordsToSay.Count > 0 && wordsToSay.Peek().Options.Count > 0)
         {
             MakeTalkerCmpltQuestOption();
             if (AllOptionComplete()) MakeTalkerObjectiveOption();
         }
         MakeWordsOptionOption();
-        if (WordsToSay.Count >= 1) currentWords = WordsToSay.Peek();
-        if (WordsToSay.Count == 1) HandlingLastWords();//因为Dequeue之后，话就没了，Words.Count就不是1了，而是0，所以要在Dequeue之前做这一步，意思是倒数第二句做这一步
-        if (WordsToSay.Count >= 1)
+        if (wordsToSay.Count >= 1) currentWords = wordsToSay.Peek();
+        if (wordsToSay.Count == 1) HandlingLastWords();//因为Dequeue之后，话就没了，Words.Count就不是1了，而是0，所以要在Dequeue之前做这一步，意思是倒数第二句做这一步
+        if (wordsToSay.Count >= 1)
         {
-            string talkerName = currentDialog.UseUnifiedNPC ? (currentDialog.UseCurrentTalkerInfo ? CurrentTalker.Info.name : currentDialog.UnifiedNPC.name) : WordsToSay.Peek().TalkerName;
-            if (WordsToSay.Peek().TalkerType == TalkerType.Player && PlayerManager.Instance.PlayerInfo)
+            string talkerName = currentDialog.UseUnifiedNPC ? (currentDialog.UseCurrentTalkerInfo ? CurrentTalker.Info.name : currentDialog.UnifiedNPC.name) : wordsToSay.Peek().TalkerName;
+            if (wordsToSay.Peek().TalkerType == TalkerType.Player && PlayerManager.Instance.PlayerInfo)
                 talkerName = PlayerManager.Instance.PlayerInfo.name;
             UI.nameText.text = talkerName;
-            UI.wordsText.text = WordsToSay.Peek().Words;
-            var words = WordsToSay.Dequeue();
+            UI.wordsText.text = wordsToSay.Peek().Words;
+            var words = wordsToSay.Dequeue();
             if (TriggerManager.Instance)
             {
                 foreach (var trigger in words.Events.FindAll(x => x.EventType == WordsEventType.Trigger))
@@ -582,7 +585,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 }
             }
         }
-        if (WordsToSay.Count == 0)
+        if (wordsToSay.Count == 0)
         {
             if (wordsOptionInstances.Count > 0)
                 HandlingLastOptionWords();//分支处理比较特殊，放到Dequque之后，否则分支最后一句不会讲
@@ -605,7 +608,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             else
             {
                 ClearOptions(OptionType.Quest);
-                if (WordsToSay.Peek().Options.Count > 0)
+                if (wordsToSay.Peek().Options.Count > 0)
                     MakeWordsOptionOption();
             }
             QuestManager.Instance.UpdateUI();
@@ -771,12 +774,12 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     private Coroutine waitToGoBackRoutine;
     private IEnumerator WaitToGoBack()
     {
-        yield return new WaitUntil(() => WordsToSay.Count <= 0);
-        if (IndexToGoBack < 0) yield break;
+        yield return new WaitUntil(() => wordsToSay.Count <= 0);
+        if (indexToGoBack < 0) yield break;
         try
         {
-            StartDialogue(currentDialog, IndexToGoBack, false);
-            IndexToGoBack = -1;
+            StartDialogue(currentDialog, indexToGoBack, false);
+            indexToGoBack = -1;
             StopCoroutine(WaitToGoBack());
         }
         catch
@@ -791,16 +794,16 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         if (!TalkAble) return;
         base.OpenWindow();
-        if(!IsUIOpen)return;
+        if (!IsUIOpen) return;
         if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
         WindowsManager.Instance.PauseAll(true, this);
         UIManager.Instance.EnableJoyStick(false);
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
     }
     public override void CloseWindow()
     {
         base.CloseWindow();
-        if (IsUIOpen)return;
+        if (IsUIOpen) return;
         CurrentType = DialogueType.Normal;
         CurrentTalker = null;
         CurrentQuest = null;
@@ -886,13 +889,13 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (IsTalking || !talker) return;
         CurrentTalker = talker;
         TalkAble = true;
-        UIManager.Instance.EnableInteractive(true, talker.TalkerName);
+        UIManager.Instance.EnableInteract(true, talker.TalkerName);
     }
     public void CannotTalk()
     {
         TalkAble = false;
         CloseWindow();
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
     }
 
     private void ShowButtons(bool shop, bool warehouse, bool quest)
@@ -902,7 +905,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         ZetanUtility.SetActive(UI.questButton.gameObject, quest);
     }
 
-    public void SetUI(DialogueUI UI)
+    public override void SetUI(DialogueUI UI)
     {
         if (waitToGoBackRoutine != null) StopCoroutine(waitToGoBackRoutine);
         foreach (var oa in optionAgents)
@@ -943,7 +946,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 for (int j = 0; j < currentDialog.Words[i].Options.Count; j++)
                     if (!find.wordsDatas[i].IsCmpltOptionWithIndex(j))
                         return;
-        while (WordsToSay.Count > 0)
+        while (wordsToSay.Count > 0)
             SayNextWords();
     }
 

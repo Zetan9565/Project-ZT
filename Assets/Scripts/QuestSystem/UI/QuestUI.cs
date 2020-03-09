@@ -40,7 +40,7 @@ public class QuestUI : WindowUI
 
     public Sprite questIcon;
 
-    public QuestFlag questFlagsPrefab;
+    public QuestFlag questFlagPrefab;
 
     protected override void Awake()
     {

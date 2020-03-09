@@ -77,6 +77,7 @@ public class TimeManagerInspector : SingletonMonoBehaviourInspector
         EditorGUILayout.LabelField("总月数", "第 " + months.intValue + " 月");
         EditorGUILayout.LabelField("总年数", "第 " + years.intValue + " 年");
         EditorGUILayout.LabelField("当月第一天", TimeManager.WeekDayToString(TimeManager.Instance.WeekDayOfTheFirstDayOfCurrentMonth, TimeManager.Instance.TimeSystem));
+        EditorGUILayout.LabelField("折合现实总时间(秒)", TimeManager.Instance.TotalTime.ToString());
         EditorGUILayout.EndVertical();
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         if (Application.isPlaying)

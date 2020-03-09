@@ -37,8 +37,11 @@ public class BuildingInfoAgent : MonoBehaviour,
         else if(eventData.button == PointerEventData.InputButton.Left)
             BuildingManager.Instance.ShowBuiltList(MBuildingInfo);
 #elif UNITY_ANDROID
-        BuildingManager.Instance.ShowDescription(MBuildingInfo);
-        BuildingManager.Instance.ShowBuiltList(MBuildingInfo);
+        if (touchTime < 0.5f)
+        {
+            BuildingManager.Instance.ShowDescription(MBuildingInfo);
+            BuildingManager.Instance.ShowBuiltList(MBuildingInfo);
+        }
 #endif
     }
 
@@ -132,7 +135,6 @@ public class BuildingInfoAgent : MonoBehaviour,
     {
 #if UNITY_ANDROID
         if (parentRect) parentRect.OnEndDrag(eventData);
-        //if(eventData.pointerCurrentRaycast.gameObject.layer == LayerMask.NameToLayer("BuildAble"))
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             if (eventData.pointerCurrentRaycast.gameObject == BuildingManager.Instance.CancelArea && BuildingManager.Instance.IsPreviewing)

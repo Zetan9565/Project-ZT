@@ -38,6 +38,8 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         }
     }
 
+    public bool ManageAble { get; private set; }
+
     public void Init()
     {
         foreach (BuildingInfoAgent ba in buildingInfoAgents)
@@ -51,6 +53,23 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
             ba.Init(bi, UI.cellsRect);
             buildingInfoAgents.Add(ba);
         }
+        ZetanUtility.SetActive(UI.locationGoBackBtn, false);
+    }
+
+    public bool IsLocating { get; private set; }
+    public void LocateBuilding(Building building)
+    {
+        ZetanUtility.SetActive(UI.locationGoBackBtn, true);
+        CameraMovement2D.Instance.MoveTo(building.transform.position);
+        WindowsManager.Instance.PauseAll(true);
+        IsLocating = true;
+    }
+    public void LocationGoBack()
+    {
+        ZetanUtility.SetActive(UI.locationGoBackBtn, false);
+        CameraMovement2D.Instance.Stop();
+        WindowsManager.Instance.PauseAll(false);
+        IsLocating = false;
     }
 
     public void SaveData(SaveData data)
@@ -239,40 +258,16 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         AStarManager.Instance.UpdateGraphs();
     }
 
-    Vector2 GetMovePosition()
+    private Vector2 GetMovePosition()
     {
-        if (ZetanUtility.IsMouseInsideScreen)
-            return Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        if (ZetanUtility.IsMouseInsideScreen) return Camera.main.ScreenToWorldPoint(Input.mousePosition);
         else return preview.transform.position;
     }
 
-    public void DestroyBuildingToDestroy()
-    {
-        if (!ToDestroy) return;
-        if (destroyConroutine != null) StopCoroutine(destroyConroutine);
-        confirmDestroy = false;
-        destroyConroutine = StartCoroutine(WaitToDestroy(ToDestroy));
-        ToDestroy.AskDestroy();
-    }
+    public Building CurrentBuilding { get; private set; }
 
-    public Building ToDestroy { get; private set; }
-    bool confirmDestroy;
-
-    public void RequestAndDestroy(Building building)
+    public void DestroyBuilding(Building building)
     {
-        ToDestroy = building;
-        DestroyBuildingToDestroy();
-    }
-
-    public void ConfirmDestroy()
-    {
-        confirmDestroy = true;
-    }
-
-    Coroutine destroyConroutine;
-    IEnumerator WaitToDestroy(Building building)
-    {
-        yield return new WaitUntil(() => { return confirmDestroy; });
         if (building && building.gameObject)
         {
             BuildingAgent ba = buildingAgents.Find(x => x.MBuilding == building);
@@ -287,7 +282,6 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
                     buildings.Remove(building);
                     if (buildings.Count < 1) this.buildings.Remove(building.MBuildingInfo);
                 }
-
             }
             if (buildingAgents.Count < 1 && currentInfo == building.MBuildingInfo && UI.listWindow.alpha > 0) HideBuiltList();
             if (AStarManager.Instance)
@@ -326,8 +320,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
             }
             building.Destroy();
         }
-        confirmDestroy = false;
-        CannotDestroy();
+        CannotManage();
     }
 
     #region UI相关
@@ -345,32 +338,14 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         FinishPreview();
         HideDescription();
         HideBuiltList();
-        ZetanUtility.SetActive(UI.destroyButton.gameObject, false);
+        ZetanUtility.SetActive(UI.locationGoBackBtn, false);
     }
-
     public void OpenCloseWindow()
     {
         if (!UI || !UI.gameObject) return;
         if (IsUIOpen) CloseWindow();
         else OpenWindow();
     }
-    /*public void PauseDisplay(bool pause)
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing && !pause)
-        {
-            UI.window.alpha = 1;
-            UI.window.blocksRaycasts = true;
-        }
-        else if (!IsPausing && pause)
-        {
-            UI.window.alpha = 0;
-            UI.window.blocksRaycasts = false;
-            ZetanUtility.SetActive(UI.destroyButton.gameObject, false);
-        }
-        IsPausing = pause;
-    }*/
 
     public void ShowDescription(BuildingInformation buildingInfo)
     {
@@ -428,7 +403,6 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         UI.listWindow.alpha = 1;
         UI.listWindow.blocksRaycasts = true;
     }
-
     public void HideBuiltList()
     {
         foreach (BuildingAgent ba in buildingAgents)
@@ -440,6 +414,30 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         UI.listWindow.blocksRaycasts = false;
     }
 
+    public void ShowInfo()
+    {
+        if (!CurrentBuilding || !CurrentBuilding.MBuildingInfo) return;
+        UI.infoWindow.alpha = 1;
+        UI.infoWindow.blocksRaycasts = true;
+        UI.infoNameText.text = CurrentBuilding.name;
+        UI.infoDesText.text = CurrentBuilding.MBuildingInfo.Description;
+        UI.mulFuncButton.onClick = CurrentBuilding.onButtonClick;
+        UI.destroyButton.onClick.AddListener(CurrentBuilding.AskDestroy);
+        UIManager.Instance.EnableInteract(false);
+    }
+    public void HideInfo()
+    {
+        UI.infoWindow.alpha = 0;
+        UI.infoWindow.blocksRaycasts = false;
+        UI.infoNameText.text = string.Empty;
+        UI.infoDesText.text = string.Empty;
+        UI.mulFuncButton.onClick = new UnityEngine.UI.Button.ButtonClickedEvent();
+        UI.destroyButton.onClick.RemoveAllListeners();
+        CurrentBuilding = null;
+        ManageAble = false;
+        if (ConfirmManager.Instance.IsUIOpen) ConfirmManager.Instance.CloseWindow();
+    }
+
     public void UpdateUI()
     {
         if (!IsUIOpen) return;
@@ -447,18 +445,21 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         if (UI.descriptionWindow.alpha > 0) ShowDescription(currentInfo);
     }
 
-    public void CanDestroy(Building building)
+    public void CanManage(Building building)
     {
-        if (!IsUIOpen || ToDestroy) return;
-        ToDestroy = building;
-        if (!IsPausing) ZetanUtility.SetActive(UI.destroyButton.gameObject, true);
+        if (CurrentBuilding == building || !building) return;
+        CurrentBuilding = building;
+        ManageAble = true;
+        UIManager.Instance.EnableInteract(true, CurrentBuilding.name);
+        //ShowInfo();
     }
-    public void CannotDestroy()
+    public void CannotManage()
     {
-        ToDestroy = null;
-        ZetanUtility.SetActive(UI.destroyButton.gameObject, false);
+        CurrentBuilding = null;
+        ManageAble = false;
         if (ConfirmManager.Instance.IsUIOpen) ConfirmManager.Instance.CloseWindow();
-        if (destroyConroutine != null) StopCoroutine(destroyConroutine);
+        HideInfo();
+        UIManager.Instance.EnableInteract(false);
     }
 
     public override void SetUI(BuildingUI UI)

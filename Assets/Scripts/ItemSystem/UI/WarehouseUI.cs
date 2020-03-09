@@ -13,6 +13,8 @@ public class WarehouseUI : WindowUI
     public Text size;
 
     public Button sortButton;
+    public InputField searchInput;
+    public Button searchButton;
 
     public ScrollRect gridRect;
 
@@ -22,5 +24,6 @@ public class WarehouseUI : WindowUI
         closeButton.onClick.AddListener(WarehouseManager.Instance.CloseWindow);
         sortButton.onClick.AddListener(WarehouseManager.Instance.Sort);
         pageSelector.onValueChanged.AddListener(WarehouseManager.Instance.SetPage);
+        searchButton.onClick.AddListener(WarehouseManager.Instance.Search);
     }
 }

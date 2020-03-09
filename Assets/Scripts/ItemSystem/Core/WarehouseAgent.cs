@@ -7,20 +7,22 @@ public class WarehouseAgent : Building
     private Warehouse warehouse = new Warehouse(50);
     public Warehouse MWarehouse => warehouse;
 
+    private void Awake()
+    {
+        onButtonClick.AddListener(delegate
+        {
+            WarehouseManager.Instance.Init(MWarehouse);
+            WarehouseManager.Instance.OpenWindow();
+        });
+    }
+
     public override void AskDestroy()
     {
         ConfirmManager.Instance.New(string.Format("{0}{1}\n内的东西不会保留，确定拆除吗？", name, ((Vector2)transform.position).ToString()),
-            BuildingManager.Instance.ConfirmDestroy,
-            delegate
-            {
-                if (IsBuilt && BuildingManager.Instance.ToDestroy == this)
-                {
-                    BuildingManager.Instance.CannotDestroy();
-                }
-            });
+            delegate { BuildingManager.Instance.DestroyBuilding(this); });
     }
 
-    protected override void OnTriggerEnter2D(Collider2D collision)
+    /*protected override void OnTriggerEnter2D(Collider2D collision)
     {
         base.OnTriggerEnter2D(collision);
         if (collision.CompareTag("Player") && IsBuilt)
@@ -45,14 +47,15 @@ public class WarehouseAgent : Building
         {
             WarehouseManager.Instance.CannotStore();
         }
-    }
+    }*/
 
     private void OnDestroy()
     {
-        if(WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled && IsBuilt)
-        {
-            WarehouseManager.Instance.CannotStore();
-        }
+        if (WarehouseManager.Instance)
+            if (WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled && IsBuilt)
+            {
+                WarehouseManager.Instance.CannotStore();
+            }
     }
 
     /*protected override void OnTriggerEnter(Collider other)

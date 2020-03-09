@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class BuildingFlag : MonoBehaviour
@@ -13,6 +14,7 @@ public class BuildingFlag : MonoBehaviour
     public void Init(Building building)
     {
         this.building = building;
+        StartCoroutine(WaitToHide());
         Update();
     }
 
@@ -25,10 +27,9 @@ public class BuildingFlag : MonoBehaviour
 
     void Update()
     {
-        if (!building || !building.gameObject) ObjectPool.Put(gameObject);
-        else
+        if (building)
         {
-            timeText.text = "建造中[" + building.leftBuildTime.ToString("F2") + "s]";
+            timeText.text = building.IsBuilt ? "已建成" : "建造中[" + building.leftBuildTime.ToString("F2") + "s]";
             Vector3 viewportPoint = Camera.main.WorldToViewportPoint(building.transform.position + building.BuildingFlagOffset);
             float sqrDistance = Vector3.SqrMagnitude(Camera.main.transform.position - building.transform.position);
             if (viewportPoint.z <= 0 || viewportPoint.x > 1 || viewportPoint.x < 0 || viewportPoint.y > 1 || viewportPoint.y < 0 || sqrDistance > 900f)
@@ -52,10 +53,19 @@ public class BuildingFlag : MonoBehaviour
                 }
             }
         }
-        if (building.IsBuilt)
+    }
+
+    private IEnumerator WaitToHide()
+    {
+        yield return new WaitUntil(() => !building || !building.gameObject || building.IsBuilt);
+        if (!building || !building.gameObject)
         {
-            timeText.text = "已建成";
-            ObjectPool.Put(gameObject, 2);
+            StopAllCoroutines();
+            ObjectPool.Put(gameObject);
+            yield break;
         }
+        else yield return new WaitForSeconds(2);
+        ObjectPool.Put(gameObject);
+        StopAllCoroutines();
     }
 }

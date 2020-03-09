@@ -14,6 +14,8 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
 
     public bool StoreAble { get; private set; }
 
+    public bool IsInputFocused => UI ? IsUIOpen && UI.searchInput.isFocused : false;
+
     private void Awake()
     {
         if (!UI || !UI.gameObject) return;
@@ -61,6 +63,22 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         }
         UI.pageSelector.SetValueWithoutNotify(0);
         SetPage(0);
+    }
+
+    public void Search()
+    {
+        if (!UI || !UI.gameObject || !UI.searchInput || !UI.searchButton) return;
+        if (string.IsNullOrEmpty(UI.searchInput.text))
+        {
+            SetPage(currentPage);
+            return;
+        }
+        foreach (var ia in itemAgents)
+        {
+            if (!ia.IsEmpty && ia.MItemInfo.ItemName.Contains(UI.searchInput.text)) continue;
+            else ia.Hide();
+        }
+        UI.searchInput.text = string.Empty;
     }
 
     #region 道具处理相关
@@ -214,7 +232,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         Init(MWarehouse);
         BackpackManager.Instance.OpenWindow();
         UIManager.Instance.EnableJoyStick(false);
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
     }
 
     public override void CloseWindow()
@@ -282,7 +300,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         if (DialogueManager.Instance.TalkAble || DialogueManager.Instance.IsUIOpen || IsUIOpen) return;
         MWarehouse = agent.MWarehouse;
         StoreAble = true;
-        UIManager.Instance.EnableInteractive(true, agent.name);
+        UIManager.Instance.EnableInteract(true, agent.name);
     }
 
     public void CannotStore()
@@ -290,7 +308,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         CloseWindow();
         ItemWindowManager.Instance.CloseWindow();
         StoreAble = false;
-        if (!(DialogueManager.Instance.TalkAble || DialogueManager.Instance.IsUIOpen)) UIManager.Instance.EnableInteractive(false);
+        if (!(DialogueManager.Instance.TalkAble || DialogueManager.Instance.IsUIOpen)) UIManager.Instance.EnableInteract(false);
     }
 
     #region 道具页相关

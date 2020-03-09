@@ -18,7 +18,7 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
         UpdateCropsArea();
         UpdateUI();
         UIManager.Instance.EnableJoyStick(false);
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
     }
 
     public override void CloseWindow()
@@ -45,7 +45,7 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
         if (!field) return;
         CurrentField = field;
         ManageAble = true;
-        UIManager.Instance.EnableInteractive(true, field.name);
+        UIManager.Instance.EnableInteract(true, field.name);
     }
 
     public void CannotManage()
@@ -53,7 +53,7 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
         ManageAble = false;
         CurrentField = null;
         CloseWindow();
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
     }
 
     public void UpdateUI()
@@ -84,7 +84,11 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
 
     public void DestroyCurrentField()
     {
-        if (!CurrentField) return;
-        BuildingManager.Instance.RequestAndDestroy(CurrentField);
+        if (CurrentField) CurrentField.AskDestroy();
+    }
+
+    public void DispatchWorker()
+    {
+        MessageManager.Instance.New("敬请期待");
     }
 }

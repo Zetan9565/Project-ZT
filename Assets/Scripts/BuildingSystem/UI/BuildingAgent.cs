@@ -17,7 +17,7 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
 
     private void Awake()
     {
-        destoryButton.onClick.AddListener(Destroy);
+        destoryButton.onClick.AddListener(AskDestroy);
     }
 
     public void Init(Building building)
@@ -40,13 +40,17 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
 
     public void UpdateUI()
     {
-        destoryButton.interactable = MBuilding.IsBuilt;
-        buildingStates.text = MBuilding.IsBuilt ? "已建成" : "建设中[" + MBuilding.leftBuildTime.ToString("F2") + "s]";
+        if (MBuilding)
+        {
+            destoryButton.interactable = MBuilding.IsBuilt;
+            buildingStates.text = MBuilding.IsBuilt ? "已建成" : "建设中[" + MBuilding.leftBuildTime.ToString("F2") + "s]";
+        }
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
         //TODO 移动视野至相应建筑
+        BuildingManager.Instance.LocateBuilding(MBuilding);
     }
 
     public void Show()
@@ -59,8 +63,8 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
         ZetanUtility.SetActive(gameObject, false);
     }
 
-    public void Destroy()
+    public void AskDestroy()
     {
-        BuildingManager.Instance.RequestAndDestroy(MBuilding);
+        if (MBuilding) MBuilding.AskDestroy();
     }
 }

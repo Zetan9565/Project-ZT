@@ -34,6 +34,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
                 SaveData data = new SaveData();
 
+                SaveTime(data);
                 SaveBag(data);
                 SaveBuilding(data);
                 SaveMaking(data);
@@ -61,6 +62,11 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
                 return false;
             }
         }
+    }
+
+    void SaveTime(SaveData data)
+    {
+        TimeManager.Instance.SaveData(data);
     }
 
     void SaveBag(SaveData data)
@@ -162,6 +168,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         LoadMapMark(data);
         LoadActions(data);
         LoadTrigger(data);
+        LoadTime(data);
     }
 
     void LoadPlayer(SaveData data)
@@ -169,6 +176,11 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         //PlayerInfoManager.Instance.SetPlayerInfo(new PlayerInformation());
         //TODO 读取玩家信息
         PlayerManager.Instance.PlayerTransform.position = new Vector3(data.playerPosX, data.playerPosY, data.playerPosZ);
+    }
+
+    void LoadTime(SaveData data)
+    {
+        TimeManager.Instance.LoadData(data);
     }
 
     void LoadBackpack(SaveData data)

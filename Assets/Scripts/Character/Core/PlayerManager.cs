@@ -45,4 +45,9 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         this.playerInfo = playerInfo;
         Init();
     }
+
+    private void Update()
+    {
+        playerController.controlAble = !InputManager.IsTyping;
+    }
 }

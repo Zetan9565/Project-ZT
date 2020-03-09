@@ -13,8 +13,10 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     private Color maxColor = Color.red;
 
 #if UNITY_ANDROID
-    public DiscardButton DiscardArea { get { return UI.discardArea; } }
+    public DiscardButton DiscardButton { get { return UI.discardButton; } }
 #endif
+
+    public bool IsInputFocused => UI ? IsUIOpen && UI.searchInput.isFocused : false;
 
     public Image GridMask { get { return UI.gridMask; } }
 
@@ -402,7 +404,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <returns>是否成功</returns>
     public bool LoseItem(ItemInfo info, params ItemInfo[] simulGetItems)
     {
-        return LoseItem(info, info.Amount, simulGetItems);
+        return LoseItem(info.item, info.Amount, simulGetItems);
     }
 
     /// <summary>
@@ -547,8 +549,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                     return;
                 }
                 break;
-            case ItemType.Armor:
-            default: return;
+            default: MessageManager.Instance.New("敬请期待"); return;
         }
         LoseItem(toEquip, 1);
         Backpack.weight.Current += toEquip.item.Weight;//装备并不是真正没有了，而是装备在身上，所以负重不变，在此处修正。
@@ -1016,6 +1017,22 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         }
         //Debug.Log("NotRequired1");
         return false;
+    }
+
+    public void Search()
+    {
+        if (!UI || !UI.gameObject || !UI.searchInput || !UI.searchButton) return;
+        if (string.IsNullOrEmpty(UI.searchInput.text))
+        {
+            SetPage(currentPage);
+            return;
+        }
+        foreach (var ia in itemAgents)
+        {
+            if (!ia.IsEmpty && ia.MItemInfo.ItemName.Contains(UI.searchInput.text)) continue;
+            else ia.Hide();
+        }
+        UI.searchInput.text = string.Empty;
     }
 
     public void SaveData(SaveData data)

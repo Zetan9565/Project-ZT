@@ -9,6 +9,8 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
 
     public Field CurrentField { get; private set; }
 
+    public bool IsInputFocused => UI ? IsUIOpen && UI.searchInput.isFocused : false;
+
     public bool PlantAble { get; private set; }
 
     public void Init(Field field)
@@ -81,7 +83,7 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
         base.OpenWindow();
         if (!IsUIOpen) return;
         UIManager.Instance.EnableJoyStick(false);
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
         UI.pageSelector.SetValueWithoutNotify(0);
         SetPage(0);
     }

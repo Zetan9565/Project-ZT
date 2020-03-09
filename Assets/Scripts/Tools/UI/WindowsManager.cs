@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/UI窗口管理器")]
@@ -120,10 +121,14 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     }
 }
 
-public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_T>, IWindowHandler where UI_T : WindowUI where Mono_T : SingletonMonoBehaviour<Mono_T>
+public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_T>, IWindowHandler, IFadeAble<WindowHandler<UI_T, Mono_T>>
+    where UI_T : WindowUI where Mono_T : SingletonMonoBehaviour<Mono_T>
 {
     [SerializeField]
     protected UI_T UI;
+
+    [SerializeField]
+    protected bool animated = true;
 
     public virtual bool IsUIOpen { get; protected set; }
 
@@ -131,15 +136,33 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
 
     public virtual Canvas CanvasToSort => UI ? UI.windowCanvas : null;
 
+    public WindowHandler<UI_T, Mono_T> MonoBehaviour => this;
+
+    public Coroutine FadeCoroutine { get; set; }
+
     public virtual void CloseWindow()
     {
         if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return ;
+        if (!IsUIOpen) return;
         if (IsPausing) return;
-        UI.window.alpha = 0;
+        if (!animated) UI.window.alpha = 0;
+        else ZetanUtility.FadeTo(0, 0.05f, this);
         UI.window.blocksRaycasts = false;
         WindowsManager.Instance.Remove(this);
         IsUIOpen = false;
+    }
+
+    public IEnumerator Fade(float alpha, float duration)
+    {
+        float time = 0;
+        float deltaAlpha = (alpha - UI.window.alpha) * Time.deltaTime / duration;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            if (time < duration) UI.window.alpha += deltaAlpha;
+            yield return null;
+        }
+        UI.window.alpha = alpha;
     }
 
     public virtual void OpenWindow()
@@ -147,7 +170,8 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
         if (!UI || !UI.gameObject) return;
         if (IsUIOpen) return;
         if (IsPausing) return;
-        UI.window.alpha = 1;
+        if(!animated) UI.window.alpha = 1;
+        else ZetanUtility.FadeTo(1, 0.05f, this);
         UI.window.blocksRaycasts = true;
         WindowsManager.Instance.Push(this);
         IsUIOpen = true;
@@ -168,6 +192,13 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
             UI.window.blocksRaycasts = false;
         }
         IsPausing = pause;
+    }
+
+    protected void Awake()
+    {
+        if (!UI) return;
+        UI.window.alpha = 0;
+        UI.window.blocksRaycasts = false;
     }
 
     public virtual void SetUI(UI_T UI)

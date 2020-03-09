@@ -34,14 +34,14 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
         if (!gatherAgent || doneAgent) return;
         GatherAgent = gatherAgent;
         GatherAble = true;
-        UIManager.Instance.EnableInteractive(true, gatherAgent.GatheringInfo.name);
+        UIManager.Instance.EnableInteract(true, gatherAgent.GatheringInfo.name);
     }
 
     public void CannotGather()
     {
         GatherAble = false;
         GatherAgent = null;
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
         if (IsGathering) ProgressBar.Instance.Cancel();
     }
 
@@ -55,7 +55,7 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
     {
         ProgressBar.Instance.New(GatherAgent.GatheringInfo.GatherTime, GatherDone, GatherCancel, "采集中");
         IsGathering = true;
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
         doneAgent = null;
     }
 

@@ -4,11 +4,6 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
 {
-    //[SerializeField]
-    //private ItemWindowUI UI;
-
-    //public bool IsPausing { get; private set; }
-
     public bool IsHeld { get; private set; }
 
     private ItemAgent itemAgent;
@@ -26,6 +21,7 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
         if (this.itemAgent) this.itemAgent.DeSelect();
         this.itemAgent = itemAgent;
         LeftOrRight(itemAgent.transform.position);
+        animated = false;
         OpenWindow();
         MItemInfo = itemAgent.MItemInfo;
         itemAgentType = itemAgent.agentType;

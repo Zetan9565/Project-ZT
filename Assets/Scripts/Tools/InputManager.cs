@@ -6,9 +6,14 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
 {
     public InputCustomInfo customInfo;
 
+    public static bool IsTyping => BackpackManager.Instance && BackpackManager.Instance.IsInputFocused ||
+        PlantManager.Instance && PlantManager.Instance.IsInputFocused ||
+        WarehouseManager.Instance && WarehouseManager.Instance.IsInputFocused;
+
     void Update()
     {
-//#if UNITY_STANDALONE
+        if (IsTyping) return;
+        //#if UNITY_STANDALONE
         if (Input.GetKeyDown(customInfo.QuestWindowButton))
             QuestManager.Instance.OpenCloseWindow();
         if (Input.GetKeyDown(customInfo.BuildingButton))
@@ -32,7 +37,7 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
         {
             PlayerManager.Instance.PlayerController.Trace();
         }
-//#endif
+        //#endif
         if (Input.GetKeyDown(customInfo.InteractiveButton) || Input.GetButtonDownMobile("Interactive"))
         {
             if (LootManager.Instance.PickAble)//优先拾取
@@ -61,11 +66,14 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
                 FieldManager.Instance.OpenWindow();
             else if (MakingManager.Instance.MakeAble)
                 MakingManager.Instance.OpenWindow();
+            else if (BuildingManager.Instance.ManageAble)
+                BuildingManager.Instance.ShowInfo();
         }
         if (Input.GetButtonDown("Cancel") || Input.GetButtonDownMobile("Cancel"))
         {
             if (ConfirmManager.Instance.IsUIOpen) ConfirmManager.Instance.Cancel();
             else if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();
+            else if (BuildingManager.Instance.IsLocating) BuildingManager.Instance.LocationGoBack();
             else if (BuildingManager.Instance.IsPreviewing) BuildingManager.Instance.FinishPreview();
             else if (WindowsManager.Instance.WindowsCount > 0) WindowsManager.Instance.CloseTop();
             else EscapeMenuManager.Instance.OpenWindow();

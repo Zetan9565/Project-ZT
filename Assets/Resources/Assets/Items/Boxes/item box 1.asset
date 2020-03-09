@@ -43,8 +43,8 @@ MonoBehaviour:
     gemSlotAmount: 0
     gemstone1: {fileID: 0}
     gemstone2: {fileID: 0}
-  - item: {fileID: 11400000, guid: 51aadb36e347b054d83df1f9f38e705e, type: 2}
-    amount: 3
+  - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
+    amount: 5
     indexInGrid: 0
     durability:
       min: 0
@@ -61,8 +61,8 @@ MonoBehaviour:
     gemSlotAmount: 0
     gemstone1: {fileID: 0}
     gemstone2: {fileID: 0}
-  - item: {fileID: 11400000, guid: 86c44e849927e8c41a0769cd6a0d9376, type: 2}
-    amount: 1
+  - item: {fileID: 11400000, guid: 6dd284fcfbbd47f45902a74655b20192, type: 2}
+    amount: 5
     indexInGrid: 0
     durability:
       min: 0

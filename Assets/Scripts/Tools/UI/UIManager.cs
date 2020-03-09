@@ -32,8 +32,8 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     public Joystick JoyStick => joyStick;
 
     [SerializeField]
-    private UIButtonToButton interactiveButton;
-    public UIButtonToButton InteractiveButton => interactiveButton;
+    private UIButtonToButton interactionButton;
+    public UIButtonToButton InteractionButton => interactionButton;
 
     public Transform QuestFlagParent
     {
@@ -51,8 +51,9 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         }
     }
 
+
     [SerializeField]
-    private Text interactiveName;
+    private Text interactionName;
 
     private static bool dontDestroyOnLoadOnce;
     private void Awake()
@@ -64,7 +65,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 #elif UNITY_ANDROID
         ZetanUtility.SetActive(JoyStick.gameObject, true);
 #endif
-        ZetanUtility.SetActive(InteractiveButton.gameObject, false);
+        ZetanUtility.SetActive(InteractionButton.gameObject, false);
         questButton.onClick.AddListener(QuestManager.Instance.OpenCloseWindow);
         backpackButton.onClick.AddListener(BackpackManager.Instance.OpenCloseWindow);
         calendarButton.onClick.AddListener(CalendarManager.Instance.OpenCloseWindow);
@@ -88,14 +89,15 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         if (!JoyStick.enabled) JoyStick.Stop();
     }
 
-    public void EnableInteractive(bool value, string name = null)
+    public void EnableInteract(bool value, string name = null)
     {
 #if UNITY_ANDROID
-        if (!value) ZetanUtility.SetActive(InteractiveButton.gameObject, false);
+        if (!value) ZetanUtility.SetActive(InteractionButton.gameObject, false);
         else
         {
-            ZetanUtility.SetActive(InteractiveButton.gameObject, true &&
+            ZetanUtility.SetActive(InteractionButton.gameObject, true &&
                 ((DialogueManager.Instance.TalkAble &&
+                !BuildingManager.Instance.ManageAble &&
                 !WarehouseManager.Instance.IsUIOpen &&
                 !LootManager.Instance.IsUIOpen &&
                 !GatherManager.Instance.IsGathering &&
@@ -103,24 +105,28 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
                 !MakingManager.Instance.IsUIOpen) ||//对话时无法激活
                 (WarehouseManager.Instance.StoreAble &&
                 !DialogueManager.Instance.IsUIOpen &&
+                !BuildingManager.Instance.ManageAble && 
                 !LootManager.Instance.IsUIOpen &&
                 !GatherManager.Instance.IsGathering &&
                 !PlantManager.Instance.IsUIOpen &&
                 !MakingManager.Instance.IsUIOpen) ||//使用仓库时无法激活
                 (LootManager.Instance.PickAble &&
                 !DialogueManager.Instance.IsUIOpen &&
+                !BuildingManager.Instance.ManageAble &&
                 !WarehouseManager.Instance.IsUIOpen &&
                 !GatherManager.Instance.IsGathering &&
                 !PlantManager.Instance.IsUIOpen &&
                 !MakingManager.Instance.IsUIOpen) ||//拾取时无法激活
                 (GatherManager.Instance.GatherAble &&
                 !DialogueManager.Instance.TalkAble &&
+                !BuildingManager.Instance.ManageAble &&
                 !WarehouseManager.Instance.IsUIOpen &&
                 !LootManager.Instance.IsUIOpen &&
                 !PlantManager.Instance.IsUIOpen &&
                 !MakingManager.Instance.IsUIOpen) ||//采集时无法激活
                 ((FieldManager.Instance.ManageAble || PlantManager.Instance.PlantAble) &&
                 !DialogueManager.Instance.TalkAble &&
+                !BuildingManager.Instance.ManageAble &&
                 !WarehouseManager.Instance.IsUIOpen &&
                 !LootManager.Instance.IsUIOpen &&
                 !GatherManager.Instance.IsGathering &&
@@ -128,21 +134,29 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
                 (MakingManager.Instance.MakeAble &&
                 !GatherManager.Instance.GatherAble &&
                 !DialogueManager.Instance.TalkAble &&
+                !BuildingManager.Instance.ManageAble &&
                 !WarehouseManager.Instance.IsUIOpen &&
                 !LootManager.Instance.IsUIOpen &&
-                !PlantManager.Instance.IsUIOpen)//制作时无法激活
+                !PlantManager.Instance.IsUIOpen) ||//制作时无法激活
+                (BuildingManager.Instance.ManageAble &&
+                !DialogueManager.Instance.TalkAble &&
+                !WarehouseManager.Instance.IsUIOpen &&
+                !LootManager.Instance.IsUIOpen &&
+                !GatherManager.Instance.IsGathering &&
+                !PlantManager.Instance.IsUIOpen &&
+                !MakingManager.Instance.IsUIOpen)
                 ));
         }
 #endif
         if (!string.IsNullOrEmpty(name) && value)
         {
-            ZetanUtility.SetActive(interactiveName.transform.parent.gameObject, true);
-            interactiveName.text = name;
+            ZetanUtility.SetActive(interactionName.transform.parent.gameObject, true);
+            interactionName.text = name;
         }
         else
         {
-            ZetanUtility.SetActive(interactiveName.transform.parent.gameObject, false);
-            interactiveName.text = string.Empty;
+            ZetanUtility.SetActive(interactionName.transform.parent.gameObject, false);
+            interactionName.text = string.Empty;
         }
     }
 

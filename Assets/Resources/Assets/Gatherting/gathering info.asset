@@ -12,12 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6f19f69292c63348996789922d3796e, type: 3}
   m_Name: gathering info
   m_EditorClassIdentifier: 
+  _ID: 
   _name: "\u836F\u8349"
   gatherType: 0
   gatherTime: 5
-  refreshTime: 60
+  refreshTime: 30
   productItems:
   - item: {fileID: 11400000, guid: a7d72e2d91b0a664392e7855e2e4d192, type: 2}
+    amount: 5
+    dropRate: 100
+    onlyDropForQuest: 0
+    bindedQuest: {fileID: 0}
+  - item: {fileID: 11400000, guid: 6dd284fcfbbd47f45902a74655b20192, type: 2}
     amount: 5
     dropRate: 100
     onlyDropForQuest: 0

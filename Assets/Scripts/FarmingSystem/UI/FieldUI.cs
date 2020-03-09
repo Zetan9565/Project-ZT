@@ -20,5 +20,6 @@ public class FieldUI : WindowUI
         closeButton.onClick.AddListener(FieldManager.Instance.CloseWindow);
         plantButton.onClick.AddListener(FieldManager.Instance.OpenClosePlantWindow);
         destroyButton.onClick.AddListener(FieldManager.Instance.DestroyCurrentField);
+        workerButton.onClick.AddListener(FieldManager.Instance.DispatchWorker);
     }
 }

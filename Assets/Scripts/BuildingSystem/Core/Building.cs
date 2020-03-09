@@ -14,7 +14,9 @@ public class Building : MonoBehaviour
 
     public new string name;
 
-    public bool IsUnderBuilding { get; private set; }
+    public UnityEngine.UI.Button.ButtonClickedEvent onButtonClick = new UnityEngine.UI.Button.ButtonClickedEvent();
+
+    public bool isUnderBuilding;
 
     [SerializeField]
     private Vector3 buildingFlagOffset;
@@ -24,7 +26,9 @@ public class Building : MonoBehaviour
 
     public BuildingInformation MBuildingInfo { get; private set; }
 
+
     private Dictionary<Behaviour, bool> components = new Dictionary<Behaviour, bool>();
+    private Dictionary<Collider, bool> colliders = new Dictionary<Collider, bool>();
 
     [SerializeField]
     protected UnityEvent onDestroy = new UnityEvent();
@@ -35,6 +39,7 @@ public class Building : MonoBehaviour
 
     public bool StarBuild(BuildingInformation buildingInfo, Vector3 position)
     {
+        if (!buildingInfo) return false;
         transform.position = position;
         MBuildingInfo = buildingInfo;
         IDStarter = MBuildingInfo.IDStarter;
@@ -44,20 +49,25 @@ public class Building : MonoBehaviour
         GetIDTail();
         if (string.IsNullOrEmpty(IDTail))
         {
-            MessageManager.Instance.New(name + "已经达到最大建设数量");
+            MessageManager.Instance.New("[" + name + "]已经达到最大建设数量");
             if (buildingAgent) buildingAgent.Clear(true);
             Destroy(gameObject);
+            return false;
         }
         foreach (var b in GetComponentsInChildren<Behaviour>())
         {
             var c2d = b as Collider2D;
             if (c2d && !c2d.isTrigger) continue;
-            var c = b as Component as Collider;
-            if (c && !c.isTrigger) continue;
             components.Add(b, b.enabled);
             if (b != this) b.enabled = false;
         }
-        IsUnderBuilding = true;
+        foreach (var c in GetComponentsInChildren<Collider>())
+        {
+            if (!c.isTrigger) continue;
+            colliders.Add(c, c.enabled);
+            c.enabled = false;
+        }
+        isUnderBuilding = true;
         StartCoroutine(Build());
         return true;
     }
@@ -76,12 +86,12 @@ public class Building : MonoBehaviour
                 components.Add(b, b.enabled);
                 if (b != this) b.enabled = false;
             }
-            IsUnderBuilding = true;
+            isUnderBuilding = true;
             StartCoroutine(Build());
         }
         else
         {
-            IsUnderBuilding = false;
+            isUnderBuilding = false;
             IsBuilt = true;
         }
         if (buildingAgent) buildingAgent.UpdateUI();
@@ -93,7 +103,7 @@ public class Building : MonoBehaviour
         {
             b.Key.enabled = b.Value;
         }
-        IsUnderBuilding = false;
+        isUnderBuilding = false;
         IsBuilt = true;
         MessageManager.Instance.New("[" + name + "] 建造完成了");
         if (buildingAgent) buildingAgent.UpdateUI();
@@ -101,7 +111,7 @@ public class Building : MonoBehaviour
 
     private IEnumerator Build()
     {
-        while (IsUnderBuilding)
+        while (isUnderBuilding)
         {
             leftBuildTime -= Time.deltaTime;
             if (leftBuildTime <= 0)
@@ -117,14 +127,7 @@ public class Building : MonoBehaviour
     public virtual void AskDestroy()
     {
         ConfirmManager.Instance.New(string.Format("确定拆除{0}{1}吗？", name, (Vector2)transform.position),
-            BuildingManager.Instance.ConfirmDestroy,
-            delegate
-            {
-                if (IsBuilt && BuildingManager.Instance.ToDestroy == this)
-                {
-                    BuildingManager.Instance.CannotDestroy();
-                }
-            });
+            delegate { BuildingManager.Instance.DestroyBuilding(this); });
     }
 
     void GetIDTail()
@@ -151,7 +154,7 @@ public class Building : MonoBehaviour
     {
         if (collision.CompareTag("Player") && IsBuilt)
         {
-            BuildingManager.Instance.CanDestroy(this);
+            BuildingManager.Instance.CanManage(this);
         }
     }
 
@@ -159,15 +162,15 @@ public class Building : MonoBehaviour
     {
         if (collision.CompareTag("Player") && IsBuilt)
         {
-            BuildingManager.Instance.CanDestroy(this);
+            BuildingManager.Instance.CanManage(this);
         }
     }
 
     protected virtual void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && IsBuilt && BuildingManager.Instance.ToDestroy == this)
+        if (collision.CompareTag("Player") && IsBuilt && BuildingManager.Instance.CurrentBuilding == this)
         {
-            BuildingManager.Instance.CannotDestroy();
+            BuildingManager.Instance.CannotManage();
         }
     }
 

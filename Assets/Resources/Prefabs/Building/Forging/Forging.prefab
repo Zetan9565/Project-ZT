@@ -130,7 +130,11 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
-  buildingFlag: {fileID: 0}
+  onButtonClick:
+    m_PersistentCalls:
+      m_Calls: []
+  isUnderBuilding: 0
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
@@ -152,7 +156,7 @@ MonoBehaviour:
   iconSize: {x: 48, y: 48}
   offset: {x: 0, y: 0}
   drawOnWorldMap: 1
-  keepOnMap: 1
+  keepOnMap: 0
   maxValidDistance: -1
   forceHided: 0
   removeAble: 0

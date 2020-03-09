@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
 
 public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHandler
 {
@@ -16,12 +16,12 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
     [SerializeField]
     private Button yes;
 
-    private UnityAction onYesClick;
+    private Action onYesClick;
 
     [SerializeField]
     private Button no;
 
-    private UnityAction onNoClick;
+    private Action onNoClick;
 
     public bool IsUIOpen { get; private set; }
     public bool IsPausing { get; private set; }
@@ -58,7 +58,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
         (this as IWindowHandler).OpenWindow();
     }
 
-    public void New(string dialog, UnityAction yesAction)
+    public void New(string dialog, Action yesAction)
     {
         dialogText.text = dialog;
         onYesClick = yesAction;
@@ -67,7 +67,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
         (this as IWindowHandler).OpenWindow();
     }
 
-    public void New(string dialog, UnityAction yesAction, UnityAction noAction)
+    public void New(string dialog, Action yesAction, Action noAction)
     {
         dialogText.text = dialog;
         onYesClick = yesAction;

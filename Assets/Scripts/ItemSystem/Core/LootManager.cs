@@ -105,13 +105,13 @@ public class LootManager : WindowHandler<LootUI, LootManager>
     {
         if (!lootAgent) return;
         LootAgent = lootAgent;
-        UIManager.Instance.EnableInteractive(true, LootAgent.name);
+        UIManager.Instance.EnableInteract(true, LootAgent.name);
         PickAble = true;
     }
     public void CannotPick()
     {
         LootAgent = null;
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
         PickAble = false;
         CloseWindow();
     }
@@ -121,7 +121,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
         base.OpenWindow();
         if (!IsUIOpen) return;
         Init();
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
 
         IsPicking = true;
     }
@@ -133,7 +133,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
         PickAble = false;
         if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();
         ItemWindowManager.Instance.CloseWindow();
-        UIManager.Instance.EnableInteractive(false);
+        UIManager.Instance.EnableInteract(false);
 
         IsPicking = false;
     }

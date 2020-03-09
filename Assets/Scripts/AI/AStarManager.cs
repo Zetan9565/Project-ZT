@@ -1,6 +1,6 @@
-﻿using Pathfinding;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using Pathfinding;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(AstarPath))]

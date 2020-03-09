@@ -143,6 +143,10 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
+  onButtonClick:
+    m_PersistentCalls:
+      m_Calls: []
+  isUnderBuilding: 0
   buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
@@ -169,7 +173,7 @@ MonoBehaviour:
   iconSize: {x: 48, y: 48}
   offset: {x: 0, y: 0}
   drawOnWorldMap: 1
-  keepOnMap: 1
+  keepOnMap: 0
   maxValidDistance: -1
   forceHided: 0
   removeAble: 0
@@ -179,7 +183,7 @@ MonoBehaviour:
   iconType: 0
   iconInstance: {fileID: 0}
   gizmos: 1
-  textToDisplay: 
+  textToDisplay: "\u4ED3\u5E93"
   iconEvents:
     onFingerClick:
       m_PersistentCalls:

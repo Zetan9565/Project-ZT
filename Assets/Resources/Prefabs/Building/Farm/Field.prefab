@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7330817754964580380}
   - component: {fileID: 7347814513168547429}
   - component: {fileID: 8480943704564243532}
+  - component: {fileID: -6071548305645702290}
   m_Layer: 0
   m_Name: Field
   m_TagString: Untagged
@@ -98,6 +99,10 @@ MonoBehaviour:
   IDStarter: 
   IDTail: 
   name: 
+  onButtonClick:
+    m_PersistentCalls:
+      m_Calls: []
+  isUnderBuilding: 0
   buildingFlagOffset: {x: 0, y: 0, z: 0}
   onDestroy:
     m_PersistentCalls:
@@ -133,3 +138,43 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2.99, y: 2.99}
   m_EdgeRadius: 0
+--- !u!114 &-6071548305645702290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 703144903013247418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7fc8902ed33a68438fb74bf1b0d4b11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  icon: {fileID: 21300000, guid: 4f8aefee31147f84f8db7d76526450f8, type: 3}
+  iconSize: {x: 48, y: 48}
+  offset: {x: 0, y: 0}
+  drawOnWorldMap: 1
+  keepOnMap: 0
+  maxValidDistance: -1
+  forceHided: 0
+  removeAble: 0
+  showRange: 0
+  rangeColor: {r: 1, g: 1, b: 1, a: 0.5}
+  rangeSize: 144
+  iconType: 0
+  iconInstance: {fileID: 0}
+  gizmos: 1
+  textToDisplay: "\u519C\u7530"
+  iconEvents:
+    onFingerClick:
+      m_PersistentCalls:
+        m_Calls: []
+    onMouseClick:
+      m_PersistentCalls:
+        m_Calls: []
+    onMouseEnter:
+      m_PersistentCalls:
+        m_Calls: []
+    onMouseExit:
+      m_PersistentCalls:
+        m_Calls: []

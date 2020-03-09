@@ -44,6 +44,8 @@ public class PlayerController2D : MonoBehaviour
 #endif
     private UpdateMode updateMode;
 
+    public bool controlAble = true;
+
     private void Awake()
     {
         if (Unit) Unit.moveSpeed = characterController.moveSpeed;
@@ -81,11 +83,20 @@ public class PlayerController2D : MonoBehaviour
         if (updateMode == UpdateMode.FixedUpdate) Control();
     }
 
+    float horizontal;
+    public float Horizontal => horizontal;
+
+    float vertical;
+    public float Vertical => vertical;
+
+    Vector2 input;
+    public Vector2 InputVector => input;
     private void Control()
     {
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
-        Vector2 input = new Vector2(horizontal, vertical);
+        if (!controlAble) return;
+        horizontal = Input.GetAxisRaw("Horizontal");
+        vertical = Input.GetAxisRaw("Vertical");
+        input = new Vector2(horizontal, vertical);
         input.Normalize();
         characterController.Move(input);
         if (Unit)
@@ -98,10 +109,8 @@ public class PlayerController2D : MonoBehaviour
             }
             if (characterController)
             {
-                if (input.magnitude == 0 && isTrace)
-                    characterController.Move(Unit.DesiredVelocity.normalized);
-                else if (Unit.IsFollowingPath || Unit.IsFollowingTarget)
-                    characterController.SetAnima(Unit.DesiredVelocity.normalized);
+                if (input.magnitude == 0 && isTrace) characterController.Move(Unit.DesiredVelocity.normalized);
+                else if (Unit.IsFollowingPath || Unit.IsFollowingTarget) characterController.SetAnima(Unit.DesiredVelocity.normalized);
                 Unit.moveSpeed = characterController.moveSpeed;
             }
         }
@@ -111,10 +120,4 @@ public class PlayerController2D : MonoBehaviour
     {
         this.characterController = characterController;
     }
-}
-public enum UpdateMode
-{
-    Update,
-    LateUpdate,
-    FixedUpdate
 }

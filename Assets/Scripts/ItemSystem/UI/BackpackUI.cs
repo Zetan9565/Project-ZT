@@ -16,9 +16,12 @@ public class BackpackUI : WindowUI
     public Button sortButton;
     public MakingTool handworkButton;
 
-    public DiscardButton discardArea;
+    public DiscardButton discardButton;
     public ScrollRect gridScrollRect;
     public Image gridMask;
+
+    public InputField searchInput;
+    public Button searchButton;
 
     protected override void Awake()
     {
@@ -32,5 +35,6 @@ public class BackpackUI : WindowUI
             MakingManager.Instance.CanMake(handworkButton);
             MakingManager.Instance.OpenWindow();
         });
+        searchButton.onClick.AddListener(BackpackManager.Instance.Search);
     }
 }

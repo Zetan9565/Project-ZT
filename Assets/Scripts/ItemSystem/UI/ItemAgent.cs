@@ -416,7 +416,7 @@ public class ItemAgent : MonoBehaviour, IDragAble,
         {
             ItemAgent target = eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<ItemAgent>();
             if (target) SwapInfoTo(target);
-            else if (eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<DiscardButton>() == BackpackManager.Instance.DiscardArea && agentType == ItemAgentType.Backpack)
+            else if (eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<DiscardButton>() == BackpackManager.Instance.DiscardButton && agentType == ItemAgentType.Backpack)
             {
                 BackpackManager.Instance.DiscardItem(MItemInfo);
                 AmountManager.Instance.SetPosition(eventData.position);

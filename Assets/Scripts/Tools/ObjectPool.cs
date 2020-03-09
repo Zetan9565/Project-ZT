@@ -16,7 +16,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
 #if UNITY_EDITOR
     [DisplayName("容量")]
 #endif
-    private int capacity = 200;
+    private int capacity = 500;
 
     [SerializeField]
 #if UNITY_EDITOR
@@ -32,6 +32,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             Destroy(gameObject);
             return;
         }
+        if (Instance.putDelayCoroutines.TryGetValue(gameObject, out var c)) Instance.StopCoroutine(c);
         ZetanUtility.SetActive(gameObject, false);
         gameObject.transform.SetParent(Instance.poolRoot, false);
         string name = gameObject.name.EndsWith("(Clone)") ? gameObject.name : gameObject.name + "Clone";
@@ -50,14 +51,20 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
         Put(component.gameObject);
     }
 
+    private readonly Dictionary<GameObject, Coroutine> putDelayCoroutines = new Dictionary<GameObject, Coroutine>();
     public static void Put(GameObject gameObject, float delayTime)
     {
         if (!Instance || Instance.pool.Count > Instance.capacity)
         {
-            Destroy(gameObject);
+            Destroy(gameObject, delayTime);
             return;
         }
-        Instance.StartCoroutine(Instance.PutDelay(gameObject, delayTime));
+        if (Instance.putDelayCoroutines.TryGetValue(gameObject, out var c))
+        {
+            Instance.StopCoroutine(c);
+            Instance.putDelayCoroutines[gameObject] = Instance.StartCoroutine(Instance.PutDelay(gameObject, delayTime));
+        }
+        else Instance.putDelayCoroutines.Add(gameObject, Instance.StartCoroutine(Instance.PutDelay(gameObject, delayTime)));
     }
     public static void Put(Component component, float delayTime)
     {
@@ -66,6 +73,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
     private IEnumerator PutDelay(GameObject gameObject, float delayTime)
     {
         yield return new WaitForSeconds(delayTime);
+        putDelayCoroutines.Remove(gameObject);
         Put(gameObject);
     }
 
@@ -80,6 +88,11 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             if (oListFound.Count < 1) Instance.pool.Remove(goName);
             go.transform.SetParent(parent, worldPositionStays);
             ZetanUtility.SetActive(go, true);
+            if(Instance.putDelayCoroutines.TryGetValue(go, out var c))
+            {
+                Instance.StopCoroutine(c);
+                Instance.putDelayCoroutines.Remove(go);
+            }
             return go;
         }
         else
@@ -99,6 +112,11 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             if (oListFound.Count < 1) Instance.pool.Remove(goName);
             go.transform.SetParent(parent, worldPositionStays);
             ZetanUtility.SetActive(go, true);
+            if (Instance.putDelayCoroutines.TryGetValue(go, out var c))
+            {
+                Instance.StopCoroutine(c);
+                Instance.putDelayCoroutines.Remove(go);
+            }
             return go.GetComponent<T>();
         }
         else
@@ -127,6 +145,11 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             if (oListFound.Count < 1) Instance.pool.Remove(goName);
             go.transform.SetParent(parent, worldPositionStays);
             ZetanUtility.SetActive(go, true);
+            if (Instance.putDelayCoroutines.TryGetValue(go, out var c))
+            {
+                Instance.StopCoroutine(c);
+                Instance.putDelayCoroutines.Remove(go);
+            }
             return go;
         }
         else
@@ -155,6 +178,11 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             if (oListFound.Count < 1) Instance.pool.Remove(goName);
             go.transform.SetParent(parent, worldPositionStays);
             ZetanUtility.SetActive(go, true);
+            if (Instance.putDelayCoroutines.TryGetValue(go, out var c))
+            {
+                Instance.StopCoroutine(c);
+                Instance.putDelayCoroutines.Remove(go);
+            }
             return go.GetComponent<T>();
         }
         else

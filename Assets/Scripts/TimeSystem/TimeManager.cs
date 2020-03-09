@@ -8,7 +8,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     /// <summary>
     /// 一个游戏分在现实中的耗时
     /// </summary>
-    public static float OneMinute => Instance ? Instance.Scale : 1;
+    public static float OneMinute => Instance ? Instance.Multiples : 1;
     /// <summary>
     /// 一个游戏时在现实中的耗时
     /// </summary>
@@ -67,7 +67,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         }
     }
 
-    public delegate void TimePassedListner(int second);
+    public delegate void TimePassedListner(float realSecond);
     public event TimePassedListner OnTimePassed;
 
     public delegate void DayPassedListner();
@@ -257,6 +257,8 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         }
     }//从1开始计
 
+    public float TotalTime { get; private set; }
+
     public Month CurrentMonth
     {
         get
@@ -276,6 +278,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     private void Awake()
     {
         UpdateUI();
+        TotalTime += timeline * OneHour;
         Date.month = CurrentMonth;
         Date.daysOfMonth = DaysOfMonth;
         Date.dayOfTheWeek = DayOfTheWeek;
@@ -292,22 +295,25 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
 
     private void Update()
     {
-        float timelineBef = timeline;
+        TimePase(UnityEngine.Time.deltaTime);
+        /*float timelineBef = timeline;
         timeline = (timeline + UnityEngine.Time.deltaTime * Scale) % 24;
         if (UI && UI.time) UI.time.text = Time;
-        if (timelineBef > timeline) NextDay();
+        if (timelineBef > timeline) NextDay();*/
     }
 
-    public void TimePase(int second)
+    public void TimePase(float realSecond)
     {
         float timelineBef = timeline;
-        int days = (int)(second * Scale / 24f);
-        for (int i = 0; i < days - 1; i++)
+        int days = (int)(realSecond * Scale / 24f);
+        for (int i = 0; i < days; i++)
             NextDay();
-        timeline = (timeline + second * Scale) % 24;
+        float rawTimeline = (timeline + realSecond * Scale);
+        timeline = rawTimeline % 24;
         if (UI && UI.time) UI.time.text = Time;
         if (timelineBef > timeline) NextDay();
-        OnTimePassed?.Invoke(second);
+        OnTimePassed?.Invoke(realSecond);
+        TotalTime += realSecond * multiples;
     }
 
     private void NextDayWithoutNotify()
@@ -342,6 +348,27 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     {
         NextDayWithoutNotify();
         OnDayPassed?.Invoke();
+    }
+
+    public void SaveData(SaveData data)
+    {
+        data.totalTime = TotalTime;
+    }
+    public void LoadData(SaveData data)
+    {
+        ResetTime();
+        TimePase(data.totalTime);
+    }
+
+    public void ResetTime()
+    {
+        Days = 1;
+        Weeks = 1;
+        Months = 1;
+        Years = 1;
+        TotalTime = 0;
+        timeline = 0;
+        UpdateUI();
     }
 
     public static string WeekDayToString(DayOfTheWeek DayOfTheWeek, TimeSystem timeSystem = TimeSystem.System24)
@@ -451,12 +478,12 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
                         case 17: dayString = "十七"; break;
                         case 18: dayString = "十八"; break;
                         case 19: dayString = "十九"; break;
+                        case 20: dayString = "二十"; break;
                         default: dayString = string.Empty; break;
                     }
-                else if (dayOfDate >= 20 && dayOfDate < 30)
+                else if (dayOfDate > 20 && dayOfDate < 30)
                     switch (dayOfDate)
                     {
-                        case 20: dayString = "廿十"; break;
                         case 21: dayString = "廿一"; break;
                         case 22: dayString = "廿二"; break;
                         case 23: dayString = "廿三"; break;

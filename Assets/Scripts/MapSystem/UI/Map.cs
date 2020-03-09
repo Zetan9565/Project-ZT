@@ -48,19 +48,18 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
 
     private void Update()
     {
-        if (touchCount > 1 && Input.touchCount > 1)
+        if (touchCount > 1 && Input.touchCount == 2)
         {
             var first = Input.GetTouch(0);
             var second = Input.GetTouch(1);
 
-            var firstPrePos = (Vector2)Camera.main.WorldToViewportPoint(first.position - first.deltaPosition);
-            var secondPrePos = (Vector2)Camera.main.WorldToViewportPoint(second.position - second.deltaPosition);
-
             var firstPos = (Vector2)Camera.main.WorldToViewportPoint(first.position);
             var secondPos = (Vector2)Camera.main.WorldToViewportPoint(second.position);
-
-            var preDis = (firstPrePos - secondPrePos).magnitude;
             var curDis = (firstPos - secondPos).magnitude;
+
+            var firstPrePos = (Vector2)Camera.main.WorldToViewportPoint(first.position - first.deltaPosition);
+            var secondPrePos = (Vector2)Camera.main.WorldToViewportPoint(second.position - second.deltaPosition);
+            var preDis = (firstPrePos - secondPrePos).magnitude;
 
             var zoomValue = curDis - preDis;
 
