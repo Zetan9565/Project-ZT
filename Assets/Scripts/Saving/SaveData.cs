@@ -22,7 +22,7 @@ public class SaveData
 
     public List<WarehouseData> warehouseDatas = new List<WarehouseData>();
 
-    public List<QuestData> ongoingQuestDatas = new List<QuestData>();
+    public List<QuestData> inProcessingQuestDatas = new List<QuestData>();
     public List<QuestData> completeQuestDatas = new List<QuestData>();
 
     public List<DialogueData> dialogueDatas = new List<DialogueData>();
@@ -183,7 +183,7 @@ public class DialogueData
     {
         dialogID = dialogue.ID;
         for (int i = 0; i < dialogue.Words.Count; i++)
-            wordsDatas.Add(new DialogueWordsData() { wordsIndex = i });
+            wordsDatas.Add(new DialogueWordsData(i));
     }
 }
 
@@ -192,22 +192,24 @@ public class DialogueWordsData
 {
     public int wordsIndex;//该语句在对话中的位置
 
-    public List<int> cmpltBranchIndexes;//已完成的分支的序号集
+    public List<int> cmpltOptionIndexes;//已完成的分支的序号集
+
+    public bool complete;
 
     public DialogueWordsData()
     {
         wordsIndex = -1;
-        cmpltBranchIndexes = new List<int>();
+        cmpltOptionIndexes = new List<int>();
     }
     public DialogueWordsData(int wordsIndex)
     {
         this.wordsIndex = wordsIndex;
-        cmpltBranchIndexes = new List<int>();
+        cmpltOptionIndexes = new List<int>();
     }
 
-    public bool IsCmpltOptionWithIndex(int index)
+    public bool IsOptionCmplt(int index)
     {
-        return cmpltBranchIndexes.Contains(index);
+        return cmpltOptionIndexes.Contains(index);
     }
 }
 #endregion
@@ -252,6 +254,7 @@ public class ActionData
 
     public bool isExecuting;
     public float executionTime;
+    public float endDelayTime;
 
     public bool isDone;
 
@@ -262,6 +265,7 @@ public class ActionData
         ID = stackElement. executor.ID;
         isExecuting = stackElement.executor.IsExecuting;
         executionTime = stackElement. executor.ExecutionTime;
+        endDelayTime = stackElement. executor.EndDelayTime;
         isDone = stackElement. executor.IsDone;
         actionType = (int)stackElement.actionType;
     }

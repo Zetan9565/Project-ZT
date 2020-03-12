@@ -95,8 +95,13 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         {
             if (SelectionType == ItemSelectionType.Discard)
             {
-                if (info.item.DiscardAble && !itemAgents.Exists(x => x.MItemInfo == info) && BackpackManager.Instance.TryLoseItem_Boolean(info))
+                if (info.item.DiscardAble && BackpackManager.Instance.TryLoseItem_Boolean(info))
                 {
+                    if(itemAgents.Exists(x => x.MItemInfo == info))
+                    {
+                        MessageManager.Instance.New("已选择该道具");
+                        return false;
+                    }
                     ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
                     ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
                     itemAgents.Add(ia);
@@ -107,10 +112,16 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
             }
             else
             {
+                if (SelectionType == ItemSelectionType.Making && info.item.MaterialType == MaterialType.None) return false;
                 if (info.Amount < 2)
                 {
-                    if (BackpackManager.Instance.TryLoseItem_Boolean(info) && !itemAgents.Exists(x => x.MItemInfo == info || x.MItemInfo.item == info.item))
+                    if (BackpackManager.Instance.TryLoseItem_Boolean(info))
                     {
+                        if(itemAgents.Exists(x => x.MItemInfo == info || x.MItemInfo.item == info.item))
+                        {
+                            MessageManager.Instance.New("已选择该道具");
+                            return false;
+                        }
                         ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
                         ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
                         itemAgents.Add(ia);
@@ -121,6 +132,11 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
                 }
                 else
                 {
+                    if (itemAgents.Exists(x => x.MItemInfo == info || x.MItemInfo.item == info.item))
+                    {
+                        MessageManager.Instance.New("已选择该道具");
+                        return false;
+                    }
                     AmountManager.Instance.New(delegate
                     {
                         if (BackpackManager.Instance.TryLoseItem_Boolean(info, (int)AmountManager.Instance.Amount))
@@ -142,8 +158,13 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
             }
         }
         else if ((SelectionType != ItemSelectionType.Discard || SelectionType == ItemSelectionType.Discard && info.item.DiscardAble)
-            && !itemAgents.Exists(x => x.MItemInfo == info) && BackpackManager.Instance.TryLoseItem_Boolean(info))
+            && BackpackManager.Instance.TryLoseItem_Boolean(info))
         {
+            if(itemAgents.Exists(x => x.MItemInfo == info))
+            {
+                MessageManager.Instance.New("已选择该道具");
+                return false;
+            }
             ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
             ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
             itemAgents.Add(ia);

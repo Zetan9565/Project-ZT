@@ -23,6 +23,8 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 #endif
     private string encryptKey = "zetangamedatezetangamdatezetanga";
 
+    public bool IsLoading { get; private set; }
+
     #region 存档相关
     public bool Save()
     {
@@ -151,12 +153,14 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     IEnumerator LoadAsync(SaveData data)
     {
+        IsLoading = true;
         AsyncOperation ao = SceneManager.LoadSceneAsync(data.sceneName);
         ao.allowSceneActivation = false;
         yield return new WaitUntil(() => { return ao.progress >= 0.9f; });
         ao.allowSceneActivation = true;
         yield return new WaitUntil(() => { return ao.isDone; });
         GameManager.InitGame(typeof(TriggerHolder));
+
         LoadPlayer(data);
         yield return new WaitUntil(() => { return PlayerManager.Instance.Backpack != null; });
         LoadBackpack(data);
@@ -169,6 +173,8 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         LoadActions(data);
         LoadTrigger(data);
         LoadTime(data);
+
+        IsLoading = false;
     }
 
     void LoadPlayer(SaveData data)
@@ -245,7 +251,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         foreach (var ad in data.actionDatas)
             foreach (var action in actions)
                 if (action.ID == ad.ID)
-                    ActionStack.Push(action, (ActionType)ad.actionType, ad.executionTime);
+                    ActionStack.Push(action, (ActionType)ad.actionType, ad.endDelayTime, ad.executionTime);
     }
 
     void LoadTrigger(SaveData data)

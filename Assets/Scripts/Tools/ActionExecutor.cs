@@ -5,22 +5,23 @@ using UnityEngine.Events;
 [AddComponentMenu("ZetanStudio/事件/行为执行器")]
 public class ActionExecutor : MonoBehaviour
 {
-    public readonly static Stack<ActionStackData> actionStacks = new Stack<ActionStackData>();
-
     [SerializeField]
     private string _ID;
     public string ID => _ID;
     [SerializeField]
     private float endDelayTime;
+    public float EndDelayTime => endDelayTime;
 
     [SerializeField]
     private UnityEvent onBegin = new UnityEvent();
     [System.Serializable]
-    private class FloatUnityEvent : UnityEvent<float> { }
+    private class ExecutingEvent : UnityEvent<float> { }
     [SerializeField]
-    private FloatUnityEvent onExecuting = new FloatUnityEvent();
+    private ExecutingEvent onExecuting = new ExecutingEvent();
     [SerializeField]
     private UnityEvent onEnd = new UnityEvent();
+    [SerializeField]
+    private UnityEvent onUndoBegin = new UnityEvent();
     [SerializeField]
     private UnityEvent onUndo = new UnityEvent();
 
@@ -43,15 +44,16 @@ public class ActionExecutor : MonoBehaviour
 
     public float ExecutionTime { get; private set; }
 
-    public void Execute(float endDelay = -1)
+    public void Execute(float endDelay = -1, float startTime = 0)
     {
         if (IsDone) return;
+        //Debug.Log($"end: {endDelay}, start: {startTime}");
         onBegin?.Invoke();
-        if (endDelay <= 0) End();
+        if (endDelay <= 0 || endDelay <= startTime) End();
         else
         {
             endDelayTime = endDelay;
-            ExecutionTime = 0;
+            ExecutionTime = startTime;
             IsExecuting = true;
         }
     }
@@ -65,19 +67,24 @@ public class ActionExecutor : MonoBehaviour
         isDone = true;
     }
 
-    public void Undo(float undoneDelay = -1)
+    public void UndoEnd()
     {
         if (!IsDone) return;
-        if (undoneDelay <= 0)
-        {
-            ExecutionTime = 0;
-            IsExecuting = false;
-            onUndo?.Invoke();
-        }
+        onUndo?.Invoke();
+        ExecutionTime = 0;
+        IsExecuting = false;
+        isDone = false;
+    }
+
+    public void Undo(float undoneDelay = -1, float startTime = 0)
+    {
+        if (!IsDone) return;
+        onUndoBegin?.Invoke();
+        if (undoneDelay <= 0 || undoneDelay <= startTime) UndoEnd();
         else
         {
             IsExecuting = true;
-            ExecutionTime = undoneDelay;
+            ExecutionTime = undoneDelay - startTime;
         }
         isDone = false;
     }
@@ -99,8 +106,7 @@ public class ActionExecutor : MonoBehaviour
             onExecuting?.Invoke(ExecutionTime);
             if (ExecutionTime <= 0)
             {
-                IsExecuting = false;
-                onUndo?.Invoke();
+                UndoEnd();
             }
         }
     }
@@ -109,17 +115,17 @@ public class ActionStack
 {
     private readonly static Stack<ActionStackData> actionStacks = new Stack<ActionStackData>();
 
-    public static void Push(ActionExecutor executor, float delay = -1)
+    public static void Push(ActionExecutor executor, float delay = -1, float startTime = 0)
     {
-        executor.Execute(delay);
+        executor.Execute(delay, startTime);
         actionStacks.Push(new ActionStackData(executor, ActionType.Execute));
         //Debug.Log("Push: " + executor.ID);
     }
 
-    public static void Push(ActionExecutor executor, ActionType actionType, float delay = -1)
+    public static void Push(ActionExecutor executor, ActionType actionType, float delay = -1, float startTime = 0)
     {
-        if (actionType == ActionType.Execute) executor.Execute(delay);
-        else executor.Undo(delay);
+        if (actionType == ActionType.Execute) executor.Execute(delay, startTime);
+        else executor.Undo(delay, startTime);
         actionStacks.Push(new ActionStackData(executor, actionType));
         //Debug.Log("Push: " + executor.ID);
     }
@@ -157,6 +163,7 @@ public class ActionStackData
         this.actionType = actionType;
     }
 }
+
 public enum ActionType
 {
     Execute,

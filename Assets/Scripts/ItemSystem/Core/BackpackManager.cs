@@ -20,7 +20,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
 
     public Image GridMask { get { return UI.gridMask; } }
 
-    public delegate void ItemAmountListener(ItemBase item, int leftAmount);
+    public delegate void ItemAmountListener(string id, int leftAmount);
     public event ItemAmountListener OnGetItemEvent;
     public event ItemAmountListener OnLoseItemEvent;
 
@@ -140,7 +140,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 }
             if (amount > Backpack.size.Rest + vacateSize)//如果留出位置还不能放下
             {
-                MessageManager.Instance.New(string.Format("请至少多留出{0}个{1}空间", amount - Backpack.size.Rest - vacateSize, GameManager.BackpackName));
+                MessageManager.Instance.New($"请至少多留出{(amount - Backpack.size.Rest - vacateSize).ToString()}个{GameManager.BackpackName}空间");
                 return false;
             }
         }
@@ -227,7 +227,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                         break;
                     }
             }
-        OnGetItemEvent?.Invoke(item, GetItemAmount(item));
+        OnGetItemEvent?.Invoke(item.ID, GetItemAmount(item));
         UpdateUI();
         return true;
     }
@@ -267,7 +267,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 else
                 {
                     MessageManager.Instance.New("发生内部错误！");
-                    Debug.Log("[Get Item Error] ID: " + info.item.ID + "[" + System.DateTime.Now.ToString() + "]");
+                    Debug.Log("[Get Item Error: Can't find ItemAgent] ID: " + info.item.ID + "[" + System.DateTime.Now.ToString() + "]");
                 }
             }
         }
@@ -281,7 +281,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                         break;
                     }
             }
-        OnGetItemEvent?.Invoke(info.item, amount);
+        OnGetItemEvent?.Invoke(info.ItemID, amount);
         UpdateUI();
         return true;
     }
@@ -303,12 +303,12 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 if (!TryGetItem_Boolean(si, new ItemInfo(item, amount))) return false;
         if (GetItemAmount(item) < amount)
         {
-            MessageManager.Instance.New(GameManager.BackpackName + "中没有这么多的 [" + item.name + "]");
+            MessageManager.Instance.New($"{GameManager.BackpackName}中没有这么多的 [{item.name}]");
             return false;
         }
         if (QuestManager.Instance.HasQuestRequiredItem(item, GetItemAmount(item) - amount))
         {
-            MessageManager.Instance.New(string.Format("[{0}] 为任务所需", item.name));
+            MessageManager.Instance.New($"[{item.name}] 为任务所需");
             return false;
         }
         return true;
@@ -359,7 +359,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             ItemInfo[] finds = Backpack.FindAll(item).ToArray();
             if (finds.Length < 1)
             {
-                MessageManager.Instance.New("该物品已不在" + GameManager.BackpackName + "中");
+                MessageManager.Instance.New($"该物品已不在{GameManager.BackpackName}中");
                 return false;
             }
             for (int i = 0; i < amount; i++)
@@ -388,7 +388,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         Backpack.LoseItemSimple(info, amount);
         ItemAgent ia = itemAgents.Find(x => x.MItemInfo == info);
         if (ia) ia.UpdateInfo();
-        OnLoseItemEvent?.Invoke(info.item, GetItemAmount(info.item));
+        OnLoseItemEvent?.Invoke(info.ItemID, GetItemAmount(info.item));
         if (ItemWindowManager.Instance.MItemInfo == info && info.Amount < 1) ItemWindowManager.Instance.CloseWindow();
         if (simulGetItems != null)
             foreach (var si in simulGetItems)
@@ -416,7 +416,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (Backpack == null || info == null || !info.item) return;
         if (!Backpack.Items.Contains(info))
         {
-            MessageManager.Instance.New("该物品已不在" + GameManager.BackpackName + "中");
+            MessageManager.Instance.New($"该物品已不在{GameManager.BackpackName}中");
             return;
         }
         if (!info.item.DiscardAble)
@@ -430,7 +430,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 ZetanUtility.ColorText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
                 {
                     if (LoseItem(info, 1))
-                        MessageManager.Instance.New(string.Format("丢掉了1个 [{0}]", info.ItemName));
+                        MessageManager.Instance.New($"丢掉了1个 [{info.ItemName}]");
                 });
         }
         else AmountManager.Instance.New(delegate
@@ -621,16 +621,16 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         base.PauseDisplay(pause);
         if (!IsPausing && pause) ItemWindowManager.Instance.CloseWindow();
     }
-    public void EnableHandwork(bool value)
-    {
-        ZetanUtility.SetActive(UI.handworkButton.gameObject,
-            value ? !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !ItemSelectionManager.Instance.IsUIOpen && !MakingManager.Instance.IsUIOpen : false);
-    }
     public void OpenCloseWindow()
     {
         if (!UI || !UI.gameObject) return;
         if (!IsUIOpen) OpenWindow();
         else CloseWindow();
+    }
+    public void EnableHandwork(bool value)
+    {
+        ZetanUtility.SetActive(UI.handworkButton.gameObject,
+            value ? !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !ItemSelectionManager.Instance.IsUIOpen && !MakingManager.Instance.IsUIOpen : false);
     }
 
     public void OpenDiscardWindow()
@@ -648,10 +648,23 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         });
     }
 
-    public void Sort()
+    public void DarkUnmakeable(bool dark)
+    {
+        if (dark)
+            foreach (var ia in itemAgents.Where(x => !x.IsEmpty))
+            {
+                if (ia.MItemInfo.item.MaterialType == MaterialType.None) ia.Dark();
+            }
+        else foreach (var ia in itemAgents.Where(x => !x.IsEmpty))
+            {
+                ia.Light();
+            }
+    }
+
+    public void Arrange()
     {
         if (!UI || !UI.gameObject) return;
-        Backpack.Sort();
+        Backpack.Arrange();
         Init();
         for (int i = 0; i < Backpack.Items.Count; i++)
             itemAgents[i].SetItem(Backpack.Items[i]);
@@ -682,9 +695,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     {
         itemAgents.RemoveAll(x => !x || !x.gameObject);
         foreach (var ia in itemAgents)
-        {
             ia.Empty();
-        }
         IsPausing = false;
         CloseWindow();
         base.SetUI(UI);

@@ -16,9 +16,10 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
 
     public bool IsInputFocused => UI ? IsUIOpen && UI.searchInput.isFocused : false;
 
-    private void Awake()
+    private new void Awake()
     {
         if (!UI || !UI.gameObject) return;
+        base.Awake();
         for (int i = 0; i < 100; i++)
         {
             ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
@@ -233,6 +234,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         BackpackManager.Instance.OpenWindow();
         UIManager.Instance.EnableJoyStick(false);
         UIManager.Instance.EnableInteract(false);
+        PlayerManager.Instance.PlayerController.controlAble = false;
     }
 
     public override void CloseWindow()
@@ -251,6 +253,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         if (DialogueManager.Instance.IsUIOpen) DialogueManager.Instance.PauseDisplay(false);
         AmountManager.Instance.Cancel();
         UIManager.Instance.EnableJoyStick(true);
+        PlayerManager.Instance.PlayerController.controlAble = true;
     }
 
     public void UpdateUI()
@@ -260,25 +263,13 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         SetPage(currentPage);
     }
 
-    public void Sort()
+    public void Arrange()
     {
-        MWarehouse.Sort();
-        //Init(MWarehouse);
+        MWarehouse.Arrange();
         foreach (ItemAgent ia in itemAgents)
-        {
             ia.Empty();
-        }
-        foreach (ItemInfo ii in MWarehouse.Items)
-        {
-            foreach (ItemAgent ia in itemAgents)
-            {
-                if (ia.IsEmpty)
-                {
-                    ia.SetItem(ii);
-                    break;
-                }
-            }
-        }
+        for (int i = 0; i < MWarehouse.Items.Count; i++)
+            itemAgents[i].SetItem(MWarehouse.Items[i]);
         UpdateUI();
     }
 
@@ -305,9 +296,10 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
 
     public void CannotStore()
     {
+        StoreAble = false;
+        IsPausing = false;
         CloseWindow();
         ItemWindowManager.Instance.CloseWindow();
-        StoreAble = false;
         if (!(DialogueManager.Instance.TalkAble || DialogueManager.Instance.IsUIOpen)) UIManager.Instance.EnableInteract(false);
     }
 

@@ -130,6 +130,12 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
     [SerializeField]
     protected bool animated = true;
 
+    [SerializeField]
+#if UNITY_EDITOR
+    [ConditionalHide("animated", true, false)]
+#endif
+    protected float animationSpeed = 0.04f;
+
     public virtual bool IsUIOpen { get; protected set; }
 
     public virtual bool IsPausing { get; protected set; }
@@ -139,19 +145,6 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
     public WindowHandler<UI_T, Mono_T> MonoBehaviour => this;
 
     public Coroutine FadeCoroutine { get; set; }
-
-    public virtual void CloseWindow()
-    {
-        if (!UI || !UI.gameObject) return;
-        if (!IsUIOpen) return;
-        if (IsPausing) return;
-        if (!animated) UI.window.alpha = 0;
-        else ZetanUtility.FadeTo(0, 0.04f, this);
-        UI.window.blocksRaycasts = false;
-        WindowsManager.Instance.Remove(this);
-        IsUIOpen = false;
-    }
-
     public IEnumerator Fade(float alpha, float duration)
     {
         float time = 0;
@@ -171,12 +164,22 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
         if (IsUIOpen) return;
         if (IsPausing) return;
         if(!animated) UI.window.alpha = 1;
-        else ZetanUtility.FadeTo(1, 0.04f, this);
+        else ZetanUtility.FadeTo(1, animationSpeed, this);
         UI.window.blocksRaycasts = true;
         WindowsManager.Instance.Push(this);
         IsUIOpen = true;
     }
-
+    public virtual void CloseWindow()
+    {
+        if (!UI || !UI.gameObject) return;
+        if (!IsUIOpen) return;
+        if (IsPausing) return;
+        if (!animated) UI.window.alpha = 0;
+        else ZetanUtility.FadeTo(0, animationSpeed, this);
+        UI.window.blocksRaycasts = false;
+        WindowsManager.Instance.Remove(this);
+        IsUIOpen = false;
+    }
     public virtual void PauseDisplay(bool pause)
     {
         if (!UI || !UI.gameObject) return;

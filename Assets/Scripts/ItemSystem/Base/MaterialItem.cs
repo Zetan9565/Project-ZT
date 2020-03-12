@@ -13,7 +13,7 @@ public class MaterialItem : ItemBase
     {
         switch (materialType)
         {
-            case MaterialType.Other:
+            case MaterialType.None:
                 return "未定义道具";
             case MaterialType.Ore:
                 return "矿石";
@@ -43,7 +43,7 @@ public class MaterialItem : ItemBase
 
 public enum MaterialType
 {
-    Other,//未定义：所有途径
+    None,//未定义：所有途径
     Ore,//矿石：采集、挖宝
     Metal,//金属：加工、挖宝、掉落
     Plant,//植物：采集、农场生产

@@ -115,7 +115,7 @@ public class Quest : ScriptableObject
     [HideInInspector]
     public TalkerData currentQuestHolder;
 
-    public bool IsOngoing { get; set; }//任务是否正在执行，在运行时用到
+    public bool InProcessing { get; set; }//任务是否正在执行，在运行时用到
 
     public bool IsComplete
     {
@@ -131,7 +131,7 @@ public class Quest : ScriptableObject
     {
         get
         {
-            return IsComplete && !IsOngoing;
+            return IsComplete && !InProcessing;
         }
     }
 }
@@ -210,8 +210,12 @@ public abstract class Objective
     }
 
     [SerializeField]
+    private bool canNavigate = true;
+    public bool CanNavigate => this is CollectObjective || this is CustomObjective ? false : canNavigate;
+
+    [SerializeField]
     private bool showMapIcon = true;
-    public bool ShowMapIcon => this is CollectObjective || this is CustomObjective ? false : showMapIcon;
+    public bool ShowMapIcon => this is CollectObjective || this is CustomObjective ? false : showMapIcon || canNavigate;//可以导航，则一定能显示地图图标
 
     [SerializeField]
     private int amount = 1;
@@ -227,6 +231,7 @@ public abstract class Objective
         set
         {
             bool befCmplt = IsComplete;
+            int befAmount = currentAmount;
             if (value < amount && value >= 0)
                 currentAmount = value;
             else if (value < 0)
@@ -234,7 +239,7 @@ public abstract class Objective
                 currentAmount = 0;
             }
             else currentAmount = amount;
-            OnStateChangeEvent?.Invoke(this, befCmplt);
+            if (befAmount != currentAmount) OnStateChangeEvent?.Invoke(this, befCmplt);
         }
     }
 
@@ -304,13 +309,6 @@ public abstract class Objective
         if (IsComplete) return;
         if (!InOrder) CurrentAmount += amount;
         else if (AllPrevObjCmplt) CurrentAmount += amount;
-        if (CurrentAmount > 0)
-        {
-            string message = DisplayName + (IsComplete ? "(完成)" : "[" + currentAmount + "/" + Amount + "]");
-            MessageManager.Instance.New(message);
-        }
-        if (runtimeParent.IsComplete)
-            MessageManager.Instance.New("[任务]" + runtimeParent.Title + "(已完成)");
     }
 
     public bool AllPrevObjCmplt//判定所有前置目标是否都完成
@@ -373,60 +371,37 @@ public class CollectObjective : Objective
 {
     [SerializeField]
     private ItemBase item;
-    public ItemBase Item
-    {
-        get
-        {
-            return item;
-        }
-    }
+    public ItemBase Item => item;
 
     [SerializeField]
     private bool checkBagAtStart = true;
     /// <summary>
     /// 是否在目标开始执行时检查背包道具看是否满足目标，否则目标重头开始计数
     /// </summary>
-    public bool CheckBagAtStart
-    {
-        get
-        {
-            return checkBagAtStart;
-        }
-    }
+    public bool CheckBagAtStart => checkBagAtStart;
 
     [SerializeField]
     private bool loseItemAtSbmt = true;
     /// <summary>
     /// 是否在提交任务时失去相应道具
     /// </summary>
-    public bool LoseItemAtSbmt
-    {
-        get
-        {
-            return loseItemAtSbmt;
-        }
-    }
+    public bool LoseItemAtSbmt => loseItemAtSbmt;
 
-    public void UpdateCollectAmount(ItemBase item, int leftAmount)//得道具时用到
+    public int amountWhenStart;
+
+    public void UpdateCollectAmount(string id, int leftAmount)//得道具时用到
     {
-        if (item == Item)
+        if (id == Item.ID)
         {
             if (IsComplete) return;
-            if (!InOrder) CurrentAmount = leftAmount;
-            else if (AllPrevObjCmplt) CurrentAmount = leftAmount;
-            if (CurrentAmount > 0)
-            {
-                string message = DisplayName + (IsComplete ? "(完成)" : "[" + CurrentAmount + "/" + Amount + "]");
-                MessageManager.Instance.New(message);
-            }
-            if (runtimeParent.IsComplete)
-                MessageManager.Instance.New("[任务]" + runtimeParent.Title + "(已完成)");
+            if (!InOrder) CurrentAmount = leftAmount - (!CheckBagAtStart ? amountWhenStart : 0);
+            else if (AllPrevObjCmplt) CurrentAmount = leftAmount - (!CheckBagAtStart ? amountWhenStart : 0);
         }
     }
 
-    public void UpdateCollectAmountDown(ItemBase item, int leftAmount)//丢道具时用到
+    public void UpdateCollectAmountDown(string id, int leftAmount)//丢道具时用到
     {
-        if (item == Item && AllPrevObjCmplt && !HasNextObjOngoing && LoseItemAtSbmt)
+        if (id == Item.ID && AllPrevObjCmplt && !HasNextObjOngoing && LoseItemAtSbmt)
             //前置目标都完成且没有后置目标在进行时，才允许更新；在提交任务时不需要提交相应道具，也不会更新减少值。
             CurrentAmount = leftAmount;
     }

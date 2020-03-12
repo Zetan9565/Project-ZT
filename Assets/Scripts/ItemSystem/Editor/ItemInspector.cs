@@ -177,8 +177,15 @@ public class ItemInspector : Editor
                 {
                     EditorGUILayout.HelpBox("制作材料存在重复。", MessageType.Error);
                 }
-                var other = Array.Find(items, x => x != item && CheckMaterialsDuplicate(item.Materials, x.Materials));
-                if (other) EditorGUILayout.HelpBox(string.Format("其它道具与此道具的制作材料重复！其它道具ID：{0}", other.ID), MessageType.Error);
+                else if (item.Materials.Exists(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.None))
+                {
+                    EditorGUILayout.HelpBox("制作材料存在未定义材料。", MessageType.Warning);
+                }
+                else
+                {
+                    var other = Array.Find(items, x => x != item && CheckMaterialsDuplicate(item.Materials, x.Materials));
+                    if (other) EditorGUILayout.HelpBox(string.Format("其它道具与此道具的制作材料重复！其它道具ID：{0}", other.ID), MessageType.Error);
+                }
                 if (materials.isExpanded)
                 {
                     serializedObject.Update();
@@ -482,7 +489,7 @@ public class ItemInspector : Editor
 
         if (item.MakingMethod != MakingMethod.None)
         {
-            editComplete &= !item.Materials.Exists(x => x.MakingType == MakingType.SingleItem && x.Item == null);
+            editComplete &= !item.Materials.Exists(x => x.MakingType == MakingType.SingleItem && x.Item == null || x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.None);
             editComplete &= !item.Materials.Exists(x => (x.MakingType == MakingType.SingleItem && item.Materials.FindAll(y => y.MakingType == MakingType.SingleItem && y.Item == x.Item).Count > 1) ||
                                 (x.MakingType == MakingType.SameType && item.Materials.FindAll(y => y.MakingType == MakingType.SameType && y.MaterialType == x.MaterialType).Count > 1));
 
@@ -560,8 +567,8 @@ public class ItemInspector : Editor
                     if (!find || find.Amount != material.Amount) return false;
                 }
             }
-        int amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Other).Select(x => x.Amount).Sum();
-        int amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Other).Select(x => x.Amount).Sum();
+        int amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.None).Select(x => x.Amount).Sum();
+        int amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.None).Select(x => x.Amount).Sum();
         if (amout1 != amout2) return false;
         amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Ore).Select(x => x.Amount).Sum();
         amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Ore).Select(x => x.Amount).Sum();

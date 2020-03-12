@@ -27,7 +27,7 @@ public class BackpackUI : WindowUI
     {
         base.Awake();
         closeButton.onClick.AddListener(BackpackManager.Instance.CloseWindow);
-        sortButton.onClick.AddListener(BackpackManager.Instance.Sort);
+        sortButton.onClick.AddListener(BackpackManager.Instance.Arrange);
         pageSelector.onValueChanged.AddListener(BackpackManager.Instance.SetPage);
         if (!handworkButton.GetComponent<Button>()) handworkButton.gameObject.AddComponent<Button>();
         handworkButton.GetComponent<Button>().onClick.AddListener(delegate

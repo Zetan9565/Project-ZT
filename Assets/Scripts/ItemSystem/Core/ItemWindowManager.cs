@@ -158,6 +158,15 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
                         case ItemSelectionType.Gift:
                             break;
                         case ItemSelectionType.Making:
+                            if (MItemInfo.item.MaterialType != MaterialType.None)
+                            {
+                                ZetanUtility.SetActive(UI.mulFunButton.gameObject, true);
+                                UI.mulFunButton.GetComponentInChildren<Text>().text = "选取";
+                                UI.mulFunButton.onClick.AddListener(delegate
+                                {
+                                    if (ItemSelectionManager.Instance.Place(MItemInfo)) CloseWindow();
+                                });
+                            }
                             break;
                         case ItemSelectionType.None:
                         default:

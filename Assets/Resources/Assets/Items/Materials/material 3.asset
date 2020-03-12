@@ -32,4 +32,8 @@ MonoBehaviour:
   minYield: 1
   maxYield: 1
   materialType: 3
-  materials: []
+  materials:
+  - item: {fileID: 0}
+    amount: 1
+    makingType: 0
+    materialType: 1

@@ -7,53 +7,23 @@ public class Dialogue : ScriptableObject
 {
     [SerializeField]
     private string _ID;
-    public string ID
-    {
-        get
-        {
-            return _ID;
-        }
-    }
+    public string ID => _ID;
 
     [SerializeField]
     private bool useUnifiedNPC;
-    public bool UseUnifiedNPC
-    {
-        get
-        {
-            return useUnifiedNPC;
-        }
-    }
+    public bool UseUnifiedNPC => useUnifiedNPC;
 
     [SerializeField]
     private bool useCurrentTalkerInfo;
-    public bool UseCurrentTalkerInfo
-    {
-        get
-        {
-            return useCurrentTalkerInfo;
-        }
-    }
+    public bool UseCurrentTalkerInfo => useCurrentTalkerInfo;
 
     [SerializeField]
     private TalkerInformation unifiedNPC;
-    public TalkerInformation UnifiedNPC
-    {
-        get
-        {
-            return unifiedNPC;
-        }
-    }
+    public TalkerInformation UnifiedNPC => unifiedNPC;
 
     [SerializeField]
     private List<DialogueWords> words = new List<DialogueWords>();
-    public List<DialogueWords> Words
-    {
-        get
-        {
-            return words;
-        }
-    }
+    public List<DialogueWords> Words => words;
 
     public int IndexOfWords(DialogueWords words)
     {
@@ -78,43 +48,19 @@ public class DialogueWords
 
     [SerializeField]
     private TalkerType talkerType = TalkerType.Player;
-    public TalkerType TalkerType
-    {
-        get
-        {
-            return talkerType;
-        }
-    }
+    public TalkerType TalkerType => talkerType;
 
     [SerializeField]
     private TalkerInformation talkerInfo;
-    public TalkerInformation TalkerInfo
-    {
-        get
-        {
-            return talkerInfo;
-        }
-    }
+    public TalkerInformation TalkerInfo => talkerInfo;
 
     [SerializeField, TextArea(3, 10)]
     private string words;
-    public string Words
-    {
-        get
-        {
-            return words;
-        }
-    }
+    public string Words => words;
 
     [SerializeField]
     private int indexOfCorrectOption;
-    public int IndexOfCorrectOption
-    {
-        get
-        {
-            return indexOfCorrectOption;
-        }
-    }
+    public int IndexOfCorrectOption => indexOfCorrectOption;
 
     public bool NeedToChusCorrectOption//仅当选择型选项多于1个时才需要选取正确选项
     {
@@ -129,33 +75,15 @@ public class DialogueWords
     /// <summary>
     /// ChuseWB = Choose Wrong Branch
     /// </summary>
-    public string WordsWhenChusWB
-    {
-        get
-        {
-            return wordsWhenChusWB;
-        }
-    }
+    public string WordsWhenChusWB => wordsWhenChusWB;
 
     [SerializeField]
     private List<WordsOption> branches = new List<WordsOption>();
-    public List<WordsOption> Options
-    {
-        get
-        {
-            return branches;
-        }
-    }
+    public List<WordsOption> Options => branches;
 
     [SerializeField]
     private List<WordsEvent> events = new List<WordsEvent>();
-    public List<WordsEvent> Events
-    {
-        get
-        {
-            return events;
-        }
-    }
+    public List<WordsEvent> Events => events;
 
     public bool IsValid
     {
@@ -221,13 +149,7 @@ public class WordsOption
     [EnumMemberNames("类型：一句分支", "类型：一段分支", "类型：选择项", "类型：提交、交换道具", "类型：取得道具")]
 #endif
     private WordsOptionType optionType;
-    public WordsOptionType OptionType
-    {
-        get
-        {
-            return optionType;
-        }
-    }
+    public WordsOptionType OptionType => optionType;
 
     [SerializeField]
     private bool hasWordsToSay;
@@ -241,46 +163,22 @@ public class WordsOption
 
     [SerializeField]
     private TalkerType talkerType;
-    public TalkerType TalkerType
-    {
-        get
-        {
-            return talkerType;
-        }
-    }
+    public TalkerType TalkerType => talkerType;
 
     [SerializeField]
     private string words;
-    public string Words
-    {
-        get
-        {
-            return words;
-        }
-    }
+    public string Words => words;
 
     [SerializeField]
     private Dialogue dialogue;
-    public Dialogue Dialogue
-    {
-        get
-        {
-            return dialogue;
-        }
-    }
+    public Dialogue Dialogue => dialogue;
 
     [SerializeField]
     private int specifyIndex = 0;
     /// <summary>
     /// 指定分支句子序号，在进入该分支时从第几句开始
     /// </summary>
-    public int SpecifyIndex
-    {
-        get
-        {
-            return specifyIndex;
-        }
-    }
+    public int SpecifyIndex => specifyIndex;
 
     [SerializeField]
     private bool goBack;
@@ -297,42 +195,18 @@ public class WordsOption
     /// <summary>
     /// 指定对话返回序号，在返回原对话时从第几句开始
     /// </summary>
-    public int IndexToGoBack
-    {
-        get
-        {
-            return indexToGoBack;
-        }
-    }
+    public int IndexToGoBack => indexToGoBack;
 
     [SerializeField]
     private ItemInfo itemToSubmit;
-    public ItemInfo ItemToSubmit
-    {
-        get
-        {
-            return itemToSubmit;
-        }
-    }
+    public ItemInfo ItemToSubmit => itemToSubmit;
 
     [SerializeField]
     private ItemInfo itemCanGet;
-    public ItemInfo ItemCanGet
-    {
-        get
-        {
-            return itemCanGet;
-        }
-    }
+    public ItemInfo ItemCanGet => itemCanGet;
     [SerializeField]
     private bool showOnlyWhenNotHave;
-    public bool ShowOnlyWhenNotHave
-    {
-        get
-        {
-            return showOnlyWhenNotHave;
-        }
-    }
+    public bool ShowOnlyWhenNotHave => showOnlyWhenNotHave;
     [SerializeField]
     private bool onlyForQuest;
     public bool OnlyForQuest
@@ -344,23 +218,11 @@ public class WordsOption
     }
     [SerializeField]
     private Quest bindedQuest;
-    public Quest BindedQuest
-    {
-        get
-        {
-            return bindedQuest;
-        }
-    }
+    public Quest BindedQuest => bindedQuest;
 
     [SerializeField]
     private bool deleteWhenCmplt = true;
-    public bool DeleteWhenCmplt
-    {
-        get
-        {
-            return deleteWhenCmplt;
-        }
-    }
+    public bool DeleteWhenCmplt => deleteWhenCmplt;
 
     public bool IsValid
     {
@@ -416,56 +278,30 @@ public class WordsEvent
     [EnumMemberNames("触发器", "增加好感", "减少好感")]
 #endif
     private WordsEventType eventType;
-    public WordsEventType EventType
-    {
-        get
-        {
-            return eventType;
-        }
-    }
+    public WordsEventType EventType => eventType;
 
     [SerializeField]
     private string wordsTrigrName;
-    public string WordsTrigrName
-    {
-        get
-        {
-            return wordsTrigrName;
-        }
-    }
+    public string WordsTrigrName => wordsTrigrName;
+
+    [SerializeField]
+    private bool doOnlyOnce;
+    public bool DoOnlyOnce => doOnlyOnce;
 
     [SerializeField]
 #if UNITY_EDITOR
     [EnumMemberNames("无", "置位", "复位")]
 #endif
     private TriggerActionType triggerActType;
-    public TriggerActionType TriggerActType
-    {
-        get
-        {
-            return triggerActType;
-        }
-    }
+    public TriggerActionType TriggerActType => triggerActType;
 
     [SerializeField]
     private TalkerInformation toWhom;
-    public TalkerInformation ToWhom
-    {
-        get
-        {
-            return toWhom;
-        }
-    }
+    public TalkerInformation ToWhom => toWhom;
 
     [SerializeField]
     private int favorabilityValue;
-    public int FavorabilityValue
-    {
-        get
-        {
-            return favorabilityValue;
-        }
-    }
+    public int AmityValue => favorabilityValue;
 
     public bool IsValid => eventType == WordsEventType.Trigger && !string.IsNullOrEmpty(wordsTrigrName)
         || eventType != WordsEventType.Trigger && toWhom && favorabilityValue >= 0;
@@ -478,8 +314,8 @@ public class WordsEvent
 public enum WordsEventType
 {
     Trigger,
-    GetFavorability,
-    LoseFavorability
+    GetAmity,
+    LoseAmity
 }
 
 public enum TalkerType
@@ -494,41 +330,17 @@ public class AffectiveDialogue
 {
     [SerializeField]
     private Dialogue level_1;
-    public Dialogue Level_1
-    {
-        get
-        {
-            return level_1;
-        }
-    }
+    public Dialogue Level_1 => level_1;
 
     [SerializeField]
     private Dialogue level_2;
-    public Dialogue Level_2
-    {
-        get
-        {
-            return level_2;
-        }
-    }
+    public Dialogue Level_2 => level_2;
 
     [SerializeField]
     private Dialogue level_3;
-    public Dialogue Level_3
-    {
-        get
-        {
-            return level_3;
-        }
-    }
+    public Dialogue Level_3 => level_3;
 
     [SerializeField]
     private Dialogue level_4;
-    public Dialogue Level_4
-    {
-        get
-        {
-            return level_1;
-        }
-    }
+    public Dialogue Level_4 => level_4;
 }

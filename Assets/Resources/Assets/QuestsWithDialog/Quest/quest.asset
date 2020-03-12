@@ -51,6 +51,7 @@ MonoBehaviour:
   collectObjectives:
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5251"
     display: 1
+    canNavigate: 1
     showMapIcon: 0
     amount: 5
     inOrder: 1
@@ -60,8 +61,10 @@ MonoBehaviour:
     item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
     checkBagAtStart: 1
     loseItemAtSbmt: 0
+    amountWhenStart: 0
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5200"
     display: 1
+    canNavigate: 1
     showMapIcon: 0
     amount: 5
     inOrder: 1
@@ -71,9 +74,11 @@ MonoBehaviour:
     item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
     checkBagAtStart: 1
     loseItemAtSbmt: 0
+    amountWhenStart: 0
   killObjectives:
   - displayName: "\u6D88\u706D\u9AB7\u9AC5"
     display: 1
+    canNavigate: 1
     showMapIcon: 1
     amount: 5
     inOrder: 1
@@ -85,6 +90,7 @@ MonoBehaviour:
     race: {fileID: 0}
   - displayName: "\u6D88\u706D\u50F5\u5C38"
     display: 1
+    canNavigate: 1
     showMapIcon: 1
     amount: 5
     inOrder: 1
@@ -97,6 +103,7 @@ MonoBehaviour:
   talkObjectives:
   - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
     display: 1
+    canNavigate: 1
     showMapIcon: 1
     amount: 1
     inOrder: 1
@@ -108,6 +115,7 @@ MonoBehaviour:
   moveObjectives:
   - displayName: "\u53BB\u5230\u6751\u5B50\u5317\u90E8\u8C03\u67E5"
     display: 1
+    canNavigate: 1
     showMapIcon: 1
     amount: 1
     inOrder: 1
@@ -127,7 +135,7 @@ MonoBehaviour:
         max: 20000
       relationshipLevel: 0
     warehouse:
-      warehouseSize:
+      size:
         min: 0
         max: 1
     shop: {fileID: 0}
@@ -144,7 +152,7 @@ MonoBehaviour:
         max: 20000
       relationshipLevel: 0
     warehouse:
-      warehouseSize:
+      size:
         min: 0
         max: 1
     shop: {fileID: 0}

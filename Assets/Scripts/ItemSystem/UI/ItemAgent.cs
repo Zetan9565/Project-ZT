@@ -246,7 +246,9 @@ public class ItemAgent : MonoBehaviour, IDragAble,
     private void BeginDrag()
     {
         if (agentType == ItemAgentType.Selection) return;
-        if (ItemSelectionManager.Instance.IsUIOpen && ItemSelectionManager.Instance.SelectionType == ItemSelectionType.Discard && !MItemInfo.item.DiscardAble) return;
+        if (ItemSelectionManager.Instance.IsUIOpen)
+            if (ItemSelectionManager.Instance.SelectionType == ItemSelectionType.Discard && !MItemInfo.item.DiscardAble) return;
+            else if (ItemSelectionManager.Instance.SelectionType == ItemSelectionType.Making && MItemInfo.item.MaterialType == MaterialType.None) return;
         DragableManager.Instance.GetDragable(this, FinishDrag, icon.rectTransform.rect.width, icon.rectTransform.rect.height);
         ItemWindowManager.Instance.CloseWindow();
         Dark();

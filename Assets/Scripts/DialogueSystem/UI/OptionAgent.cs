@@ -88,13 +88,13 @@ public class OptionAgent : MonoBehaviour
             case OptionType.Confirm:
                 if (DialogueManager.Instance.CurrentType == DialogueType.Quest)
                     if (!DialogueManager.Instance.CurrentQuest.IsComplete && QuestManager.Instance.AcceptQuest(DialogueManager.Instance.CurrentQuest))
-                        DialogueManager.Instance.GotoDefault();
+                        DialogueManager.Instance.GoBackDefault();
                     else if (QuestManager.Instance.CompleteQuest(DialogueManager.Instance.CurrentQuest))
-                        DialogueManager.Instance.GotoDefault();
+                        DialogueManager.Instance.GoBackDefault();
                 break;
             case OptionType.Back:
                 DialogueManager.Instance.HideQuestDescription();
-                DialogueManager.Instance.GotoDefault();
+                DialogueManager.Instance.GoBackDefault();
                 break;
             case OptionType.Continue:
                 DialogueManager.Instance.SayNextWords();

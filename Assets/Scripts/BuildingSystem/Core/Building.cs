@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+[DisallowMultipleComponent]
 public class Building : MonoBehaviour
 {
     public string IDStarter;
@@ -49,7 +50,7 @@ public class Building : MonoBehaviour
         GetIDTail();
         if (string.IsNullOrEmpty(IDTail))
         {
-            MessageManager.Instance.New("[" + name + "]已经达到最大建设数量");
+            MessageManager.Instance.New($"[{name}]已经达到最大建设数量");
             if (buildingAgent) buildingAgent.Clear(true);
             Destroy(gameObject);
             return false;
@@ -105,7 +106,7 @@ public class Building : MonoBehaviour
         }
         isUnderBuilding = false;
         IsBuilt = true;
-        MessageManager.Instance.New("[" + name + "] 建造完成了");
+        MessageManager.Instance.New($"[{name}] 建造完成了");
         if (buildingAgent) buildingAgent.UpdateUI();
     }
 

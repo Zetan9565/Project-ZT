@@ -173,6 +173,46 @@ public class DialogueInspector : Editor
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount - lineHeight, rect.width, lineHeight * 4),
                     w_words, new GUIContent(string.Empty));
                 lineCount += 2;
+                if (EditorGUI.EndChangeCheck()) words.serializedObject.ApplyModifiedProperties();
+                if (GUI.Button(new Rect(rect.x, rect.y + lineHeightSpace * (lineCount + 0.5f), rect.width, lineHeight), "插入关键字（需取消输入状态来刷新）"))
+                {
+                    GenericMenu menu = new GenericMenu();
+                    for (int i = 0; i < npcs.Length; i++)
+                        menu.AddItem(new GUIContent($"人名/{CharacterInformation.GetSexString(npcs[i].Sex)}/{npcs[i].name}"), false, OnSelectNpc, i);
+                    var items = Resources.LoadAll<ItemBase>("");
+                    for (int i = 0; i < items.Length; i++)
+                        menu.AddItem(new GUIContent($"道具/{ItemBase.GetItemTypeString(items[i].ItemType)}/{items[i].name}"), false, OnSelectItem, i);
+                    var enemies = Resources.LoadAll<EnemyInformation>("");
+                    for (int i = 0; i < enemies.Length; i++)
+                        menu.AddItem(new GUIContent(string.Format("敌人/{0}{1}", enemies[i].Race ? enemies[i].Race.name + "/" : string.Empty, enemies[i].name)),
+                            false, OnSelectEnemy, i);
+
+                    menu.DropDown(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight));
+
+                    void OnSelectNpc(object i)
+                    {
+                        int ni = (int)i;
+                        w_words.stringValue += $"{{[NPC]{npcs[ni].ID}}}";
+                        serializedObject.ApplyModifiedProperties();
+                    }
+
+                    void OnSelectItem(object i)
+                    {
+                        int ii = (int)i;
+                        w_words.stringValue += $"{{[ITEM]{items[ii].ID}}}";
+                        serializedObject.ApplyModifiedProperties();
+                    }
+
+                    void OnSelectEnemy(object i)
+                    {
+                        int ei = (int)i;
+                        w_words.stringValue += $"{{[ENMY]{enemies[ei].ID}}}";
+                        serializedObject.ApplyModifiedProperties();
+                    }
+                }
+                lineCount++;
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(new Rect(rect.x + 12, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
                     options, new GUIContent("选项\t\t" + (options.isExpanded ? string.Empty : (options.arraySize > 0 ? "数量: " + options.arraySize : "无选项"))));
                 lineCount++;
@@ -535,8 +575,8 @@ public class DialogueInspector : Editor
                                     EditorGUI.PropertyField(new Rect(_rect.x + 30 + _rect.width / 1.5f, _rect.y + lineHeightSpace, _rect.width - 30 - _rect.width / 1.5f, lineHeight),
                                         triggerActType, new GUIContent(string.Empty));
                                     break;
-                                case WordsEventType.GetFavorability:
-                                case WordsEventType.LoseFavorability:
+                                case WordsEventType.GetAmity:
+                                case WordsEventType.LoseAmity:
                                     oIndex = GetNPCIndex(toWhom.objectReferenceValue as TalkerInformation);
                                     indexes.Clear();
                                     names.Clear();
@@ -618,7 +658,7 @@ public class DialogueInspector : Editor
             if (words.isExpanded)
             {
                 if (dialogue.Words[index].TalkerType == TalkerType.NPC && !useUnifiedNPC.boolValue) lineCount += 1;//NPC选择
-                lineCount += 4;//对话、分支
+                lineCount += 5;//对话、按钮、分支
                 if (options.isExpanded)
                 {
                     if (options.arraySize > 1)

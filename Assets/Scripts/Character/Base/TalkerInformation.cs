@@ -6,131 +6,53 @@ public class TalkerInformation : CharacterInformation
 {
     [SerializeField]
     private Dialogue defaultDialogue;
-    public Dialogue DefaultDialogue
-    {
-        get
-        {
-            return defaultDialogue;
-        }
-    }
+    public Dialogue DefaultDialogue => defaultDialogue;
 
     [SerializeField]
     private bool isWarehouseAgent;
-    public bool IsWarehouseAgent
-    {
-        get
-        {
-            return isWarehouseAgent;
-        }
-    }
+    public bool IsWarehouseAgent => isWarehouseAgent;
     [SerializeField]
     private Warehouse warehouse = new Warehouse();
-    public Warehouse Warehouse
-    {
-        get
-        {
-            return warehouse;
-        }
-    }
+    public Warehouse Warehouse => warehouse;
 
     [SerializeField]
     private bool isVendor;
-    public bool IsVendor
-    {
-        get
-        {
-            return isVendor;
-        }
-    }
+    public bool IsVendor => isVendor;
     [SerializeField]
     private ShopInformation shop;
-    public ShopInformation Shop
-    {
-        get
-        {
-            return shop;
-        }
-    }
+    public ShopInformation Shop => shop;
 
     [SerializeField]
     private List<Quest> questsStored = new List<Quest>();
-    public List<Quest> QuestsStored
-    {
-        get
-        {
-            return questsStored;
-        }
-    }
+    public List<Quest> QuestsStored => questsStored;
 
     [SerializeField]
     private bool canDEV_RLAT;
-    public bool CanDEV_RLAT
-    {
-        get
-        {
-            return canDEV_RLAT;
-        }
-    }
+    public bool CanDEV_RLAT => canDEV_RLAT;
 
     [SerializeField]
     private Dialogue normalItemDialogue;
-    public Dialogue NormalItemDialogue
-    {
-        get
-        {
-            return normalItemDialogue;
-        }
-    }
+    public Dialogue NormalItemDialogue => normalItemDialogue;
 
     [SerializeField]
     private AffectiveDialogue favoriteItemDialogue;
-    public AffectiveDialogue FavoriteItemDialogue
-    {
-        get
-        {
-            return favoriteItemDialogue;
-        }
-    }
+    public AffectiveDialogue FavoriteItemDialogue => favoriteItemDialogue;
 
     [SerializeField]
     private AffectiveDialogue hateItemDialogue;
-    public AffectiveDialogue HateItemDialogue
-    {
-        get
-        {
-            return hateItemDialogue;
-        }
-    }
+    public AffectiveDialogue HateItemDialogue => hateItemDialogue;
 
     [SerializeField]
     private List<FavoriteItemInfo> favoriteItems = new List<FavoriteItemInfo>();
-    public List<FavoriteItemInfo> FavoriteItems
-    {
-        get
-        {
-            return favoriteItems;
-        }
-    }
+    public List<FavoriteItemInfo> FavoriteItems => favoriteItems;
 
     [SerializeField]
     private List<HateItemInfo> hateItems = new List<HateItemInfo>();
-    public List<HateItemInfo> HateItems
-    {
-        get
-        {
-            return hateItems;
-        }
-    }
+    public List<HateItemInfo> HateItems => hateItems;
 
     [SerializeField]
     private bool canMarry;
-    public bool CanMarry
-    {
-        get
-        {
-            return canMarry;
-        }
-    }
+    public bool CanMarry => canMarry;
 }
 
 [System.Serializable]

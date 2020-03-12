@@ -164,7 +164,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             {
                 icon.iconRange = ObjectPool.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
                 ZetanUtility.SetActive(icon.iconRange.gameObject, true);
-                icon.iconRange.RectTransform.sizeDelta = new Vector2(rangeSize, rangeSize);
+                icon.iconRange.rectTransform.sizeDelta = new Vector2(rangeSize, rangeSize);
             }
             icon.RemoveAble = removeAble;
             icon.TextToDisplay = textToDisplay;
@@ -231,7 +231,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         {
             MapIconHolder holder = iconKvp.Key;
             float sqrDistance = Vector3.SqrMagnitude(holder.transform.position - player.position);
-            if (!iconKvp.Value.ForceHided && (isViewingWorldMap && holder.drawOnWorldMap || !isViewingWorldMap && (!holder.AutoHide
+            if (iconKvp.Key.isActiveAndEnabled && !iconKvp.Value.ForceHided && (isViewingWorldMap && holder.drawOnWorldMap || !isViewingWorldMap && (!holder.AutoHide
                || holder.AutoHide && holder.DistanceSqr >= sqrDistance)))
             {
                 if (holder.showRange && !iconKvp.Value.iconRange)

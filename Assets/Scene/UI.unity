@@ -438,6 +438,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 632207804}
   animated: 1
+  animationSpeed: 0.04
 --- !u!1 &20826726
 GameObject:
   m_ObjectHideFlags: 0
@@ -2889,6 +2890,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 1248686241}
   animated: 0
+  animationSpeed: 0.04
   slotCount: 10
   defaultLootPrefab: {fileID: 4971178635026308411, guid: 7786fb215e3056c4e93993db12bea13e,
     type: 3}
@@ -5487,7 +5489,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 528181992}
   animated: 1
-  questsOngoing: []
+  animationSpeed: 0.04
+  questsInProcessing: []
   questsComplete: []
 --- !u!1 &167153637
 GameObject:
@@ -6830,6 +6833,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 55938043}
   animated: 1
+  animationSpeed: 0.04
   currentInfo: {fileID: 0}
   preview: {fileID: 0}
   gridSize: 1
@@ -7462,6 +7466,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 155554680}
   animated: 0
+  animationSpeed: 0.04
 --- !u!1 &250965375
 GameObject:
   m_ObjectHideFlags: 0
@@ -14454,6 +14459,9 @@ MonoBehaviour:
           m_StringArgument: "\u5DF2\u7F6E\u4F4D"
           m_BoolArgument: 1
         m_CallState: 2
+  onUndoBegin:
+    m_PersistentCalls:
+      m_Calls: []
   onUndo:
     m_PersistentCalls:
       m_Calls: []
@@ -14491,6 +14499,9 @@ MonoBehaviour:
           m_StringArgument: "\u5DF2\u590D\u4F4D"
           m_BoolArgument: 0
         m_CallState: 2
+  onUndoBegin:
+    m_PersistentCalls:
+      m_Calls: []
   onUndo:
     m_PersistentCalls:
       m_Calls: []
@@ -19259,6 +19270,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 616548982}
   animated: 0
+  animationSpeed: 0.04
 --- !u!114 &616548982
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23652,6 +23664,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 1314211769}
   animated: 1
+  animationSpeed: 0.04
 --- !u!1 &795011988
 GameObject:
   m_ObjectHideFlags: 0
@@ -24794,7 +24807,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UI: {fileID: 1552566403}
-  animated: 0
+  animated: 1
+  animationSpeed: 0.04
 --- !u!1 &856177356
 GameObject:
   m_ObjectHideFlags: 0
@@ -25662,6 +25676,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 1244110438}
   animated: 1
+  animationSpeed: 0.04
   overColor: {r: 1, g: 0.80775726, b: 0.1745283, a: 1}
   maxColor: {r: 1, g: 0, b: 0, a: 1}
   itemAgents: []
@@ -33280,7 +33295,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-  questFlagsOffset: {x: 0, y: 2.8, z: 0}
+  questFlagOffset: {x: 0, y: 2.8, z: 0}
   iconHolder: {fileID: 1137171750}
 --- !u!114 &1137171750
 MonoBehaviour:
@@ -36837,6 +36852,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 965859530}
   animated: 1
+  animationSpeed: 0.04
 --- !u!1 &1288915306
 GameObject:
   m_ObjectHideFlags: 0
@@ -39340,6 +39356,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 1687212488}
   animated: 1
+  animationSpeed: 0.04
 --- !u!1 &1375797053
 GameObject:
   m_ObjectHideFlags: 0
@@ -40210,6 +40227,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 322733031}
   animated: 1
+  animationSpeed: 0.04
 --- !u!1 &1409990638
 GameObject:
   m_ObjectHideFlags: 0
@@ -40243,12 +40261,12 @@ MonoBehaviour:
   backpackName: "\u80CC\u5305"
   coinName: "\u6587"
   qualityColors:
-  - {r: 0.7075472, g: 0.7075472, b: 0.7075472, a: 1}
+  - {r: 0.7607844, g: 0.7607844, b: 0.7607844, a: 1}
   - {r: 0.3964934, g: 0.8490566, b: 0.3964934, a: 1}
   - {r: 0.30277678, g: 0.65943414, b: 0.7924528, a: 1}
   - {r: 0.8773585, g: 0.8637667, b: 0.32694018, a: 1}
   - {r: 0.9150943, g: 0.59128165, b: 0.26330543, a: 1}
-  UIRootPrefab: {fileID: 4298284693081300884}
+  UIPrefab: {fileID: 4298284693081300884}
 --- !u!114 &1409990640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -49111,7 +49129,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-  questFlagsOffset: {x: 0, y: 2.8, z: 0}
+  questFlagOffset: {x: 0, y: 2.8, z: 0}
   iconHolder: {fileID: 1747857559}
 --- !u!58 &1747857561
 CircleCollider2D:
@@ -52469,7 +52487,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 3, y: 3}
   m_EdgeRadius: 0
 --- !u!114 &1867875259
 MonoBehaviour:
@@ -53231,6 +53249,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 1366160055}
   animated: 1
+  animationSpeed: 0.04
 --- !u!1 &1922156636
 GameObject:
   m_ObjectHideFlags: 0
@@ -53617,6 +53636,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UI: {fileID: 1585799563}
   animated: 1
+  animationSpeed: 0.04
 --- !u!1 &1939828466
 GameObject:
   m_ObjectHideFlags: 0

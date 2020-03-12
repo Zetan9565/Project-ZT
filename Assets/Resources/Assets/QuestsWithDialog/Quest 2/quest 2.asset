@@ -43,6 +43,7 @@ MonoBehaviour:
   collectObjectives:
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5251"
     display: 1
+    canNavigate: 1
     showMapIcon: 0
     amount: 5
     inOrder: 1
@@ -52,8 +53,10 @@ MonoBehaviour:
     item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
     checkBagAtStart: 1
     loseItemAtSbmt: 0
+    amountWhenStart: 0
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5200"
     display: 1
+    canNavigate: 1
     showMapIcon: 0
     amount: 5
     inOrder: 1
@@ -63,12 +66,14 @@ MonoBehaviour:
     item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
     checkBagAtStart: 1
     loseItemAtSbmt: 0
+    amountWhenStart: 0
   killObjectives: []
   talkObjectives: []
   moveObjectives: []
   submitObjectives:
   - displayName: "\u4E0A\u4EA4\u7834\u65E7\u7684\u5251"
     display: 1
+    canNavigate: 1
     showMapIcon: 1
     amount: 1
     inOrder: 1
@@ -90,7 +95,7 @@ MonoBehaviour:
         max: 20000
       relationshipLevel: 0
     warehouse:
-      warehouseSize:
+      size:
         min: 0
         max: 1
     shop: {fileID: 0}
@@ -107,7 +112,7 @@ MonoBehaviour:
         max: 20000
       relationshipLevel: 0
     warehouse:
-      warehouseSize:
+      size:
         min: 0
         max: 1
     shop: {fileID: 0}

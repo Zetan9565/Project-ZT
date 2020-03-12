@@ -37,7 +37,7 @@ public class AStarUnit : MonoBehaviour
     private new Rigidbody2D rigidbody2D;
     [SerializeField]
     private CharacterController controller;
-    private new Transform transform;
+    public new Transform transform { get; private set; }
 
     public float moveSpeed = 10f;
     public float turnSpeed = 10f;

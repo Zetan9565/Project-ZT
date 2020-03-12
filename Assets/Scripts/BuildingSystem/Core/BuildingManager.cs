@@ -57,12 +57,14 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     }
 
     public bool IsLocating { get; private set; }
+    public Building LocatingBuilding { get; private set; }
     public void LocateBuilding(Building building)
     {
         ZetanUtility.SetActive(UI.locationGoBackBtn, true);
         CameraMovement2D.Instance.MoveTo(building.transform.position);
         WindowsManager.Instance.PauseAll(true);
         IsLocating = true;
+        LocatingBuilding = building;
     }
     public void LocationGoBack()
     {
@@ -70,6 +72,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         CameraMovement2D.Instance.Stop();
         WindowsManager.Instance.PauseAll(false);
         IsLocating = false;
+        LocatingBuilding = null;
     }
 
     public void SaveData(SaveData data)
@@ -339,6 +342,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         HideDescription();
         HideBuiltList();
         ZetanUtility.SetActive(UI.locationGoBackBtn, false);
+        TipsManager.Instance.Hide();
     }
     public void OpenCloseWindow()
     {

@@ -3,6 +3,7 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public delegate void DialogueListner();
 [DisallowMultipleComponent]
@@ -65,7 +66,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         get
         {
-            if (!CurrentTalker || !CurrentTalker.QuestInstances.Exists(x => !x.IsOngoing) || CurrentTalker.QuestInstances.Exists(x => x.IsComplete)) return false;
+            if (!CurrentTalker || !CurrentTalker.QuestInstances.Exists(x => !x.InProcessing) || CurrentTalker.QuestInstances.Exists(x => x.IsComplete)) return false;
             return true;
         }
     }
@@ -137,8 +138,8 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         CurrentQuest = quest;
         CurrentType = DialogueType.Quest;
         ShowButtons(false, false, false);
-        if (!CurrentQuest.IsComplete && !CurrentQuest.IsOngoing) StartDialogue(quest.BeginDialogue);
-        else if (!CurrentQuest.IsComplete && CurrentQuest.IsOngoing) StartDialogue(quest.OngoingDialogue);
+        if (!CurrentQuest.IsComplete && !CurrentQuest.InProcessing) StartDialogue(quest.BeginDialogue);
+        else if (!CurrentQuest.IsComplete && CurrentQuest.InProcessing) StartDialogue(quest.OngoingDialogue);
         else StartDialogue(quest.CompleteDialogue);
     }
 
@@ -159,14 +160,13 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         bool submitAble = true;
         if (parentQ.CmpltObjctvInOrder)
             foreach (var o in parentQ.ObjectiveInstances)
-                if (o is CollectObjective)
-                    if (o.InOrder && o.IsComplete)
-                        if (amount - submitObj.Amount < o.Amount)
-                        {
-                            submitAble = false;
-                            MessageManager.Instance.New("该物品为其它目标所需");
-                            break;
-                        }
+                if (o is CollectObjective && (o as CollectObjective).LoseItemAtSbmt && o.InOrder && o.IsComplete)
+                    if (amount - submitObj.Amount < o.Amount)
+                    {
+                        submitAble = false;
+                        MessageManager.Instance.New($"该物品为目标[{o.DisplayName}]所需");
+                        break;
+                    }
         submitAble &= BackpackManager.Instance.TryLoseItem_Boolean(submitObj.ItemToSubmit, submitObj.Amount);
         if (!submitAble) return;
         currentSubmitObj = submitObj;
@@ -316,10 +316,10 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         ClearOptions();
         foreach (Quest quest in CurrentTalker.QuestInstances)
         {
-            if (!QuestManager.Instance.HasCompleteQuest(quest) && QuestManager.Instance.IsQuestAcceptable(quest) && QuestManager.Instance.IsQuestValid(quest))
+            if (!QuestManager.Instance.HasCompleteQuest(quest) && QuestManager.Instance.IsQuestAcceptable(quest) && QuestManager.IsQuestValid(quest))
             {
                 OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
-                oa.Init(quest.Title + (quest.IsComplete ? "(完成)" : quest.IsOngoing ? "(进行中)" : string.Empty), quest);
+                oa.Init(quest.Title + (quest.IsComplete ? "(完成)" : quest.InProcessing ? "(进行中)" : string.Empty), quest);
                 if (quest.IsComplete)
                 {
                     //保证完成的任务优先显示，方便玩家提交完成的任务
@@ -334,13 +334,13 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             OptionAgent oa = optionAgents[i];
             //若当前选项关联的任务在进行中
-            if (oa.MQuest.IsOngoing && !oa.MQuest.IsComplete)
+            if (oa.MQuest.InProcessing && !oa.MQuest.IsComplete)
             {
                 //则从后向前找一个新位置以放置该选项
                 for (int j = optionAgents.Count - 1; j > i; j--)
                 {
                     //若找到了合适的位置
-                    if (!optionAgents[j].MQuest.IsOngoing && !optionAgents[j].MQuest.IsComplete)
+                    if (!optionAgents[j].MQuest.InProcessing && !optionAgents[j].MQuest.IsComplete)
                     {
                         //则从该位置开始到选项的原位置，逐个前移一位，填充(覆盖)选项的原位置并空出新位置
                         for (int k = i; k < j; k++)
@@ -393,7 +393,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         int index = 1;
         ClearOptions(OptionType.Quest, OptionType.Option);
-        foreach (TalkObjective to in CurrentTalker.Data.objectivesTalkToThis)
+        foreach (TalkObjective to in CurrentTalker.Data.objectivesTalkToThis.Where(o => !o.IsComplete))
         {
             if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
             {
@@ -405,7 +405,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             }
         }
         index = 1;
-        foreach (SubmitObjective so in CurrentTalker.Data.objectivesSubmitToThis)
+        foreach (SubmitObjective so in CurrentTalker.Data.objectivesSubmitToThis.Where(o => !o.IsComplete))
         {
             if (so.AllPrevObjCmplt && !so.HasNextObjOngoing)
             {
@@ -421,7 +421,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     /// <summary>
     /// 生成分支对话选项
     /// </summary>
-    private void MakeWordsOptionOption()
+    private void MakeNormalOption()
     {
         if (wordsToSay.Count < 1 || wordsToSay.Peek().Options.Count < 1) return;
         DialogueWords currentWords = wordsToSay.Peek();
@@ -435,7 +435,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             {
                 DialogueWordsData wordsDataFound = dialogDataFound.wordsDatas.Find(x => x.wordsIndex == currentDialog.IndexOfWords(currentWords));
                 //这个选择型分支是否完成了
-                if (isLastWords || wordsDataFound != null && wordsDataFound.IsCmpltOptionWithIndex(currentWords.IndexOfOption(option)))
+                if (isLastWords || wordsDataFound != null && wordsDataFound.IsOptionCmplt(currentWords.IndexOfOption(option)))
                     continue;//是最后一句话或者选项完成则跳过创建
             }
             if (option.IsValid)
@@ -506,7 +506,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         for (int i = 0; i < optionAgents.Count; i++)
         {
-            //此时的OptionType.Quest实际上是OptionType.CmpltQuest，完成的任务
+            //此时的OptionType.Quest实际上是完成的任务
             if (exceptions.Contains(OptionType.Quest) && optionAgents[i] && optionAgents[i].OptionType == OptionType.Quest)
             {
                 if (optionAgents[i].MQuest.IsComplete)
@@ -555,7 +555,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             MakeTalkerCmpltQuestOption();
             if (AllOptionComplete()) MakeTalkerObjectiveOption();
         }
-        MakeWordsOptionOption();
+        MakeNormalOption();
         if (wordsToSay.Count >= 1) currentWords = wordsToSay.Peek();
         if (wordsToSay.Count == 1) HandlingLastWords();//因为Dequeue之后，话就没了，Words.Count就不是1了，而是0，所以要在Dequeue之前做这一步，意思是倒数第二句做这一步
         if (wordsToSay.Count >= 1)
@@ -564,30 +564,12 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             if (wordsToSay.Peek().TalkerType == TalkerType.Player && PlayerManager.Instance.PlayerInfo)
                 talkerName = PlayerManager.Instance.PlayerInfo.name;
             UI.nameText.text = talkerName;
-            UI.wordsText.text = wordsToSay.Peek().Words;
-            var words = wordsToSay.Dequeue();
-            if (TriggerManager.Instance)
-            {
-                foreach (var trigger in words.Events.FindAll(x => x.EventType == WordsEventType.Trigger))
-                {
-                    switch (trigger.TriggerActType)
-                    {
-                        case TriggerActionType.Set:
-                            TriggerManager.Instance.SetTrigger(trigger.WordsTrigrName, true);
-                            break;
-                        case TriggerActionType.Reset:
-                            TriggerManager.Instance.SetTrigger(trigger.WordsTrigrName, false);
-                            break;
-                        case TriggerActionType.None:
-                        default:
-                            break;
-                    }
-                }
-            }
+            UI.wordsText.text = HandlingWords(wordsToSay.Peek().Words);
+            wordsToSay.Dequeue();
         }
         if (wordsToSay.Count == 0)
         {
-            if (wordsOptionInstances.Count > 0)
+            if (wordsOptionInstances.Count > 0)//分支栈不是空的，说明当前对话是其它某句话的一个分支
                 HandlingLastOptionWords();//分支处理比较特殊，放到Dequque之后，否则分支最后一句不会讲
             OnFinishDialogueEvent?.Invoke();
         }
@@ -609,7 +591,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             {
                 ClearOptions(OptionType.Quest);
                 if (wordsToSay.Peek().Options.Count > 0)
-                    MakeWordsOptionOption();
+                    MakeNormalOption();
             }
             QuestManager.Instance.UpdateUI();
         }
@@ -624,19 +606,18 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (currentSubmitObj)
         {
             //双重确认，以防出错
-            Quest parent = currentSubmitObj.runtimeParent;
+            Quest qParent = currentSubmitObj.runtimeParent;
             var amount = BackpackManager.Instance.GetItemAmount(currentSubmitObj.ItemToSubmit);
             bool submitAble = true;
-            if (parent.CmpltObjctvInOrder)
-                foreach (var o in parent.ObjectiveInstances)
-                    if (o is CollectObjective && (o as CollectObjective).LoseItemAtSbmt)
-                        if (o.InOrder && o.IsComplete)
-                            if (amount - currentSubmitObj.Amount < o.Amount)
-                            {
-                                submitAble = false;
-                                MessageManager.Instance.New("该物品为其它目标所需");
-                                break;
-                            }
+            if (qParent.CmpltObjctvInOrder)
+                foreach (var o in qParent.ObjectiveInstances)
+                    if (o is CollectObjective && (o as CollectObjective).LoseItemAtSbmt && o.InOrder && o.IsComplete)
+                        if (amount - currentSubmitObj.Amount < o.Amount)
+                        {
+                            submitAble = false;
+                            MessageManager.Instance.New($"该物品为目标[{o.DisplayName}]所需");
+                            break;
+                        }
             submitAble &= BackpackManager.Instance.TryLoseItem_Boolean(currentSubmitObj.ItemToSubmit, currentSubmitObj.Amount);
             if (submitAble)
             {
@@ -652,13 +633,11 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                     optionAgents.Remove(oa);
                     oa.Recycle();
                 }
-                //目标已经完成，不再需要保留在对话人的目标列表里，从对话人的提交型目标里删掉相应信息
-                CurrentTalker.Data.objectivesSubmitToThis.RemoveAll(x => x == currentSubmitObj);
                 //若该目标是任务的最后一个目标，则可以直接提交任务
-                if (parent.IsComplete && parent.ObjectiveInstances.IndexOf(currentSubmitObj) == parent.ObjectiveInstances.Count - 1)
+                if (qParent.currentQuestHolder == CurrentTalker.Data && qParent.IsComplete && qParent.ObjectiveInstances.IndexOf(currentSubmitObj) == qParent.ObjectiveInstances.Count - 1)
                 {
                     oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
-                    oa.Init("继续", parent);
+                    oa.Init("继续", qParent);
                     optionAgents.Add(oa);
                 }
             }
@@ -677,14 +656,12 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                     optionAgents.Remove(oa);
                     oa.Recycle();
                 }
-                //目标已经完成，不再需要保留在对话人的目标列表里，从对话人的对话型目标里删掉相应信息
-                CurrentTalker.Data.objectivesTalkToThis.RemoveAll(x => x == currentTalkObj);
                 //该目标是任务的最后一个目标，则可以直接提交任务
-                Quest parent = currentTalkObj.runtimeParent;
-                if (parent.IsComplete && parent.ObjectiveInstances.IndexOf(currentSubmitObj) == parent.ObjectiveInstances.Count - 1)
+                Quest qParent = currentTalkObj.runtimeParent;
+                if (qParent.currentQuestHolder == CurrentTalker.Data && qParent.IsComplete && qParent.ObjectiveInstances.IndexOf(currentTalkObj) == qParent.ObjectiveInstances.Count - 1)
                 {
                     oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
-                    oa.Init("继续", parent);
+                    oa.Init("继续", qParent);
                     optionAgents.Add(oa);
                 }
             }
@@ -698,7 +675,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     private void HandlingLastQuestWords()
     {
         if (!AllOptionComplete()) return;
-        if (!CurrentQuest.IsOngoing || CurrentQuest.IsComplete)
+        if (!CurrentQuest.InProcessing || CurrentQuest.IsComplete)
         {
             ClearOptions();
             //若是任务对话的最后一句，则根据任务情况弹出确认按钮
@@ -725,46 +702,66 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             DialogueWords topWordsParent = null;
             if (topOptionInstance.runtimeWordsParentIndex > -1 && topOptionInstance.runtimeWordsParentIndex < topOptionInstance.runtimeDialogParent.Words.Count)
                 topWordsParent = topOptionInstance.runtimeDialogParent.Words[topOptionInstance.runtimeWordsParentIndex];//找到包含当前分支的语句
-            if (topWordsParent != null && topWordsParent.IsCorrectOption(currentOption))
+            if (topWordsParent != null)
             {
-                if (topOptionInstance.OptionType == WordsOptionType.Choice)
-                {
-                    int indexOfWordsParent = topOptionInstance.runtimeDialogParent.IndexOfWords(topWordsParent);
-                    foreach (WordsOption option in topWordsParent.Options)
+                int indexOfWordsParent = topOptionInstance.runtimeDialogParent.IndexOfWords(topWordsParent);
+                string dialogParentID = topOptionInstance.runtimeDialogParent.ID;
+
+                if (topOptionInstance.OptionType == WordsOptionType.Choice && topWordsParent.NeedToChusCorrectOption)//该对话需要选择正确选项，且该选项是选择型选项
+                    if (topWordsParent.IsCorrectOption(currentOption))//该选项是正确选项
+                                                                      //传入currentOption而不是topOptionInstance是因为前者是存于本地的原始数据，后者是实例化的数据
                     {
-                        string parentID = topOptionInstance.runtimeDialogParent.ID;
-                        DialogueWordsData _find = dialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
-                        if (_find == null)
+                        foreach (WordsOption option in topWordsParent.Options.Where(x => x.OptionType == WordsOptionType.Choice))//则其他选择型选项就跟着完成了
                         {
-                            dialogueDatas.Add(parentID, new DialogueData(option.runtimeDialogParent));
-                            _find = dialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
+                            CompleteOption(option, out var result);
+                            result.complete = true;
+                            var choiceOptions = topWordsParent.Options.Where(x => x.OptionType == WordsOptionType.Choice).ToList();
+                            for (int i = 0; i < choiceOptions.Count; i++)
+                            {
+                                if (result.IsOptionCmplt(i) || !choiceOptions[i].DeleteWhenCmplt) continue;
+                                result.complete = false;
+                                break;
+                            }
                         }
-                        int indexOfBranch = topWordsParent.IndexOfOption(option);
-                        _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
+                        StartDialogue(topOptionInstance.runtimeDialogParent, topOptionInstance.runtimeIndexToGoBack, false);
                     }
-                    StartDialogue(topOptionInstance.runtimeDialogParent, topOptionInstance.runtimeIndexToGoBack, false);
-                }
-            }
-            else
-            {
-                if (topOptionInstance.OptionType == WordsOptionType.Choice && topOptionInstance.DeleteWhenCmplt)
-                {
-                    int indexOfWords = topOptionInstance.runtimeDialogParent.IndexOfWords(topWordsParent);
-                    string parentID = topOptionInstance.runtimeDialogParent.ID;
-                    DialogueWordsData _find = dialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWords);
-                    if (_find == null)
+                    else if (topOptionInstance.DeleteWhenCmplt)//若该选项不是正确选项，但完成后需要删除
                     {
-                        dialogueDatas.Add(parentID, new DialogueData(topOptionInstance.runtimeDialogParent));
-                        _find = dialogueDatas[parentID].wordsDatas.Find(x => x.wordsIndex == indexOfWords);
+                        CompleteOption(currentOption, out _);
                     }
-                    int indexOfBranch = topWordsParent.IndexOfOption(currentOption);
-                    _find.cmpltBranchIndexes.Add(indexOfBranch);//该分支已完成
+
+                void CompleteOption(WordsOption option, out DialogueWordsData result)
+                {
+                    dialogueDatas.TryGetValue(dialogParentID, out var dFound);
+                    if (dFound == null)
+                    {
+                        dFound = new DialogueData(option.runtimeDialogParent);
+                        dialogueDatas.Add(dialogParentID, dFound);
+                    }
+                    result = dFound.wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
+                    if (result == null)
+                    {
+                        result = new DialogueWordsData(indexOfWordsParent);
+                        dFound.wordsDatas.Add(result);
+                    }
+                    int indexOfOption = topWordsParent.IndexOfOption(option);
+                    if (!result.cmpltOptionIndexes.Contains(indexOfOption)) result.cmpltOptionIndexes.Add(indexOfOption);//该分支已完成
+                    //Debug.Log($"完成选项{indexOfOption}: " + option.Title);
+                }
+
+                if (dialogueDatas.TryGetValue(dialogParentID, out var dfind))
+                {
+                    if (dfind.wordsDatas.TrueForAll(x => x.complete))
+                        ExecuteEvents(topWordsParent);
+                }
+                else if (!topWordsParent.NeedToChusCorrectOption)//找不到，且该句子不需要选择正确选项，可以直接完成
+                {
+                    ExecuteEvents(topWordsParent);
                 }
                 if (topWordsParent != null && topWordsParent.NeedToChusCorrectOption && !topWordsParent.IsCorrectOption(currentOption))//选择错误，则说选择错误时应该说的话
                     StartOneWords(new DialogueWords(topWordsParent.TalkerInfo, topWordsParent.WordsWhenChusWB, topWordsParent.TalkerType),
                         topOptionInstance.runtimeDialogParent, topOptionInstance.runtimeIndexToGoBack);
-                else if (topOptionInstance.GoBack)
-                    //处理普通的带返回的分支
+                else if (topOptionInstance.GoBack)//处理普通的带返回的分支
                     StartDialogue(topOptionInstance.runtimeDialogParent, topOptionInstance.runtimeIndexToGoBack, false);
             }
         }
@@ -799,6 +796,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         WindowsManager.Instance.PauseAll(true, this);
         UIManager.Instance.EnableJoyStick(false);
         UIManager.Instance.EnableInteract(false);
+        PlayerManager.Instance.PlayerController.controlAble = false;
     }
     public override void CloseWindow()
     {
@@ -821,6 +819,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (ShopManager.Instance.IsUIOpen) ShopManager.Instance.CloseWindow();
         IsTalking = false;
         UIManager.Instance.EnableJoyStick(true);
+        PlayerManager.Instance.PlayerController.controlAble = true;
     }
 
     public void ShowQuestDescription(Quest quest)
@@ -882,6 +881,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     public void OpenGiftWindow()
     {
         //TODO 把玩家背包道具读出并展示
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Gift, "选择礼物", "确定要送出这些礼物吗？", null);
     }
 
     public void CanTalk(Talker talker)
@@ -894,6 +894,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     public void CannotTalk()
     {
         TalkAble = false;
+        IsPausing = false;
         CloseWindow();
         UIManager.Instance.EnableInteract(false);
     }
@@ -933,7 +934,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         ZetanUtility.SetActive(UI.questButton.gameObject, false);
         ZetanUtility.SetActive(UI.warehouseButton.gameObject, false);
         ZetanUtility.SetActive(UI.shopButton.gameObject, false);
-        GotoDefault();
+        GoBackDefault();
         Skip();
         MakeTalkerQuestOption();
     }
@@ -944,13 +945,13 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (find != null)
             for (int i = 0; i < currentDialog.Words.Count; i++)
                 for (int j = 0; j < currentDialog.Words[i].Options.Count; j++)
-                    if (!find.wordsDatas[i].IsCmpltOptionWithIndex(j))
+                    if (!find.wordsDatas[i].IsOptionCmplt(j))//只要有一句话的分支有没完成的，则无法跳过
                         return;
         while (wordsToSay.Count > 0)
             SayNextWords();
     }
 
-    public void GotoDefault()
+    public void GoBackDefault()
     {
         currentOption = null;
         wordsOptionInstances.Clear();
@@ -959,7 +960,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         StartNormalDialogue(CurrentTalker);
     }
 
-    public bool AllOptionComplete()
+    private bool AllOptionComplete()
     {
         dialogueDatas.TryGetValue(currentDialog.ID, out DialogueData dialogDataFound);
         if (dialogDataFound == null) return false;
@@ -969,16 +970,85 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             if (wordsDataFound != null)
                 for (int j = 0; j < currentDialog.Words[i].Options.Count; j++)
                     //这个分支是否完成了
-                    if (wordsDataFound.IsCmpltOptionWithIndex(j)) continue;//完成则跳过
+                    if (wordsDataFound.IsOptionCmplt(j)) continue;//完成则跳过
                     else return false;//只要有一个没完成，就返回False
         }
         return true;
+    }
+
+    private void ExecuteEvents(DialogueWords words)
+    {
+        foreach (var we in words.Events)
+        {
+            switch (we.EventType)
+            {
+                case WordsEventType.Trigger:
+                    break;
+                case WordsEventType.GetAmity:
+                    break;
+                case WordsEventType.LoseAmity:
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     public void RemoveDialogueData(Dialogue dialogue)
     {
         if (!dialogue) return;
         dialogueDatas.Remove(dialogue.ID);
+    }
+
+    private string HandlingWords(string words)
+    {
+        StringBuilder newWords = new StringBuilder();
+        StringBuilder keyWordsSB = new StringBuilder();
+        bool startKey = false;
+        for (int i = 0; i < words.Length; i++)
+        {
+            if (words[i] == '{' && i + 1 < words.Length)
+            {
+                startKey = true;
+                i++;
+            }
+            else if (words[i] == '}')
+            {
+                startKey = false;
+                newWords.Append(HandlingName(keyWordsSB.ToString()));
+                keyWordsSB.Clear();
+            }
+            else if (!startKey) newWords.Append(words[i]);
+            if (startKey) keyWordsSB.Append(words[i]);
+        }
+
+        return newWords.ToString();
+
+        string HandlingName(string keyWords)
+        {
+            if (keyWords.StartsWith("[NPC]"))//为了性能，建议多此一举
+            {
+                keyWords = keyWords.Replace("[NPC]", string.Empty);
+                GameManager.TalkerInfos.TryGetValue(keyWords, out var talker);
+                if (talker) keyWords = talker.name;
+                return ZetanUtility.ColorText(keyWords, Color.green);
+            }
+            else if (keyWords.StartsWith("[ITEM]"))
+            {
+                keyWords = keyWords.Replace("[ITEM]", string.Empty);
+                GameManager.Items.TryGetValue(keyWords, out var item);
+                if (item) keyWords = item.name;
+                return ZetanUtility.ColorText(keyWords, Color.yellow);
+            }
+            else if (keyWords.StartsWith("[ENMY]"))
+            {
+                keyWords = keyWords.Replace("[ENMY]",string.Empty);
+                GameManager.EnemyInfos.TryGetValue(keyWords, out var enemy);
+                if (enemy) keyWords = enemy.name;
+                return ZetanUtility.ColorText(keyWords, Color.red);
+            }
+            return keyWords;
+        }
     }
 
     public void SaveData(SaveData data)

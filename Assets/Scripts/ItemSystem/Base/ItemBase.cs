@@ -142,7 +142,8 @@ public abstract class ItemBase : ScriptableObject
 
     public bool DIYAble => MakingTool != MakingToolType.None && !Materials.TrueForAll(x => x.MakingType == MakingType.SingleItem);
 
-    public bool Makable => MakingMethod != MakingMethod.None && Materials != null && Materials.Count > 0;
+    public bool Makable => MakingMethod != MakingMethod.None && Materials != null && Materials.Count > 0 && 
+        !Materials.Exists(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.None);
     #endregion
 
     #region 类型判断相关

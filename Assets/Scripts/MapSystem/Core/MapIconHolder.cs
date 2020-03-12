@@ -81,7 +81,7 @@ public class MapIconHolder : MonoBehaviour
                     if (iconInstance.iconRange)
                     {
                         if (iconInstance.iconRange.Color != rangeColor) iconInstance.iconRange.Color = rangeColor;
-                        iconInstance.iconRange.RectTransform.sizeDelta = new Vector2(rangeSize * 2, rangeSize * 2) * zoom;
+                        iconInstance.iconRange.rectTransform.sizeDelta = new Vector2(rangeSize * 2, rangeSize * 2) * zoom;
                     }
                 }
                 else ZetanUtility.SetActive(iconInstance.iconRange.gameObject, false);

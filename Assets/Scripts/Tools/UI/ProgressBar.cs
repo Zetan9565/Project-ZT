@@ -166,7 +166,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         if (progressCoroutine != null) StopCoroutine(progressCoroutine);
     }
 
-    private void CancelWithoutNotify()
+    public void CancelWithoutNotify()
     {
         targetTime = 0;
         currentTime = 0;

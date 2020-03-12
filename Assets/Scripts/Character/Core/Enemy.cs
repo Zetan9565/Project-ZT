@@ -1,37 +1,25 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public delegate void EnermyDeathListener();
 
 [DisallowMultipleComponent]
 public class Enemy : MonoBehaviour
 {
-    public string EnemyID
-    {
-        get { return Info.ID; }
-    }
+    public string EnemyID => info ? info.ID : string.Empty;
 
-    public string EnemyName
-    {
-        get { return info.name; }
-    }
+    public string EnemyName => info ? info.name : string.Empty;
 
     [SerializeField]
     private EnemyInformation info;
-    public EnemyInformation Info
-    {
-        get
-        {
-            return info;
-        }
-    }
+    public EnemyInformation Info => info;
 
+    public delegate void EnermyDeathListener();
     public event EnermyDeathListener OnDeathEvent;
 
     private void Awake()
     {
         GameManager.Enemies.TryGetValue(EnemyID, out var enemies);
-        if (enemies == null || enemies.Count < 1) GameManager.Enemies.Add(EnemyID, new List<Enemy>() { this });
+        if (enemies == null) GameManager.Enemies.Add(EnemyID, new List<Enemy>() { this });
         else if (!enemies.Contains(this)) GameManager.Enemies[EnemyID].Add(this);
     }
 

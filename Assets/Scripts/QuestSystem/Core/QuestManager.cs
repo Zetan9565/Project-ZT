@@ -24,15 +24,13 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 #if UNITY_EDITOR
     [ReadOnly]
 #endif
-    private List<Quest> questsOngoing = new List<Quest>();
-    public List<Quest> QuestsOngoing => questsOngoing;
+    private List<Quest> questsInProcessing = new List<Quest>();
 
     [SerializeField]
 #if UNITY_EDITOR
     [ReadOnly]
 #endif
     private List<Quest> questsComplete = new List<Quest>();
-    public List<Quest> QuestsComplete => questsComplete;
 
     private Quest selectedQuest;
 
@@ -41,12 +39,16 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     /// 接取任务
     /// </summary>
     /// <param name="quest">要接取的任务</param>
-    /// <param name="loadMode">是否读档模式</param>
-    public bool AcceptQuest(Quest quest, bool loadMode = false)
+    public bool AcceptQuest(Quest quest)
     {
         if (!quest || !IsQuestValid(quest))
         {
             MessageManager.Instance.New("无效任务");
+            return false;
+        }
+        if (!IsQuestAcceptable(quest) && !SaveManager.Instance.IsLoading)
+        {
+            MessageManager.Instance.New("未满足任务接取条件");
             return false;
         }
         if (HasOngoingQuest(quest))
@@ -90,7 +92,8 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 CollectObjective co = o as CollectObjective;
                 BackpackManager.Instance.OnGetItemEvent += co.UpdateCollectAmount;
                 BackpackManager.Instance.OnLoseItemEvent += co.UpdateCollectAmountDown;
-                if (co.CheckBagAtStart && !loadMode) co.UpdateCollectAmount(co.Item, BackpackManager.Instance.GetItemAmount(co.Item.ID));
+                if (co.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.UpdateCollectAmount(co.Item.ID, BackpackManager.Instance.GetItemAmount(co.Item.ID));
+                else if (!co.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.amountWhenStart = BackpackManager.Instance.GetItemAmount(co.Item.ID);
             }
             if (o is KillObjective)
             {
@@ -98,28 +101,35 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 switch (ko.ObjectiveType)
                 {
                     case KillObjectiveType.Specific:
-                        foreach (Enemy enemy in GameManager.Enemies[ko.Enemy.ID])
-                            enemy.OnDeathEvent += ko.UpdateKillAmount;
+                        GameManager.Enemies[ko.Enemy.ID].ForEach(e => e.OnDeathEvent += ko.UpdateKillAmount);
                         break;
                     case KillObjectiveType.Race:
                         foreach (List<Enemy> enemies in
                             GameManager.Enemies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
-                            foreach (Enemy enemy in enemies)
-                                enemy.OnDeathEvent += ko.UpdateKillAmount;
+                            enemies.ForEach(e => e.OnDeathEvent += ko.UpdateKillAmount);
                         break;
                     case KillObjectiveType.Any:
                         foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
-                            foreach (Enemy enemy in enemies)
-                                enemy.OnDeathEvent += ko.UpdateKillAmount;
+                            enemies.ForEach(e => e.OnDeathEvent += ko.UpdateKillAmount);
                         break;
                 }
             }
             if (o is TalkObjective)
-                if (!o.IsComplete) GameManager.TalkerDatas[(o as TalkObjective).NPCToTalk.ID].objectivesTalkToThis.Add(o as TalkObjective);
+                if (!o.IsComplete)
+                {
+                    var talker = GameManager.TalkerDatas[(o as TalkObjective).NPCToTalk.ID];
+                    talker.objectivesTalkToThis.Add(o as TalkObjective);
+                    o.OnStateChangeEvent += talker.TryRemoveObjective;
+                }
             if (o is MoveObjective)
-                GameManager.QuestPoints[(o as MoveObjective).PointID].OnMoveIntoEvent += (o as MoveObjective).UpdateMoveState;
+                GameManager.QuestPoints[(o as MoveObjective).PointID].ForEach(x => x.OnMoveIntoEvent += (o as MoveObjective).UpdateMoveState);
             if (o is SubmitObjective)
-                if (!o.IsComplete) GameManager.TalkerDatas[(o as SubmitObjective).NPCToSubmit.ID].objectivesSubmitToThis.Add(o as SubmitObjective);
+                if (!o.IsComplete)
+                {
+                    var talker = GameManager.TalkerDatas[(o as SubmitObjective).NPCToSubmit.ID];
+                    talker.objectivesSubmitToThis.Add(o as SubmitObjective);
+                    o.OnStateChangeEvent += talker.TryRemoveObjective;
+                }
             if (o is CustomObjective)
             {
                 CustomObjective cuo = o as CustomObjective;
@@ -129,13 +139,12 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     TriggerManager.Instance.SetTrigger(cuo.TriggerName, state == TriggerState.On ? true : false);
             }
         }
-        quest.IsOngoing = true;
-        QuestsOngoing.Add(quest);
+        quest.InProcessing = true;
+        questsInProcessing.Add(quest);
         if (quest.NPCToSubmit)
             GameManager.TalkerDatas[quest.NPCToSubmit.ID].TransferQuestToThis(quest);
-        if (!loadMode)
-            MessageManager.Instance.New("接取了任务 [" + quest.Title + "]");
-        if (QuestsOngoing.Count > 0)
+        if (!SaveManager.Instance.IsLoading) MessageManager.Instance.New($"接取了任务 [{quest.Title}]");
+        if (questsInProcessing.Count > 0)
         {
             UI.questBoard.alpha = 1;
             UI.questBoard.blocksRaycasts = true;
@@ -150,14 +159,13 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     /// 完成任务
     /// </summary>
     /// <param name="quest">要放弃的任务</param>
-    /// <param name="loadMode">是否读档模式</param>
     /// <returns>是否成功完成任务</returns>
-    public bool CompleteQuest(Quest quest, bool loadMode = false)
+    public bool CompleteQuest(Quest quest)
     {
         if (!quest) return false;
         if (HasOngoingQuest(quest) && quest.IsComplete)
         {
-            if (!loadMode)
+            if (!SaveManager.Instance.IsLoading)
             {
                 foreach (ItemInfo rwi in quest.RewardItems)
                     if (!BackpackManager.Instance.TryGetItem_Boolean(rwi)) return false;
@@ -172,16 +180,16 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     if (questsReqThisQuestItem.Contains(quest) && questsReqThisQuestItem.Count > 1)
                     //需要道具的任务群包含该任务且数量多于一个，说明有其他任务对该任务需提交的道具存在依赖
                     {
-                        MessageManager.Instance.New("提交失败！其他任务对该任务需提交物品存在依赖");
+                        MessageManager.Instance.New("提交失败！其他任务对该任务需提交的物品存在依赖");
                         return false;
                     }
                 }
             }
-            quest.IsOngoing = false;
-            QuestsOngoing.Remove(quest);
+            quest.InProcessing = false;
+            questsInProcessing.Remove(quest);
             RemoveUIElementByQuest(quest);
             quest.currentQuestHolder.questInstances.Remove(quest);
-            QuestsComplete.Add(quest);
+            questsComplete.Add(quest);
             QuestAgent cqa;
             if (quest.Group)
             {
@@ -217,7 +225,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     CollectObjective co = o as CollectObjective;
                     BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmount;
                     BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
-                    if (!loadMode && co.LoseItemAtSbmt) BackpackManager.Instance.LoseItem(co.Item, o.Amount);
+                    if (!SaveManager.Instance.IsLoading && co.LoseItemAtSbmt) BackpackManager.Instance.LoseItem(co.Item, o.Amount);
                 }
                 if (o is KillObjective)
                 {
@@ -225,34 +233,35 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     switch (ko.ObjectiveType)
                     {
                         case KillObjectiveType.Specific:
-                            foreach (Enemy enemy in GameManager.Enemies[ko.Enemy.ID])
-                                enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                            GameManager.Enemies[ko.Enemy.ID].ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
                             break;
                         case KillObjectiveType.Race:
                             foreach (List<Enemy> enemies in
                                 GameManager.Enemies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
-                                foreach (Enemy enemy in enemies)
-                                    enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                                enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
                             break;
                         case KillObjectiveType.Any:
                             foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
-                                foreach (Enemy enemy in enemies)
-                                    enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                                enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
                             break;
                     }
                 }
                 if (o is TalkObjective)
                 {
-                    GameManager.TalkerDatas[(o as TalkObjective).NPCToTalk.ID].objectivesTalkToThis.RemoveAll(x => x == (o as TalkObjective));
+                    var talker = GameManager.TalkerDatas[(o as TalkObjective).NPCToTalk.ID];
+                    talker.objectivesTalkToThis.RemoveAll(x => x == (o as TalkObjective));
+                    o.OnStateChangeEvent -= talker.TryRemoveObjective;
                 }
                 if (o is MoveObjective)
                 {
                     MoveObjective mo = o as MoveObjective;
-                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveState;
+                    GameManager.QuestPoints[mo.PointID].ForEach(x => x.OnMoveIntoEvent -= mo.UpdateMoveState);
                 }
                 if (o is SubmitObjective)
                 {
-                    GameManager.TalkerDatas[(o as SubmitObjective).NPCToSubmit.ID].objectivesSubmitToThis.RemoveAll(x => x == (o as SubmitObjective));
+                    var talker = GameManager.TalkerDatas[(o as SubmitObjective).NPCToSubmit.ID];
+                    talker.objectivesSubmitToThis.RemoveAll(x => x == (o as SubmitObjective));
+                    o.OnStateChangeEvent -= talker.TryRemoveObjective;
                 }
                 if (o is CustomObjective)
                 {
@@ -261,7 +270,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 }
                 RemoveObjectiveMapIcon(o);
             }
-            if (!loadMode)
+            if (!SaveManager.Instance.IsLoading)
             {
                 //TODO 经验的处理
                 BackpackManager.Instance.GetMoney(quest.RewardMoney);
@@ -269,10 +278,10 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 {
                     BackpackManager.Instance.GetItem(info);
                 }
-                MessageManager.Instance.New("提交了任务 [" + quest.Title + "]");
+                MessageManager.Instance.New($"提交了任务 [{quest.Title}]");
             }
             HideDescription();
-            if (QuestsOngoing.Count < 1)
+            if (questsInProcessing.Count < 1)
             {
                 UI.questBoard.alpha = 0;
                 UI.questBoard.blocksRaycasts = false;
@@ -292,8 +301,8 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     {
         if (HasOngoingQuest(quest) && quest && quest.Abandonable)
         {
-            quest.IsOngoing = false;
-            QuestsOngoing.Remove(quest);
+            quest.InProcessing = false;
+            questsInProcessing.Remove(quest);
             foreach (Objective o in quest.ObjectiveInstances)
             {
                 o.OnStateChangeEvent -= OnObjectiveStateChange;
@@ -301,6 +310,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 {
                     CollectObjective co = o as CollectObjective;
                     co.CurrentAmount = 0;
+                    co.amountWhenStart = 0;
                     BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmount;
                     BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
                 }
@@ -311,19 +321,16 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     switch (ko.ObjectiveType)
                     {
                         case KillObjectiveType.Specific:
-                            foreach (Enemy enemy in GameManager.Enemies[ko.Enemy.ID])
-                                enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                            GameManager.Enemies[ko.Enemy.ID].ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
                             break;
                         case KillObjectiveType.Race:
                             foreach (List<Enemy> enemies in
                                 GameManager.Enemies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
-                                foreach (Enemy enemy in enemies)
-                                    enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                                enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
                             break;
                         case KillObjectiveType.Any:
                             foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
-                                foreach (Enemy enemy in enemies)
-                                    enemy.OnDeathEvent -= ko.UpdateKillAmount;
+                                enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
                             break;
                     }
                 }
@@ -338,7 +345,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 {
                     MoveObjective mo = o as MoveObjective;
                     mo.CurrentAmount = 0;
-                    GameManager.QuestPoints[mo.PointID].OnMoveIntoEvent -= mo.UpdateMoveState;
+                    GameManager.QuestPoints[mo.PointID].ForEach(x => x.OnMoveIntoEvent -= mo.UpdateMoveState);
                 }
                 if (o is SubmitObjective)
                 {
@@ -356,7 +363,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             }
             if (quest.NPCToSubmit)
                 quest.originalQuestHolder.TransferQuestToThis(quest);
-            if (QuestsOngoing.Count < 1)
+            if (questsInProcessing.Count < 1)
             {
                 UI.questBoard.alpha = 0;
                 UI.questBoard.blocksRaycasts = false;
@@ -414,9 +421,10 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 }
                 if (parallelObj.Count > 0)
                 {
-                    int index = UnityEngine.Random.Range(0, parallelObj.Count);//如果目标可以同时进行，则随机选一个
+                    int index = Random.Range(0, parallelObj.Count);//如果目标可以同时进行，则随机选一个
                     currentObj = parallelObj[index];
                 }
+                if (!currentObj.CanNavigate) return;
                 if (currentObj is TalkObjective)
                 {
                     TalkObjective to = currentObj as TalkObjective;
@@ -444,10 +452,10 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 else if (currentObj is MoveObjective)
                 {
                     MoveObjective mo = currentObj as MoveObjective;
-                    GameManager.QuestPoints.TryGetValue(mo.PointID, out QuestPoint pointFound);
-                    if (pointFound)
+                    GameManager.QuestPoints.TryGetValue(mo.PointID, out var pointsFound);
+                    if (pointsFound != null)
                     {
-                        destination = pointFound.transform.position;
+                        destination = pointsFound[Random.Range(0, pointsFound.Count)].transform.position;
                         SetDestination();
                     }
                 }
@@ -480,6 +488,15 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 
     private void OnObjectiveStateChange(Objective objective, bool befCmplt)
     {
+        if (!SaveManager.Instance.IsLoading)
+        {
+            if (objective.CurrentAmount > 0)
+            {
+                string message = objective.DisplayName + (objective.IsComplete ? "(完成)" : $"[{objective.CurrentAmount}/{objective.Amount}]");
+                MessageManager.Instance.New(message);
+            }
+            if (objective.runtimeParent.IsComplete) MessageManager.Instance.New($"[任务]{objective.runtimeParent.Title}(已完成)");
+        }
         if (!befCmplt && objective.IsComplete)
         {
             UpdateNextCollectObjectives(objective);
@@ -579,7 +596,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                                    selectedQuest.Title,
                                    selectedQuest.originalQuestHolder.TalkerName,
                                    selectedQuest.Description,
-                                   selectedQuest.IsComplete ? "(完成)" : selectedQuest.IsOngoing ? "(进行中)" : string.Empty,
+                                   selectedQuest.IsComplete ? "(完成)" : selectedQuest.InProcessing ? "(进行中)" : string.Empty,
                                    objectives.ToString()).ToString();
         }
     }
@@ -728,10 +745,10 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         else if (objective is MoveObjective)
         {
             MoveObjective mo = objective as MoveObjective;
-            GameManager.QuestPoints.TryGetValue(mo.PointID, out QuestPoint pointFound);
-            if (pointFound)
+            GameManager.QuestPoints.TryGetValue(mo.PointID, out var pointsFound);
+            if (pointsFound != null)
             {
-                destination = pointFound.transform.position;
+                destination = pointsFound[Random.Range(0, pointsFound.Count)].transform.position;
                 CreateIcon();
             }
         }
@@ -794,20 +811,20 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     #region 其它
     public bool HasOngoingQuest(Quest quest)
     {
-        return QuestsOngoing.Contains(quest);
+        return questsInProcessing.Contains(quest);
     }
     public bool HasOngoingQuestWithID(string questID)
     {
-        return QuestsOngoing.Exists(x => x.ID == questID);
+        return questsInProcessing.Exists(x => x.ID == questID);
     }
 
     public bool HasCompleteQuest(Quest quest)
     {
-        return QuestsComplete.Contains(quest);
+        return questsComplete.Contains(quest);
     }
     private bool HasCompleteQuestWithID(string questID)
     {
-        return QuestsComplete.Exists(x => x.ID == questID);
+        return questsComplete.Exists(x => x.ID == questID);
     }
 
     /// <summary>
@@ -993,7 +1010,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     /// </summary>
     /// <param name="quest"></param>
     /// <returns></returns>
-    public bool IsQuestValid(Quest quest)
+    public static bool IsQuestValid(Quest quest)
     {
         if (quest.ObjectiveInstances.Count < 1) return false;
         if (string.IsNullOrEmpty(quest.ID) || string.IsNullOrEmpty(quest.Title)) return false;
@@ -1029,16 +1046,16 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     }
     private IEnumerable<Quest> QuestsRequireItem(ItemBase item, int leftAmount)
     {
-        return QuestsOngoing.FindAll(x => BackpackManager.Instance.DoQuestRequireItem(x, item, leftAmount)).AsEnumerable();
+        return questsInProcessing.FindAll(x => BackpackManager.Instance.DoQuestRequireItem(x, item, leftAmount)).AsEnumerable();
     }
 
     public void SaveData(SaveData data)
     {
-        foreach (Quest quest in QuestsOngoing)
+        foreach (Quest quest in questsInProcessing)
         {
-            data.ongoingQuestDatas.Add(new QuestData(quest));
+            data.inProcessingQuestDatas.Add(new QuestData(quest));
         }
-        foreach (Quest quest in QuestsComplete)
+        foreach (Quest quest in questsComplete)
         {
             data.completeQuestDatas.Add(new QuestData(quest));
         }
@@ -1046,35 +1063,35 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 
     public void Init()
     {
-        foreach (var quest in QuestsOngoing)
+        foreach (var quest in questsInProcessing)
             foreach (Objective o in quest.ObjectiveInstances)
                 RemoveObjectiveMapIcon(o);
-        QuestsOngoing.Clear();
-        QuestsComplete.Clear();
-        foreach (var qba in questBoardAgents)
-        {
-            qba.questAgent.Recycle();
-            qba.Recycle();
-        }
+        questsInProcessing.Clear();
+        questsComplete.Clear();
+        questBoardAgents.ForEach(qba => { qba.questAgent.Recycle(); qba.Recycle(); });
         questAgents.Clear();
         questBoardAgents.Clear();
+        completeQuestAgents.ForEach(cqa => cqa.Recycle());
+        completeQuestAgents.Clear();
+        questGroupAgents.ForEach(qga => qga.Recycle());
+        questGroupAgents.Clear();
         UI.questBoard.alpha = 0;
         UI.questBoard.blocksRaycasts = false;
     }
 
     public void LoadQuest(SaveData data)
     {
-        QuestsOngoing.Clear();
-        foreach (QuestData questData in data.ongoingQuestDatas)
+        questsInProcessing.Clear();
+        foreach (QuestData questData in data.inProcessingQuestDatas)
         {
             HandlingQuestData(questData);
             UpdateUI();
         }
-        QuestsComplete.Clear();
+        questsComplete.Clear();
         foreach (QuestData questData in data.completeQuestDatas)
         {
             Quest quest = HandlingQuestData(questData);
-            CompleteQuest(quest, true);
+            CompleteQuest(quest);
         }
     }
     private Quest HandlingQuestData(QuestData questData)
@@ -1083,7 +1100,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         if (!questGiver) return null;
         Quest quest = questGiver.questInstances.Find(x => x.ID == questData.questID);
         if (!quest) return null;
-        AcceptQuest(quest, true);
+        AcceptQuest(quest);
         foreach (ObjectiveData od in questData.objectiveDatas)
         {
             foreach (Objective o in quest.ObjectiveInstances)

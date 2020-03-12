@@ -48,6 +48,6 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
 
     private void Update()
     {
-        playerController.controlAble = !InputManager.IsTyping;
+        if (InputManager.IsTyping) playerController.controlAble = false;
     }
 }

@@ -1,13 +1,15 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using System.Collections;
 
 [RequireComponent(typeof(Image))]
 public class MapIcon : MonoBehaviour, IPointerClickHandler,
     IPointerDownHandler, IPointerUpHandler,
     IPointerEnterHandler, IPointerExitHandler
 {
+    public new Transform transform { get; private set; }
+
     [HideInInspector]
     public Image iconImage;
 
@@ -142,6 +144,7 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
         iconImage = GetComponent<Image>();
         ImageCanvas = iconImage.GetComponent<CanvasGroup>();
         if (!ImageCanvas) ImageCanvas = iconImage.gameObject.AddComponent<CanvasGroup>();
+        transform = base.transform;
     }
 
 #if UNITY_ANDROID

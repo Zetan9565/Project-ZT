@@ -48,6 +48,7 @@ MonoBehaviour:
   killObjectives:
   - displayName: "\u51FB\u6740\u9AB7\u9AC5"
     display: 1
+    canNavigate: 1
     showMapIcon: 1
     amount: 5
     inOrder: 1
@@ -60,6 +61,7 @@ MonoBehaviour:
   talkObjectives:
   - displayName: "\u5B89\u6170\u739B\u4E3D\u4E9A"
     display: 1
+    canNavigate: 1
     showMapIcon: 1
     amount: 1
     inOrder: 1
@@ -81,7 +83,7 @@ MonoBehaviour:
         max: 20000
       relationshipLevel: 0
     warehouse:
-      warehouseSize:
+      size:
         min: 0
         max: 1
     shop: {fileID: 0}
@@ -98,7 +100,7 @@ MonoBehaviour:
         max: 20000
       relationshipLevel: 0
     warehouse:
-      warehouseSize:
+      size:
         min: 0
         max: 1
     shop: {fileID: 0}

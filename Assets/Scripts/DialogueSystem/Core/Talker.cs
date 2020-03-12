@@ -12,15 +12,17 @@ public class Talker : MonoBehaviour
 
     public string TalkerName => info ? info.name : string.Empty;
 
-    public Vector3 questFlagsOffset;
-    private QuestFlag flagsAgent;
+    public Vector3 questFlagOffset;
+    private QuestFlag flagAgent;
 
     public TalkerData Data { get; private set; }
 
-    public List<Quest> QuestInstances => Data.questInstances;
+    public List<Quest> QuestInstances => Data ? Data.questInstances : null;
 
     [SerializeField]
     private MapIconHolder iconHolder;
+
+    public new Transform transform { get; private set; }
 
     public void Init()
     {
@@ -49,8 +51,8 @@ public class Talker : MonoBehaviour
         Data.currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         Data.currentPosition = transform.position;
         if (Info.IsVendor && !ShopManager.Vendors.Contains(Data)) ShopManager.Vendors.Add(Data);
-        flagsAgent = ObjectPool.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject, UIManager.Instance.QuestFlagParent).GetComponent<QuestFlag>();
-        flagsAgent.Init(this);
+        flagAgent = ObjectPool.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject, UIManager.Instance.QuestFlagParent).GetComponent<QuestFlag>();
+        flagAgent.Init(this);
     }
 
     public void OnTalkBegin()
@@ -108,6 +110,7 @@ public class Talker : MonoBehaviour
             iconHolder.iconEvents.onMouseEnter.AddListener(ShowNameAtMousePosition);
             iconHolder.iconEvents.onMouseExit.AddListener(HideNameImmediately);
         }
+        transform = base.transform;
     }
 
     private void Update()
@@ -129,7 +132,12 @@ public class Talker : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (flagsAgent) flagsAgent.Recycle();
+        if (flagAgent) flagAgent.Recycle();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireCube(base.transform.position + questFlagOffset, Vector3.one);
     }
 
     #region 触发器相关
@@ -317,6 +325,16 @@ public class TalkerData
                 questInstances.Add(questInstance);
             }
         }
+    }
+
+    public void TryRemoveObjective(Objective objective, bool befCmplt)
+    {
+        if (!befCmplt && objective.IsComplete)
+            if (objective is TalkObjective || objective is SubmitObjective)
+                if (objectivesTalkToThis.Contains(objective as TalkObjective))
+                    objectivesTalkToThis.RemoveAll(x => x == objective as TalkObjective);
+                else if (objectivesSubmitToThis.Contains(objective as SubmitObjective))
+                    objectivesSubmitToThis.RemoveAll(x => x == objective as SubmitObjective);
     }
 
     public void TransferQuestToThis(Quest quest)

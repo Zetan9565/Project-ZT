@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -44,13 +45,14 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     private static bool dontDestroyOnLoadOnce;
 
     [SerializeField]
-    private UIManager UIRootPrefab;
+    private UIManager UIPrefab;
     private void Awake()
     {
         if (!dontDestroyOnLoadOnce)
         {
             DontDestroyOnLoad(this);
             dontDestroyOnLoadOnce = true;
+            StartCoroutine(InitDelay());
         }
         else
         {
@@ -58,19 +60,24 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }
     }
 
-    private void Start()
+    private IEnumerator InitDelay()
     {
+        yield return new WaitForEndOfFrame();
         InitGame();
     }
 
     public static Dictionary<CropInformation, List<Crop>> Crops { get; } = new Dictionary<CropInformation, List<Crop>>();
 
     public static Dictionary<string, List<Enemy>> Enemies { get; } = new Dictionary<string, List<Enemy>>();
+    public static Dictionary<string, EnemyInformation> EnemyInfos { get; } = new Dictionary<string, EnemyInformation>();
 
     public static Dictionary<string, Talker> Talkers { get; } = new Dictionary<string, Talker>();
+    public static Dictionary<string, TalkerInformation> TalkerInfos { get; } = new Dictionary<string, TalkerInformation>();
     public static Dictionary<string, TalkerData> TalkerDatas { get; } = new Dictionary<string, TalkerData>();
 
-    public static Dictionary<string, QuestPoint> QuestPoints { get; } = new Dictionary<string, QuestPoint>();
+    public static Dictionary<string, List<QuestPoint>> QuestPoints { get; } = new Dictionary<string, List<QuestPoint>>();
+
+    public static Dictionary<string, ItemBase> Items { get; } = new Dictionary<string, ItemBase>();
 
     public static void InitGame(params Type[] exceptions)
     {
@@ -79,6 +86,22 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         Crops.Clear();
         foreach (var enemykvp in Enemies)
             enemykvp.Value.RemoveAll(x => !x || !x.gameObject);
+
+        EnemyInfos.Clear();
+        var enemies = Resources.LoadAll<EnemyInformation>("");
+        foreach (var e in enemies)
+            EnemyInfos.Add(e.ID, e);
+
+        Items.Clear();
+        var items = Resources.LoadAll<ItemBase>("");
+        foreach (var i in items)
+            Items.Add(i.ID, i);
+
+        TalkerInfos.Clear();
+        var talkers = Resources.LoadAll<TalkerInformation>("");
+        foreach (var t in talkers)
+            TalkerInfos.Add(t.ID, t);
+
         if (exceptions == null || !exceptions.Contains(typeof(Talker)))
         {
             Talkers.Clear();
@@ -90,7 +113,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             foreach (var tholder in FindObjectsOfType<TriggerHolder>())
                 tholder.Init();
         PlayerManager.Instance.Init();
-        if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIRootPrefab);
+        if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIPrefab);
         UIManager.Instance.Init();
         QuestManager.Instance.Init();
         MessageManager.Instance.Init();
@@ -108,9 +131,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     /// <returns>获得的道具</returns>
     public static ItemBase GetItemByID(string id)
     {
-        ItemBase[] items = Resources.LoadAll<ItemBase>("");
-        if (items.Length < 1) return null;
-        return Array.Find(items, x => x.ID == id);
+        Items.TryGetValue(id, out var item);
+        return item;
     }
 
     public static Color QualityToColor(ItemQuality quality)

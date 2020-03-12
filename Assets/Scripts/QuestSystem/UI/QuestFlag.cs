@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class QuestFlag : MonoBehaviour
 {
     private Image icon;
+    private RectTransform iconRectTransform;
     private CanvasGroup canvasGroup;
 
     [SerializeField]
@@ -53,13 +54,13 @@ public class QuestFlag : MonoBehaviour
         }
         foreach (var quest in questHolder.QuestInstances)
         {
-            if (!quest.IsComplete && !quest.IsOngoing && QuestManager.Instance.IsQuestAcceptable(quest))//只要有一个没接取
+            if (!quest.IsComplete && !quest.InProcessing && QuestManager.Instance.IsQuestAcceptable(quest))//只要有一个没接取
             {
                 icon.overrideSprite = notAccepted;
                 mapIcon.iconImage.overrideSprite = notAccepted;
                 return;
             }
-            else if (quest.IsComplete && quest.IsOngoing)//只要有一个完成
+            else if (quest.IsComplete && quest.InProcessing)//只要有一个完成
             {
                 icon.overrideSprite = complete;
                 mapIcon.iconImage.overrideSprite = complete;
@@ -80,6 +81,7 @@ public class QuestFlag : MonoBehaviour
     void Awake()
     {
         icon = GetComponent<Image>();
+        iconRectTransform = icon.rectTransform;
         canvasGroup = GetComponent<CanvasGroup>();
         if (!canvasGroup) canvasGroup = gameObject.AddComponent<CanvasGroup>();
         canvasGroup.blocksRaycasts = false;
@@ -89,33 +91,32 @@ public class QuestFlag : MonoBehaviour
     {
         if (questHolder)
         {
-            Vector3 viewportPoint = Camera.main.WorldToViewportPoint(questHolder.transform.position + questHolder.questFlagsOffset);
+            Vector3 viewportPoint = Camera.main.WorldToViewportPoint(questHolder.transform.position + questHolder.questFlagOffset);
             float sqrDistance = Vector3.SqrMagnitude(Camera.main.transform.position - questHolder.transform.position);
-            if (viewportPoint.z <= 0 || viewportPoint.x > 1 || viewportPoint.x < 0 || viewportPoint.y > 1 || viewportPoint.y < 0 || 
-                questHolder.QuestInstances.Count < 1 && !hasObjective || sqrDistance > 900f)
+            if (viewportPoint.z <= 0 || viewportPoint.x > 1 || viewportPoint.x < 0 || viewportPoint.y > 1 || viewportPoint.y < 0 ||
+                !questHolder.isActiveAndEnabled || questHolder.QuestInstances.Count < 1 && !hasObjective || sqrDistance > 900f)
             {
                 if (icon.enabled) icon.enabled = false;
-                if (questHolder.QuestInstances.Count < 1 && !hasObjective) mapIcon.Hide();
+                if (!questHolder.isActiveAndEnabled || questHolder.QuestInstances.Count < 1 && !hasObjective) mapIcon.Hide();
             }
-            else if (questHolder.QuestInstances.Count > 0 || hasObjective)
+            else if (questHolder.isActiveAndEnabled && (questHolder.QuestInstances.Count > 0 || hasObjective))
             {
                 if (!icon.enabled) icon.enabled = true;
                 Vector2 position = new Vector2(Screen.width * viewportPoint.x, Screen.height * viewportPoint.y);
-                icon.rectTransform.position = position;
+                iconRectTransform.position = position;
                 if (sqrDistance > 625 && sqrDistance <= 900)
                 {
                     float percent = (900 - sqrDistance) / 275;
                     canvasGroup.alpha = percent;
-                    icon.rectTransform.localScale = new Vector3(percent, percent, 1);
+                    iconRectTransform.localScale = new Vector3(percent, percent, 1);
                 }
                 else
                 {
                     canvasGroup.alpha = 1;
-                    icon.rectTransform.localScale = Vector3.one;
+                    iconRectTransform.localScale = Vector3.one;
                 }
             }
-            if (questHolder.QuestInstances.Count > 0 || hasObjective)
-                mapIcon.Show(false);
+            if (questHolder.isActiveAndEnabled && (questHolder.QuestInstances.Count > 0 || hasObjective)) mapIcon.Show(false);
             else mapIcon.Hide();
         }
     }

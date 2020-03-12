@@ -22,7 +22,7 @@ public class WarehouseUI : WindowUI
     {
         base.Awake();
         closeButton.onClick.AddListener(WarehouseManager.Instance.CloseWindow);
-        sortButton.onClick.AddListener(WarehouseManager.Instance.Sort);
+        sortButton.onClick.AddListener(WarehouseManager.Instance.Arrange);
         pageSelector.onValueChanged.AddListener(WarehouseManager.Instance.SetPage);
         searchButton.onClick.AddListener(WarehouseManager.Instance.Search);
     }

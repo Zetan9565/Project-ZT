@@ -9,7 +9,7 @@ public class TalkerInspector : Editor
     Talker talker;
 
     SerializedProperty info;
-    SerializedProperty questFlagsOffset;
+    SerializedProperty questFlagOffset;
 
     TalkerInformation[] npcs;
     string[] npcNames;
@@ -21,7 +21,7 @@ public class TalkerInspector : Editor
 
         talker = target as Talker;
         info = serializedObject.FindProperty("info");
-        questFlagsOffset = serializedObject.FindProperty("questFlagsOffset");
+        questFlagOffset = serializedObject.FindProperty("questFlagOffset");
     }
 
     public override void OnInspectorGUI()
@@ -41,8 +41,8 @@ public class TalkerInspector : Editor
         GUI.enabled = false;
         EditorGUILayout.PropertyField(info, new GUIContent("引用资源"));
         GUI.enabled = true;
-        EditorGUILayout.PropertyField(questFlagsOffset, new GUIContent("任务状态器位置偏移"));
-        if (Application.isPlaying)
+        EditorGUILayout.PropertyField(questFlagOffset, new GUIContent("任务状态器位置偏移"));
+        if (Application.isPlaying && talker.QuestInstances != null && talker.QuestInstances.Count > 0)
         {
             EditorGUILayout.BeginVertical("Box");
             EditorGUILayout.LabelField("任务实例", new GUIStyle { fontStyle = FontStyle.Bold });

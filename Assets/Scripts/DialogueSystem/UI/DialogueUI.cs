@@ -45,7 +45,7 @@ public class DialogueUI : WindowUI
         base.Awake();
         warehouseButton.onClick.AddListener(DialogueManager.Instance.OpenTalkerWarehouse);
         shopButton.onClick.AddListener(DialogueManager.Instance.OpenTalkerShop);
-        backButton.onClick.AddListener(DialogueManager.Instance.GotoDefault);
+        backButton.onClick.AddListener(DialogueManager.Instance.GoBackDefault);
         closeButton.onClick.AddListener(DialogueManager.Instance.CloseWindow);
         questButton.onClick.AddListener(DialogueManager.Instance.ShowTalkerQuest);
         pageUpButton.onClick.AddListener(DialogueManager.Instance.OptionPageUp);

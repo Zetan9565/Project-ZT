@@ -159,7 +159,7 @@ public class Backpack
         return items.Count;
     }
 
-    public void Sort()
+    public void Arrange()
     {
         Items.Sort((x, y) =>
         {
@@ -191,6 +191,8 @@ public class Backpack
                 else if (y.item.ItemType == ItemType.Elixir) return 1;
                 else if (x.item.ItemType == ItemType.Box) return -1;
                 else if (y.item.ItemType == ItemType.Box) return 1;
+                else if (x.item.ItemType == ItemType.Book) return -1;
+                else if (y.item.ItemType == ItemType.Book) return 1;
                 else if (x.item.ItemType == ItemType.Valuables) return -1;
                 else if (y.item.ItemType == ItemType.Valuables) return 1;
                 else if (x.item.ItemType == ItemType.Quest) return -1;
@@ -199,6 +201,8 @@ public class Backpack
                 else if (y.item.ItemType == ItemType.Material) return 1;
                 else if (x.item.ItemType == ItemType.Seed) return -1;
                 else if (y.item.ItemType == ItemType.Seed) return 1;
+                else if (x.item.ItemType == ItemType.Bag) return -1;
+                else if (y.item.ItemType == ItemType.Bag) return 1;
                 else if (x.item.ItemType == ItemType.Other) return -1;
                 else if (y.item.ItemType == ItemType.Other) return 1;
                 else return 0;

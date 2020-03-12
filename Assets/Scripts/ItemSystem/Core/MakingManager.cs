@@ -110,12 +110,21 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                     });
                 }, amountCanMake, "制作次数");
             }
-        else ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", MakeCurrent);
+        else
+        {
+            ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", MakeCurrent,
+                delegate
+                {
+                    BackpackManager.Instance.DarkUnmakeable(false);
+                });
+            BackpackManager.Instance.DarkUnmakeable(true);
+        }
     }
 
     private void MakeCurrent(List<ItemInfo> materials)
     {
         //Debug.Log("Start making");
+        BackpackManager.Instance.DarkUnmakeable(false);
         IsMaking = true;
         PauseDisplay(true);
         if (UI.loopToggle.isOn)
@@ -166,11 +175,17 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
 
     public void DIY()
     {
-        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", DIYMake);
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", DIYMake,
+            delegate
+            {
+                BackpackManager.Instance.DarkUnmakeable(false);
+            });
+        BackpackManager.Instance.DarkUnmakeable(true);
         HideDescription();
     }
     public void DIYMake(List<ItemInfo> materials)
     {
+        BackpackManager.Instance.DarkUnmakeable(false);
         IsMaking = true;
         PauseDisplay(true);
         ProgressBar.Instance.New(CurrentTool.MakingTime,
@@ -453,7 +468,9 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
     public void CannotMake()
     {
         CurrentTool = null;
-        if (IsMaking) ProgressBar.Instance.Cancel();
+        if (IsMaking) ProgressBar.Instance.CancelWithoutNotify();
+        PauseDisplay(false);
+        UI.window.alpha = 0;
         CloseWindow();
         UIManager.Instance.EnableInteract(false);
     }

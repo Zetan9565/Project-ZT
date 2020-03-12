@@ -7,10 +7,12 @@ public class BuildingFlag : MonoBehaviour
     [SerializeField]
     private Text timeText;
 
+    public new Transform transform { get; private set; }
+
     private CanvasGroup canvasGroup;
 
     private Building building;
-    // Start is called before the first frame update
+
     public void Init(Building building)
     {
         this.building = building;
@@ -23,13 +25,14 @@ public class BuildingFlag : MonoBehaviour
         canvasGroup = GetComponent<CanvasGroup>();
         if (!canvasGroup) canvasGroup = gameObject.AddComponent<CanvasGroup>();
         canvasGroup.blocksRaycasts = false;
+        transform = base.transform;
     }
 
     void Update()
     {
         if (building)
         {
-            timeText.text = building.IsBuilt ? "已建成" : "建造中[" + building.leftBuildTime.ToString("F2") + "s]";
+            timeText.text = building.IsBuilt ? "已建成" : $"建造中[{building.leftBuildTime.ToString("F2")}s]";
             Vector3 viewportPoint = Camera.main.WorldToViewportPoint(building.transform.position + building.BuildingFlagOffset);
             float sqrDistance = Vector3.SqrMagnitude(Camera.main.transform.position - building.transform.position);
             if (viewportPoint.z <= 0 || viewportPoint.x > 1 || viewportPoint.x < 0 || viewportPoint.y > 1 || viewportPoint.y < 0 || sqrDistance > 900f)

@@ -5,6 +5,9 @@ public class CameraFollowing2D : SingletonMonoBehaviour<CameraFollowing2D>
 {
     public new Camera camera;
 
+    [HideInInspector]
+    public Transform CameraTransform { get; private set; }
+
     public Transform target;
 
     public Vector2 offset;
@@ -20,7 +23,8 @@ public class CameraFollowing2D : SingletonMonoBehaviour<CameraFollowing2D>
 
     private void Awake()
     {
-        if (camera) camera = GetComponent<Camera>();
+        if (!camera) camera = GetComponent<Camera>();
+        CameraTransform = camera.transform;
     }
 
     private void Update()
@@ -46,10 +50,10 @@ public class CameraFollowing2D : SingletonMonoBehaviour<CameraFollowing2D>
 
     void Follow()
     {
-        if (target && camera)
+        if (target && CameraTransform)
         {
-            if (smooth) camera.transform.position = Vector3.Lerp(camera.transform.position, (Vector3)offset + new Vector3(target.position.x, target.position.y, camera.transform.position.z), smoothness);
-            else camera.transform.position = (Vector3)offset + new Vector3(target.position.x, target.position.y, camera.transform.position.z);
+            if (smooth) CameraTransform.position = Vector3.Lerp(CameraTransform.position, (Vector3)offset + new Vector3(target.position.x, target.position.y, CameraTransform.position.z), smoothness);
+            else CameraTransform.position = (Vector3)offset + new Vector3(target.position.x, target.position.y, CameraTransform.position.z);
         }
     }
 }

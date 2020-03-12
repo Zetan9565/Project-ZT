@@ -6,13 +6,7 @@ public class LootAgent : MonoBehaviour
 {
     [SerializeField]
     private string _name;
-    public new string name
-    {
-        get
-        {
-            return _name;
-        }
-    }
+    public new string name => _name;
 
     [SerializeField]
     private float disappearTime;
