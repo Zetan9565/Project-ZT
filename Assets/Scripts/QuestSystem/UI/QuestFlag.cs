@@ -54,13 +54,13 @@ public class QuestFlag : MonoBehaviour
         }
         foreach (var quest in questHolder.QuestInstances)
         {
-            if (!quest.IsComplete && !quest.InProcessing && QuestManager.Instance.IsQuestAcceptable(quest))//只要有一个没接取
+            if (!quest.IsComplete && !quest.InProgress && QuestManager.Instance.IsQuestAcceptable(quest))//只要有一个没接取
             {
                 icon.overrideSprite = notAccepted;
                 mapIcon.iconImage.overrideSprite = notAccepted;
                 return;
             }
-            else if (quest.IsComplete && quest.InProcessing)//只要有一个完成
+            else if (quest.IsComplete && quest.InProgress)//只要有一个完成
             {
                 icon.overrideSprite = complete;
                 mapIcon.iconImage.overrideSprite = complete;

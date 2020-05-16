@@ -22,7 +22,7 @@ public class SaveData
 
     public List<WarehouseData> warehouseDatas = new List<WarehouseData>();
 
-    public List<QuestData> inProcessingQuestDatas = new List<QuestData>();
+    public List<QuestData> inProgressQuestDatas = new List<QuestData>();
     public List<QuestData> completeQuestDatas = new List<QuestData>();
 
     public List<DialogueData> dialogueDatas = new List<DialogueData>();

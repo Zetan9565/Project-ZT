@@ -10,7 +10,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     public QuestFlag QuestFlagsPrefab => UI ? UI.questFlagPrefab : null;
 
     private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
-    private readonly List<QuestAgent> questAgents = new List<QuestAgent>();
+    private readonly List<QuestAgent> progressQuestAgents = new List<QuestAgent>();
     private readonly List<QuestAgent> completeQuestAgents = new List<QuestAgent>();
     private readonly List<QuestGroupAgent> questGroupAgents = new List<QuestGroupAgent>();
     private readonly List<QuestGroupAgent> cmpltQuestGroupAgents = new List<QuestGroupAgent>();
@@ -24,7 +24,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 #if UNITY_EDITOR
     [ReadOnly]
 #endif
-    private List<Quest> questsInProcessing = new List<Quest>();
+    private List<Quest> questsInProgress = new List<Quest>();
 
     [SerializeField]
 #if UNITY_EDITOR
@@ -80,7 +80,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         }
         else qa = ObjectPool.Get(UI.questPrefab, UI.questListParent).GetComponent<QuestAgent>();
         qa.Init(quest);
-        questAgents.Add(qa);
+        progressQuestAgents.Add(qa);
         QuestBoardAgent qba = ObjectPool.Get(UI.boardQuestPrefab, UI.questBoardArea).GetComponent<QuestBoardAgent>();
         qba.Init(qa);
         questBoardAgents.Add(qba);
@@ -139,12 +139,12 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     TriggerManager.Instance.SetTrigger(cuo.TriggerName, state == TriggerState.On ? true : false);
             }
         }
-        quest.InProcessing = true;
-        questsInProcessing.Add(quest);
+        quest.InProgress = true;
+        questsInProgress.Add(quest);
         if (quest.NPCToSubmit)
             GameManager.TalkerDatas[quest.NPCToSubmit.ID].TransferQuestToThis(quest);
         if (!SaveManager.Instance.IsLoading) MessageManager.Instance.New($"接取了任务 [{quest.Title}]");
-        if (questsInProcessing.Count > 0)
+        if (questsInProgress.Count > 0)
         {
             UI.questBoard.alpha = 1;
             UI.questBoard.blocksRaycasts = true;
@@ -185,8 +185,8 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     }
                 }
             }
-            quest.InProcessing = false;
-            questsInProcessing.Remove(quest);
+            quest.InProgress = false;
+            questsInProgress.Remove(quest);
             RemoveUIElementByQuest(quest);
             quest.currentQuestHolder.questInstances.Remove(quest);
             questsComplete.Add(quest);
@@ -281,7 +281,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 MessageManager.Instance.New($"提交了任务 [{quest.Title}]");
             }
             HideDescription();
-            if (questsInProcessing.Count < 1)
+            if (questsInProgress.Count < 1)
             {
                 UI.questBoard.alpha = 0;
                 UI.questBoard.blocksRaycasts = false;
@@ -301,8 +301,8 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     {
         if (HasOngoingQuest(quest) && quest && quest.Abandonable)
         {
-            quest.InProcessing = false;
-            questsInProcessing.Remove(quest);
+            quest.InProgress = false;
+            questsInProgress.Remove(quest);
             foreach (Objective o in quest.ObjectiveInstances)
             {
                 o.OnStateChangeEvent -= OnObjectiveStateChange;
@@ -363,7 +363,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             }
             if (quest.NPCToSubmit)
                 quest.originalQuestHolder.TransferQuestToThis(quest);
-            if (questsInProcessing.Count < 1)
+            if (questsInProgress.Count < 1)
             {
                 UI.questBoard.alpha = 0;
                 UI.questBoard.blocksRaycasts = false;
@@ -547,7 +547,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     #region UI相关
     public void UpdateUI()
     {
-        using (var qaEnum = questAgents.GetEnumerator())
+        using (var qaEnum = progressQuestAgents.GetEnumerator())
             while (qaEnum.MoveNext())
                 qaEnum.Current.UpdateStatus();
 
@@ -596,7 +596,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                                    selectedQuest.Title,
                                    selectedQuest.originalQuestHolder.TalkerName,
                                    selectedQuest.Description,
-                                   selectedQuest.IsComplete ? "(完成)" : selectedQuest.InProcessing ? "(进行中)" : string.Empty,
+                                   selectedQuest.IsComplete ? "(完成)" : selectedQuest.InProgress ? "(进行中)" : string.Empty,
                                    objectives.ToString()).ToString();
         }
     }
@@ -606,7 +606,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         if (!questAgent.MQuest) return;
         if (selectedQuest && selectedQuest != questAgent.MQuest)
         {
-            QuestAgent qa = questAgents.Find(x => x.MQuest == selectedQuest);
+            QuestAgent qa = progressQuestAgents.Find(x => x.MQuest == selectedQuest);
             if (qa) qa.Deselect();
             else
             {
@@ -646,7 +646,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     }
     public void HideDescription()
     {
-        QuestAgent qa = questAgents.Find(x => x.MQuest == selectedQuest);
+        QuestAgent qa = progressQuestAgents.Find(x => x.MQuest == selectedQuest);
         if (qa) qa.Deselect();
         else
         {
@@ -688,7 +688,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 
     private void RemoveUIElementByQuest(Quest quest)
     {
-        QuestAgent qa = questAgents.Find(x => x.MQuest == quest);
+        QuestAgent qa = progressQuestAgents.Find(x => x.MQuest == quest);
         if (qa)
         {
             QuestBoardAgent qba = questBoardAgents.Find(x => x.questAgent == qa);
@@ -708,7 +708,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     qga.Recycle();
                 }
             }
-            questAgents.Remove(qa);
+            progressQuestAgents.Remove(qa);
             qa.Recycle();
         }
     }
@@ -800,7 +800,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 qba.Recycle();
             }
         }
-        questAgents.Clear();
+        progressQuestAgents.Clear();
         questBoardAgents.Clear();
         IsPausing = false;
         CloseWindow();
@@ -811,11 +811,11 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     #region 其它
     public bool HasOngoingQuest(Quest quest)
     {
-        return questsInProcessing.Contains(quest);
+        return questsInProgress.Contains(quest);
     }
     public bool HasOngoingQuestWithID(string questID)
     {
-        return questsInProcessing.Exists(x => x.ID == questID);
+        return questsInProgress.Exists(x => x.ID == questID);
     }
 
     public bool HasCompleteQuest(Quest quest)
@@ -990,7 +990,8 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     {
         switch (condition.AcceptCondition)
         {
-            case QuestCondition.CompleteQuest: return QuestManager.Instance.HasCompleteQuestWithID(condition.CompleteQuest.ID);
+            case QuestCondition.CompleteQuest: return HasCompleteQuestWithID(condition.CompleteQuest.ID);
+            case QuestCondition.AcceptQuest: return HasOngoingQuestWithID(condition.CompleteQuest.ID);
             case QuestCondition.HasItem: return BackpackManager.Instance.HasItemWithID(condition.OwnedItem.ID);
             case QuestCondition.LevelEquals: return PlayerManager.Instance.PlayerInfo.level == condition.Level;
             case QuestCondition.LevelLargeThen: return PlayerManager.Instance.PlayerInfo.level > condition.Level;
@@ -1046,14 +1047,14 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     }
     private IEnumerable<Quest> QuestsRequireItem(ItemBase item, int leftAmount)
     {
-        return questsInProcessing.FindAll(x => BackpackManager.Instance.DoQuestRequireItem(x, item, leftAmount)).AsEnumerable();
+        return questsInProgress.FindAll(x => BackpackManager.Instance.DoQuestRequireItem(x, item, leftAmount)).AsEnumerable();
     }
 
     public void SaveData(SaveData data)
     {
-        foreach (Quest quest in questsInProcessing)
+        foreach (Quest quest in questsInProgress)
         {
-            data.inProcessingQuestDatas.Add(new QuestData(quest));
+            data.inProgressQuestDatas.Add(new QuestData(quest));
         }
         foreach (Quest quest in questsComplete)
         {
@@ -1063,13 +1064,13 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 
     public void Init()
     {
-        foreach (var quest in questsInProcessing)
+        foreach (var quest in questsInProgress)
             foreach (Objective o in quest.ObjectiveInstances)
                 RemoveObjectiveMapIcon(o);
-        questsInProcessing.Clear();
+        questsInProgress.Clear();
         questsComplete.Clear();
         questBoardAgents.ForEach(qba => { qba.questAgent.Recycle(); qba.Recycle(); });
-        questAgents.Clear();
+        progressQuestAgents.Clear();
         questBoardAgents.Clear();
         completeQuestAgents.ForEach(cqa => cqa.Recycle());
         completeQuestAgents.Clear();
@@ -1081,8 +1082,8 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 
     public void LoadQuest(SaveData data)
     {
-        questsInProcessing.Clear();
-        foreach (QuestData questData in data.inProcessingQuestDatas)
+        questsInProgress.Clear();
+        foreach (QuestData questData in data.inProgressQuestDatas)
         {
             HandlingQuestData(questData);
             UpdateUI();

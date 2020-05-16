@@ -32,6 +32,10 @@ public class Quest : ScriptableObject
     public List<QuestAcceptCondition> AcceptConditions => acceptConditions;
 
     [SerializeField]
+    private string conditionRelational;
+    public string ConditionRelational => conditionRelational;
+
+    [SerializeField]
 #if UNITY_EDITOR
     [EnumMemberNames("普通", "主线", "反复")]
 #endif
@@ -48,10 +52,6 @@ public class Quest : ScriptableObject
 #endif
     private TimeUnit timeUnit = TimeUnit.Day;
     public TimeUnit TimeUnit => timeUnit;
-
-    [SerializeField]
-    private string conditionRelational;
-    public string ConditionRelational => conditionRelational;
 
     [SerializeField]
     private Dialogue beginDialogue;
@@ -115,7 +115,7 @@ public class Quest : ScriptableObject
     [HideInInspector]
     public TalkerData currentQuestHolder;
 
-    public bool InProcessing { get; set; }//任务是否正在执行，在运行时用到
+    public bool InProgress { get; set; }//任务是否正在执行，在运行时用到
 
     public bool IsComplete
     {
@@ -131,7 +131,7 @@ public class Quest : ScriptableObject
     {
         get
         {
-            return IsComplete && !InProcessing;
+            return IsComplete && !InProgress;
         }
     }
 }
@@ -152,7 +152,7 @@ public class QuestAcceptCondition
 {
     [SerializeField]
 #if UNITY_EDITOR
-    [EnumMemberNames("等级等于", "等级大于", "等级小于", "完成任务", "拥有道具", "触发器开启", "触发器关闭")]
+    [EnumMemberNames("等级等于", "等级大于", "等级小于", "完成任务", "接取任务", "拥有道具", "触发器开启", "触发器关闭")]
 #endif
     private QuestCondition acceptCondition = QuestCondition.CompleteQuest;
     public QuestCondition AcceptCondition => acceptCondition;
@@ -180,6 +180,7 @@ public enum QuestCondition
     LevelLargeThen,
     LevelLessThen,
     CompleteQuest,
+    AcceptQuest,
     HasItem,
     TriggerSet,
     TriggerReset

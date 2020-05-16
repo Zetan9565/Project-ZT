@@ -18,10 +18,10 @@ MonoBehaviour:
   abandonable: 1
   group: {fileID: 0}
   acceptConditions: []
+  conditionRelational: ~0
   questType: 0
   repeatFrequancy: 1
   timeUnit: 2
-  conditionRelational: 
   beginDialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
   ongoingDialogue: {fileID: 11400000, guid: c761d5a3c1f0b214395f27054fb51f08, type: 2}
   completeDialogue: {fileID: 11400000, guid: c761d5a3c1f0b214395f27054fb51f08, type: 2}
@@ -35,6 +35,7 @@ MonoBehaviour:
   talkObjectives:
   - displayName: "\u5B89\u6170\u739B\u4E3D\u4E9A"
     display: 1
+    canNavigate: 1
     showMapIcon: 1
     amount: 1
     inOrder: 0
@@ -56,7 +57,7 @@ MonoBehaviour:
         max: 20000
       relationshipLevel: 0
     warehouse:
-      warehouseSize:
+      size:
         min: 0
         max: 1
     shop: {fileID: 0}
@@ -73,7 +74,7 @@ MonoBehaviour:
         max: 20000
       relationshipLevel: 0
     warehouse:
-      warehouseSize:
+      size:
         min: 0
         max: 1
     shop: {fileID: 0}

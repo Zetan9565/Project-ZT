@@ -378,6 +378,9 @@ public class QuestInspector : Editor
                     case QuestCondition.CompleteQuest:
                         EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "完成任务");
                         break;
+                    case QuestCondition.AcceptQuest:
+                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "接取任务");
+                        break;
                     case QuestCondition.HasItem:
                         EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "拥有道具");
                         break;
@@ -413,6 +416,7 @@ public class QuestInspector : Editor
             switch (quest.AcceptConditions[index].AcceptCondition)
             {
                 case QuestCondition.CompleteQuest:
+                case QuestCondition.AcceptQuest:
                     completeQuest = acceptCondition.FindPropertyRelative("completeQuest");
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), completeQuest, new GUIContent("需完成的任务"));
                     if (completeQuest.objectReferenceValue == target) completeQuest.objectReferenceValue = null;
@@ -453,6 +457,7 @@ public class QuestInspector : Editor
             switch (quest.AcceptConditions[index].AcceptCondition)
             {
                 case QuestCondition.CompleteQuest:
+                case QuestCondition.AcceptQuest:
                     if (quest.AcceptConditions[index].CompleteQuest)
                         return 3 * lineHeightSpace;
                     else return 2 * lineHeightSpace;
@@ -497,6 +502,7 @@ public class QuestInspector : Editor
                 switch (x.AcceptCondition)
                 {
                     case QuestCondition.CompleteQuest:
+                    case QuestCondition.AcceptQuest:
                         if (x.CompleteQuest) return false;
                         else return true;
                     case QuestCondition.HasItem:
@@ -505,8 +511,6 @@ public class QuestInspector : Editor
                     case QuestCondition.LevelEquals:
                     case QuestCondition.LevelLargeThen:
                     case QuestCondition.LevelLessThen:
-                        //case QuestCondition.LevelLargeOrEqualsThen:
-                        //case QuestCondition.LevelLessOrEqualsThen:
                         if (x.Level > 0) return false;
                         else return true;
                     case QuestCondition.TriggerSet:
@@ -1438,6 +1442,7 @@ public class QuestInspector : Editor
             switch (x.AcceptCondition)
             {
                 case QuestCondition.CompleteQuest:
+                case QuestCondition.AcceptQuest:
                     if (x.CompleteQuest) return false;
                     else return true;
                 case QuestCondition.HasItem:

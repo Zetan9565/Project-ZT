@@ -66,7 +66,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         get
         {
-            if (!CurrentTalker || !CurrentTalker.QuestInstances.Exists(x => !x.InProcessing) || CurrentTalker.QuestInstances.Exists(x => x.IsComplete)) return false;
+            if (!CurrentTalker || !CurrentTalker.QuestInstances.Exists(x => !x.InProgress) || CurrentTalker.QuestInstances.Exists(x => x.IsComplete)) return false;
             return true;
         }
     }
@@ -138,8 +138,8 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         CurrentQuest = quest;
         CurrentType = DialogueType.Quest;
         ShowButtons(false, false, false);
-        if (!CurrentQuest.IsComplete && !CurrentQuest.InProcessing) StartDialogue(quest.BeginDialogue);
-        else if (!CurrentQuest.IsComplete && CurrentQuest.InProcessing) StartDialogue(quest.OngoingDialogue);
+        if (!CurrentQuest.IsComplete && !CurrentQuest.InProgress) StartDialogue(quest.BeginDialogue);
+        else if (!CurrentQuest.IsComplete && CurrentQuest.InProgress) StartDialogue(quest.OngoingDialogue);
         else StartDialogue(quest.CompleteDialogue);
     }
 
@@ -319,7 +319,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             if (!QuestManager.Instance.HasCompleteQuest(quest) && QuestManager.Instance.IsQuestAcceptable(quest) && QuestManager.IsQuestValid(quest))
             {
                 OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
-                oa.Init(quest.Title + (quest.IsComplete ? "(完成)" : quest.InProcessing ? "(进行中)" : string.Empty), quest);
+                oa.Init(quest.Title + (quest.IsComplete ? "(完成)" : quest.InProgress ? "(进行中)" : string.Empty), quest);
                 if (quest.IsComplete)
                 {
                     //保证完成的任务优先显示，方便玩家提交完成的任务
@@ -334,13 +334,13 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             OptionAgent oa = optionAgents[i];
             //若当前选项关联的任务在进行中
-            if (oa.MQuest.InProcessing && !oa.MQuest.IsComplete)
+            if (oa.MQuest.InProgress && !oa.MQuest.IsComplete)
             {
                 //则从后向前找一个新位置以放置该选项
                 for (int j = optionAgents.Count - 1; j > i; j--)
                 {
                     //若找到了合适的位置
-                    if (!optionAgents[j].MQuest.InProcessing && !optionAgents[j].MQuest.IsComplete)
+                    if (!optionAgents[j].MQuest.InProgress && !optionAgents[j].MQuest.IsComplete)
                     {
                         //则从该位置开始到选项的原位置，逐个前移一位，填充(覆盖)选项的原位置并空出新位置
                         for (int k = i; k < j; k++)
@@ -675,7 +675,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     private void HandlingLastQuestWords()
     {
         if (!AllOptionComplete()) return;
-        if (!CurrentQuest.InProcessing || CurrentQuest.IsComplete)
+        if (!CurrentQuest.InProgress || CurrentQuest.IsComplete)
         {
             ClearOptions();
             //若是任务对话的最后一句，则根据任务情况弹出确认按钮
