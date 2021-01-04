@@ -34,11 +34,11 @@ namespace Pathfinding.Util {
 		public ParallelWorkQueue (Queue<T> queue) {
 			this.queue = queue;
 			initialCount = queue.Count;
-			#if SINGLE_THREAD
+#if SINGLE_THREAD
 			threadCount = 1;
-			#else
+#else
 			threadCount = System.Math.Min(initialCount, System.Math.Max(1, AstarPath.CalculateThreadCount(ThreadCount.AutomaticHighLoad)));
-			#endif
+#endif
 		}
 
 		/// <summary>Execute the tasks.</summary>
@@ -64,13 +64,13 @@ namespace Pathfinding.Util {
 			waitEvents = new ManualResetEvent[threadCount];
 			for (int i = 0; i < waitEvents.Length; i++) {
 				waitEvents[i] = new ManualResetEvent(false);
-				#if NETFX_CORE
+#if NETFX_CORE
 				// Need to make a copy here, otherwise it may refer to some other index when the task actually runs.
 				int threadIndex = i;
 				System.Threading.Tasks.Task.Run(() => RunTask(threadIndex));
-				#else
+#else
 				ThreadPool.QueueUserWorkItem(threadIndex => RunTask((int)threadIndex), i);
-				#endif
+#endif
 			}
 
 			while (!WaitHandle.WaitAll(waitEvents, progressTimeoutMillis)) {

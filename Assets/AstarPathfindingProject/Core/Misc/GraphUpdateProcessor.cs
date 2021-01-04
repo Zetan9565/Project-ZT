@@ -169,11 +169,11 @@ namespace Pathfinding {
 			if (force) {
 				asyncGraphUpdatesComplete.WaitOne();
 			} else {
-				#if !UNITY_WEBGL
+#if !UNITY_WEBGL
 				if (!asyncGraphUpdatesComplete.WaitOne(0)) {
 					return false;
 				}
-				#endif
+#endif
 			}
 
 			Assert.AreEqual(graphUpdateQueueAsync.Count, 0, "Queue should be empty at this stage");
@@ -295,7 +295,7 @@ namespace Pathfinding {
 			}
 		}
 
-	#if !UNITY_WEBGL
+#if !UNITY_WEBGL
 		/// <summary>
 		/// Graph update thread.
 		/// Async graph updates will be executed by this method in another thread.

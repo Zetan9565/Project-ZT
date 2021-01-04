@@ -30,21 +30,24 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private Vector2 defaultMarkSize = new Vector2(64, 64);
 
     [SerializeField]
-    private MapCamera mapCamera;
-    [SerializeField]
     private MapCamera cameraPrefab;
-    public Camera Camera
+    [SerializeField]
+    private MapCamera mapCamera;
+    public Camera MapCamera
     {
         get
         {
             if (!mapCamera) mapCamera = Instantiate(cameraPrefab, transform);
             return mapCamera.Camera;
         }
-
     }
 
     [SerializeField]
     private RenderTexture targetTexture;
+    [SerializeField]
+    private Vector2Int textureSize = new Vector2Int(1024, 1024);
+    [SerializeField]
+    private RenderTextureFormat textureFormat = RenderTextureFormat.ARGB32;
     [SerializeField]
     private LayerMask mapRenderMask = ~0;
 
@@ -224,9 +227,9 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private void DrawMapIcons()
     {
         if (!UI || !UI.gameObject) return;
-        if (!Camera.orthographic) Camera.orthographic = true;
-        if (!Camera.CompareTag("MapCamera")) Camera.tag = "MapCamera";
-        if (Camera.cullingMask != mapRenderMask) Camera.cullingMask = mapRenderMask;
+        if (!MapCamera.orthographic) MapCamera.orthographic = true;
+        if (!MapCamera.CompareTag("MapCamera")) MapCamera.tag = "MapCamera";
+        if (MapCamera.cullingMask != mapRenderMask) MapCamera.cullingMask = mapRenderMask;
         foreach (var iconKvp in iconsWithHolder)
         {
             MapIconHolder holder = iconKvp.Key;
@@ -251,7 +254,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         if (!icon || !UI || !UI.gameObject) return;
         //把相机视野内的世界坐标归一化为一个裁剪正方体中的坐标，其边长为1，就是说所有视野内的坐标都变成了x、z、y分量都在(0,1)以内的裁剪坐标
-        Vector3 viewportPoint = Camera.WorldToViewportPoint(worldPosition);
+        Vector3 viewportPoint = MapCamera.WorldToViewportPoint(worldPosition);
         //这一步用于修正UI因设备分辨率不一样，在进行缩放后实际Rect信息变了而产生的问题
         Rect screenSpaceRect = ZetanUtility.GetScreenSpaceRect(UI.mapRect);
         //获取四个顶点的位置，顶点序号
@@ -329,8 +332,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         {
             isSwitching = true;
             switchTime = 0;
-            startSizeOfCamForMap = Camera.orthographicSize;
-            startPosOfCamForMap = Camera.transform.position;
+            startSizeOfCamForMap = MapCamera.orthographicSize;
+            startPosOfCamForMap = MapCamera.transform.position;
             startPositionOfMap = UI.mapWindowRect.anchoredPosition;
             startSizeOfMapWindow = UI.mapWindowRect.rect.size;
             startSizeOfMap = UI.mapRect.rect.size;
@@ -353,8 +356,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         {
             if (!IsAnimaComplete(false))
             {
-                Vector3 newCamPos = new Vector3(player.position.x, use2D ? player.position.y : Camera.transform.position.y, use2D ? Camera.transform.position.z : player.position.z);
-                Camera.transform.position = Vector3.Lerp(startPosOfCamForMap, newCamPos, switchTime);
+                Vector3 newCamPos = new Vector3(player.position.x, use2D ? player.position.y : MapCamera.transform.position.y, use2D ? MapCamera.transform.position.z : player.position.z);
+                MapCamera.transform.position = Vector3.Lerp(startPosOfCamForMap, newCamPos, switchTime);
                 AnimateTo(miniModeInfo);
             }
             else ToMiniMap();
@@ -363,7 +366,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private void AnimateTo(MapModeInfo modeInfo)
     {
         if (!UI || !UI.gameObject) return;
-        Camera.orthographicSize = Mathf.Lerp(startSizeOfCamForMap, modeInfo.currentSizeOfCam, switchTime);
+        MapCamera.orthographicSize = Mathf.Lerp(startSizeOfCamForMap, modeInfo.currentSizeOfCam, switchTime);
         UI.mapWindowRect.anchoredPosition = Vector3.Lerp(startPositionOfMap, modeInfo.anchoredPosition, switchTime);
         UI.mapRect.sizeDelta = Vector2.Lerp(startSizeOfMap, modeInfo.sizeOfMap, switchTime);
         UI.mapWindowRect.sizeDelta = Vector2.Lerp(startSizeOfMapWindow, modeInfo.sizeOfWindow, switchTime);
@@ -395,7 +398,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private void SetInfoFrom(MapModeInfo modeInfo)
     {
         if (!UI || !UI.gameObject) return;
-        Camera.orthographicSize = modeInfo.currentSizeOfCam;
+        MapCamera.orthographicSize = modeInfo.currentSizeOfCam;
         zoomLimit.x = modeInfo.minZoomOfCam;
         zoomLimit.y = modeInfo.maxZoomOfCam;
         UI.mapWindowRect.anchorMin = modeInfo.windowAnchoreMin;
@@ -410,10 +413,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void SetCurrentAsMiniMap()
     {
         if (!UI || !UI.gameObject || isViewingWorldMap) return;
-        if (Camera)
+        if (MapCamera)
         {
-            miniModeInfo.defaultSizeOfCam = Camera.orthographicSize;
-            miniModeInfo.currentSizeOfCam = Camera.orthographicSize;
+            miniModeInfo.defaultSizeOfCam = MapCamera.orthographicSize;
+            miniModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
         }
         else Debug.LogError("地图相机不存在！");
         try
@@ -428,10 +431,10 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void SetCurrentAsWorldMap()
     {
         if (!UI || !UI.gameObject || !isViewingWorldMap) return;
-        if (Camera)
+        if (MapCamera)
         {
-            worldModeInfo.defaultSizeOfCam = Camera.orthographicSize;
-            worldModeInfo.currentSizeOfCam = Camera.orthographicSize;
+            worldModeInfo.defaultSizeOfCam = MapCamera.orthographicSize;
+            worldModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
         }
         else Debug.LogError("地图相机不存在！");
         try
@@ -464,25 +467,27 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void RemakeCamera()
     {
         if (!cameraPrefab) return;
+        if (mapCamera) ObjectPool.Put(mapCamera);
         mapCamera = Instantiate(cameraPrefab, transform);
-        DontDestroyOnLoad(mapCamera);
+        mapCamera.Camera.targetTexture = targetTexture;
+        //DontDestroyOnLoad(mapCamera);
     }
     private void FollowPlayer()
     {
         if (!player || !playerIconInstance) return;
-        DrawMapIcon(isViewingWorldMap ? player.position : Camera.transform.position, playerIconInstance, true);
+        DrawMapIcon(isViewingWorldMap ? player.position : MapCamera.transform.position, playerIconInstance, true);
         playerIconInstance.transform.SetSiblingIndex(playerIconInstance.transform.childCount - 1);
         if (!rotateMap)
         {
             if (use2D)
             {
                 playerIconInstance.transform.eulerAngles = new Vector3(playerIconInstance.transform.eulerAngles.x, playerIconInstance.transform.eulerAngles.y, player.eulerAngles.z);
-                Camera.transform.eulerAngles = Vector3.zero;
+                MapCamera.transform.eulerAngles = Vector3.zero;
             }
             else
             {
                 playerIconInstance.transform.eulerAngles = new Vector3(playerIconInstance.transform.eulerAngles.x, playerIconInstance.transform.eulerAngles.y, -player.eulerAngles.y);
-                Camera.transform.eulerAngles = Vector3.right * 90;
+                MapCamera.transform.eulerAngles = Vector3.right * 90;
             }
         }
         else
@@ -490,21 +495,21 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             if (use2D)
             {
                 playerIconInstance.transform.eulerAngles = Vector3.zero;
-                Camera.transform.eulerAngles = new Vector3(0, 0, player.eulerAngles.z);
+                MapCamera.transform.eulerAngles = new Vector3(0, 0, player.eulerAngles.z);
             }
             else
             {
                 playerIconInstance.transform.eulerAngles = Vector3.zero;
-                Camera.transform.eulerAngles = new Vector3(Camera.transform.eulerAngles.x, player.eulerAngles.y, Camera.transform.eulerAngles.z);
+                MapCamera.transform.eulerAngles = new Vector3(MapCamera.transform.eulerAngles.x, player.eulerAngles.y, MapCamera.transform.eulerAngles.z);
             }
         }
         if (!isViewingWorldMap && !isSwitching && !isMovingCamera)
         {
             //2D模式，则跟随目标的Y坐标，相机的Z坐标不动；3D模式，则跟随目标的Z坐标，相机的Y坐标不动。
             Vector3 newCamPos = new Vector3(player.position.x + offset.x,
-                use2D ? player.position.y + offset.y : Camera.transform.position.y,
-                use2D ? Camera.transform.position.z : player.position.z + offset.y);
-            Camera.transform.position = newCamPos;
+                use2D ? player.position.y + offset.y : MapCamera.transform.position.y,
+                use2D ? MapCamera.transform.position.z : player.position.z + offset.y);
+            MapCamera.transform.position = newCamPos;
         }
         playerIconInstance.transform.SetAsLastSibling();
     }
@@ -516,8 +521,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void MoveCameraTo(Vector3 worldPosition)
     {
         if (isSwitching || !isViewingWorldMap) return;
-        Vector3 newCamPos = new Vector3(worldPosition.x, use2D ? worldPosition.y : Camera.transform.position.y, use2D ? Camera.transform.position.z : worldPosition.z);
-        startPosOfCamForMap = Camera.transform.position;
+        Vector3 newCamPos = new Vector3(worldPosition.x, use2D ? worldPosition.y : MapCamera.transform.position.y, use2D ? MapCamera.transform.position.z : worldPosition.z);
+        startPosOfCamForMap = MapCamera.transform.position;
         camMoveDestination = newCamPos;
         isMovingCamera = true;
         cameraMovingTime = 0;
@@ -529,7 +534,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         Vector3[] corners = new Vector3[4];
         UI.mapRect.GetWorldCorners(corners);
         Vector2 mapViewportPoint = new Vector2((mousePosition.x - corners[0].x) / screenSpaceRect.width, (mousePosition.y - corners[0].y) / screenSpaceRect.height);
-        Vector3 worldPosition = Camera.ViewportToWorldPoint(mapViewportPoint);
+        Vector3 worldPosition = MapCamera.ViewportToWorldPoint(mapViewportPoint);
         return use2D ? new Vector3(worldPosition.x, worldPosition.y) : worldPosition;
     }
 
@@ -540,19 +545,19 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         isMovingCamera = false;
         cameraMovingTime = 0;
         float mag = new Vector2(Screen.width, Screen.height).magnitude;
-        direction = new Vector2(direction.x * 1000 / mag, direction.y * 1000 / mag) * (Camera.orthographicSize / worldModeInfo.currentSizeOfCam);
-        Camera.transform.Translate(new Vector3(direction.x, use2D ? direction.y : 0, use2D ? 0 : direction.y) * dragSensitivity / CameraZoom);
+        direction = new Vector2(direction.x * 1000 / mag, direction.y * 1000 / mag) * (MapCamera.orthographicSize / worldModeInfo.currentSizeOfCam);
+        MapCamera.transform.Translate(new Vector3(direction.x, use2D ? direction.y : 0, use2D ? 0 : direction.y) * dragSensitivity / CameraZoom);
     }
 
     public void Zoom(float value)
     {
         if (isSwitching || value == 0) return;
-        Camera.orthographicSize = Mathf.Clamp(Camera.orthographicSize - value, zoomLimit.x, zoomLimit.y);
-        if (IsViewingWorldMap) worldModeInfo.currentSizeOfCam = Camera.orthographicSize;
-        else miniModeInfo.currentSizeOfCam = Camera.orthographicSize;
+        MapCamera.orthographicSize = Mathf.Clamp(MapCamera.orthographicSize - value, zoomLimit.x, zoomLimit.y);
+        if (IsViewingWorldMap) worldModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
+        else miniModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
     }
 
-    public float CameraZoom => IsViewingWorldMap ? (worldModeInfo.defaultSizeOfCam / Camera.orthographicSize) : (miniModeInfo.defaultSizeOfCam / Camera.orthographicSize);
+    public float CameraZoom => IsViewingWorldMap ? (worldModeInfo.defaultSizeOfCam / MapCamera.orthographicSize) : (miniModeInfo.defaultSizeOfCam / MapCamera.orthographicSize);
     #endregion
 
     #region MonoBehaviour
@@ -568,8 +573,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         if (isMovingCamera)
         {
             cameraMovingTime += Time.deltaTime * 5;
-            if (camMoveDestination != Camera.transform.position)
-                Camera.transform.position = Vector3.Lerp(startPosOfCamForMap, camMoveDestination, cameraMovingTime);
+            if (camMoveDestination != MapCamera.transform.position)
+                MapCamera.transform.position = Vector3.Lerp(startPosOfCamForMap, camMoveDestination, cameraMovingTime);
             else
             {
                 isMovingCamera = false;
@@ -613,7 +618,12 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void Init()
     {
         InitPlayerIcon();
-        Camera.targetTexture = targetTexture;
+        if (targetTexture) targetTexture.Release();
+        targetTexture = new RenderTexture(textureSize.x, textureSize.y, 24, textureFormat)
+        {
+            name = "MapTexture"
+        };
+        MapCamera.targetTexture = targetTexture;
         UI.mapImage.texture = targetTexture;
         miniModeInfo.currentSizeOfCam = miniModeInfo.defaultSizeOfCam;
         worldModeInfo.currentSizeOfCam = worldModeInfo.defaultSizeOfCam;

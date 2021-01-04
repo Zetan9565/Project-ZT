@@ -91,10 +91,14 @@ namespace Pathfinding {
 		/// <summary>
 		/// If true, some interpolation will be done when a new path has been calculated.
 		/// This is used to avoid short distance teleportation.
+		/// See: <see cref="switchPathInterpolationSpeed"/>
 		/// </summary>
 		public bool interpolatePathSwitches = true;
 
-		/// <summary>How quickly to interpolate to the new path</summary>
+		/// <summary>
+		/// How quickly to interpolate to the new path.
+		/// See: <see cref="interpolatePathSwitches"/>
+		/// </summary>
 		public float switchPathInterpolationSpeed = 5;
 
 		/// <summary>True if the end of the current path has been reached</summary>
@@ -350,6 +354,23 @@ namespace Pathfinding {
 			ClearPath();
 			// Make sure we no longer receive callbacks when paths complete
 			seeker.pathCallback -= OnPathComplete;
+		}
+
+		/// <summary>\copydoc Pathfinding::IAstarAI::GetRemainingPath</summary>
+		public void GetRemainingPath (List<Vector3> buffer, out bool stale) {
+			buffer.Clear();
+			if (!interpolator.valid) {
+				buffer.Add(position);
+				stale = true;
+				return;
+			}
+
+			stale = false;
+			interpolator.GetRemainingPath(buffer);
+			// The agent is almost always at interpolation.position (which is buffer[0])
+			// but sometimes - in particular when interpolating between two paths - the agent might at a slightly different position.
+			// So we replace the first point with the actual position of the agent.
+			buffer[0] = position;
 		}
 
 		public void Teleport (Vector3 position, bool clearPath = true) {

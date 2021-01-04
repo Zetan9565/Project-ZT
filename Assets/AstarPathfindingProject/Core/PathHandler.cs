@@ -100,11 +100,11 @@ namespace Pathfinding {
 		public uint F { get { return g+h; } }
 
 		public void UpdateG (Path path) {
-			#if ASTAR_NO_TRAVERSAL_COST
+#if ASTAR_NO_TRAVERSAL_COST
 			g = parent.g + cost;
-			#else
+#else
 			g = parent.g + cost + path.GetTraversalCost(node);
-			#endif
+#endif
 		}
 	}
 

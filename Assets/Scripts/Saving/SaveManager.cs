@@ -57,7 +57,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
             }
             catch (Exception ex)
             {
-                throw ex;
+                //throw ex;
                 Debug.LogWarning(ex.Message);
                 if (fs != null) fs.Close();
                 MessageManager.Instance.New("保存失败！");

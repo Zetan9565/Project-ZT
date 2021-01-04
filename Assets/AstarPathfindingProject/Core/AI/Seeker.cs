@@ -201,8 +201,8 @@ namespace Pathfinding {
 		/// Releases any eventually claimed paths.
 		/// Calls OnDestroy on the <see cref="startEndModifier"/>.
 		///
-		/// See: ReleaseClaimedPath
-		/// See: startEndModifier
+		/// See: <see cref="ReleaseClaimedPath"/>
+		/// See: <see cref="startEndModifier"/>
 		/// </summary>
 		public void OnDestroy () {
 			ReleaseClaimedPath();
@@ -219,7 +219,7 @@ namespace Pathfinding {
 		///
 		/// See: pooling (view in online documentation for working links)
 		/// </summary>
-		public void ReleaseClaimedPath () {
+		void ReleaseClaimedPath () {
 			if (prevPath != null) {
 				prevPath.Release(this, true);
 				prevPath = null;
@@ -323,16 +323,19 @@ namespace Pathfinding {
 					pathCallback(p);
 				}
 
+				// Note: it is important that #prevPath is kept alive (i.e. not pooled)
+				// if we are drawing gizmos.
+				// It is also important that #path is kept alive since it can be returned
+				// from the GetCurrentPath method.
+				// Since #path will be copied to #prevPath it is sufficient that #prevPath
+				// is kept alive until it is replaced.
+
 				// Recycle the previous path to reduce the load on the GC
 				if (prevPath != null) {
 					prevPath.Release(this, true);
 				}
 
 				prevPath = p;
-
-				// If not drawing gizmos, then storing prevPath is quite unecessary
-				// So clear it and set prevPath to null
-				if (!drawGizmos) ReleaseClaimedPath();
 			}
 		}
 

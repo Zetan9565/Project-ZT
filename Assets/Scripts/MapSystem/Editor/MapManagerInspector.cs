@@ -14,7 +14,8 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
     SerializedProperty playerIconSize;
     SerializedProperty mapCamera;
     SerializedProperty cameraPrefab;
-    SerializedProperty targetTexture;
+    SerializedProperty textueSize;
+    SerializedProperty textueFormat;
     SerializedProperty mapRenderMask;
     SerializedProperty use2D;
     SerializedProperty rotateMap;
@@ -42,7 +43,8 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
         playerIconSize = serializedObject.FindProperty("playerIconSize");
         mapCamera = serializedObject.FindProperty("mapCamera");
         cameraPrefab = serializedObject.FindProperty("cameraPrefab");
-        targetTexture = serializedObject.FindProperty("targetTexture");
+        textueSize = serializedObject.FindProperty("textureSize");
+        textueFormat = serializedObject.FindProperty("textureFormat");
         mapRenderMask = serializedObject.FindProperty("mapRenderMask");
         use2D = serializedObject.FindProperty("use2D");
         rotateMap = serializedObject.FindProperty("rotateMap");
@@ -89,17 +91,18 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
             EditorGUILayout.PropertyField(playerIconSize, new GUIContent("主图标大小"));
             defaultMarkIcon.objectReferenceValue = EditorGUILayout.ObjectField("默认标记图标", defaultMarkIcon.objectReferenceValue as Sprite, typeof(Sprite), false);
             EditorGUILayout.PropertyField(defaultMarkSize, new GUIContent("默认标记大小"));
-            EditorGUILayout.PropertyField(mapCamera, new GUIContent("地图相机"));
             EditorGUILayout.PropertyField(cameraPrefab, new GUIContent("地图相机预制件"));
-            EditorGUILayout.PropertyField(targetTexture, new GUIContent("采样贴图"));
+            if (!Application.isPlaying) GUI.enabled = false;
+            EditorGUILayout.PropertyField(mapCamera, new GUIContent("地图相机"));
+            if (!Application.isPlaying) GUI.enabled = true;
+            EditorGUILayout.PropertyField(textueSize, new GUIContent("相机采样分辨率"));
+            EditorGUILayout.PropertyField(textueFormat, new GUIContent("相机采样格式"));
             if (Application.isPlaying) GUI.enabled = true;
             EditorGUILayout.PropertyField(mapRenderMask, new GUIContent("地图相机可视层"));
             if (mapCamera.objectReferenceValue)
             {
                 Camera cam = (mapCamera.objectReferenceValue as MapCamera).Camera;
                 cam.cullingMask = mapRenderMask.intValue;
-                if (targetTexture.objectReferenceValue && cam.targetTexture != targetTexture.objectReferenceValue)
-                    cam.targetTexture = targetTexture.objectReferenceValue as RenderTexture;
             }
             EditorGUILayout.Space();
             EditorGUILayout.PropertyField(worldEdgeSize, new GUIContent("大地图边框厚度"));

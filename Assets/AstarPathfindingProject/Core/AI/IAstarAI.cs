@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Pathfinding {
 	/// <summary>
@@ -247,6 +248,22 @@ namespace Pathfinding {
 		/// See: Take a look at the <see cref="Pathfinding.AIDestinationSetter"/> source code for an example of how it can be used.
 		/// </summary>
 		System.Action onSearchPath { get; set; }
+
+		/// <summary>
+		/// Fills buffer with the remaining path.
+		///
+		/// <code>
+		/// var buffer = new List<Vector3>();
+		/// ai.GetRemainingPath(buffer, out bool stale);
+		/// for (int i = 0; i < buffer.Count - 1; i++) {
+		///     Debug.DrawLine(buffer[i], buffer[i+1], Color.red);
+		/// }
+		/// </code>
+		/// [Open online documentation to see images]
+		/// </summary>
+		/// <param name="buffer">The buffer will be cleared and replaced with the path. The first point is the current position of the agent.</param>
+		/// <param name="stale">May be true if the path is invalid in some way. For example if the agent has no path or (for the RichAI script only) if the agent has detected that some nodes in the path have been destroyed.</param>
+		void GetRemainingPath (List<Vector3> buffer, out bool stale);
 
 		/// <summary>
 		/// Recalculate the current path.

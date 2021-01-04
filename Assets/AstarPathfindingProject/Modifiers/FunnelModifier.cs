@@ -46,12 +46,12 @@ namespace Pathfinding {
 		/// </summary>
 		public bool splitAtEveryPortal;
 
-	#if UNITY_EDITOR
+#if UNITY_EDITOR
 		[UnityEditor.MenuItem("CONTEXT/Seeker/Add Funnel Modifier")]
 		public static void AddComp (UnityEditor.MenuCommand command) {
 			(command.context as Component).gameObject.AddComponent(typeof(FunnelModifier));
 		}
-	#endif
+#endif
 
 		public override int Order { get { return 10; } }
 

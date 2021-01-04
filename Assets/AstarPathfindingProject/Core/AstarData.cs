@@ -293,9 +293,9 @@ namespace Pathfinding {
 			sr.SerializeExtraInfo();
 			byte[] bytes = sr.CloseSerialize();
 			checksum = sr.GetChecksum();
-	#if ASTARDEBUG
+#if ASTARDEBUG
 			Debug.Log("Got a whole bunch of data, "+bytes.Length+" bytes");
-	#endif
+#endif
 			graphLock.Release();
 			return bytes;
 		}

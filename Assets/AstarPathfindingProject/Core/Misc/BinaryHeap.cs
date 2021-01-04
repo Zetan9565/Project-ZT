@@ -121,9 +121,9 @@ namespace Pathfinding {
 
 			var newHeap = new Tuple[newSize];
 			heap.CopyTo(newHeap, 0);
-			#if ASTARDEBUG
+#if ASTARDEBUG
 			UnityEngine.Debug.Log("Resizing binary heap to "+newSize);
-			#endif
+#endif
 			heap = newHeap;
 		}
 
@@ -284,9 +284,9 @@ namespace Pathfinding {
 		/// Usually called after the hTarget on a path has been changed
 		/// </summary>
 		public void Rebuild () {
-			#if ASTARDEBUG
+#if ASTARDEBUG
 			int changes = 0;
-			#endif
+#endif
 
 			for (int i = 2; i < numberOfItems; i++) {
 				int bubbleIndex = i;
@@ -307,18 +307,18 @@ namespace Pathfinding {
 #endif
 
 						bubbleIndex = parentIndex;
-						#if ASTARDEBUG
+#if ASTARDEBUG
 						changes++;
-						#endif
+#endif
 					} else {
 						break;
 					}
 				}
 			}
 
-			#if ASTARDEBUG
+#if ASTARDEBUG
 			UnityEngine.Debug.Log("+++ Rebuilt Heap - "+changes+" changes +++");
-			#endif
+#endif
 		}
 	}
 }

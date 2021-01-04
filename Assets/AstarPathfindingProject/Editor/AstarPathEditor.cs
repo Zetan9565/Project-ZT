@@ -264,13 +264,13 @@ namespace Pathfinding {
 			}
 
 
-	#if ProfileAstar
+#if ProfileAstar
 			if (GUILayout.Button("Log Profiles")) {
 				AstarProfiler.PrintResults();
 				AstarProfiler.PrintFastResults();
 				AstarProfiler.Reset();
 			}
-	#endif
+#endif
 
 			// Handle undo
 			SaveGraphsAndUndo(storedEventType, storedEventCommand);

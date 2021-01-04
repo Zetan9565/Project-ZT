@@ -669,14 +669,14 @@ namespace Pathfinding {
 			// Midpoint between the two tiles
 			int midpoint = (int)Math.Round((Math.Max(t1coord, t2coord) * tileWorldSize) * Int3.Precision);
 
-			#if ASTARDEBUG
+#if ASTARDEBUG
 			Vector3 v1 = new Vector3(-100, 0, -100);
 			Vector3 v2 = new Vector3(100, 0, 100);
 			v1[coord] = midpoint*Int3.PrecisionFactor;
 			v2[coord] = midpoint*Int3.PrecisionFactor;
 
 			Debug.DrawLine(v1, v2, Color.magenta);
-			#endif
+#endif
 
 			TriangleMeshNode[] nodes1 = tile1.nodes;
 			TriangleMeshNode[] nodes2 = tile2.nodes;

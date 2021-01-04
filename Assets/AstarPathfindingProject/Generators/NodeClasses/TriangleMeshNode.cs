@@ -339,7 +339,7 @@ namespace Pathfinding {
 			// No connection was found between the nodes
 			// Check if there is a node link that connects them
 			if (edge == -1) {
-				#if !ASTAR_NO_POINT_GRAPH
+#if !ASTAR_NO_POINT_GRAPH
 				if (connections != null) {
 					for (int i = 0; i < connections.Length; i++) {
 						if (connections[i].node.GraphIndex != GraphIndex) {
@@ -352,7 +352,7 @@ namespace Pathfinding {
 						}
 					}
 				}
-				#endif
+#endif
 
 				return false;
 			}

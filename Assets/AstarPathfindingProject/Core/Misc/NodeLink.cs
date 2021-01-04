@@ -93,7 +93,7 @@ namespace Pathfinding {
 			Draw.Gizmos.Bezier(Start.position, End.position, deleteConnection ? Color.red : Color.green);
 		}
 
-	#if UNITY_EDITOR
+#if UNITY_EDITOR
 		[UnityEditor.MenuItem("Edit/Pathfinding/Link Pair %&l")]
 		public static void LinkObjects () {
 			Transform[] tfs = Selection.transforms;
@@ -152,6 +152,6 @@ namespace Pathfinding {
 				}
 			}
 		}
-	#endif
+#endif
 	}
 }

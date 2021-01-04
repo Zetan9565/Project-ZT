@@ -242,9 +242,9 @@ namespace Pathfinding {
 
 			hasParsedServerMessage = true;
 
-			#if ASTARDEBUG
+#if ASTARDEBUG
 			Debug.Log("Result from update check:\n"+result);
-			#endif
+#endif
 
 			string[] splits = result.Split('|');
 			latestVersionDescription = splits.Length > 1 ? splits[1] : "";
