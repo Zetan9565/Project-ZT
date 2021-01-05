@@ -21,7 +21,7 @@ public class Dialogue : ScriptableObject
     private TalkerInformation unifiedNPC;
     public TalkerInformation UnifiedNPC => unifiedNPC;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<DialogueWords> words = new List<DialogueWords>();
     public List<DialogueWords> Words => words;
 
@@ -77,11 +77,11 @@ public class DialogueWords
     /// </summary>
     public string WordsWhenChusWB => wordsWhenChusWB;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<WordsOption> branches = new List<WordsOption>();
     public List<WordsOption> Options => branches;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<WordsEvent> events = new List<WordsEvent>();
     public List<WordsEvent> Events => events;
 

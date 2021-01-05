@@ -822,7 +822,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     {
         return questsComplete.Contains(quest);
     }
-    private bool HasCompleteQuestWithID(string questID)
+    public bool HasCompleteQuestWithID(string questID)
     {
         return questsComplete.Exists(x => x.ID == questID);
     }

@@ -42,11 +42,11 @@ public class TalkerInformation : CharacterInformation
     private AffectiveDialogue hateItemDialogue;
     public AffectiveDialogue HateItemDialogue => hateItemDialogue;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<FavoriteItemInfo> favoriteItems = new List<FavoriteItemInfo>();
     public List<FavoriteItemInfo> FavoriteItems => favoriteItems;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<HateItemInfo> hateItems = new List<HateItemInfo>();
     public List<HateItemInfo> HateItems => hateItems;
 

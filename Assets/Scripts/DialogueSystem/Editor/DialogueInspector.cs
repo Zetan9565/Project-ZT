@@ -540,7 +540,7 @@ public class DialogueInspector : Editor
                     optionsList.DoList(new Rect(rect.x, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width, lineHeight * (options.arraySize + 1)));
                     words.serializedObject.ApplyModifiedProperties();
                 }
-                words.serializedObject.Update();
+                serializedObject.Update();
                 EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(new Rect(rect.x + 12, rect.y + (optionsList == null ? 0 : optionsList.GetHeight()) + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
                     events, new GUIContent("事件\t\t" + (events.isExpanded ? string.Empty : (events.arraySize > 0 ? "数量: " + events.arraySize : "无事件"))));
@@ -549,7 +549,6 @@ public class DialogueInspector : Editor
                 if (events.isExpanded)
                 {
                     events.serializedObject.Update();
-                    EditorGUI.BeginChangeCheck();
                     wordsEventsLists.TryGetValue(dialogue.Words[index], out ReorderableList eventsList);
                     if (eventsList == null)
                     {
@@ -652,13 +651,13 @@ public class DialogueInspector : Editor
             int lineCount = 1;
             float listHeight = 0.0f;
             SerializedProperty words = dialogWords.GetArrayElementAtIndex(index);
-            SerializedProperty options = words.FindPropertyRelative("branches");
-            SerializedProperty events = words.FindPropertyRelative("events");
-            SerializedProperty indexOfCorrectOption = words.FindPropertyRelative("indexOfCorrectOption");
             if (words.isExpanded)
             {
+                SerializedProperty options = words.FindPropertyRelative("branches");
+                SerializedProperty events = words.FindPropertyRelative("events");
+                SerializedProperty indexOfCorrectOption = words.FindPropertyRelative("indexOfCorrectOption");
                 if (dialogue.Words[index].TalkerType == TalkerType.NPC && !useUnifiedNPC.boolValue) lineCount += 1;//NPC选择
-                lineCount += 5;//对话、按钮、分支
+                lineCount += 5;//对话、按钮、选项
                 if (options.isExpanded)
                 {
                     if (options.arraySize > 1)
@@ -671,11 +670,13 @@ public class DialogueInspector : Editor
                     if (wordsOptionsLists.TryGetValue(dialogue.Words[index], out var optionList))
                         listHeight += optionList.GetHeight();
                 }
-                lineCount++;//选项
+                lineCount++;//事件
                 if (events.isExpanded)
                 {
-                    if (wordsEventsLists.TryGetValue(dialogue.Words[index], out var triggersList))
-                        listHeight += triggersList.GetHeight();
+                    if (wordsEventsLists.TryGetValue(dialogue.Words[index], out var eventsList))
+                    {
+                        listHeight += eventsList.GetHeight();
+                    }
                 }
                 listHeight -= 8;
             }

@@ -85,27 +85,27 @@ public class Quest : ScriptableObject
 
     public List<Objective> ObjectiveInstances { get; } = new List<Objective>();
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<CollectObjective> collectObjectives = new List<CollectObjective>();
     public List<CollectObjective> CollectObjectives => collectObjectives;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<KillObjective> killObjectives = new List<KillObjective>();
     public List<KillObjective> KillObjectives => killObjectives;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<TalkObjective> talkObjectives = new List<TalkObjective>();
     public List<TalkObjective> TalkObjectives => talkObjectives;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<MoveObjective> moveObjectives = new List<MoveObjective>();
     public List<MoveObjective> MoveObjectives => moveObjectives;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<SubmitObjective> submitObjectives = new List<SubmitObjective>();
     public List<SubmitObjective> SubmitObjectives => submitObjectives;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<CustomObjective> customObjectives = new List<CustomObjective>();
     public List<CustomObjective> CustomObjectives => customObjectives;
 

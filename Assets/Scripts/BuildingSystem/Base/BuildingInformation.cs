@@ -66,7 +66,7 @@ public class BuildingInformation : ScriptableObject
         }
     }
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<MaterialInfo> materials = new List<MaterialInfo>();
     public virtual List<MaterialInfo> Materials
     {

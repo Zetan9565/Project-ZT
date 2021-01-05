@@ -171,7 +171,7 @@ public class ItemInspector : Editor
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (makingMethod.enumValueIndex != (int)MakingMethod.None)
             {
-                EditorGUILayout.PropertyField(materials, new GUIContent("制作材料\t\t" + (materials.arraySize > 0 ? "数量：" + materials.arraySize : "无")), false);
+                EditorGUILayout.PropertyField(materials, new GUIContent("制作材料\t\t" + (materials.arraySize > 0 ? "数量：" + materials.arraySize : "无")));
                 if (item.Materials.Exists(x => (x.MakingType == MakingType.SingleItem && item.Materials.FindAll(y => y.MakingType == MakingType.SingleItem && y.Item == x.Item).Count > 1) ||
                    (x.MakingType == MakingType.SameType && item.Materials.FindAll(y => y.MakingType == MakingType.SameType && y.MaterialType == x.MaterialType).Count > 1)))
                 {

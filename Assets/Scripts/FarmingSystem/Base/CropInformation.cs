@@ -46,7 +46,7 @@ public class CropInformation : ScriptableObject
         }
     }
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<CropStage> stages = new List<CropStage>()
     {
         new CropStage(1, CropStages.Seed ),

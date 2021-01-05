@@ -8,14 +8,14 @@ public class ShopInformation : ScriptableObject
     private string shopName;
     public string ShopName => shopName;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<MerchandiseInfo> commodities = new List<MerchandiseInfo>();
     /// <summary>
     /// 在出售的东西
     /// </summary>
     public List<MerchandiseInfo> Commodities => commodities;
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<MerchandiseInfo> acquisitions = new List<MerchandiseInfo>();
     /// <summary>
     /// 在收购的东西

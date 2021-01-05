@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class BoxItem : ItemBase
 {
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<ItemInfo> itemsInBox = new List<ItemInfo>();
     public List<ItemInfo> ItemsInBox
     {

@@ -14,7 +14,7 @@ public class EnemyInformation : CharacterInformation
         }
     }
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     private List<DropItemInfo> dropItems = new List<DropItemInfo>();
     public List<DropItemInfo> DropItems
     {

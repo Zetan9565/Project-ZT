@@ -106,7 +106,7 @@ public abstract class ItemBase : ScriptableObject
         }
     }
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     protected List<MaterialInfo> materials = new List<MaterialInfo>();
     public virtual List<MaterialInfo> Materials => materials;
 
