@@ -2,7 +2,7 @@
 
 [CreateAssetMenu(fileName = "Weapon", menuName = "ZetanStudio/道具/武器")]
 [System.Serializable]
-public class WeaponItem : ItemBase
+public class WeaponItem : EquipmentItem
 {
     [SerializeField]
     private WeaponType weaponType;
@@ -59,17 +59,6 @@ public class WeaponItem : ItemBase
         get
         {
             return hit;
-        }
-    }
-
-    [SerializeField]
-    [Range(0, 2)]
-    private int gemSlotAmount = 0;
-    public int GemSlotAmout
-    {
-        get
-        {
-            return gemSlotAmount;
         }
     }
 

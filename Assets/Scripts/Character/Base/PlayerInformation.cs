@@ -94,6 +94,10 @@ public class PlayerInformation : CharacterInformation
 
     #region 能力相关
     [SerializeField]
+    private RoleAttributeGroup attribute;
+    public RoleAttributeGroup Attribute => attribute;
+
+    [SerializeField]
     private ScopeInt _HP = new ScopeInt(150) { Current = 150 };
     public ScopeInt HP
     {

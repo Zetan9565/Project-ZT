@@ -34,6 +34,8 @@ public class CharacterInfoInspector : Editor
 
     PlayerInformation player;
     SerializedProperty backpack;
+    SerializedProperty attribute;
+    RoleAttributeGroupDrawer attrDrawer;
 
     ReorderableList dropItemList;
     ReorderableList favoriteItemList;
@@ -93,6 +95,8 @@ public class CharacterInfoInspector : Editor
         else if (player)
         {
             backpack = serializedObject.FindProperty("backpack");
+            attribute = serializedObject.FindProperty("attribute");
+            attrDrawer = new RoleAttributeGroupDrawer(serializedObject, attribute, lineHeight, lineHeightSpace);
         }
     }
 
@@ -179,6 +183,7 @@ public class CharacterInfoInspector : Editor
                     SerializedProperty weight = backpack.FindPropertyRelative("weight");
                     size.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认容量(格)", size.FindPropertyRelative("max").intValue, 30, 200);
                     weight.FindPropertyRelative("max").floatValue = EditorGUILayout.Slider("默认负重(WL)", weight.FindPropertyRelative("max").floatValue, 100, 1000);
+                    attrDrawer.DrawLayoutEditor();
                     if (EditorGUI.EndChangeCheck())
                         serializedObject.ApplyModifiedProperties();
                 }

@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEditorInternal;
+using ICSharpCode.NRefactory.Ast;
 
 [CustomEditor(typeof(ItemBase), true)]
 [CanEditMultipleObjects]
@@ -46,6 +47,9 @@ public class ItemInspector : Editor
 
     ItemBase[] items;
 
+    SerializedProperty attribute;
+    RoleAttributeGroupDrawer attrDrawer;
+
     private void OnEnable()
     {
         items = Resources.LoadAll<ItemBase>("");
@@ -81,6 +85,12 @@ public class ItemInspector : Editor
         {
             boxItems = serializedObject.FindProperty("itemsInBox");
             HandlingBoxItemList();
+        }
+
+        if (target is EquipmentItem)
+        {
+            attribute = serializedObject.FindProperty("attribute");
+            attrDrawer = new RoleAttributeGroupDrawer(serializedObject, attribute, lineHeight, lineHeightSpace);
         }
 
         materialType = serializedObject.FindProperty("materialType");
@@ -360,32 +370,10 @@ public class ItemInspector : Editor
 
                 break;
             case ItemType.Weapon:
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("cutATK"), new GUIContent("斩击攻击力"));
-                if (serializedObject.FindProperty("cutATK").intValue < 0) serializedObject.FindProperty("cutATK").intValue = 0;
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("punATK"), new GUIContent("刺击攻击力"));
-                if (serializedObject.FindProperty("punATK").intValue < 0) serializedObject.FindProperty("punATK").intValue = 0;
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("bluATK"), new GUIContent("钝击攻击力"));
-                if (serializedObject.FindProperty("bluATK").intValue < 0) serializedObject.FindProperty("bluATK").intValue = 0;
-
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("_DEF"), new GUIContent("防御力"));
-                if (serializedObject.FindProperty("_DEF").intValue < 0) serializedObject.FindProperty("_DEF").intValue = 0;
-
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("hit"), new GUIContent("命中力"));
-                if (serializedObject.FindProperty("hit").intValue < 0) serializedObject.FindProperty("hit").intValue = 0;
-
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("gemSlotAmount"), new GUIContent("默认宝石槽数"));
                 goto case ItemType.Gemstone;
             case ItemType.Armor:
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("armorType"), new GUIContent("防具类型"));
-
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("_DEF"), new GUIContent("防御力"));
-                if (serializedObject.FindProperty("_DEF").intValue < 0) serializedObject.FindProperty("_DEF").intValue = 0;
-
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("hit"), new GUIContent("命中力"));
-                if (serializedObject.FindProperty("hit").intValue < 0) serializedObject.FindProperty("hit").intValue = 0;
-
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("flee"), new GUIContent("闪避力"));
-                if (serializedObject.FindProperty("flee").intValue < 0) serializedObject.FindProperty("flee").intValue = 0;
 
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("gemSlotAmount"), new GUIContent("默认宝石槽数"));
                 goto case ItemType.Gemstone;
@@ -430,6 +418,9 @@ public class ItemInspector : Editor
         }
         if (item.IsEquipment)
         {
+            EditorGUILayout.PropertyField(attribute, new GUIContent("装备属性"), false);
+            if (attribute.isExpanded)
+                attrDrawer?.DrawLayoutEditor();
             EditorGUILayout.PropertyField(maxDurability, new GUIContent("最大耐久度"));
             if (maxDurability.intValue < 1) maxDurability.intValue = 1;
         }
