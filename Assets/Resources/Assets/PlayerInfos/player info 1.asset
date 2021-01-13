@@ -16,12 +16,12 @@ MonoBehaviour:
   _Name: "\u674E\u9A81"
   sex: 1
   backpack:
-    backpackSize:
+    size:
       min: 0
       max: 50
-    weightLoad:
+    weight:
       min: 0
-      max: 100
+      max: 150
   primaryWeapon:
     item: {fileID: 0}
     amount: 1
@@ -112,6 +112,8 @@ MonoBehaviour:
     gemSlotAmount: 0
     gemstone1: {fileID: 0}
     gemstone2: {fileID: 0}
+  attribute:
+    attributes: []
   _HP:
     min: 0
     max: 150

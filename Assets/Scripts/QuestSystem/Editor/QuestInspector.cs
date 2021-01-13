@@ -17,8 +17,7 @@ public class QuestInspector : Editor
     SerializedProperty questType;
     SerializedProperty repeatFrequancy;
     SerializedProperty timeUnit;
-    SerializedProperty acceptConditions;
-    SerializedProperty conditionRelational;
+    SerializedProperty acceptCondition;
     SerializedProperty beginDialogue;
     SerializedProperty ongoingDialogue;
     SerializedProperty completeDialogue;
@@ -34,7 +33,7 @@ public class QuestInspector : Editor
     SerializedProperty submitObjectives;
     SerializedProperty customObjectives;
 
-    ReorderableList acceptConditionList;
+    ConditionGroupDrawer acceptConditionDrawer;
 
     ReorderableList rewardItemList;
 
@@ -79,8 +78,7 @@ public class QuestInspector : Editor
         questType = serializedObject.FindProperty("questType");
         repeatFrequancy = serializedObject.FindProperty("repeatFrequancy");
         timeUnit = serializedObject.FindProperty("timeUnit");
-        acceptConditions = serializedObject.FindProperty("acceptConditions");
-        conditionRelational = serializedObject.FindProperty("conditionRelational");
+        acceptCondition = serializedObject.FindProperty("acceptCondition");
         beginDialogue = serializedObject.FindProperty("beginDialogue");
         ongoingDialogue = serializedObject.FindProperty("ongoingDialogue");
         completeDialogue = serializedObject.FindProperty("completeDialogue");
@@ -95,7 +93,7 @@ public class QuestInspector : Editor
         moveObjectives = serializedObject.FindProperty("moveObjectives");
         submitObjectives = serializedObject.FindProperty("submitObjectives");
         customObjectives = serializedObject.FindProperty("customObjectives");
-        HandlingAcceptConditionList();
+        acceptConditionDrawer = new ConditionGroupDrawer(serializedObject, acceptCondition, lineHeight, lineHeightSpace);
         HandlingQuestRewardItemList();
         HandlingCollectObjectiveList();
         HandlingKillObjectiveList();
@@ -184,21 +182,7 @@ public class QuestInspector : Editor
                 break;
             case 1:
                 #region case 1 条件
-                serializedObject.Update();
-                acceptConditionList.DoLayoutList();
-                serializedObject.ApplyModifiedProperties();
-                if (acceptConditions.arraySize > 0)
-                {
-                    serializedObject.Update();
-                    EditorGUI.BeginChangeCheck();
-                    EditorGUILayout.PropertyField(conditionRelational, new GUIContent("条件关系表达式"));
-                    GUI.enabled = false;
-                    EditorGUILayout.TextArea("1、操作数为条件的序号\n2、运算符可使用 \"(\"、\")\"、\"+\"(或)、\"*\"(且)、\"~\"(非)" +
-                        "\n3、未对非法输入进行处理，需规范填写\n4、例：(0 + 1) * ~2 表示满足条件0或1且不满足条件2\n5、为空时默认进行相互的“且”运算");
-                    GUI.enabled = true;
-                    if (EditorGUI.EndChangeCheck())
-                        serializedObject.ApplyModifiedProperties();
-                }
+                acceptConditionDrawer.DoLayoutDraw();
                 #endregion
                 break;
             case 2:
@@ -363,170 +347,6 @@ public class QuestInspector : Editor
                 #endregion
                 break;
         }
-    }
-
-    void HandlingAcceptConditionList()
-    {
-        acceptConditionList = new ReorderableList(serializedObject, acceptConditions, true, true, true, true);
-        acceptConditionList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
-        {
-            serializedObject.Update();
-            if (quest.AcceptConditions[index] != null)
-            {
-                switch (quest.AcceptConditions[index].AcceptCondition)
-                {
-                    case QuestCondition.CompleteQuest:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "完成任务");
-                        break;
-                    case QuestCondition.AcceptQuest:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "接取任务");
-                        break;
-                    case QuestCondition.HasItem:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "拥有道具");
-                        break;
-                    case QuestCondition.LevelEquals:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级等于");
-                        break;
-                    case QuestCondition.LevelLargeThen:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级大于");
-                        break;
-                    case QuestCondition.LevelLessThen:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级小于");
-                        break;
-                    case QuestCondition.TriggerSet:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "触发器开启");
-                        break;
-                    case QuestCondition.TriggerReset:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "触发器关闭");
-                        break;
-                    default:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "未定义条件");
-                        break;
-                }
-            }
-            else EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
-            EditorGUI.BeginChangeCheck();
-            SerializedProperty acceptCondition = acceptConditions.GetArrayElementAtIndex(index);
-            EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
-                acceptCondition.FindPropertyRelative("acceptCondition"), new GUIContent(string.Empty), true);
-            SerializedProperty level;
-            SerializedProperty completeQuest;
-            SerializedProperty ownedItem;
-
-            switch (quest.AcceptConditions[index].AcceptCondition)
-            {
-                case QuestCondition.CompleteQuest:
-                case QuestCondition.AcceptQuest:
-                    completeQuest = acceptCondition.FindPropertyRelative("completeQuest");
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), completeQuest, new GUIContent("需完成的任务"));
-                    if (completeQuest.objectReferenceValue == target) completeQuest.objectReferenceValue = null;
-                    if (quest.AcceptConditions[index].CompleteQuest)
-                    {
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "任务标题", quest.AcceptConditions[index].CompleteQuest.Title);
-                    }
-                    break;
-                case QuestCondition.HasItem:
-                    ownedItem = acceptCondition.FindPropertyRelative("ownedItem");
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), ownedItem, new GUIContent("需拥有的道具"));
-                    if (quest.AcceptConditions[index].OwnedItem)
-                    {
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "道具名称", quest.AcceptConditions[index].OwnedItem.name);
-                    }
-                    break;
-                case QuestCondition.LevelEquals:
-                case QuestCondition.LevelLargeThen:
-                case QuestCondition.LevelLessThen:
-                    level = acceptCondition.FindPropertyRelative("level");
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), level, new GUIContent("限制的等级"));
-                    if (level.intValue < 1) level.intValue = 1;
-                    break;
-                case QuestCondition.TriggerSet:
-                case QuestCondition.TriggerReset:
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight),
-                        acceptCondition.FindPropertyRelative("triggerName"), new GUIContent("触发器名称"));
-                    break;
-                default: break;
-            }
-
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
-
-        acceptConditionList.elementHeightCallback = (int index) =>
-        {
-            switch (quest.AcceptConditions[index].AcceptCondition)
-            {
-                case QuestCondition.CompleteQuest:
-                case QuestCondition.AcceptQuest:
-                    if (quest.AcceptConditions[index].CompleteQuest)
-                        return 3 * lineHeightSpace;
-                    else return 2 * lineHeightSpace;
-                case QuestCondition.HasItem:
-                    if (quest.AcceptConditions[index].OwnedItem)
-                        return 3 * lineHeightSpace;
-                    else return 2 * lineHeightSpace;
-                case QuestCondition.LevelEquals:
-                case QuestCondition.LevelLargeThen:
-                case QuestCondition.LevelLessThen:
-                case QuestCondition.TriggerSet:
-                case QuestCondition.TriggerReset:
-                    return 2 * lineHeightSpace;
-                default: return lineHeightSpace;
-            }
-        };
-
-        acceptConditionList.onAddCallback = (list) =>
-        {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            quest.AcceptConditions.Add(new QuestAcceptCondition());
-            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
-        };
-
-        acceptConditionList.onRemoveCallback = (list) =>
-        {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            if (EditorUtility.DisplayDialog("删除", "确定删除这个条件吗？", "确定", "取消"))
-            {
-                quest.AcceptConditions.RemoveAt(list.index);
-            }
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
-
-        acceptConditionList.drawHeaderCallback = (rect) =>
-        {
-            int notCmpltCount = quest.AcceptConditions.FindAll(x =>
-            {
-                switch (x.AcceptCondition)
-                {
-                    case QuestCondition.CompleteQuest:
-                    case QuestCondition.AcceptQuest:
-                        if (x.CompleteQuest) return false;
-                        else return true;
-                    case QuestCondition.HasItem:
-                        if (x.OwnedItem) return false;
-                        else return true;
-                    case QuestCondition.LevelEquals:
-                    case QuestCondition.LevelLargeThen:
-                    case QuestCondition.LevelLessThen:
-                        if (x.Level > 0) return false;
-                        else return true;
-                    case QuestCondition.TriggerSet:
-                    case QuestCondition.TriggerReset:
-                        if (!string.IsNullOrEmpty(x.TriggerName)) return false;
-                        else return true;
-                    default: return false;
-                }
-            }).Count;
-            EditorGUI.LabelField(rect, "接取条件列表", "数量：" + acceptConditions.arraySize + (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
-        };
-
-        acceptConditionList.drawNoneElementCallback = (rect) =>
-        {
-            EditorGUI.LabelField(rect, "空列表");
-        };
     }
 
     void HandlingQuestRewardItemList()
@@ -1437,24 +1257,24 @@ public class QuestInspector : Editor
 
         editComplete &= !(string.IsNullOrEmpty(quest.ID) || string.IsNullOrEmpty(quest.Title) || string.IsNullOrEmpty(quest.Description));
 
-        editComplete &= !quest.AcceptConditions.Exists(x =>
+        editComplete &= !quest.AcceptCondition.Conditions.Exists(x =>
         {
-            switch (x.AcceptCondition)
+            switch (x.Type)
             {
-                case QuestCondition.CompleteQuest:
-                case QuestCondition.AcceptQuest:
+                case ConditionType.CompleteQuest:
+                case ConditionType.AcceptQuest:
                     if (x.CompleteQuest) return false;
                     else return true;
-                case QuestCondition.HasItem:
+                case ConditionType.HasItem:
                     if (x.OwnedItem) return false;
                     else return true;
-                case QuestCondition.LevelEquals:
-                case QuestCondition.LevelLargeThen:
-                case QuestCondition.LevelLessThen:
+                case ConditionType.LevelEquals:
+                case ConditionType.LevelLargeThen:
+                case ConditionType.LevelLessThen:
                     if (x.Level > 0) return false;
                     else return true;
-                case QuestCondition.TriggerSet:
-                case QuestCondition.TriggerReset:
+                case ConditionType.TriggerSet:
+                case ConditionType.TriggerReset:
                     if (!string.IsNullOrEmpty(x.TriggerName)) return false;
                     else return true;
                 default: return false;

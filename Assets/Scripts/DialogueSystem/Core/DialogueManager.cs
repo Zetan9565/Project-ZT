@@ -122,7 +122,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (!UI) return;
         CurrentTalker = talker;
         CurrentType = DialogueType.Normal;
-        if (talker.QuestInstances.FindAll(q => QuestManager.Instance.IsQuestAcceptable(q)).Count > 0)
+        if (talker.QuestInstances.FindAll(q => q.AcceptCondition.IsMeet()).Count > 0)
             ZetanUtility.SetActive(UI.questButton.gameObject, true);
         else ZetanUtility.SetActive(UI.questButton.gameObject, false);
         ZetanUtility.SetActive(UI.warehouseButton.gameObject, talker.Info.IsWarehouseAgent);
@@ -316,7 +316,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         ClearOptions();
         foreach (Quest quest in CurrentTalker.QuestInstances)
         {
-            if (!QuestManager.Instance.HasCompleteQuest(quest) && QuestManager.Instance.IsQuestAcceptable(quest) && QuestManager.IsQuestValid(quest))
+            if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.AcceptCondition.IsMeet() && QuestManager.IsQuestValid(quest))
             {
                 OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
                 oa.Init(quest.Title + (quest.IsComplete ? "(完成)" : quest.InProgress ? "(进行中)" : string.Empty), quest);

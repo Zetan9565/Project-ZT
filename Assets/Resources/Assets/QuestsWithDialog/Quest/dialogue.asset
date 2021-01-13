@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ID: DIALG000004
   useUnifiedNPC: 1
-  useTalkerInfo: 1
+  useCurrentTalkerInfo: 0
   unifiedNPC: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
   words:
   - talkerType: 2

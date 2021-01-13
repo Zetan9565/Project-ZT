@@ -28,12 +28,8 @@ public class Quest : ScriptableObject
     public QuestGroup Group => group;
 
     [SerializeField]
-    private List<QuestAcceptCondition> acceptConditions = new List<QuestAcceptCondition>();
-    public List<QuestAcceptCondition> AcceptConditions => acceptConditions;
-
-    [SerializeField]
-    private string conditionRelational;
-    public string ConditionRelational => conditionRelational;
+    private ConditionGroup acceptCondition = new ConditionGroup();
+    public ConditionGroup AcceptCondition => acceptCondition;
 
     [SerializeField]
 #if UNITY_EDITOR

@@ -420,7 +420,7 @@ public class ItemInspector : Editor
         {
             EditorGUILayout.PropertyField(attribute, new GUIContent("装备属性"), false);
             if (attribute.isExpanded)
-                attrDrawer?.DrawLayoutEditor();
+                attrDrawer?.DoLayoutDraw();
             EditorGUILayout.PropertyField(maxDurability, new GUIContent("最大耐久度"));
             if (maxDurability.intValue < 1) maxDurability.intValue = 1;
         }

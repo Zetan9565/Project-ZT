@@ -30,7 +30,20 @@ MonoBehaviour:
   rewardItems: []
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 0
-  collectObjectives: []
+  collectObjectives:
+  - displayName: 
+    display: 1
+    canNavigate: 1
+    showMapIcon: 1
+    amount: 1
+    inOrder: 0
+    orderIndex: 1
+    runtimeID: 
+    runtimeParent: {fileID: 0}
+    item: {fileID: 0}
+    checkBagAtStart: 1
+    loseItemAtSbmt: 1
+    amountWhenStart: 0
   killObjectives: []
   talkObjectives:
   - displayName: "\u5B89\u6170\u739B\u4E3D\u4E9A"

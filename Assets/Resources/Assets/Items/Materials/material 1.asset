@@ -24,9 +24,12 @@ MonoBehaviour:
   description: "\u53EF\u4EE5\u51B6\u70BC\u6210\u94C1\u91D1\u5C5E\u3002"
   stackAble: 1
   discardAble: 1
-  useable: 0
+  lockAble: 1
+  usable: 0
   inexhaustible: 0
   maxDurability: 100
-  processMethod: 0
-  materials: []
+  makingMethod: 0
+  minYield: 1
+  maxYield: 1
   materialType: 1
+  materials: []
