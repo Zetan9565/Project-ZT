@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "gathering info", menuName = "ZetanStudio/采集物信息")]
@@ -26,9 +25,6 @@ public class GatheringInformation : ScriptableObject
     }
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("手动", "斧子", "镐子", "铲子", "锄头")]
-#endif
     protected GatherType gatherType;
     public GatherType GatherType
     {
@@ -83,21 +79,26 @@ public enum GatherType
     /// <summary>
     /// 手采
     /// </summary>
+    [InspectorName("手摘")]
     Hands,
     /// <summary>
     /// 斧子
     /// </summary>
+    [InspectorName("用斧子砍")]
     Axe,
     /// <summary>
     /// 镐子
     /// </summary>
+    [InspectorName("用稿子敲")]
     Shovel,
     /// <summary>
     /// 铲子
     /// </summary>
+    [InspectorName("用铲子挖")]
     Spade,
     /// <summary>
     /// 锄头
     /// </summary>
+    [InspectorName("用锄头翻")]
     Hoe
 }

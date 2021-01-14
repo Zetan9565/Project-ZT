@@ -93,7 +93,7 @@ public class QuestInspector : Editor
         moveObjectives = serializedObject.FindProperty("moveObjectives");
         submitObjectives = serializedObject.FindProperty("submitObjectives");
         customObjectives = serializedObject.FindProperty("customObjectives");
-        acceptConditionDrawer = new ConditionGroupDrawer(serializedObject, acceptCondition, lineHeight, lineHeightSpace);
+        acceptConditionDrawer = new ConditionGroupDrawer(serializedObject, acceptCondition, lineHeight, lineHeightSpace, "接取条件列表");
         HandlingQuestRewardItemList();
         HandlingCollectObjectiveList();
         HandlingKillObjectiveList();
@@ -197,9 +197,6 @@ public class QuestInspector : Editor
                 serializedObject.Update();
                 rewardItemList.DoLayoutList();
                 serializedObject.ApplyModifiedProperties();
-                if (quest.RewardItems.Count >= 10)
-                    rewardItemList.displayAdd = false;
-                else rewardItemList.displayAdd = true;
                 #endregion
                 break;
             case 3:
@@ -384,6 +381,11 @@ public class QuestInspector : Editor
             quest.RewardItems.Add(new ItemInfo());
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
+        };
+
+        rewardItemList.onCanAddCallback = (list) =>
+        {
+            return list.count < 10;
         };
 
         rewardItemList.onRemoveCallback = (list) =>
@@ -1263,10 +1265,10 @@ public class QuestInspector : Editor
             {
                 case ConditionType.CompleteQuest:
                 case ConditionType.AcceptQuest:
-                    if (x.CompleteQuest) return false;
+                    if (x.RelatedQuest) return false;
                     else return true;
                 case ConditionType.HasItem:
-                    if (x.OwnedItem) return false;
+                    if (x.RelatedItem) return false;
                     else return true;
                 case ConditionType.LevelEquals:
                 case ConditionType.LevelLargeThen:

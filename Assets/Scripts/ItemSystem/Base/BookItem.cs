@@ -4,9 +4,6 @@
 public class BookItem : ItemBase
 {
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("技能书", "建造图纸", "制作指南")]
-#endif
     private BookType bookType;
     public BookType BookType
     {
@@ -45,7 +42,12 @@ public class BookItem : ItemBase
 
 public enum BookType
 {
+    [InspectorName("技能书")]
     Skill,
+
+    [InspectorName("建造图纸")]
     Building,
+
+    [InspectorName("制作指南")]
     Making
 }

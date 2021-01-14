@@ -58,9 +58,6 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     private float Scale => multiples / 60;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("12小时制", "24小时制", "十二时辰")]
-#endif
     private TimeSystem timeSystem = TimeSystem.System24;
     public TimeSystem TimeSystem
     {
@@ -520,18 +517,34 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
 
 public enum TimeSystem
 {
+    [InspectorName("12小时制")]
     System12,
+
+    [InspectorName("24小时制")]
     System24,
+
+    [InspectorName("十二时辰制")]
     Twelve
 }
 
 public enum TimeUnit
 {
+    [InspectorName("分")]
     Minute,
+
+    [InspectorName("时")]
     Hour,
+
+    [InspectorName("天")]
     Day,
+
+    [InspectorName("月")]
     Month,
+
+    [InspectorName("季")]
     Season,
+
+    [InspectorName("年")]
     Year
 }
 

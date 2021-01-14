@@ -145,9 +145,6 @@ public class WordsOption
     }
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("类型：一句分支", "类型：一段分支", "类型：选择项", "类型：提交、交换道具", "类型：取得道具")]
-#endif
     private WordsOptionType optionType;
     public WordsOptionType OptionType => optionType;
 
@@ -263,10 +260,19 @@ public class WordsOption
 }
 public enum WordsOptionType
 {
+    [InspectorName("类型：一句分支")]
     BranchWords,
+
+    [InspectorName("类型：一段分支")]
     BranchDialogue,
+
+    [InspectorName("类型：选择项")]
     Choice,
+
+    [InspectorName("提交、交换道具")]
     SubmitAndGet,
+
+    [InspectorName("取得道具")]
     OnlyGet
 }
 
@@ -274,9 +280,6 @@ public enum WordsOptionType
 public class WordsEvent
 {
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("触发器", "增加好感", "减少好感")]
-#endif
     private WordsEventType eventType;
     public WordsEventType EventType => eventType;
 
@@ -289,9 +292,6 @@ public class WordsEvent
     public bool DoOnlyOnce => doOnlyOnce;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("无", "置位", "复位")]
-#endif
     private TriggerActionType triggerActType;
     public TriggerActionType TriggerActType => triggerActType;
 
@@ -313,15 +313,25 @@ public class WordsEvent
 }
 public enum WordsEventType
 {
+    [InspectorName("触发器")]
     Trigger,
+
+    [InspectorName("增加好感")]
     GetAmity,
+
+    [InspectorName("减少好感")]
     LoseAmity
 }
 
 public enum TalkerType
 {
+    [InspectorName("提交处NPC")]
     NPC,
+
+    [InspectorName("玩家角色")]
     Player,
+
+    [InspectorName("统一的NPC")]
     UnifiedNPC
 }
 

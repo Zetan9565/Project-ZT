@@ -1,12 +1,9 @@
 ﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "armor", menuName = "ZetanStudio/道具/防具")]
-public class ArmorItem : ItemBase
+public class ArmorItem : EquipmentItem
 {
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("盔甲", "头盔", "靴子", "护手", "衣服")]
-#endif
     private ArmorType armorType;
     public ArmorType ArmorType
     {
@@ -47,17 +44,6 @@ public class ArmorItem : ItemBase
     }
 
     [SerializeField]
-    [Range(0, 2)]
-    private int gemSlotAmount = 0;
-    public int GemSlotAmout
-    {
-        get
-        {
-            return gemSlotAmount;
-        }
-    }
-
-    [SerializeField]
     private PowerUp powerup = new PowerUp();
     public PowerUp Powerup
     {
@@ -76,9 +62,18 @@ public class ArmorItem : ItemBase
 
 public enum ArmorType
 {
+    [InspectorName("盔甲")]
     Armor,
+
+    [InspectorName("头盔")]
     Helmet,
+
+    [InspectorName("靴子")]
     Boots,
+
+    [InspectorName("护手")]
     Gloves,
+
+    [InspectorName("衣服")]
     Clothes
 }

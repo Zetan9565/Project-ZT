@@ -19,9 +19,6 @@ public abstract class ItemBase : ScriptableObject
     public virtual ItemType ItemType => itemType;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("凡品", "精品", "珍品", "极品", "绝品")]
-#endif
     protected ItemQuality quality;
     public virtual ItemQuality Quality => quality;
 
@@ -79,9 +76,6 @@ public abstract class ItemBase : ScriptableObject
 
     #region 制作相关
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("不可制作", "手工", "冶炼", "锻造", "织布", "裁缝", "烹饪", "炼丹", "制药", "晾晒", "研磨")]
-#endif
     protected MakingMethod makingMethod;
     public virtual MakingMethod MakingMethod => makingMethod;
 
@@ -94,9 +88,6 @@ public abstract class ItemBase : ScriptableObject
     public virtual int MaxYield => maxYield;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("未定义", "矿石", "金属", "植物", "布料", "肉类", "皮毛", "水果", "图纸", "调料")]
-#endif
     protected MaterialType materialType;
     public MaterialType MaterialType
     {
@@ -284,29 +275,19 @@ public enum ItemType
 
 public enum ItemQuality
 {
-    /// <summary>
-    /// 凡品
-    /// </summary>
+    [InspectorName("凡品")]
     Normal,
 
-    /// <summary>
-    /// 精品
-    /// </summary>
+    [InspectorName("精品")]
     Exquisite,
 
-    /// <summary>
-    /// 珍品
-    /// </summary>
+    [InspectorName("珍品")]
     Precious,
 
-    /// <summary>
-    /// 极品
-    /// </summary>
+    [InspectorName("极品")]
     Best,
 
-    /// <summary>
-    /// 绝品
-    /// </summary>
+    [InspectorName("绝品")]
     Peerless,
 }
 
@@ -315,62 +296,76 @@ public enum MakingMethod
     /// <summary>
     /// 不可制作
     /// </summary>
+    [InspectorName("不可制作")]
     None,
 
     /// <summary>
     /// 手工：所有类型
     /// </summary>
+    [InspectorName("手工")]
     Handmade,
 
     /// <summary>
     /// 冶炼：材料
     /// </summary>
+    [InspectorName("冶炼")]
     Smelt,
 
     /// <summary>
     /// 锻造：装备、工具
     /// </summary>
+    [InspectorName("锻造")]
     Forging,
 
     /// <summary>
     /// 织布：材料
     /// </summary>
+    [InspectorName("织布")]
     Weaving,
 
     /// <summary>
     /// 裁缝：装备
     /// </summary>
+    [InspectorName("裁缝")]
     Tailor,
 
     /// <summary>
     /// 烹饪：菜肴、Buff
     /// </summary>
+    [InspectorName("烹饪")]
     Cooking,
 
     /// <summary>
     /// 炼丹：Buff、恢复剂
     /// </summary>
+    [InspectorName("炼丹")]
     Alchemy,
 
     /// <summary>
     /// 制药：恢复剂
     /// </summary>
+    [InspectorName("制药")]
     Pharmaceutical,
 
     /// <summary>
     /// 晾晒：材料、恢复剂
     /// </summary>
+    [InspectorName("晾晒")]
     Season,
 
     /// <summary>
     /// 研磨：材料、恢复剂
     /// </summary>
+    [InspectorName("研磨")]
     Triturate
 }
 
 public enum MakingType
 {
+    [InspectorName("单种道具")]
     SingleItem,//单种道具
+
+    [InspectorName("同类道具")]
     SameType//同类道具
 }
 #endregion
@@ -591,16 +586,10 @@ public class MaterialInfo
     public int Amount => amount;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("单种材料", "同类材料")]
-#endif
     private MakingType makingType;
     public MakingType MakingType => makingType;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("未定义", "矿石", "金属", "植物", "布料", "肉类", "皮毛", "水果")]
-#endif
     private MaterialType materialType;
     public MaterialType MaterialType => materialType;
 
@@ -849,9 +838,6 @@ public class FavoriteItemInfo
     }
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("稍微喜欢", "喜欢", "着迷", "狂热")]
-#endif
     private FavoriteLevel favoriteLevel = FavoriteLevel.Little;
     public FavoriteLevel FavoriteLevel
     {
@@ -869,9 +855,16 @@ public class FavoriteItemInfo
 
 public enum FavoriteLevel
 {
+    [InspectorName("稍微喜欢")]
     Little = 10,//稍微喜欢+10
+
+    [InspectorName("喜欢")]
     Fond = 30,//喜欢+30
+
+    [InspectorName("很喜欢")]
     Fascinated = 100,//着迷+100
+
+    [InspectorName("着迷")]
     Crazy = 300//狂热的+300
 }
 
@@ -889,9 +882,6 @@ public class HateItemInfo
     }
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("不喜欢", "稍微讨厌", "讨厌", "深恶痛绝")]
-#endif
     private HateLevel hateLevel = HateLevel.Dislike;
     public HateLevel HateLevel
     {
@@ -909,9 +899,16 @@ public class HateItemInfo
 
 public enum HateLevel
 {
+    [InspectorName("不喜欢")]
     Dislike = 10,//不喜欢-10
+
+    [InspectorName("稍微讨厌")]
     Little = 30,//稍微讨厌-30
+
+    [InspectorName("讨厌")]
     Hate = 100,//讨厌-100
+
+    [InspectorName("很讨厌")]
     Detest = 300//深恶痛绝-300
 }
 #endregion

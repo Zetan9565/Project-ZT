@@ -353,7 +353,7 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
             Debug.Log("已存在寻路管理器");
             return;
         }
-        new GameObject("ObjectPool").AddComponent<AStarManager>();
+        new GameObject("AStarManager").AddComponent<AStarManager>();
     }
 #endif
 }

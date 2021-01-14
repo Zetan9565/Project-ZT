@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
-using UnityEditor;
 
 [System.Serializable]
-public class EquipmentItem : ItemBase
+public abstract class EquipmentItem : ItemBase
 {
     [SerializeField]
     private RoleAttributeGroup attribute;

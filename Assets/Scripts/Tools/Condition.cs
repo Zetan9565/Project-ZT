@@ -7,9 +7,6 @@ using UnityEngine;
 public class Condition
 {
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("等级等于", "等级大于", "等级小于", "完成任务", "接取任务", "拥有道具", "触发器开启", "触发器关闭")]
-#endif
     private ConditionType type = ConditionType.CompleteQuest;
     public ConditionType Type => type;
 
@@ -18,12 +15,12 @@ public class Condition
     public int Level => level;
 
     [SerializeField]
-    private Quest completeQuest;
-    public Quest CompleteQuest => completeQuest;
+    private Quest relatedQuest;
+    public Quest RelatedQuest => relatedQuest;
 
     [SerializeField]
-    private ItemBase ownedItem;
-    public ItemBase OwnedItem => ownedItem;
+    private ItemBase relatedItem;
+    public ItemBase RelatedItem => relatedItem;
 
     [SerializeField]
     private string triggerName;
@@ -32,13 +29,28 @@ public class Condition
 
 public enum ConditionType
 {
+    [InspectorName("等级等于")]
     LevelEquals,
+
+    [InspectorName("等级大于")]
     LevelLargeThen,
+
+    [InspectorName("等级小于")]
     LevelLessThen,
+
+    [InspectorName("完成任务")]
     CompleteQuest,
+
+    [InspectorName("接取任务")]
     AcceptQuest,
+
+    [InspectorName("拥有道具")]
     HasItem,
+
+    [InspectorName("触发器置位")]
     TriggerSet,
+
+    [InspectorName("触发器复位")]
     TriggerReset
 }
 
@@ -193,241 +205,19 @@ public class ConditionGroup
     {
         switch (condition.Type)
         {
-            case ConditionType.CompleteQuest: return QuestManager.Instance.HasCompleteQuestWithID(condition.CompleteQuest.ID);
-            case ConditionType.AcceptQuest: return QuestManager.Instance.HasOngoingQuestWithID(condition.CompleteQuest.ID);
-            case ConditionType.HasItem: return BackpackManager.Instance.HasItemWithID(condition.OwnedItem.ID);
+            case ConditionType.CompleteQuest: return QuestManager.Instance.HasCompleteQuestWithID(condition.RelatedQuest.ID);
+            case ConditionType.AcceptQuest: return QuestManager.Instance.HasOngoingQuestWithID(condition.RelatedQuest.ID);
+            case ConditionType.HasItem: return BackpackManager.Instance.HasItemWithID(condition.RelatedItem.ID);
             case ConditionType.LevelEquals: return PlayerManager.Instance.PlayerInfo.level == condition.Level;
             case ConditionType.LevelLargeThen: return PlayerManager.Instance.PlayerInfo.level > condition.Level;
             case ConditionType.LevelLessThen: return PlayerManager.Instance.PlayerInfo.level < condition.Level;
             case ConditionType.TriggerSet:
                 var state = TriggerManager.Instance.GetTriggerState(condition.TriggerName);
-                return state != TriggerState.NotExist ? (state == TriggerState.On ? true : false) : false;
+                return state != TriggerState.NotExist && (state == TriggerState.On);
             case ConditionType.TriggerReset:
                 state = TriggerManager.Instance.GetTriggerState(condition.TriggerName);
-                return state != TriggerState.NotExist ? (state == TriggerState.Off ? true : false) : false;
+                return state != TriggerState.NotExist && (state == TriggerState.Off);
             default: return true;
         }
-    }
-}
-
-public class ConditionGroupDrawer
-{
-    private readonly SerializedObject owner;
-
-    private readonly SerializedProperty property;
-
-    private readonly float lineHeightSpace;
-
-    public ReorderableList ConditionList { get; }
-
-    public ConditionGroupDrawer(SerializedObject owner, SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "条件列表")
-    {
-        this.owner = owner;
-        this.property = property;
-        this.lineHeightSpace = lineHeightSpace;
-        SerializedProperty conditions = property.FindPropertyRelative("conditions");
-        ConditionList = new ReorderableList(property.serializedObject, conditions, true, true, true, true);
-        ConditionList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
-        {
-            owner.Update();
-            SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
-            SerializedProperty type = condition.FindPropertyRelative("type");
-            ConditionType conditionType = (ConditionType)type.enumValueIndex;
-            SerializedProperty level;
-            SerializedProperty completeQuest;
-            SerializedProperty ownedItem;
-            if (condition != null)
-            {
-                switch (conditionType)
-                {
-                    case ConditionType.CompleteQuest:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "完成任务");
-                        break;
-                    case ConditionType.AcceptQuest:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "接取任务");
-                        break;
-                    case ConditionType.HasItem:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "拥有道具");
-                        break;
-                    case ConditionType.LevelEquals:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级等于");
-                        break;
-                    case ConditionType.LevelLargeThen:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级大于");
-                        break;
-                    case ConditionType.LevelLessThen:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级小于");
-                        break;
-                    case ConditionType.TriggerSet:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "触发器开启");
-                        break;
-                    case ConditionType.TriggerReset:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "触发器关闭");
-                        break;
-                    default:
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "未定义条件");
-                        break;
-                }
-            }
-            else EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
-            EditorGUI.BeginChangeCheck();
-            EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
-                type, new GUIContent(string.Empty), true);
-
-            switch (conditionType)
-            {
-                case ConditionType.CompleteQuest:
-                case ConditionType.AcceptQuest:
-                    completeQuest = condition.FindPropertyRelative("completeQuest");
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), completeQuest, new GUIContent("需完成的任务"));
-                    if (completeQuest.objectReferenceValue == owner.targetObject as Quest) completeQuest.objectReferenceValue = null;
-                    if (completeQuest.objectReferenceValue)
-                    {
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "任务标题", completeQuest.FindPropertyRelative("title").stringValue);
-                    }
-                    break;
-                case ConditionType.HasItem:
-                    ownedItem = condition.FindPropertyRelative("ownedItem");
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), ownedItem, new GUIContent("需拥有的道具"));
-                    if (ownedItem.objectReferenceValue)
-                    {
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "道具名称", ownedItem.FindPropertyRelative("_Name").stringValue);
-                    }
-                    break;
-                case ConditionType.LevelEquals:
-                case ConditionType.LevelLargeThen:
-                case ConditionType.LevelLessThen:
-                    level = condition.FindPropertyRelative("level");
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), level, new GUIContent("限制的等级"));
-                    if (level.intValue < 1) level.intValue = 1;
-                    break;
-                case ConditionType.TriggerSet:
-                case ConditionType.TriggerReset:
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight),
-                        condition.FindPropertyRelative("triggerName"), new GUIContent("触发器名称"));
-                    break;
-                default: break;
-            }
-
-            if (EditorGUI.EndChangeCheck())
-                owner.ApplyModifiedProperties();
-        };
-
-        ConditionList.elementHeightCallback = (int index) =>
-        {
-            SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
-            SerializedProperty type = condition.FindPropertyRelative("type");
-            ConditionType conditionType = (ConditionType)type.enumValueIndex;
-            switch (conditionType)
-            {
-                case ConditionType.CompleteQuest:
-                case ConditionType.AcceptQuest:
-                    if (condition.FindPropertyRelative("completeQuest").objectReferenceValue)
-                        return 3 * lineHeightSpace;
-                    else return 2 * lineHeightSpace;
-                case ConditionType.HasItem:
-                    if (condition.FindPropertyRelative("ownedItem").objectReferenceValue)
-                        return 3 * lineHeightSpace;
-                    else return 2 * lineHeightSpace;
-                case ConditionType.LevelEquals:
-                case ConditionType.LevelLargeThen:
-                case ConditionType.LevelLessThen:
-                case ConditionType.TriggerSet:
-                case ConditionType.TriggerReset:
-                    return 2 * lineHeightSpace;
-                default: return lineHeightSpace;
-            }
-        };
-
-        ConditionList.onRemoveCallback = (list) =>
-        {
-            owner.Update();
-            EditorGUI.BeginChangeCheck();
-            if (EditorUtility.DisplayDialog("删除", "确定删除这个条件吗？", "确定", "取消"))
-            {
-                conditions.DeleteArrayElementAtIndex(list.index);
-            }
-            if (EditorGUI.EndChangeCheck())
-                owner.ApplyModifiedProperties();
-        };
-
-        ConditionList.drawHeaderCallback = (rect) =>
-        {
-            int notCmpltCount = 0;
-            for (int i = 0; i < conditions.arraySize; i++)
-            {
-                SerializedProperty condition = conditions.GetArrayElementAtIndex(i);
-                SerializedProperty type = condition.FindPropertyRelative("type");
-                ConditionType conditionType = (ConditionType)type.enumValueIndex;
-                SerializedProperty level = condition.FindPropertyRelative("level");
-                SerializedProperty completeQuest = condition.FindPropertyRelative("completeQuest");
-                SerializedProperty ownedItem = condition.FindPropertyRelative("ownedItem");
-                switch (conditionType)
-                {
-                    case ConditionType.CompleteQuest:
-                    case ConditionType.AcceptQuest:
-                        if (completeQuest.objectReferenceValue == null) notCmpltCount++;
-                        break;
-                    case ConditionType.HasItem:
-                        if (ownedItem.objectReferenceValue == null) notCmpltCount++;
-                        break;
-                    case ConditionType.LevelEquals:
-                    case ConditionType.LevelLargeThen:
-                    case ConditionType.LevelLessThen:
-                        if (level.intValue < 1) notCmpltCount++;
-                        break;
-                    case ConditionType.TriggerSet:
-                    case ConditionType.TriggerReset:
-                        if (!string.IsNullOrEmpty(condition.FindPropertyRelative("triggerName").stringValue)) notCmpltCount++;
-                        break;
-                    default: break;
-                }
-            }
-            EditorGUI.LabelField(rect, listTitle, "数量：" + conditions.arraySize + (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
-        };
-
-        ConditionList.drawNoneElementCallback = (rect) =>
-        {
-            EditorGUI.LabelField(rect, "空列表");
-        };
-    }
-
-    public void DoLayoutDraw()
-    {
-        owner?.Update();
-        ConditionList?.DoLayoutList();
-        owner?.ApplyModifiedProperties();
-        if (ConditionList != null && ConditionList.count > 0)
-        {
-            owner?.Update();
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(property.FindPropertyRelative("relational"), new GUIContent("(?)条件关系表达式"));
-            if (EditorGUI.EndChangeCheck())
-                owner?.ApplyModifiedProperties();
-        }
-    }
-
-    public void DoDraw(Rect rect)
-    {
-        owner?.Update();
-        ConditionList?.DoList(rect);
-        owner?.ApplyModifiedProperties();
-        if (ConditionList != null && ConditionList.count > 0)
-        {
-            owner?.Update();
-            EditorGUI.BeginChangeCheck();
-            EditorGUI.PropertyField(new Rect(rect.x, rect.y + ConditionList.GetHeight(), rect.width, lineHeightSpace), property.FindPropertyRelative("relational"), new GUIContent("(?)条件关系表达式"));
-            if (EditorGUI.EndChangeCheck())
-                owner?.ApplyModifiedProperties();
-        }
-    }
-
-    public float GetDrawHeight()
-    {
-        if (ConditionList == null) return 0;
-        float height = ConditionList.GetHeight();
-        if (ConditionList.count > 0)
-            height += lineHeightSpace;
-        return height;
     }
 }

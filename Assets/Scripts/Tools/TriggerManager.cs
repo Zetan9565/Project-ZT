@@ -87,7 +87,12 @@ public enum TriggerState
 
 public enum TriggerActionType
 {
+    [InspectorName("无")]
     None,
+
+    [InspectorName("置位")]
     Set,
+
+    [InspectorName("复位")]
     Reset
 }

@@ -27,6 +27,11 @@ public class ZetanUtility
         return string.Format("<color=#{0}>{1}</color>", ColorUtility.ToHtmlStringRGB(color), text);
     }
 
+    public static bool IsPrefab(GameObject gameObject)
+    {
+        return gameObject.scene.name == null;
+    }
+
     public static void SetActive(GameObject gameObject, bool value)
     {
         if (!gameObject) return;

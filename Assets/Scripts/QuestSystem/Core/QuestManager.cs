@@ -301,78 +301,82 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     {
         if (HasOngoingQuest(quest) && quest && quest.Abandonable)
         {
-            quest.InProgress = false;
-            questsInProgress.Remove(quest);
-            foreach (Objective o in quest.ObjectiveInstances)
+            if (HasQuestNeedAsCondition(quest, out var bindQuest))
+                ConfirmManager.Instance.New($"由于任务[{bindQuest.Title}]正在进行，无法放弃该任务。");
+            else
             {
-                o.OnStateChangeEvent -= OnObjectiveStateChange;
-                if (o is CollectObjective)
+                quest.InProgress = false;
+                questsInProgress.Remove(quest);
+                foreach (Objective o in quest.ObjectiveInstances)
                 {
-                    CollectObjective co = o as CollectObjective;
-                    co.CurrentAmount = 0;
-                    co.amountWhenStart = 0;
-                    BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmount;
-                    BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
-                }
-                if (o is KillObjective)
-                {
-                    KillObjective ko = o as KillObjective;
-                    ko.CurrentAmount = 0;
-                    switch (ko.ObjectiveType)
+                    o.OnStateChangeEvent -= OnObjectiveStateChange;
+                    if (o is CollectObjective)
                     {
-                        case KillObjectiveType.Specific:
-                            GameManager.Enemies[ko.Enemy.ID].ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                            break;
-                        case KillObjectiveType.Race:
-                            foreach (List<Enemy> enemies in
-                                GameManager.Enemies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
-                                enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                            break;
-                        case KillObjectiveType.Any:
-                            foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
-                                enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                            break;
+                        CollectObjective co = o as CollectObjective;
+                        co.CurrentAmount = 0;
+                        co.amountWhenStart = 0;
+                        BackpackManager.Instance.OnGetItemEvent -= co.UpdateCollectAmount;
+                        BackpackManager.Instance.OnLoseItemEvent -= co.UpdateCollectAmountDown;
                     }
+                    if (o is KillObjective)
+                    {
+                        KillObjective ko = o as KillObjective;
+                        ko.CurrentAmount = 0;
+                        switch (ko.ObjectiveType)
+                        {
+                            case KillObjectiveType.Specific:
+                                GameManager.Enemies[ko.Enemy.ID].ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
+                                break;
+                            case KillObjectiveType.Race:
+                                foreach (List<Enemy> enemies in
+                                    GameManager.Enemies.Select(x => x.Value).Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Race))
+                                    enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
+                                break;
+                            case KillObjectiveType.Any:
+                                foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
+                                    enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
+                                break;
+                        }
+                    }
+                    if (o is TalkObjective)
+                    {
+                        TalkObjective to = o as TalkObjective;
+                        to.CurrentAmount = 0;
+                        GameManager.TalkerDatas[to.NPCToTalk.ID].objectivesTalkToThis.RemoveAll(x => x == to);
+                        DialogueManager.Instance.RemoveDialogueData(to.Dialogue);
+                    }
+                    if (o is MoveObjective)
+                    {
+                        MoveObjective mo = o as MoveObjective;
+                        mo.CurrentAmount = 0;
+                        GameManager.QuestPoints[mo.PointID].ForEach(x => x.OnMoveIntoEvent -= mo.UpdateMoveState);
+                    }
+                    if (o is SubmitObjective)
+                    {
+                        SubmitObjective so = o as SubmitObjective;
+                        so.CurrentAmount = 0;
+                        GameManager.TalkerDatas[so.NPCToSubmit.ID].objectivesSubmitToThis.RemoveAll(x => x == so);
+                    }
+                    if (o is CustomObjective)
+                    {
+                        CustomObjective cuo = o as CustomObjective;
+                        cuo.CurrentAmount = 0;
+                        TriggerManager.Instance.DeleteTriggerListner(cuo.UpdateTriggerState);
+                    }
+                    RemoveObjectiveMapIcon(o);
                 }
-                if (o is TalkObjective)
+                if (quest.NPCToSubmit)
+                    quest.originalQuestHolder.TransferQuestToThis(quest);
+                if (questsInProgress.Count < 1)
                 {
-                    TalkObjective to = o as TalkObjective;
-                    to.CurrentAmount = 0;
-                    GameManager.TalkerDatas[to.NPCToTalk.ID].objectivesTalkToThis.RemoveAll(x => x == to);
-                    DialogueManager.Instance.RemoveDialogueData(to.Dialogue);
+                    UI.questBoard.alpha = 0;
+                    UI.questBoard.blocksRaycasts = false;
                 }
-                if (o is MoveObjective)
-                {
-                    MoveObjective mo = o as MoveObjective;
-                    mo.CurrentAmount = 0;
-                    GameManager.QuestPoints[mo.PointID].ForEach(x => x.OnMoveIntoEvent -= mo.UpdateMoveState);
-                }
-                if (o is SubmitObjective)
-                {
-                    SubmitObjective so = o as SubmitObjective;
-                    so.CurrentAmount = 0;
-                    GameManager.TalkerDatas[so.NPCToSubmit.ID].objectivesSubmitToThis.RemoveAll(x => x == so);
-                }
-                if (o is CustomObjective)
-                {
-                    CustomObjective cuo = o as CustomObjective;
-                    cuo.CurrentAmount = 0;
-                    TriggerManager.Instance.DeleteTriggerListner(cuo.UpdateTriggerState);
-                }
-                RemoveObjectiveMapIcon(o);
+                OnQuestStatusChange?.Invoke();
+                return true;
             }
-            if (quest.NPCToSubmit)
-                quest.originalQuestHolder.TransferQuestToThis(quest);
-            if (questsInProgress.Count < 1)
-            {
-                UI.questBoard.alpha = 0;
-                UI.questBoard.blocksRaycasts = false;
-            }
-            OnQuestStatusChange?.Invoke();
-            return true;
         }
         else if (!quest.Abandonable) ConfirmManager.Instance.New("该任务无法放弃。");
-        OnQuestStatusChange?.Invoke();
         return false;
     }
     /// <summary>
@@ -581,16 +585,14 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         }
         else
         {
-            int lineCount = selectedQuest.ObjectiveInstances.FindAll(x => x.Display).Count - 1;
-            for (int i = 0; i < selectedQuest.ObjectiveInstances.Count; i++)
+            List<Objective> displayObjectives = selectedQuest.ObjectiveInstances.FindAll(x => x.Display);
+            int lineCount = displayObjectives.Count - 1;
+            for (int i = 0; i < displayObjectives.Count; i++)
             {
-                if (selectedQuest.ObjectiveInstances[i].Display)
-                {
-                    string endLine = i == lineCount ? string.Empty : "\n";
-                    objectives.Append(selectedQuest.ObjectiveInstances[i].DisplayName +
-                                  "[" + selectedQuest.ObjectiveInstances[i].CurrentAmount + "/" + selectedQuest.ObjectiveInstances[i].Amount + "]" +
-                                  (selectedQuest.ObjectiveInstances[i].IsComplete ? "(达成)" + endLine : endLine));
-                }
+                string endLine = i == lineCount ? string.Empty : "\n";
+                objectives.Append(displayObjectives[i].DisplayName +
+                              "[" + displayObjectives[i].CurrentAmount + "/" + displayObjectives[i].Amount + "]" +
+                              (displayObjectives[i].IsComplete ? "(达成)" + endLine : endLine));
             }
             UI.descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[委托人: {1}]\n{2}\n\n<b>任务目标{3}</b>\n{4}",
                                    selectedQuest.Title,
@@ -825,6 +827,12 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     public bool HasCompleteQuestWithID(string questID)
     {
         return questsComplete.Exists(x => x.ID == questID);
+    }
+
+    public bool HasQuestNeedAsCondition(Quest quest, out Quest bindQuest)
+    {
+        bindQuest = questsInProgress.First(x => x.AcceptCondition.Conditions.Exists(y => y.Type == ConditionType.AcceptQuest && y.RelatedQuest.ID == quest.ID));
+        return bindQuest != null;
     }
 
     /// <summary>

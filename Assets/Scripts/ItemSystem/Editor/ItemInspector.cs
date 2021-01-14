@@ -49,6 +49,7 @@ public class ItemInspector : Editor
 
     SerializedProperty attribute;
     RoleAttributeGroupDrawer attrDrawer;
+    MaterialListDrawer materialsDrawer;
 
     private void OnEnable()
     {
@@ -78,7 +79,7 @@ public class ItemInspector : Editor
         makingMethod = serializedObject.FindProperty("makingMethod");
         minYield = serializedObject.FindProperty("minYield");
         maxYield = serializedObject.FindProperty("maxYield");
-        HandlingMaterialItemList();
+        materialsDrawer = new MaterialListDrawer(serializedObject, materials, lineHeight, lineHeightSpace);
 
         box = target as BoxItem;
         if (box)
@@ -181,7 +182,7 @@ public class ItemInspector : Editor
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (makingMethod.enumValueIndex != (int)MakingMethod.None)
             {
-                EditorGUILayout.PropertyField(materials, new GUIContent("制作材料\t\t" + (materials.arraySize > 0 ? "数量：" + materials.arraySize : "无")));
+                EditorGUILayout.PropertyField(materials, new GUIContent("制作材料\t\t" + (materials.arraySize > 0 ? "数量：" + materials.arraySize : "无")), false);
                 if (item.Materials.Exists(x => (x.MakingType == MakingType.SingleItem && item.Materials.FindAll(y => y.MakingType == MakingType.SingleItem && y.Item == x.Item).Count > 1) ||
                    (x.MakingType == MakingType.SameType && item.Materials.FindAll(y => y.MakingType == MakingType.SameType && y.MaterialType == x.MaterialType).Count > 1)))
                 {
@@ -193,14 +194,12 @@ public class ItemInspector : Editor
                 }
                 else
                 {
-                    var other = Array.Find(items, x => x != item && CheckMaterialsDuplicate(item.Materials, x.Materials));
+                    var other = Array.Find(items, x => x.MakingMethod != MakingMethod.None && x.MakingMethod == item.MakingMethod && x != item && CheckMaterialsDuplicate(item.Materials, x.Materials));
                     if (other) EditorGUILayout.HelpBox(string.Format("其它道具与此道具的制作材料重复！其它道具ID：{0}", other.ID), MessageType.Error);
                 }
                 if (materials.isExpanded)
                 {
-                    serializedObject.Update();
-                    materialList.DoLayoutList();
-                    serializedObject.ApplyModifiedProperties();
+                    materialsDrawer.DoLayoutDraw();
                 }
             }
         }
@@ -277,86 +276,6 @@ public class ItemInspector : Editor
         };
 
         boxItemList.drawNoneElementCallback = (rect) =>
-        {
-            EditorGUI.LabelField(rect, "空列表");
-        };
-    }
-
-    void HandlingMaterialItemList()
-    {
-        materialList = new ReorderableList(serializedObject, materials, true, true, true, true);
-        materialList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
-        {
-            serializedObject.Update();
-            if (this.item.Materials[index] != null && this.item.Materials[index].Item != null && this.item.Materials[index].MakingType == MakingType.SingleItem)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), this.item.Materials[index].Item.name);
-            else if (this.item.Materials[index] != null && this.item.Materials[index].MakingType == MakingType.SameType)
-            {
-                switch (this.item.Materials[index].MaterialType)
-                {
-                    case MaterialType.Cloth: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "布料"); break;
-                    case MaterialType.Fruit: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "水果"); break;
-                    case MaterialType.Fur: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "皮毛"); break;
-                    case MaterialType.Meat: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "肉类"); break;
-                    case MaterialType.Metal: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "金属"); break;
-                    case MaterialType.Ore: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "矿石"); break;
-                    case MaterialType.Plant: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "植物"); break;
-                    default: EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "未定义"); break;
-                }
-            }
-            else
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
-            EditorGUI.BeginChangeCheck();
-            SerializedProperty itemInfo = materials.GetArrayElementAtIndex(index);
-            SerializedProperty makingType = itemInfo.FindPropertyRelative("makingType");
-            SerializedProperty item = itemInfo.FindPropertyRelative("item");
-            SerializedProperty materialType = itemInfo.FindPropertyRelative("materialType");
-            SerializedProperty amount = itemInfo.FindPropertyRelative("amount");
-            EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight), makingType, new GUIContent(string.Empty));
-            if (makingType.enumValueIndex == (int)MakingType.SameType)
-                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), materialType, new GUIContent("所需种类"));
-            else
-                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), item, new GUIContent("所需材料"));
-            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight),
-                amount, new GUIContent("所需数量"));
-            if (amount.intValue < 1) amount.intValue = 1;
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
-
-        materialList.elementHeightCallback = (int index) =>
-        {
-            return 3 * lineHeightSpace;
-        };
-
-        materialList.onAddCallback = (list) =>
-        {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            item.Materials.Add(new MaterialInfo());
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
-
-        materialList.onRemoveCallback = (list) =>
-        {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
-            {
-                item.Materials.RemoveAt(list.index);
-            }
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
-
-        materialList.drawHeaderCallback = (rect) =>
-        {
-            int notCmpltCount = item.Materials.FindAll(x => !x.Item).Count;
-            EditorGUI.LabelField(rect, "制作材料列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
-        };
-
-        materialList.drawNoneElementCallback = (rect) =>
         {
             EditorGUI.LabelField(rect, "空列表");
         };

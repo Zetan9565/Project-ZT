@@ -32,9 +32,6 @@ public class Quest : ScriptableObject
     public ConditionGroup AcceptCondition => acceptCondition;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("普通", "主线", "反复")]
-#endif
     private QuestType questType;
     public QuestType QuestType => questType;
 
@@ -43,9 +40,6 @@ public class Quest : ScriptableObject
     public int RepeatFrequancy => repeatFrequancy;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("分", "时", "天", "周", "月", "年")]
-#endif
     private TimeUnit timeUnit = TimeUnit.Day;
     public TimeUnit TimeUnit => timeUnit;
 
@@ -134,54 +128,15 @@ public class Quest : ScriptableObject
 
 public enum QuestType
 {
+    [InspectorName("普通")]
     Normal,
+
+    [InspectorName("主要")]
     Main,
+
+    [InspectorName("反复")]
     Repeated,
 }
-
-#region 任务条件
-/// <summary>
-/// 任务接取条件
-/// </summary>
-[System.Serializable]
-public class QuestAcceptCondition
-{
-    [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("等级等于", "等级大于", "等级小于", "完成任务", "接取任务", "拥有道具", "触发器开启", "触发器关闭")]
-#endif
-    private QuestCondition acceptCondition = QuestCondition.CompleteQuest;
-    public QuestCondition AcceptCondition => acceptCondition;
-
-    [SerializeField]
-    private int level = 1;
-    public int Level => level;
-
-    [SerializeField]
-    private Quest completeQuest;
-    public Quest CompleteQuest => completeQuest;
-
-    [SerializeField]
-    private ItemBase ownedItem;
-    public ItemBase OwnedItem => ownedItem;
-
-    [SerializeField]
-    private string triggerName;
-    public string TriggerName => triggerName;
-}
-
-public enum QuestCondition
-{
-    LevelEquals,
-    LevelLargeThen,
-    LevelLessThen,
-    CompleteQuest,
-    AcceptQuest,
-    HasItem,
-    TriggerSet,
-    TriggerReset
-}
-#endregion
 
 #region 任务目标
 public delegate void ObjectiveStateListner(Objective objective, bool cmpltStateBef);
@@ -410,9 +365,6 @@ public class CollectObjective : Objective
 public class KillObjective : Objective
 {
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("特定敌人", "特定种群", "任意敌人")]
-#endif
     private KillObjectiveType objectiveType;
     public KillObjectiveType ObjectiveType
     {
@@ -452,16 +404,19 @@ public enum KillObjectiveType
     /// <summary>
     /// 特定敌人
     /// </summary>
+    [InspectorName("特定敌人")]
     Specific,
 
     /// <summary>
     /// 特定种族
     /// </summary>
+    [InspectorName("特定种族")]
     Race,
 
     /// <summary>
     /// 任意
     /// </summary>
+    [InspectorName("任意敌人")]
     Any
 }
 /// <summary>
@@ -553,9 +508,6 @@ public class SubmitObjective : Objective
     }
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("提交处的NPC", "玩家")]
-#endif
     private TalkerType talkerType;
     public TalkerType TalkerType
     {

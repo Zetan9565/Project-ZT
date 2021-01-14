@@ -144,6 +144,7 @@ public class CropInfoInspector : Editor
                 EditorGUI.PropertyField(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), lootPrefab, new GUIContent("掉落物预制件"));
                 lineCount++;
             }
+            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (cropStage.isExpanded)
             {
                 serializedObject.Update();

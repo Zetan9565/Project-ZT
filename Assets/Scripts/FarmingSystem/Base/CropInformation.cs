@@ -14,16 +14,10 @@ public class CropInformation : ScriptableObject
     public new string name => _name;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("未定义", "蔬菜", "水果", "材木")]
-#endif
     private CropType cropType;
     public CropType CropType => cropType;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("全年", "春季", "春夏", "夏季", "夏秋", "秋季", "秋冬", "冬季", "冬春")]
-#endif
     private CropSeason plantSeason;
     public CropSeason PlantSeason
     {
@@ -72,29 +66,46 @@ public class CropInformation : ScriptableObject
 }
 public enum CropSeason
 {
+    [InspectorName("全年")]
     All,
+
+    [InspectorName("春季")]
     Spring,
+    [InspectorName("春夏")]
     SpringAndSummer,
+
+    [InspectorName("夏季")]
     Summer,
+    [InspectorName("夏秋")]
     SummerAndAutumn,
+
+    [InspectorName("秋季")]
     Autumn,
+    [InspectorName("秋冬")]
     AutumnAndWinter,
+
+    [InspectorName("冬季")]
     Winter,
+    [InspectorName("冬春")]
     WinterAndSpring
 }
 public enum CropType
 {
+    [InspectorName("未定义")]
     Undefined,
+
+    [InspectorName("蔬菜")]
     Vegetable,
+
+    [InspectorName("水果")]
     Fruit,
+
+    [InspectorName("材木")]
     Tree
 }
 [System.Serializable]
 public class CropStage
 {
-#if UNITY_EDITOR
-    [EnumMemberNames("种子期", "幼苗期", "成长期", "开花期", "结果期", "成熟期", "过熟期", "收割期", "枯萎期", "腐朽期")]
-#endif
     [SerializeField]
     private CropStages stage;
     public CropStages Stage => stage;
@@ -106,9 +117,6 @@ public class CropStage
     public Sprite graph;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("手动", "斧子", "镐子", "铲子", "锄头")]
-#endif
     protected GatherType gatherType;
     public GatherType GatherType => gatherType;
 
@@ -117,8 +125,8 @@ public class CropStage
     public float GatherTime => gatherTime;
 
     [SerializeField]
-    private GameObject lootPrefab;
-    public GameObject LootPrefab => lootPrefab;
+    private LootAgent lootPrefab;
+    public LootAgent LootPrefab => lootPrefab;
 
     public bool HarvestAble => productItems.Count > 0 && repeatTimes > 0;
     public bool RepeatAble
@@ -157,41 +165,51 @@ public enum CropStages
     /// <summary>
     /// 种子期
     /// </summary>
+    [InspectorName("播种期")]
     Seed,
     /// <summary>
     /// 幼苗期
     /// </summary>
+    [InspectorName("幼苗期")]
     Seedling,
     /// <summary>
     /// 成长期
     /// </summary>
+    [InspectorName("成长期")]
     Growing,
     /// <summary>
     /// 开花期
     /// </summary>
+    [InspectorName("开花期")]
     Flowering,
     /// <summary>
     /// 结果期
     /// </summary>
+    [InspectorName("结果期")]
     Bearing,
     /// <summary>
     /// 成熟期
     /// </summary>
+    [InspectorName("成熟期")]
     Maturity,
     /// <summary>
     /// 过熟期
     /// </summary>
+    [InspectorName("过熟期")]
     OverMature,
     /// <summary>
     /// 收割期
     /// </summary>
+    [InspectorName("收割期")]
     Harvested,
     /// <summary>
     /// 枯萎期
     /// </summary>
+    [InspectorName("枯萎期")]
     Withered,
     /// <summary>
     /// 腐朽期
     /// </summary>
+    [InspectorName("腐朽期")]
     Decay
 }

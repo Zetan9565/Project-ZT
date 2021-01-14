@@ -205,15 +205,25 @@ public class RoleAttribute
 
 public enum RoleAttributeType
 {
+    [InspectorName("体力")]
     HP,
+    [InspectorName("内力")]
     MP,
+    [InspectorName("耐力")]
     SP,
+    [InspectorName("攻击力")]
     ATK,
+    [InspectorName("防御力")]
     DEF,
+    [InspectorName("命中率")]
     Hit,
+    [InspectorName("暴击率")]
     Crit,
+    [InspectorName("攻击速度")]
     ATKSpd,
+    [InspectorName("移动速度")]
     MoveSpd,
+    [InspectorName("布尔测试")]
     TestBool,
 }
 
@@ -427,90 +437,4 @@ public class RoleAttributeGroup
         return self != null;
     }
     #endregion
-}
-
-public class RoleAttributeGroupDrawer
-{
-    private readonly SerializedObject owner;
-
-    public ReorderableList AttributesList { get; }
-
-    public RoleAttributeGroupDrawer(SerializedObject owner, SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "属性列表")
-    {
-        this.owner = owner;
-        SerializedProperty attrs = property.FindPropertyRelative("attributes");
-        if (attrs != null)
-        {
-            AttributesList = new ReorderableList(owner, attrs, true, true, true, true);
-            AttributesList.drawElementCallback = (rect, index, isActive, isFocused) =>
-            {
-                owner.Update();
-                EditorGUI.BeginChangeCheck();
-                SerializedProperty attr = attrs.GetArrayElementAtIndex(index);
-                SerializedProperty type = attr.FindPropertyRelative("type");
-                SerializedProperty value = attr.FindPropertyRelative(TypeToPropertyName(type.enumValueIndex));
-                EditorGUI.PropertyField(new Rect(rect.x, rect.y, rect.width / 2, lineHeight), type, new GUIContent(string.Empty));
-                EditorGUI.PropertyField(new Rect(rect.x + rect.width * 2 / 3, rect.y, rect.width / 3, lineHeight), value, new GUIContent(string.Empty));
-                if (EditorGUI.EndChangeCheck())
-                    owner.ApplyModifiedProperties();
-            };
-
-            AttributesList.elementHeightCallback = (index) =>
-            {
-                return lineHeightSpace;
-            };
-
-            AttributesList.drawHeaderCallback = (rect) =>
-            {
-                EditorGUI.LabelField(rect, listTitle);
-            };
-
-            AttributesList.drawNoneElementCallback = (rect) =>
-            {
-                EditorGUI.LabelField(rect, "空列表");
-            };
-        }
-    }
-
-    public void DoLayoutDraw()
-    {
-        owner?.Update();
-        AttributesList?.DoLayoutList();
-        owner?.ApplyModifiedProperties();
-    }
-
-    public void DoDraw(Rect rect)
-    {
-        owner?.Update();
-        AttributesList?.DoList(rect);
-        owner?.ApplyModifiedProperties();
-    }
-
-    public float GetDrawHeight()
-    {
-        if (AttributesList == null) return 0;
-        return AttributesList.GetHeight();
-    }
-
-    private string TypeToPropertyName(int type)
-    {
-        switch ((RoleAttributeType)type)
-        {
-            case RoleAttributeType.HP:
-            case RoleAttributeType.MP:
-            case RoleAttributeType.SP:
-            case RoleAttributeType.ATK:
-            case RoleAttributeType.DEF:
-                return "intValue";
-            case RoleAttributeType.Hit:
-            case RoleAttributeType.Crit:
-            case RoleAttributeType.ATKSpd:
-            case RoleAttributeType.MoveSpd:
-                return "floatValue";
-            case RoleAttributeType.TestBool:
-                return "boolValue";
-            default:
-                return "intValue";
-        }
-    }
 }

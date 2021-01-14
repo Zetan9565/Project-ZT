@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -44,13 +45,14 @@ public class QuestBoardAgent : MonoBehaviour, IPointerClickHandler, IPointerDown
         }
         else
         {
-            for (int i = 0; i < questAgent.MQuest.ObjectiveInstances.Count; i++)
+            List<Objective> displayObjectives = questAgent.MQuest.ObjectiveInstances.FindAll(x => x.Display);
+            for (int i = 0; i < displayObjectives.Count; i++)
             {
-                bool isCmplt = questAgent.MQuest.ObjectiveInstances[i].IsComplete;
-                string endLine = i == questAgent.MQuest.ObjectiveInstances.Count - 1 ? string.Empty : "\n";
-                objectives += (isCmplt ? "<color=#" + ColorUtility.ToHtmlStringRGB(cmpltObjectv) + ">" : string.Empty) + "-" + questAgent.MQuest.ObjectiveInstances[i].DisplayName +
+                bool isCmplt = displayObjectives[i].IsComplete;
+                string endLine = i == displayObjectives.Count - 1 ? string.Empty : "\n";
+                objectives += (isCmplt ? "<color=#" + ColorUtility.ToHtmlStringRGB(cmpltObjectv) + ">" : string.Empty) + "-" + displayObjectives[i].DisplayName +
                               (isCmplt ? "(达成)</color>" + endLine :
-                              "[" + questAgent.MQuest.ObjectiveInstances[i].CurrentAmount + "/" + questAgent.MQuest.ObjectiveInstances[i].Amount + "]" + endLine);
+                              "[" + displayObjectives[i].CurrentAmount + "/" + displayObjectives[i].Amount + "]" + endLine);
             }
         }
         ObjectiveText.text = objectives;

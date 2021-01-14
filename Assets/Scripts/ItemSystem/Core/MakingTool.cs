@@ -4,9 +4,6 @@
 public class MakingTool : MonoBehaviour
 {
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("未定义(在此组件无效)", "手工", "锻造炉", "织布机", "料理台", "制药台", "炼丹炉", "晾晒台", "臼和杵")]
-#endif
     private MakingToolType toolType;
     public MakingToolType ToolType
     {
@@ -78,50 +75,60 @@ public enum MakingToolType
     /// <summary>
     /// 未定义
     /// </summary>
+    [InspectorName("未定义")]
     None,
 
     /// <summary>
     /// 手工
     /// </summary>
+    [InspectorName("手工")]
     Handwork,
 
     /// <summary>
     /// 锻造炉
     /// </summary>
+    [InspectorName("锻造炉")]
     Forging,
 
     /// <summary>
     /// 织布机
     /// </summary>
+    [InspectorName("织布机")]
     Loom,
 
     /// <summary>
     /// 缝纫台
     /// </summary>
+    [InspectorName("缝纫台")]
     SewingTable,
 
     /// <summary>
     /// 料理台
     /// </summary>
+    [InspectorName("料体台")]
     Kitchen,
 
     /// <summary>
     /// 制药台
     /// </summary>
+    [InspectorName("制药台")]
     PharmaceuticalTable,
 
     /// <summary>
     /// 炼丹炉
     /// </summary>
+    [InspectorName("炼丹炉")]
     AlchemyFurnace,
 
     /// <summary>
     /// 晾晒台
     /// </summary>
+    [InspectorName("晾晒台")]
     DryingTable,
 
     /// <summary>
     /// 臼和杵
     /// </summary>
+    [InspectorName("臼和杵")]
     PestleAndMortar
 }
