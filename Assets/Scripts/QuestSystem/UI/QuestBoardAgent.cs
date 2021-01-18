@@ -36,7 +36,7 @@ public class QuestBoardAgent : MonoBehaviour, IPointerClickHandler, IPointerDown
 
     public void UpdateStatus()
     {
-        if (questAgent.MQuest) TitleText.text = questAgent.MQuest.Title + (questAgent.MQuest.IsComplete ? "(完成)" : string.Empty);
+        if (questAgent.MQuest) TitleText.text = questAgent.MQuest.Info.Title + (questAgent.MQuest.IsComplete ? "(完成)" : string.Empty);
         string objectives = string.Empty;
         if (questAgent.MQuest.IsComplete)
         {
@@ -45,14 +45,14 @@ public class QuestBoardAgent : MonoBehaviour, IPointerClickHandler, IPointerDown
         }
         else
         {
-            List<Objective> displayObjectives = questAgent.MQuest.ObjectiveInstances.FindAll(x => x.Display);
+            List<ObjectiveData> displayObjectives = questAgent.MQuest.ObjectiveInstances.FindAll(x => x.Info.Display);
             for (int i = 0; i < displayObjectives.Count; i++)
             {
                 bool isCmplt = displayObjectives[i].IsComplete;
                 string endLine = i == displayObjectives.Count - 1 ? string.Empty : "\n";
-                objectives += (isCmplt ? "<color=#" + ColorUtility.ToHtmlStringRGB(cmpltObjectv) + ">" : string.Empty) + "-" + displayObjectives[i].DisplayName +
+                objectives += (isCmplt ? "<color=#" + ColorUtility.ToHtmlStringRGB(cmpltObjectv) + ">" : string.Empty) + "-" + displayObjectives[i].Info.DisplayName +
                               (isCmplt ? "(达成)</color>" + endLine :
-                              "[" + displayObjectives[i].CurrentAmount + "/" + displayObjectives[i].Amount + "]" + endLine);
+                              "[" + displayObjectives[i].CurrentAmount + "/" + displayObjectives[i].Info.Amount + "]" + endLine);
             }
         }
         ObjectiveText.text = objectives;

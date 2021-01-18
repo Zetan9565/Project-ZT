@@ -102,6 +102,10 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         foreach (var t in talkers)
             TalkerInfos.Add(t.ID, t);
 
+        QuestPoints.Clear();
+        foreach (var qPoint in FindObjectsOfType<QuestPoint>())
+            qPoint.Init();
+
         if (exceptions == null || !exceptions.Contains(typeof(Talker)))
         {
             Talkers.Clear();

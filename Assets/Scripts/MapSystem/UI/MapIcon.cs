@@ -55,7 +55,7 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
     //[HideInInspector]
     public MapIconHolder holder;
 
-    public void Show(bool showRange)
+    public void Show(bool showRange = false)
     {
         if (ForceHided) return;
         ZetanUtility.SetActive(iconImage.gameObject, true);

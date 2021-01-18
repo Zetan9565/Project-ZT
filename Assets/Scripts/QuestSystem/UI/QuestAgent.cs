@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class QuestAgent : MonoBehaviour
 {
     [HideInInspector]
-    public Quest MQuest { get; private set; }
+    public QuestData MQuest { get; private set; }
     [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("标题文字")]
@@ -32,7 +32,7 @@ public class QuestAgent : MonoBehaviour
     /// </summary>
     /// <param name="quest">对应任务</param>
     /// <param name="isFinished">任务完成情况</param>
-    public void Init(Quest quest, bool isFinished = false)
+    public void Init(QuestData quest, bool isFinished = false)
     {
         if (!selectedOutline.effectColor.Equals(selectedColor)) selectedOutline.effectColor = selectedColor;
         MQuest = quest;
@@ -54,8 +54,8 @@ public class QuestAgent : MonoBehaviour
     {
         if (MQuest)
         {
-            if (!belongToCmplt) TitleText.text = MQuest.Title + (MQuest.IsComplete ? "(完成)" : string.Empty);
-            else TitleText.text = MQuest.Title;
+            if (!belongToCmplt) TitleText.text = MQuest.Info.Title + (MQuest.IsComplete ? "(完成)" : string.Empty);
+            else TitleText.text = MQuest.Info.Title;
         }
     }
 

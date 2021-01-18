@@ -17,7 +17,7 @@ public class Talker : MonoBehaviour
 
     public TalkerData Data { get; private set; }
 
-    public List<Quest> QuestInstances => Data ? Data.questInstances : null;
+    public List<QuestData> QuestInstances => Data ? Data.questInstances : null;
 
     [SerializeField]
     private MapIconHolder iconHolder;
@@ -211,14 +211,14 @@ public class TalkerData
 
     public ShopInformation shop;
 
-    public List<TalkObjective> objectivesTalkToThis = new List<TalkObjective>();
-    public List<SubmitObjective> objectivesSubmitToThis = new List<SubmitObjective>();
+    public List<TalkObjectiveData> objectivesTalkToThis = new List<TalkObjectiveData>();
+    public List<SubmitObjectiveData> objectivesSubmitToThis = new List<SubmitObjectiveData>();
 
     public delegate void DialogueListener();
     public event DialogueListener OnTalkBeginEvent;
     public event DialogueListener OnTalkFinishedEvent;
 
-    public List<Quest> questInstances = new List<Quest>();
+    public List<QuestData> questInstances = new List<QuestData>();
 
     public virtual void OnTalkBegin()
     {
@@ -256,88 +256,27 @@ public class TalkerData
         {
             if (quest)
             {
-                Quest questInstance = Object.Instantiate(quest);
-                foreach (CollectObjective co in questInstance.CollectObjectives)
-                    if (co.IsValid) questInstance.ObjectiveInstances.Add(co);
-                foreach (KillObjective ko in questInstance.KillObjectives)
-                    if (ko.IsValid) questInstance.ObjectiveInstances.Add(ko);
-                foreach (TalkObjective to in questInstance.TalkObjectives)
-                    if (to.IsValid) questInstance.ObjectiveInstances.Add(to);
-                foreach (MoveObjective mo in questInstance.MoveObjectives)
-                    if (mo.IsValid) questInstance.ObjectiveInstances.Add(mo);
-                foreach (SubmitObjective so in questInstance.SubmitObjectives)
-                    if (so.IsValid) questInstance.ObjectiveInstances.Add(so);
-                foreach (CustomObjective cuo in questInstance.CustomObjectives)
-                    if (cuo.IsValid) questInstance.ObjectiveInstances.Add(cuo);
-                questInstance.ObjectiveInstances.Sort((x, y) =>
+                QuestData questInstance = new QuestData(quest)
                 {
-                    if (x.OrderIndex > y.OrderIndex) return 1;
-                    else if (x.OrderIndex < y.OrderIndex) return -1;
-                    else return 0;
-                });
-                if (quest.CmpltObjctvInOrder)
-                    for (int i = 1; i < questInstance.ObjectiveInstances.Count; i++)
-                    {
-                        if (questInstance.ObjectiveInstances[i].OrderIndex >= questInstance.ObjectiveInstances[i - 1].OrderIndex)
-                        {
-                            questInstance.ObjectiveInstances[i].PrevObjective = questInstance.ObjectiveInstances[i - 1];
-                            questInstance.ObjectiveInstances[i - 1].NextObjective = questInstance.ObjectiveInstances[i];
-                        }
-                    }
-                int i1, i2, i3, i4, i5, i6;
-                i1 = i2 = i3 = i4 = i5 = i6 = 0;
-                foreach (Objective o in questInstance.ObjectiveInstances)
-                {
-                    if (o is CollectObjective)
-                    {
-                        o.runtimeID = questInstance.ID + "_CO" + i1;
-                        i1++;
-                    }
-                    if (o is KillObjective)
-                    {
-                        o.runtimeID = questInstance.ID + "_KO" + i2;
-                        i2++;
-                    }
-                    if (o is TalkObjective)
-                    {
-                        o.runtimeID = questInstance.ID + "_TO" + i3;
-                        i3++;
-                    }
-                    if (o is MoveObjective)
-                    {
-                        o.runtimeID = questInstance.ID + "_MO" + i4;
-                        i4++;
-                    }
-                    if (o is SubmitObjective)
-                    {
-                        o.runtimeID = questInstance.ID + "_SO" + i5;
-                        i5++;
-                    }
-                    if (o is CustomObjective)
-                    {
-                        o.runtimeID = questInstance.ID + "_CUO" + i6;
-                        i6++;
-                    }
-                    o.runtimeParent = questInstance;
-                }
-                questInstance.originalQuestHolder = this;
-                questInstance.currentQuestHolder = this;
+                    originalQuestHolder = this,
+                    currentQuestHolder = this
+                };
                 questInstances.Add(questInstance);
             }
         }
     }
 
-    public void TryRemoveObjective(Objective objective, bool befCmplt)
+    public void TryRemoveObjective(ObjectiveData objective, bool befCmplt)
     {
         if (!befCmplt && objective.IsComplete)
-            if (objective is TalkObjective || objective is SubmitObjective)
-                if (objectivesTalkToThis.Contains(objective as TalkObjective))
-                    objectivesTalkToThis.RemoveAll(x => x == objective as TalkObjective);
-                else if (objectivesSubmitToThis.Contains(objective as SubmitObjective))
-                    objectivesSubmitToThis.RemoveAll(x => x == objective as SubmitObjective);
+            if (objective is TalkObjectiveData || objective is SubmitObjectiveData)
+                if (objectivesTalkToThis.Contains(objective as TalkObjectiveData))
+                    objectivesTalkToThis.RemoveAll(x => x == objective as TalkObjectiveData);
+                else if (objectivesSubmitToThis.Contains(objective as SubmitObjectiveData))
+                    objectivesSubmitToThis.RemoveAll(x => x == objective as SubmitObjectiveData);
     }
 
-    public void TransferQuestToThis(Quest quest)
+    public void TransferQuestToThis(QuestData quest)
     {
         if (!quest) return;
         questInstances.Add(quest);

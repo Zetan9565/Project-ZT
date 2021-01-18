@@ -15,7 +15,6 @@ public class ItemInspector : Editor
     BoxItem box;
 
     ReorderableList boxItemList;
-    ReorderableList materialList;
 
     float lineHeight;
     float lineHeightSpace;

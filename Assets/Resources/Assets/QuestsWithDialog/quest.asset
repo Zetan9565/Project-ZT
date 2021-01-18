@@ -17,8 +17,14 @@ MonoBehaviour:
   description: "\u739B\u4E3D\u4E9A\u62C5\u5FC3\u4E00\u4E9B\u4E8B\u60C5\uFF0C\u5E2E\u52A9\u5979\u5427\u3002"
   abandonable: 1
   group: {fileID: 0}
-  acceptConditions: []
-  conditionRelational: ~0
+  acceptCondition:
+    conditions:
+    - type: 4
+      level: 1
+      relatedQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
+      relatedItem: {fileID: 0}
+      triggerName: 
+    relational: 
   questType: 0
   repeatFrequancy: 1
   timeUnit: 2
@@ -30,20 +36,7 @@ MonoBehaviour:
   rewardItems: []
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 0
-  collectObjectives:
-  - displayName: 
-    display: 1
-    canNavigate: 1
-    showMapIcon: 1
-    amount: 1
-    inOrder: 0
-    orderIndex: 1
-    runtimeID: 
-    runtimeParent: {fileID: 0}
-    item: {fileID: 0}
-    checkBagAtStart: 1
-    loseItemAtSbmt: 1
-    amountWhenStart: 0
+  collectObjectives: []
   killObjectives: []
   talkObjectives:
   - displayName: "\u5B89\u6170\u739B\u4E3D\u4E9A"
@@ -53,44 +46,3934 @@ MonoBehaviour:
     amount: 1
     inOrder: 0
     orderIndex: 1
-    runtimeID: 
-    runtimeParent: {fileID: 0}
+    runtimeID: QEST004_TO0
+    runtimeParent:
+      originalQuestHolder:
+        info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+        currentScene: UI
+        currentPosition: {x: 0, y: -12.605, z: 0}
+        relationshipInstance:
+          relationshipValue:
+            min: -500
+            max: 20000
+          relationshipLevel: 0
+        warehouse:
+          size:
+            min: 0
+            max: 1
+        shop: {fileID: 0}
+        objectivesTalkToThis:
+        - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+          display: 1
+          canNavigate: 1
+          showMapIcon: 1
+          amount: 1
+          inOrder: 1
+          orderIndex: 1
+          runtimeID: QEST001_TO0
+          runtimeParent:
+            originalQuestHolder:
+              info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+              currentScene: UI
+              currentPosition: {x: 2.5, y: 3.51, z: 0}
+              relationshipInstance:
+                relationshipValue:
+                  min: -500
+                  max: 20000
+                relationshipLevel: 0
+              warehouse:
+                size:
+                  min: 0
+                  max: 50
+              shop: {fileID: 0}
+              objectivesTalkToThis: []
+              objectivesSubmitToThis: []
+              questInstances:
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+            currentQuestHolder:
+              info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+              currentScene: UI
+              currentPosition: {x: 2.5, y: 3.51, z: 0}
+              relationshipInstance:
+                relationshipValue:
+                  min: -500
+                  max: 20000
+                relationshipLevel: 0
+              warehouse:
+                size:
+                  min: 0
+                  max: 50
+              shop: {fileID: 0}
+              objectivesTalkToThis: []
+              objectivesSubmitToThis: []
+              questInstances:
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+          _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+          dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491, type: 2}
+        objectivesSubmitToThis: []
+        questInstances:
+        - originalQuestHolder:
+            info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+            currentScene: UI
+            currentPosition: {x: 0, y: -12.605, z: 0}
+            relationshipInstance:
+              relationshipValue:
+                min: -500
+                max: 20000
+              relationshipLevel: 0
+            warehouse:
+              size:
+                min: 0
+                max: 1
+            shop: {fileID: 0}
+            objectivesTalkToThis:
+            - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+              display: 1
+              canNavigate: 1
+              showMapIcon: 1
+              amount: 1
+              inOrder: 1
+              orderIndex: 1
+              runtimeID: QEST001_TO0
+              runtimeParent:
+                originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                type: 2}
+              dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                type: 2}
+            objectivesSubmitToThis: []
+            questInstances:
+            - originalQuestHolder:
+                info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+                currentScene: UI
+                currentPosition: {x: 0, y: -12.605, z: 0}
+                relationshipInstance:
+                  relationshipValue:
+                    min: -500
+                    max: 20000
+                  relationshipLevel: 0
+                warehouse:
+                  size:
+                    min: 0
+                    max: 1
+                shop: {fileID: 0}
+                objectivesTalkToThis:
+                - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                  display: 1
+                  canNavigate: 1
+                  showMapIcon: 1
+                  amount: 1
+                  inOrder: 1
+                  orderIndex: 1
+                  runtimeID: QEST001_TO0
+                  runtimeParent:
+                    originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                    type: 2}
+                  dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                    type: 2}
+                objectivesSubmitToThis: []
+                questInstances:
+                - originalQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                  currentQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+              currentQuestHolder:
+                info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+                currentScene: UI
+                currentPosition: {x: 0, y: -12.605, z: 0}
+                relationshipInstance:
+                  relationshipValue:
+                    min: -500
+                    max: 20000
+                  relationshipLevel: 0
+                warehouse:
+                  size:
+                    min: 0
+                    max: 1
+                shop: {fileID: 0}
+                objectivesTalkToThis:
+                - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                  display: 1
+                  canNavigate: 1
+                  showMapIcon: 1
+                  amount: 1
+                  inOrder: 1
+                  orderIndex: 1
+                  runtimeID: QEST001_TO0
+                  runtimeParent:
+                    originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                    type: 2}
+                  dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                    type: 2}
+                objectivesSubmitToThis: []
+                questInstances:
+                - originalQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                  currentQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+          currentQuestHolder:
+            info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+            currentScene: UI
+            currentPosition: {x: 0, y: -12.605, z: 0}
+            relationshipInstance:
+              relationshipValue:
+                min: -500
+                max: 20000
+              relationshipLevel: 0
+            warehouse:
+              size:
+                min: 0
+                max: 1
+            shop: {fileID: 0}
+            objectivesTalkToThis:
+            - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+              display: 1
+              canNavigate: 1
+              showMapIcon: 1
+              amount: 1
+              inOrder: 1
+              orderIndex: 1
+              runtimeID: QEST001_TO0
+              runtimeParent:
+                originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                type: 2}
+              dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                type: 2}
+            objectivesSubmitToThis: []
+            questInstances:
+            - originalQuestHolder:
+                info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+                currentScene: UI
+                currentPosition: {x: 0, y: -12.605, z: 0}
+                relationshipInstance:
+                  relationshipValue:
+                    min: -500
+                    max: 20000
+                  relationshipLevel: 0
+                warehouse:
+                  size:
+                    min: 0
+                    max: 1
+                shop: {fileID: 0}
+                objectivesTalkToThis:
+                - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                  display: 1
+                  canNavigate: 1
+                  showMapIcon: 1
+                  amount: 1
+                  inOrder: 1
+                  orderIndex: 1
+                  runtimeID: QEST001_TO0
+                  runtimeParent:
+                    originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                    type: 2}
+                  dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                    type: 2}
+                objectivesSubmitToThis: []
+                questInstances:
+                - originalQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                  currentQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+              currentQuestHolder:
+                info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+                currentScene: UI
+                currentPosition: {x: 0, y: -12.605, z: 0}
+                relationshipInstance:
+                  relationshipValue:
+                    min: -500
+                    max: 20000
+                  relationshipLevel: 0
+                warehouse:
+                  size:
+                    min: 0
+                    max: 1
+                shop: {fileID: 0}
+                objectivesTalkToThis:
+                - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                  display: 1
+                  canNavigate: 1
+                  showMapIcon: 1
+                  amount: 1
+                  inOrder: 1
+                  orderIndex: 1
+                  runtimeID: QEST001_TO0
+                  runtimeParent:
+                    originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                    type: 2}
+                  dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                    type: 2}
+                objectivesSubmitToThis: []
+                questInstances:
+                - originalQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                  currentQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+      currentQuestHolder:
+        info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+        currentScene: UI
+        currentPosition: {x: 0, y: -12.605, z: 0}
+        relationshipInstance:
+          relationshipValue:
+            min: -500
+            max: 20000
+          relationshipLevel: 0
+        warehouse:
+          size:
+            min: 0
+            max: 1
+        shop: {fileID: 0}
+        objectivesTalkToThis:
+        - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+          display: 1
+          canNavigate: 1
+          showMapIcon: 1
+          amount: 1
+          inOrder: 1
+          orderIndex: 1
+          runtimeID: QEST001_TO0
+          runtimeParent:
+            originalQuestHolder:
+              info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+              currentScene: UI
+              currentPosition: {x: 2.5, y: 3.51, z: 0}
+              relationshipInstance:
+                relationshipValue:
+                  min: -500
+                  max: 20000
+                relationshipLevel: 0
+              warehouse:
+                size:
+                  min: 0
+                  max: 50
+              shop: {fileID: 0}
+              objectivesTalkToThis: []
+              objectivesSubmitToThis: []
+              questInstances:
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+            currentQuestHolder:
+              info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
+              currentScene: UI
+              currentPosition: {x: 2.5, y: 3.51, z: 0}
+              relationshipInstance:
+                relationshipValue:
+                  min: -500
+                  max: 20000
+                relationshipLevel: 0
+              warehouse:
+                size:
+                  min: 0
+                  max: 50
+              shop: {fileID: 0}
+              objectivesTalkToThis: []
+              objectivesSubmitToThis: []
+              questInstances:
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              - originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+          _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+          dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491, type: 2}
+        objectivesSubmitToThis: []
+        questInstances:
+        - originalQuestHolder:
+            info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+            currentScene: UI
+            currentPosition: {x: 0, y: -12.605, z: 0}
+            relationshipInstance:
+              relationshipValue:
+                min: -500
+                max: 20000
+              relationshipLevel: 0
+            warehouse:
+              size:
+                min: 0
+                max: 1
+            shop: {fileID: 0}
+            objectivesTalkToThis:
+            - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+              display: 1
+              canNavigate: 1
+              showMapIcon: 1
+              amount: 1
+              inOrder: 1
+              orderIndex: 1
+              runtimeID: QEST001_TO0
+              runtimeParent:
+                originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                type: 2}
+              dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                type: 2}
+            objectivesSubmitToThis: []
+            questInstances:
+            - originalQuestHolder:
+                info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+                currentScene: UI
+                currentPosition: {x: 0, y: -12.605, z: 0}
+                relationshipInstance:
+                  relationshipValue:
+                    min: -500
+                    max: 20000
+                  relationshipLevel: 0
+                warehouse:
+                  size:
+                    min: 0
+                    max: 1
+                shop: {fileID: 0}
+                objectivesTalkToThis:
+                - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                  display: 1
+                  canNavigate: 1
+                  showMapIcon: 1
+                  amount: 1
+                  inOrder: 1
+                  orderIndex: 1
+                  runtimeID: QEST001_TO0
+                  runtimeParent:
+                    originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                    type: 2}
+                  dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                    type: 2}
+                objectivesSubmitToThis: []
+                questInstances:
+                - originalQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                  currentQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+              currentQuestHolder:
+                info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+                currentScene: UI
+                currentPosition: {x: 0, y: -12.605, z: 0}
+                relationshipInstance:
+                  relationshipValue:
+                    min: -500
+                    max: 20000
+                  relationshipLevel: 0
+                warehouse:
+                  size:
+                    min: 0
+                    max: 1
+                shop: {fileID: 0}
+                objectivesTalkToThis:
+                - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                  display: 1
+                  canNavigate: 1
+                  showMapIcon: 1
+                  amount: 1
+                  inOrder: 1
+                  orderIndex: 1
+                  runtimeID: QEST001_TO0
+                  runtimeParent:
+                    originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                    type: 2}
+                  dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                    type: 2}
+                objectivesSubmitToThis: []
+                questInstances:
+                - originalQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                  currentQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+          currentQuestHolder:
+            info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+            currentScene: UI
+            currentPosition: {x: 0, y: -12.605, z: 0}
+            relationshipInstance:
+              relationshipValue:
+                min: -500
+                max: 20000
+              relationshipLevel: 0
+            warehouse:
+              size:
+                min: 0
+                max: 1
+            shop: {fileID: 0}
+            objectivesTalkToThis:
+            - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+              display: 1
+              canNavigate: 1
+              showMapIcon: 1
+              amount: 1
+              inOrder: 1
+              orderIndex: 1
+              runtimeID: QEST001_TO0
+              runtimeParent:
+                originalQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                currentQuestHolder:
+                  info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                    type: 2}
+                  currentScene: UI
+                  currentPosition: {x: 2.5, y: 3.51, z: 0}
+                  relationshipInstance:
+                    relationshipValue:
+                      min: -500
+                      max: 20000
+                    relationshipLevel: 0
+                  warehouse:
+                    size:
+                      min: 0
+                      max: 50
+                  shop: {fileID: 0}
+                  objectivesTalkToThis: []
+                  objectivesSubmitToThis: []
+                  questInstances:
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  - originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+              _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                type: 2}
+              dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                type: 2}
+            objectivesSubmitToThis: []
+            questInstances:
+            - originalQuestHolder:
+                info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+                currentScene: UI
+                currentPosition: {x: 0, y: -12.605, z: 0}
+                relationshipInstance:
+                  relationshipValue:
+                    min: -500
+                    max: 20000
+                  relationshipLevel: 0
+                warehouse:
+                  size:
+                    min: 0
+                    max: 1
+                shop: {fileID: 0}
+                objectivesTalkToThis:
+                - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                  display: 1
+                  canNavigate: 1
+                  showMapIcon: 1
+                  amount: 1
+                  inOrder: 1
+                  orderIndex: 1
+                  runtimeID: QEST001_TO0
+                  runtimeParent:
+                    originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                    type: 2}
+                  dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                    type: 2}
+                objectivesSubmitToThis: []
+                questInstances:
+                - originalQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                  currentQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+              currentQuestHolder:
+                info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+                currentScene: UI
+                currentPosition: {x: 0, y: -12.605, z: 0}
+                relationshipInstance:
+                  relationshipValue:
+                    min: -500
+                    max: 20000
+                  relationshipLevel: 0
+                warehouse:
+                  size:
+                    min: 0
+                    max: 1
+                shop: {fileID: 0}
+                objectivesTalkToThis:
+                - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                  display: 1
+                  canNavigate: 1
+                  showMapIcon: 1
+                  amount: 1
+                  inOrder: 1
+                  orderIndex: 1
+                  runtimeID: QEST001_TO0
+                  runtimeParent:
+                    originalQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                    currentQuestHolder:
+                      info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
+                        type: 2}
+                      currentScene: UI
+                      currentPosition: {x: 2.5, y: 3.51, z: 0}
+                      relationshipInstance:
+                        relationshipLevel: 0
+                      shop: {fileID: 0}
+                      objectivesTalkToThis: []
+                      objectivesSubmitToThis: []
+                      questInstances: []
+                  _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                    type: 2}
+                  dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                    type: 2}
+                objectivesSubmitToThis: []
+                questInstances:
+                - originalQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                  currentQuestHolder:
+                    info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                      type: 2}
+                    currentScene: UI
+                    currentPosition: {x: 0, y: -12.605, z: 0}
+                    relationshipInstance:
+                      relationshipValue:
+                        min: -500
+                        max: 20000
+                      relationshipLevel: 0
+                    warehouse:
+                      size:
+                        min: 0
+                        max: 1
+                    shop: {fileID: 0}
+                    objectivesTalkToThis:
+                    - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
+                      display: 1
+                      canNavigate: 1
+                      showMapIcon: 1
+                      amount: 1
+                      inOrder: 1
+                      orderIndex: 1
+                      runtimeID: QEST001_TO0
+                      _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731,
+                        type: 2}
+                      dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491,
+                        type: 2}
+                    objectivesSubmitToThis: []
+                    questInstances:
+                    - originalQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
+                      currentQuestHolder:
+                        currentScene: UI
+                        currentPosition: {x: 0, y: -12.605, z: 0}
     _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
     dialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
   moveObjectives: []
   submitObjectives: []
   customObjectives: []
-  originalQuestHolder:
-    info: {fileID: 0}
-    currentScene: 
-    currentPosition: {x: 0, y: 0, z: 0}
-    relationshipInstance:
-      relationshipValue:
-        min: -500
-        max: 20000
-      relationshipLevel: 0
-    warehouse:
-      size:
-        min: 0
-        max: 1
-    shop: {fileID: 0}
-    objectivesTalkToThis: []
-    objectivesSubmitToThis: []
-    questInstances: []
-  currentQuestHolder:
-    info: {fileID: 0}
-    currentScene: 
-    currentPosition: {x: 0, y: 0, z: 0}
-    relationshipInstance:
-      relationshipValue:
-        min: -500
-        max: 20000
-      relationshipLevel: 0
-    warehouse:
-      size:
-        min: 0
-        max: 1
-    shop: {fileID: 0}
-    objectivesTalkToThis: []
-    objectivesSubmitToThis: []
-    questInstances: []

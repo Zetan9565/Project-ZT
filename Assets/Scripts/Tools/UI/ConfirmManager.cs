@@ -23,6 +23,8 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
 
     private Action onNoClick;
 
+    private short showTimes = 0;
+
     public bool IsUIOpen { get; private set; }
     public bool IsPausing { get; private set; }
 
@@ -51,6 +53,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
 
     public void New(string dialog)
     {
+        showTimes++;
         dialogText.text = dialog;
         onYesClick = null;
         onNoClick = null;
@@ -60,6 +63,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
 
     public void New(string dialog, Action yesAction)
     {
+        showTimes++;
         dialogText.text = dialog;
         onYesClick = yesAction;
         onNoClick = null;
@@ -69,6 +73,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
 
     public void New(string dialog, Action yesAction, Action noAction)
     {
+        showTimes++;
         dialogText.text = dialog;
         onYesClick = yesAction;
         onNoClick = noAction;
@@ -83,14 +88,16 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
 
     public void Confirm()
     {
+        showTimes--;
         onYesClick?.Invoke();
-        CloseWindow();
+        if (showTimes < 1) CloseWindow();
     }
 
     public void Cancel()
     {
+        showTimes--;
         onNoClick?.Invoke();
-        CloseWindow();
+        if (showTimes < 1) CloseWindow();
     }
 
     void IWindowHandler.OpenWindow()

@@ -47,7 +47,7 @@ public class TalkerInspector : Editor
             EditorGUILayout.BeginVertical("Box");
             EditorGUILayout.LabelField("任务实例", new GUIStyle { fontStyle = FontStyle.Bold });
             for (int i = 0; i < talker.QuestInstances.Count; i++)
-                EditorGUILayout.LabelField("实例 " + i.ToString(), talker.QuestInstances[i].Title);
+                EditorGUILayout.LabelField("实例 " + i.ToString(), talker.QuestInstances[i].Info.Title);
             EditorGUILayout.EndVertical();
         }
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();

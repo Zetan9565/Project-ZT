@@ -12,14 +12,18 @@ public class QuestPoint : MonoBehaviour
     private string _ID;
     public string ID => _ID;
 
+    public bool IsInit { get; private set; }
+
     public delegate void MoveToPointListener(QuestPoint point);
     public event MoveToPointListener OnMoveIntoEvent;
     public event MoveToPointListener OnMoveAwayEvent;
 
-    private void Awake()
+    public bool Init()
     {
         if (!GameManager.QuestPoints.ContainsKey(ID)) GameManager.QuestPoints.Add(ID, new List<QuestPoint>() { this });
         else if (!GameManager.QuestPoints[ID].Contains(this)) GameManager.QuestPoints[ID].Add(this);
+        IsInit = true;
+        return true;
     }
 
     //private void OnTriggerEnter(Collider other)

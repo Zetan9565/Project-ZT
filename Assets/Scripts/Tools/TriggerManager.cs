@@ -55,14 +55,14 @@ public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
     public void SaveData(SaveData data)
     {
         foreach (var trigger in triggers)
-            data.triggerData.stateDatas.Add(new TriggerStateData(trigger.Key, trigger.Value));
+            data.triggerData.stateDatas.Add(new TriggerStateSaveData(trigger.Key, trigger.Value));
         foreach (var holder in holders)
-            data.triggerData.holderDatas.Add(new TriggerHolderData(holder.Value));
+            data.triggerData.holderDatas.Add(new TriggerHolderSaveData(holder.Value));
     }
     public void LoadData(SaveData data)
     {
         triggers.Clear();
-        foreach (TriggerStateData sd in data.triggerData.stateDatas)
+        foreach (TriggerStateSaveData sd in data.triggerData.stateDatas)
         {
             bool state = sd.triggerState == (int)TriggerState.On;
             if (!triggers.ContainsKey(sd.triggerName))
@@ -72,7 +72,7 @@ public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
         foreach (var holder in this.holders.Values.ToArray())
             DeleteTriggerHolder(holder);
         var holders = FindObjectsOfType<TriggerHolder>();
-        foreach (TriggerHolderData hd in data.triggerData.holderDatas)
+        foreach (TriggerHolderSaveData hd in data.triggerData.holderDatas)
             foreach (var holder in holders)
                 holder.LoadData(hd);
         QuestManager.Instance.UpdateUI();

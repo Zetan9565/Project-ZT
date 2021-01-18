@@ -992,25 +992,25 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="item">所需判定的道具</param>
     /// <param name="leftAmount">所需判定的数量</param>
     /// <returns>是否需要</returns>
-    public bool DoQuestRequireItem(Quest quest, ItemBase item, int leftAmount)
+    public bool IsQuestRequireItem(QuestData quest, ItemBase item, int leftAmount)
     {
-        if (quest.CmpltObjctvInOrder)
+        if (quest.Info.CmpltObjctvInOrder)
         {
-            foreach (Objective o in quest.ObjectiveInstances)
+            foreach (ObjectiveData o in quest.ObjectiveInstances)
             {
                 //当目标是收集类目标且在提交任务同时会失去相应道具时，才进行判断
-                if (o is CollectObjective && item == (o as CollectObjective).Item && (o as CollectObjective).LoseItemAtSbmt)
+                if (o is CollectObjectiveData co && item == co.Info.Item && co.Info.LoseItemAtSbmt)
                 {
-                    if (o.IsComplete && o.InOrder)
+                    if (o.IsComplete && o.Info.InOrder)
                     {
                         //如果剩余的道具数量不足以维持该目标完成状态
-                        if (o.Amount > leftAmount)
+                        if (o.Info.Amount > leftAmount)
                         {
-                            Objective tempObj = o.NextObjective;
+                            ObjectiveData tempObj = o.NextObjective;
                             while (tempObj != null)
                             {
                                 //则判断是否有后置目标在进行，以保证在打破该目标的完成状态时，后置目标不受影响
-                                if (tempObj.CurrentAmount > 0 && tempObj.OrderIndex > o.OrderIndex)
+                                if (tempObj.CurrentAmount > 0 && tempObj.Info.OrderIndex > o.Info.OrderIndex)
                                 {
                                     //Debug.Log("Required");
                                     return true;
@@ -1057,14 +1057,14 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             data.backpackData.money = Backpack.Money;
             foreach (ItemInfo info in Backpack.Items)
             {
-                data.backpackData.itemDatas.Add(new ItemData(info));
+                data.backpackData.itemDatas.Add(new ItemSaveData(info));
             }
         }
     }
-    public void LoadData(BackpackData backpackData)
+    public void LoadData(BackpackSaveData backpackData)
     {
         if (Backpack == null) return;
-        foreach (ItemData id in backpackData.itemDatas)
+        foreach (ItemSaveData id in backpackData.itemDatas)
             if (!GameManager.GetItemByID(id.itemID)) return;
         Backpack.LoseMoneySimple(Backpack.Money);
         Backpack.GetMoneySimple(backpackData.money);
@@ -1072,7 +1072,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         Backpack.weight = new ScopeFloat(backpackData.maxWeightLoad) { Current = backpackData.currentSize };
         Backpack.Items.Clear();
         Init();
-        foreach (ItemData id in backpackData.itemDatas)
+        foreach (ItemSaveData id in backpackData.itemDatas)
         {
             ItemInfo newInfo = new ItemInfo(GameManager.GetItemByID(id.itemID), id.amount);
             //TODO 把newInfo的耐久度等信息处理

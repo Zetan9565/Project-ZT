@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ID: CROP001
   _name: "\u6D4B\u8BD5\u4F5C\u72691"
-  cropType: 0
+  cropType: 2
   plantSeason: 0
   stages:
   - stage: 0

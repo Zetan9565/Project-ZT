@@ -92,12 +92,12 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         {
             if (kvp.Value.info.IsWarehouseAgent)
             {
-                data.warehouseDatas.Add(new WarehouseData(kvp.Value.TalkerID, kvp.Value.warehouse));
+                data.warehouseDatas.Add(new WarehouseSaveData(kvp.Value.TalkerID, kvp.Value.warehouse));
             }
         }
         foreach (var kvp in FindObjectsOfType<WarehouseAgent>())
         {
-            data.warehouseDatas.Add(new WarehouseData(kvp.ID, kvp.MWarehouse));
+            data.warehouseDatas.Add(new WarehouseSaveData(kvp.ID, kvp.MWarehouse));
         }
     }
 
@@ -114,7 +114,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     void SaveActions(SaveData data)
     {
         foreach (var action in ActionStack.ToArray().Reverse())
-            data.actionDatas.Add(new ActionData(action));
+            data.actionDatas.Add(new ActionSaveData(action));
     }
 
     void SaveTrigger(SaveData data)
@@ -208,7 +208,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     void LoadWarehouse(SaveData data)
     {
         WarehouseAgent[] warehouseAgents = FindObjectsOfType<WarehouseAgent>();
-        foreach (WarehouseData wd in data.warehouseDatas)
+        foreach (WarehouseSaveData wd in data.warehouseDatas)
         {
             Warehouse warehouse = null;
             GameManager.TalkerDatas.TryGetValue(wd.handlerID, out TalkerData handler);
@@ -222,7 +222,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
             {
                 warehouse.size = new ScopeInt(wd.maxSize) { Current = wd.currentSize };
                 warehouse.Items.Clear();
-                foreach (ItemData id in wd.itemDatas)
+                foreach (ItemSaveData id in wd.itemDatas)
                 {
                     ItemInfo newInfo = new ItemInfo(GameManager.GetItemByID(id.itemID), id.amount)
                     {

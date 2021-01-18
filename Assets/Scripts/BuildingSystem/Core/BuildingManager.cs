@@ -80,7 +80,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         data.buildingSystemData.learneds = buildingsLearned.Select(x => x.IDStarter).ToArray();
         foreach (Building b in FindObjectsOfType<Building>())
         {
-            data.buildingSystemData.buildingDatas.Add(new BuildingData(b));
+            data.buildingSystemData.buildingDatas.Add(new BuildingSaveData(b));
         }
     }
 
@@ -237,7 +237,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         }
     }
 
-    public void LoadData(BuildingSystemData buildingSystemData)
+    public void LoadData(BuildingSystemSaveData buildingSystemData)
     {
         buildingsLearned.Clear();
         BuildingInformation[] buildingInfos = Resources.LoadAll<BuildingInformation>("");
@@ -246,7 +246,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
             BuildingInformation find = Array.Find(buildingInfos, x => x.IDStarter == learned);
             if (find) buildingsLearned.Add(find);
         }
-        foreach (BuildingData buildingData in buildingSystemData.buildingDatas)
+        foreach (BuildingSaveData buildingData in buildingSystemData.buildingDatas)
         {
             BuildingInformation find = Array.Find(buildingInfos, x => x.IDStarter == buildingData.IDStarter);
             if (find)

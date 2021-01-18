@@ -8,10 +8,10 @@ public class OptionAgent : MonoBehaviour
 
     public OptionType OptionType { get; private set; }
 
-    public Quest MQuest { get; private set; }
+    public QuestData MQuest { get; private set; }
 
-    public TalkObjective TalkObjective { get; private set; }
-    public SubmitObjective SubmitObjective { get; private set; }
+    public TalkObjectiveData TalkObjective { get; private set; }
+    public SubmitObjectiveData SubmitObjective { get; private set; }
 
     public WordsOption BranchDialogue { get; private set; }
 
@@ -39,7 +39,7 @@ public class OptionAgent : MonoBehaviour
         OptionType = OptionType.Confirm;
     }
 
-    public void Init(string text, Quest quest)
+    public void Init(string text, QuestData quest)
     {
         if (!titleText)
             titleText = GetComponentInChildren<Text>();
@@ -48,14 +48,14 @@ public class OptionAgent : MonoBehaviour
         MQuest = quest;
     }
 
-    public void Init(string text, TalkObjective objective)
+    public void Init(string text, TalkObjectiveData objective)
     {
         titleText.text = text;
         OptionType = OptionType.Objective;
         TalkObjective = objective;
     }
 
-    public void Init(string text, SubmitObjective objective)
+    public void Init(string text, SubmitObjectiveData objective)
     {
         titleText.text = text;
         OptionType = OptionType.Objective;

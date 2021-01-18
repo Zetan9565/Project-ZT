@@ -14,24 +14,24 @@ public class SaveData
     public float playerPosY;
     public float playerPosZ;
 
-    public BackpackData backpackData = new BackpackData();
+    public BackpackSaveData backpackData = new BackpackSaveData();
 
     public List<string> makingDatas = new List<string>();
 
-    public BuildingSystemData buildingSystemData = new BuildingSystemData();
+    public BuildingSystemSaveData buildingSystemData = new BuildingSystemSaveData();
 
-    public List<WarehouseData> warehouseDatas = new List<WarehouseData>();
+    public List<WarehouseSaveData> warehouseDatas = new List<WarehouseSaveData>();
 
-    public List<QuestData> inProgressQuestDatas = new List<QuestData>();
-    public List<QuestData> completeQuestDatas = new List<QuestData>();
+    public List<QuestSaveData> inProgressQuestDatas = new List<QuestSaveData>();
+    public List<QuestSaveData> completeQuestDatas = new List<QuestSaveData>();
 
-    public List<DialogueData> dialogueDatas = new List<DialogueData>();
+    public List<DialogueSaveData> dialogueDatas = new List<DialogueSaveData>();
 
-    public List<MapMarkData> markDatas = new List<MapMarkData>();
+    public List<MapMarkSaveData> markDatas = new List<MapMarkSaveData>();
 
-    public List<ActionData> actionDatas = new List<ActionData>();
+    public List<ActionSaveData> actionDatas = new List<ActionSaveData>();
 
-    public TriggerData triggerData = new TriggerData();
+    public TriggerSaveData triggerData = new TriggerSaveData();
 
     public SaveData()
     {
@@ -46,7 +46,7 @@ public class SaveData
 
 #region 道具相关
 [Serializable]
-public class BackpackData
+public class BackpackSaveData
 {
     public long money;
 
@@ -56,11 +56,11 @@ public class BackpackData
     public float currentWeight;
     public float maxWeightLoad;
 
-    public List<ItemData> itemDatas = new List<ItemData>();
+    public List<ItemSaveData> itemDatas = new List<ItemSaveData>();
 }
 
 [Serializable]
-public class WarehouseData
+public class WarehouseSaveData
 {
     public string handlerID;
 
@@ -69,9 +69,9 @@ public class WarehouseData
     public int currentSize;
     public int maxSize;
 
-    public List<ItemData> itemDatas = new List<ItemData>();
+    public List<ItemSaveData> itemDatas = new List<ItemSaveData>();
 
-    public WarehouseData(string id, Warehouse warehouse)
+    public WarehouseSaveData(string id, Warehouse warehouse)
     {
         handlerID = id;
         money = warehouse.Money;
@@ -79,13 +79,13 @@ public class WarehouseData
         maxSize = warehouse.size.Max;
         foreach (ItemInfo info in warehouse.Items)
         {
-            itemDatas.Add(new ItemData(info));
+            itemDatas.Add(new ItemSaveData(info));
         }
     }
 }
 
 [Serializable]
-public class ItemData
+public class ItemSaveData
 {
     public string itemID;
 
@@ -93,7 +93,7 @@ public class ItemData
 
     public int indexInGrid;
 
-    public ItemData(ItemInfo itemInfo)
+    public ItemSaveData(ItemInfo itemInfo)
     {
         itemID = itemInfo.ItemID;
         amount = itemInfo.Amount;
@@ -104,15 +104,15 @@ public class ItemData
 
 #region 建筑相关
 [Serializable]
-public class BuildingSystemData
+public class BuildingSystemSaveData
 {
     public string[] learneds;
 
-    public List<BuildingData> buildingDatas = new List<BuildingData>();
+    public List<BuildingSaveData> buildingDatas = new List<BuildingSaveData>();
 }
 
 [Serializable]
-public class BuildingData
+public class BuildingSaveData
 {
     public string IDStarter;
 
@@ -124,7 +124,7 @@ public class BuildingData
 
     public float leftBuildTime;
 
-    public BuildingData(Building building)
+    public BuildingSaveData(Building building)
     {
         IDStarter = building.IDStarter;
         IDTail = building.IDTail;
@@ -138,32 +138,32 @@ public class BuildingData
 
 #region 任务相关
 [Serializable]
-public class QuestData
+public class QuestSaveData
 {
     public string questID;
 
     public string originalGiverID;
 
-    public List<ObjectiveData> objectiveDatas = new List<ObjectiveData>();
+    public List<ObjectiveSaveData> objectiveDatas = new List<ObjectiveSaveData>();
 
-    public QuestData(Quest quest)
+    public QuestSaveData(QuestData quest)
     {
-        questID = quest.ID;
+        questID = quest.Info.ID;
         originalGiverID = quest.originalQuestHolder.TalkerID;
-        foreach (Objective o in quest.ObjectiveInstances)
+        foreach (ObjectiveData o in quest.ObjectiveInstances)
         {
-            objectiveDatas.Add(new ObjectiveData(o));
+            objectiveDatas.Add(new ObjectiveSaveData(o));
         }
     }
 }
 [Serializable]
-public class ObjectiveData
+public class ObjectiveSaveData
 {
     public string objectiveID;
 
     public int currentAmount;
 
-    public ObjectiveData(Objective objective)
+    public ObjectiveSaveData(ObjectiveData objective)
     {
         objectiveID = objective.runtimeID;
         currentAmount = objective.CurrentAmount;
@@ -173,38 +173,38 @@ public class ObjectiveData
 
 #region 对话相关
 [Serializable]
-public class DialogueData
+public class DialogueSaveData
 {
     public string dialogID;
 
-    public List<DialogueWordsData> wordsDatas = new List<DialogueWordsData>();
+    public List<DialogueWordsSaveData> wordsDatas = new List<DialogueWordsSaveData>();
 
-    public DialogueData(Dialogue dialogue)
+    public DialogueSaveData(Dialogue dialogue)
     {
         dialogID = dialogue.ID;
         for (int i = 0; i < dialogue.Words.Count; i++)
-            wordsDatas.Add(new DialogueWordsData(i));
+            wordsDatas.Add(new DialogueWordsSaveData(i));
     }
 }
 
 [Serializable]
-public class DialogueWordsData
+public class DialogueWordsSaveData
 {
     public int wordsIndex;//该语句在对话中的位置
 
-    public List<int> cmpltOptionIndexes;//已完成的分支的序号集
+    public HashSet<int> cmpltOptionIndexes;//已完成的分支的序号集
 
     public bool complete;
 
-    public DialogueWordsData()
+    public DialogueWordsSaveData()
     {
         wordsIndex = -1;
-        cmpltOptionIndexes = new List<int>();
+        cmpltOptionIndexes = new HashSet<int>();
     }
-    public DialogueWordsData(int wordsIndex)
+    public DialogueWordsSaveData(int wordsIndex)
     {
         this.wordsIndex = wordsIndex;
-        cmpltOptionIndexes = new List<int>();
+        cmpltOptionIndexes = new HashSet<int>();
     }
 
     public bool IsOptionCmplt(int index)
@@ -216,31 +216,31 @@ public class DialogueWordsData
 
 #region 其它
 [Serializable]
-public class TriggerData
+public class TriggerSaveData
 {
-    public List<TriggerStateData> stateDatas = new List<TriggerStateData>();
-    public List<TriggerHolderData> holderDatas = new List<TriggerHolderData>();
+    public List<TriggerStateSaveData> stateDatas = new List<TriggerStateSaveData>();
+    public List<TriggerHolderSaveData> holderDatas = new List<TriggerHolderSaveData>();
 }
 [Serializable]
-public class TriggerHolderData
+public class TriggerHolderSaveData
 {
     public string ID;
     public bool isSetAtFirst;
 
-    public TriggerHolderData(TriggerHolder holder)
+    public TriggerHolderSaveData(TriggerHolder holder)
     {
         ID = holder.ID;
         isSetAtFirst = holder.isSetAtFirst;
     }
 }
 [Serializable]
-public class TriggerStateData
+public class TriggerStateSaveData
 {
     public string triggerName;
 
     public int triggerState;
 
-    public TriggerStateData(string triggerName, TriggerState triggerState)
+    public TriggerStateSaveData(string triggerName, TriggerState triggerState)
     {
         this.triggerName = triggerName;
         this.triggerState = (int)triggerState;
@@ -248,7 +248,7 @@ public class TriggerStateData
 }
 
 [Serializable]
-public class ActionData
+public class ActionSaveData
 {
     public string ID;
 
@@ -260,7 +260,7 @@ public class ActionData
 
     public int actionType;
 
-    public ActionData(ActionStackData stackElement)
+    public ActionSaveData(ActionStackData stackElement)
     {
         ID = stackElement. executor.ID;
         isExecuting = stackElement.executor.IsExecuting;
@@ -272,7 +272,7 @@ public class ActionData
 }
 
 [Serializable]
-public class MapMarkData
+public class MapMarkSaveData
 {
     public float worldPosX;
     public float worldPosY;
@@ -281,7 +281,7 @@ public class MapMarkData
     public bool removeAble;
     public string textToDisplay;
 
-    public MapMarkData(MapManager.MapIconWithoutHolder iconWoH)
+    public MapMarkSaveData(MapManager.MapIconWithoutHolder iconWoH)
     {
         worldPosX = iconWoH.worldPosition.x;
         worldPosY = iconWoH.worldPosition.y;

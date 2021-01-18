@@ -37,11 +37,13 @@ MonoBehaviour:
     amount: 5
     makingType: 0
     materialType: 2
+  attribute:
+    attributes: []
+  gemSlotAmount: 0
   armorType: 0
   _DEF: 0
   hit: 0
   flee: 0
-  gemSlotAmount: 0
   powerup:
     _ATK_Add: 0
     _DEF_Add: 0

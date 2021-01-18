@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6f19f69292c63348996789922d3796e, type: 3}
   m_Name: gathering info
   m_EditorClassIdentifier: 
-  _ID: 
+  _ID: GATH00001
   _name: "\u836F\u8349"
   gatherType: 0
   gatherTime: 5

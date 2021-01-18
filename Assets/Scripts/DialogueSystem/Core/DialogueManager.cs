@@ -45,9 +45,9 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     public Talker CurrentTalker { get; private set; }
 
     #region 任务相关
-    private TalkObjective currentTalkObj;
-    private SubmitObjective currentSubmitObj;
-    public Quest CurrentQuest { get; private set; }
+    private TalkObjectiveData currentTalkObj;
+    private SubmitObjectiveData currentSubmitObj;
+    public QuestData CurrentQuest { get; private set; }
     private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
     #endregion
 
@@ -60,7 +60,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     private readonly Queue<DialogueWords> wordsToSay = new Queue<DialogueWords>();
 
-    private readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
+    private readonly Dictionary<string, DialogueSaveData> dialogueDatas = new Dictionary<string, DialogueSaveData>();
 
     public bool NPCHasNotAcptQuests
     {
@@ -90,7 +90,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         StopAllCoroutines();
         if (dialogue.Words.Count < 1 || !dialogue) return;
         currentDialog = dialogue;
-        if (!dialogueDatas.ContainsKey(dialogue.ID)) dialogueDatas.Add(dialogue.ID, new DialogueData(dialogue));
+        if (!dialogueDatas.ContainsKey(dialogue.ID)) dialogueDatas.Add(dialogue.ID, new DialogueSaveData(dialogue));
         IsTalking = true;
         wordsToSay.Clear();
         if (startIndex < 0) startIndex = 0;
@@ -122,7 +122,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (!UI) return;
         CurrentTalker = talker;
         CurrentType = DialogueType.Normal;
-        if (talker.QuestInstances.FindAll(q => q.AcceptCondition.IsMeet()).Count > 0)
+        if (talker.QuestInstances.FindAll(q => q.Info.AcceptCondition.IsMeet()).Count > 0)
             ZetanUtility.SetActive(UI.questButton.gameObject, true);
         else ZetanUtility.SetActive(UI.questButton.gameObject, false);
         ZetanUtility.SetActive(UI.warehouseButton.gameObject, talker.Info.IsWarehouseAgent);
@@ -132,47 +132,47 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         talker.OnTalkBegin();
     }
 
-    public void StartQuestDialogue(Quest quest)
+    public void StartQuestDialogue(QuestData quest)
     {
         if (!quest) return;
         CurrentQuest = quest;
         CurrentType = DialogueType.Quest;
         ShowButtons(false, false, false);
-        if (!CurrentQuest.IsComplete && !CurrentQuest.InProgress) StartDialogue(quest.BeginDialogue);
-        else if (!CurrentQuest.IsComplete && CurrentQuest.InProgress) StartDialogue(quest.OngoingDialogue);
-        else StartDialogue(quest.CompleteDialogue);
+        if (!CurrentQuest.IsComplete && !CurrentQuest.InProgress) StartDialogue(quest.Info.BeginDialogue);
+        else if (!CurrentQuest.IsComplete && CurrentQuest.InProgress) StartDialogue(quest.Info.OngoingDialogue);
+        else StartDialogue(quest.Info.CompleteDialogue);
     }
 
-    public void StartObjectiveDialogue(TalkObjective talkObj)
+    public void StartObjectiveDialogue(TalkObjectiveData talkObj)
     {
         if (talkObj == null) return;
         currentTalkObj = talkObj;
         CurrentType = DialogueType.Objective;
         ShowButtons(false, false, false);
-        StartDialogue(talkObj.Dialogue);
+        StartDialogue(talkObj.Info.Dialogue);
     }
 
-    public void StartObjectiveDialogue(SubmitObjective submitObj)
+    public void StartObjectiveDialogue(SubmitObjectiveData submitObj)
     {
         if (submitObj == null) return;
-        Quest parentQ = submitObj.runtimeParent;
-        var amount = BackpackManager.Instance.GetItemAmount(submitObj.ItemToSubmit);
+        QuestData parentQ = submitObj.runtimeParent;
+        var amount = BackpackManager.Instance.GetItemAmount(submitObj.Info.ItemToSubmit);
         bool submitAble = true;
-        if (parentQ.CmpltObjctvInOrder)
+        if (parentQ.Info.CmpltObjctvInOrder)
             foreach (var o in parentQ.ObjectiveInstances)
-                if (o is CollectObjective && (o as CollectObjective).LoseItemAtSbmt && o.InOrder && o.IsComplete)
-                    if (amount - submitObj.Amount < o.Amount)
+                if (o is CollectObjectiveData co && co.Info.LoseItemAtSbmt && o.Info.InOrder && o.IsComplete)
+                    if (amount - submitObj.Info.Amount < o.Info.Amount)
                     {
                         submitAble = false;
-                        MessageManager.Instance.New($"该物品为目标[{o.DisplayName}]所需");
+                        MessageManager.Instance.New($"该物品为目标[{o.Info.DisplayName}]所需");
                         break;
                     }
-        submitAble &= BackpackManager.Instance.TryLoseItem_Boolean(submitObj.ItemToSubmit, submitObj.Amount);
+        submitAble &= BackpackManager.Instance.TryLoseItem_Boolean(submitObj.Info.ItemToSubmit, submitObj.Info.Amount);
         if (!submitAble) return;
         currentSubmitObj = submitObj;
         CurrentType = DialogueType.Objective;
         ShowButtons(false, false, false);
-        StartOneWords(new DialogueWords(submitObj.TalkerType == TalkerType.NPC ? CurrentTalker.Info : null, submitObj.WordsWhenSubmit, submitObj.TalkerType));
+        StartOneWords(new DialogueWords(submitObj.Info.TalkerType == TalkerType.NPC ? CurrentTalker.Info : null, submitObj.Info.WordsWhenSubmit, submitObj.Info.TalkerType));
         SayNextWords();
     }
 
@@ -314,12 +314,12 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         if (CurrentTalker.QuestInstances.Count < 1) return;
         ClearOptions();
-        foreach (Quest quest in CurrentTalker.QuestInstances)
+        foreach (QuestData quest in CurrentTalker.QuestInstances)
         {
-            if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.AcceptCondition.IsMeet() && QuestManager.IsQuestValid(quest))
+            if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.Info.AcceptCondition.IsMeet() && QuestManager.IsQuestValid(quest.Info))
             {
                 OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
-                oa.Init(quest.Title + (quest.IsComplete ? "(完成)" : quest.InProgress ? "(进行中)" : string.Empty), quest);
+                oa.Init(quest.Info.Title + (quest.IsComplete ? "(完成)" : quest.InProgress ? "(进行中)" : string.Empty), quest);
                 if (quest.IsComplete)
                 {
                     //保证完成的任务优先显示，方便玩家提交完成的任务
@@ -370,12 +370,12 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         if (CurrentTalker.QuestInstances.Count < 1) return;
         ClearOptions(OptionType.Option);
-        foreach (Quest quest in CurrentTalker.QuestInstances)
+        foreach (QuestData quest in CurrentTalker.QuestInstances)
         {
             if (!QuestManager.Instance.HasCompleteQuest(quest) && quest.IsComplete)
             {
                 OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
-                oa.Init(quest.Title + "(完成)", quest);
+                oa.Init(quest.Info.Title + "(完成)", quest);
                 optionAgents.Add(oa);
             }
         }
@@ -393,24 +393,24 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         int index = 1;
         ClearOptions(OptionType.Quest, OptionType.Option);
-        foreach (TalkObjective to in CurrentTalker.Data.objectivesTalkToThis.Where(o => !o.IsComplete))
+        foreach (TalkObjectiveData to in CurrentTalker.Data.objectivesTalkToThis.Where(o => !o.IsComplete))
         {
             if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
             {
                 OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
-                oa.Init(to.runtimeParent.Title, to);
+                oa.Init(to.runtimeParent.Info.Title, to);
                 optionAgents.Add(oa);
                 if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) ZetanUtility.SetActive(oa.gameObject, false);//第一页以外隐藏
                 index++;
             }
         }
         index = 1;
-        foreach (SubmitObjective so in CurrentTalker.Data.objectivesSubmitToThis.Where(o => !o.IsComplete))
+        foreach (SubmitObjectiveData so in CurrentTalker.Data.objectivesSubmitToThis.Where(o => !o.IsComplete))
         {
             if (so.AllPrevObjCmplt && !so.HasNextObjOngoing)
             {
                 OptionAgent oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent, false).GetComponent<OptionAgent>();
-                oa.Init(so.DisplayName, so);
+                oa.Init(so.Info.DisplayName, so);
                 optionAgents.Add(oa);
                 if (index > UI.lineAmount - (int)(UI.wordsText.preferredHeight / UI.textLineHeight)) ZetanUtility.SetActive(oa.gameObject, false);//第一页以外隐藏
                 index++;
@@ -425,7 +425,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         if (wordsToSay.Count < 1 || wordsToSay.Peek().Options.Count < 1) return;
         DialogueWords currentWords = wordsToSay.Peek();
-        dialogueDatas.TryGetValue(currentDialog.ID, out DialogueData dialogDataFound);
+        dialogueDatas.TryGetValue(currentDialog.ID, out DialogueSaveData dialogDataFound);
         if (CurrentType == DialogueType.Normal) ClearOptions(OptionType.Quest, OptionType.Objective);
         else ClearOptions();
         bool isLastWords = currentDialog.IndexOfWords(wordsToSay.Peek()) == currentDialog.Words.Count - 1;
@@ -433,7 +433,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             if (option.OptionType == WordsOptionType.Choice && dialogDataFound != null)
             {
-                DialogueWordsData wordsDataFound = dialogDataFound.wordsDatas.Find(x => x.wordsIndex == currentDialog.IndexOfWords(currentWords));
+                DialogueWordsSaveData wordsDataFound = dialogDataFound.wordsDatas.Find(x => x.wordsIndex == currentDialog.IndexOfWords(currentWords));
                 //这个选择型分支是否完成了
                 if (isLastWords || wordsDataFound != null && wordsDataFound.IsOptionCmplt(currentWords.IndexOfOption(option)))
                     continue;//是最后一句话或者选项完成则跳过创建
@@ -606,23 +606,23 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (currentSubmitObj)
         {
             //双重确认，以防出错
-            Quest qParent = currentSubmitObj.runtimeParent;
-            var amount = BackpackManager.Instance.GetItemAmount(currentSubmitObj.ItemToSubmit);
+            QuestData qParent = currentSubmitObj.runtimeParent;
+            var amount = BackpackManager.Instance.GetItemAmount(currentSubmitObj.Info.ItemToSubmit);
             bool submitAble = true;
-            if (qParent.CmpltObjctvInOrder)
+            if (qParent.Info.CmpltObjctvInOrder)
                 foreach (var o in qParent.ObjectiveInstances)
-                    if (o is CollectObjective && (o as CollectObjective).LoseItemAtSbmt && o.InOrder && o.IsComplete)
-                        if (amount - currentSubmitObj.Amount < o.Amount)
+                    if (o is CollectObjectiveData co && co.Info.LoseItemAtSbmt && o.Info.InOrder && o.IsComplete)
+                        if (amount - currentSubmitObj.Info.Amount < o.Info.Amount)
                         {
                             submitAble = false;
-                            MessageManager.Instance.New($"该物品为目标[{o.DisplayName}]所需");
+                            MessageManager.Instance.New($"该物品为目标[{o.Info.DisplayName}]所需");
                             break;
                         }
-            submitAble &= BackpackManager.Instance.TryLoseItem_Boolean(currentSubmitObj.ItemToSubmit, currentSubmitObj.Amount);
+            submitAble &= BackpackManager.Instance.TryLoseItem_Boolean(currentSubmitObj.Info.ItemToSubmit, currentSubmitObj.Info.Amount);
             if (submitAble)
             {
-                BackpackManager.Instance.LoseItem(currentSubmitObj.ItemToSubmit, currentSubmitObj.Amount);
-                currentSubmitObj.UpdateSubmitState(currentSubmitObj.Amount);
+                BackpackManager.Instance.LoseItem(currentSubmitObj.Info.ItemToSubmit, currentSubmitObj.Info.Amount);
+                currentSubmitObj.UpdateSubmitState(currentSubmitObj.Info.Amount);
             }
             if (currentSubmitObj.IsComplete)
             {
@@ -657,7 +657,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                     oa.Recycle();
                 }
                 //该目标是任务的最后一个目标，则可以直接提交任务
-                Quest qParent = currentTalkObj.runtimeParent;
+                QuestData qParent = currentTalkObj.runtimeParent;
                 if (qParent.currentQuestHolder == CurrentTalker.Data && qParent.IsComplete && qParent.ObjectiveInstances.IndexOf(currentTalkObj) == qParent.ObjectiveInstances.Count - 1)
                 {
                     oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
@@ -730,18 +730,18 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                         CompleteOption(currentOption, out _);
                     }
 
-                void CompleteOption(WordsOption option, out DialogueWordsData result)
+                void CompleteOption(WordsOption option, out DialogueWordsSaveData result)
                 {
                     dialogueDatas.TryGetValue(dialogParentID, out var dFound);
                     if (dFound == null)
                     {
-                        dFound = new DialogueData(option.runtimeDialogParent);
+                        dFound = new DialogueSaveData(option.runtimeDialogParent);
                         dialogueDatas.Add(dialogParentID, dFound);
                     }
                     result = dFound.wordsDatas.Find(x => x.wordsIndex == indexOfWordsParent);
                     if (result == null)
                     {
-                        result = new DialogueWordsData(indexOfWordsParent);
+                        result = new DialogueWordsSaveData(indexOfWordsParent);
                         dFound.wordsDatas.Add(result);
                     }
                     int indexOfOption = topWordsParent.IndexOfOption(option);
@@ -822,16 +822,16 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         PlayerManager.Instance.PlayerController.controlAble = true;
     }
 
-    public void ShowQuestDescription(Quest quest)
+    public void ShowQuestDescription(QuestData quest)
     {
         if (quest == null) return;
         CurrentQuest = quest;
         UI.descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[委托人: {1}]\n{2}",
-            CurrentQuest.Title,
+            CurrentQuest.Info.Title,
             CurrentQuest.originalQuestHolder.TalkerName,
-            CurrentQuest.Description).ToString();
-        UI.moneyText.text = CurrentQuest.RewardMoney > 0 ? CurrentQuest.RewardMoney.ToString() : "无";
-        UI.EXPText.text = CurrentQuest.RewardEXP > 0 ? CurrentQuest.RewardEXP.ToString() : "无";
+            CurrentQuest.Info.Description).ToString();
+        UI.moneyText.text = CurrentQuest.Info.RewardMoney > 0 ? CurrentQuest.Info.RewardMoney.ToString() : "无";
+        UI.EXPText.text = CurrentQuest.Info.RewardEXP > 0 ? CurrentQuest.Info.RewardEXP.ToString() : "无";
         int befCount = rewardCells.Count;
         for (int i = 0; i < 10 - befCount; i++)
         {
@@ -841,7 +841,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         }
         foreach (ItemAgent rwc in rewardCells)
             if (rwc) rwc.Empty();
-        foreach (ItemInfo info in quest.RewardItems)
+        foreach (ItemInfo info in quest.Info.RewardItems)
             foreach (ItemAgent rw in rewardCells)
             {
                 if (rw.IsEmpty)
@@ -941,7 +941,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     public void Skip()
     {
-        dialogueDatas.TryGetValue(currentDialog.ID, out DialogueData find);
+        dialogueDatas.TryGetValue(currentDialog.ID, out DialogueSaveData find);
         if (find != null)
             for (int i = 0; i < currentDialog.Words.Count; i++)
                 for (int j = 0; j < currentDialog.Words[i].Options.Count; j++)
@@ -962,11 +962,11 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     private bool AllOptionComplete()
     {
-        dialogueDatas.TryGetValue(currentDialog.ID, out DialogueData dialogDataFound);
+        dialogueDatas.TryGetValue(currentDialog.ID, out DialogueSaveData dialogDataFound);
         if (dialogDataFound == null) return false;
         for (int i = 0; i < currentDialog.Words.Count; i++)
         {
-            DialogueWordsData wordsDataFound = dialogDataFound.wordsDatas.Find(x => x.wordsIndex == i);
+            DialogueWordsSaveData wordsDataFound = dialogDataFound.wordsDatas.Find(x => x.wordsIndex == i);
             if (wordsDataFound != null)
                 for (int j = 0; j < currentDialog.Words[i].Options.Count; j++)
                     //这个分支是否完成了
@@ -1053,7 +1053,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     public void SaveData(SaveData data)
     {
-        foreach (KeyValuePair<string, DialogueData> kvpDialog in dialogueDatas)
+        foreach (KeyValuePair<string, DialogueSaveData> kvpDialog in dialogueDatas)
         {
             data.dialogueDatas.Add(kvpDialog.Value);
         }
@@ -1061,7 +1061,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     public void LoadData(SaveData data)
     {
         dialogueDatas.Clear();
-        foreach (DialogueData dd in data.dialogueDatas)
+        foreach (DialogueSaveData dd in data.dialogueDatas)
         {
             dialogueDatas.Add(dd.dialogID, dd);
         }

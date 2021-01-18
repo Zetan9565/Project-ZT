@@ -660,7 +660,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void SaveData(SaveData data)
     {
         foreach (var iconWoH in IconsWithoutHolder.Values)
-            if (iconWoH.mapIcon.iconType == MapIconType.Mark) data.markDatas.Add(new MapMarkData(iconWoH));
+            if (iconWoH.mapIcon.iconType == MapIconType.Mark) data.markDatas.Add(new MapMarkSaveData(iconWoH));
     }
 
     public void LoadData(SaveData data)

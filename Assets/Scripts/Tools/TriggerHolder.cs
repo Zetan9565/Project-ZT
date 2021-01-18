@@ -43,7 +43,7 @@ public class TriggerHolder : MonoBehaviour
                     ActionStack.Push(reset.action, reset.delay);
     }
 
-    public void LoadData(TriggerHolderData data)
+    public void LoadData(TriggerHolderSaveData data)
     {
         if (data.ID != ID) return;
         if (TriggerManager.Instance && !string.IsNullOrEmpty(triggerName))
