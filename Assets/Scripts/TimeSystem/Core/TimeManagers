@@ -5,19 +5,11 @@ using UnityEngine;
 [AddComponentMenu("ZetanStudio/管理器/时间管理器")]
 public class TimeManager : SingletonMonoBehaviour<TimeManager>
 {
-    #region 常量
-    public const int HourToSeconds = 3600;
-    public const int DayToSeconds = 86400;
-    public const int WeekToSeconds = 604800;
-    public const int MonthToSeconds = 2592000;
-    public const int YearToSeconds = 31104000;
-    #endregion
-
-    #region 静态成员
+    #region 静态属性
     /// <summary>
     /// 一个游戏分在现实中的耗时(秒)
     /// </summary>
-    public static float OneMinute => Instance ? 60 / Instance.Multiples : 1;
+    public static float OneMinute => Instance ? Instance.Multiples : 1;
     /// <summary>
     /// 一个游戏时在现实中的耗时(秒)
     /// </summary>
@@ -38,79 +30,33 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     /// 一个游戏年在现实中的耗时(秒)
     /// </summary>
     public static float OneYear => OneSeason * 4;
-
-    public static string WeekDayToString(DayOfWeek dayOfWeek, TimeSystem timeSystem = TimeSystem.System24)
-    {
-        DayOfWeek day = dayOfWeek;
-        switch (day)
-        {
-            case DayOfWeek.Monday:
-                return timeSystem == TimeSystem.Twelve ? "月曜" : "星期一";
-            case DayOfWeek.Tuesday:
-                return timeSystem == TimeSystem.Twelve ? "金曜" : "星期二";
-            case DayOfWeek.Wednesday:
-                return timeSystem == TimeSystem.Twelve ? "木曜" : "星期三";
-            case DayOfWeek.Thursday:
-                return timeSystem == TimeSystem.Twelve ? "水曜" : "星期四";
-            case DayOfWeek.Friday:
-                return timeSystem == TimeSystem.Twelve ? "火曜" : "星期五";
-            case DayOfWeek.Saturday:
-                return timeSystem == TimeSystem.Twelve ? "土曜" : "星期六";
-            case DayOfWeek.Sunday:
-            default:
-                return timeSystem == TimeSystem.Twelve ? "日曜" : "星期日";
-        }
-    }
-
-    public static Seaon MonthToSeason(Month month)
-    {
-        switch (month)
-        {
-            case Month.January:
-            case Month.February:
-            case Month.March:
-                return Seaon.Spring;
-            case Month.April:
-            case Month.May:
-            case Month.June:
-                return Seaon.Summer;
-            case Month.July:
-            case Month.August:
-            case Month.September:
-                return Seaon.Autumn;
-            case Month.October:
-            case Month.November:
-            case Month.Decamber:
-            default:
-                return Seaon.Winter;
-        }
-    }
     #endregion
 
-    #region 可控成员
     [SerializeField]
     private TimeUI UI;
-
-    [SerializeField]
-    [Tooltip("现实中的 1 秒折合游戏中的多少秒钟？")]
-    private int multiples = 60;
-    public int Multiples
-    {
-        get => multiples;
-        set { multiples = value; }
-    }
 
     [SerializeField]
     private float timeline = 8;
     public float Timeline
     {
-        get => timeline;
-        set
+        get
         {
-            timeline = value % 24;
-            totalTime = ((Days - 1) * DayToSeconds + (decimal)timeline * HourToSeconds) / multiples;
+            return timeline;
         }
     }
+
+    public float NormalizeTimeline => Timeline / 24;
+
+    [SerializeField]
+    [Tooltip("现实中的 1 秒折合游戏中的多少分钟？")]
+    private float multiples = 1;
+    public float Multiples
+    {
+        get => multiples;
+        set { multiples = value; }
+    }
+
+    private float Scale => multiples / 60;
 
     [SerializeField]
     private TimeSystem timeSystem = TimeSystem.System24;
@@ -122,21 +68,12 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         }
     }
 
-    public delegate void TimePassedListner(decimal realSecond);
+    public delegate void TimePassedListner(float realSecond);
     public event TimePassedListner OnTimePassed;
-    #endregion
 
-    #region 日期相关
-    public string DateString
-    {
-        get
-        {
-            Date.month = CurrentMonth;
-            Date.dayOfMonth = DayOfMonth;
-            Date.dayOfWeek = DayOfWeek;
-            return Date.ToString(timeSystem);
-        }
-    }
+    public delegate void DayPassedListner();
+    public event DayPassedListner OnDayPassed;
+
     public string TimeString
     {
         get
@@ -209,53 +146,15 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         }
     }
 
-    public DateInfo Date { get; private set; } = new DateInfo();
-    public int DayOfMonth
-    {
-        get
-        {
-            int temp = Days % 30;
-            return temp == 0 ? 30 : temp;
-        }
-    }
-    public DayOfWeek DayOfWeek
-    {
-        get
-        {
-            int day = Days % 7;
-            return day == 0 ? DayOfWeek.Saturday : (DayOfWeek)(day - 1);
-        }
-    }
-    public int DayOfYear
-    {
-        get
-        {
-            int dayOfYeay = Days % 360;
-            return dayOfYeay == 0 ? 360 : dayOfYeay;
-        }
-        set
-        {
-            value = (value < 1 ? 1 : value) % 360;
-            value = value == 0 ? 360 : value;
-            totalTime = ((Years - 1) * YearToSeconds + (value - 1) * DayToSeconds + (decimal)timeline * HourToSeconds) / multiples;
-        }
-    }
-    public Month CurrentMonth
-    {
-        get
-        {
-            int monthIndex = Months%12;
-            return (Month)(monthIndex == 0 ? 12 : monthIndex);
-        }
-    }
-    public Seaon CurrentSeason => MonthToSeason(CurrentMonth);
+    [SerializeField]
+    private Month currentMonth = Month.January;
     public DayOfWeek WeekDayOfTheFirstDayOfCurrentMonth
     {
         get
         {
-            int dayOfMonth = DayOfMonth;
+            int daysOfMonth = DayOfMonth;
             int dayOfWeek = (int)DayOfWeek;
-            for (int i = dayOfMonth - 1; i > 0; i--)
+            for (int i = daysOfMonth - 1; i > 0; i--)
             {
                 dayOfWeek--;
                 if (dayOfWeek < 0) dayOfWeek = 6;
@@ -263,93 +162,167 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
             return (DayOfWeek)dayOfWeek;
         }
     }
-    #endregion
+    public Seaon CurrentSeason => MonthToSeason(CurrentMonth);
+    [SerializeField]
+    private int days = 1;
+    [SerializeField]
+    private int daysOfYear = 1;
+    [SerializeField]
+    private int weeks = 1;
+    [SerializeField]
+    private int months = 1;
+    [SerializeField]
+    private int years = 1;
 
-    #region 计数相关
-    public int Days
+    public string DateString
     {
         get
         {
-            int days = Mathf.CeilToInt((float)(totalTime * multiples / DayToSeconds));
-            return days < 1 ? 1 : days;
+            Date.month = CurrentMonth;
+            Date.dayOfMonth = DayOfMonth;
+            Date.dayOfWeek = DayOfWeek;
+            return Date.ToString(timeSystem);
+        }
+    }
+    public DateInfo Date { get; private set; } = new DateInfo();
+    public int DayOfMonth => Days % 30 == 0 ? 30 : Days % 30;
+    public DayOfWeek DayOfWeek
+    {
+        get
+        {
+            int days = Days % 7;
+            if (days == 0) return DayOfWeek.Saturday;
+            else return (DayOfWeek)(days - 1);
+        }
+    }
+    public int DaysOfYear => daysOfYear;
+    public int Days
+    {
+        get => days;
+        private set
+        {
+            days = value;
+            Date.dayOfMonth = DayOfMonth;
+            Date.dayOfWeek = DayOfWeek;
+            daysOfYear = days % 360 == 0 ? 360 : days % 360;
+            if (UI && UI.days) UI.days.text = "第 " + days + " 天";
+            if (UI && UI.dayOfDate) UI.dayOfDate.text = DayOfMonth + "日";
+            if (UI && UI.date) UI.date.text = DateString;
+            CalendarManager.Instance.UpdateToday();
         }
     }//从1开始计
     public int Weeks
     {
-        get
-        {
-            int weeks = Mathf.CeilToInt((float)(totalTime * multiples / WeekToSeconds));
-            return weeks < 1 ? 1 : weeks;
-        }
+        get => weeks;
+        private set => weeks = value;
     }//从1开始计
     public int Months//从1开始计
     {
-        get
+        get => months;
+        set
         {
-            int months = Mathf.CeilToInt((float)(totalTime * multiples / MonthToSeconds));
-            return months < 1 ? 1 : months;
+            months = value;
+            if (UI && UI.months) UI.months.text = "第" + months + "月";
         }
     }
     public int Years
     {
-        get
+        get => years;
+        private set
         {
-            int years = Mathf.CeilToInt((float)(totalTime * multiples / YearToSeconds));
-            return years < 1 ? 1 : years;
+            if (UI && UI.years) UI.years.text = "第" + Years + "年";
+            years = value;
         }
     }//从1开始计
-    #endregion
 
-    #region 运行时相关
-    public float NormalizeTimeline => timeline / 24;
-
-    [SerializeField]
-    private decimal totalTime = 0;
-    public decimal TotalTime
+    private float totalTime;
+    public float TotalTime
     {
         get => totalTime;
-        set => totalTime = value;
+        set
+        {
+            totalTime = value;
+            SetTime(totalTime);
+        }
     }
 
-    private int dayBefore = 0;
-    #endregion
-
-    #region UI相关
-    public void UpdateUI()
+    public Month CurrentMonth
     {
-        UpdateDate();
-        UpdateTime();
+        get => currentMonth;
+        private set
+        {
+            currentMonth = value;
+            Date.month = currentMonth;
+            if (UI && UI.monthOfDate) UI.monthOfDate.text = Date.GetMonthString(TimeSystem);
+            if (UI && UI.date) UI.date.text = DateString;
+        }
     }
-    private void UpdateDate()
+
+    private void Awake()
+    {
+        UpdateUI();
+        totalTime += timeline * OneHour;
+        Date.month = CurrentMonth;
+        Date.dayOfMonth = DayOfMonth;
+        Date.dayOfWeek = DayOfWeek;
+        CalendarManager.Instance.UpdateMonth();
+    }
+
+    public void UpdateUI()
     {
         if (UI && UI.days) UI.days.text = "第" + Days + "天";
         if (UI && UI.dayOfDate) UI.dayOfDate.text = DayOfMonth + "日";
         if (UI && UI.date) UI.date.text = DateString;
         if (UI && UI.years) UI.years.text = "第" + Years + "年";
     }
-    private void UpdateTime()
-    {
-        if (UI && UI.time) UI.time.text = TimeString;
-    }
-    #endregion
 
-    public void TimePase(decimal realSecond)
+    private void Update()
     {
-        OnTimePassed?.Invoke(realSecond);
-        totalTime += realSecond;
-        timeline = (float)(totalTime * multiples / HourToSeconds % 24);
-        CheckDayChange();
-        UpdateTime();
+        TimePase(Time.deltaTime);
     }
-    private void CheckDayChange()
+
+    public void TimePase(float realSecond)
     {
-        int dayNow = Days;
-        if (dayBefore != dayNow)
+        float timelineBef = timeline;
+        int days = (int)(realSecond * Scale / 24f);
+        for (int i = 0; i < days; i++)
+            NextDay();
+        float rawTimeline = timeline + realSecond * Scale;
+        timeline = rawTimeline % 24;
+        if (UI && UI.time) UI.time.text = TimeString;
+        if (timelineBef > timeline) NextDay();
+        OnTimePassed?.Invoke(realSecond);
+        totalTime = ((Days - 1) * 60 * 24 + timeline * 60) / multiples;
+    }
+
+    private void NextDayWithoutNotify()
+    {
+        //Debug.Log("一天过去了");
+        Days++;
+        if (Days % 7 == 1)
         {
-            UpdateDate();
-            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.DayChange, dayBefore, dayNow);
-            dayBefore = dayNow;
+            //Debug.Log("一周过去了");
+            Weeks++;
         }
+        if (Days % 30 == 1)
+        {
+            //Debug.Log("一月过去了");
+            int monthIndex = Mathf.CeilToInt((Days + 1) * 1.0f / 30);
+            monthIndex = monthIndex % 12 == 0 ? 12 : monthIndex % 12;
+            CurrentMonth = (Month)monthIndex;
+            Date.month = CurrentMonth;
+            CalendarManager.Instance.UpdateMonth();
+        }
+        if (Days % 360 == 1)
+        {
+            //Debug.Log("一年过去了");
+            Years++;
+        }
+    }
+    private void NextDay()
+    {
+        NextDayWithoutNotify();
+        OnDayPassed?.Invoke();
     }
 
     public void SaveData(SaveData data)
@@ -362,35 +335,68 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         SetTime(data.totalTime);
     }
 
-    private void SetTime(decimal totalTime)
+    private void SetTime(float totalTime)
     {
         ResetTime();
         TimePase(totalTime);
     }
     private void ResetTime()
     {
+        Days = 1;
+        Weeks = 1;
+        Months = 1;
+        Years = 1;
         totalTime = 0;
         timeline = 0;
-        dayBefore = 0;
         UpdateUI();
     }
 
-    #region MonoBehaviour
-    private void Awake()
+    public static string WeekDayToString(DayOfWeek dayOfWeek, TimeSystem timeSystem = TimeSystem.System24)
     {
-        UpdateUI();
-        Timeline = timeline;
-        Date.month = CurrentMonth;
-        Date.dayOfMonth = DayOfMonth;
-        Date.dayOfWeek = DayOfWeek;
-        CheckDayChange();
+        DayOfWeek day = dayOfWeek;
+        switch (day)
+        {
+            case DayOfWeek.Monday:
+                return timeSystem == TimeSystem.Twelve ? "月曜" : "星期一";
+            case DayOfWeek.Tuesday:
+                return timeSystem == TimeSystem.Twelve ? "金曜" : "星期二";
+            case DayOfWeek.Wednesday:
+                return timeSystem == TimeSystem.Twelve ? "木曜" : "星期三";
+            case DayOfWeek.Thursday:
+                return timeSystem == TimeSystem.Twelve ? "水曜" : "星期四";
+            case DayOfWeek.Friday:
+                return timeSystem == TimeSystem.Twelve ? "火曜" : "星期五";
+            case DayOfWeek.Saturday:
+                return timeSystem == TimeSystem.Twelve ? "土曜" : "星期六";
+            case DayOfWeek.Sunday:
+            default:
+                return timeSystem == TimeSystem.Twelve ? "日曜" : "星期日";
+        }
     }
 
-    private void Update()
+    public static Seaon MonthToSeason(Month month)
     {
-        TimePase((decimal)Time.deltaTime);
+        switch (month)
+        {
+            case Month.January:
+            case Month.February:
+            case Month.March:
+                return Seaon.Spring;
+            case Month.April:
+            case Month.May:
+            case Month.June:
+                return Seaon.Summer;
+            case Month.July:
+            case Month.August:
+            case Month.September:
+                return Seaon.Autumn;
+            case Month.October:
+            case Month.November:
+            case Month.Decamber:
+            default:
+                return Seaon.Winter;
+        }
     }
-    #endregion
 
     [Serializable]
     public class DateInfo
@@ -476,7 +482,8 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
 
         public string GetWeekDayString(TimeSystem timeSystem)
         {
-            switch (dayOfWeek)
+            DayOfWeek day = dayOfWeek;
+            switch (day)
             {
                 case DayOfWeek.Monday:
                     return timeSystem == TimeSystem.Twelve ? "月曜" : "星期一";
@@ -500,5 +507,77 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         {
             return GetMonthString(timeSystem) + GetDayOfMonthString(timeSystem) + " " + GetWeekDayString(timeSystem);
         }
+    }
+}
+
+public class TimeManagerNew : MonoBehaviour
+{
+    #region 常量
+    public const int HourToSeconds = 3600;
+    public const int DayToSeconds = 86400;
+    public const int WeekToSeconds = 604800;
+    public const int MonthToSeconds = 2592000;
+    public const int YearToSeconds = 31104000;
+    #endregion
+
+    public float multiples = 60;
+
+    public float totalTime;
+
+    public float timeline = 0;
+    public float Timeline
+    {
+        get => timeline;
+        set
+        {
+            timeline = value % 24;
+            Vector2 today = GetTodayTimeStamp();
+            totalTime = today.x + timeline * DayToSeconds;
+        }
+    }
+
+    public int Days => Mathf.CeilToInt(totalTime / DayToSeconds);
+    public int DayOfWeek
+    {
+        get
+        {
+            int temp = Days % 7;
+            return temp == 0 ? 7 : temp;
+        }
+    }
+    public int DayOfMonth
+    {
+        get
+        {
+            int temp = Days % 30;
+            return temp == 0 ? 30 : temp;
+        }
+    }
+    public int DayOfYear
+    {
+        get
+        {
+            int temp = Days % 3600;
+            return temp == 0 ? 360 : temp;
+        }
+    }
+
+    public int Weeks => Mathf.CeilToInt(totalTime / WeekToSeconds);
+
+    public int Months => Mathf.CeilToInt(totalTime / MonthToSeconds);
+
+    public int Years => Mathf.CeilToInt(totalTime / YearToSeconds);
+
+    private void TimePass(float realSeconds)
+    {
+        totalTime += realSeconds * multiples;
+        timeline = totalTime / 3600 % 24;
+    }
+
+    public Vector2 GetTodayTimeStamp()
+    {
+        float start = (Days - 1) * DayToSeconds;
+        float end = start + DayToSeconds;
+        return new Vector2(start, end);
     }
 }

@@ -19,6 +19,11 @@ public abstract class ManagedObject : MonoBehaviour
         return true;
     }
 
+    public virtual bool Reset()
+    {
+        return true;
+    }
+
     public virtual bool OnSaveGame(SaveData data)
     {
         return true;

@@ -44,6 +44,8 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     private static bool dontDestroyOnLoadOnce;
 
+    public static bool IsExiting { get; private set; }
+
     [SerializeField]
     private UIManager UIPrefab;
     private void Awake()
@@ -58,6 +60,11 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         {
             DestroyImmediate(gameObject);
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        IsExiting = true;
     }
 
     private IEnumerator InitDelay()

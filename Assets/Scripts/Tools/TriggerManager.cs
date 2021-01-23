@@ -18,6 +18,7 @@ public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
             triggers.Add(triggerName, value ? TriggerState.On : TriggerState.Off);
         else triggers[triggerName] = value ? TriggerState.On : TriggerState.Off;
         OnTriggerSetEvent?.Invoke(triggerName, value);
+        NotifyCenter.Instance.PostNotify("TriggerChange", triggerName, value);
         QuestManager.Instance.UpdateUI();
     }
 
@@ -37,7 +38,7 @@ public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
         if (!holder && holders.ContainsKey(holder.ID)) return;
         OnTriggerSetEvent += holder.OnTriggerSet;
         if (triggers.TryGetValue(holder.TriggerName, out var state))
-            holder.OnTriggerSet(holder.name, state == TriggerState.On ? true : false);
+            holder.OnTriggerSet(holder.name, state == TriggerState.On);
         holders.Add(holder.ID, holder);
     }
 

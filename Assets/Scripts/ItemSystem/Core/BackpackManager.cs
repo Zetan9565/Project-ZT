@@ -630,7 +630,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     public void EnableHandwork(bool value)
     {
         ZetanUtility.SetActive(UI.handworkButton.gameObject,
-            value ? !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !ItemSelectionManager.Instance.IsUIOpen && !MakingManager.Instance.IsUIOpen : false);
+            value && !ShopManager.Instance.IsUIOpen && !WarehouseManager.Instance.IsUIOpen && !ItemSelectionManager.Instance.IsUIOpen && !MakingManager.Instance.IsUIOpen);
     }
 
     public void OpenDiscardWindow()

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Diagnostics;
 
 public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
 {
@@ -24,6 +25,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
 #endif
     private float cleanDelayTime = 600.0f;//池子东西放多放久了臭，要按时排掉
 
+    private string putLog;
     public static void Put(GameObject gameObject)
     {
         if (!gameObject) return;
@@ -39,7 +41,18 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
         Instance.pool.TryGetValue(name, out var oListFound);
         if (oListFound != null)
         {
-            if (!oListFound.Contains(gameObject)) oListFound.Add(gameObject);
+            StackTrace st = new StackTrace(true);
+            if (!oListFound.Contains(gameObject))
+            {
+                var sf = st.GetFrame(1);
+                if (sf != null) Instance.putLog = $"{sf.GetFileName()}:{sf.GetFileLineNumber()}";
+                oListFound.Add(gameObject);
+            }
+            else
+            {
+                var sf = st.GetFrame(1);
+                UnityEngine.Debug.LogError($"重复入池：上次：{Instance.putLog}\n当前：{sf.GetFileName()}:{sf.GetFileLineNumber()}");
+            }
         }
         else
         {
@@ -88,7 +101,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             if (oListFound.Count < 1) Instance.pool.Remove(goName);
             go.transform.SetParent(parent, worldPositionStays);
             ZetanUtility.SetActive(go, true);
-            if(Instance.putDelayCoroutines.TryGetValue(go, out var c))
+            if (Instance.putDelayCoroutines.TryGetValue(go, out var c))
             {
                 Instance.StopCoroutine(c);
                 Instance.putDelayCoroutines.Remove(go);
@@ -225,7 +238,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
     {
         if (Instance)
         {
-            Debug.Log("已存在对象池");
+            UnityEngine.Debug.Log("已存在对象池");
             return;
         }
         new GameObject("ObjectPool").AddComponent<ObjectPool>();

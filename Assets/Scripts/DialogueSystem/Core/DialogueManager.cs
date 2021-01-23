@@ -1024,7 +1024,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
         return newWords.ToString();
 
-        string HandlingName(string keyWords)
+        static string HandlingName(string keyWords)
         {
             if (keyWords.StartsWith("[NPC]"))//为了性能，建议多此一举
             {

@@ -185,17 +185,17 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 
     public void RemoveMapIcon(MapIconHolder holder, bool force = false)
     {
-        if (!holder || !holder.removeAble && !force) { Debug.Log("return1"); return; }
+        if (!holder || !holder.removeAble && !force) { Debug.Log("return1" + holder); return; }
         //Debug.Log("remove");
         iconsWithHolder.TryGetValue(holder, out MapIcon iconFound);
         if (!iconFound && holder.iconInstance) iconFound = holder.iconInstance;
         if (iconFound) iconFound.Recycle();
         iconsWithHolder.Remove(holder);
     }
-    public void RemoveMapIcon(MapIcon icon, bool force)
+    public void RemoveMapIcon(MapIcon icon, bool force = false)
     {
         if (!icon || !icon.RemoveAble && !force) return;
-        if (icon.holder) RemoveMapIcon(icon.holder);
+        if (icon.holder) RemoveMapIcon(icon.holder, force);
         else
         {
             IconsWithoutHolder.Remove(icon);
@@ -215,13 +215,16 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void DestroyMapIcon(MapIcon icon)
     {
         if (!icon) return;
-        if (icon.holder) RemoveMapIcon(icon.holder);
+        if (icon.holder)
+        {
+            RemoveMapIcon(icon.holder, true);
+        }
         else
         {
             if (!icon.holder) IconsWithoutHolder.Remove(icon);
             else iconsWithHolder.Remove(icon.holder);
-            Destroy(icon);
         }
+        Destroy(icon);
     }
 
     private void DrawMapIcons()

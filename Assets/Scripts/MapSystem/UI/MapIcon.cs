@@ -76,7 +76,7 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
         }
         iconImage.raycastTarget = true;
         RemoveAble = true;
-        if (!string.IsNullOrEmpty(TextToDisplay)) TipsManager.Instance.Hide();
+        if (!string.IsNullOrEmpty(TextToDisplay) && TipsManager.Instance) TipsManager.Instance.Hide();
         TextToDisplay = string.Empty;
         if (iconRange) ObjectPool.Put(iconRange.gameObject);
         iconRange = null;

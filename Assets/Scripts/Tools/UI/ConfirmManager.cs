@@ -23,7 +23,7 @@ public class ConfirmManager : SingletonMonoBehaviour<ConfirmManager>, IWindowHan
 
     private Action onNoClick;
 
-    private short showTimes = 0;
+    private sbyte showTimes = 0;
 
     public bool IsUIOpen { get; private set; }
     public bool IsPausing { get; private set; }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 
 [DisallowMultipleComponent, RequireComponent(typeof(MapIconHolder))]
-public class QuestPoint : MonoBehaviour
+public class QuestPoint : ManagedObject
 {
     [SerializeField]
 #if UNITY_EDITOR
@@ -12,18 +12,15 @@ public class QuestPoint : MonoBehaviour
     private string _ID;
     public string ID => _ID;
 
-    public bool IsInit { get; private set; }
-
     public delegate void MoveToPointListener(QuestPoint point);
     public event MoveToPointListener OnMoveIntoEvent;
     public event MoveToPointListener OnMoveAwayEvent;
 
-    public bool Init()
+    public override bool Init()
     {
         if (!GameManager.QuestPoints.ContainsKey(ID)) GameManager.QuestPoints.Add(ID, new List<QuestPoint>() { this });
         else if (!GameManager.QuestPoints[ID].Contains(this)) GameManager.QuestPoints[ID].Add(this);
-        IsInit = true;
-        return true;
+        return base.Init();
     }
 
     //private void OnTriggerEnter(Collider other)

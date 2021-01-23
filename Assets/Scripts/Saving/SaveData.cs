@@ -8,7 +8,7 @@ public class SaveData
     public string sceneName;
 
     public DateTime saveDate;
-    public float totalTime;
+    public decimal totalTime;
 
     public float playerPosX;
     public float playerPosY;

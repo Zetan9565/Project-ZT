@@ -35,7 +35,6 @@ public class Crop : MonoBehaviour
         HarvestAble = false;
         Parent = parent;
         totalGrowthDays = 1;
-        TimeManager.Instance.OnDayPassed += UpdateDay;
         GameManager.Crops.TryGetValue(Info, out var crops);
         if (crops != null)
         {
@@ -47,13 +46,19 @@ public class Crop : MonoBehaviour
             RuntimeID = Info.ID + "I0000";
             GameManager.Crops.Add(Info, new List<Crop>() { this });
         }
+        NotifyCenter.Instance.RemoveListener(this);
+        NotifyCenter.Instance.AddListener(NotifyCenter.CommonKeys.DayChange, UpdateDay);
     }
 
-    public void UpdateDay()
+    public void UpdateDay(params object[] msg)
     {
-        totalGrowthDays++;
-        stageGrowthDays++;
-        HandlingStage();
+        if (msg.Length > 1)
+        {
+            int days = (int)msg[1] - (int)msg[0];
+            totalGrowthDays += days;
+            stageGrowthDays += days;
+            HandlingStage();
+        }
     }
 
     private void HandlingStage()
@@ -134,7 +139,7 @@ public class Crop : MonoBehaviour
         nextStage = null;
         currentHarvestTimes = -1;
         totalGrowthDays = -1;
-        TimeManager.Instance.OnDayPassed -= UpdateDay;
+        NotifyCenter.Instance.RemoveListener(this);
     }
 
     public void Recycle()

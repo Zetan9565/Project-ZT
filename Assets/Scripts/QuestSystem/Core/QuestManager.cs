@@ -20,9 +20,9 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     public delegate void QuestStatusListener();
     public event QuestStatusListener OnQuestStatusChange;
 
-    private List<QuestData> questsInProgress = new List<QuestData>();
+    private readonly List<QuestData> questsInProgress = new List<QuestData>();
 
-    private List<QuestData> questsComplete = new List<QuestData>();
+    private readonly List<QuestData> questsComplete = new List<QuestData>();
 
     private QuestData selectedQuest;
 
@@ -125,7 +125,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 TriggerManager.Instance.RegisterTriggerEvent(cuo.UpdateTriggerState);
                 var state = TriggerManager.Instance.GetTriggerState(cuo.Info.TriggerName);
                 if (cuo.Info.CheckStateAtAcpt && state != TriggerState.NotExist)
-                    TriggerManager.Instance.SetTrigger(cuo.Info.TriggerName, state == TriggerState.On ? true : false);
+                    TriggerManager.Instance.SetTrigger(cuo.Info.TriggerName, state == TriggerState.On);
             }
         }
         quest.InProgress = true;
@@ -142,14 +142,12 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         ObjectiveData firstObj = quest.ObjectiveInstances[0];
         CreateObjectiveMapIcon(firstObj);
         OnQuestStatusChange?.Invoke();
-        NotifyCenter.Instance.PostNotify("AcctpQuest", quest);
+        NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.QuestChange, quest);
         return true;
     }
-    public void OnQuestAccept(params object[] args)
+    public void OnTriggerChange(params object[] args)
     {
-        if (args.Length > 0 && args[0] is Quest quest)
-            MessageManager.Instance.New($"事件通知：接取了任务[{quest.Title}]");
-        NotifyCenter.Instance.RemoveListener("AcctpQuest", OnQuestAccept);
+        //TODO 处理触发器改变时
     }
 
     /// <summary>
@@ -279,9 +277,11 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 UI.questBoard.blocksRaycasts = false;
             }
             OnQuestStatusChange?.Invoke();
+            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.QuestChange, quest);
             return true;
         }
         OnQuestStatusChange?.Invoke();
+        NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.QuestChange, quest);
         return false;
     }
 
@@ -363,6 +363,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     UI.questBoard.blocksRaycasts = false;
                 }
                 OnQuestStatusChange?.Invoke();
+                NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.QuestChange, quest);
                 return true;
             }
         }
@@ -529,6 +530,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             else CreateObjectiveMapIcon(nextToDo);
             RemoveObjectiveMapIcon(objective);
             OnQuestStatusChange?.Invoke();
+            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.ObjectiveChange, objective);
         }
         //else Debug.Log("无操作");
     }
@@ -626,8 +628,8 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     break;
                 }
             }
-        ZetanUtility.SetActive(UI.abandonButton.gameObject, questAgent.MQuest.IsFinished ? false : questAgent.MQuest.Info.Abandonable);
-        ZetanUtility.SetActive(UI.traceButton.gameObject, questAgent.MQuest.IsFinished ? false : true);
+        ZetanUtility.SetActive(UI.abandonButton.gameObject, !questAgent.MQuest.IsFinished && questAgent.MQuest.Info.Abandonable);
+        ZetanUtility.SetActive(UI.traceButton.gameObject, !questAgent.MQuest.IsFinished);
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = true;
         ItemWindowManager.Instance.CloseWindow();
@@ -911,7 +913,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         UI.questBoard.alpha = 0;
         UI.questBoard.blocksRaycasts = false;
 
-        NotifyCenter.Instance.AddListener("AcctpQuest", OnQuestAccept);
+        NotifyCenter.Instance.AddListener(NotifyCenter.CommonKeys.TriggerChange, OnTriggerChange);
     }
 
     public void LoadQuest(SaveData data)

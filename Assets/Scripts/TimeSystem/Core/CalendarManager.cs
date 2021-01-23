@@ -9,12 +9,24 @@ public class CalendarManager : WindowHandler<CalendarUI, CalendarManager>, IOpen
 
     public void Init()
     {
+        RemakeGrid();
+        NotifyCenter.Instance.RemoveListener(this);
+        NotifyCenter.Instance.AddListener(NotifyCenter.CommonKeys.DayChange, OnDayChange);
+    }
+
+    private void RemakeGrid()
+    {
         int countBef = dateAgents.Count;
         for (int i = 0; i < 42 - countBef; i++)
         {
             DateAgent da = Instantiate(UI.dateCellPrefab, UI.dateCellsParent);
             dateAgents.Add(da);
         }
+    }
+
+    public void OnDayChange(params object[] msg)
+    {
+        UpdateUI();
     }
 
     public void UpdateUI()
@@ -26,7 +38,7 @@ public class CalendarManager : WindowHandler<CalendarUI, CalendarManager>, IOpen
     public void UpdateMonth()
     {
         if (!UI || !UI.gameObject || !IsUIOpen || !TimeManager.Instance) return;
-        Init();
+        RemakeGrid();
         foreach (DateAgent da in dateAgents)
             da.Empty();
         int startIndex = (int)TimeManager.Instance.WeekDayOfTheFirstDayOfCurrentMonth;
@@ -48,7 +60,7 @@ public class CalendarManager : WindowHandler<CalendarUI, CalendarManager>, IOpen
             while (dateAgentEnum.MoveNext())
                 dateAgentEnum.Current.SetToday(false);
         int startIndex = (int)TimeManager.Instance.WeekDayOfTheFirstDayOfCurrentMonth;
-        int todayIndex = TimeManager.Instance.DaysOfMonth + startIndex - 1;
+        int todayIndex = TimeManager.Instance.DayOfMonth + startIndex - 1;
         if (todayIndex > -1 && todayIndex < dateAgents.Count) dateAgents[todayIndex].SetToday(true);
     }
 

@@ -23,6 +23,11 @@ public class Condition
     [SerializeField]
     private string triggerName;
     public string TriggerName => triggerName;
+
+    public static implicit operator bool(Condition self)
+    {
+        return self != null;
+    }
 }
 
 public enum ConditionType

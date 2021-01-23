@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Image), typeof(CanvasGroup))]
@@ -18,6 +19,8 @@ public class QuestFlag : MonoBehaviour
     private Talker questHolder;
     private MapIcon mapIcon;
 
+    private readonly HashSet<string> triggerNames = new HashSet<string>();
+
     public void Init(Talker questHolder)
     {
         this.questHolder = questHolder;
@@ -28,9 +31,18 @@ public class QuestFlag : MonoBehaviour
             mapIcon.iconImage.raycastTarget = false;
             mapIcon.Hide();
         }
+        triggerNames.Clear();
+        foreach (var quest in questHolder.QuestInstances)
+        {
+            Condition find = quest.Info.AcceptCondition.Conditions.Find(x => x.Type == ConditionType.TriggerSet || x.Type == ConditionType.TriggerReset);
+            if (find) triggerNames.Add(find.TriggerName);
+        }
         UpdateUI();
         Update();
         if (QuestManager.Instance) QuestManager.Instance.OnQuestStatusChange += UpdateUI;
+
+        NotifyCenter.Instance.RemoveListener(this);
+        NotifyCenter.Instance.AddListener("TriggerChange", OnTriggerChange);
     }
 
     private bool conditionShow;
@@ -47,7 +59,7 @@ public class QuestFlag : MonoBehaviour
             return;
         }
         //Debug.Log("enter");
-        if (hasObjective)//该NPC有未完成的谈话任务
+        if (hasObjective)//该NPC身上有未完成的任务目标
         {
             icon.overrideSprite = accepted;
             mapIcon.iconImage.overrideSprite = accepted;
@@ -107,9 +119,21 @@ public class QuestFlag : MonoBehaviour
 
     public void Recycle()
     {
+        if (NotifyCenter.Instance) NotifyCenter.Instance.RemoveListener(this);
+        if(MapManager.Instance) MapManager.Instance.RemoveMapIcon(mapIcon);
         questHolder = null;
-        if (mapIcon) mapIcon.Recycle();
+        mapIcon = null;
         ObjectPool.Put(gameObject);
+    }
+
+    public void OnTriggerChange(params object[] args)
+    {
+        if (args.Length > 1)
+        {
+            if (triggerNames.Contains(args[0].ToString()))
+                UpdateUI();
+            MessageManager.Instance.New($"事件通知：触发器{args[0]}状态变成{args[1]}]");
+        }
     }
 
     void Awake()
@@ -133,7 +157,8 @@ public class QuestFlag : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (MapManager.Instance) MapManager.Instance.DestroyMapIcon(mapIcon);
+        if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(mapIcon);
         if (QuestManager.Instance) QuestManager.Instance.OnQuestStatusChange -= UpdateUI;
+        if (NotifyCenter.Instance) NotifyCenter.Instance.RemoveListener(this);
     }
 }
