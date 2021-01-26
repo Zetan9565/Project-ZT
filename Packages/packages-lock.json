@@ -112,7 +112,7 @@
       "url": "https://packages.unity.cn"
     },
     "com.unity.purchasing": {
-      "version": "2.1.1",
+      "version": "2.2.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {

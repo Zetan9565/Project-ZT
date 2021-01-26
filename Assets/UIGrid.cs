@@ -5,12 +5,20 @@ using UnityEngine;
 [RequireComponent(typeof(RectTransform))]
 public class UIGrid : MonoBehaviour
 {
-    private RectTransform rectTransform;
+    public RectTransform rectTransform;
 
+    public UnityEngine.UI.Text text;
+
+    public int dataIndex = -1;
+
+    private void Awake()
+    {
+        rectTransform = GetComponent<RectTransform>();
+    }
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -22,11 +30,13 @@ public class UIGrid : MonoBehaviour
 
     public void Init(RectTransform parent, float size)
     {
-        rectTransform = GetComponent<RectTransform>();
     }
 
-    public void RefreshData()
+    public void RefreshData(object data)
     {
-
+        if (data is ItemInfo info)
+        {
+            text.text = dataIndex.ToString();
+        }
     }
 }
