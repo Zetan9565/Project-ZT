@@ -177,3 +177,11 @@ Update Mode: updateDependencies
 
 The following packages were 已更新:
   com.unity.purchasing 从版本 2.1.1 到 2.2.1
+
+=== Thu Feb  4 20:17:43 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.ads from version 3.5.2 to 3.6.1

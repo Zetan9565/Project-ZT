@@ -23,4 +23,9 @@ public class SkillMachineBehaviour : StateMachineBehaviour
     {
         enterCallback?.Invoke(skillInfo.name);
     }
+
+    public override void OnStateMachineEnter(Animator animator, int stateMachinePathHash)
+    {
+        base.OnStateMachineEnter(animator, stateMachinePathHash);
+    }
 }

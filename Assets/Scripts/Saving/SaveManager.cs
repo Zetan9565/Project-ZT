@@ -90,7 +90,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     {
         foreach (KeyValuePair<string, TalkerData> kvp in GameManager.TalkerDatas)
         {
-            if (kvp.Value.info.IsWarehouseAgent)
+            if (kvp.Value.Info.IsWarehouseAgent)
             {
                 data.warehouseDatas.Add(new WarehouseSaveData(kvp.Value.TalkerID, kvp.Value.warehouse));
             }

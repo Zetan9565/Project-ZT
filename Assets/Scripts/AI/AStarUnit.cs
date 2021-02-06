@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -59,6 +60,8 @@ public class AStarUnit : MonoBehaviour
     [SerializeField]
     private string animaMagnitude = "Move";
     private int animaMagnitudeHash;
+
+    public event Action<Vector2> onAnima;
     #endregion
 
     [SerializeField]
@@ -114,10 +117,10 @@ public class AStarUnit : MonoBehaviour
         get => isFollowingTarget;
         set
         {
-            bool origin = isFollowingTarget;
+            bool followBef = isFollowingTarget;
             isFollowingTarget = value;
-            if (!origin && isFollowingTarget) StartFollowingTarget();
-            else if (origin && !isFollowingTarget)
+            if (!followBef && isFollowingTarget) StartFollowingTarget();
+            else if (followBef && !isFollowingTarget)
             {
                 if (targetFollowCoroutine != null) StopCoroutine(targetFollowCoroutine);
                 targetFollowCoroutine = null;
@@ -221,6 +224,7 @@ public class AStarUnit : MonoBehaviour
         isFollowingPath = false;
         ShowPath(false);
         gizmosTargetPos = default;
+        onAnima?.Invoke(Vector2.zero);
     }
 
     private void RequestPath(Vector3 destination)
@@ -423,22 +427,29 @@ public class AStarUnit : MonoBehaviour
     #region 其他
     private void UpdatePathRenderer()
     {
-        LinkedList<Vector3> leftPoint = new LinkedList<Vector3>(path.Skip(targetWaypointIndex).ToArray());
-        leftPoint.AddFirst(OffsetPosition);
-        pathRenderer.positionCount = leftPoint.Count;
-        pathRenderer.SetPositions(leftPoint.ToArray());
-        if ((OffsetPosition - Destination).sqrMagnitude < stopDistance * stopDistance) ShowPath(false);
+        if (pathRenderer && path != null && path.Length > 0)
+        {
+            LinkedList<Vector3> leftPoint = new LinkedList<Vector3>(path.Skip(targetWaypointIndex).ToArray());
+            leftPoint.AddFirst(OffsetPosition);
+            pathRenderer.positionCount = leftPoint.Count;
+            pathRenderer.SetPositions(leftPoint.ToArray());
+            if ((OffsetPosition - Destination).sqrMagnitude < stopDistance * stopDistance) ShowPath(false);
+        }
     }
 
     private void UpdateAnimation()
     {
         Vector3 animaInput = DesiredVelocity.normalized;
-        if (animaInput.sqrMagnitude > 0)
+        if (animator)
         {
-            animator.SetFloat(animaHorizontalHash, animaInput.x);
-            animator.SetFloat(animaVerticalHash, animaInput.y);
+            if (animaInput.sqrMagnitude > 0)
+            {
+                animator.SetFloat(animaHorizontalHash, animaInput.x);
+                animator.SetFloat(animaVerticalHash, animaInput.y);
+            }
+            animator.SetFloat(animaMagnitudeHash, animaInput.sqrMagnitude);
         }
-        animator.SetFloat(animaMagnitudeHash, animaInput.sqrMagnitude);
+        if (IsFollowingPath) onAnima?.Invoke(animaInput);
     }
 
     private enum UnitMoveMode
@@ -474,14 +485,8 @@ public class AStarUnit : MonoBehaviour
 
     private void Update()
     {
-        if (pathRenderer && path != null && path.Length > 0)
-        {
-            UpdatePathRenderer();
-        }
-        if (animator)
-        {
-            UpdateAnimation();
-        }
+        UpdatePathRenderer();
+        UpdateAnimation();
     }
     private void LateUpdate()
     {

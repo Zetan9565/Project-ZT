@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 
+[RequireComponent(typeof(Character))]
 public class PlayerController2D : MonoBehaviour
 {
     [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("角色控制器")]
 #endif
-    private CharacterController2D characterController;
-    public CharacterController2D CharacterController
+    private CharacterMotion characterController;
+    public CharacterMotion CharacterController
     {
         get
         {
@@ -92,7 +93,7 @@ public class PlayerController2D : MonoBehaviour
         characterController.Move(input.normalized);
         if (Unit)
         {
-            if (input.magnitude > 0 || Unit.IsStop)
+            if (input.sqrMagnitude > 0 || Unit.IsStop)
             {
                 Unit.IsFollowingPath = false;
                 Unit.IsFollowingTarget = false;
@@ -100,14 +101,14 @@ public class PlayerController2D : MonoBehaviour
             }
             if (characterController)
             {
-                if (input.magnitude == 0 && isTrace) characterController.Move(Unit.DesiredVelocity.normalized);
-                else if (Unit.IsFollowingPath || Unit.IsFollowingTarget) characterController.SetAnima(Unit.DesiredVelocity.normalized);
+                if (input.sqrMagnitude == 0 && isTrace) characterController.Move(Unit.DesiredVelocity.normalized);
+                else if (Unit.IsFollowingPath || Unit.IsFollowingTarget) characterController.SetMoveAnima(Unit.DesiredVelocity.normalized);
                 Unit.moveSpeed = characterController.moveSpeed;
             }
         }
     }
 
-    public void SetController(CharacterController2D characterController)
+    public void SetController(CharacterMotion characterController)
     {
         this.characterController = characterController;
     }

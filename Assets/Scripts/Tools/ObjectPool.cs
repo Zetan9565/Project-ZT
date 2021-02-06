@@ -25,7 +25,8 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
 #endif
     private float cleanDelayTime = 600.0f;//池子东西放多放久了臭，要按时排掉
 
-    private string putLog;
+    private readonly Dictionary<GameObject, string> putLog = new Dictionary<GameObject, string>();
+
     public static void Put(GameObject gameObject)
     {
         if (!gameObject) return;
@@ -38,20 +39,23 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
         ZetanUtility.SetActive(gameObject, false);
         gameObject.transform.SetParent(Instance.poolRoot, false);
         string name = gameObject.name.EndsWith("(Clone)") ? gameObject.name : gameObject.name + "Clone";
-        Instance.pool.TryGetValue(name, out var oListFound);
-        if (oListFound != null)
+        if (Instance.pool.TryGetValue(name, out var oListFound))
         {
             StackTrace st = new StackTrace(true);
             if (!oListFound.Contains(gameObject))
             {
                 var sf = st.GetFrame(1);
-                if (sf != null) Instance.putLog = $"{sf.GetFileName()}:{sf.GetFileLineNumber()}";
+                if (sf != null)
+                {
+                    if (Instance.putLog.ContainsKey(gameObject)) Instance.putLog[gameObject] = $"{sf.GetFileName()}:{sf.GetFileLineNumber()}";
+                    else Instance.putLog.Add(gameObject, $"{sf.GetFileName()}:{sf.GetFileLineNumber()}");
+                }
                 oListFound.Add(gameObject);
             }
             else
             {
                 var sf = st.GetFrame(1);
-                UnityEngine.Debug.LogError($"重复入池：上次：{Instance.putLog}\n当前：{sf.GetFileName()}:{sf.GetFileLineNumber()}");
+                UnityEngine.Debug.LogError($"重复入池：上次：{Instance.putLog[gameObject]}\n当前：{sf.GetFileName()}:{sf.GetFileLineNumber()}");
             }
         }
         else
@@ -228,6 +232,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
                 foreach (var o in pool[keys[i]])
                     if (o) Destroy(o);
             pool.Clear();
+            putLog.Clear();
             System.GC.Collect();
         }
     }

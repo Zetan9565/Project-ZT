@@ -2,11 +2,9 @@
 using UnityEngine;
 
 [DisallowMultipleComponent, RequireComponent(typeof(MapIconHolder))]
-public class Talker : MonoBehaviour
+public class Talker : Character
 {
-    [SerializeField]
-    private TalkerInformation info;
-    public TalkerInformation Info => info;
+    public new TalkerInformation Info => (TalkerInformation)info;
 
     public string TalkerID => info ? info.ID : string.Empty;
 
@@ -15,7 +13,15 @@ public class Talker : MonoBehaviour
     public Vector3 questFlagOffset;
     private QuestFlag flagAgent;
 
-    public TalkerData Data { get; private set; }
+    public new TalkerData Data
+    {
+        get => (TalkerData)data;
+        set
+        {
+            data = value;
+            base.Data = data;
+        }
+    }
 
     public List<QuestData> QuestInstances => Data ? Data.questInstances : null;
 
@@ -24,7 +30,7 @@ public class Talker : MonoBehaviour
 
     public new Transform transform { get; private set; }
 
-    public void Init()
+    public override bool Init()
     {
         if (!GameManager.Talkers.ContainsKey(TalkerID)) GameManager.Talkers.Add(TalkerID, this);
         else if (!GameManager.Talkers[TalkerID] || !GameManager.Talkers[TalkerID].gameObject)
@@ -33,17 +39,16 @@ public class Talker : MonoBehaviour
             GameManager.Talkers.Add(TalkerID, this);
         }
         else Destroy(gameObject);
-        GameManager.TalkerDatas.TryGetValue(TalkerID, out TalkerData dataFound);
-        if (!dataFound)
+        if (!GameManager.TalkerDatas.TryGetValue(TalkerID, out TalkerData dataFound))
         {
-            Data = new TalkerData();
+            Data = new TalkerData(Info);
             if (Info.IsVendor)
             {
                 Data.shop = Instantiate(Info.Shop);
                 Data.shop.Init();
             }
             else if (Info.IsWarehouseAgent) Data.warehouse = new Warehouse(Info.Warehouse.size.Max);
-            Data.info = Info;
+            Data.Info = Info;
             Data.InitQuest(Info.QuestsStored);
             GameManager.TalkerDatas.Add(TalkerID, Data);
         }
@@ -53,6 +58,7 @@ public class Talker : MonoBehaviour
         if (Info.IsVendor && !ShopManager.Vendors.Contains(Data)) ShopManager.Vendors.Add(Data);
         flagAgent = ObjectPool.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject, UIManager.Instance.QuestFlagParent).GetComponent<QuestFlag>();
         flagAgent.Init(this);
+        return true;
     }
 
     public void OnTalkBegin()
@@ -86,12 +92,12 @@ public class Talker : MonoBehaviour
     private string GetMapIconName()
     {
         System.Text.StringBuilder name = new System.Text.StringBuilder(TalkerName);
-        if (info.IsVendor && info.Shop || info.IsWarehouseAgent && info.Warehouse)
+        if (Info.IsVendor && Info.Shop || Info.IsWarehouseAgent && Info.Warehouse)
         {
             name.Append("<");
-            if (info.IsVendor) name.Append(info.Shop.ShopName);
-            if (info.IsVendor && info.IsWarehouseAgent) name.Append(",");
-            if (info.IsWarehouseAgent) name.Append("仓库");
+            if (Info.IsVendor) name.Append(Info.Shop.ShopName);
+            if (Info.IsVendor && Info.IsWarehouseAgent) name.Append(",");
+            if (Info.IsWarehouseAgent) name.Append("仓库");
             name.Append(">");
         }
         return name.ToString();
@@ -181,14 +187,24 @@ public class Talker : MonoBehaviour
 }
 
 [System.Serializable]
-public class TalkerData
+public class TalkerData : CharacterData
 {
-    public TalkerInformation info;
+    public TalkerInformation Info
+    {
+        get
+        {
+            return (TalkerInformation)info;
+        }
+        set
+        {
+            info = value;
+        }
+    }
     public string TalkerID
     {
         get
         {
-            if (info) return info.ID;
+            if (Info) return Info.ID;
             return string.Empty;
         }
     }
@@ -197,13 +213,10 @@ public class TalkerData
     {
         get
         {
-            if (info) return info.name;
+            if (Info) return Info.name;
             return string.Empty;
         }
     }
-
-    public string currentScene;
-    public Vector3 currentPosition;
 
     public Relationship relationshipInstance;
 
@@ -220,6 +233,11 @@ public class TalkerData
 
     public List<QuestData> questInstances = new List<QuestData>();
 
+    public TalkerData(TalkerInformation info) : base(info)
+    {
+
+    }
+
     public virtual void OnTalkBegin()
     {
         OnTalkBeginEvent?.Invoke();
@@ -232,14 +250,14 @@ public class TalkerData
 
     public void OnGetGift(ItemBase gift)
     {
-        if (info.FavoriteItems.Exists(x => x.Item.ID == gift.ID))
+        if (Info.FavoriteItems.Exists(x => x.Item.ID == gift.ID))
         {
-            FavoriteItemInfo find = info.FavoriteItems.Find(x => x.Item.ID == gift.ID);
+            FavoriteItemInfo find = Info.FavoriteItems.Find(x => x.Item.ID == gift.ID);
             relationshipInstance.RelationshipValue.Current += (int)find.FavoriteLevel;
         }
-        else if (info.HateItems.Exists(x => x.Item.ID == gift.ID))
+        else if (Info.HateItems.Exists(x => x.Item.ID == gift.ID))
         {
-            HateItemInfo find = info.HateItems.Find(x => x.Item.ID == gift.ID);
+            HateItemInfo find = Info.HateItems.Find(x => x.Item.ID == gift.ID);
             relationshipInstance.RelationshipValue.Current -= (int)find.HateLevel;
         }
         else

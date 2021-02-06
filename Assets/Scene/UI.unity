@@ -901,11 +901,11 @@ GameObject:
   - component: {fileID: 33372324}
   - component: {fileID: 33372331}
   - component: {fileID: 33372330}
-  - component: {fileID: 33372329}
   - component: {fileID: 33372328}
   - component: {fileID: 33372326}
   - component: {fileID: 33372325}
   - component: {fileID: 33372327}
+  - component: {fileID: 33372329}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -954,12 +954,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 33372330}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &33372326
@@ -1026,15 +1026,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 33372323}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 33372330}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &33372330
 Animator:
   serializedVersion: 3
@@ -4554,11 +4554,11 @@ GameObject:
   - component: {fileID: 130097661}
   - component: {fileID: 130097668}
   - component: {fileID: 130097667}
-  - component: {fileID: 130097666}
   - component: {fileID: 130097665}
   - component: {fileID: 130097663}
   - component: {fileID: 130097662}
   - component: {fileID: 130097664}
+  - component: {fileID: 130097666}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -4607,12 +4607,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 130097667}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &130097663
@@ -4679,15 +4679,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 130097660}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 130097667}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &130097667
 Animator:
   serializedVersion: 3
@@ -5285,11 +5285,11 @@ GameObject:
   - component: {fileID: 148590915}
   - component: {fileID: 148590922}
   - component: {fileID: 148590921}
-  - component: {fileID: 148590920}
   - component: {fileID: 148590919}
   - component: {fileID: 148590917}
   - component: {fileID: 148590916}
   - component: {fileID: 148590918}
+  - component: {fileID: 148590920}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -5338,12 +5338,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 148590921}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &148590917
@@ -5410,15 +5410,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 148590914}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 148590921}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &148590921
 Animator:
   serializedVersion: 3
@@ -7098,11 +7098,11 @@ GameObject:
   - component: {fileID: 209046162}
   - component: {fileID: 209046161}
   - component: {fileID: 209046160}
-  - component: {fileID: 209046159}
   - component: {fileID: 209046158}
   - component: {fileID: 209046156}
   - component: {fileID: 209046154}
   - component: {fileID: 209046155}
+  - component: {fileID: 209046157}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -7137,12 +7137,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 209046160}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!114 &209046155
@@ -7189,6 +7189,24 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.35
+--- !u!114 &209046157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 209046153}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
+  animaHorizontal: Horizontal
+  animaVertical: Vertical
+  character: {fileID: 0}
 --- !u!210 &209046158
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -7200,24 +7218,6 @@ SortingGroup:
   m_SortingLayerID: 2050152057
   m_SortingLayer: 2
   m_SortingOrder: 0
---- !u!114 &209046159
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 209046153}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 209046160}
-  animaHorizontal: Horizontal
-  animaVertical: Vertical
-  animaMagnitude: Move
 --- !u!95 &209046160
 Animator:
   serializedVersion: 3
@@ -8593,11 +8593,11 @@ GameObject:
   - component: {fileID: 303863143}
   - component: {fileID: 303863150}
   - component: {fileID: 303863149}
-  - component: {fileID: 303863148}
   - component: {fileID: 303863147}
   - component: {fileID: 303863145}
   - component: {fileID: 303863144}
   - component: {fileID: 303863146}
+  - component: {fileID: 303863148}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -8646,12 +8646,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 303863149}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &303863145
@@ -8718,15 +8718,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 303863142}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 303863149}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: 
+  character: {fileID: 0}
 --- !u!95 &303863149
 Animator:
   serializedVersion: 3
@@ -10019,11 +10019,11 @@ GameObject:
   - component: {fileID: 340145889}
   - component: {fileID: 340145896}
   - component: {fileID: 340145895}
-  - component: {fileID: 340145894}
   - component: {fileID: 340145893}
   - component: {fileID: 340145891}
   - component: {fileID: 340145890}
   - component: {fileID: 340145892}
+  - component: {fileID: 340145894}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -10072,12 +10072,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 340145895}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &340145891
@@ -10144,15 +10144,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 340145888}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 340145895}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
-  animaVertical: 
-  animaMagnitude: Move
+  animaVertical: Vertical
+  character: {fileID: 0}
 --- !u!95 &340145895
 Animator:
   serializedVersion: 3
@@ -10498,11 +10498,11 @@ GameObject:
   - component: {fileID: 365270540}
   - component: {fileID: 365270539}
   - component: {fileID: 365270538}
-  - component: {fileID: 365270541}
   - component: {fileID: 365270537}
   - component: {fileID: 365270536}
   - component: {fileID: 365270533}
   - component: {fileID: 365270534}
+  - component: {fileID: 365270535}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -10537,12 +10537,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 365270538}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!114 &365270534
@@ -10573,6 +10573,24 @@ MonoBehaviour:
   tagPenalties: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   graphMask:
     value: -1
+--- !u!114 &365270535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365270532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
+  animaHorizontal: Horizontal
+  animaVertical: Vertical
+  character: {fileID: 0}
 --- !u!58 &365270536
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -10684,24 +10702,6 @@ Transform:
   m_Father: {fileID: 857495468}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &365270541
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 365270532}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 365270538}
-  animaHorizontal: Horizontal
-  animaVertical: Vertical
-  animaMagnitude: Move
 --- !u!1 &365583223
 GameObject:
   m_ObjectHideFlags: 0
@@ -10864,8 +10864,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 365976552}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -11336,11 +11336,11 @@ GameObject:
   - component: {fileID: 384878973}
   - component: {fileID: 384878980}
   - component: {fileID: 384878979}
-  - component: {fileID: 384878978}
   - component: {fileID: 384878977}
   - component: {fileID: 384878975}
   - component: {fileID: 384878974}
   - component: {fileID: 384878976}
+  - component: {fileID: 384878978}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -11389,12 +11389,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 384878979}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &384878975
@@ -11461,15 +11461,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 384878972}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 384878979}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &384878979
 Animator:
   serializedVersion: 3
@@ -13515,11 +13515,11 @@ GameObject:
   - component: {fileID: 448579595}
   - component: {fileID: 448579594}
   - component: {fileID: 448579593}
-  - component: {fileID: 448579592}
   - component: {fileID: 448579591}
   - component: {fileID: 448579589}
   - component: {fileID: 448579587}
   - component: {fileID: 448579588}
+  - component: {fileID: 448579590}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -13554,12 +13554,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 448579593}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!114 &448579588
@@ -13606,6 +13606,24 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.35
+--- !u!114 &448579590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448579586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
+  animaHorizontal: Horizontal
+  animaVertical: Vertical
+  character: {fileID: 0}
 --- !u!210 &448579591
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -13617,24 +13635,6 @@ SortingGroup:
   m_SortingLayerID: 2050152057
   m_SortingLayer: 2
   m_SortingOrder: 0
---- !u!114 &448579592
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 448579586}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 448579593}
-  animaHorizontal: Horizontal
-  animaVertical: Vertical
-  animaMagnitude: Move
 --- !u!95 &448579593
 Animator:
   serializedVersion: 3
@@ -15861,11 +15861,11 @@ GameObject:
   - component: {fileID: 525495861}
   - component: {fileID: 525495868}
   - component: {fileID: 525495867}
-  - component: {fileID: 525495866}
   - component: {fileID: 525495865}
   - component: {fileID: 525495863}
   - component: {fileID: 525495862}
   - component: {fileID: 525495864}
+  - component: {fileID: 525495866}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -15914,12 +15914,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 525495867}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &525495863
@@ -15986,15 +15986,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 525495860}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 525495867}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: M
+  character: {fileID: 0}
 --- !u!95 &525495867
 Animator:
   serializedVersion: 3
@@ -20147,11 +20147,11 @@ GameObject:
   - component: {fileID: 640681878}
   - component: {fileID: 640681885}
   - component: {fileID: 640681884}
-  - component: {fileID: 640681883}
   - component: {fileID: 640681882}
   - component: {fileID: 640681880}
   - component: {fileID: 640681879}
   - component: {fileID: 640681881}
+  - component: {fileID: 640681883}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -20200,12 +20200,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 640681884}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &640681880
@@ -20272,15 +20272,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 640681877}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 640681884}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &640681884
 Animator:
   serializedVersion: 3
@@ -22080,11 +22080,11 @@ GameObject:
   - component: {fileID: 671210499}
   - component: {fileID: 671210506}
   - component: {fileID: 671210505}
-  - component: {fileID: 671210504}
   - component: {fileID: 671210503}
   - component: {fileID: 671210501}
   - component: {fileID: 671210500}
   - component: {fileID: 671210502}
+  - component: {fileID: 671210504}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -22133,12 +22133,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 671210505}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &671210501
@@ -22205,15 +22205,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 671210498}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 671210505}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &671210505
 Animator:
   serializedVersion: 3
@@ -23669,11 +23669,11 @@ GameObject:
   - component: {fileID: 779163944}
   - component: {fileID: 779163951}
   - component: {fileID: 779163950}
-  - component: {fileID: 779163949}
   - component: {fileID: 779163948}
   - component: {fileID: 779163946}
   - component: {fileID: 779163945}
   - component: {fileID: 779163947}
+  - component: {fileID: 779163949}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -23722,12 +23722,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 779163950}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &779163946
@@ -23794,15 +23794,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 779163943}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 779163950}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &779163950
 Animator:
   serializedVersion: 3
@@ -25750,8 +25750,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 1040, y: 0}
-  m_SizeDelta: {x: 2080, y: 0}
+  m_AnchoredPosition: {x: 1041.3706, y: 0}
+  m_SizeDelta: {x: 2082.7412, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &863408216
 MonoBehaviour:
@@ -26688,6 +26688,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rectTransform: {fileID: 0}
   text: {fileID: 1832443562}
+  dataIndex: -1
 --- !u!114 &901554673
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26983,7 +26984,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 89429756}
   m_HandleRect: {fileID: 89429755}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -27549,6 +27550,7 @@ GameObject:
   m_Component:
   - component: {fileID: 939414645}
   - component: {fileID: 939414646}
+  - component: {fileID: 939414647}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -27587,6 +27589,22 @@ MonoBehaviour:
   unit: {fileID: 1396470411}
   updateMode: 2
   controlAble: 1
+--- !u!114 &939414647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 939414644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e1fcd135b288194e8d19c74a2bb5943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onInit:
+    m_PersistentCalls:
+      m_Calls: []
+  info: {fileID: 0}
 --- !u!1 &943576434
 GameObject:
   m_ObjectHideFlags: 0
@@ -27908,11 +27926,11 @@ GameObject:
   - component: {fileID: 959506149}
   - component: {fileID: 959506156}
   - component: {fileID: 959506155}
-  - component: {fileID: 959506154}
   - component: {fileID: 959506153}
   - component: {fileID: 959506151}
   - component: {fileID: 959506150}
   - component: {fileID: 959506152}
+  - component: {fileID: 959506154}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -27961,12 +27979,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 959506155}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &959506151
@@ -28033,15 +28051,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 959506148}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 959506155}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &959506155
 Animator:
   serializedVersion: 3
@@ -30859,11 +30877,11 @@ GameObject:
   - component: {fileID: 1058665618}
   - component: {fileID: 1058665625}
   - component: {fileID: 1058665624}
-  - component: {fileID: 1058665623}
   - component: {fileID: 1058665622}
   - component: {fileID: 1058665620}
   - component: {fileID: 1058665619}
   - component: {fileID: 1058665621}
+  - component: {fileID: 1058665623}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -30912,12 +30930,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1058665624}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1058665620
@@ -30984,15 +31002,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1058665617}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1058665624}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &1058665624
 Animator:
   serializedVersion: 3
@@ -32800,11 +32818,11 @@ GameObject:
   - component: {fileID: 1111577601}
   - component: {fileID: 1111577600}
   - component: {fileID: 1111577599}
-  - component: {fileID: 1111577598}
   - component: {fileID: 1111577597}
   - component: {fileID: 1111577595}
   - component: {fileID: 1111577593}
   - component: {fileID: 1111577594}
+  - component: {fileID: 1111577596}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -32839,12 +32857,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1111577599}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!114 &1111577594
@@ -32891,6 +32909,24 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.35
+--- !u!114 &1111577596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1111577592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
+  animaHorizontal: Horizontal
+  animaVertical: Vertical
+  character: {fileID: 0}
 --- !u!210 &1111577597
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -32902,24 +32938,6 @@ SortingGroup:
   m_SortingLayerID: 2050152057
   m_SortingLayer: 2
   m_SortingOrder: 0
---- !u!114 &1111577598
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1111577592}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1111577599}
-  animaHorizontal: Horizontal
-  animaVertical: Vertical
-  animaMagnitude: Move
 --- !u!95 &1111577599
 Animator:
   serializedVersion: 3
@@ -33015,11 +33033,11 @@ GameObject:
   - component: {fileID: 1112351072}
   - component: {fileID: 1112351079}
   - component: {fileID: 1112351078}
-  - component: {fileID: 1112351077}
   - component: {fileID: 1112351076}
   - component: {fileID: 1112351074}
   - component: {fileID: 1112351073}
   - component: {fileID: 1112351075}
+  - component: {fileID: 1112351077}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -33068,12 +33086,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1112351078}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1112351074
@@ -33140,15 +33158,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1112351071}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1112351078}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &1112351078
 Animator:
   serializedVersion: 3
@@ -34039,6 +34057,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12d026f0d5dcebe40a47aeaebc07607e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onInit:
+    m_PersistentCalls:
+      m_Calls: []
   info: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
   questFlagOffset: {x: 0, y: 2.8, z: 0}
   iconHolder: {fileID: 1137171750}
@@ -35204,11 +35225,11 @@ GameObject:
   - component: {fileID: 1171858666}
   - component: {fileID: 1171858665}
   - component: {fileID: 1171858664}
-  - component: {fileID: 1171858667}
   - component: {fileID: 1171858663}
   - component: {fileID: 1171858662}
   - component: {fileID: 1171858659}
   - component: {fileID: 1171858660}
+  - component: {fileID: 1171858661}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -35243,12 +35264,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1171858664}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!114 &1171858660
@@ -35279,6 +35300,24 @@ MonoBehaviour:
   tagPenalties: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   graphMask:
     value: -1
+--- !u!114 &1171858661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1171858658}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
+  animaHorizontal: Horizontal
+  animaVertical: Vertical
+  character: {fileID: 0}
 --- !u!58 &1171858662
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -35390,24 +35429,6 @@ Transform:
   m_Father: {fileID: 857495468}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1171858667
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1171858658}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1171858664}
-  animaHorizontal: Horizontal
-  animaVertical: Vertical
-  animaMagnitude: Move
 --- !u!1 &1172058109
 GameObject:
   m_ObjectHideFlags: 0
@@ -35587,11 +35608,11 @@ GameObject:
   - component: {fileID: 1173924795}
   - component: {fileID: 1173924802}
   - component: {fileID: 1173924801}
-  - component: {fileID: 1173924800}
   - component: {fileID: 1173924799}
   - component: {fileID: 1173924797}
   - component: {fileID: 1173924796}
   - component: {fileID: 1173924798}
+  - component: {fileID: 1173924800}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -35640,12 +35661,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1173924801}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1173924797
@@ -35712,15 +35733,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1173924794}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 52, guid: 0000000000000000f000000000000000, type: 3}
-  moveSpeed: 7
-  animator: {fileID: 1173924801}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
-  animaVertical: item box
-  animaMagnitude: book
+  animaVertical: Vertical
+  character: {fileID: 0}
 --- !u!95 &1173924801
 Animator:
   serializedVersion: 3
@@ -36336,11 +36357,11 @@ GameObject:
   - component: {fileID: 1224266338}
   - component: {fileID: 1224266345}
   - component: {fileID: 1224266344}
-  - component: {fileID: 1224266343}
   - component: {fileID: 1224266342}
   - component: {fileID: 1224266340}
   - component: {fileID: 1224266339}
   - component: {fileID: 1224266341}
+  - component: {fileID: 1224266343}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -36389,12 +36410,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1224266344}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1224266340
@@ -36461,15 +36482,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1224266337}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1224266344}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &1224266344
 Animator:
   serializedVersion: 3
@@ -40519,11 +40540,11 @@ GameObject:
   - component: {fileID: 1394434172}
   - component: {fileID: 1394434179}
   - component: {fileID: 1394434178}
-  - component: {fileID: 1394434177}
   - component: {fileID: 1394434176}
   - component: {fileID: 1394434174}
   - component: {fileID: 1394434173}
   - component: {fileID: 1394434175}
+  - component: {fileID: 1394434177}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -40572,12 +40593,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1394434178}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1394434174
@@ -40644,15 +40665,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1394434171}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1394434178}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &1394434178
 Animator:
   serializedVersion: 3
@@ -40738,9 +40759,9 @@ GameObject:
   - component: {fileID: 1396470409}
   - component: {fileID: 1396470410}
   - component: {fileID: 1396470412}
-  - component: {fileID: 1396470407}
   - component: {fileID: 1396470411}
   - component: {fileID: 1396470413}
+  - component: {fileID: 1396470407}
   m_Layer: 11
   m_Name: Character
   m_TagString: Player
@@ -40841,15 +40862,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1396470403}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 1396470409}
-  moveSpeed: 7
   animator: {fileID: 1396470404}
+  mRigidbody: {fileID: 1396470409}
+  moveSpeed: 7
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 939414647}
 --- !u!210 &1396470408
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -40878,7 +40899,7 @@ Rigidbody2D:
   m_AngularDrag: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 0
   m_CollisionDetection: 0
   m_Constraints: 4
@@ -41183,11 +41204,11 @@ GameObject:
   - component: {fileID: 1412412296}
   - component: {fileID: 1412412303}
   - component: {fileID: 1412412302}
-  - component: {fileID: 1412412301}
   - component: {fileID: 1412412300}
   - component: {fileID: 1412412298}
   - component: {fileID: 1412412297}
   - component: {fileID: 1412412299}
+  - component: {fileID: 1412412301}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -41236,12 +41257,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1412412302}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1412412298
@@ -41308,15 +41329,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1412412295}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1412412302}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &1412412302
 Animator:
   serializedVersion: 3
@@ -42676,11 +42697,11 @@ GameObject:
   - component: {fileID: 1467781647}
   - component: {fileID: 1467781654}
   - component: {fileID: 1467781653}
-  - component: {fileID: 1467781652}
   - component: {fileID: 1467781651}
   - component: {fileID: 1467781649}
   - component: {fileID: 1467781648}
   - component: {fileID: 1467781650}
+  - component: {fileID: 1467781652}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -42729,12 +42750,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1467781653}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1467781649
@@ -42801,15 +42822,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1467781646}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1467781653}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &1467781653
 Animator:
   serializedVersion: 3
@@ -45079,11 +45100,11 @@ GameObject:
   - component: {fileID: 1567882064}
   - component: {fileID: 1567882071}
   - component: {fileID: 1567882070}
-  - component: {fileID: 1567882069}
   - component: {fileID: 1567882068}
   - component: {fileID: 1567882066}
   - component: {fileID: 1567882065}
   - component: {fileID: 1567882067}
+  - component: {fileID: 1567882069}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -45132,12 +45153,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1567882070}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1567882066
@@ -45204,15 +45225,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1567882063}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1567882070}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: iOS
+  character: {fileID: 0}
 --- !u!95 &1567882070
 Animator:
   serializedVersion: 3
@@ -46438,11 +46459,11 @@ GameObject:
   - component: {fileID: 1616631153}
   - component: {fileID: 1616631160}
   - component: {fileID: 1616631159}
-  - component: {fileID: 1616631158}
   - component: {fileID: 1616631157}
   - component: {fileID: 1616631155}
   - component: {fileID: 1616631154}
   - component: {fileID: 1616631156}
+  - component: {fileID: 1616631158}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -46491,12 +46512,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1616631159}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1616631155
@@ -46563,15 +46584,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1616631152}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1616631159}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &1616631159
 Animator:
   serializedVersion: 3
@@ -47029,11 +47050,11 @@ GameObject:
   - component: {fileID: 1635053591}
   - component: {fileID: 1635053598}
   - component: {fileID: 1635053597}
-  - component: {fileID: 1635053596}
   - component: {fileID: 1635053595}
   - component: {fileID: 1635053593}
   - component: {fileID: 1635053592}
   - component: {fileID: 1635053594}
+  - component: {fileID: 1635053596}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -47082,12 +47103,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1635053597}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1635053593
@@ -47154,15 +47175,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1635053590}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1635053597}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &1635053597
 Animator:
   serializedVersion: 3
@@ -47369,6 +47390,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1640856625}
   - component: {fileID: 1640856626}
+  - component: {fileID: 1640856627}
   m_Layer: 0
   m_Name: PlayerManager
   m_TagString: Untagged
@@ -47404,6 +47426,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInfo: {fileID: 11400000, guid: f2c3ff81a70cef249adc3905f2931f0a, type: 2}
   playerController: {fileID: 939414646}
+  character: {fileID: 0}
+--- !u!114 &1640856627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1640856624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e1fcd135b288194e8d19c74a2bb5943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onInit:
+    m_PersistentCalls:
+      m_Calls: []
+  info: {fileID: 0}
 --- !u!1 &1645141715
 GameObject:
   m_ObjectHideFlags: 0
@@ -48128,11 +48167,11 @@ GameObject:
   - component: {fileID: 1690495726}
   - component: {fileID: 1690495733}
   - component: {fileID: 1690495732}
-  - component: {fileID: 1690495731}
   - component: {fileID: 1690495730}
   - component: {fileID: 1690495728}
   - component: {fileID: 1690495727}
   - component: {fileID: 1690495729}
+  - component: {fileID: 1690495731}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -48181,12 +48220,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1690495732}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1690495728
@@ -48253,15 +48292,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1690495725}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1690495732}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &1690495732
 Animator:
   serializedVersion: 3
@@ -49017,8 +49056,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 1040, y: 0}
-  m_SizeDelta: {x: 2080, y: 0}
+  m_AnchoredPosition: {x: 1041.3706, y: 0}
+  m_SizeDelta: {x: 2082.7412, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &1723881631
 GameObject:
@@ -50167,6 +50206,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12d026f0d5dcebe40a47aeaebc07607e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onInit:
+    m_PersistentCalls:
+      m_Calls: []
   info: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
   questFlagOffset: {x: 0, y: 2.8, z: 0}
   iconHolder: {fileID: 1747857559}
@@ -50580,11 +50622,11 @@ GameObject:
   - component: {fileID: 1760510977}
   - component: {fileID: 1760510976}
   - component: {fileID: 1760510975}
-  - component: {fileID: 1760510974}
   - component: {fileID: 1760510973}
   - component: {fileID: 1760510971}
   - component: {fileID: 1760510969}
   - component: {fileID: 1760510970}
+  - component: {fileID: 1760510972}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -50619,12 +50661,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1760510975}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!114 &1760510970
@@ -50671,6 +50713,24 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.35
+--- !u!114 &1760510972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1760510968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
+  animaHorizontal: Horizontal
+  animaVertical: Vertical
+  character: {fileID: 0}
 --- !u!210 &1760510973
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -50682,24 +50742,6 @@ SortingGroup:
   m_SortingLayerID: 2050152057
   m_SortingLayer: 2
   m_SortingOrder: 0
---- !u!114 &1760510974
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1760510968}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1760510975}
-  animaHorizontal: Horizontal
-  animaVertical: Vertical
-  animaMagnitude: Move
 --- !u!95 &1760510975
 Animator:
   serializedVersion: 3
@@ -53805,11 +53847,11 @@ GameObject:
   - component: {fileID: 1874379347}
   - component: {fileID: 1874379354}
   - component: {fileID: 1874379353}
-  - component: {fileID: 1874379352}
   - component: {fileID: 1874379351}
   - component: {fileID: 1874379349}
   - component: {fileID: 1874379348}
   - component: {fileID: 1874379350}
+  - component: {fileID: 1874379352}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -53858,12 +53900,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1874379353}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!58 &1874379349
@@ -53930,15 +53972,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1874379346}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1874379353}
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
   animaHorizontal: Horizontal
   animaVertical: Vertical
-  animaMagnitude: Move
+  character: {fileID: 0}
 --- !u!95 &1874379353
 Animator:
   serializedVersion: 3
@@ -55054,7 +55096,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1940612766
 RectTransform:
   m_ObjectHideFlags: 0
@@ -55897,11 +55939,11 @@ GameObject:
   - component: {fileID: 1985110949}
   - component: {fileID: 1985110948}
   - component: {fileID: 1985110947}
-  - component: {fileID: 1985110946}
   - component: {fileID: 1985110945}
   - component: {fileID: 1985110943}
   - component: {fileID: 1985110941}
   - component: {fileID: 1985110942}
+  - component: {fileID: 1985110944}
   m_Layer: 11
   m_Name: UnitTest
   m_TagString: NPC
@@ -55936,12 +55978,12 @@ MonoBehaviour:
   turnSpeed: 10
   slopeLimit: 45
   stopDistance: 1
-  animator: {fileID: 1985110947}
+  animator: {fileID: 0}
   animaHorizontal: Horizontal
   animaVertical: Vertical
   animaMagnitude: Move
   pathRenderer: {fileID: 0}
-  drawGizmos: 1
+  drawGizmos: 0
   lineColor: {r: 0, g: 1, b: 0.1510973, a: 0.5019608}
   pointColor: {r: 0, g: 1, b: 1, a: 0.5}
 --- !u!114 &1985110942
@@ -55988,6 +56030,24 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.35
+--- !u!114 &1985110944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1985110940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e2eefceeb450224eb7719df17637c37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  mRigidbody: {fileID: 0}
+  moveSpeed: 5
+  animaHorizontal: Horizontal
+  animaVertical: Vertical
+  character: {fileID: 0}
 --- !u!210 &1985110945
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -55999,24 +56059,6 @@ SortingGroup:
   m_SortingLayerID: 2050152057
   m_SortingLayer: 2
   m_SortingOrder: 0
---- !u!114 &1985110946
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1985110940}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rigidbd: {fileID: 0}
-  moveSpeed: 7
-  animator: {fileID: 1985110947}
-  animaHorizontal: Horizontal
-  animaVertical: Vertical
-  animaMagnitude: Move
 --- !u!95 &1985110947
 Animator:
   serializedVersion: 3

@@ -422,8 +422,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 if (!currentObj.Info.CanNavigate) return;
                 if (currentObj is TalkObjectiveData to)
                 {
-                    GameManager.TalkerDatas.TryGetValue(to.Info.NPCToTalk.ID, out TalkerData talkerFound);
-                    if (talkerFound)
+                    if (GameManager.TalkerDatas.TryGetValue(to.Info.NPCToTalk.ID, out TalkerData talkerFound))
                     {
                         destination = talkerFound.currentPosition;
                         SetDestination();
@@ -431,8 +430,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 }
                 else if (currentObj is KillObjectiveData ko)
                 {
-                    GameManager.Enemies.TryGetValue(ko.Info.Enemy.ID, out List<Enemy> enemiesFound);
-                    if (enemiesFound != null && enemiesFound.Count > 0)
+                    if (GameManager.Enemies.TryGetValue(ko.Info.Enemy.ID, out List<Enemy> enemiesFound) && enemiesFound.Count > 0)
                     {
                         Enemy enemy = enemiesFound.FirstOrDefault();
                         if (enemy)
@@ -444,8 +442,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 }
                 else if (currentObj is MoveObjectiveData mo)
                 {
-                    GameManager.QuestPoints.TryGetValue(mo.Info.PointID, out var pointsFound);
-                    if (pointsFound != null)
+                    if (GameManager.QuestPoints.TryGetValue(mo.Info.PointID, out var pointsFound))
                     {
                         destination = pointsFound[Random.Range(0, pointsFound.Count)].transform.position;
                         SetDestination();
@@ -453,8 +450,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 }
                 else if (currentObj is SubmitObjectiveData so)
                 {
-                    GameManager.TalkerDatas.TryGetValue(so.Info.NPCToSubmit.ID, out TalkerData talkerFound);
-                    if (talkerFound)
+                    if (GameManager.TalkerDatas.TryGetValue(so.Info.NPCToSubmit.ID, out TalkerData talkerFound))
                     {
                         destination = talkerFound.currentPosition;
                         SetDestination();
@@ -710,8 +706,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         Vector3 destination;
         if (objective is TalkObjectiveData to)
         {
-            GameManager.TalkerDatas.TryGetValue(to.Info.NPCToTalk.ID, out TalkerData talkerFound);
-            if (talkerFound)
+            if (GameManager.TalkerDatas.TryGetValue(to.Info.NPCToTalk.ID, out TalkerData talkerFound))
             {
                 destination = talkerFound.currentPosition;
                 CreateIcon();
@@ -719,8 +714,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         }
         else if (objective is KillObjectiveData ko)
         {
-            GameManager.Enemies.TryGetValue(ko.Info.Enemy.ID, out List<Enemy> enemiesFound);
-            if (enemiesFound != null && enemiesFound.Count > 0)
+            if (GameManager.Enemies.TryGetValue(ko.Info.Enemy.ID, out List<Enemy> enemiesFound) && enemiesFound.Count > 0)
             {
                 Enemy enemy = enemiesFound.FirstOrDefault();
                 if (enemy)
@@ -732,8 +726,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         }
         else if (objective is MoveObjectiveData mo)
         {
-            GameManager.QuestPoints.TryGetValue(mo.Info.PointID, out var pointsFound);
-            if (pointsFound != null)
+            if (GameManager.QuestPoints.TryGetValue(mo.Info.PointID, out var pointsFound))
             {
                 destination = pointsFound[Random.Range(0, pointsFound.Count)].transform.position;
                 CreateIcon();
@@ -741,8 +734,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         }
         else if (objective is SubmitObjectiveData so)
         {
-            GameManager.TalkerDatas.TryGetValue(so.Info.NPCToSubmit.ID, out TalkerData talkerFound);
-            if (talkerFound)
+            if (GameManager.TalkerDatas.TryGetValue(so.Info.NPCToSubmit.ID, out TalkerData talkerFound))
             {
                 destination = talkerFound.currentPosition;
                 CreateIcon();
@@ -757,8 +749,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 MapManager.Instance.CreateDefaultMark(destination, true, false, objective.Info.DisplayName);
             if (icon)
             {
-                questIcons.TryGetValue(objective, out MapIcon iconExist);
-                if (iconExist)
+                if (questIcons.TryGetValue(objective, out MapIcon iconExist))
                 {
                     MapManager.Instance.RemoveMapIcon(iconExist, true);
                     questIcons[objective] = icon;
@@ -770,10 +761,11 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     private void RemoveObjectiveMapIcon(ObjectiveData objective)
     {
         if (!objective) return;
-        //Debug.Log("Try remove icon for " + objective.DisplayName);
-        questIcons.TryGetValue(objective, out MapIcon icon);
-        if (icon) MapManager.Instance.RemoveMapIcon(icon, true);
-        //else Debug.Log("remove failed for " + objective.DisplayName);
+        if (questIcons.TryGetValue(objective, out MapIcon icon))
+        {
+            questIcons.Remove(objective);
+            MapManager.Instance.RemoveMapIcon(icon, true);
+        }
     }
 
     public override void SetUI(QuestUI UI)

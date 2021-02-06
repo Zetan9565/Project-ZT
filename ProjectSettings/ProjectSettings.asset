@@ -675,6 +675,7 @@ PlayerSettings:
     30: UNITY_POST_PROCESSING_STACK_V2
     31: UNITY_POST_PROCESSING_STACK_V2
     32: UNITY_POST_PROCESSING_STACK_V2
+    33: UNITY_POST_PROCESSING_STACK_V2
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

@@ -18,12 +18,7 @@ MonoBehaviour:
   abandonable: 1
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptCondition:
-    conditions:
-    - type: 6
-      level: 1
-      relatedQuest: {fileID: 0}
-      relatedItem: {fileID: 0}
-      triggerName: qwe
+    conditions: []
     relational: 
   questType: 0
   repeatFrequancy: 0
@@ -56,7 +51,7 @@ MonoBehaviour:
   cmpltObjctvInOrder: 1
   collectObjectives:
   - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5251"
-    display: 0
+    display: 1
     canNavigate: 1
     showMapIcon: 0
     amount: 5

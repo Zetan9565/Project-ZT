@@ -31,13 +31,18 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
 
     public Backpack Backpack { get { return PlayerInfo.backpack; } }
 
+    public Character character;
+
     public void Init()
     {
+        playerController = FindObjectOfType<PlayerController2D>();
+        character = playerController.GetComponent<Character>();
         if (playerInfo)
         {
             playerInfo = Instantiate(playerInfo);
+            character.SetInfo(playerInfo);
+            playerController.CharacterController.character = character;
         }
-        playerController = FindObjectOfType<PlayerController2D>();
     }
 
     public void SetPlayerInfo(PlayerInformation playerInfo)
