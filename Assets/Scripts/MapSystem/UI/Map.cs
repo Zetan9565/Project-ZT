@@ -89,16 +89,19 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
             }
         }
     }
-
+#endif
     private int touchCount;
     public void OnPointerDown(PointerEventData eventData)
     {
+#if UNITY_ANDROID
         if (touchCount < 2) touchCount++;
+#endif
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
+#if UNITY_ANDROID
         if (touchCount > 0) touchCount--;
-    }
 #endif
+    }
 }
