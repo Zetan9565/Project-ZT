@@ -54,7 +54,7 @@ public class GatheringInformation : ScriptableObject
         }
     }
 
-    [SerializeField]
+    [SerializeField, NonReorderable]
     protected List<DropItemInfo> productItems = new List<DropItemInfo>();
     public List<DropItemInfo> ProductItems
     {

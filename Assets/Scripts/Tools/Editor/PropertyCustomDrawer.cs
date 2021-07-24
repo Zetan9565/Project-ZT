@@ -74,13 +74,15 @@ public class RoleAttributeGroupDrawer
             case RoleAttributeType.HP:
             case RoleAttributeType.MP:
             case RoleAttributeType.SP:
-            case RoleAttributeType.ATK:
+            case RoleAttributeType.CutATK:
+            case RoleAttributeType.PunATK:
+            case RoleAttributeType.BluATK:
             case RoleAttributeType.DEF:
                 return "intValue";
             case RoleAttributeType.Hit:
             case RoleAttributeType.Crit:
-            case RoleAttributeType.ATKSpd:
-            case RoleAttributeType.MoveSpd:
+            case RoleAttributeType.ATKSpeed:
+            case RoleAttributeType.MoveSpeed:
                 return "floatValue";
             case RoleAttributeType.TestBool:
                 return "boolValue";
@@ -161,10 +163,139 @@ public class MaterialListDrawer
             drawHeaderCallback = (rect) =>
             {
                 int notCmpltCount = 0;
+                SerializedProperty material;
                 for (int i = 0; i < property.arraySize; i++)
                 {
-                    SerializedProperty material = property.GetArrayElementAtIndex(i);
+                    material = property.GetArrayElementAtIndex(i);
                     if (!material.FindPropertyRelative("item").objectReferenceValue)
+                        notCmpltCount++;
+                }
+                EditorGUI.LabelField(rect, listTitle, notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
+            },
+
+            drawNoneElementCallback = (rect) =>
+            {
+                EditorGUI.LabelField(rect, "空列表");
+            }
+        };
+    }
+
+    public void DoLayoutDraw()
+    {
+        owner?.Update();
+        List?.DoLayoutList();
+        owner?.ApplyModifiedProperties();
+    }
+
+    public void DoDraw(Rect rect)
+    {
+        owner?.Update();
+        List?.DoList(rect);
+        owner?.ApplyModifiedProperties();
+    }
+
+    public float GetDrawHeight()
+    {
+        if (List == null) return 0;
+        return List.GetHeight();
+    }
+}
+
+public class DropItemListDrawer
+{
+    private readonly SerializedObject owner;
+
+    public ReorderableList List { get; }
+
+    public DropItemListDrawer(SerializedObject owner, SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "产出列表")
+    {
+        this.owner = owner;
+        List = new ReorderableList(owner, property, true, true, true, true)
+        {
+            drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+            {
+                owner.Update();
+                SerializedProperty itemInfo = property.GetArrayElementAtIndex(index);
+                EditorGUI.BeginChangeCheck();
+                SerializedProperty item = itemInfo.FindPropertyRelative("item");
+                if (item.objectReferenceValue != null)
+                    EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent((item.objectReferenceValue as ItemBase).name));
+                else
+                    EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent("(空)"));
+                SerializedProperty minAmount = itemInfo.FindPropertyRelative("minAmount");
+                SerializedProperty maxAmount = itemInfo.FindPropertyRelative("maxAmount");
+                SerializedProperty dropRate = itemInfo.FindPropertyRelative("dropRate");
+                SerializedProperty onlyDropForQuest = itemInfo.FindPropertyRelative("onlyDropForQuest");
+                SerializedProperty binedQuest = itemInfo.FindPropertyRelative("bindedQuest");
+                EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
+                    item, new GUIContent(string.Empty));
+                if (itemInfo.isExpanded)
+                {
+                    int lineCount = 1;
+                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                        dropRate, new GUIContent("掉落概率百分比"));
+                    if (dropRate.floatValue < 0) dropRate.floatValue = 0.0f;
+                    lineCount++;
+                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                        minAmount, new GUIContent("最少掉落"));
+                    EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                        maxAmount, new GUIContent("最多掉落"));
+                    if (minAmount.intValue < 1) minAmount.intValue = 1;
+                    lineCount++;
+                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                        onlyDropForQuest, new GUIContent("只在进行任务时掉落"));
+                    if (onlyDropForQuest.boolValue)
+                    {
+                        EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                            binedQuest, new GUIContent(string.Empty));
+                        if (binedQuest.objectReferenceValue)
+                        {
+                            lineCount++;
+                            EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "任务名称",
+                                (binedQuest.objectReferenceValue as Quest).Title);
+                        }
+                    }
+                }
+                if (EditorGUI.EndChangeCheck())
+                    owner.ApplyModifiedProperties();
+            },
+
+            elementHeightCallback = (int index) =>
+            {
+                int lineCount = 1;
+                SerializedProperty dropItem = property.GetArrayElementAtIndex(index);
+                if (dropItem.isExpanded)
+                {
+                    lineCount += 3;//数量、百分比、只在
+                    if (dropItem.FindPropertyRelative("onlyDropForQuest").boolValue)
+                    {
+                        if (dropItem.FindPropertyRelative("bindedQuest").objectReferenceValue)
+                            lineCount++;//任务标题
+                    }
+                }
+                return lineCount * lineHeightSpace;
+            },
+
+            onRemoveCallback = (list) =>
+            {
+                owner.Update();
+                EditorGUI.BeginChangeCheck();
+                if (EditorUtility.DisplayDialog("删除", "确定删除这个掉落道具吗？", "确定", "取消"))
+                {
+                    property.DeleteArrayElementAtIndex(list.index);
+                }
+                if (EditorGUI.EndChangeCheck())
+                    owner.ApplyModifiedProperties();
+            },
+
+            drawHeaderCallback = (rect) =>
+            {
+                int notCmpltCount = 0;
+                SerializedProperty dropItem;
+                for (int i = 0; i < property.arraySize; i++)
+                {
+                    dropItem = property.GetArrayElementAtIndex(i);
+                    if (!dropItem.FindPropertyRelative("item").objectReferenceValue)
                         notCmpltCount++;
                 }
                 EditorGUI.LabelField(rect, listTitle, notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);

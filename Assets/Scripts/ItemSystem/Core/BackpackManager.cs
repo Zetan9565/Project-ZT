@@ -28,6 +28,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
 
     private Backpack Backpack => PlantManager.Instance ? PlayerManager.Instance.Backpack : null;
 
+    //TODO 临时字段，影响美观，到时再改
     public List<ItemInfo> Seeds => Backpack ? Backpack.Items.FindAll(x => x.item.IsSeed) : null;
 
     public long Money => Backpack ? Backpack.Money : 0;
@@ -474,7 +475,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     void UseBox(ItemInfo MItemInfo)
     {
         BoxItem box = MItemInfo.item as BoxItem;
-        LoseItem(MItemInfo, 1, box.ItemsInBox.ToArray());
+        LoseItem(MItemInfo, 1, box.GetItems());
     }
 
     void UseEuipment(ItemInfo MItemInfo)
@@ -1006,7 +1007,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                         //如果剩余的道具数量不足以维持该目标完成状态
                         if (o.Info.Amount > leftAmount)
                         {
-                            ObjectiveData tempObj = o.NextObjective;
+                            ObjectiveData tempObj = o.nextObjective;
                             while (tempObj != null)
                             {
                                 //则判断是否有后置目标在进行，以保证在打破该目标的完成状态时，后置目标不受影响
@@ -1015,7 +1016,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                                     //Debug.Log("Required");
                                     return true;
                                 }
-                                tempObj = tempObj.NextObjective;
+                                tempObj = tempObj.nextObjective;
                             }
                         }
                         //Debug.Log("NotRequired3");

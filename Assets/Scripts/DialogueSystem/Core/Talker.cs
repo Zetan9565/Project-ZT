@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-[DisallowMultipleComponent, RequireComponent(typeof(MapIconHolder))]
+[DisallowMultipleComponent, RequireComponent(typeof(MapIconHolder), typeof(Interactive))]
 public class Talker : Character
 {
     public new TalkerInformation Info => (TalkerInformation)info;
@@ -29,6 +29,14 @@ public class Talker : Character
     private MapIconHolder iconHolder;
 
     public new Transform transform { get; private set; }
+
+    public bool Interactive
+    {
+        get
+        {
+            return info && data && !DialogueManager.Instance.IsTalking;
+        }
+    }
 
     public override bool Init()
     {
@@ -74,6 +82,17 @@ public class Talker : Character
     public void OnGetGift(ItemBase gift)
     {
         Data.OnGetGift(gift);
+    }
+
+    public bool DoInteract()
+    {
+        return DialogueManager.Instance.Talk(this);
+    }
+
+    public void OnExit(Collider2D collision)
+    {
+        if (collision.CompareTag("Player") && DialogueManager.Instance.CurrentTalker == this)
+            DialogueManager.Instance.CancelTalk();
     }
 
     #region UI相关
@@ -145,44 +164,6 @@ public class Talker : Character
     {
         Gizmos.DrawWireCube(base.transform.position + questFlagOffset, Vector3.one);
     }
-
-    #region 触发器相关
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Player") && !DialogueManager.Instance.IsTalking)
-            DialogueManager.Instance.CanTalk(this);
-    }
-
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Player") && !DialogueManager.Instance.IsTalking)
-            DialogueManager.Instance.CanTalk(this);
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Player") && DialogueManager.Instance.CurrentTalker != null && DialogueManager.Instance.CurrentTalker == this)
-            DialogueManager.Instance.CannotTalk();
-    }
-
-    /*private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player") && !DialogueManager.Instance.IsTalking)
-            DialogueManager.Instance.CanTalk(this);
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.CompareTag("Player") && !DialogueManager.Instance.IsTalking)
-            DialogueManager.Instance.CanTalk(this);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player") && DialogueManager.Instance.CurrentTalker != null && DialogueManager.Instance.CurrentTalker == this)
-            DialogueManager.Instance.CannotTalk();
-    }*/
-    #endregion
     #endregion
 }
 

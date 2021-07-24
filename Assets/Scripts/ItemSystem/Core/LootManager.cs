@@ -101,19 +101,22 @@ public class LootManager : WindowHandler<LootUI, LootManager>
     }
 
     #region UI相关
-    public void CanPick(LootAgent lootAgent)
+    public bool Pick(LootAgent lootAgent)
     {
-        if (!lootAgent) return;
+        if(IsPicking)
+        {
+            MessageManager.Instance.New("请先拾取完上一个物品");
+            return false;
+        }
+        if(GatherManager.Instance.IsGathering)
+        {
+            MessageManager.Instance.New("请先等待采集完成");
+            return false;
+        }
+        if (!lootAgent) return false;
         LootAgent = lootAgent;
-        UIManager.Instance.EnableInteract(true, LootAgent.name);
-        PickAble = true;
-    }
-    public void CannotPick()
-    {
-        LootAgent = null;
-        UIManager.Instance.EnableInteract(false);
-        PickAble = false;
-        CloseWindow();
+        OpenWindow();
+        return true;
     }
 
     public override void OpenWindow()
@@ -121,8 +124,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
         base.OpenWindow();
         if (!IsUIOpen) return;
         Init();
-        UIManager.Instance.EnableInteract(false);
-
+        NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.WindowStateChange, typeof(LootManager), true);
         IsPicking = true;
     }
     public override void CloseWindow()
@@ -133,8 +135,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
         PickAble = false;
         if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();
         ItemWindowManager.Instance.CloseWindow();
-        UIManager.Instance.EnableInteract(false);
-
+        NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.WindowStateChange, typeof(LootManager), false);
         IsPicking = false;
     }
     #endregion

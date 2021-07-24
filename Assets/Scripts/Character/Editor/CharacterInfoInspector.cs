@@ -364,12 +364,13 @@ public class CharacterInfoInspector : Editor
             serializedObject.Update();
             SerializedProperty itemInfo = dropItems.GetArrayElementAtIndex(index);
             if (enemy.DropItems[index] != null && enemy.DropItems[index].Item != null)
-                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2, lineHeight), itemInfo, new GUIContent(enemy.DropItems[index].ItemName));
+                EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent(enemy.DropItems[index].ItemName));
             else
-                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2, lineHeight), itemInfo, new GUIContent("(空)"));
+                EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent("(空)"));
             EditorGUI.BeginChangeCheck();
             SerializedProperty item = itemInfo.FindPropertyRelative("item");
-            SerializedProperty amount = itemInfo.FindPropertyRelative("amount");
+            SerializedProperty minAmount = itemInfo.FindPropertyRelative("minAmount");
+            SerializedProperty maxAmount = itemInfo.FindPropertyRelative("maxAmount");
             SerializedProperty dropRate = itemInfo.FindPropertyRelative("dropRate");
             SerializedProperty onlyDropForQuest = itemInfo.FindPropertyRelative("onlyDropForQuest");
             SerializedProperty binedQuest = itemInfo.FindPropertyRelative("bindedQuest");
@@ -379,26 +380,26 @@ public class CharacterInfoInspector : Editor
             {
                 int lineCount = 1;
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                    amount, new GUIContent("最大掉落数量"));
-                if (amount.intValue < 1) amount.intValue = 1;
-                lineCount++;
-                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                     dropRate, new GUIContent("掉落概率百分比"));
                 if (dropRate.floatValue < 0) dropRate.floatValue = 0.0f;
                 lineCount++;
-                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                    onlyDropForQuest, new GUIContent("只在进行任务时掉落"));
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                    minAmount, new GUIContent("最少掉落"));
+                EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                    maxAmount, new GUIContent("最多掉落"));
+                if (minAmount.intValue < 1) minAmount.intValue = 1;
                 lineCount++;
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                    onlyDropForQuest, new GUIContent("只在进行任务时掉落"));
                 if (onlyDropForQuest.boolValue)
                 {
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                        binedQuest, new GUIContent("相关任务"));
-                    lineCount++;
+                    EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                        binedQuest, new GUIContent(string.Empty));
                     if (binedQuest.objectReferenceValue)
                     {
+                        lineCount++;
                         EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "任务名称",
                             (binedQuest.objectReferenceValue as Quest).Title);
-                        lineCount++;
                     }
                 }
             }
@@ -414,7 +415,6 @@ public class CharacterInfoInspector : Editor
                 lineCount += 3;//数量、百分比、只在
                 if (enemy.DropItems[index].OnlyDropForQuest)
                 {
-                    lineCount++;//任务
                     if (enemy.DropItems[index].BindedQuest)
                         lineCount++;//任务标题
                 }
@@ -426,7 +426,7 @@ public class CharacterInfoInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            enemy.DropItems.Add(new DropItemInfo() { Amount = 1, DropRate = 100.0f });
+            enemy.DropItems.Add(new DropItemInfo() { MinAmount = 1, DropRate = 100.0f });
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };

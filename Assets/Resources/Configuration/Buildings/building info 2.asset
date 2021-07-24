@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1827504e3a4d6184ca30c3ead316328c, type: 3}
+  m_Name: building info 2
+  m_EditorClassIdentifier: 
+  _IDPrefix: TOOLA
+  _name: "\u6D4B\u8BD5\u7528\u953B\u9020\u7089"
+  description: "\u7528\u4E8E\u953B\u51B6\u91D1\u5C5E\u7684\u5DE5\u4F5C\u5957\u4EF6\u3002"
+  manageable: 1
+  buildTime: 10
+  prefab: {fileID: 6884571979959223206, guid: 01b0ef269f99d564b83e50d3f6ef7753, type: 3}
+  preview: {fileID: 1393819643250639705, guid: 207d44e6b9b40da48af7186e4c4f3c32, type: 3}
+  materials:
+  - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
+    amount: 5
+    makingType: 0
+    materialType: 0
+  addendas:
+  - {fileID: 11400000, guid: c66551966307bfc40a8791e089bf06ee, type: 2}

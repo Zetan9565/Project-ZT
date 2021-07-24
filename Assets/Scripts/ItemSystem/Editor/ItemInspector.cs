@@ -5,16 +5,12 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEditorInternal;
-using ICSharpCode.NRefactory.Ast;
 
 [CustomEditor(typeof(ItemBase), true)]
 [CanEditMultipleObjects]
-public class ItemInspector : Editor
+public partial class ItemInspector : Editor
 {
     protected ItemBase item;
-    BoxItem box;
-
-    ReorderableList boxItemList;
 
     float lineHeight;
     float lineHeightSpace;
@@ -39,8 +35,6 @@ public class ItemInspector : Editor
     SerializedProperty minYield;
     SerializedProperty maxYield;
     SerializedProperty materials;
-
-    SerializedProperty boxItems;
 
     SerializedProperty materialType;
 
@@ -83,8 +77,7 @@ public class ItemInspector : Editor
         box = target as BoxItem;
         if (box)
         {
-            boxItems = serializedObject.FindProperty("itemsInBox");
-            HandlingBoxItemList();
+            BoxItemEnable();
         }
 
         if (target is EquipmentItem)
@@ -124,21 +117,12 @@ public class ItemInspector : Editor
             }
         }
         EditorGUILayout.PropertyField(_Name, new GUIContent("名称"));
-        string typeName = "未定义";
-        switch (item.ItemType)
-        {
-            case ItemType.Weapon: typeName = "武器"; break;
-            case ItemType.Armor: typeName = "防具"; break;
-            case ItemType.Box: typeName = "箱子"; break;
-            case ItemType.Material: typeName = "制作材料"; break;
-            case ItemType.Quest: typeName = "任务道具"; break;
-            case ItemType.Gemstone: typeName = "宝石"; break;
-            case ItemType.Book: typeName = "书籍/图纸"; break;
-            case ItemType.Bag: typeName = "扩张用袋子"; break;
-            case ItemType.Medicine: typeName = "药物"; break;
-            default: break;
-        }
-        EditorGUILayout.LabelField("道具类型", typeName);
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("道具类型");
+        GUI.enabled = false;
+        EditorGUILayout.PropertyField(itemType, new GUIContent(string.Empty));
+        GUI.enabled = true;
+        EditorGUILayout.EndHorizontal();
         EditorGUILayout.PropertyField(materialType, new GUIContent("作为材料时的类型"));
         if (item.ItemType != ItemType.Quest)
             EditorGUILayout.PropertyField(quality, new GUIContent("道具品质"));
@@ -204,80 +188,9 @@ public class ItemInspector : Editor
         }
         if (box)
         {
-            EditorGUILayout.PropertyField(boxItems, new GUIContent("盒内道具\t\t" + (boxItems.arraySize > 0 ? "数量：" + boxItems.arraySize : "无")), false);
-            if (boxItems.isExpanded)
-            {
-                EditorGUILayout.HelpBox("目前只设计8个容量。", MessageType.Info);
-                serializedObject.Update();
-                boxItemList.DoLayoutList();
-                serializedObject.ApplyModifiedProperties();
-                if (box.ItemsInBox.Count >= 8)
-                    boxItemList.displayAdd = false;
-                else boxItemList.displayAdd = true;
-            }
+            DrawBoxItem();
         }
         EditorGUILayout.EndHorizontal();
-    }
-
-    void HandlingBoxItemList()
-    {
-        boxItemList = new ReorderableList(serializedObject, boxItems, true, true, true, true);
-        boxItemList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
-        {
-            serializedObject.Update();
-            if (box.ItemsInBox[index] != null && box.ItemsInBox[index].item != null)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), box.ItemsInBox[index].item.name);
-            else
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
-            EditorGUI.BeginChangeCheck();
-            SerializedProperty itemInfo = boxItems.GetArrayElementAtIndex(index);
-            SerializedProperty item = itemInfo.FindPropertyRelative("item");
-            SerializedProperty amount = itemInfo.FindPropertyRelative("amount");
-            EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
-                item, new GUIContent(string.Empty));
-            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight),
-                amount, new GUIContent("数量"));
-            if (amount.intValue < 1) amount.intValue = 1;
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
-
-        boxItemList.elementHeightCallback = (int index) =>
-        {
-            return 2 * lineHeightSpace;
-        };
-
-        boxItemList.onAddCallback = (list) =>
-        {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            box.ItemsInBox.Add(new ItemInfo());
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
-
-        boxItemList.onRemoveCallback = (list) =>
-        {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
-            {
-                box.ItemsInBox.RemoveAt(list.index);
-            }
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
-
-        boxItemList.drawHeaderCallback = (rect) =>
-        {
-            int notCmpltCount = box.ItemsInBox.FindAll(x => !x.item).Count;
-            EditorGUI.LabelField(rect, "盒内道具列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
-        };
-
-        boxItemList.drawNoneElementCallback = (rect) =>
-        {
-            EditorGUI.LabelField(rect, "空列表");
-        };
     }
 
     void HandlingItemType()
@@ -307,7 +220,7 @@ public class ItemInspector : Editor
                         EditorGUILayout.PropertyField(building, new GUIContent("可学设施"), true);
                         if (building.objectReferenceValue)
                         {
-                            EditorGUILayout.LabelField("设施名称", (building.objectReferenceValue as BuildingInformation).Name);
+                            EditorGUILayout.LabelField("设施名称", (building.objectReferenceValue as BuildingInformation).name);
                         }
                         break;
                     case BookType.Making:
@@ -331,6 +244,9 @@ public class ItemInspector : Editor
             case ItemType.Quest:
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("triggerName"), new GUIContent("触发器名称"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("stateToSet"), new GUIContent("触发器状态"));
+                break;
+            case ItemType.Seed:
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("crop"), new GUIContent("农作物信息"));
                 break;
             default: break;
         }
@@ -394,7 +310,7 @@ public class ItemInspector : Editor
             );
 
         if (box)
-            editComplete &= !box.ItemsInBox.Exists(x => x.item == null);
+            editComplete &= CheckBoxEditCmlt();
 
         if (item.MakingMethod != MakingMethod.None)
         {

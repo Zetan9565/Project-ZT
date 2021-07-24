@@ -31,10 +31,6 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     private Joystick joyStick;
     public Joystick JoyStick => joyStick;
 
-    [SerializeField]
-    private UIButtonToButton interactionButton;
-    public UIButtonToButton InteractionButton => interactionButton;
-
     public Transform QuestFlagParent
     {
         get
@@ -51,10 +47,6 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         }
     }
 
-
-    [SerializeField]
-    private Text interactionName;
-
     private static bool dontDestroyOnLoadOnce;
     private void Awake()
     {
@@ -65,7 +57,6 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 #elif UNITY_ANDROID
         ZetanUtility.SetActive(JoyStick.gameObject, true);
 #endif
-        ZetanUtility.SetActive(InteractionButton.gameObject, false);
         questButton.onClick.AddListener(QuestManager.Instance.OpenCloseWindow);
         backpackButton.onClick.AddListener(BackpackManager.Instance.OpenCloseWindow);
         calendarButton.onClick.AddListener(CalendarManager.Instance.OpenCloseWindow);
@@ -84,80 +75,11 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     public void EnableJoyStick(bool value)
     {
-        JoyStick.enabled = value && !(DialogueManager.Instance.IsUIOpen || ShopManager.Instance.IsUIOpen ||
-            WarehouseManager.Instance.IsUIOpen || QuestManager.Instance.IsUIOpen || BuildingManager.Instance.IsPreviewing);
+        if (Application.platform == RuntimePlatform.Android) joyStick.enabled = false;
+        else
+            JoyStick.enabled = value && !(DialogueManager.Instance.IsUIOpen || ShopManager.Instance.IsUIOpen ||
+                WarehouseManager.Instance.IsUIOpen || QuestManager.Instance.IsUIOpen || BuildingManager.Instance.IsPreviewing);
         if (!JoyStick.enabled) JoyStick.Stop();
-    }
-
-    public void EnableInteract(bool value, string name = null)
-    {
-#if UNITY_ANDROID
-        if (!value) ZetanUtility.SetActive(InteractionButton.gameObject, false);
-        else
-        {
-            ZetanUtility.SetActive(InteractionButton.gameObject, true &&
-                ((DialogueManager.Instance.TalkAble &&
-                !BuildingManager.Instance.ManageAble &&
-                !WarehouseManager.Instance.IsUIOpen &&
-                !LootManager.Instance.IsUIOpen &&
-                !GatherManager.Instance.IsGathering &&
-                !PlantManager.Instance.IsUIOpen &&
-                !MakingManager.Instance.IsUIOpen) ||//对话时无法激活
-                (WarehouseManager.Instance.StoreAble &&
-                !DialogueManager.Instance.IsUIOpen &&
-                !BuildingManager.Instance.ManageAble && 
-                !LootManager.Instance.IsUIOpen &&
-                !GatherManager.Instance.IsGathering &&
-                !PlantManager.Instance.IsUIOpen &&
-                !MakingManager.Instance.IsUIOpen) ||//使用仓库时无法激活
-                (LootManager.Instance.PickAble &&
-                !DialogueManager.Instance.IsUIOpen &&
-                !BuildingManager.Instance.ManageAble &&
-                !WarehouseManager.Instance.IsUIOpen &&
-                !GatherManager.Instance.IsGathering &&
-                !PlantManager.Instance.IsUIOpen &&
-                !MakingManager.Instance.IsUIOpen) ||//拾取时无法激活
-                (GatherManager.Instance.GatherAble &&
-                !DialogueManager.Instance.TalkAble &&
-                !BuildingManager.Instance.ManageAble &&
-                !WarehouseManager.Instance.IsUIOpen &&
-                !LootManager.Instance.IsUIOpen &&
-                !PlantManager.Instance.IsUIOpen &&
-                !MakingManager.Instance.IsUIOpen) ||//采集时无法激活
-                ((FieldManager.Instance.ManageAble || PlantManager.Instance.PlantAble) &&
-                !DialogueManager.Instance.TalkAble &&
-                !BuildingManager.Instance.ManageAble &&
-                !WarehouseManager.Instance.IsUIOpen &&
-                !LootManager.Instance.IsUIOpen &&
-                !GatherManager.Instance.IsGathering &&
-                !MakingManager.Instance.IsUIOpen) ||//种植时无法激活
-                (MakingManager.Instance.MakeAble &&
-                !GatherManager.Instance.GatherAble &&
-                !DialogueManager.Instance.TalkAble &&
-                !BuildingManager.Instance.ManageAble &&
-                !WarehouseManager.Instance.IsUIOpen &&
-                !LootManager.Instance.IsUIOpen &&
-                !PlantManager.Instance.IsUIOpen) ||//制作时无法激活
-                (BuildingManager.Instance.ManageAble &&
-                !DialogueManager.Instance.TalkAble &&
-                !WarehouseManager.Instance.IsUIOpen &&
-                !LootManager.Instance.IsUIOpen &&
-                !GatherManager.Instance.IsGathering &&
-                !PlantManager.Instance.IsUIOpen &&
-                !MakingManager.Instance.IsUIOpen)
-                ));
-        }
-#endif
-        if (!string.IsNullOrEmpty(name) && value)
-        {
-            ZetanUtility.SetActive(interactionName.transform.parent.gameObject, true);
-            interactionName.text = name;
-        }
-        else
-        {
-            ZetanUtility.SetActive(interactionName.transform.parent.gameObject, false);
-            interactionName.text = string.Empty;
-        }
     }
 
     public void ShowAll()
@@ -189,6 +111,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         DialogueManager.Instance.SetUI(FindObjectOfType<DialogueUI>());
         EscapeMenuManager.Instance.SetUI(FindObjectOfType<EscapeUI>());
         FieldManager.Instance.SetUI(FindObjectOfType<FieldUI>());
+        InteractionManager.Instance.SetUI(FindObjectOfType<InteractionUI>());
         ItemSelectionManager.Instance.SetUI(FindObjectOfType<ItemSeletionUI>());
         ItemWindowManager.Instance.SetUI(FindObjectOfType<ItemWindowUI>());
         LootManager.Instance.SetUI(FindObjectOfType<LootUI>());

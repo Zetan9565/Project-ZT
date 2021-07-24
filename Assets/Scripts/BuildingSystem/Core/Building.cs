@@ -5,17 +5,21 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [DisallowMultipleComponent]
-public class Building : MonoBehaviour
+public class Building : InteractiveObject
 {
-    public string IDStarter;
+    public string IDPrefix;
 
     public string IDTail;
 
-    public string ID { get { return IDStarter + IDTail; } }
+    public string ID { get { return IDPrefix + IDTail; } }
 
-    public new string name;
-
-    public UnityEngine.UI.Button.ButtonClickedEvent onButtonClick = new UnityEngine.UI.Button.ButtonClickedEvent();
+    public override string name
+    {
+        get
+        {
+            return MBuildingInfo ? MBuildingInfo.name : "未设置";
+        }
+    }
 
     public bool isUnderBuilding;
 
@@ -25,8 +29,20 @@ public class Building : MonoBehaviour
 
     public bool IsBuilt { get; private set; }
 
-    public BuildingInformation MBuildingInfo { get; private set; }
+    public override bool Interactive
+    {
+        get
+        {
+            return MBuildingInfo && base.Interactive && IsBuilt && !BuildingManager.Instance.IsManaging;
+        }
 
+        protected set
+        {
+            base.Interactive = value;
+        }
+    }
+
+    public BuildingInformation MBuildingInfo { get; private set; }
 
     private Dictionary<Behaviour, bool> components = new Dictionary<Behaviour, bool>();
     private Dictionary<Collider, bool> colliders = new Dictionary<Collider, bool>();
@@ -43,11 +59,12 @@ public class Building : MonoBehaviour
         if (!buildingInfo) return false;
         transform.position = position;
         MBuildingInfo = buildingInfo;
-        IDStarter = MBuildingInfo.IDStarter;
-        name = MBuildingInfo.Name;
+        IDPrefix = MBuildingInfo.IDPrefix;
+        name = MBuildingInfo.name;
         leftBuildTime = MBuildingInfo.BuildTime;
         if (buildingAgent) buildingAgent.UpdateUI();
-        GetIDTail();
+        //GetIDTail();
+        IDTail = GetInstanceID().ToString();
         if (string.IsNullOrEmpty(IDTail))
         {
             MessageManager.Instance.New($"[{name}]已经达到最大建设数量");
@@ -73,10 +90,10 @@ public class Building : MonoBehaviour
         return true;
     }
 
-    public void LoadBuild(string IDStarter, string IDTail, string name, float buildTime, Vector3 position)
+    public void LoadBuild(string IDPrefix, string IDTail, string name, float buildTime, Vector3 position)
     {
         transform.position = position;
-        this.IDStarter = IDStarter;
+        this.IDPrefix = IDPrefix;
         this.IDTail = IDTail;
         this.name = name;
         leftBuildTime = buildTime;
@@ -100,14 +117,15 @@ public class Building : MonoBehaviour
 
     private void BuildComplete()
     {
-        foreach (var b in components)
-        {
-            b.Key.enabled = b.Value;
-        }
         isUnderBuilding = false;
         IsBuilt = true;
         MessageManager.Instance.New($"[{name}] 建造完成了");
         if (buildingAgent) buildingAgent.UpdateUI();
+        OnBuilt();
+        foreach (var b in components)
+        {
+            b.Key.enabled = b.Value;
+        }
     }
 
     private IEnumerator Build()
@@ -131,6 +149,11 @@ public class Building : MonoBehaviour
             delegate { BuildingManager.Instance.DestroyBuilding(this); });
     }
 
+    protected virtual void OnBuilt()
+    {
+
+    }
+
     void GetIDTail()
     {
         Building[] buildings = FindObjectsOfType<Building>();
@@ -138,65 +161,44 @@ public class Building : MonoBehaviour
         for (int i = 1; i < 1000; i++)
         {
             IDTail = i.ToString().PadLeft(3, '0');
-            string newID = IDStarter + IDTail;
+            string newID = IDPrefix + IDTail;
             if (!Array.Exists(buildings, x => x.ID == newID && x != this))
                 break;
         }
     }
 
-    public void Destroy()
+    public virtual void Destroy()
     {
         onDestroy?.Invoke();
         Destroy(gameObject);
     }
 
-    #region MonoBehaviour
-    protected virtual void OnTriggerEnter2D(Collider2D collision)
+    public virtual void OnCancelManage()
     {
-        if (collision.CompareTag("Player") && IsBuilt)
-        {
-            BuildingManager.Instance.CanManage(this);
-        }
+
     }
 
-    protected virtual void OnTriggerStay2D(Collider2D collision)
+    public virtual void OnDoneManage()
     {
-        if (collision.CompareTag("Player") && IsBuilt)
-        {
-            BuildingManager.Instance.CanManage(this);
-        }
+        BuildingManager.Instance.PauseDisplayInfo(false);
     }
 
-    protected virtual void OnTriggerExit2D(Collider2D collision)
+    public virtual void OnManage()
     {
-        if (collision.CompareTag("Player") && IsBuilt && BuildingManager.Instance.CurrentBuilding == this)
-        {
-            BuildingManager.Instance.CannotManage();
-        }
+        if (MBuildingInfo.Manageable)
+            BuildingManager.Instance.PauseDisplayInfo(true);
     }
 
-    /*protected virtual void OnTriggerEnter(Collider other)
+    public override bool DoInteract()
     {
-        if (other.tag == "Player" && IsBuilt)
-        {
-            BuildingManager.Instance.CanDestroy(this);
-        }
+        return BuildingManager.Instance.Manage(this);
     }
 
-    protected virtual void OnTriggerStay(Collider other)
+    protected override void OnExit(Collider2D collision)
     {
-        if (other.tag == "Player" && IsBuilt)
+        if (collision.CompareTag("Player") && BuildingManager.Instance.CurrentBuilding == this)
         {
-            BuildingManager.Instance.CanDestroy(this);
+            BuildingManager.Instance.CancelManage();
         }
     }
-
-    protected virtual void OnTriggerExit(Collider other)
-    {
-        if (other.tag == "Player" && IsBuilt && BuildingManager.Instance.ToDestroy == this)
-        {
-            BuildingManager.Instance.CannotDestroy();
-        }
-    }*/
-    #endregion
 }

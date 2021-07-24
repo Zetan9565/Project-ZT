@@ -8,6 +8,8 @@ public class NotifyCenter : SingletonMonoBehaviour<NotifyCenter>
         public const string QuestChange = "QuestChange";
         public const string ObjectiveChange = "ObjectiveChange";
         public const string TriggerChange = "TriggerChange";
+        public const string WindowStateChange = "WindowStateChange";
+        public const string GatheringStateChange = "GatheringStateChange";
     }
 
     private readonly Dictionary<string, Notify> notifies = new Dictionary<string, Notify>();

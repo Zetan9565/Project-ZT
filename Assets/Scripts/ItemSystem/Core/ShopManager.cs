@@ -258,6 +258,7 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         ItemWindowManager.Instance.CloseWindow();
         if (DialogueManager.Instance.IsUIOpen) DialogueManager.Instance.PauseDisplay(false);
         AmountManager.Instance.Cancel();
+        UIManager.Instance.EnableJoyStick(true);
     }
 
     public void SetPage(int page)

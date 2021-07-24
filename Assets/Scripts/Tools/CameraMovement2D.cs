@@ -17,7 +17,6 @@ public class CameraMovement2D : SingletonMonoBehaviour<CameraMovement2D>
     private float cameraMovingTime;
     public void MoveTo(Vector2 position)
     {
-        isActing = true;
         startPosition = cameraFollowing.CameraTransform.position;
         targetPosition = new Vector3(position.x, position.y, cameraFollowing.CameraTransform.position.z);
         isMoving = true;
@@ -38,10 +37,8 @@ public class CameraMovement2D : SingletonMonoBehaviour<CameraMovement2D>
         }
     }
 
-    private bool isActing;
     public void Stop()
     {
-        isActing = false;
         if (!cameraFollowing.enabled) cameraFollowing.enabled = true;
     }
 }

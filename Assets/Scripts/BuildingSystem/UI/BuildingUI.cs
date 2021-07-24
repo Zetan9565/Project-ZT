@@ -13,8 +13,6 @@ public class BuildingUI : WindowUI
 
     public ScrollRect cellsRect;
 
-    public GameObject cancelArea;
-
     public CanvasGroup descriptionWindow;
     public Text nameText;
     public Text desciptionText;
@@ -31,9 +29,9 @@ public class BuildingUI : WindowUI
     public Button destroyButton;
     public Button closeInfoButton;
 
-    public Button locationGoBackBtn;
-    [HideInInspector]
-    public CanvasGroup goBackBtnCanvas;
+    public Button buildButton;
+    public Button backButton;
+    public GameObject joyStick;
 
     protected override void Awake()
     {
@@ -45,8 +43,7 @@ public class BuildingUI : WindowUI
         infoCanvas.overrideSorting = true;
         infoCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         closeInfoButton.onClick.AddListener(BuildingManager.Instance.HideInfo);
-        goBackBtnCanvas = locationGoBackBtn.gameObject.AddComponent<CanvasGroup>();
-        goBackBtnCanvas.ignoreParentGroups = true;
-        locationGoBackBtn.onClick.AddListener(BuildingManager.Instance.LocationGoBack);
+        buildButton.onClick.AddListener(BuildingManager.Instance.Build);
+        backButton.onClick.AddListener(BuildingManager.Instance.GoBack);
     }
 }

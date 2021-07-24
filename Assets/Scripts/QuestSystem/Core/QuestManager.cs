@@ -145,10 +145,6 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.QuestChange, quest);
         return true;
     }
-    public void OnTriggerChange(params object[] args)
-    {
-        //TODO 处理触发器改变时
-    }
 
     /// <summary>
     /// 完成任务
@@ -816,11 +812,11 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     /// </summary>
     private void UpdateNextCollectObjectives(ObjectiveData objective)
     {
-        if (!objective || !objective.NextObjective) return;
-        ObjectiveData nextObjective = objective.NextObjective;
+        if (!objective || !objective.nextObjective) return;
+        ObjectiveData nextObjective = objective.nextObjective;
         while (nextObjective != null)
         {
-            if (!(nextObjective is CollectObjectiveData) && nextObjective.Info.InOrder && nextObjective.NextObjective != null && nextObjective.NextObjective.Info.InOrder && nextObjective.Info.OrderIndex < nextObjective.NextObjective.Info.OrderIndex)
+            if (!(nextObjective is CollectObjectiveData) && nextObjective.Info.InOrder && nextObjective.nextObjective != null && nextObjective.nextObjective.Info.InOrder && nextObjective.Info.OrderIndex < nextObjective.nextObjective.Info.OrderIndex)
             {
                 //若相邻后置目标不是收集类目标，该后置目标按顺序执行，其相邻后置也按顺序执行，且两者不可同时执行，则说明无法继续更新后置的收集类目标
                 return;
@@ -829,7 +825,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             {
                 if (co.Info.CheckBagAtStart) co.CurrentAmount = BackpackManager.Instance.GetItemAmount(co.Info.Item.ID);
             }
-            nextObjective = nextObjective.NextObjective;
+            nextObjective = nextObjective.nextObjective;
         }
     }
 
@@ -934,7 +930,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         {
             foreach (ObjectiveData o in quest.ObjectiveInstances)
             {
-                if (o.runtimeID == od.objectiveID)
+                if (o.entityID == od.objectiveID)
                 {
                     o.CurrentAmount = od.currentAmount;
                     break;
@@ -942,6 +938,11 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             }
         }
         return quest;
+    }
+
+    public void OnTriggerChange(params object[] args)
+    {
+        //TODO 处理触发器改变时
     }
     #endregion
 }

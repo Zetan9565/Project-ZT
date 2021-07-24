@@ -32,7 +32,7 @@ public class BackpackUI : WindowUI
         if (!handworkButton.GetComponent<Button>()) handworkButton.gameObject.AddComponent<Button>();
         handworkButton.GetComponent<Button>().onClick.AddListener(delegate
         {
-            MakingManager.Instance.CanMake(handworkButton);
+            MakingManager.Instance.Make(handworkButton);
             MakingManager.Instance.OpenWindow();
         });
         searchButton.onClick.AddListener(BackpackManager.Instance.Search);

@@ -39,10 +39,10 @@
         }
     }
 
-    public ObjectiveData PrevObjective;
-    public ObjectiveData NextObjective;
+    public ObjectiveData prevObjective;
+    public ObjectiveData nextObjective;
 
-    public string runtimeID;
+    public string entityID;
 
     public QuestData runtimeParent;
 
@@ -59,14 +59,14 @@
     {
         get
         {
-            ObjectiveData tempObj = PrevObjective;
+            ObjectiveData tempObj = prevObjective;
             while (tempObj != null)
             {
                 if (!tempObj.IsComplete && tempObj.Info.OrderIndex < Info.OrderIndex)
                 {
                     return false;
                 }
-                tempObj = tempObj.PrevObjective;
+                tempObj = tempObj.prevObjective;
             }
             return true;
         }
@@ -75,14 +75,14 @@
     {
         get
         {
-            ObjectiveData tempObj = NextObjective;
+            ObjectiveData tempObj = nextObjective;
             while (tempObj != null)
             {
                 if (tempObj.CurrentAmount > 0 && tempObj.Info.OrderIndex > Info.OrderIndex)
                 {
                     return true;
                 }
-                tempObj = tempObj.NextObjective;
+                tempObj = tempObj.nextObjective;
             }
             return false;
         }
@@ -96,8 +96,8 @@
         get
         {
             if (!Info.InOrder) return true;//不按顺序，说明可以并行执行
-            if (PrevObjective && PrevObjective.Info.OrderIndex == Info.OrderIndex) return true;//有前置目标，而且顺序码与前置目标相同，说明可以并行执行
-            if (NextObjective && NextObjective.Info.OrderIndex == Info.OrderIndex) return true;//有后置目标，而且顺序码与后置目标相同，说明可以并行执行
+            if (prevObjective && prevObjective.Info.OrderIndex == Info.OrderIndex) return true;//有前置目标，而且顺序码与前置目标相同，说明可以并行执行
+            if (nextObjective && nextObjective.Info.OrderIndex == Info.OrderIndex) return true;//有后置目标，而且顺序码与后置目标相同，说明可以并行执行
             return false;
         }
     }

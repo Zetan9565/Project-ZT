@@ -36,17 +36,13 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
         {
             case ItemType.Weapon:
                 WeaponItem weapon = MItemInfo.item as WeaponItem;
-                UI.effectText.text = (weapon.CutATK > 0 ? "斩击攻击力+" + weapon.CutATK + "\n" : string.Empty) +
-                    (weapon.PunATK > 0 ? "刺击攻击力+" + weapon.PunATK + "\n" : string.Empty) +
-                    (weapon.BluATK > 0 ? "钝击攻击力+" + weapon.BluATK + "\n" : string.Empty) +
-                    (weapon.DEF > 0 ? "防御力力+" + weapon.DEF + "\n" : string.Empty) +
-                    (weapon.Hit > 0 ? "命中+" + weapon.Hit + "\n" : string.Empty);
-                if (weapon.Powerup.IsEffective)
+                UI.effectText.text = weapon.Attribute.ToString();
+                if (weapon.Attribute)
                 {
                     ZetanUtility.SetActive(UI.mulFunTitle.gameObject, true);
                     ZetanUtility.SetActive(UI.mulFunText.gameObject, true);
                     UI.mulFunTitle.text = "-附加能力";
-                    UI.mulFunText.text = weapon.Powerup.ToString();
+                    UI.mulFunText.text = weapon.Attribute.ToString();
                 }
                 else
                 {
@@ -78,7 +74,7 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
                 System.Text.StringBuilder itemsInfo = new System.Text.StringBuilder();
                 for (int i = 0; i < box.ItemsInBox.Count; i++)
                 {
-                    itemsInfo.Append("[" + box.ItemsInBox[i].ItemName + "] × " + box.ItemsInBox[i].Amount);
+                    itemsInfo.Append("[" + box.ItemsInBox[i].ItemName + "] × " + box.ItemsInBox[i].MinAmount);
                     if (i != box.ItemsInBox.Count - 1) itemsInfo.Append("\n");
                 }
                 UI.mulFunText.text = itemsInfo.ToString();
@@ -266,17 +262,13 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
         {
             case ItemType.Weapon:
                 WeaponItem weapon = equipped.item as WeaponItem;
-                UI.subUI.effectText.text = (weapon.CutATK > 0 ? "斩击攻击力+" + weapon.CutATK + "\n" : string.Empty) +
-                    (weapon.PunATK > 0 ? "刺击攻击力+" + weapon.PunATK + "\n" : string.Empty) +
-                    (weapon.BluATK > 0 ? "钝击攻击力+" + weapon.BluATK + "\n" : string.Empty) +
-                    (weapon.DEF > 0 ? "防御力力+" + weapon.DEF + "\n" : string.Empty) +
-                    (weapon.Hit > 0 ? "命中+" + weapon.Hit + "\n" : string.Empty);
-                if (weapon.Powerup.IsEffective)
+                UI.subUI.effectText.text = weapon.Attribute.ToString();
+                if (weapon.Attribute)
                 {
                     ZetanUtility.SetActive(UI.subUI.mulFunTitle.gameObject, true);
                     ZetanUtility.SetActive(UI.subUI.mulFunText.gameObject, true);
                     UI.subUI.mulFunTitle.text = "-附加能力";
-                    UI.subUI.mulFunText.text = weapon.Powerup.ToString();
+                    UI.subUI.mulFunText.text = weapon.Attribute.ToString();
                 }
                 else
                 {

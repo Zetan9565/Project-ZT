@@ -12,7 +12,7 @@ public class RoleAttribute
 
     [SerializeField]
     private int intValue;
-    public int IntValue => IntValue;
+    public int IntValue => intValue;
 
     [SerializeField]
     private float floatValue;
@@ -34,13 +34,17 @@ public class RoleAttribute
                     return "蓝";
                 case RoleAttributeType.SP:
                     return "耐";
-                case RoleAttributeType.ATK:
-                    return "攻";
+                case RoleAttributeType.CutATK:
+                    return "切攻";
+                case RoleAttributeType.PunATK:
+                    return "穿攻";
+                case RoleAttributeType.BluATK:
+                    return "钝攻";
                 case RoleAttributeType.DEF:
                     return "防";
-                case RoleAttributeType.ATKSpd:
+                case RoleAttributeType.ATKSpeed:
                     return "攻速";
-                case RoleAttributeType.MoveSpd:
+                case RoleAttributeType.MoveSpeed:
                     return "移速";
                 default:
                     return "未知属性";
@@ -57,13 +61,15 @@ public class RoleAttribute
                 case RoleAttributeType.HP:
                 case RoleAttributeType.MP:
                 case RoleAttributeType.SP:
-                case RoleAttributeType.ATK:
+                case RoleAttributeType.CutATK:
+                case RoleAttributeType.PunATK:
+                case RoleAttributeType.BluATK:
                 case RoleAttributeType.DEF:
                     return intValue;
                 case RoleAttributeType.Hit:
                 case RoleAttributeType.Crit:
-                case RoleAttributeType.ATKSpd:
-                case RoleAttributeType.MoveSpd:
+                case RoleAttributeType.ATKSpeed:
+                case RoleAttributeType.MoveSpeed:
                     return floatValue;
                 case RoleAttributeType.TestBool:
                     return boolValue;
@@ -78,14 +84,16 @@ public class RoleAttribute
                 case RoleAttributeType.HP:
                 case RoleAttributeType.MP:
                 case RoleAttributeType.SP:
-                case RoleAttributeType.ATK:
+                case RoleAttributeType.CutATK:
+                case RoleAttributeType.PunATK:
+                case RoleAttributeType.BluATK:
                 case RoleAttributeType.DEF:
                     intValue = (int)value;
                     break;
                 case RoleAttributeType.Hit:
                 case RoleAttributeType.Crit:
-                case RoleAttributeType.ATKSpd:
-                case RoleAttributeType.MoveSpd:
+                case RoleAttributeType.ATKSpeed:
+                case RoleAttributeType.MoveSpeed:
                     floatValue = (float)value;
                     break;
                 case RoleAttributeType.TestBool:
@@ -120,13 +128,15 @@ public class RoleAttribute
             case RoleAttributeType.HP:
             case RoleAttributeType.MP:
             case RoleAttributeType.SP:
-            case RoleAttributeType.ATK:
+            case RoleAttributeType.CutATK:
+            case RoleAttributeType.PunATK:
+            case RoleAttributeType.BluATK:
             case RoleAttributeType.DEF:
                 return typeof(int);
             case RoleAttributeType.Hit:
             case RoleAttributeType.Crit:
-            case RoleAttributeType.ATKSpd:
-            case RoleAttributeType.MoveSpd:
+            case RoleAttributeType.ATKSpeed:
+            case RoleAttributeType.MoveSpeed:
                 return typeof(float);
             default:
                 return typeof(int);
@@ -140,13 +150,15 @@ public class RoleAttribute
             case RoleAttributeType.HP:
             case RoleAttributeType.MP:
             case RoleAttributeType.SP:
-            case RoleAttributeType.ATK:
+            case RoleAttributeType.CutATK:
+            case RoleAttributeType.PunATK:
+            case RoleAttributeType.BluATK:
             case RoleAttributeType.DEF:
                 return true;
             case RoleAttributeType.Hit:
             case RoleAttributeType.Crit:
-            case RoleAttributeType.ATKSpd:
-            case RoleAttributeType.MoveSpd:
+            case RoleAttributeType.ATKSpeed:
+            case RoleAttributeType.MoveSpeed:
             case RoleAttributeType.TestBool:
             default:
                 return false;
@@ -160,13 +172,15 @@ public class RoleAttribute
             case RoleAttributeType.HP:
             case RoleAttributeType.MP:
             case RoleAttributeType.SP:
-            case RoleAttributeType.ATK:
+            case RoleAttributeType.CutATK:
+            case RoleAttributeType.PunATK:
+            case RoleAttributeType.BluATK:
             case RoleAttributeType.DEF:
                 return false;
             case RoleAttributeType.Hit:
             case RoleAttributeType.Crit:
-            case RoleAttributeType.ATKSpd:
-            case RoleAttributeType.MoveSpd:
+            case RoleAttributeType.ATKSpeed:
+            case RoleAttributeType.MoveSpeed:
                 return true;
             case RoleAttributeType.TestBool:
             default:
@@ -181,12 +195,14 @@ public class RoleAttribute
             case RoleAttributeType.HP:
             case RoleAttributeType.MP:
             case RoleAttributeType.SP:
-            case RoleAttributeType.ATK:
+            case RoleAttributeType.CutATK:
+            case RoleAttributeType.PunATK:
+            case RoleAttributeType.BluATK:
             case RoleAttributeType.DEF:
             case RoleAttributeType.Hit:
             case RoleAttributeType.Crit:
-            case RoleAttributeType.ATKSpd:
-            case RoleAttributeType.MoveSpd:
+            case RoleAttributeType.ATKSpeed:
+            case RoleAttributeType.MoveSpeed:
                 return false;
             case RoleAttributeType.TestBool:
                 return true;
@@ -209,18 +225,24 @@ public enum RoleAttributeType
     MP,
     [InspectorName("耐力")]
     SP,
-    [InspectorName("攻击力")]
-    ATK,
+    [InspectorName("切割力")]
+    CutATK,
+    [InspectorName("穿刺力")]
+    PunATK,
+    [InspectorName("钝击力")]
+    BluATK,
     [InspectorName("防御力")]
     DEF,
     [InspectorName("命中率")]
     Hit,
+    [InspectorName("闪避率")]
+    Flee,
     [InspectorName("暴击率")]
     Crit,
     [InspectorName("攻击速度")]
-    ATKSpd,
+    ATKSpeed,
     [InspectorName("移动速度")]
-    MoveSpd,
+    MoveSpeed,
     [InspectorName("布尔测试")]
     TestBool,
 }
@@ -310,15 +332,17 @@ public class RoleAttributeGroup
             case RoleAttributeType.HP:
             case RoleAttributeType.MP:
             case RoleAttributeType.SP:
-            case RoleAttributeType.ATK:
+            case RoleAttributeType.CutATK:
+            case RoleAttributeType.PunATK:
+            case RoleAttributeType.BluATK:
             case RoleAttributeType.DEF:
                 //即便索引器是获取该类属性多个条目的总值，但在置数时会覆盖该类型第一个条目，所以无需担心加错
                 this[attr.Type] = (int)this[attr.Type] + attr.IntValue;
                 break;
             case RoleAttributeType.Hit:
             case RoleAttributeType.Crit:
-            case RoleAttributeType.ATKSpd:
-            case RoleAttributeType.MoveSpd:
+            case RoleAttributeType.ATKSpeed:
+            case RoleAttributeType.MoveSpeed:
                 this[attr.Type] = (float)this[attr.Type] + attr.FloatValue;
                 break;
             case RoleAttributeType.TestBool:
@@ -346,15 +370,17 @@ public class RoleAttributeGroup
             case RoleAttributeType.HP:
             case RoleAttributeType.MP:
             case RoleAttributeType.SP:
-            case RoleAttributeType.ATK:
+            case RoleAttributeType.CutATK:
+            case RoleAttributeType.PunATK:
+            case RoleAttributeType.BluATK:
             case RoleAttributeType.DEF:
                 //即便索引器是获取该类属性多个条目的总值，但在置数时会覆盖该类型第一个条目，所以无需担心减错
                 this[attr.Type] = (int)this[attr.Type] - attr.IntValue;
                 break;
             case RoleAttributeType.Hit:
             case RoleAttributeType.Crit:
-            case RoleAttributeType.ATKSpd:
-            case RoleAttributeType.MoveSpd:
+            case RoleAttributeType.ATKSpeed:
+            case RoleAttributeType.MoveSpeed:
                 this[attr.Type] = (float)this[attr.Type] - attr.FloatValue;
                 break;
             case RoleAttributeType.TestBool:
@@ -371,6 +397,24 @@ public class RoleAttributeGroup
         {
             SubAttribute(attr);
         }
+    }
+
+    public override string ToString()
+    {
+        System.Text.StringBuilder str = new System.Text.StringBuilder();
+        RoleAttribute temp;
+        for (int i = 0; i < attributes.Count; i++)
+        {
+            temp = attributes[i];
+            if (RoleAttribute.IsUsingIntValue(temp.Type) && temp.IntValue <= 0 || RoleAttribute.IsUsingFloatValue(temp.Type) && temp.FloatValue <= 0.0f)
+                continue;
+            str.Append(temp.name);
+            str.Append(" ");
+            str.Append(temp.Value);
+            if (i != attributes.Count - 1)
+                str.Append("\n");
+        }
+        return str.ToString();
     }
 
     #region 运算符重载

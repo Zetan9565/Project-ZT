@@ -21,10 +21,10 @@ public class CropAgent : MonoBehaviour
 
     public void UpdateInfo()
     {
-        totalDays.text = MCrop.totalGrowthDays.ToString();
+        //totalDays.text = MCrop.totalGrowthDays.ToString();
         ZetanUtility.SetActive(dryIcon.gameObject, MCrop.Dry);
         ZetanUtility.SetActive(pestIcon.gameObject, MCrop.Pest);
-        ZetanUtility.SetActive(matureIcon.gameObject, MCrop.currentStage.HarvestAble);
+        //ZetanUtility.SetActive(matureIcon.gameObject, MCrop.currentStage.HarvestAble);
     }
 
     public void Clear(bool recycle = false)

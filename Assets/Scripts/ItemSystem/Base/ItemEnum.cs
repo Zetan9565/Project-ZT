@@ -5,82 +5,82 @@ public enum ItemType
     /// <summary>
     /// 其他
     /// </summary>
-    Other,
+    [InspectorName("其它")] Other,
 
     /// <summary>
     /// 药剂
     /// </summary>
-    Medicine,
+    [InspectorName("药剂")] Medicine,
 
     /// <summary>
     /// 丹药
     /// </summary>
-    Elixir,
+    [InspectorName("丹药")] Elixir,
 
     /// <summary>
     /// 菜肴
     /// </summary>
-    Cuisine,
+    [InspectorName("菜肴")] Cuisine,
 
     /// <summary>
     /// 武器
     /// </summary>
-    Weapon,
+    [InspectorName("武器")] Weapon,
 
     /// <summary>
     /// 防具
     /// </summary>
-    Armor,
+    [InspectorName("防具")] Armor,
 
     /// <summary>
     /// 首饰
     /// </summary>
-    Jewelry,
+    [InspectorName("首饰")] Jewelry,
 
     /// <summary>
     /// 盒子、箱子
     /// </summary>
-    Box,
+    [InspectorName("盒子或箱子")] Box,
 
     /// <summary>
     /// 加工材料
     /// </summary>
-    Material,
+    [InspectorName("材料")] Material,
 
     /// <summary>
     /// 贵重品：用于贸易
     /// </summary>
-    Valuables,
+    [InspectorName("贵重品")] Valuables,
 
     /// <summary>
     /// 任务道具
     /// </summary>
-    Quest,
+    [InspectorName("任务道具")] Quest,
 
     /// <summary>
     /// 采集工具
     /// </summary>
-    Tool,
+    [InspectorName("工具")] Tool,
 
     /// <summary>
     /// 宝石
     /// </summary>
-    Gemstone,
+    [InspectorName("宝石")] Gemstone,
 
     /// <summary>
     /// 书籍
     /// </summary>
-    Book,
+    [InspectorName("书籍")] Book,
 
     /// <summary>
     /// 袋子
     /// </summary>
-    Bag,
+    [InspectorName("袋子")] Bag,
 
     /// <summary>
     /// 种子
     /// </summary>
-    Seed
+    [InspectorName("种子")] Seed
 }
 
 public enum ItemQuality

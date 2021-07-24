@@ -10,9 +10,10 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
 
     private readonly List<ItemAgent> itemAgents = new List<ItemAgent>();
 
+    public WarehouseAgent WarehouseAgent { get; private set; }
     public Warehouse MWarehouse { get; private set; }
 
-    public bool StoreAble { get; private set; }
+    public bool Managing { get; private set; }
 
     public bool IsInputFocused => UI ? IsUIOpen && UI.searchInput.isFocused : false;
 
@@ -231,9 +232,9 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         base.OpenWindow();
         if (!IsUIOpen) return;
         Init(MWarehouse);
+        Managing = true;
         BackpackManager.Instance.OpenWindow();
         UIManager.Instance.EnableJoyStick(false);
-        UIManager.Instance.EnableInteract(false);
         PlayerManager.Instance.PlayerController.controlAble = false;
     }
 
@@ -241,7 +242,10 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
     {
         base.CloseWindow();
         if (IsUIOpen) return;
+        if (WarehouseAgent) WarehouseAgent.OnDoneManage();
+        WarehouseAgent = null;
         MWarehouse = null;
+        Managing = false;
         foreach (ItemAgent ia in itemAgents)
         {
             ia.FinishDrag();
@@ -286,21 +290,22 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
     }
     #endregion
 
-    public void CanStore(WarehouseAgent agent)
+    public bool Manage(WarehouseAgent agent)
     {
-        if (DialogueManager.Instance.TalkAble || DialogueManager.Instance.IsUIOpen || IsUIOpen) return;
+        if (DialogueManager.Instance.IsUIOpen || IsUIOpen || !agent || MWarehouse == agent)
+            return false;
+
+        WarehouseAgent = agent;
         MWarehouse = agent.MWarehouse;
-        StoreAble = true;
-        UIManager.Instance.EnableInteract(true, agent.name);
+        OpenWindow();
+        return true;
     }
 
-    public void CannotStore()
+    public void CancelManage()
     {
-        StoreAble = false;
         IsPausing = false;
         CloseWindow();
         ItemWindowManager.Instance.CloseWindow();
-        if (!(DialogueManager.Instance.TalkAble || DialogueManager.Instance.IsUIOpen)) UIManager.Instance.EnableInteract(false);
     }
 
     #region 道具页相关

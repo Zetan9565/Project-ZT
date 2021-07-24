@@ -3,7 +3,7 @@ using UnityEngine;
 
 
 [DisallowMultipleComponent, RequireComponent(typeof(MapIconHolder))]
-public class QuestPoint : ManagedObject
+public class QuestPoint :MonoBehaviour, IManageAble
 {
     [SerializeField]
 #if UNITY_EDITOR
@@ -12,15 +12,28 @@ public class QuestPoint : ManagedObject
     private string _ID;
     public string ID => _ID;
 
+    public bool IsInit
+    {
+        get
+        {
+            throw new System.NotImplementedException();
+        }
+
+        set
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
     public delegate void MoveToPointListener(QuestPoint point);
     public event MoveToPointListener OnMoveIntoEvent;
     public event MoveToPointListener OnMoveAwayEvent;
 
-    public override bool Init()
+    public bool Init()
     {
         if (!GameManager.QuestPoints.ContainsKey(ID)) GameManager.QuestPoints.Add(ID, new List<QuestPoint>() { this });
         else if (!GameManager.QuestPoints[ID].Contains(this)) GameManager.QuestPoints[ID].Add(this);
-        return base.Init();
+        return true;
     }
 
     //private void OnTriggerEnter(Collider other)
@@ -66,5 +79,20 @@ public class QuestPoint : ManagedObject
             OnMoveAwayEvent?.Invoke(this);
             QuestManager.Instance.UpdateUI();
         }
+    }
+
+    public bool Reset()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool OnSaveGame(SaveData data)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool OnLoadGame(SaveData data)
+    {
+        throw new System.NotImplementedException();
     }
 }

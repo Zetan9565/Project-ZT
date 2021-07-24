@@ -7,13 +7,32 @@ public class WarehouseAgent : Building
     private Warehouse warehouse = new Warehouse(50);
     public Warehouse MWarehouse => warehouse;
 
-    private void Awake()
+    public override bool Interactive
     {
-        onButtonClick.AddListener(delegate
+        get
         {
-            WarehouseManager.Instance.Init(MWarehouse);
-            WarehouseManager.Instance.OpenWindow();
-        });
+            return warehouse && base.Interactive && !WarehouseManager.Instance.Managing;
+        }
+
+        protected set
+        {
+            base.Interactive = value;
+        }
+    }
+
+    public override void OnManage()
+    {
+        base.OnManage();
+        WarehouseManager.Instance.Manage(this);
+    }
+
+    public override void OnCancelManage()
+    {
+        base.OnCancelManage();
+        if (WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled && IsBuilt)
+        {
+            WarehouseManager.Instance.CancelManage();
+        }
     }
 
     public override void AskDestroy()
@@ -22,66 +41,12 @@ public class WarehouseAgent : Building
             delegate { BuildingManager.Instance.DestroyBuilding(this); });
     }
 
-    /*protected override void OnTriggerEnter2D(Collider2D collision)
-    {
-        base.OnTriggerEnter2D(collision);
-        if (collision.CompareTag("Player") && IsBuilt)
-        {
-            WarehouseManager.Instance.CanStore(this);
-        }
-    }
-
-    protected override void OnTriggerStay2D(Collider2D collision)
-    {
-        base.OnTriggerStay2D(collision);
-        if (collision.CompareTag("Player") && !WarehouseManager.Instance.IsUIOpen && IsBuilt)
-        {
-            WarehouseManager.Instance.CanStore(this);
-        }
-    }
-
-    protected override void OnTriggerExit2D(Collider2D collision)
-    {
-        base.OnTriggerExit2D(collision);
-        if (collision.CompareTag("Player") && WarehouseManager.Instance.MWarehouse == MWarehouse && IsBuilt)
-        {
-            WarehouseManager.Instance.CannotStore();
-        }
-    }*/
-
     private void OnDestroy()
     {
         if (WarehouseManager.Instance)
             if (WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled && IsBuilt)
             {
-                WarehouseManager.Instance.CannotStore();
+                WarehouseManager.Instance.CancelManage();
             }
     }
-
-    /*protected override void OnTriggerEnter(Collider other)
-    {
-        base.OnTriggerEnter(other);
-        if (other.tag == "Player" && isActiveAndEnabled)
-        {
-            WarehouseManager.Instance.CanStore(this);
-        }
-    }
-
-    protected override void OnTriggerStay(Collider other)
-    {
-        base.OnTriggerStay(other);
-        if (other.tag == "Player" && !WarehouseManager.Instance.IsUIOpen && isActiveAndEnabled)
-        {
-            WarehouseManager.Instance.CanStore(this);
-        }
-    }
-
-    protected override void OnTriggerExit(Collider other)
-    {
-        base.OnTriggerExit(other);
-        if (other.tag == "Player" && WarehouseManager.Instance.MWarehouse == MWarehouse && isActiveAndEnabled)
-        {
-            WarehouseManager.Instance.CannotStore();
-        }
-    }*/
 }

@@ -43,16 +43,6 @@ public class ArmorItem : EquipmentItem
         }
     }
 
-    [SerializeField]
-    private PowerUp powerup = new PowerUp();
-    public PowerUp Powerup
-    {
-        get
-        {
-            return powerup;
-        }
-    }
-
     public ArmorItem()
     {
         itemType = ItemType.Armor;

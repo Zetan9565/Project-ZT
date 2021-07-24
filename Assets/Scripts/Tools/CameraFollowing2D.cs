@@ -15,7 +15,7 @@ public class CameraFollowing2D : SingletonMonoBehaviour<CameraFollowing2D>
     public bool smooth = true;
 
 #if UNITY_EDITOR
-    [ConditionalHide("smooth", true)]
+    [ConditionalHide("smooth")]
 #endif
     public float smoothness = 0.25f;
 

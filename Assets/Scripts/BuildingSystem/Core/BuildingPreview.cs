@@ -4,9 +4,9 @@ using System.Collections.Generic;
 [DisallowMultipleComponent]
 public class BuildingPreview : MonoBehaviour
 {
-    private List<Collider> Colliders = new List<Collider>();
+    private HashSet<Collider> Colliders = new HashSet<Collider>();
 
-    private List<Collider2D> Colliders2D = new List<Collider2D>();
+    private HashSet<Collider2D> Colliders2D = new HashSet<Collider2D>();
 
     public int ColliderCount
     {
@@ -64,7 +64,17 @@ public class BuildingPreview : MonoBehaviour
     {
         if (!collision.isTrigger)
         {
-            Colliders2D.Add(collision);
+            if (!Colliders2D.Contains(collision))
+                Colliders2D.Add(collision);
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (!collision.isTrigger)
+        {
+            if (!Colliders2D.Contains(collision))
+                Colliders2D.Add(collision);
         }
     }
 

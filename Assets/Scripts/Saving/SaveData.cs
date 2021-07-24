@@ -114,7 +114,7 @@ public class BuildingSystemSaveData
 [Serializable]
 public class BuildingSaveData
 {
-    public string IDStarter;
+    public string IDPrefix;
 
     public string IDTail;
 
@@ -126,7 +126,7 @@ public class BuildingSaveData
 
     public BuildingSaveData(Building building)
     {
-        IDStarter = building.IDStarter;
+        IDPrefix = building.IDPrefix;
         IDTail = building.IDTail;
         posX = building.transform.position.x;
         posY = building.transform.position.y;
@@ -165,7 +165,7 @@ public class ObjectiveSaveData
 
     public ObjectiveSaveData(ObjectiveData objective)
     {
-        objectiveID = objective.runtimeID;
+        objectiveID = objective.entityID;
         currentAmount = objective.CurrentAmount;
     }
 }

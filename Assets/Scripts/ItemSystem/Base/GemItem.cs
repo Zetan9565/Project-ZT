@@ -4,8 +4,8 @@
 public class GemItem : ItemBase
 {
     [SerializeField]
-    private PowerUp powerup = new PowerUp();
-    public PowerUp Powerup
+    private RoleAttributeGroup powerup = new RoleAttributeGroup();
+    public RoleAttributeGroup Powerup
     {
         get
         {

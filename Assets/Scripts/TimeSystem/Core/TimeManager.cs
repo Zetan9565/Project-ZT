@@ -333,6 +333,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     }
     #endregion
 
+    #region 逻辑
     public void TimePase(decimal realSecond)
     {
         OnTimePassed?.Invoke(realSecond);
@@ -374,6 +375,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         dayBefore = 0;
         UpdateUI();
     }
+    #endregion
 
     #region MonoBehaviour
     private void Awake()

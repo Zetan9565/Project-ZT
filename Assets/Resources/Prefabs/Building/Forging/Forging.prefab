@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 6884571979959223207}
   - component: {fileID: 6884571979959223206}
   - component: {fileID: 6884571979959223205}
-  - component: {fileID: 6884571979959223209}
   - component: {fileID: -7397772194208729079}
   m_Layer: 10
   m_Name: Forging
@@ -46,10 +45,12 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -97,6 +98,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1760b978acfc1934d86355ba01deeb23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activated: 1
+  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
+  IDStarter: 
+  IDTail: 
+  isUnderBuilding: 0
+  buildingFlagOffset: {x: 0, y: 0, z: 0}
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
+  buildingAgent: {fileID: 0}
+  leftBuildTime: 0
   toolType: 2
   makingTime: 10
 --- !u!58 &6884571979959223205
@@ -115,31 +127,6 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 1.285
---- !u!114 &6884571979959223209
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6884571979959223204}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22c7008e00851a8448d7a8e5906cf6fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  IDStarter: 
-  IDTail: 
-  name: 
-  onButtonClick:
-    m_PersistentCalls:
-      m_Calls: []
-  isUnderBuilding: 0
-  buildingFlagOffset: {x: 0, y: 0, z: 0}
-  onDestroy:
-    m_PersistentCalls:
-      m_Calls: []
-  buildingAgent: {fileID: 0}
-  leftBuildTime: 0
 --- !u!114 &-7397772194208729079
 MonoBehaviour:
   m_ObjectHideFlags: 0

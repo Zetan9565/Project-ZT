@@ -6,34 +6,20 @@ using UnityEngine;
 public class BuildingInformation : ScriptableObject
 {
     [SerializeField]
-    private string _IDStarter;
-    public string IDStarter
-    {
-        get
-        {
-            return _IDStarter;
-        }
-    }
+    private string _IDPrefix;
+    public string IDPrefix => _IDPrefix;
 
     [SerializeField]
-    private new string name;
-    public string Name
-    {
-        get
-        {
-            return name;
-        }
-    }
+    private string _name;
+    public new string name => _name;
 
     [SerializeField]
     private string description;
-    public string Description
-    {
-        get
-        {
-            return description;
-        }
-    }
+    public string Description => description;
+
+    [SerializeField]
+    private bool manageable;
+    public bool Manageable => manageable;
 
     [SerializeField]
     private float buildTime = 10.0f;
@@ -48,31 +34,16 @@ public class BuildingInformation : ScriptableObject
 
     [SerializeField]
     private Building prefab;
-    public Building Prefab
-    {
-        get
-        {
-            return prefab;
-        }
-    }
+    public Building Prefab => prefab;
 
     [SerializeField]
     private BuildingPreview preview;
-    public BuildingPreview Preview
-    {
-        get
-        {
-            return preview;
-        }
-    }
+    public BuildingPreview Preview => preview;
 
-    [SerializeField, NonReorderable]
+    [SerializeField]
     private List<MaterialInfo> materials = new List<MaterialInfo>();
-    public virtual List<MaterialInfo> Materials
-    {
-        get
-        {
-            return materials;
-        }
-    }
+    public virtual List<MaterialInfo> Materials => materials;
+    [SerializeField]
+    private List<Object> addendas = new List<Object>();
+    public virtual List<Object> Addendas => addendas;
 }

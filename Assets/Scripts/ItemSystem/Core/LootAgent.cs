@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LootAgent : MonoBehaviour
+public class LootAgent : InteractiveObject
 {
-    [SerializeField]
-    private string _name;
-    public new string name => _name;
-
     [SerializeField]
     private float disappearTime;
 
@@ -16,6 +12,18 @@ public class LootAgent : MonoBehaviour
     [HideInInspector]
     public List<ItemInfo> lootItems = new List<ItemInfo>();
 
+    public override bool Interactive
+    {
+        get
+        {
+            return base.Interactive && !LootManager.Instance.IsPicking;
+        }
+
+        protected set
+        {
+            base.Interactive = value;
+        }
+    }
 
     public void Init(List<ItemInfo> lootItems, Vector3 position)
     {
@@ -39,39 +47,8 @@ public class LootAgent : MonoBehaviour
         recycleRoutine = null;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    public override bool DoInteract()
     {
-        if (collision.CompareTag("Player") && !LootManager.Instance.IsPicking)
-            LootManager.Instance.CanPick(this);
+        return LootManager.Instance.Pick(this);
     }
-
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Player") && !LootManager.Instance.IsPicking)
-            LootManager.Instance.CanPick(this);
-    }
-
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.CompareTag("Player") && LootManager.Instance.LootAgent == this)
-            LootManager.Instance.CannotPick();
-    }
-
-    /*private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player") && !LootManager.Instance.IsPicking)
-            LootManager.Instance.CanPick(this);
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.CompareTag("Player") && !LootManager.Instance.IsPicking)
-            LootManager.Instance.CanPick(this);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player") && LootManager.Instance.LootAgent == this)
-            LootManager.Instance.CannotPick();
-    }*/
 }

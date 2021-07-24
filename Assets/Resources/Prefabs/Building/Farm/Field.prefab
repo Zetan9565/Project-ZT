@@ -45,10 +45,12 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -109,9 +111,7 @@ MonoBehaviour:
       m_Calls: []
   buildingAgent: {fileID: 0}
   leftBuildTime: 0
-  space: 0
-  fertility: 0
-  Humidity: 0
+  collider: {fileID: 8480943704564243532}
 --- !u!61 &8480943704564243532
 BoxCollider2D:
   m_ObjectHideFlags: 0

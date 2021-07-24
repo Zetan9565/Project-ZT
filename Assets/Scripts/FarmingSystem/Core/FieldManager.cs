@@ -8,7 +8,7 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
 
     private readonly List<CropAgent> cropAgents = new List<CropAgent>();
 
-    public bool ManageAble { get; private set; }
+    public bool IsManaging { get; private set; }
 
     public override void OpenWindow()
     {
@@ -18,14 +18,14 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
         UpdateCropsArea();
         UpdateUI();
         UIManager.Instance.EnableJoyStick(false);
-        UIManager.Instance.EnableInteract(false);
     }
 
     public override void CloseWindow()
     {
         base.CloseWindow();
         if (IsUIOpen) return;
-        ManageAble = false;
+        IsManaging = false;
+        if (CurrentField) CurrentField.OnDoneManage();
         CurrentField = null;
         UIManager.Instance.EnableJoyStick(true);
     }
@@ -40,27 +40,26 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
         else PlantManager.Instance.CloseWindow();
     }
 
-    public void CanManage(Field field)
+    public bool Manage(Field field)
     {
-        if (!field) return;
+        if (!field || IsManaging) return false;
         CurrentField = field;
-        ManageAble = true;
-        UIManager.Instance.EnableInteract(true, field.name);
+        IsManaging = true;
+        OpenWindow();
+        return true;
     }
 
-    public void CannotManage()
+    public void CancelManage()
     {
-        ManageAble = false;
-        CurrentField = null;
+        IsManaging = false;
         CloseWindow();
-        UIManager.Instance.EnableInteract(false);
     }
 
     public void UpdateUI()
     {
-        UI.space.text = CurrentField.Crops.Count + "/" + CurrentField.space;
-        UI.fertility.text = CurrentField.fertility.ToString();
-        UI.humidity.text = CurrentField.fertility.ToString();
+        UI.space.text = CurrentField.Crops.Count + "/" + CurrentField.Data.spaceOccup;
+        UI.fertility.text = CurrentField.Data.fertility.ToString();
+        UI.humidity.text = CurrentField.Data.fertility.ToString();
         foreach (var ca in cropAgents)
             ca.UpdateInfo();
     }
@@ -90,5 +89,11 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
     public void DispatchWorker()
     {
         MessageManager.Instance.New("敬请期待");
+    }
+
+    public void Plant(Crop crop)
+    {
+        CropAgent ca = ObjectPool.Get(UI.cropPrefab, UI.cropCellsParent).GetComponent<CropAgent>();
+        ca.Init(crop);
     }
 }

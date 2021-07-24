@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class Character : ManagedObject
+public class Character : MonoBehaviour, IManageAble
 {
     [SerializeField]
     protected CharacterInformation info;
@@ -10,12 +10,15 @@ public class Character : ManagedObject
     protected CharacterData data;
     public CharacterData Data { get => data; protected set => data = value; }
 
-    public override bool Init()
+    public bool IsInit { get; protected set; }
+
+    public virtual bool Init()
     {
         Data = new CharacterData(Info);
         Data.currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         Data.currentPosition = transform.position;
-        return base.Init();
+        IsInit = true;
+        return true;
     }
 
     public void SetInfo(CharacterInformation info)
@@ -25,15 +28,18 @@ public class Character : ManagedObject
         Data.currentPosition = transform.position;
     }
 
-    // Use this for initialization
-    void Start()
+    public bool Reset()
     {
-
+        throw new System.NotImplementedException();
     }
 
-    // Update is called once per frame
-    void Update()
+    public bool OnSaveGame(SaveData data)
     {
+        throw new System.NotImplementedException();
+    }
 
+    public bool OnLoadGame(SaveData data)
+    {
+        throw new System.NotImplementedException();
     }
 }

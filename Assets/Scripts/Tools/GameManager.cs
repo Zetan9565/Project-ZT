@@ -74,6 +74,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     }
 
     public static Dictionary<CropInformation, List<Crop>> Crops { get; } = new Dictionary<CropInformation, List<Crop>>();
+    public static Dictionary<CropInformation, List<CropData>> CropDatas { get; } = new Dictionary<CropInformation, List<CropData>>();
 
     public static Dictionary<string, List<Enemy>> Enemies { get; } = new Dictionary<string, List<Enemy>>();
     public static Dictionary<string, EnemyInformation> EnemyInfos { get; } = new Dictionary<string, EnemyInformation>();

@@ -61,3 +61,27 @@ public interface IDragAble
 {
     Sprite DragAbleIcon { get; }
 }
+
+public interface IInteractive<T> where T : MonoBehaviour
+{
+    T MonoBehaviour { get; }
+
+    void OnTriggerEnter2D(Collider2D collision);
+
+    void OnTriggerStay2D(Collider2D collision);
+
+    void OnTriggerExit2D(Collider2D collision);
+}
+
+public interface IManageAble
+{
+    public bool IsInit { get; }
+
+    public bool Init();
+
+    public bool Reset();
+
+    public bool OnSaveGame(SaveData data);
+
+    public bool OnLoadGame(SaveData data);
+}

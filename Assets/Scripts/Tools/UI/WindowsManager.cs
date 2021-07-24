@@ -132,7 +132,7 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
 
     [SerializeField]
 #if UNITY_EDITOR
-    [ConditionalHide("animated", true, false)]
+    [ConditionalHide("animated", false)]
 #endif
     protected float animationSpeed = 0.04f;
 

@@ -44,9 +44,12 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -58,6 +61,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -93,6 +97,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 467db1db44484a94d82a7f9918864368, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activated: 1
+  customName: 1
   _name: "\u9F13\u9F13\u7684\u888B\u5B50"
   disappearTime: 30
   lootItems: []

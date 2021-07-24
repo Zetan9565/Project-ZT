@@ -9,16 +9,15 @@ public class PlantUI : WindowUI
     public Transform seedCellsParent;
 
     public CanvasGroup descriptionWindow;
-
     public Text nameText;
-
     public ItemAgent icon;
-
+    public Text amount;
     public Text description;
 
     public InputField searchInput;
-
     public Button searchButton;
+
+    public GameObject cancelArea;
 
     protected override void Awake()
     {

@@ -18,7 +18,7 @@ public class BuildingInfoAgent : MonoBehaviour,
     public void Init(BuildingInformation buildingInfo, ScrollRect parentRect = null)
     {
         MBuildingInfo = buildingInfo;
-        nameText.text = buildingInfo.Name;
+        nameText.text = buildingInfo.name;
         this.parentRect = parentRect;
     }
 
@@ -135,13 +135,8 @@ public class BuildingInfoAgent : MonoBehaviour,
     {
 #if UNITY_ANDROID
         if (parentRect) parentRect.OnEndDrag(eventData);
-        if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            if (eventData.pointerCurrentRaycast.gameObject == BuildingManager.Instance.CancelArea && BuildingManager.Instance.IsPreviewing)
-                BuildingManager.Instance.FinishPreview();
-            else if (BuildingManager.Instance.IsPreviewing)
-                BuildingManager.Instance.Build();
-        }
+        if (BuildingManager.Instance.IsPreviewing && eventData.button == PointerEventData.InputButton.Left)
+            BuildingManager.Instance.Place();
 #endif
     }
 }

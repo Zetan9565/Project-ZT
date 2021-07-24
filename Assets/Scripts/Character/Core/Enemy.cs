@@ -30,11 +30,7 @@ public class Enemy : MonoBehaviour
         QuestManager.Instance.UpdateUI();
         if (info.DropItems.Count > 0)
         {
-            List<ItemInfo> lootItems = new List<ItemInfo>();
-            foreach (DropItemInfo di in info.DropItems)
-                if (ZetanUtility.Probability(di.DropRate))
-                    if (!di.OnlyDropForQuest || (di.OnlyDropForQuest && QuestManager.Instance.HasOngoingQuestWithID(di.BindedQuest.ID)))
-                        lootItems.Add(new ItemInfo(di.Item, Random.Range(1, di.Amount + 1)));
+            List<ItemInfo> lootItems = DropItemInfo.Drop(info.DropItems);
             if (lootItems.Count > 0)
             {
                 LootAgent la = ObjectPool.Get(info.LootPrefab).GetComponent<LootAgent>();

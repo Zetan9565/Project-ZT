@@ -5,9 +5,17 @@ using UnityEngine;
 [System.Serializable]
 public class BoxItem : ItemBase
 {
+    [SerializeField]
+    private int minAmount;
+    public int MinAmount => minAmount;
+
+    [SerializeField]
+    private int maxAmount;
+    public int MaxAmount => maxAmount;
+
     [SerializeField, NonReorderable]
-    private List<ItemInfo> itemsInBox = new List<ItemInfo>();
-    public List<ItemInfo> ItemsInBox
+    private List<DropItemInfo> itemsInBox = new List<DropItemInfo>();
+    public List<DropItemInfo> ItemsInBox
     {
         get
         {
@@ -20,25 +28,9 @@ public class BoxItem : ItemBase
         itemType = ItemType.Box;
     }
 
-    public override float Weight
+    public ItemInfo[] GetItems()
     {
-        get
-        {
-            float newWeight = weight;
-            foreach (ItemInfo info in itemsInBox)
-            {
-                if (info.IsValid)
-                    newWeight += info.item.Weight * info.Amount;
-            }
-            return newWeight;
-        }
-    }
-
-    public float EmptyWeight
-    {
-        get
-        {
-            return weight;
-        }
+        List<ItemInfo> lootItems = DropItemInfo.Drop(itemsInBox);
+        return lootItems.ToArray();
     }
 }

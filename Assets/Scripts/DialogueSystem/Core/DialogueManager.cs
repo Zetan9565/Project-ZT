@@ -72,14 +72,13 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     }
 
     public bool IsTalking { get; private set; }
-    public bool TalkAble { get; private set; }
 
     private int indexToGoBack = -1;
 
     #region 开始新对话
     public void BeginNewDialogue()
     {
-        if (!CurrentTalker || !TalkAble || IsTalking) return;
+        if (!CurrentTalker || IsTalking) return;
         StartNormalDialogue(CurrentTalker);
         OnBeginDialogueEvent?.Invoke();
     }
@@ -789,14 +788,13 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     #region UI相关
     public override void OpenWindow()
     {
-        if (!TalkAble) return;
         base.OpenWindow();
         if (!IsUIOpen) return;
         if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
         WindowsManager.Instance.PauseAll(true, this);
         UIManager.Instance.EnableJoyStick(false);
-        UIManager.Instance.EnableInteract(false);
         PlayerManager.Instance.PlayerController.controlAble = false;
+        NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.WindowStateChange, typeof(DialogueManager), true);
     }
     public override void CloseWindow()
     {
@@ -820,6 +818,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         IsTalking = false;
         UIManager.Instance.EnableJoyStick(true);
         PlayerManager.Instance.PlayerController.controlAble = true;
+        NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.WindowStateChange, typeof(DialogueManager), false);
     }
 
     public void ShowQuestDescription(QuestData quest)
@@ -884,19 +883,22 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Gift, "选择礼物", "确定要送出这些礼物吗？", null);
     }
 
-    public void CanTalk(Talker talker)
+    public bool Talk(Talker talker)
     {
-        if (IsTalking || !talker) return;
+        if (GatherManager.Instance.IsGathering)
+        {
+            MessageManager.Instance.New("请先等待采集完成");
+            return false;
+        }
+        if (IsTalking || !talker) return false;
         CurrentTalker = talker;
-        TalkAble = true;
-        UIManager.Instance.EnableInteract(true, talker.TalkerName);
+        BeginNewDialogue();
+        return true;
     }
-    public void CannotTalk()
+    public void CancelTalk()
     {
-        TalkAble = false;
         IsPausing = false;
         CloseWindow();
-        UIManager.Instance.EnableInteract(false);
     }
 
     private void ShowButtons(bool shop, bool warehouse, bool quest)

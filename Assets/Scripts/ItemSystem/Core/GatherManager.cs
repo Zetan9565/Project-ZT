@@ -12,9 +12,9 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
 
     [SerializeField]
     private float lootInvaildDistance = 2.0f;
-    private GatherAgent doneAgent;
+    private Gathering doneAgent;
 
-    public GatherAgent GatherAgent { get; private set; }
+    public Gathering GatherAgent { get; private set; }
 
     public bool GatherAble { get; private set; }
     public bool IsGathering { get; private set; }
@@ -29,40 +29,42 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
         }
     }
 
-    public void CanGather(GatherAgent gatherAgent)
-    {
-        if (!gatherAgent || doneAgent) return;
-        GatherAgent = gatherAgent;
-        GatherAble = true;
-        UIManager.Instance.EnableInteract(true, gatherAgent.GatheringInfo.name);
-    }
-
-    public void CannotGather()
+    public void Cancel()
     {
         GatherAble = false;
         GatherAgent = null;
-        UIManager.Instance.EnableInteract(false);
         if (IsGathering) ProgressBar.Instance.Cancel();
     }
 
-    public void TryGather()
+    public bool Gather(Gathering gatherAgent)
     {
+        if (IsGathering)
+        {
+            MessageManager.Instance.New("请等待上一个采集完成");
+            return false;
+        }
         //PlayerManager.Instance.PlayerController.Animator.SetInteger(animaNameHash, (int)GatherAgent.GatheringInfo.GatherType);
+        GatherAgent = gatherAgent;
+        GatherAble = true;
         GatherStart();
+        return true;
     }
 
     private void GatherStart()
     {
-        ProgressBar.Instance.New(GatherAgent.GatheringInfo.GatherTime, GatherDone, GatherCancel, "采集中");
-        IsGathering = true;
-        UIManager.Instance.EnableInteract(false);
         doneAgent = null;
+        if (!IsGathering)
+            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.GatheringStateChange, true);
+        IsGathering = true;
+        ProgressBar.Instance.New(GatherAgent.GatheringInfo.GatherTime, GatherDone, GatherCancel, "采集中");
     }
 
     private void GatherDone()
     {
         PlayerManager.Instance.PlayerController.Animator.SetInteger(animaNameHash, -1);
         GatherAgent.GatherSuccess();
+        if (IsGathering)
+            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.GatheringStateChange, false);
         IsGathering = false;
         doneAgent = GatherAgent;
         StartCoroutine(UpdateDistance());
@@ -71,6 +73,8 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
     private void GatherCancel()
     {
         PlayerManager.Instance.PlayerController.Animator.SetInteger(animaNameHash, -1);
+        if (IsGathering)
+            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.GatheringStateChange, false);
         IsGathering = false;
     }
 

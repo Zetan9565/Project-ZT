@@ -12,6 +12,32 @@ public class QuestData
 {
     public Quest Info { get; }
 
+    public List<ObjectiveData> ObjectiveInstances { get; } = new List<ObjectiveData>();
+
+    public TalkerData originalQuestHolder;
+
+    public TalkerData currentQuestHolder;
+
+    public bool InProgress { get; set; }//任务是否正在执行，在运行时用到
+
+    public bool IsComplete
+    {
+        get
+        {
+            if (ObjectiveInstances.Exists(x => !x.IsComplete))
+                return false;
+            return true;
+        }
+    }
+
+    public bool IsFinished
+    {
+        get
+        {
+            return IsComplete && !InProgress;
+        }
+    }
+
     public QuestData(Quest quest)
     {
         Info = quest;
@@ -38,8 +64,8 @@ public class QuestData
             {
                 if (ObjectiveInstances[i].Info.OrderIndex >= ObjectiveInstances[i - 1].Info.OrderIndex)
                 {
-                    ObjectiveInstances[i].PrevObjective = ObjectiveInstances[i - 1];
-                    ObjectiveInstances[i - 1].NextObjective = ObjectiveInstances[i];
+                    ObjectiveInstances[i].prevObjective = ObjectiveInstances[i - 1];
+                    ObjectiveInstances[i - 1].nextObjective = ObjectiveInstances[i];
                 }
             }
         int i1, i2, i3, i4, i5, i6;
@@ -48,61 +74,35 @@ public class QuestData
         {
             if (o.Info is CollectObjective)
             {
-                o.runtimeID = quest.ID + "_CO" + i1;
+                o.entityID = quest.ID + "_CO" + i1;
                 i1++;
             }
             if (o.Info is KillObjective)
             {
-                o.runtimeID = quest.ID + "_KO" + i2;
+                o.entityID = quest.ID + "_KO" + i2;
                 i2++;
             }
             if (o.Info is TalkObjective)
             {
-                o.runtimeID = quest.ID + "_TO" + i3;
+                o.entityID = quest.ID + "_TO" + i3;
                 i3++;
             }
             if (o.Info is MoveObjective)
             {
-                o.runtimeID = quest.ID + "_MO" + i4;
+                o.entityID = quest.ID + "_MO" + i4;
                 i4++;
             }
             if (o.Info is SubmitObjective)
             {
-                o.runtimeID = quest.ID + "_SO" + i5;
+                o.entityID = quest.ID + "_SO" + i5;
                 i5++;
             }
             if (o.Info is CustomObjective)
             {
-                o.runtimeID = quest.ID + "_CUO" + i6;
+                o.entityID = quest.ID + "_CUO" + i6;
                 i6++;
             }
             o.runtimeParent = this;
-        }
-    }
-
-    public List<ObjectiveData> ObjectiveInstances { get; } = new List<ObjectiveData>();
-
-    public TalkerData originalQuestHolder;
-
-    public TalkerData currentQuestHolder;
-
-    public bool InProgress { get; set; }//任务是否正在执行，在运行时用到
-
-    public bool IsComplete
-    {
-        get
-        {
-            if (ObjectiveInstances.Exists(x => !x.IsComplete))
-                return false;
-            return true;
-        }
-    }
-
-    public bool IsFinished
-    {
-        get
-        {
-            return IsComplete && !InProgress;
         }
     }
 

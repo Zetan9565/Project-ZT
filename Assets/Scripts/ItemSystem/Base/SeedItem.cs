@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+[CreateAssetMenu(fileName ="seed", menuName ="ZetanStudio/道具/种子")]
 public class SeedItem : ItemBase
 {
     [SerializeField]
