@@ -55,8 +55,8 @@ public class DialogueWords
     public TalkerInformation TalkerInfo => talkerInfo;
 
     [SerializeField, TextArea(3, 10)]
-    private string words;
-    public string Words => words;
+    private string content;
+    public string Content => content;
 
     [SerializeField]
     private int indexOfCorrectOption;
@@ -66,20 +66,17 @@ public class DialogueWords
     {
         get
         {
-            return branches != null && indexOfCorrectOption > -1 && branches.FindAll(x => x.OptionType == WordsOptionType.Choice).Count > 1;
+            return indexOfCorrectOption > -1 && options.FindAll(x => x.OptionType == WordsOptionType.Choice).Count > 1;
         }
     }
 
     [SerializeField]
-    private string wordsWhenChusWB;
-    /// <summary>
-    /// ChuseWB = Choose Wrong Branch
-    /// </summary>
-    public string WordsWhenChusWB => wordsWhenChusWB;
+    private string wrongChoiceWords;
+    public string WrongChoiceWords => wrongChoiceWords;
 
     [SerializeField, NonReorderable]
-    private List<WordsOption> branches = new List<WordsOption>();
-    public List<WordsOption> Options => branches;
+    private List<WordsOption> options = new List<WordsOption>();
+    public List<WordsOption> Options => options;
 
     [SerializeField, NonReorderable]
     private List<WordsEvent> events = new List<WordsEvent>();
@@ -89,8 +86,8 @@ public class DialogueWords
     {
         get
         {
-            return !(TalkerType == TalkerType.NPC && !talkerInfo || string.IsNullOrEmpty(words) ||
-            branches.Exists(b => b && !b.IsValid) || events.Exists(e => e && !e.IsValid) || NeedToChusCorrectOption && string.IsNullOrEmpty(wordsWhenChusWB));
+            return !(TalkerType == TalkerType.NPC && !talkerInfo || string.IsNullOrEmpty(content) ||
+            options.Exists(b => b && !b.IsValid) || events.Exists(e => e && !e.IsValid) || NeedToChusCorrectOption && string.IsNullOrEmpty(wrongChoiceWords));
         }
     }
 
@@ -102,7 +99,7 @@ public class DialogueWords
     public DialogueWords(TalkerInformation talkerInfo, string words, TalkerType talkerType = 0)
     {
         this.talkerInfo = talkerInfo;
-        this.words = words;
+        this.content = words;
         this.talkerType = talkerType;
     }
 
@@ -114,10 +111,10 @@ public class DialogueWords
     public override string ToString()
     {
         if (TalkerType == TalkerType.NPC && talkerInfo)
-            return "[" + talkerInfo.name + "]说：" + words;
+            return "[" + talkerInfo.name + "]说：" + content;
         else if (TalkerType == TalkerType.Player)
-            return "[玩家]说：" + words;
-        else return "[Unnamed]说：" + words;
+            return "[玩家]说：" + content;
+        else return "[Unnamed]说：" + content;
     }
 
     public int IndexOfOption(WordsOption option)
@@ -183,7 +180,7 @@ public class WordsOption
     {
         get
         {
-            return goBack || optionType == WordsOptionType.SubmitAndGet || optionType == WordsOptionType.OnlyGet;
+            return goBack || optionType == WordsOptionType.Choice || optionType == WordsOptionType.SubmitAndGet || optionType == WordsOptionType.OnlyGet;
         }
     }
 
@@ -219,7 +216,7 @@ public class WordsOption
 
     [SerializeField]
     private bool deleteWhenCmplt = true;
-    public bool DeleteWhenCmplt => deleteWhenCmplt;
+    public bool DeleteWhenCmplt => deleteWhenCmplt && optionType == WordsOptionType.Choice;
 
     public bool IsValid
     {
@@ -333,24 +330,4 @@ public enum TalkerType
 
     [InspectorName("统一的NPC")]
     UnifiedNPC
-}
-
-[Serializable]
-public class AffectiveDialogue
-{
-    [SerializeField]
-    private Dialogue level_1;
-    public Dialogue Level_1 => level_1;
-
-    [SerializeField]
-    private Dialogue level_2;
-    public Dialogue Level_2 => level_2;
-
-    [SerializeField]
-    private Dialogue level_3;
-    public Dialogue Level_3 => level_3;
-
-    [SerializeField]
-    private Dialogue level_4;
-    public Dialogue Level_4 => level_4;
 }

@@ -71,7 +71,7 @@ public class WarehouseSaveData
 
     public List<ItemSaveData> itemDatas = new List<ItemSaveData>();
 
-    public WarehouseSaveData(string id, Warehouse warehouse)
+    public WarehouseSaveData(string id, WarehouseData warehouse)
     {
         handlerID = id;
         money = warehouse.Money;
@@ -118,19 +118,21 @@ public class BuildingSaveData
 
     public string IDTail;
 
+    public string scene;
     public float posX;
     public float posY;
     public float posZ;
 
     public float leftBuildTime;
 
-    public BuildingSaveData(Building building)
+    public BuildingSaveData(BuildingData building)
     {
         IDPrefix = building.IDPrefix;
         IDTail = building.IDTail;
-        posX = building.transform.position.x;
-        posY = building.transform.position.y;
-        posZ = building.transform.position.z;
+        scene = building.scene;
+        posX = building.position.x;
+        posY = building.position.y;
+        posZ = building.position.z;
         leftBuildTime = building.leftBuildTime;
     }
 }
@@ -179,32 +181,28 @@ public class DialogueSaveData
 
     public List<DialogueWordsSaveData> wordsDatas = new List<DialogueWordsSaveData>();
 
-    public DialogueSaveData(Dialogue dialogue)
+    public DialogueSaveData(DialogueData dialogue)
     {
-        dialogID = dialogue.ID;
-        for (int i = 0; i < dialogue.Words.Count; i++)
-            wordsDatas.Add(new DialogueWordsSaveData(i));
+        dialogID = dialogue.origin.ID;
+        foreach (DialogueWordsData words in dialogue.wordsDatas)
+        {
+            wordsDatas.Add(new DialogueWordsSaveData(words));
+        }
     }
 }
 
 [Serializable]
 public class DialogueWordsSaveData
 {
-    public int wordsIndex;//该语句在对话中的位置
+    public HashSet<int> cmpltOptionIndexes = new HashSet<int>();//已完成的选项的序号集
 
-    public HashSet<int> cmpltOptionIndexes;//已完成的分支的序号集
-
-    public bool complete;
-
-    public DialogueWordsSaveData()
+    public DialogueWordsSaveData(DialogueWordsData words)
     {
-        wordsIndex = -1;
-        cmpltOptionIndexes = new HashSet<int>();
-    }
-    public DialogueWordsSaveData(int wordsIndex)
-    {
-        this.wordsIndex = wordsIndex;
-        cmpltOptionIndexes = new HashSet<int>();
+        for (int i = 0; i < words.optionDatas.Count; i++)
+        {
+            if (words.optionDatas[i].isDone)
+                cmpltOptionIndexes.Add(i);
+        }
     }
 
     public bool IsOptionCmplt(int index)

@@ -13,23 +13,40 @@ public class CropAgent : MonoBehaviour
     public Image matureIcon;
     public Button destroyButton;
 
+    private CropStage stageBef;
+
     public void Init(Crop crop)
     {
+        Clear();
         MCrop = crop;
+        MCrop.UI = this;
+        MCrop.Data.OnStageChange += UpdateInfo;
         UpdateInfo();
     }
 
     public void UpdateInfo()
     {
-        //totalDays.text = MCrop.totalGrowthDays.ToString();
+        if (!MCrop) return;
+        totalDays.text = MCrop.Data.growthDays.ToString();
+        nameText.text = MCrop.Data.Info.name;
         ZetanUtility.SetActive(dryIcon.gameObject, MCrop.Dry);
         ZetanUtility.SetActive(pestIcon.gameObject, MCrop.Pest);
-        //ZetanUtility.SetActive(matureIcon.gameObject, MCrop.currentStage.HarvestAble);
+        ZetanUtility.SetActive(matureIcon.gameObject, MCrop.Data.HarvestAble);
+    }
+
+    public void UpdateInfo(CropStage stage)
+    {
+        if(stage!=stageBef)
+        {
+            stageBef = stage;
+            UpdateInfo();
+        }
     }
 
     public void Clear(bool recycle = false)
     {
         MCrop = null;
+        nameText.text = string.Empty;
         totalDays.text = string.Empty;
         ZetanUtility.SetActive(dryIcon.gameObject, false);
         ZetanUtility.SetActive(pestIcon.gameObject, false);
@@ -41,8 +58,7 @@ public class CropAgent : MonoBehaviour
     {
         ConfirmManager.Instance.New("销毁作物不会有任何产物，确定销毁吗？", delegate
          {
-             if (MCrop) MCrop.Recycle();
-             Clear(true);
+             FieldManager.Instance.Remove(MCrop);
          });
     }
 }

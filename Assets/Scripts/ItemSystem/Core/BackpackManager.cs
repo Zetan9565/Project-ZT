@@ -338,6 +338,15 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     {
         return TryLoseItem_Boolean(info.item, info.Amount, simulGetItems);
     }
+    public bool TryLoseItems_Boolean(IEnumerable<ItemInfo> infos)
+    {
+        foreach (ItemInfo info in infos)
+        {
+            if (!TryLoseItem_Boolean(info))
+                return false;
+        }
+        return true;
+    }
 
     /// <summary>
     /// 失去道具
@@ -782,10 +791,10 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         }
         return true;
     }
-    public bool IsMaterialsEnough(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<ItemInfo> materials)
+    public bool IsMaterialsEnough(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfo> materials)
     {
-        if (itemMaterials == null || itemMaterials.Count() < 1 || materials == null || materials.Count() < 1 || itemMaterials.Count() != materials.Count()) return false;
-        foreach (var material in itemMaterials)
+        if (targetMaterials == null || targetMaterials.Count() < 1 || materials == null || materials.Count() < 1 || targetMaterials.Count() != materials.Count()) return false;
+        foreach (var material in targetMaterials)
         {
             if (material.MakingType == MakingType.SingleItem)
             {
@@ -814,7 +823,32 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         return true;
     }
 
-    public IEnumerable<string> GetMaterialsInfo(IEnumerable<MaterialInfo> materials)
+    public List<ItemInfo> GetMaterialsFromBackpack(IEnumerable<MaterialInfo> targetMaterials)
+    {
+        if (targetMaterials == null) return null;
+
+        List<ItemInfo> items = new List<ItemInfo>();
+        if (targetMaterials.Count() < 1) return items;
+
+        var materialEnum = targetMaterials.GetEnumerator();
+        while (materialEnum.MoveNext())
+        {
+            if (materialEnum.Current.MakingType == MakingType.SingleItem)
+            {
+                int have = GetItemAmount(materialEnum.Current.Item);
+                have = have > materialEnum.Current.Amount ? materialEnum.Current.Amount : have;
+                items.Add(new ItemInfo(materialEnum.Current.Item, have));
+            }
+            else
+            {
+                ItemInfo item = Backpack.Items.Find(x => x.item.MaterialType == materialEnum.Current.MaterialType && x.Amount >= materialEnum.Current.Amount);
+                if (item) items.Add(new ItemInfo(item.item, materialEnum.Current.Amount));
+            }
+        }
+        return items;
+    }
+
+    public IEnumerable<string> GetMaterialsInfoString(IEnumerable<MaterialInfo> materials)
     {
         List<string> info = new List<string>();
         using (var materialEnum = materials.GetEnumerator())

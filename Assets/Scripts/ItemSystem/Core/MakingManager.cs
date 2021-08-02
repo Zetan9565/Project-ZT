@@ -17,6 +17,16 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
 
     public MakingTool CurrentTool { get; private set; }
 
+    private MakingToolInformation toolInfo;
+    public MakingToolInformation ToolInfo
+    {
+        get
+        {
+            if (CurrentTool) return CurrentTool.ToolInfo;
+            else return toolInfo;
+        }
+    }
+
     public bool IsMaking { get; private set; }
 
     public void Init()
@@ -24,9 +34,9 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         foreach (MakingAgent ma in makingAgents)
             ma.Clear(true);
         makingAgents.Clear();
-        if (CurrentTool)
+        if (ToolInfo)
             foreach (ItemBase item in learnedItems)
-                if (item.MakingTool == CurrentTool.Info.ToolType)
+                if (item.MakingTool == ToolInfo.ToolType)
                 {
                     MakingAgent ma = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<MakingAgent>();
                     ma.Init(item);
@@ -36,7 +46,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
 
     public void MakeCurrent()
     {
-        if (!CurrentTool || !currentItem) return;
+        if (!ToolInfo || !currentItem) return;
         if (IsMaking)
         {
             MessageManager.Instance.New("正在制作中");
@@ -55,7 +65,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                 {
                     IsMaking = true;
                     PauseDisplay(true);
-                    ProgressBar.Instance.New(CurrentTool.Info.MakingTime, delegate
+                    ProgressBar.Instance.New(ToolInfo.MakingTime, delegate
                     {
                         IsMaking = false;
                         PauseDisplay(false);
@@ -81,7 +91,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                         int amount = (int)AmountManager.Instance.Amount;
                         IsMaking = true;
                         PauseDisplay(true);
-                        ProgressBar.Instance.New(CurrentTool.Info.MakingTime, amount - 1,
+                        ProgressBar.Instance.New(ToolInfo.MakingTime, amount - 1,
                             delegate
                             {
                                 IsMaking = false;
@@ -126,7 +136,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         IsMaking = true;
         PauseDisplay(true);
         if (UI.loopToggle.isOn)
-            ProgressBar.Instance.New(CurrentTool.Info.MakingTime,
+            ProgressBar.Instance.New(ToolInfo.MakingTime,
             delegate
             {
                 bool enough = BackpackManager.Instance.IsMaterialsEnough(currentItem.Materials, materials);
@@ -154,7 +164,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                 PauseDisplay(false);
             }, "制作中", true);
         else
-            ProgressBar.Instance.New(CurrentTool.Info.MakingTime,
+            ProgressBar.Instance.New(ToolInfo.MakingTime,
                 delegate
                 {
                     MakeItem(currentItem, materials);
@@ -186,7 +196,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         BackpackManager.Instance.DarkUnmakeable(false);
         IsMaking = true;
         PauseDisplay(true);
-        ProgressBar.Instance.New(CurrentTool.Info.MakingTime,
+        ProgressBar.Instance.New(ToolInfo.MakingTime,
             delegate
             {
                 MakeItem(materials);
@@ -340,10 +350,10 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
     /// <param name="materials">放入的材料</param>
     private bool MakeItem(IEnumerable<ItemInfo> materials)
     {
-        foreach (var item in learnedItems.Where(x => x.MakingTool == CurrentTool.Info.ToolType))
+        foreach (var item in learnedItems.Where(x => x.MakingTool == ToolInfo.ToolType))
             if (CheckMaterialsMatch(item.Materials, materials))
                 return MakeItem(item, materials);
-        var items = Resources.LoadAll<ItemBase>("").Where(x => x.Makable && x.MakingTool == CurrentTool.Info.ToolType).Except(learnedItems);
+        var items = Resources.LoadAll<ItemBase>("").Where(x => x.Makable && x.MakingTool == ToolInfo.ToolType).Except(learnedItems);
         foreach (var item in items)
             if (CheckMaterialsMatch(item.Materials, materials))
                 return MakeItem(item, materials);
@@ -376,7 +386,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
     #region UI相关
     public override void OpenWindow()
     {
-        if (!CurrentTool) return;
+        if (!ToolInfo) return;
         base.OpenWindow();
         if (!IsUIOpen) return;
         IsMaking = true;
@@ -394,8 +404,10 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         base.CloseWindow();
         if (IsUIOpen) return;
         IsMaking = false;
+        if (CurrentTool) CurrentTool.OnDoneManage();
         CurrentTool = null;
         currentItem = null;
+        toolInfo = null;
         HideDescription();
         AmountManager.Instance.Cancel();
         ItemWindowManager.Instance.CloseWindow();
@@ -416,7 +428,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
     {
         if (!item) return;
         currentItem = item;
-        List<string> info = BackpackManager.Instance.GetMaterialsInfo(currentItem.Materials).ToList();
+        List<string> info = BackpackManager.Instance.GetMaterialsInfoString(currentItem.Materials).ToList();
         StringBuilder materials = new StringBuilder("<b>持有数量：</b>" + BackpackManager.Instance.GetItemAmount(item));
         materials.Append("\n<b>制作材料：</b>");
         materials.Append(BackpackManager.Instance.IsMaterialsEnough(item.Materials) ? "<color=green>(可制作)</color>\n" : "<color=red>(耗材不足)</color>\n");
@@ -450,7 +462,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
 
     public bool Make(MakingTool tool)
     {
-        if (!tool || tool.Info.ToolType == MakingToolType.None) return false;
+        if (!tool || tool.ToolInfo.ToolType == MakingToolType.None) return false;
         if (IsMaking)
         {
             MessageManager.Instance.New("正在制作中");
@@ -461,9 +473,22 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         return true;
     }
 
+    public bool Make(MakingToolInformation tool)
+    {
+        if (!tool || tool.ToolType == MakingToolType.None) return false;
+        if (IsMaking)
+        {
+            MessageManager.Instance.New("正在制作中");
+            return false;
+        }
+        CurrentTool = null;
+        toolInfo = tool;
+        OpenWindow();
+        return true;
+    }
+
     public void CancelMake()
     {
-        CurrentTool = null;
         if (IsMaking) ProgressBar.Instance.CancelWithoutNotify();
         PauseDisplay(false);
         UI.window.alpha = 0;

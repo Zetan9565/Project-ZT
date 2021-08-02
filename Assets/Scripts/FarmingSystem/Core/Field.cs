@@ -3,69 +3,79 @@ using UnityEngine;
 
 public class Field : Building
 {
-    public FieldData Data { get; private set; }
+    public FieldData FData { get; private set; }
 
     public List<Crop> Crops { get; } = new List<Crop>();
 
-    public new Collider2D collider;
+    public Renderer Range { get; private set; }
 
-    public override bool Interactive
+    private void Awake()
+    {
+        Range = GetComponent<Renderer>();
+    }
+
+    public override bool IsInteractive
     {
         get
         {
-            return base.Interactive && Data && FieldManager.Instance.CurrentField != this;
+            return base.IsInteractive && FData && FieldManager.Instance.CurrentField != this;
         }
     }
 
     public override void OnCancelManage()
     {
+        base.OnCancelManage();
         if (FieldManager.Instance.CurrentField == this)
             FieldManager.Instance.CancelManage();
     }
 
-    public override void AskDestroy()
-    {
-        ConfirmManager.Instance.New("耕地内的作物不会保留，确定退耕吗？",
-            delegate { BuildingManager.Instance.DestroyBuilding(this); });
-    }
-
     public void Init(FieldInformation field)
     {
-
+        FData = new FieldData(field)
+        {
+            entity = this
+        };
+        FieldManager.Instance.Reclaim(FData);
     }
 
     public void PlantCrop(CropInformation crop, Vector3 position)
     {
         if (!crop) return;
 
-        CropData cropData = Data.PlantCrop(crop);
+        if (FData.spaceOccup < crop.Size)
+        {
+            MessageManager.Instance.New("空间不足");
+            return;
+        }
+
+        CropData cropData = FData.PlantCrop(crop);
 
         if (cropData)
         {
             Crop entity = ObjectPool.Get(crop.Prefab, transform);
-            entity.Plant(cropData, this, position);
+            entity.Init(cropData, this, position);
+            FieldManager.Instance.Plant(entity);
         }
     }
 
-    public void RemoveCrop(Crop crop)
+    public void Remove(Crop crop)
     {
         if (!crop) return;
-
-        Data.RemoveCrop(crop.Data);
+        FData.RemoveCrop(crop.Data);
     }
 
     public override void Destroy()
     {
+        FData.OnDestroy();
         base.Destroy();
-
     }
 
     protected override void OnBuilt()
     {
-        if (MBuildingInfo.Addendas.Count > 0)
+        if (Info.Addendas.Count > 0)
         {
-            if (MBuildingInfo.Addendas[0] is FieldInformation info)
-                Data = new FieldData(info);
+            if (Info.Addendas[0] is FieldInformation info)
+                Init(info);
         }
     }
 

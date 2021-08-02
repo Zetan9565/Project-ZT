@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(fileName ="tool info", menuName ="ZetanStudio/制作工具信息")]
+[CreateAssetMenu(fileName = "tool info", menuName = "ZetanStudio/制作工具信息")]
 public class MakingToolInformation : ScriptableObject
 {
 #if UNITY_EDITOR
@@ -54,6 +54,21 @@ public class MakingToolInformation : ScriptableObject
             case MakingToolType.None:
             default:
                 return "未定义";
+        }
+    }
+
+    private static MakingToolInformation handwork;
+    public static MakingToolInformation Handwork
+    {
+        get
+        {
+            if (!handwork)
+            {
+                handwork = CreateInstance<MakingToolInformation>();
+                handwork.toolType = MakingToolType.Handwork;
+                handwork.makingTime = 5;
+            }
+            return handwork;
         }
     }
 }

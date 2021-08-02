@@ -12,8 +12,8 @@ public class TalkerInformation : CharacterInformation
     private bool isWarehouseAgent;
     public bool IsWarehouseAgent => isWarehouseAgent;
     [SerializeField]
-    private Warehouse warehouse = new Warehouse();
-    public Warehouse Warehouse => warehouse;
+    private int warehouseCapcity = 30;
+    public int WarehouseCapcity => warehouseCapcity;
 
     [SerializeField]
     private bool isVendor;
@@ -34,25 +34,34 @@ public class TalkerInformation : CharacterInformation
     private Dialogue normalItemDialogue;
     public Dialogue NormalItemDialogue => normalItemDialogue;
 
-    [SerializeField]
-    private AffectiveDialogue favoriteItemDialogue;
-    public AffectiveDialogue FavoriteItemDialogue => favoriteItemDialogue;
+    [SerializeField, NonReorderable]
+    private List<AffectiveDialogue> giftDialogues = new List<AffectiveDialogue>();
+    public List<AffectiveDialogue> GiftDialogues => giftDialogues;
 
-    [SerializeField]
-    private AffectiveDialogue hateItemDialogue;
-    public AffectiveDialogue HateItemDialogue => hateItemDialogue;
 
     [SerializeField, NonReorderable]
-    private List<FavoriteItemInfo> favoriteItems = new List<FavoriteItemInfo>();
-    public List<FavoriteItemInfo> FavoriteItems => favoriteItems;
-
-    [SerializeField, NonReorderable]
-    private List<HateItemInfo> hateItems = new List<HateItemInfo>();
-    public List<HateItemInfo> HateItems => hateItems;
+    private List<AffectiveItemInfo> affectiveItems = new List<AffectiveItemInfo>();
+    public List<AffectiveItemInfo> AffectiveItems => affectiveItems;
 
     [SerializeField]
     private bool canMarry;
     public bool CanMarry => canMarry;
+}
+
+[System.Serializable]
+public class AffectiveDialogue
+{
+    [SerializeField]
+    private int lowerBound;
+    public int LowerBound => lowerBound;
+
+    [SerializeField]
+    private int upperBound;
+    public int UpperBound => upperBound;
+
+    [SerializeField]
+    private Dialogue dialogue;
+    public Dialogue Dialogue => dialogue;
 }
 
 [System.Serializable]

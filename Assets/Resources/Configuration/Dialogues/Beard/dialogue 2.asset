@@ -19,15 +19,15 @@ MonoBehaviour:
   words:
   - talkerType: 2
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-    words: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
+    content: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
     indexOfCorrectOption: 0
-    wordsWhenChusWB: "\u8FD9\u90FD\u80FD\u9009\u9519\uFF0C\u592A\u83DC\u4E86"
-    branches:
+    wrongChoiceWords: 
+    options:
     - title: "\u9886\u53D6\u7834\u65E7\u7684\u5251"
       optionType: 4
       hasWordsToSay: 0
       talkerType: 0
-      words: "\u7ED9\u4F60\u7834\u65E7\u7684\u5251\uFF0C\u62FF\u597D\u4E86\u3002"
+      words: "\u7ED9\u4F60\u7834\u65E7\u7684\u5251\uFF0C\u62FF\u597D\u54AF\u3002"
       dialogue: {fileID: 0}
       specifyIndex: -1
       goBack: 0
@@ -63,7 +63,7 @@ MonoBehaviour:
       optionType: 3
       hasWordsToSay: 0
       talkerType: 0
-      words: "\u90A3\u6211\u5C31\u6536\u4E0B\u4E86\u3002"
+      words: "\u7ED9\u4F60\u7834\u65E7\u7684\u5200\uFF0C\u62FF\u597D\u54AF\u3002"
       dialogue: {fileID: 0}
       specifyIndex: -1
       goBack: 0

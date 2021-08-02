@@ -19,7 +19,7 @@ MonoBehaviour:
   words:
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-    words: "{[NPC]NPC001}\u5728\u6751\u5B50\u5357\u9762\u7684\u78E8\u574A\u65C1\u8FB9\u3002"
+    content: "{[NPC]NPC001}\u5728\u6751\u5B50\u5357\u9762\u7684\u78E8\u574A\u65C1\u8FB9\u3002"
     indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []

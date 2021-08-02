@@ -119,7 +119,7 @@ public class StoryInspector : Editor
                                     {
                                         GUI.enabled = false;
                                         EditorGUI.TextField(new Rect(rect2.x, rect2.y + lineHeightSpace * _lineCount, rect2.width, lineHeight),
-                                            (dialogue.objectReferenceValue as Dialogue).Words[0].Words);
+                                            (dialogue.objectReferenceValue as Dialogue).Words[0].Content);
                                         GUI.enabled = true;
                                         _lineCount++;
                                     }

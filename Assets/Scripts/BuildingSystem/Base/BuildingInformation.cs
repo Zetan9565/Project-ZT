@@ -22,6 +22,10 @@ public class BuildingInformation : ScriptableObject
     public bool Manageable => manageable;
 
     [SerializeField]
+    private string manageBtnName = "管理";
+    public string ManageBtnName => manageBtnName;
+
+    [SerializeField]
     private float buildTime = 10.0f;
     public float BuildTime
     {

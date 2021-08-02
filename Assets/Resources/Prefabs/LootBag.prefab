@@ -100,6 +100,8 @@ MonoBehaviour:
   activated: 1
   customName: 1
   _name: "\u9F13\u9F13\u7684\u888B\u5B50"
+  icon: {fileID: 0}
+  hidePanelOnInteract: 1
   disappearTime: 30
   lootItems: []
 --- !u!61 &894064566661103019

@@ -19,15 +19,15 @@ MonoBehaviour:
   words:
   - talkerType: 2
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    words: "\u5C0F\u5E05\u54E5\uFF0C\u6709\u4EC0\u4E48\u4E8B\u5417\uFF1F"
+    content: "\u5C0F\u5E05\u54E5\uFF0C\u6709\u4EC0\u4E48\u4E8B\u5417\uFF1F"
     indexOfCorrectOption: 1
-    wordsWhenChusWB: "\u6CA1\u4E8B\u5C31\u7B97\u4E86\u3002"
-    branches:
+    wrongChoiceWords: "\u6CA1\u4E8B\u5C31\u7B97\u4E86\u3002"
+    options:
     - title: "\u6CA1\u4E8B"
       optionType: 2
-      hasWordsToSay: 0
+      hasWordsToSay: 1
       talkerType: 0
-      words: 
+      words: "\u4E0D\u597D\u610F\u601D\uFF0C\u53EF\u80FD\u95EE\u9519\u4EBA\u4E86\u3002"
       dialogue: {fileID: 0}
       specifyIndex: 0
       goBack: 0
@@ -98,29 +98,29 @@ MonoBehaviour:
     events: []
   - talkerType: 1
     talkerInfo: {fileID: 0}
-    words: "\u542C\u8BF4\u4F60\u9047\u5230\u4E86\u602A\u7269\uFF0C\u662F\u5728\u54EA\u513F\u9047\u5230\u7684\uFF1F"
+    content: "\u542C\u8BF4\u4F60\u9047\u5230\u4E86\u602A\u7269\uFF0C\u662F\u5728\u54EA\u513F\u9047\u5230\u7684\uFF1F"
     indexOfCorrectOption: 0
-    wordsWhenChusWB: 
-    branches: []
+    wrongChoiceWords: 
+    options: []
     events: []
   - talkerType: 2
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    words: "\u5662\uFF0C\u662F\u8FD9\u4E2A\u4E8B\u513F\u554A\u3002"
+    content: "\u5662\uFF0C\u662F\u8FD9\u4E2A\u4E8B\u513F\u554A\u3002"
     indexOfCorrectOption: 0
-    wordsWhenChusWB: 
-    branches: []
+    wrongChoiceWords: 
+    options: []
     events: []
   - talkerType: 2
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    words: "\u602A\u7269\u5728\u6751\u5B50\u5317\u8FB9\u90A3\u6761\u8DEF\u7684\u51FA\u53E3\u90A3\u513F\u5F98\u5F8A\u7740\u5462\u3002"
+    content: "\u602A\u7269\u5728\u6751\u5B50\u5317\u8FB9\u90A3\u6761\u8DEF\u7684\u51FA\u53E3\u90A3\u513F\u5F98\u5F8A\u7740\u5462\u3002"
     indexOfCorrectOption: 0
-    wordsWhenChusWB: "\u4F60\u4E0D\u4FE1\u5C31\u7B97\u4E86\uFF0C\u5C45\u7136\u8FD8\u8BF4\u8FD9\u79CD\u8BDD\uFF01"
-    branches:
+    wrongChoiceWords: "\u4F60\u4E0D\u4FE1\u5C31\u7B97\u4E86\uFF0C\u8FD8\u8BF4\u51FA\u8FD9\u79CD\u8BDD\uFF01"
+    options:
     - title: "\u76F8\u4FE1\u5979\u7684\u8BDD"
       optionType: 2
       hasWordsToSay: 0
       talkerType: 1
-      words: "O98K\uFF0C\u6211\u8FD9\u5C31\u53BB\u770B\u770B\u3002"
+      words: 
       dialogue: {fileID: 0}
       specifyIndex: -1
       goBack: 0
@@ -191,8 +191,8 @@ MonoBehaviour:
     events: []
   - talkerType: 2
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    words: "\u8BF7\u5C0F\u5FC3\uFF01"
+    content: "\u8BF7\u5C0F\u5FC3\uFF01"
     indexOfCorrectOption: 0
-    wordsWhenChusWB: 
-    branches: []
+    wrongChoiceWords: 
+    options: []
     events: []

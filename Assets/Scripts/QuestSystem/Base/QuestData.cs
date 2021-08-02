@@ -20,6 +20,9 @@ public class QuestData
 
     public bool InProgress { get; set; }//任务是否正在执行，在运行时用到
 
+    /// <summary>
+    /// 所以目标是否都已达成
+    /// </summary>
     public bool IsComplete
     {
         get
@@ -30,6 +33,9 @@ public class QuestData
         }
     }
 
+    /// <summary>
+    /// 是否已经提交完成
+    /// </summary>
     public bool IsFinished
     {
         get

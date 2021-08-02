@@ -17,7 +17,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     /// <summary>
     /// 一个游戏分在现实中的耗时(秒)
     /// </summary>
-    public static float OneMinute => Instance ? 60 / Instance.Multiples : 1;
+    public static float OneMinute => Instance ? 60 / Instance.multiples : 1;
     /// <summary>
     /// 一个游戏时在现实中的耗时(秒)
     /// </summary>
@@ -91,14 +91,8 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     [SerializeField]
     private TimeUI UI;
 
-    [SerializeField]
     [Tooltip("现实中的 1 秒折合游戏中的多少秒钟？")]
-    private int multiples = 60;
-    public int Multiples
-    {
-        get => multiples;
-        set { multiples = value; }
-    }
+    public int multiples = 60;
 
     [SerializeField]
     private float timeline = 8;
@@ -244,7 +238,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     {
         get
         {
-            int monthIndex = Months%12;
+            int monthIndex = Months % 12;
             return (Month)(monthIndex == 0 ? 12 : monthIndex);
         }
     }
@@ -308,7 +302,11 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     public decimal TotalTime
     {
         get => totalTime;
-        set => totalTime = value;
+        set
+        {
+            OnTimePassed?.Invoke(value - totalTime);
+            totalTime = value;
+        }
     }
 
     private int dayBefore = 0;
@@ -333,7 +331,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     }
     #endregion
 
-    #region 逻辑
+    #region 数据逻辑
     public void TimePase(decimal realSecond)
     {
         OnTimePassed?.Invoke(realSecond);

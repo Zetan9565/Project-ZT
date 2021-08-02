@@ -13,26 +13,26 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private Button destoryButton;
 
-    public Building MBuilding { get; private set; }
+    public BuildingData MBuilding { get; private set; }
 
     private void Awake()
     {
         destoryButton.onClick.AddListener(AskDestroy);
     }
 
-    public void Init(Building building)
+    public void Init(BuildingData building)
     {
         if (!building) return;
         MBuilding = building;
-        MBuilding.buildingAgent = this;
+        MBuilding.entity.buildingAgent = this;
         destoryButton.interactable = MBuilding.IsBuilt;
-        buildingPosition.text = "位置" + ((Vector2)MBuilding.transform.position).ToString();
+        buildingPosition.text = "位置" + ((Vector2)MBuilding.entity.transform.position).ToString();
         buildingStates.text = MBuilding.IsBuilt ? "已建成" : "建设中[" + MBuilding.leftBuildTime.ToString("F2") + "s]";
     }
 
     public void Clear(bool recycle = false)
     {
-        if (MBuilding) MBuilding.buildingAgent = null;
+        if (MBuilding) MBuilding.entity.buildingAgent = null;
         MBuilding = null;
         buildingPosition.text = string.Empty;
         if (recycle) ObjectPool.Put(gameObject);
@@ -50,7 +50,7 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         //TODO 移动视野至相应建筑
-        BuildingManager.Instance.LocateBuilding(MBuilding);
+        BuildingManager.Instance.LocateBuilding(MBuilding.entity);
     }
 
     public void Show()
@@ -65,6 +65,6 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
 
     public void AskDestroy()
     {
-        if (MBuilding) MBuilding.AskDestroy();
+        if (MBuilding) BuildingManager.Instance.DestroyBuilding(MBuilding);
     }
 }

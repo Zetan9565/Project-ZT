@@ -95,9 +95,9 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
                 data.warehouseDatas.Add(new WarehouseSaveData(kvp.Value.TalkerID, kvp.Value.warehouse));
             }
         }
-        foreach (var kvp in FindObjectsOfType<WarehouseAgent>())
+        foreach (var kvp in FindObjectsOfType<Warehouse>())
         {
-            data.warehouseDatas.Add(new WarehouseSaveData(kvp.ID, kvp.MWarehouse));
+            data.warehouseDatas.Add(new WarehouseSaveData(kvp.EntityID, kvp.WData));
         }
     }
 
@@ -207,16 +207,16 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void LoadWarehouse(SaveData data)
     {
-        WarehouseAgent[] warehouseAgents = FindObjectsOfType<WarehouseAgent>();
+        Warehouse[] warehouseAgents = FindObjectsOfType<Warehouse>();
         foreach (WarehouseSaveData wd in data.warehouseDatas)
         {
-            Warehouse warehouse = null;
+            WarehouseData warehouse = null;
             GameManager.TalkerDatas.TryGetValue(wd.handlerID, out TalkerData handler);
             if (handler) warehouse = handler.warehouse;
             else
             {
-                WarehouseAgent wagent = Array.Find(warehouseAgents, x => x.ID == wd.handlerID);
-                if (wagent) warehouse = wagent.MWarehouse;
+                Warehouse wagent = Array.Find(warehouseAgents, x => x.EntityID == wd.handlerID);
+                if (wagent) warehouse = wagent.WData;
             }
             if (warehouse != null)
             {

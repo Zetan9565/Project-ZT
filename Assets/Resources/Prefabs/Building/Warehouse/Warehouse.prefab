@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1361377691869460029}
   - component: {fileID: 1361377691869460030}
+  - component: {fileID: -2462463077964888329}
   - component: {fileID: 1361377691869460031}
   - component: {fileID: 8761270117585121961}
-  - component: {fileID: -2462463077964888329}
   - component: {fileID: -3931792385367669269}
   - component: {fileID: -8883293740048559767}
   m_Layer: 10
@@ -47,10 +47,12 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -86,6 +88,28 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &-2462463077964888329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1361377691869460025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d524d1c2af6df24e910283de3863b32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activated: 1
+  customName: 0
+  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
+  icon: {fileID: 0}
+  hidePanelOnInteract: 0
+  onDestroy:
+    m_PersistentCalls:
+      m_Calls: []
+  buildingAgent: {fileID: 0}
+  defaultSize: 50
 --- !u!58 &1361377691869460031
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -128,35 +152,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2, y: 1}
   m_EdgeRadius: 0
---- !u!114 &-2462463077964888329
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1361377691869460025}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37863b83f7b7f4141adb48cb7694b34d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  IDStarter: 
-  IDTail: 
-  name: 
-  onButtonClick:
-    m_PersistentCalls:
-      m_Calls: []
-  isUnderBuilding: 0
-  buildingFlagOffset: {x: 0, y: 0, z: 0}
-  onDestroy:
-    m_PersistentCalls:
-      m_Calls: []
-  buildingAgent: {fileID: 0}
-  leftBuildTime: 0
-  warehouse:
-    size:
-      min: 0
-      max: 50
 --- !u!114 &-3931792385367669269
 MonoBehaviour:
   m_ObjectHideFlags: 0

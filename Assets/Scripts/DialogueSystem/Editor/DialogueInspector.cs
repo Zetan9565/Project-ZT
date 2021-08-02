@@ -98,10 +98,10 @@ public class DialogueInspector : Editor
             SerializedProperty words = dialogWords.GetArrayElementAtIndex(index);
             SerializedProperty talkerType = words.FindPropertyRelative("talkerType");
             SerializedProperty talkerInfo = words.FindPropertyRelative("talkerInfo");
-            SerializedProperty w_words = words.FindPropertyRelative("words");
+            SerializedProperty content = words.FindPropertyRelative("content");
             SerializedProperty indexOfCorrectOption = words.FindPropertyRelative("indexOfCorrectOption");
-            SerializedProperty wordsWhenChusWB = words.FindPropertyRelative("wordsWhenChusWB");
-            SerializedProperty options = words.FindPropertyRelative("branches");
+            SerializedProperty wrongChoiceWords = words.FindPropertyRelative("wrongChoiceWords");
+            SerializedProperty options = words.FindPropertyRelative("options");
             SerializedProperty events = words.FindPropertyRelative("events");
 
             string talkerName;
@@ -171,11 +171,12 @@ public class DialogueInspector : Editor
                     lineCount++;
                 }
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount - lineHeight, rect.width, lineHeight * 4),
-                    w_words, new GUIContent(string.Empty));
+                    content, new GUIContent(string.Empty));
                 lineCount += 2;
                 if (EditorGUI.EndChangeCheck()) words.serializedObject.ApplyModifiedProperties();
-                if (GUI.Button(new Rect(rect.x, rect.y + lineHeightSpace * (lineCount + 0.5f), rect.width, lineHeight), "插入关键字（需取消输入状态来刷新）"))
+                if (GUI.Button(new Rect(rect.x, rect.y + lineHeightSpace * (lineCount + 0.5f), rect.width, lineHeight), "插入关键字"))
                 {
+                    GUI.FocusControl(null);
                     GenericMenu menu = new GenericMenu();
                     for (int i = 0; i < npcs.Length; i++)
                         menu.AddItem(new GUIContent($"人名/{CharacterInformation.GetSexString(npcs[i].Sex)}/{npcs[i].name}"), false, OnSelectNpc, i);
@@ -192,21 +193,21 @@ public class DialogueInspector : Editor
                     void OnSelectNpc(object i)
                     {
                         int ni = (int)i;
-                        w_words.stringValue += $"{{[NPC]{npcs[ni].ID}}}";
+                        content.stringValue += $"{{[NPC]{npcs[ni].ID}}}";
                         serializedObject.ApplyModifiedProperties();
                     }
 
                     void OnSelectItem(object i)
                     {
                         int ii = (int)i;
-                        w_words.stringValue += $"{{[ITEM]{items[ii].ID}}}";
+                        content.stringValue += $"{{[ITEM]{items[ii].ID}}}";
                         serializedObject.ApplyModifiedProperties();
                     }
 
                     void OnSelectEnemy(object i)
                     {
                         int ei = (int)i;
-                        w_words.stringValue += $"{{[ENMY]{enemies[ei].ID}}}";
+                        content.stringValue += $"{{[ENMY]{enemies[ei].ID}}}";
                         serializedObject.ApplyModifiedProperties();
                     }
                 }
@@ -243,8 +244,8 @@ public class DialogueInspector : Editor
                             EditorGUI.LabelField(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
                                 "选择其它选项时说的话：");
                             lineCount++;
-                            wordsWhenChusWB.stringValue = EditorGUI.TextArea(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
-                                wordsWhenChusWB.stringValue);
+                            wrongChoiceWords.stringValue = EditorGUI.TextArea(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount + lineHeight - 5, rect.width - 8, lineHeight),
+                                wrongChoiceWords.stringValue);
                             lineCount++;
                         }
                     }
@@ -407,7 +408,7 @@ public class DialogueInspector : Editor
                                         if (goBack.boolValue && optionType.intValue != (int)WordsOptionType.Choice)//选择型选项无法指定返回序号
                                         {
                                             indexToGoBack.intValue = EditorGUI.IntSlider(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
-                                                "返回至的对话序号", indexToGoBack.intValue, -1, dialogWords.arraySize - 1);
+                                                new GUIContent("返回至的对话序号", "-1表示返回出现该选项的原句子"), indexToGoBack.intValue, -1, dialogWords.arraySize - 1);
                                             _lineCount++;
                                         }
                                     }
@@ -641,7 +642,7 @@ public class DialogueInspector : Editor
             else
             {
                 GUI.enabled = false;
-                EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), w_words.stringValue);
+                EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), content.stringValue);
                 GUI.enabled = true;
             }
         };
@@ -653,7 +654,7 @@ public class DialogueInspector : Editor
             SerializedProperty words = dialogWords.GetArrayElementAtIndex(index);
             if (words.isExpanded)
             {
-                SerializedProperty options = words.FindPropertyRelative("branches");
+                SerializedProperty options = words.FindPropertyRelative("options");
                 SerializedProperty events = words.FindPropertyRelative("events");
                 SerializedProperty indexOfCorrectOption = words.FindPropertyRelative("indexOfCorrectOption");
                 if (dialogue.Words[index].TalkerType == TalkerType.NPC && !useUnifiedNPC.boolValue) lineCount += 1;//NPC选择
@@ -710,7 +711,7 @@ public class DialogueInspector : Editor
 
         wordsList.drawHeaderCallback = (rect) =>
         {
-            int notCmpltCount = dialogue.Words.FindAll(w => w.TalkerType == TalkerType.NPC && (!w.TalkerInfo || string.IsNullOrEmpty(w.Words)) || w.Options.Exists(b => b && !b.IsValid)).Count;
+            int notCmpltCount = dialogue.Words.FindAll(w => w.TalkerType == TalkerType.NPC && (!w.TalkerInfo || string.IsNullOrEmpty(w.Content)) || w.Options.Exists(b => b && !b.IsValid)).Count;
             EditorGUI.LabelField(rect, "对话列表", "数量：" + dialogue.Words.Count +
                 (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
         };

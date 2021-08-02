@@ -15,34 +15,20 @@ MonoBehaviour:
   _ID: NPC002
   _Name: "\u6069\u683C\u65AF"
   sex: 1
-  defaultDialogue: {fileID: 11400000, guid: 1740b858db157dc4080c2efc9a15f9be, type: 2}
+  defaultDialogue: {fileID: 11400000, guid: 982521bacf361f14289d5658a605bca4, type: 2}
   isWarehouseAgent: 1
-  warehouse:
-    size:
-      min: 0
-      max: 50
+  warehouseCapcity: 30
   isVendor: 0
   shop: {fileID: 0}
   questsStored:
   - {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
   - {fileID: 11400000, guid: 5288a43013e44284baed8b30be1f92de, type: 2}
   - {fileID: 11400000, guid: 75021802295611e4bb73ffff88713358, type: 2}
-  canDEV_RLAT: 0
-  normalItemDialogue: {fileID: 0}
-  favoriteItemDialogue:
-    level_1: {fileID: 0}
-    level_2: {fileID: 0}
-    level_3: {fileID: 0}
-    level_4: {fileID: 0}
-  hateItemDialogue:
-    level_1: {fileID: 0}
-    level_2: {fileID: 0}
-    level_3: {fileID: 0}
-    level_4: {fileID: 0}
-  favoriteItems:
-  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    favoriteLevel: 10
-  hateItems:
-  - item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
-    hateLevel: 10
+  canDEV_RLAT: 1
+  normalItemDialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
+  giftDialogues:
+  - lowerBound: 0
+    upperBound: 0
+    dialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
+  affectiveItems: []
   canMarry: 0

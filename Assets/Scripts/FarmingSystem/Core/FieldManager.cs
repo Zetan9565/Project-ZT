@@ -8,6 +8,8 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
 
     private readonly List<CropAgent> cropAgents = new List<CropAgent>();
 
+    private readonly List<FieldData> fields = new List<FieldData>();
+
     public bool IsManaging { get; private set; }
 
     public override void OpenWindow()
@@ -57,9 +59,9 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
 
     public void UpdateUI()
     {
-        UI.space.text = CurrentField.Crops.Count + "/" + CurrentField.Data.spaceOccup;
-        UI.fertility.text = CurrentField.Data.fertility.ToString();
-        UI.humidity.text = CurrentField.Data.fertility.ToString();
+        UI.space.text = CurrentField.Crops.Count + "/" + CurrentField.FData.spaceOccup;
+        UI.fertility.text = CurrentField.FData.fertility.ToString();
+        UI.humidity.text = CurrentField.FData.fertility.ToString();
         foreach (var ca in cropAgents)
             ca.UpdateInfo();
     }
@@ -83,7 +85,7 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
 
     public void DestroyCurrentField()
     {
-        if (CurrentField) CurrentField.AskDestroy();
+        if (CurrentField) BuildingManager.Instance.DestroyBuilding(CurrentField.Data);
     }
 
     public void DispatchWorker()
@@ -91,9 +93,37 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
         MessageManager.Instance.New("敬请期待");
     }
 
+    public void Reclaim(FieldData field)
+    {
+        lock (fields)
+            fields.Add(field);
+    }
+
     public void Plant(Crop crop)
     {
         CropAgent ca = ObjectPool.Get(UI.cropPrefab, UI.cropCellsParent).GetComponent<CropAgent>();
         ca.Init(crop);
+    }
+
+    public void Remove(Crop crop)
+    {
+        if (!crop) return;
+        crop.Parent.Remove(crop);
+        if (crop.UI) crop.UI.Clear(true);
+        cropAgents.Remove(crop.UI);
+    }
+
+    public void Init()
+    {
+        fields.Clear();
+        TimeManager.Instance.OnTimePassed -= TimePass;
+        TimeManager.Instance.OnTimePassed += TimePass;
+    }
+
+    private void TimePass(decimal realTime)
+    {
+        using var fieldEnum = fields.GetEnumerator();
+        while (fieldEnum.MoveNext())
+            fieldEnum.Current.TimePass((float)realTime);
     }
 }

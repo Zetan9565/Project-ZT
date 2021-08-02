@@ -11,9 +11,11 @@ public class BuildingFlag : MonoBehaviour
 
     private CanvasGroup canvasGroup;
 
-    private Building building;
+    private BuildingPreview building;
 
-    public void Init(Building building)
+    private bool IsValid => building && building.gameObject && building.Data;
+
+    public void Init(BuildingPreview building)
     {
         this.building = building;
         StartCoroutine(WaitToHide());
@@ -30,9 +32,9 @@ public class BuildingFlag : MonoBehaviour
 
     void Update()
     {
-        if (building)
+        if (building && building.Data)
         {
-            timeText.text = building.IsBuilt ? "已建成" : $"建造中[{building.leftBuildTime.ToString("F2")}s]";
+            timeText.text = building.Data.IsBuilt ? "已建成" : $"建造中[{building.Data.leftBuildTime.ToString("F2")}s]";
             Vector3 viewportPoint = Camera.main.WorldToViewportPoint(building.transform.position + building.BuildingFlagOffset);
             float sqrDistance = Vector3.SqrMagnitude(Camera.main.transform.position - building.transform.position);
             if (viewportPoint.z <= 0 || viewportPoint.x > 1 || viewportPoint.x < 0 || viewportPoint.y > 1 || viewportPoint.y < 0 || sqrDistance > 900f)
@@ -60,8 +62,8 @@ public class BuildingFlag : MonoBehaviour
 
     private IEnumerator WaitToHide()
     {
-        yield return new WaitUntil(() => !building || !building.gameObject || building.IsBuilt);
-        if (!building || !building.gameObject)
+        yield return new WaitUntil(() => !IsValid || building.Data.IsBuilt);
+        if (!IsValid)
         {
             StopAllCoroutines();
             ObjectPool.Put(gameObject);

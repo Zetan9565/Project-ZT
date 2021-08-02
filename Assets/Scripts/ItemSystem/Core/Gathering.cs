@@ -13,21 +13,11 @@ public class Gathering : InteractiveObject
     [SerializeField]
     protected bool hideOnGathered;
 
-    [SerializeField]
-    private new Collider2D collider;
-
-    private bool gatherAble = true;
-    public override bool Interactive
+    public override bool IsInteractive
     {
         get
         {
-            return gatherAble && gatheringInfo && GatherManager.Instance.GatherAgent != this;
-        }
-
-        protected set
-        {
-            gatherAble = value;
-            collider.enabled = gatherAble;
+            return gatheringInfo && gatheringInfo.ProductItems.Count > 0 && GatherManager.Instance.Gathering != this;
         }
     }
 
@@ -42,7 +32,6 @@ public class Gathering : InteractiveObject
     {
         onGatherFinish?.Invoke();
         if (hideOnGathered) GetComponent<Renderer>().enabled = false;
-        Interactive = false;
         if (GatheringInfo.ProductItems.Count > 0)
         {
             List<ItemInfo> lootItems = DropItemInfo.Drop(GatheringInfo.ProductItems);
@@ -58,10 +47,10 @@ public class Gathering : InteractiveObject
 
     protected virtual IEnumerator UpdateTime()
     {
-        if (GatheringInfo.RefreshTime < 0) yield return null;
+        if (GatheringInfo.RefreshTime < 0) yield break;
 
         LeftRefreshTime = GatheringInfo.RefreshTime;
-        while (!Interactive && GatheringInfo)
+        while (!IsInteractive && GatheringInfo)
         {
             LeftRefreshTime -= Time.deltaTime;
             if (LeftRefreshTime <= 0)
@@ -76,7 +65,7 @@ public class Gathering : InteractiveObject
 
     public virtual void Refresh()
     {
-        Interactive = true;
+        IsInteractive = true;
         if (hideOnGathered) GetComponent<Renderer>().enabled = true;
     }
 
@@ -84,14 +73,14 @@ public class Gathering : InteractiveObject
     {
         if (GatherManager.Instance.Gather(this))
         {
-            return true;
+            return base.DoInteract();
         }
-        else return false;
+        return false;
     }
 
     protected override void OnExit(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && GatherManager.Instance.GatherAgent == this)
+        if (collision.CompareTag("Player") && GatherManager.Instance.Gathering == this)
         {
             GatherManager.Instance.Cancel();
         }

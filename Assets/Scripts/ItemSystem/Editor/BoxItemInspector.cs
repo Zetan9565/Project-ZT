@@ -37,10 +37,16 @@ public partial class ItemInspector
                 lineCount++;
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight),
                     minAmount, new GUIContent("最少产出"));
+                if (minAmount.intValue < 1) minAmount.intValue = 1;
                 EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight),
                     maxAmount, new GUIContent("最多产出"));
-                if (minAmount.intValue < 1) minAmount.intValue = 1;
                 if (maxAmount.intValue < 1) maxAmount.intValue = 1;
+                if (minAmount.intValue > maxAmount.intValue)
+                {
+                    minAmount.intValue = maxAmount.intValue + minAmount.intValue;
+                    maxAmount.intValue = minAmount.intValue - maxAmount.intValue;
+                    minAmount.intValue = minAmount.intValue - maxAmount.intValue;
+                }
             }
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();

@@ -16,10 +16,13 @@ public class FieldData
 
     public List<CropData> Crops { get; } = new List<CropData>();
 
+    private readonly List<CropData> dieCrops = new List<CropData>();
+
     public FieldData(FieldInformation info)
     {
         Info = info;
         humidity = info.Humidity;
+        spaceOccup = info.Capacity;
     }
 
     public CropData PlantCrop(CropInformation crop)
@@ -36,7 +39,7 @@ public class FieldData
     public void RemoveCrop(CropData crop)
     {
         if (!crop) return;
-        Crops.Remove(crop);
+        dieCrops.Add(crop);
     }
 
     public void TimePass(float realTime)
@@ -45,11 +48,23 @@ public class FieldData
         {
             crop.Grow(realTime);
         }
+        foreach (CropData crop in dieCrops)
+        {
+            if (crop.entity) crop.entity.Recycle();
+            if (GameManager.Crops.TryGetValue(crop.Info, out var find))
+                find.Remove(crop.entity);
+
+            Crops.Remove(crop);
+            if (GameManager.CropDatas.TryGetValue(crop.Info, out var find2))
+                find2.Remove(crop);
+        }
+        dieCrops.Clear();
     }
 
     public void OnDestroy()
     {
         Crops.Clear();
+        dieCrops.Clear();
     }
 
     public static implicit operator bool(FieldData self)

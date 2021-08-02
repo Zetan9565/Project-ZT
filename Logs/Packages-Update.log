@@ -216,3 +216,11 @@ The following packages were 已更新:
   com.unity.render-pipelines.core 从版本 10.5.0 到 11.0.0
   com.unity.render-pipelines.universal 从版本 10.5.0 到 11.0.0
   com.unity.timeline 从版本 1.4.8 到 1.5.5
+
+=== Mon Aug  2 11:23:12 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.collab-proxy 从版本 1.5.7 到 1.7.1

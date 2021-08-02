@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ID: CROP001
   _name: "\u6D4B\u8BD5\u4F5C\u72691"
-  cropType: 2
+  cropType: 1
   temperature: 20
   humidity: 50
   size: 1
@@ -23,40 +23,22 @@ MonoBehaviour:
     type: 3}
   plantSeason: 0
   stages:
-  - stage: 0
-    lastingDays: 1
-    graph: {fileID: 21300000, guid: 92157dd176782664291ac2f7194171ea, type: 3}
-    repeatTimes: 0
-    indexToReturn: 0
-    gatherInfo: {fileID: 0}
   - stage: 1
     lastingDays: 1
     graph: {fileID: 0}
     repeatTimes: 0
     indexToReturn: 0
     gatherInfo: {fileID: 0}
-  - stage: 2
-    lastingDays: 1
-    graph: {fileID: 0}
-    repeatTimes: 1
-    indexToReturn: 0
-    gatherInfo: {fileID: 0}
-  - stage: 4
-    lastingDays: 1
-    graph: {fileID: 0}
-    repeatTimes: 1
-    indexToReturn: 0
-    gatherInfo: {fileID: 11400000, guid: f8d493d6b3173974d818047699d10d9b, type: 2}
   - stage: 5
     lastingDays: 1
     graph: {fileID: 0}
     repeatTimes: 1
     indexToReturn: 0
-    gatherInfo: {fileID: 0}
+    gatherInfo: {fileID: 11400000, guid: f8d493d6b3173974d818047699d10d9b, type: 2}
   - stage: 7
     lastingDays: 1
     graph: {fileID: 0}
-    repeatTimes: 1
+    repeatTimes: 0
     indexToReturn: 0
     gatherInfo: {fileID: 0}
   - stage: 8

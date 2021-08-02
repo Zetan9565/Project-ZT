@@ -55,7 +55,7 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
         else
             position = preview.transform.position;
 
-        Bounds fieldB = CurrentField.collider.bounds;
+        Bounds fieldB = CurrentField.Range.bounds;
         Bounds cropB = preview.collider2D.bounds;
         position = new Vector2(Mathf.Clamp(position.x, fieldB.center.x - fieldB.extents.x + cropB.extents.x, fieldB.center.x + fieldB.extents.x - cropB.extents.x),
             Mathf.Clamp(position.y, fieldB.center.y - fieldB.extents.y + cropB.extents.y, fieldB.center.y + fieldB.extents.y - cropB.extents.y));
@@ -110,10 +110,7 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
     {
         if (PlantAble)
         {
-            CropData cd = new CropData(currentInfo, CurrentField.Data);
-            Crop crop = Instantiate(currentInfo.Prefab);
-            crop.Plant(cd, CurrentField, preview.Position);
-            FieldManager.Instance.Plant(crop);
+            CurrentField.PlantCrop(currentInfo, preview.Position);
         }
         else
             MessageManager.Instance.New("存在障碍物");

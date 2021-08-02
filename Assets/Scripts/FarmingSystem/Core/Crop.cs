@@ -5,11 +5,11 @@ using UnityEngine;
 [AddComponentMenu("ZetanStudio/农牧/农作物")]
 public class Crop : Gathering
 {
-    public string EntityID { get; private set; }
+    public string EntityID => Data ? Data.entityID : string.Empty;
 
-    public CropInformation Info { get; private set; }
+    public CropData Data;// { get; private set; }
 
-    public CropData Data { get; private set; }
+    public CropAgent UI;
 
     public bool Dry
     {
@@ -30,11 +30,11 @@ public class Crop : Gathering
 
     public Field Parent { get; private set; }
 
-    public override bool Interactive
+    public override bool IsInteractive
     {
         get
         {
-            if (Data) return Data.harvestAble;
+            if (Data) return base.IsInteractive && Data.HarvestAble;
             else return false;
         }
     }
@@ -42,9 +42,10 @@ public class Crop : Gathering
     [HideInInspector]
     public UnityEngine.Events.UnityEvent onHarvestFinish = new UnityEngine.Events.UnityEvent();
 
-    public void Plant(CropData data, Field parent, Vector3 position)
+    public void Init(CropData data, Field parent, Vector3 position)
     {
         Clear();
+        data.entity = this;
         Data = data;
         Data.OnStageChange += OnStageChange;
         Parent = parent;
@@ -52,50 +53,39 @@ public class Crop : Gathering
         transform.position = position;
     }
 
-
-    private void HarvestDone()
+    public override void GatherSuccess()
     {
-
-    }
-
-    public void OnHarvestSuccess()
-    {
-        onHarvestFinish?.Invoke();
-        List<ItemInfo> lootItems = Data.OnHarvestSuccess();
-        if (lootItems.Count > 0)
-        {
-            LootAgent la = ObjectPool.Get(Data.currentStage.GatherInfo.LootPrefab).GetComponent<LootAgent>();
-            la.Init(lootItems, transform.position);
-        }
-        HarvestDone();
+        base.GatherSuccess();
+        Data.OnHarvest();
     }
 
     private void Clear()
     {
-        if (Info)
+        if (Data && Data.Info)
         {
-            GameManager.Crops.TryGetValue(Info, out var crops);
+            GameManager.Crops.TryGetValue(Data.Info, out var crops);
             if (crops != null)
             {
                 crops.Remove(this);
-                if (crops.Count < 1) GameManager.Crops.Remove(Info);
+                if (crops.Count < 1) GameManager.Crops.Remove(Data.Info);
             }
-            Info = null;
+            Data = null;
         }
         if (Parent)
         {
             Parent.Crops.Remove(this);
             Parent = null;
         }
-        EntityID = string.Empty;
         gatheringInfo = null;
-        NotifyCenter.Instance.RemoveListener(this);
+        UI = null;
     }
 
     private void OnStageChange(CropStage stage)
     {
+        if (!stage) return;
         if (stage.HarvestAble)
             gatheringInfo = Data.currentStage.GatherInfo;
+        else gatheringInfo = null;
     }
 
     public void Recycle()
@@ -107,7 +97,7 @@ public class Crop : Gathering
     //农作物的刷新不依赖采集物
     protected override IEnumerator UpdateTime()
     {
-        yield return null;
+        yield break;
     }
 
     private void Awake()

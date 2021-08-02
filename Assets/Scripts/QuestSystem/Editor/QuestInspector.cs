@@ -214,7 +214,7 @@ public class QuestInspector : Editor
                     for (int i = 0; i < quest.BeginDialogue.Words.Count; i++)
                     {
                         var words = quest.BeginDialogue.Words[i];
-                        dialogue += "[" + words.TalkerName + "]说：\n-" + words.Words;
+                        dialogue += "[" + words.TalkerName + "]说：\n-" + words.Content;
                         for (int j = 0; j < words.Options.Count; j++)
                         {
                             dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
@@ -238,7 +238,7 @@ public class QuestInspector : Editor
                     for (int i = 0; i < quest.OngoingDialogue.Words.Count; i++)
                     {
                         var words = quest.OngoingDialogue.Words[i];
-                        dialogue += "[" + words.TalkerName + "]说：\n-" + words.Words;
+                        dialogue += "[" + words.TalkerName + "]说：\n-" + words.Content;
                         for (int j = 0; j < words.Options.Count; j++)
                         {
                             dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
@@ -262,7 +262,7 @@ public class QuestInspector : Editor
                     for (int i = 0; i < quest.CompleteDialogue.Words.Count; i++)
                     {
                         var words = quest.CompleteDialogue.Words[i];
-                        dialogue += "[" + words.TalkerName + "]说：\n-" + words.Words;
+                        dialogue += "[" + words.TalkerName + "]说：\n-" + words.Content;
                         for (int j = 0; j < words.Options.Count; j++)
                         {
                             dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
@@ -781,7 +781,7 @@ public class QuestInspector : Editor
                 {
                     GUI.enabled = false;
                     EditorGUI.TextArea(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                        quest.TalkObjectives[index].Dialogue.Words[0].TalkerName + "说：" + quest.TalkObjectives[index].Dialogue.Words[0].Words);
+                        quest.TalkObjectives[index].Dialogue.Words[0].TalkerName + "说：" + quest.TalkObjectives[index].Dialogue.Words[0].Content);
                     GUI.enabled = true;
                     lineCount++;
                 }

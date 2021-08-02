@@ -19,7 +19,7 @@ MonoBehaviour:
   group: {fileID: 0}
   acceptCondition:
     conditions:
-    - type: 4
+    - type: 2
       level: 1
       relatedQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
       relatedItem: {fileID: 0}
@@ -30,7 +30,7 @@ MonoBehaviour:
   timeUnit: 2
   beginDialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
   ongoingDialogue: {fileID: 11400000, guid: c761d5a3c1f0b214395f27054fb51f08, type: 2}
-  completeDialogue: {fileID: 11400000, guid: c761d5a3c1f0b214395f27054fb51f08, type: 2}
+  completeDialogue: {fileID: 11400000, guid: 1740b858db157dc4080c2efc9a15f9be, type: 2}
   rewardMoney: 0
   rewardEXP: 0
   rewardItems: []

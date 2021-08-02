@@ -28,7 +28,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 703144903013247418}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -98,19 +98,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b445cbcd52e11341ad724f3d1fc9737, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IDStarter: 
-  IDTail: 
-  name: 
-  onButtonClick:
-    m_PersistentCalls:
-      m_Calls: []
-  isUnderBuilding: 0
-  buildingFlagOffset: {x: 0, y: 0, z: 0}
+  activated: 1
+  customName: 0
+  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
+  icon: {fileID: 0}
+  hidePanelOnInteract: 0
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
   buildingAgent: {fileID: 0}
-  leftBuildTime: 0
   collider: {fileID: 8480943704564243532}
 --- !u!61 &8480943704564243532
 BoxCollider2D:

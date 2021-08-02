@@ -12,16 +12,16 @@ public class LootAgent : InteractiveObject
     [HideInInspector]
     public List<ItemInfo> lootItems = new List<ItemInfo>();
 
-    public override bool Interactive
+    public override bool IsInteractive
     {
         get
         {
-            return base.Interactive && !LootManager.Instance.IsPicking;
+            return base.IsInteractive && !LootManager.Instance.IsPicking;
         }
 
         protected set
         {
-            base.Interactive = value;
+            base.IsInteractive = value;
         }
     }
 
@@ -49,6 +49,8 @@ public class LootAgent : InteractiveObject
 
     public override bool DoInteract()
     {
-        return LootManager.Instance.Pick(this);
+        if (LootManager.Instance.Pick(this))
+            return base.DoInteract();
+        return false;
     }
 }

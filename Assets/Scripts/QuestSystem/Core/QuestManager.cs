@@ -524,6 +524,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             OnQuestStatusChange?.Invoke();
             NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.ObjectiveChange, objective);
         }
+        UpdateUI();
         //else Debug.Log("无操作");
     }
     #endregion
@@ -531,13 +532,15 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     #region UI相关
     public void UpdateUI()
     {
-        using (var qaEnum = progressQuestAgents.GetEnumerator())
-            while (qaEnum.MoveNext())
-                qaEnum.Current.UpdateStatus();
-
         using (var qbaEnum = questBoardAgents.GetEnumerator())
             while (qbaEnum.MoveNext())
                 qbaEnum.Current.UpdateStatus();
+
+        if (!IsUIOpen) return;
+
+        using (var qaEnum = progressQuestAgents.GetEnumerator())
+            while (qaEnum.MoveNext())
+                qaEnum.Current.UpdateStatus();
 
         using (var qgaEnum = questGroupAgents.GetEnumerator())
             while (qgaEnum.MoveNext())

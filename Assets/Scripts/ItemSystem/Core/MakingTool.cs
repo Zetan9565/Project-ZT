@@ -3,33 +3,35 @@
 [DisallowMultipleComponent]
 public class MakingTool : Building
 {
-    public MakingToolInformation Info { get; private set; }
+    public MakingToolInformation ToolInfo { get; private set; }
 
-    public override bool Interactive
+    public override bool IsInteractive
     {
         get
         {
-            return base.Interactive && Info && !MakingManager.Instance.IsMaking;
+            return base.IsInteractive && ToolInfo && !MakingManager.Instance.IsMaking;
         }
     }
 
     public override void OnCancelManage()
     {
+        base.OnCancelManage();
         if (MakingManager.Instance.CurrentTool == this)
             MakingManager.Instance.CancelMake();
     }
 
     public override void OnManage()
     {
+        base.OnManage();
         MakingManager.Instance.Make(this);
     }
 
     protected override void OnBuilt()
     {
-        if (MBuildingInfo.Addendas.Count > 0)
+        if (Info.Addendas.Count > 0)
         {
-            if (MBuildingInfo.Addendas[0] is MakingToolInformation info)
-                Info = info;
+            if (Info.Addendas[0] is MakingToolInformation info)
+                ToolInfo = info;
         }
     }
 }

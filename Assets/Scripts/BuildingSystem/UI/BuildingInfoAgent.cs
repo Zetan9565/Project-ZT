@@ -13,11 +13,11 @@ public class BuildingInfoAgent : MonoBehaviour,
 
     private ScrollRect parentRect;
 
-    public BuildingInformation MBuildingInfo { get; private set; }
+    public BuildingInformation Info { get; private set; }
 
     public void Init(BuildingInformation buildingInfo, ScrollRect parentRect = null)
     {
-        MBuildingInfo = buildingInfo;
+        Info = buildingInfo;
         nameText.text = buildingInfo.name;
         this.parentRect = parentRect;
     }
@@ -25,7 +25,7 @@ public class BuildingInfoAgent : MonoBehaviour,
     public void Clear(bool recycle = false)
     {
         nameText.text = string.Empty;
-        MBuildingInfo = null;
+        Info = null;
         if (recycle) ObjectPool.Put(gameObject);
     }
 
@@ -39,8 +39,8 @@ public class BuildingInfoAgent : MonoBehaviour,
 #elif UNITY_ANDROID
         if (touchTime < 0.5f)
         {
-            BuildingManager.Instance.ShowDescription(MBuildingInfo);
-            BuildingManager.Instance.ShowBuiltList(MBuildingInfo);
+            BuildingManager.Instance.ShowDescription(Info);
+            BuildingManager.Instance.ShowBuiltList(Info);
         }
 #endif
     }
@@ -65,12 +65,12 @@ public class BuildingInfoAgent : MonoBehaviour,
 
     void TryBuild()
     {
-        if (!BackpackManager.Instance.IsMaterialsEnough(MBuildingInfo.Materials))
+        if (!BackpackManager.Instance.IsMaterialsEnough(Info.Materials))
         {
             MessageManager.Instance.New("耗材不足");
             return;
         }
-        else BuildingManager.Instance.CreatPreview(MBuildingInfo);
+        else BuildingManager.Instance.CreatPreview(Info);
     }
 
     public void OnLongPress()
@@ -136,7 +136,7 @@ public class BuildingInfoAgent : MonoBehaviour,
 #if UNITY_ANDROID
         if (parentRect) parentRect.OnEndDrag(eventData);
         if (BuildingManager.Instance.IsPreviewing && eventData.button == PointerEventData.InputButton.Left)
-            BuildingManager.Instance.Place();
+            BuildingManager.Instance.DoPlace();
 #endif
     }
 }

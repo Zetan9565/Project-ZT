@@ -43,8 +43,8 @@ MonoBehaviour:
     onlyDropForQuest: 0
     bindedQuest: {fileID: 0}
   - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
-    minAmount: 5
-    maxAmount: 5
+    minAmount: 10
+    maxAmount: 10
     dropRate: 100
     onlyDropForQuest: 0
     bindedQuest: {fileID: 0}

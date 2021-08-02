@@ -27,10 +27,11 @@ public class Talker : Character
 
     [SerializeField]
     private MapIconHolder iconHolder;
+    public Interactive Interactive { get; private set; }
 
     public new Transform transform { get; private set; }
 
-    public bool Interactive
+    public bool IsInteractive
     {
         get
         {
@@ -55,7 +56,7 @@ public class Talker : Character
                 Data.shop = Instantiate(Info.Shop);
                 Data.shop.Init();
             }
-            else if (Info.IsWarehouseAgent) Data.warehouse = new Warehouse(Info.Warehouse.size.Max);
+            else if (Info.IsWarehouseAgent) Data.warehouse = new WarehouseData(Info.WarehouseCapcity);
             Data.Info = Info;
             Data.InitQuest(Info.QuestsStored);
             GameManager.TalkerDatas.Add(TalkerID, Data);
@@ -111,7 +112,7 @@ public class Talker : Character
     private string GetMapIconName()
     {
         System.Text.StringBuilder name = new System.Text.StringBuilder(TalkerName);
-        if (Info.IsVendor && Info.Shop || Info.IsWarehouseAgent && Info.Warehouse)
+        if (Info.IsVendor && Info.Shop || Info.IsWarehouseAgent && Info.WarehouseCapcity > 0)
         {
             name.Append("<");
             if (Info.IsVendor) name.Append(Info.Shop.ShopName);
@@ -126,6 +127,7 @@ public class Talker : Character
     #region MonoBehaviour
     private void Awake()
     {
+        Interactive = GetComponent<Interactive>();
         iconHolder = GetComponent<MapIconHolder>();
         if (iconHolder)
         {
@@ -165,126 +167,4 @@ public class Talker : Character
         Gizmos.DrawWireCube(base.transform.position + questFlagOffset, Vector3.one);
     }
     #endregion
-}
-
-[System.Serializable]
-public class TalkerData : CharacterData
-{
-    public TalkerInformation Info
-    {
-        get
-        {
-            return (TalkerInformation)info;
-        }
-        set
-        {
-            info = value;
-        }
-    }
-    public string TalkerID
-    {
-        get
-        {
-            if (Info) return Info.ID;
-            return string.Empty;
-        }
-    }
-
-    public string TalkerName
-    {
-        get
-        {
-            if (Info) return Info.name;
-            return string.Empty;
-        }
-    }
-
-    public Relationship relationshipInstance;
-
-    public Warehouse warehouse;
-
-    public ShopInformation shop;
-
-    public List<TalkObjectiveData> objectivesTalkToThis = new List<TalkObjectiveData>();
-    public List<SubmitObjectiveData> objectivesSubmitToThis = new List<SubmitObjectiveData>();
-
-    public delegate void DialogueListener();
-    public event DialogueListener OnTalkBeginEvent;
-    public event DialogueListener OnTalkFinishedEvent;
-
-    public List<QuestData> questInstances = new List<QuestData>();
-
-    public TalkerData(TalkerInformation info) : base(info)
-    {
-
-    }
-
-    public virtual void OnTalkBegin()
-    {
-        OnTalkBeginEvent?.Invoke();
-    }
-
-    public virtual void OnTalkFinished()
-    {
-        OnTalkFinishedEvent?.Invoke();
-    }
-
-    public void OnGetGift(ItemBase gift)
-    {
-        if (Info.FavoriteItems.Exists(x => x.Item.ID == gift.ID))
-        {
-            FavoriteItemInfo find = Info.FavoriteItems.Find(x => x.Item.ID == gift.ID);
-            relationshipInstance.RelationshipValue.Current += (int)find.FavoriteLevel;
-        }
-        else if (Info.HateItems.Exists(x => x.Item.ID == gift.ID))
-        {
-            HateItemInfo find = Info.HateItems.Find(x => x.Item.ID == gift.ID);
-            relationshipInstance.RelationshipValue.Current -= (int)find.HateLevel;
-        }
-        else
-        {
-            relationshipInstance.RelationshipValue.Current += 5;
-        }
-    }
-
-    public void InitQuest(List<Quest> questsStored)
-    {
-        if (questsStored == null) return;
-        if (questInstances.Count > 0) questInstances.Clear();
-        foreach (Quest quest in questsStored)
-        {
-            if (quest)
-            {
-                QuestData questInstance = new QuestData(quest)
-                {
-                    originalQuestHolder = this,
-                    currentQuestHolder = this
-                };
-                questInstances.Add(questInstance);
-            }
-        }
-    }
-
-    public void TryRemoveObjective(ObjectiveData objective, bool befCmplt)
-    {
-        if (!befCmplt && objective.IsComplete)
-            if (objective is TalkObjectiveData || objective is SubmitObjectiveData)
-                if (objectivesTalkToThis.Contains(objective as TalkObjectiveData))
-                    objectivesTalkToThis.RemoveAll(x => x == objective as TalkObjectiveData);
-                else if (objectivesSubmitToThis.Contains(objective as SubmitObjectiveData))
-                    objectivesSubmitToThis.RemoveAll(x => x == objective as SubmitObjectiveData);
-    }
-
-    public void TransferQuestToThis(QuestData quest)
-    {
-        if (!quest) return;
-        questInstances.Add(quest);
-        quest.currentQuestHolder.questInstances.Remove(quest);
-        quest.currentQuestHolder = this;
-    }
-
-    public static implicit operator bool(TalkerData self)
-    {
-        return self != null;
-    }
 }

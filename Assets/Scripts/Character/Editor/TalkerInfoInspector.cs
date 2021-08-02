@@ -1,0 +1,407 @@
+﻿using UnityEditor;
+using UnityEditorInternal;
+using UnityEngine;
+
+public partial class CharacterInfoInspector
+{
+    TalkerInformation talker;
+    SerializedProperty defalutDialogue;
+    SerializedProperty canDEV_RLAT;
+    SerializedProperty normalItemDialogue;
+    SerializedProperty giftDialogues;
+    SerializedProperty affectiveItems;
+    SerializedProperty canMarry;
+    SerializedProperty isWarehouseAgent;
+    SerializedProperty warehouseCapcity;
+    SerializedProperty isVendor;
+    SerializedProperty shop;
+
+    SerializedProperty questsStored;
+
+    int barIndex;
+
+    ReorderableList giftDialoguesList;
+    ReorderableList affectiveItemsList;
+    ReorderableList questList;
+
+    void TalkerInfoEnable()
+    {
+        defalutDialogue = serializedObject.FindProperty("defaultDialogue");
+        canDEV_RLAT = serializedObject.FindProperty("canDEV_RLAT");
+        normalItemDialogue = serializedObject.FindProperty("normalItemDialogue");
+        giftDialogues = serializedObject.FindProperty("giftDialogues");
+        affectiveItems = serializedObject.FindProperty("affectiveItems");
+        canMarry = serializedObject.FindProperty("canMarry");
+        isWarehouseAgent = serializedObject.FindProperty("isWarehouseAgent");
+        isVendor = serializedObject.FindProperty("isVendor");
+        warehouseCapcity = serializedObject.FindProperty("warehouseCapcity");
+        shop = serializedObject.FindProperty("shop");
+        questsStored = serializedObject.FindProperty("questsStored");
+
+        HandlingGiftDialogueList();
+        HandlingAffectiveItemsList();
+        HandlingQuestList();
+    }
+
+    void TalkerInfoHeader()
+    {
+        if (talker.AffectiveItems.Exists(x => talker.AffectiveItems.Find(y => y.Item == x.Item && y != x)))
+            EditorGUILayout.HelpBox("喜讨道具存在重复！", MessageType.Warning);
+        else if (string.IsNullOrEmpty(talker.name) || string.IsNullOrEmpty(talker.ID) || !talker.DefaultDialogue || talker.IsVendor && !talker.Shop ||
+            talker.CanDEV_RLAT && (!talker.NormalItemDialogue ||
+            (talker.AffectiveItems.Count > 0 && !talker.GiftDialogues.Exists(x => !x.Dialogue)) ||
+              talker.AffectiveItems.Exists(x => !x.Item)))
+            EditorGUILayout.HelpBox("该NPC信息未补全。", MessageType.Warning);
+        else EditorGUILayout.HelpBox("该NPC信息已完整。", MessageType.Info);
+    }
+
+    void HandlingGiftDialogueList()
+    {
+        giftDialoguesList = new ReorderableList(serializedObject, giftDialogues, true, true, true, true);
+        giftDialoguesList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+        {
+            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
+            SerializedProperty giftDialogue = giftDialogues.GetArrayElementAtIndex(index);
+            SerializedProperty dialogue = giftDialogue.FindPropertyRelative("dialogue");
+            SerializedProperty lowerBound = giftDialogue.FindPropertyRelative("lowerBound");
+            SerializedProperty upperBound = giftDialogue.FindPropertyRelative("upperBound");
+            EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2, lineHeight),
+                giftDialogue, new GUIContent($"对话[{lowerBound.intValue}~{upperBound.intValue}]"));
+            EditorGUI.PropertyField(new Rect(rect.x + 8 + rect.width / 2, rect.y, rect.width / 2 - 8, lineHeight),
+                dialogue, new GUIContent(string.Empty));
+            int lineCount = 1;
+            if (dialogue.objectReferenceValue)
+            {
+                Dialogue dialog = dialogue.objectReferenceValue as Dialogue;
+                if (dialog.Words[0])
+                {
+                    GUI.enabled = false;
+                    EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), $"[{dialog.Words[0].TalkerName}]说：{dialog.Words[0].Content}");
+                    GUI.enabled = true;
+                    lineCount++;
+                }
+            }
+            if (giftDialogue.isExpanded)
+            {
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    lowerBound, new GUIContent("所属亲密度区间下限"));
+                lineCount++;
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    upperBound, new GUIContent("所属亲密度区间上限"));
+            }
+            if (EditorGUI.EndChangeCheck())
+                serializedObject.ApplyModifiedProperties();
+        };
+
+        giftDialoguesList.elementHeightCallback = (index) =>
+        {
+            SerializedProperty giftDialogue = giftDialogues.GetArrayElementAtIndex(index);
+            SerializedProperty dialogue = giftDialogue.FindPropertyRelative("dialogue");
+            int lineCount = 2;
+            if (giftDialogue.isExpanded)
+            {
+                lineCount++;
+                if (dialogue.objectReferenceValue)
+                    lineCount++;
+            }
+            return lineHeightSpace * lineCount;
+        };
+
+        giftDialoguesList.onRemoveCallback = (list) =>
+        {
+            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
+            if (EditorUtility.DisplayDialog("删除", "确定删除这个对话吗？", "确定", "取消"))
+                giftDialogues.DeleteArrayElementAtIndex(list.index);
+            if (EditorGUI.EndChangeCheck())
+                serializedObject.ApplyModifiedProperties();
+        };
+
+        giftDialoguesList.drawHeaderCallback = (rect) =>
+        {
+            int notCmpltCount = talker.AffectiveItems.FindAll(x => !x.Item).Count;
+            EditorGUI.LabelField(rect, "送礼对话列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
+        };
+
+        giftDialoguesList.drawNoneElementCallback = (rect) =>
+        {
+            EditorGUI.LabelField(rect, "空列表");
+        };
+    }
+
+    void HandlingAffectiveItemsList()
+    {
+        affectiveItemsList = new ReorderableList(serializedObject, affectiveItems, true, true, true, true);
+        affectiveItemsList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+        {
+            serializedObject.Update();
+            if (talker.AffectiveItems[index].Item != null)
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.AffectiveItems[index].Item.name);
+            else
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
+            EditorGUI.BeginChangeCheck();
+            SerializedProperty favoriteItem = affectiveItems.GetArrayElementAtIndex(index);
+            SerializedProperty item = favoriteItem.FindPropertyRelative("item");
+            SerializedProperty intimacyValue = favoriteItem.FindPropertyRelative("intimacyValue");
+            EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
+                item, new GUIContent(string.Empty));
+            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight),
+                intimacyValue, new GUIContent("亲密值"));
+            if (EditorGUI.EndChangeCheck())
+                serializedObject.ApplyModifiedProperties();
+        };
+
+        affectiveItemsList.elementHeightCallback = (index) =>
+        {
+            return 2 * lineHeightSpace;
+        };
+
+        affectiveItemsList.onRemoveCallback = (list) =>
+        {
+            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
+            if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
+                affectiveItems.DeleteArrayElementAtIndex(list.index);
+            if (EditorGUI.EndChangeCheck())
+                serializedObject.ApplyModifiedProperties();
+        };
+
+        affectiveItemsList.drawHeaderCallback = (rect) =>
+        {
+            int notCmpltCount = talker.AffectiveItems.FindAll(x => !x.Item).Count;
+            EditorGUI.LabelField(rect, "亲密值道具列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
+        };
+
+        affectiveItemsList.drawNoneElementCallback = (rect) =>
+        {
+            EditorGUI.LabelField(rect, "空列表");
+        };
+    }
+
+    void HandlingQuestList()
+    {
+        questList = new ReorderableList(serializedObject, questsStored, true, true, true, true);
+
+        questList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+        {
+            serializedObject.Update();
+            if (talker.QuestsStored[index])
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.QuestsStored[index].Title);
+            else
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
+            SerializedProperty quest = questsStored.GetArrayElementAtIndex(index);
+            EditorGUI.BeginChangeCheck();
+            Quest qBef = quest.objectReferenceValue as Quest;
+            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), quest, new GUIContent(string.Empty));
+            if (qBef != quest.objectReferenceValue as Quest && talker.QuestsStored.Contains(quest.objectReferenceValue as Quest))
+            {
+                EditorUtility.DisplayDialog("错误", "已添加该任务。", "确定");
+                quest.objectReferenceValue = qBef;
+            }
+            else
+            {
+                var conflictTalker = allTalkers.Find(x => x.QuestsStored.Count > 0 && x.QuestsStored.Contains(quest.objectReferenceValue as Quest));
+                if (conflictTalker && conflictTalker != talker)
+                {
+                    EditorUtility.DisplayDialog("错误", "[" + conflictTalker.name + "]已使用该任务，无法添加。", "确定");
+                    quest.objectReferenceValue = qBef;
+                }
+            }
+            if (EditorGUI.EndChangeCheck())
+                serializedObject.ApplyModifiedProperties();
+        };
+
+        questList.elementHeightCallback = (int index) =>
+        {
+            return 2 * lineHeightSpace;
+        };
+
+        questList.onAddCallback = (list) =>
+        {
+            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
+            if (list.index > 0 && list.index < talker.QuestsStored.Count)
+                talker.QuestsStored.Insert(list.index, null);
+            else talker.QuestsStored.Add(null);
+            if (EditorGUI.EndChangeCheck())
+                serializedObject.ApplyModifiedProperties();
+        };
+
+        questList.onRemoveCallback = (list) =>
+        {
+            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
+            if (EditorUtility.DisplayDialog("删除", "确定删除这个任务吗？", "确定", "取消"))
+                talker.QuestsStored.RemoveAt(list.index);
+            if (EditorGUI.EndChangeCheck())
+                serializedObject.ApplyModifiedProperties();
+        };
+
+        questList.drawHeaderCallback = (rect) =>
+        {
+            int notCmpltCount = talker.QuestsStored.FindAll(x => !x).Count;
+            EditorGUI.LabelField(rect, "任务列表", "数量：" + talker.QuestsStored.Count + (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+        };
+
+        questList.drawNoneElementCallback = (rect) =>
+        {
+            EditorGUI.LabelField(rect, "空列表");
+        };
+    }
+
+    void DrawTalkerInfo()
+    {
+        if (talker)
+            barIndex = GUILayout.Toolbar(barIndex, new string[] { "基本信息", "仓库和商店", "任务信息", "亲密度信息" });
+        EditorGUILayout.Space();
+        switch (barIndex)
+        {
+            case 0:
+                #region case 0
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
+                if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID())
+                {
+                    if (!string.IsNullOrEmpty(_ID.stringValue) && ExistsID()) EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
+                    else EditorGUILayout.HelpBox("识别码为空！", MessageType.Error);
+                    if (GUILayout.Button("自动生成识别码"))
+                    {
+                        _ID.stringValue = GetAutoID();
+                        EditorGUI.FocusTextInControl(null);
+                    }
+                }
+                EditorGUILayout.PropertyField(_Name, new GUIContent("名称"));
+                EditorGUILayout.PropertyField(sex, new GUIContent("性别"));
+                EditorGUILayout.PropertyField(defalutDialogue, new GUIContent("默认对话"));
+                if (talker.DefaultDialogue)
+                {
+                    if (talker.DefaultDialogue.Words.Exists(x => x.NeedToChusCorrectOption))
+                        EditorGUILayout.HelpBox("该对话有选择型分支，不建议用作默认对话。", MessageType.Warning);
+                    string dialogue = string.Empty;
+                    for (int i = 0; i < talker.DefaultDialogue.Words.Count; i++)
+                    {
+                        var words = talker.DefaultDialogue.Words[i];
+                        dialogue += "[" + words.TalkerName + "]说：\n-" + words.Content;
+                        for (int j = 0; j < words.Options.Count; j++)
+                        {
+                            dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
+                        }
+                        dialogue += i == talker.DefaultDialogue.Words.Count - 1 ? string.Empty : "\n";
+                    }
+                    GUI.enabled = false;
+                    EditorGUILayout.TextArea(dialogue);
+                    GUI.enabled = true;
+                }
+                if (EditorGUI.EndChangeCheck())
+                    serializedObject.ApplyModifiedProperties();
+                #endregion
+                break;
+            case 1:
+                #region case 1
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                if (talker)
+                {
+                    EditorGUILayout.PropertyField(isWarehouseAgent, new GUIContent("是仓库管理员"));
+                    if (isWarehouseAgent.boolValue)
+                    {
+                        EditorGUILayout.PropertyField(warehouseCapcity, new GUIContent("仓库容量"));
+                    }
+                    EditorGUILayout.PropertyField(isVendor, new GUIContent("是商贩"));
+                    if (isVendor.boolValue)
+                    {
+                        EditorGUILayout.PropertyField(shop, new GUIContent("商铺信息"));
+                        if (talker.Shop)
+                        {
+                            EditorGUILayout.BeginVertical("Box");
+                            EditorGUILayout.LabelField("商店名称", talker.Shop.ShopName);
+                            if (talker.Shop.Commodities.Count > 0)
+                            {
+                                EditorGUILayout.LabelField("商品列表", new GUIStyle { fontStyle = FontStyle.Bold });
+                                for (int i = 0; i < talker.Shop.Commodities.Count; i++)
+                                    EditorGUILayout.LabelField("商品 " + (i + 1), talker.Shop.Commodities[i].Item.name);
+                            }
+                            if (talker.Shop.Acquisitions.Count > 0)
+                            {
+                                EditorGUILayout.LabelField("收购品列表", new GUIStyle { fontStyle = FontStyle.Bold });
+                                for (int i = 0; i < talker.Shop.Acquisitions.Count; i++)
+                                    EditorGUILayout.LabelField("收购品 " + (i + 1), talker.Shop.Acquisitions[i].Item.name);
+                            }
+                            EditorGUILayout.EndVertical();
+                        }
+                    }
+                }
+                if (EditorGUI.EndChangeCheck())
+                    serializedObject.ApplyModifiedProperties();
+                #endregion
+                break;
+            case 2:
+                #region case 2
+                if (talker)
+                {
+                    serializedObject.Update();
+                    questList.DoLayoutList();
+                    serializedObject.ApplyModifiedProperties();
+                }
+                #endregion
+                break;
+            case 3:
+                #region case 3
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.PropertyField(canDEV_RLAT, new GUIContent("可培养感情"));
+                if (EditorGUI.EndChangeCheck())
+                    serializedObject.ApplyModifiedProperties();
+                if (canDEV_RLAT.boolValue)
+                {
+                    serializedObject.Update();
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUILayout.PropertyField(normalItemDialogue, new GUIContent("赠送中性物品时的对话"));
+                    if (talker.NormalItemDialogue)
+                    {
+                        string dialogue = string.Empty;
+                        for (int i = 0; i < talker.NormalItemDialogue.Words.Count; i++)
+                        {
+                            var words = talker.NormalItemDialogue.Words[i];
+                            dialogue += "[" + words.TalkerName + "]说：\n-" + words.Content;
+                            for (int j = 0; j < words.Options.Count; j++)
+                            {
+                                dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
+                            }
+                            dialogue += i == talker.NormalItemDialogue.Words.Count - 1 ? string.Empty : "\n";
+                        }
+                        GUI.enabled = false;
+                        EditorGUILayout.TextArea(dialogue);
+                        GUI.enabled = true;
+                    }
+                    EditorGUILayout.PropertyField(giftDialogues, new GUIContent("赠送物品时的对话\t\t" + (giftDialogues.arraySize > 0 ? "数量：" + giftDialogues.arraySize : "无")), false);
+                    if (EditorGUI.EndChangeCheck())
+                        serializedObject.ApplyModifiedProperties();
+                    if (giftDialogues.isExpanded)
+                    {
+                        serializedObject.Update();
+                        giftDialoguesList.DoLayoutList();
+                        serializedObject.ApplyModifiedProperties();
+                    }
+                    EditorGUILayout.Space();
+                    EditorGUILayout.PropertyField(affectiveItems, new GUIContent("亲密值道具\t\t" + (affectiveItems.arraySize > 0 ? "数量：" + affectiveItems.arraySize : "无")), false);
+                    if (affectiveItems.isExpanded)
+                    {
+                        serializedObject.Update();
+                        affectiveItemsList.DoLayoutList();
+                        serializedObject.ApplyModifiedProperties();
+                    }
+                    EditorGUILayout.Space();
+                    serializedObject.Update();
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUILayout.PropertyField(canMarry, new GUIContent("可结婚"));
+                    if (EditorGUI.EndChangeCheck())
+                        serializedObject.ApplyModifiedProperties();
+                }
+                #endregion
+                break;
+        }
+    }
+}

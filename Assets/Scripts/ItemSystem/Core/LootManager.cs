@@ -131,6 +131,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
     {
         base.CloseWindow();
         if (IsUIOpen) return;
+        if (LootAgent) LootAgent.FinishInteraction();
         LootAgent = null;
         PickAble = false;
         if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();

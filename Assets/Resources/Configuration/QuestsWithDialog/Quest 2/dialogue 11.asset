@@ -19,21 +19,21 @@ MonoBehaviour:
   words:
   - talkerType: 1
     talkerInfo: {fileID: 0}
-    words: "\u558F\uFF0C\u8FD9\u662F\u6211\u6253\u6B7B\u602A\u7269\u6389\u7684\u6B66\u5668\uFF0C\u8FD9\u4E0B\u653E\u5FC3\u4E86\u5427\u3002"
+    content: "\u558F\uFF0C\u8FD9\u662F\u6211\u6253\u6B7B\u602A\u7269\u6389\u7684\u6B66\u5668\uFF0C\u8FD9\u4E0B\u653E\u5FC3\u4E86\u5427\u3002"
     indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []
     events: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    words: "\u54C7\u54E6\uFF0C\u90A3\u4F60\u5F88\u68D2\u68D2\u54E6\uFF01\u8FD9\u4E0B\u6211\u5C31\u653E\u4E00\u767E\u4E2A\u5FC3\u4E86\u3002"
+    content: "\u54C7\u54E6\uFF0C\u90A3\u4F60\u5F88\u68D2\u68D2\u54E6\uFF01\u8FD9\u4E0B\u6211\u5C31\u653E\u4E00\u767E\u4E2A\u5FC3\u4E86\u3002"
     indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []
     events: []
   - talkerType: 1
     talkerInfo: {fileID: 0}
-    words: "\u5475\u5475\u3002"
+    content: "\u5475\u5475\u3002"
     indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []

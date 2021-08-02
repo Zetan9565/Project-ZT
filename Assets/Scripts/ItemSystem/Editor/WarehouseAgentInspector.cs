@@ -1,17 +1,15 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
-[CustomEditor(typeof(WarehouseAgent))]
+[CustomEditor(typeof(Warehouse))]
 public class WarehouseAgentInspector : BuildingInspector
 {
-    WarehouseAgent agent;
-
-    SerializedProperty warehouse;
+    SerializedProperty defaultSize;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        agent = target as WarehouseAgent;
-        warehouse = serializedObject.FindProperty("warehouse");
+        defaultSize = serializedObject.FindProperty("defaultSize");
     }
 
     public override void OnInspectorGUI()
@@ -19,10 +17,7 @@ public class WarehouseAgentInspector : BuildingInspector
         base.OnInspectorGUI();
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.LabelField("识别码", agent.ID);
-        SerializedProperty warehouseSize = warehouse.FindPropertyRelative("size");
-        warehouseSize.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认仓库容量(格)",
-            warehouseSize.FindPropertyRelative("max").intValue, 30, 150);
+        EditorGUILayout.PropertyField(defaultSize, new GUIContent("默认容量"));
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
     }
 }

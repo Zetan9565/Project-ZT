@@ -25,7 +25,8 @@ public class BuildingUI : WindowUI
     public Canvas infoCanvas;
     public Text infoNameText;
     public Text infoDesText;
-    public Button mulFuncButton;
+    public Button manageButton;
+    public Text manageBtnName;
     public Button destroyButton;
     public Button closeInfoButton;
 
@@ -43,7 +44,7 @@ public class BuildingUI : WindowUI
         infoCanvas.overrideSorting = true;
         infoCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         closeInfoButton.onClick.AddListener(BuildingManager.Instance.HideInfo);
-        buildButton.onClick.AddListener(BuildingManager.Instance.Build);
+        buildButton.onClick.AddListener(BuildingManager.Instance.DoBuild);
         backButton.onClick.AddListener(BuildingManager.Instance.GoBack);
     }
 }

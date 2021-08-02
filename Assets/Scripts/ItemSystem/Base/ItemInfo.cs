@@ -274,7 +274,7 @@ public class MaterialInfo
 
 #region 喜厌道具信息相关
 [Serializable]
-public class FavoriteItemInfo
+public class AffectiveItemInfo
 {
     [SerializeField]
     private ItemBase item;
@@ -287,77 +287,39 @@ public class FavoriteItemInfo
     }
 
     [SerializeField]
-    private FavoriteLevel favoriteLevel = FavoriteLevel.Little;
-    public FavoriteLevel FavoriteLevel
-    {
-        get
-        {
-            return favoriteLevel;
-        }
-    }
+    private int intimacyValue;
+    public int IntimacyValue => intimacyValue;
 
-    public static implicit operator bool(FavoriteItemInfo self)
+    public static implicit operator bool(AffectiveItemInfo self)
     {
         return self != null;
     }
 }
 
-public enum FavoriteLevel
+public enum EmotionalLevel
 {
     [InspectorName("稍微喜欢")]
-    Little = 10,//稍微喜欢+10
+    Like,//稍微喜欢+10
 
     [InspectorName("喜欢")]
-    Fond = 30,//喜欢+30
+    Fond,//喜欢+30
 
     [InspectorName("很喜欢")]
-    Fascinated = 100,//着迷+100
+    Fascinated,//着迷+100
 
     [InspectorName("着迷")]
-    Crazy = 300//狂热的+300
-}
+    Crazy,//狂热的+300
 
-[Serializable]
-public class HateItemInfo
-{
-    [SerializeField]
-    private ItemBase item;
-    public ItemBase Item
-    {
-        get
-        {
-            return item;
-        }
-    }
-
-    [SerializeField]
-    private HateLevel hateLevel = HateLevel.Dislike;
-    public HateLevel HateLevel
-    {
-        get
-        {
-            return hateLevel;
-        }
-    }
-
-    public static implicit operator bool(HateItemInfo self)
-    {
-        return self != null;
-    }
-}
-
-public enum HateLevel
-{
     [InspectorName("不喜欢")]
-    Dislike = 10,//不喜欢-10
+    Dislike,//不喜欢-10
 
     [InspectorName("稍微讨厌")]
-    Little = 30,//稍微讨厌-30
+    LittleHate,//稍微讨厌-30
 
     [InspectorName("讨厌")]
-    Hate = 100,//讨厌-100
+    Hate,//讨厌-100
 
     [InspectorName("很讨厌")]
-    Detest = 300//深恶痛绝-300
+    Detes,//深恶痛绝-300
 }
 #endregion

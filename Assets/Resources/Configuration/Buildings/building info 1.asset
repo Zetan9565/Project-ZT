@@ -16,6 +16,7 @@ MonoBehaviour:
   _name: "\u6D4B\u8BD5\u7528\u519C\u7530"
   description: "\u53EF\u79CD\u690D\u4F5C\u7269\u7684\u519C\u7530\u3002"
   manageable: 1
+  manageBtnName: "\u79CD\u690D"
   buildTime: 1
   prefab: {fileID: 7347814513168547429, guid: 74d259af2e68f3d49b92ffb11b1a6732, type: 3}
   preview: {fileID: 7034579680335251296, guid: f7d8c628e0b664b46858efd152d50e17, type: 3}

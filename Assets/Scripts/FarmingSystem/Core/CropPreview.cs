@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CropPreview : MonoBehaviour
 {
-    public Collider2D collider2D;
+    public new Collider2D collider2D;
 
     private List<Collider> Colliders = new List<Collider>();
 

@@ -170,7 +170,7 @@ public class CropStage
     {
         get
         {
-            return repeatTimes != 0;
+            return repeatTimes < 0 || repeatTimes > 1;
         }
     }
 

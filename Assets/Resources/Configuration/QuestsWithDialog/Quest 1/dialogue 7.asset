@@ -19,14 +19,14 @@ MonoBehaviour:
   words:
   - talkerType: 1
     talkerInfo: {fileID: 0}
-    words: "\u6211\u5DF2\u7ECF\u628A\u602A\u7269\u5904\u7F6E\u4E86\uFF0C{[NPC]NPC001}\u4E5F\u5B89\u6170\u4E86\u3002"
+    content: "\u6211\u5DF2\u7ECF\u628A\u602A\u7269\u5904\u7F6E\u4E86\uFF0C{[NPC]NPC001}\u4E5F\u5B89\u6170\u4E86\u3002"
     indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []
     events: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-    words: "\u5594\u5594\uFF0C\u8C22\u8C22\u3002"
+    content: "\u5594\u5594\uFF0C\u8C22\u8C22\u3002"
     indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []

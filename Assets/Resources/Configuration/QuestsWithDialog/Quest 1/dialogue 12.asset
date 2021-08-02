@@ -19,14 +19,14 @@ MonoBehaviour:
   words:
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-    words: "\u770B\u6765\u771F\u7684\u6709\u602A\u7269\u554A\uFF0C\u90A3\u5C31\u518D\u53BB\u6740\u51E0\u53EA\uFF01"
+    content: "\u770B\u6765\u771F\u7684\u6709\u602A\u7269\u554A\uFF0C\u90A3\u5C31\u518D\u53BB\u6740\u51E0\u53EA\uFF01"
     indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []
     events: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-    words: "\u7136\u540E\u53BB\u5B89\u6170\u4E00\u4E0B{[NPC]NPC001}\uFF0C\u5C31\u8BF4\u5DF2\u7ECF\u6559\u8BAD\u4E86\u90A3\u4E9B\u602A\u7269\u4E86\u3002"
+    content: "\u7136\u540E\u53BB\u5B89\u6170\u4E00\u4E0B{[NPC]NPC001}\uFF0C\u5C31\u8BF4\u5DF2\u7ECF\u6559\u8BAD\u4E86\u90A3\u4E9B\u602A\u7269\u4E86\u3002"
     indexOfCorrectOption: 0
     wordsWhenChusWB: 
     branches: []

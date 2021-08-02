@@ -46,7 +46,6 @@ public class NotifyCenter : SingletonMonoBehaviour<NotifyCenter>
                 notifiesWithOwner.Add(target, new Dictionary<string, HashSet<NotifyListener>>() { { msgType, new HashSet<NotifyListener>() { listener } } });
         }
     }
-
     public void RemoveListener(string msgType, NotifyListener listener)
     {
         if (notifies.TryGetValue(msgType, out Notify find))
