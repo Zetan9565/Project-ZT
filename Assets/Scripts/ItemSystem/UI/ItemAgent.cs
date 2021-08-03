@@ -27,6 +27,12 @@ public class ItemAgent : MonoBehaviour, IDragAble,
 #endif
     private Image qualityEdge;
 
+    [SerializeField]
+#if UNITY_EDITOR
+    [DisplayName("复选框")]
+#endif
+    private GameObject mark;
+
     public Sprite DragAbleIcon => icon.overrideSprite;
 
     [HideInInspector]
@@ -93,12 +99,10 @@ public class ItemAgent : MonoBehaviour, IDragAble,
             {
                 if (agentType == ItemAgentType.Warehouse)
                 {
-                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
                     WarehouseManager.Instance.TakeOutItem(MItemInfo, true);
                 }
                 else if (agentType == ItemAgentType.Backpack)
                 {
-                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
                     WarehouseManager.Instance.StoreItem(MItemInfo, true);
                 }
             }
@@ -106,12 +110,10 @@ public class ItemAgent : MonoBehaviour, IDragAble,
             {
                 if (agentType == ItemAgentType.Selling && ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo))
                 {
-                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
                     ShopManager.Instance.SellItem(ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo);
                 }
                 else if (agentType == ItemAgentType.Backpack)
                 {
-                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
                     ShopManager.Instance.PurchaseItem(MItemInfo);
                 }
             }
@@ -119,14 +121,14 @@ public class ItemAgent : MonoBehaviour, IDragAble,
             {
                 if (agentType == ItemAgentType.Loot)
                 {
-                    if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
                     LootManager.Instance.TakeItem(MItemInfo, true);
                 }
             }
             else if (ItemSelectionManager.Instance.IsUIOpen)
             {
                 if (agentType == ItemAgentType.Backpack)
-                    ItemSelectionManager.Instance.Place(MItemInfo);
+                    if(ItemSelectionManager.Instance.Place(MItemInfo))
+                        Mark(true);
                 else if (agentType == ItemAgentType.Selection)
                     ItemSelectionManager.Instance.TakeOut(MItemInfo);
             }
@@ -134,9 +136,15 @@ public class ItemAgent : MonoBehaviour, IDragAble,
         }
     }
 
+    public void Mark(bool mark)
+    {
+        ZetanUtility.SetActive(this.mark, mark);
+    }
+
     public void Empty()
     {
-        icon.color = Color.white;
+        Mark(false);
+        Light();
         icon.overrideSprite = null;
         amount.text = string.Empty;
         MItemInfo = null;
@@ -145,6 +153,7 @@ public class ItemAgent : MonoBehaviour, IDragAble,
 
     public void Clear(bool recycle = false)
     {
+        Mark(false);
         icon.color = Color.white;
         icon.overrideSprite = null;
         amount.text = string.Empty;
@@ -219,17 +228,34 @@ public class ItemAgent : MonoBehaviour, IDragAble,
     {
         if (target != this && agentType != ItemAgentType.None)
         {
-            if (target.agentType == agentType && (agentType == ItemAgentType.Backpack || agentType == ItemAgentType.Warehouse))
+            if (target.agentType == agentType && (agentType == ItemAgentType.Backpack || agentType == ItemAgentType.Warehouse) && !ItemSelectionManager.Instance.IsUIOpen)
                 if (target.IsEmpty)
                 {
                     target.SetItem(MItemInfo);
-                    Empty(); ;
+                    target.Mark(mark.activeSelf);
+                    if (isDark) target.Dark();
+                    else target.Light();
+                    Empty();
                 }
                 else
                 {
+                    bool targetMark = target.mark.activeSelf;
+                    bool targetDark = target.isDark;
+                    Debug.Log(target.isDark);
+
                     ItemInfo targetInfo = target.MItemInfo;
                     target.SetItem(MItemInfo);
+
+                    target.Mark(mark.activeSelf);
+
                     SetItem(targetInfo);
+                    Mark(targetMark);
+
+                    if (isDark) target.Dark();
+                    else target.Light();
+
+                    if (targetDark) Dark();
+                    else Light();
                 }
             else if (target.agentType == ItemAgentType.Warehouse && agentType == ItemAgentType.Backpack)
                 WarehouseManager.Instance.StoreItem(MItemInfo);
@@ -238,7 +264,8 @@ public class ItemAgent : MonoBehaviour, IDragAble,
             else if (target.agentType == ItemAgentType.Backpack && agentType == ItemAgentType.Selling)
                 ShopManager.Instance.SellItem(ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo);
             else if (target.agentType == ItemAgentType.Selection && agentType == ItemAgentType.Backpack)
-                ItemSelectionManager.Instance.Place(MItemInfo);
+                if(ItemSelectionManager.Instance.Place(MItemInfo))
+                    Mark(true);
         }
         FinishDrag();
     }
@@ -251,12 +278,12 @@ public class ItemAgent : MonoBehaviour, IDragAble,
             else if (ItemSelectionManager.Instance.SelectionType == ItemSelectionType.Making && MItemInfo.item.MaterialType == MaterialType.None) return;
         DragableManager.Instance.GetDragable(this, FinishDrag, icon.rectTransform.rect.width, icon.rectTransform.rect.height);
         ItemWindowManager.Instance.CloseWindow();
-        Dark();
+        Select();
     }
     public void FinishDrag()
     {
         if (!DragableManager.Instance.IsDraging) return;
-        Light();
+        DeSelect();
         DragableManager.Instance.ResetIcon();
         ItemWindowManager.Instance.CloseWindow();
     }
@@ -424,7 +451,8 @@ public class ItemAgent : MonoBehaviour, IDragAble,
                 AmountManager.Instance.SetPosition(eventData.position);
             }
             else if (eventData.pointerCurrentRaycast.gameObject == ItemSelectionManager.Instance.PlacementArea && agentType == ItemAgentType.Backpack)
-                ItemSelectionManager.Instance.Place(MItemInfo);
+                if(ItemSelectionManager.Instance.Place(MItemInfo))
+                    Mark(true);
         }
 #endif
         FinishDrag();

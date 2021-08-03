@@ -8,8 +8,10 @@ public class DialogueUI : WindowUI
 
     public Text wordsText;
 
-    public Button backButton;
+    public Transform buttonArea;
 
+    public Button backButton;
+    public Button giftButton;
     public Button warehouseButton;
     public Button shopButton;
 
@@ -43,6 +45,7 @@ public class DialogueUI : WindowUI
     protected override void Awake()
     {
         base.Awake();
+        giftButton.onClick.AddListener(DialogueManager.Instance.SendTalkerGifts);
         warehouseButton.onClick.AddListener(DialogueManager.Instance.OpenTalkerWarehouse);
         shopButton.onClick.AddListener(DialogueManager.Instance.OpenTalkerShop);
         backButton.onClick.AddListener(DialogueManager.Instance.GoBackDefault);

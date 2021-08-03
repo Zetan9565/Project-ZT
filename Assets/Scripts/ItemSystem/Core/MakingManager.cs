@@ -59,6 +59,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
             return;
         }
         if (!currentItem.DIYAble)
+        {
             if (amountCanMake > 0 && amountCanMake < 2)
             {
                 ConfirmManager.Instance.New(string.Format("确定制作1次 [{0}] 吗？", currentItem.name), delegate
@@ -84,14 +85,14 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
             else
             {
                 AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
-                AmountManager.Instance.New(delegate
+                AmountManager.Instance.New(delegate (long amount)
                 {
-                    ConfirmManager.Instance.New(string.Format("确定制作{0}次 [{1}] 吗？", (int)AmountManager.Instance.Amount, currentItem.name), delegate
+                    ConfirmManager.Instance.New(string.Format("确定制作{0}次 [{1}] 吗？", (int)amount, currentItem.name), delegate
                     {
-                        int amount = (int)AmountManager.Instance.Amount;
+                        int num = (int)amount;
                         IsMaking = true;
                         PauseDisplay(true);
-                        ProgressBar.Instance.New(ToolInfo.MakingTime, amount - 1,
+                        ProgressBar.Instance.New(ToolInfo.MakingTime, num - 1,
                             delegate
                             {
                                 IsMaking = false;
@@ -118,21 +119,19 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                     });
                 }, amountCanMake, "制作次数");
             }
+        }
         else
         {
-            ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", MakeCurrent,
-                delegate
-                {
-                    BackpackManager.Instance.DarkUnmakeable(false);
-                });
-            BackpackManager.Instance.DarkUnmakeable(true);
+            ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", delegate (ItemAgent ia)
+            {
+                return ia.MItemInfo.item.MaterialType != MaterialType.None;
+            }, MakeCurrent);
         }
     }
 
-    private void MakeCurrent(List<ItemInfo> materials)
+    private void MakeCurrent(IEnumerable<ItemInfo> materials)
     {
         //Debug.Log("Start making");
-        BackpackManager.Instance.DarkUnmakeable(false);
         IsMaking = true;
         PauseDisplay(true);
         if (UI.loopToggle.isOn)
@@ -183,17 +182,15 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
 
     public void DIY()
     {
-        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", DIYMake,
-            delegate
-            {
-                BackpackManager.Instance.DarkUnmakeable(false);
-            });
-        BackpackManager.Instance.DarkUnmakeable(true);
+        bool condition(ItemAgent ia)
+        {
+            return ia.MItemInfo.item.MaterialType != MaterialType.None;
+        }
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", condition, DIYMake);
         HideDescription();
     }
-    public void DIYMake(List<ItemInfo> materials)
+    public void DIYMake(IEnumerable<ItemInfo> materials)
     {
-        BackpackManager.Instance.DarkUnmakeable(false);
         IsMaking = true;
         PauseDisplay(true);
         ProgressBar.Instance.New(ToolInfo.MakingTime,

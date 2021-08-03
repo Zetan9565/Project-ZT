@@ -9,8 +9,6 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
     [SerializeField]
     private Vector2 defaultOffset = new Vector2(-100, 100);
 
-    public long Amount { get; private set; }
-
     public bool IsUIOpen
     {
         get
@@ -21,15 +19,16 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         }
     }
 
-    private Action onConfirm;
+    private Action<long> onConfirm;
     private Action onCancel;
 
+    private long amount;
     private long min;
     private long max;
 
     private bool firstInput;
 
-    public void New(Action confirmAction, long max, string title = "")
+    public void New(Action<long> confirmAction, long max, string title = "")
     {
         long min = 0;
         if (max < min)
@@ -40,14 +39,14 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         }
         this.max = max;
         this.min = min;
-        Amount = max > 0 ? 1 : 0;
-        UI.amount.text = Amount.ToString();
+        amount = max > 0 ? 1 : 0;
+        UI.amount.text = amount.ToString();
         onConfirm = confirmAction;
         onCancel = null;
         ShowUI(title);
     }
 
-    public void New(Action confirmAction, long min, long max, string title = "")
+    public void New(Action<long> confirmAction, long min, long max, string title = "")
     {
         if (max < min)
         {
@@ -57,14 +56,14 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         }
         this.max = max;
         this.min = min;
-        Amount = max > min ? min : 0;
-        UI.amount.text = Amount.ToString();
+        amount = max > min ? min : 0;
+        UI.amount.text = amount.ToString();
         onConfirm = confirmAction;
         onCancel = null;
         ShowUI(title);
     }
 
-    public void New(Action confirmAction, Action cancelAction, long max, string title = "")
+    public void New(Action<long> confirmAction, Action cancelAction, long max, string title = "")
     {
         if (max < min)
         {
@@ -74,14 +73,14 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         }
         this.max = max;
         min = 0;
-        Amount = max >= 0 ? 0 : min;
-        UI.amount.text = Amount.ToString();
+        amount = max >= 0 ? 0 : min;
+        UI.amount.text = amount.ToString();
         onConfirm = confirmAction;
         onCancel = cancelAction;
         ShowUI(title);
     }
 
-    public void New(Action confirmAction, Action cancelAction, long max, long min, string title = "")
+    public void New(Action<long> confirmAction, Action cancelAction, long max, long min, string title = "")
     {
         if (max < min)
         {
@@ -91,8 +90,8 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         }
         this.max = max;
         this.min = min;
-        Amount = max >= 0 ? 0 : min;
-        UI.amount.text = Amount.ToString();
+        amount = max >= 0 ? 0 : min;
+        UI.amount.text = amount.ToString();
         onConfirm = confirmAction;
         onCancel = cancelAction;
         ShowUI(title);
@@ -125,8 +124,8 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
             long.TryParse(UI.amount.text, out long current);
             if (current < min) current = min;
             else if (current > max) current = max;
-            Amount = current;
-            UI.amount.text = Amount.ToString();
+            amount = current;
+            UI.amount.text = amount.ToString();
         }
         UI.amount.MoveTextEnd(false);
     }
@@ -137,8 +136,8 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         long.TryParse(UI.amount.text, out long current);
         if (current < min) current = min;
         else if (current > max) current = max;
-        Amount = current;
-        UI.amount.text = Amount.ToString();
+        amount = current;
+        UI.amount.text = amount.ToString();
         UI.amount.MoveTextEnd(false);
         firstInput = false;
     }
@@ -149,8 +148,8 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         if (UI.amount.text.Length <= UI.amount.characterLimit - 1)
             if (current < max) current++;
             else current = max;
-        Amount = current;
-        UI.amount.text = Amount.ToString();
+        amount = current;
+        UI.amount.text = amount.ToString();
         UI.amount.MoveTextEnd(false);
         firstInput = false;
     }
@@ -160,24 +159,24 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         long.TryParse(UI.amount.text, out long current);
         if (current > min && UI.amount.text.Length < UI.amount.characterLimit - 1) current--;
         else current = min;
-        Amount = current;
-        UI.amount.text = Amount.ToString();
+        amount = current;
+        UI.amount.text = amount.ToString();
         UI.amount.MoveTextEnd(false);
         firstInput = false;
     }
 
     public void Max()
     {
-        Amount = max;
-        UI.amount.text = Amount.ToString();
+        amount = max;
+        UI.amount.text = amount.ToString();
         UI.amount.MoveTextEnd(false);
         firstInput = false;
     }
 
     public void Clear()
     {
-        Amount = min;
-        UI.amount.text = Amount.ToString();
+        amount = min;
+        UI.amount.text = amount.ToString();
         UI.amount.MoveTextEnd(false);
         firstInput = false;
     }
@@ -186,7 +185,7 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
     {
         UI.window.alpha = 0;
         UI.window.blocksRaycasts = false;
-        onConfirm?.Invoke();
+        onConfirm?.Invoke(amount);
         firstInput = false;
     }
 
@@ -217,10 +216,10 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         if (UI.amount.text.Length <= UI.amount.characterLimit - 1)
             if (current > max) current = max;
             else if (current < min) current = min;
-        Amount = current;
-        UI.amount.text = Amount.ToString();
+        amount = current;
+        UI.amount.text = amount.ToString();
         UI.amount.MoveTextEnd(false);
-        if (Amount < 1) UI.confirm.interactable = false;
+        if (amount < 1) UI.confirm.interactable = false;
         else UI.confirm.interactable = true;
     }
 }

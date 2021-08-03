@@ -10,6 +10,7 @@ public class DialogueInspector : Editor
 {
     Dialogue dialogue;
     SerializedProperty _ID;
+    SerializedProperty storyDialogue;
     SerializedProperty useUnifiedNPC;
     SerializedProperty useCurrentTalkerInfo;
     SerializedProperty unifiedNPC;
@@ -35,6 +36,7 @@ public class DialogueInspector : Editor
         dialogue = target as Dialogue;
 
         _ID = serializedObject.FindProperty("_ID");
+        storyDialogue = serializedObject.FindProperty("storyDialogue");
         useUnifiedNPC = serializedObject.FindProperty("useUnifiedNPC");
         useCurrentTalkerInfo = serializedObject.FindProperty("useCurrentTalkerInfo");
         unifiedNPC = serializedObject.FindProperty("unifiedNPC");
@@ -64,21 +66,28 @@ public class DialogueInspector : Editor
                 EditorGUI.FocusTextInControl(null);
             }
         }
+        EditorGUILayout.PropertyField(storyDialogue, new GUIContent("剧情用对话"));
+        if (storyDialogue.boolValue)
+        {
+            EditorGUILayout.HelpBox("在进行该对话时将不会显示返回、结束等按钮，且在完成对话时会自动关闭对话窗口。", MessageType.Info);
+        }
+        EditorGUILayout.BeginHorizontal();
         EditorGUILayout.PropertyField(useUnifiedNPC, new GUIContent("使用统一的NPC"));
-        if (useUnifiedNPC.boolValue)
+        if (useUnifiedNPC.boolValue && !storyDialogue.boolValue)
         {
             EditorGUILayout.PropertyField(useCurrentTalkerInfo, new GUIContent("统一为当前对话人"));
-            if (!useCurrentTalkerInfo.boolValue)
-            {
-                EditorGUILayout.BeginHorizontal();
-                if (dialogue.UnifiedNPC) unifiedNPC.objectReferenceValue = npcs[EditorGUILayout.Popup(GetNPCIndex(dialogue.UnifiedNPC), npcNames)];
-                else if (npcs.Length > 0) unifiedNPC.objectReferenceValue = npcs[EditorGUILayout.Popup(0, npcNames)];
-                else EditorGUILayout.Popup(0, new string[] { "无可用谈话人" });
-                GUI.enabled = false;
-                EditorGUILayout.PropertyField(unifiedNPC, new GUIContent(string.Empty));
-                GUI.enabled = true;
-                EditorGUILayout.EndVertical();
-            }
+        }
+        EditorGUILayout.EndHorizontal();
+        if (useUnifiedNPC.boolValue && !useCurrentTalkerInfo.boolValue)
+        {
+            EditorGUILayout.BeginHorizontal();
+            if (dialogue.UnifiedNPC) unifiedNPC.objectReferenceValue = npcs[EditorGUILayout.Popup(GetNPCIndex(dialogue.UnifiedNPC), npcNames)];
+            else if (npcs.Length > 0) unifiedNPC.objectReferenceValue = npcs[EditorGUILayout.Popup(0, npcNames)];
+            else EditorGUILayout.Popup(0, new string[] { "无可用谈话人" });
+            GUI.enabled = false;
+            EditorGUILayout.PropertyField(unifiedNPC, new GUIContent(string.Empty));
+            GUI.enabled = true;
+            EditorGUILayout.EndVertical();
         }
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         serializedObject.Update();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -13,45 +14,36 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
 
     public ItemSelectionType SelectionType { get; private set; }
 
-    private Action<List<ItemInfo>> onConfirm;
+    private Func<ItemAgent, bool> condition;
+    private Action<IEnumerable<ItemInfo>> onConfirm;
     private Action onCancel;
 
     private string dialog;
 
-    public void StartSelection(ItemSelectionType selectionType, string title, string confirmDialog, Action<List<ItemInfo>> confirmCallback, Action cancelCallback = null)
+    public void StartSelection(ItemSelectionType selectionType, string title, string confirmDialog, Func<ItemAgent, bool> conditionCallback, Action<IEnumerable<ItemInfo>> confirmCallback, Action cancelCallback = null)
     {
         if (selectionType == ItemSelectionType.None) return;
         SelectionType = selectionType;
         UI.windowTitle.text = title;
+        if (conditionCallback != null)
+            condition = conditionCallback;
+        else 
+            condition = delegate (ItemAgent _) { return true; };
         onConfirm = confirmCallback;
         onCancel = cancelCallback;
         dialog = confirmDialog;
         OpenWindow();
         BackpackManager.Instance.EnableHandwork(false);
     }
-    
-    public void StartSelection(ItemSelectionType selectionType, string title, Action<List<ItemInfo>> confirmCallback, Action cancelCallback = null)
+
+    public void StartSelection(ItemSelectionType selectionType, string title, Func<ItemAgent, bool> conditionCallback, Action<IEnumerable<ItemInfo>> confirmCallback, Action cancelCallback = null)
     {
-        if (selectionType == ItemSelectionType.None) return;
-        SelectionType = selectionType;
-        UI.windowTitle.text = title;
-        onConfirm = confirmCallback;
-        onCancel = cancelCallback;
-        dialog = string.Empty;
-        OpenWindow();
-        BackpackManager.Instance.EnableHandwork(false);
+        StartSelection(selectionType, title, string.Empty, conditionCallback, confirmCallback, cancelCallback);
     }
 
-    public void StartSelection(ItemSelectionType selectionType, Action<List<ItemInfo>> confirmCallback, Action cancelCallback = null)
+    public void StartSelection(ItemSelectionType selectionType, Func<ItemAgent, bool> conditionCallback, Action<IEnumerable<ItemInfo>> confirmCallback, Action cancelCallback = null)
     {
-        if (selectionType == ItemSelectionType.None) return;
-        SelectionType = selectionType;
-        UI.windowTitle.text = "选择物品";
-        onConfirm = confirmCallback;
-        onCancel = cancelCallback;
-        dialog = string.Empty;
-        OpenWindow();
-        BackpackManager.Instance.EnableHandwork(false);
+        StartSelection(selectionType, "选择物品", conditionCallback, confirmCallback, cancelCallback);
     }
 
     public void Confirm()
@@ -73,7 +65,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         }
         else ConfirmManager.Instance.New(dialog, delegate
         {
-            onConfirm?.Invoke(infos);
+            onConfirm?.Invoke(itemAgents.Select(x=>x.MItemInfo));
             CloseWindow();
         });
     }
@@ -97,58 +89,42 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
             {
                 if (info.item.DiscardAble && BackpackManager.Instance.TryLoseItem_Boolean(info))
                 {
-                    if(itemAgents.Exists(x => x.MItemInfo == info))
+                    if (itemAgents.Exists(x => x.MItemInfo == info))
                     {
                         MessageManager.Instance.New("已选择该道具");
                         return false;
                     }
-                    ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-                    ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
-                    itemAgents.Add(ia);
-                    ia.SetItem(info);
-                    if (itemAgents.Count > 0) ZetanUtility.SetActive(UI.tips, false);
+                    MakeSlot(info);
                     return true;
                 }
             }
             else
             {
                 if (SelectionType == ItemSelectionType.Making && info.item.MaterialType == MaterialType.None) return false;
+                if (itemAgents.Exists(x => x.MItemInfo == info || x.MItemInfo.item == info.item))
+                {
+                    MessageManager.Instance.New("已选择该道具");
+                    return false;
+                }
                 if (info.Amount < 2)
                 {
                     if (BackpackManager.Instance.TryLoseItem_Boolean(info))
                     {
-                        if(itemAgents.Exists(x => x.MItemInfo == info || x.MItemInfo.item == info.item))
-                        {
-                            MessageManager.Instance.New("已选择该道具");
-                            return false;
-                        }
-                        ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-                        ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
-                        itemAgents.Add(ia);
-                        ia.SetItem(info);
-                        if (itemAgents.Count > 0) ZetanUtility.SetActive(UI.tips, false);
+                        MakeSlot(info);
                         return true;
                     }
                 }
                 else
                 {
-                    if (itemAgents.Exists(x => x.MItemInfo == info || x.MItemInfo.item == info.item))
+                    AmountManager.Instance.New(delegate (long amount)
                     {
-                        MessageManager.Instance.New("已选择该道具");
-                        return false;
-                    }
-                    AmountManager.Instance.New(delegate
-                    {
-                        if (BackpackManager.Instance.TryLoseItem_Boolean(info, (int)AmountManager.Instance.Amount))
+                        if (BackpackManager.Instance.TryLoseItem_Boolean(info, (int)amount))
                         {
                             ItemAgent ia = itemAgents.Find(x => x.MItemInfo.item == info.item);
-                            if (ia) ia.MItemInfo.Amount = (int)AmountManager.Instance.Amount;
+                            if (ia) ia.MItemInfo.Amount = (int)amount;
                             else
                             {
-                                ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-                                ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
-                                itemAgents.Add(ia);
-                                ia.SetItem(new ItemInfo(info.item, (int)AmountManager.Instance.Amount));
+                                MakeSlot(new ItemInfo(info.item, (int)amount));
                             }
                             if (itemAgents.Count > 0) ZetanUtility.SetActive(UI.tips, false);
                         }
@@ -160,19 +136,24 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         else if ((SelectionType != ItemSelectionType.Discard || SelectionType == ItemSelectionType.Discard && info.item.DiscardAble)
             && BackpackManager.Instance.TryLoseItem_Boolean(info))
         {
-            if(itemAgents.Exists(x => x.MItemInfo == info))
+            if (itemAgents.Exists(x => x.MItemInfo == info))
             {
                 MessageManager.Instance.New("已选择该道具");
                 return false;
             }
+            MakeSlot(info);
+            return true;
+        }
+        return false;
+
+        void MakeSlot(ItemInfo info)
+        {
             ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
             ia.Init(ItemAgentType.Selection, -1, UI.gridScrollRect);
             itemAgents.Add(ia);
             ia.SetItem(info);
             if (itemAgents.Count > 0) ZetanUtility.SetActive(UI.tips, false);
-            return true;
         }
-        return false;
     }
 
     public void TakeOut(ItemInfo info)
@@ -181,6 +162,7 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         itemAgent.Clear(true);
         itemAgents.Remove(itemAgent);
         if (itemAgents.Count < 1) ZetanUtility.SetActive(UI.tips, true);
+        BackpackManager.Instance.MarkSlot(info, false);
     }
 
     public override void OpenWindow()
@@ -188,6 +170,9 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         base.OpenWindow();
         if (!IsUIOpen) return;
         if (ItemWindowManager.Instance.IsUIOpen) ItemWindowManager.Instance.CloseWindow();
+        if (!BackpackManager.Instance.IsPausing) BackpackManager.Instance.PauseDisplay(false);
+        if (!BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.OpenWindow();
+        BackpackManager.Instance.PartSelectable(true, condition);
     }
 
     public override void CloseWindow()
@@ -195,13 +180,18 @@ public class ItemSelectionManager : WindowHandler<ItemSeletionUI, ItemSelectionM
         base.CloseWindow();
         if (IsUIOpen) return;
         foreach (var ia in itemAgents)
+        {
+            BackpackManager.Instance.MarkSlot(ia.MItemInfo, false);
             ia.Clear(true);
+        }
         itemAgents.Clear();
         ZetanUtility.SetActive(UI.tips, true);
         dialog = string.Empty;
         SelectionType = ItemSelectionType.None;
         onCancel?.Invoke();
         BackpackManager.Instance.EnableHandwork(true);
+        BackpackManager.Instance.PartSelectable(false);
+        condition = null;
     }
 }
 public enum ItemSelectionType

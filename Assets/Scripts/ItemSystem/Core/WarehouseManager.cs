@@ -93,10 +93,10 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
             else
             {
                 AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
-                AmountManager.Instance.New(delegate
+                AmountManager.Instance.New(delegate (long amount)
                 {
-                    if (OnStore(info, (int)AmountManager.Instance.Amount))
-                        MessageManager.Instance.New(string.Format("存入了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
+                    if (OnStore(info, (int)amount))
+                        MessageManager.Instance.New(string.Format("存入了{0}个 [{1}]", (int)amount, info.ItemName));
                 }, info.Amount);
             }
         }
@@ -170,10 +170,10 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
             else
             {
                 AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
-                AmountManager.Instance.New(delegate
+                AmountManager.Instance.New(delegate (long amount)
                 {
-                    if (OnTakeOut(info, (int)AmountManager.Instance.Amount))
-                        MessageManager.Instance.New(string.Format("取出了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
+                    if (OnTakeOut(info, (int)amount))
+                        MessageManager.Instance.New(string.Format("取出了{0}个 [{1}]", (int)amount, info.ItemName));
                 }, info.Amount);
             }
         else

@@ -147,7 +147,11 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
                                 UI.mulFunButton.GetComponentInChildren<Text>().text = "选取";
                                 UI.mulFunButton.onClick.AddListener(delegate
                                 {
-                                    if (ItemSelectionManager.Instance.Place(MItemInfo)) CloseWindow();
+                                    if (ItemSelectionManager.Instance.Place(MItemInfo))
+                                    {
+                                        BackpackManager.Instance.MarkSlot(MItemInfo, false);
+                                        CloseWindow();
+                                    }
                                 });
                             }
                             break;
@@ -160,7 +164,11 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
                                 UI.mulFunButton.GetComponentInChildren<Text>().text = "选取";
                                 UI.mulFunButton.onClick.AddListener(delegate
                                 {
-                                    if (ItemSelectionManager.Instance.Place(MItemInfo)) CloseWindow();
+                                    if (ItemSelectionManager.Instance.Place(MItemInfo))
+                                    {
+                                        BackpackManager.Instance.MarkSlot(MItemInfo, false);
+                                        CloseWindow();
+                                    }
                                 });
                             }
                             break;

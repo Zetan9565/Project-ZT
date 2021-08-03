@@ -10,12 +10,16 @@ public class Dialogue : ScriptableObject
     public string ID => _ID;
 
     [SerializeField]
+    private bool storyDialogue;
+    public bool StoryDialogue => storyDialogue;
+
+    [SerializeField]
     private bool useUnifiedNPC;
     public bool UseUnifiedNPC => useUnifiedNPC;
 
     [SerializeField]
     private bool useCurrentTalkerInfo;
-    public bool UseCurrentTalkerInfo => useCurrentTalkerInfo;
+    public bool UseCurrentTalkerInfo => useCurrentTalkerInfo && !storyDialogue;
 
     [SerializeField]
     private TalkerInformation unifiedNPC;
@@ -24,11 +28,6 @@ public class Dialogue : ScriptableObject
     [SerializeField, NonReorderable]
     private List<DialogueWords> words = new List<DialogueWords>();
     public List<DialogueWords> Words => words;
-
-    public int IndexOfWords(DialogueWords words)
-    {
-        return Words.IndexOf(words);
-    }
 }
 [Serializable]
 public class DialogueWords
@@ -151,7 +150,7 @@ public class WordsOption
     {
         get
         {
-            return hasWordsToSay && optionType == WordsOptionType.Choice || optionType != WordsOptionType.Choice;
+            return hasWordsToSay && optionType == WordsOptionType.Choice || optionType != WordsOptionType.Choice && optionType != WordsOptionType.BranchDialogue;
         }
     }
 
@@ -230,25 +229,12 @@ public class WordsOption
         }
     }
 
-    [HideInInspector]
-    public Dialogue runtimeDialogParent;
-    [HideInInspector]
-    public int runtimeWordsParentIndex;
-
-    [HideInInspector]
-    public int runtimeIndexToGoBack;
-
-    public WordsOption()
-    {
-
-    }
+    public WordsOption() { }
 
     public WordsOption(WordsOptionType optionType)
     {
         this.optionType = optionType;
     }
-
-    public WordsOption Cloned => MemberwiseClone() as WordsOption;
 
     public static implicit operator bool(WordsOption self)
     {

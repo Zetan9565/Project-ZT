@@ -13,10 +13,15 @@ MonoBehaviour:
   m_Name: dialogue 10
   m_EditorClassIdentifier: 
   _ID: DIALG000013
+  storyDialogue: 0
+  useUnifiedNPC: 0
+  useCurrentTalkerInfo: 0
+  unifiedNPC: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
   words:
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
     content: "\u600E\u4E48\u5FC3\u91CC\u8FD8\u662F\u89C9\u5F97\u6709\u4E9B\u62C5\u5FC3\u5462\uFF1F"
-    indexOfRrightBranch: -1
-    wordsWhenChusWB: 
-    branches: []
+    indexOfCorrectOption: 0
+    wrongChoiceWords: 
+    options: []
+    events: []

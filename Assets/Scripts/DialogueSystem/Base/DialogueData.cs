@@ -34,11 +34,12 @@ public class DialogueWordsData
     {
         origin = words;
         this.parent = parent;
-        if (origin.Options.Count > 0)
+        if (origin.Options.Count > 0 && parent)
         {
-            int indexBack = parent.origin.Words.IndexOf(words);
+            int index = parent.origin.Words.IndexOf(words);
             for (int i = 0; i < origin.Options.Count; i++)
             {
+                int indexBack = index;
                 WordsOption option = origin.Options[i];
                 if (words.NeedToChusCorrectOption)
                 {
@@ -47,7 +48,9 @@ public class DialogueWordsData
                 }
                 else
                 {
-                    indexBack = option.IndexToGoBack > 0 && option.OptionType != WordsOptionType.SubmitAndGet && option.OptionType != WordsOptionType.OnlyGet ? option.IndexToGoBack : indexBack;
+                    indexBack = option.IndexToGoBack > 0 && option.OptionType != WordsOptionType.SubmitAndGet && option.OptionType != WordsOptionType.OnlyGet &&
+                        parent.origin.StoryDialogue && (option.OptionType == WordsOptionType.BranchDialogue || option.OptionType == WordsOptionType.BranchWords) && !option.GoBack
+                        ? option.IndexToGoBack : indexBack;
                 }
                 WordsOptionData od = new WordsOptionData(option, this, indexBack);
                 optionDatas.Add(od);

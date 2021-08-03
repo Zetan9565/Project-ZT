@@ -443,13 +443,13 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                         MessageManager.Instance.New($"丢掉了1个 [{info.ItemName}]");
                 });
         }
-        else AmountManager.Instance.New(delegate
+        else AmountManager.Instance.New(delegate (long amount)
         {
-            ConfirmManager.Instance.New(string.Format("确定丢弃{0}个 [{1}] 吗？", (int)AmountManager.Instance.Amount,
+            ConfirmManager.Instance.New(string.Format("确定丢弃{0}个 [{1}] 吗？", (int)amount,
                 ZetanUtility.ColorText(info.ItemName, GameManager.QualityToColor(info.item.Quality))), delegate
                 {
-                    if (LoseItem(info, (int)AmountManager.Instance.Amount))
-                        MessageManager.Instance.New(string.Format("丢掉了{0}个 [{1}]", (int)AmountManager.Instance.Amount, info.ItemName));
+                    if (LoseItem(info, (int)amount))
+                        MessageManager.Instance.New(string.Format("丢掉了{0}个 [{1}]", (int)amount, info.ItemName));
                 });
         }, info.Amount);
     }
@@ -607,7 +607,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     #region UI相关
     public override void OpenWindow()
     {
-        if (DialogueManager.Instance.IsTalking && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen) return;
+        if (DialogueManager.Instance.IsTalking && !WarehouseManager.Instance.IsUIOpen && !ShopManager.Instance.IsUIOpen && !ItemSelectionManager.Instance.IsUIOpen) return;
         base.OpenWindow();
         if (!IsUIOpen) return;
         GridMask.raycastTarget = true;
@@ -645,30 +645,36 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
 
     public void OpenDiscardWindow()
     {
-        foreach (var ia in itemAgents)
+        bool condition(ItemAgent ia)
         {
-            if (!ia.IsEmpty && !ia.MItemInfo.item.DiscardAble) ia.Dark();
+            return ia.IsEmpty || ia.MItemInfo.item.DiscardAble;
         }
-        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Discard, "丢弃物品", "确定要丢掉这些道具吗？", DiscardItems, delegate
-        {
-            foreach (var ia in itemAgents)
-            {
-                if (!ia.IsEmpty) ia.Light();
-            }
-        });
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Discard, "丢弃物品", "确定要丢掉这些道具吗？", condition, DiscardItems);
     }
 
-    public void DarkUnmakeable(bool dark)
+    public void PartSelectable(bool mark, System.Func<ItemAgent, bool> condition = null)
     {
-        if (dark)
+        if (mark && condition != null)
             foreach (var ia in itemAgents.Where(x => !x.IsEmpty))
             {
-                if (ia.MItemInfo.item.MaterialType == MaterialType.None) ia.Dark();
+                if (condition(ia)) ia.Light();
+                else ia.Dark();
             }
         else foreach (var ia in itemAgents.Where(x => !x.IsEmpty))
             {
                 ia.Light();
             }
+    }
+
+    public void MarkSlot(ItemInfo info, bool mark)
+    {
+        if (!info || !info.item) return;
+        ItemAgent ia = null;
+        if (!info.item.StackAble)
+            ia = itemAgents.Find(x => x.MItemInfo == info);
+        else
+            ia = itemAgents.Find(x => x.MItemInfo && x.MItemInfo.ItemID == info.ItemID);
+        if (ia) ia.Mark(mark);
     }
 
     public void Arrange()

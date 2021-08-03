@@ -9,6 +9,8 @@ public class DialogueUIInspector : Editor
     SerializedProperty window;
     SerializedProperty nameText;
     SerializedProperty wordsText;
+    SerializedProperty buttonArea;
+    SerializedProperty giftButton;
     SerializedProperty warehouseButton;
     SerializedProperty shopButton;
     SerializedProperty backButton;
@@ -35,6 +37,8 @@ public class DialogueUIInspector : Editor
         window = serializedObject.FindProperty("window");
         nameText = serializedObject.FindProperty("nameText");
         wordsText = serializedObject.FindProperty("nameText");
+        buttonArea = serializedObject.FindProperty("buttonArea");
+        giftButton = serializedObject.FindProperty("giftButton");
         warehouseButton = serializedObject.FindProperty("warehouseButton");
         shopButton = serializedObject.FindProperty("shopButton");
         backButton = serializedObject.FindProperty("backButton");
@@ -64,6 +68,8 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.PropertyField(window, new GUIContent("对话框"));
         EditorGUILayout.PropertyField(nameText, new GUIContent("说话者名字"));
         EditorGUILayout.PropertyField(wordsText, new GUIContent("语句文字"));
+        EditorGUILayout.PropertyField(buttonArea, new GUIContent("按钮区"));
+        EditorGUILayout.PropertyField(giftButton, new GUIContent("送礼按钮"));
         EditorGUILayout.PropertyField(warehouseButton, new GUIContent("仓库按钮"));
         EditorGUILayout.PropertyField(shopButton, new GUIContent("商店按钮"));
         EditorGUILayout.PropertyField(backButton, new GUIContent("返回按钮"));

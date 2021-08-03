@@ -53,9 +53,9 @@ public class LootManager : WindowHandler<LootUI, LootManager>
             else
             {
                 AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
-                AmountManager.Instance.New(delegate
+                AmountManager.Instance.New(delegate (long amount)
                 {
-                    OnTake(info, (int)AmountManager.Instance.Amount);
+                    OnTake(info, (int)amount);
                 }, info.Amount);
             }
         else OnTake(info, info.Amount);

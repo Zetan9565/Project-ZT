@@ -18,7 +18,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     public DialogueType CurrentType { get; private set; } = DialogueType.Normal;
 
-    public bool NPCHasNotAcptQuests
+    public bool ShouldShowQuest
     {
         get
         {
@@ -39,9 +39,9 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     #region 选项相关
     private readonly List<OptionButtonData> buttonDatas = new List<OptionButtonData>();
 
-    private readonly List<OptionAgent> optionAgents = new List<OptionAgent>();
+    private readonly List<ButtonWithText> optionAgents = new List<ButtonWithText>();
     public int OptionsCount => optionAgents.Count;
-    public OptionAgent FirstOption
+    public ButtonWithText FirstOption
     {
         get
         {
@@ -82,7 +82,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         OnBeginDialogueEvent?.Invoke();
     }
 
-    public void StartTalking(Talker talker)
+    private void StartTalking(Talker talker)
     {
         if (!UI) return;
         CurrentTalker = talker;
@@ -154,6 +154,17 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         }
         if (wordsToSay.Count < 1)//最后一句
         {
+            //完成剧情用对话时，结束对话
+            if (currentWords && currentWords.parent && currentWords.parent.origin.StoryDialogue && currentWords.IsDone)
+            {
+                buttonDatas.Add(new OptionButtonData("结束", delegate
+                {
+                    OnFinishDialogueEvent?.Invoke();
+                    CloseWindow();
+                }));
+                RefreshOptionUI();
+                return;
+            }
             if (currentQuest)//这是由任务引发的对话
             {
                 HandlingLast_Quest();
@@ -176,7 +187,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             foreach (var option in currentWords.optionDatas)
             {
-                if (!option.isDone)
+                if (!option.isDone || option.origin.OptionType != WordsOptionType.Choice)
                 {
                     string title = option.origin.Title;
                     if (option.origin.OptionType == WordsOptionType.SubmitAndGet)
@@ -358,7 +369,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         ClearOptions();
         foreach (var option in buttonDatas)
         {
-            var oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent).GetComponent<OptionAgent>();
+            var oa = ObjectPool.Get(UI.optionPrefab, UI.optionsParent).GetComponent<ButtonWithText>();
             oa.Init(option.text, option.callback);
             optionAgents.Add(oa);
         }
@@ -472,7 +483,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                     choiceOptionSaid.Pop();
                 var currentOption = this.currentOption;
                 this.currentOption = null;
-                if (currentOption.origin.DeleteWhenCmplt)
+                if (currentOption.origin.OptionType != WordsOptionType.Choice || currentOption.origin.OptionType == WordsOptionType.Choice && currentOption.origin.DeleteWhenCmplt)
                     currentOption.isDone = true;
                 if (currentOption.origin.OptionType == WordsOptionType.Choice && currentOption.parent.origin.IsCorrectOption(currentOption.origin))//选择型选项的最后一句
                 {
@@ -491,7 +502,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                             }
                     }
                 }
-                else if (currentOption.origin.GoBack)
+                else if (currentOption.origin.GoBack || currentOption.parent.parent.origin.StoryDialogue)
                 {
                     DoDialogue(currentOption.parent.parent.origin, currentOption.indexToGoBack);
                 }
@@ -515,6 +526,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             wordsToSay.Push(findDialog.wordsDatas[i]);
         }
+        PauseButtons(dialogue.StoryDialogue);
     }
 
     private void DoOption(WordsOptionData option)
@@ -567,7 +579,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         }
         else if (option.origin.OptionType == WordsOptionType.BranchDialogue)
         {
-            StartDialogue(option.origin.Dialogue);
+            DoDialogue(option.origin.Dialogue);
         }
         SayNextWords();
 
@@ -703,14 +715,30 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     public void OpenGiftWindow()
     {
         //TODO 把玩家背包道具读出并展示
-        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Gift, "选择礼物", "确定要送出这些礼物吗？", null);
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Gift, "选择礼物", "确定要送出这些礼物吗？", null, OnSendGift, delegate
+        {
+            BackpackManager.Instance.PauseDisplay(false);
+            BackpackManager.Instance.CloseWindow();
+            PauseDisplay(false);
+        });
+        PauseDisplay(true);
+    }
+    private void OnSendGift(IEnumerable<ItemInfo> items)
+    {
+
     }
 
-    private void ShowButtons(bool shop, bool warehouse, bool quest)
+    private void ShowButtons(bool shop, bool warehouse, bool quest, bool back = true)
     {
         ZetanUtility.SetActive(UI.shopButton.gameObject, shop);
         ZetanUtility.SetActive(UI.warehouseButton.gameObject, warehouse);
         ZetanUtility.SetActive(UI.questButton.gameObject, quest);
+        ZetanUtility.SetActive(UI.backButton.gameObject, back);
+    }
+
+    private void PauseButtons(bool pause)
+    {
+        ZetanUtility.SetActive(UI.buttonArea, !pause);
     }
 
     public override void SetUI(DialogueUI UI)
@@ -780,6 +808,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             switch (we.EventType)
             {
                 case WordsEventType.Trigger:
+                    TriggerManager.Instance.SetTrigger(we.WordsTrigrName, we.TriggerActType == TriggerActionType.Set);
                     break;
                 case WordsEventType.GetAmity:
                     break;

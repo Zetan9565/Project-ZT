@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: dialogue 1
   m_EditorClassIdentifier: 
   _ID: DIALG000003
+  storyDialogue: 0
   useUnifiedNPC: 1
   useCurrentTalkerInfo: 0
   unifiedNPC: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
@@ -56,9 +57,6 @@ MonoBehaviour:
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 0
-      runtimeDialogParent: {fileID: 0}
-      runtimeWordsParentIndex: 0
-      runtimeIndexToGoBack: 0
     - title: "\u9519\u8BEF\u9009\u9879"
       optionType: 2
       hasWordsToSay: 0
@@ -92,9 +90,6 @@ MonoBehaviour:
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 0
-      runtimeDialogParent: {fileID: 0}
-      runtimeWordsParentIndex: 0
-      runtimeIndexToGoBack: 0
     events: []
   - talkerType: 2
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
@@ -135,9 +130,6 @@ MonoBehaviour:
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 1
-      runtimeDialogParent: {fileID: 0}
-      runtimeWordsParentIndex: 0
-      runtimeIndexToGoBack: 0
     - title: "\u5206\u652F\u4E8C"
       optionType: 0
       hasWordsToSay: 0
@@ -171,7 +163,4 @@ MonoBehaviour:
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 1
-      runtimeDialogParent: {fileID: 0}
-      runtimeWordsParentIndex: 0
-      runtimeIndexToGoBack: 0
     events: []

@@ -19,7 +19,6 @@ public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
         else triggers[triggerName] = value ? TriggerState.On : TriggerState.Off;
         OnTriggerSetEvent?.Invoke(triggerName, value);
         NotifyCenter.Instance.PostNotify("TriggerChange", triggerName, value);
-        QuestManager.Instance.UpdateUI();
     }
 
     public TriggerState GetTriggerState(string triggerName)
