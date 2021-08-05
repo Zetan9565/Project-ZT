@@ -1,30 +1,19 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
-public class ItemWindowUI : ItemWindowBaseUI
+public class ItemWindowUI : WindowUI
 {
-    public ItemWindowBaseUI subUI;
+    public ItemInfoDisplayer windowPrefab;
+    public Transform windowParent;
 
-    public Button mulFunButton;
+    public RectTransform buttonArea;
+    public Transform buttonParent;
+    public ButtonWithText buttonPrefab;
 
-    public Button discardButton;
+    public Transform cacheParent;
 
-    public GameObject buttonsArea;
-
-    [HideInInspector]
-    private CanvasGroup buttonAreaCanvas;
-
-    private new void Awake()
+    protected override void Awake()
     {
         base.Awake();
-        ZetanUtility.SetActive(closeButton.gameObject, false);
-#if UNITY_STANDALONE
-        ZetanUtility.SetActive(buttonsArea, false);
-#elif UNITY_ANDROID
-        if (!buttonsArea.GetComponent<CanvasGroup>()) buttonAreaCanvas = buttonsArea.AddComponent<CanvasGroup>();
-        buttonAreaCanvas.ignoreParentGroups = true;
-        discardButton.onClick.AddListener(ItemWindowManager.Instance.DiscardCurrentItem);
         closeButton.onClick.AddListener(ItemWindowManager.Instance.CloseWindow);
-#endif
     }
 }

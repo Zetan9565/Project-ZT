@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class ItemSeletionUI : WindowUI
+public class ItemSelectionUI : WindowUI
 {
     public Text windowTitle;
     public GameObject tips;

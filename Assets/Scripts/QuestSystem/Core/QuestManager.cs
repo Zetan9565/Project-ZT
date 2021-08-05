@@ -9,7 +9,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 {
     public QuestFlag QuestFlagsPrefab => UI ? UI.questFlagPrefab : null;
 
-    private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
+    private readonly List<ItemSlotBase> rewardCells = new List<ItemSlotBase>();
     private readonly List<QuestAgent> progressQuestAgents = new List<QuestAgent>();
     private readonly List<QuestAgent> completeQuestAgents = new List<QuestAgent>();
     private readonly List<QuestGroupAgent> questGroupAgents = new List<QuestGroupAgent>();
@@ -608,14 +608,14 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         int befCount = rewardCells.Count;
         for (int i = 0; i < 10 - befCount; i++)
         {
-            ItemAgent rwc = ObjectPool.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemAgent>();
+            ItemSlotBase rwc = ObjectPool.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemSlotBase>();
             rwc.Init();
             rewardCells.Add(rwc);
         }
-        foreach (ItemAgent rwc in rewardCells)
+        foreach (ItemSlotBase rwc in rewardCells)
             if (rwc) rwc.Empty();
         foreach (ItemInfo info in selectedQuest.Info.RewardItems)
-            foreach (ItemAgent rwc in rewardCells)
+            foreach (ItemSlotBase rwc in rewardCells)
             {
                 if (rwc.IsEmpty)
                 {

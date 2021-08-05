@@ -24,7 +24,7 @@ public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterH
             }
 #elif UNITY_ANDROID
             BackpackManager.Instance.OpenDiscardWindow();
-            TipsManager.Instance.ShowText(transform.position, "将物品拖拽至此按钮丢弃，或者点击该按钮进行选取。", 3);
+            TipsManager.Instance.ShowText(transform.position, "将物品拖拽到此按钮丢弃，或者点击该按钮进行多选。", 3);
 #endif
         }
     }
@@ -33,7 +33,7 @@ public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     {
 #if UNITY_STANDALONE
         if (!DragableManager.Instance.IsDraging)
-            TipsManager.Instance.ShowText(transform.position, "将物品拖拽至此按钮丢弃，或者点击该按钮进行选取。", 3);
+            TipsManager.Instance.ShowText(transform.position, "将物品放置到此按钮丢弃，或者点击该按钮进行多选。", 3);
 #endif
     }
 

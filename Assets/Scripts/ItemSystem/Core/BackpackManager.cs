@@ -24,7 +24,8 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     public event ItemAmountListener OnGetItemEvent;
     public event ItemAmountListener OnLoseItemEvent;
 
-    public List<ItemAgent> itemAgents = new List<ItemAgent>();
+    public readonly List<ItemSlot> itemSlots = new List<ItemSlot>();
+    public readonly HashSet<ItemSlot> slotsMap = new HashSet<ItemSlot>();
 
     private Backpack Backpack => PlantManager.Instance ? PlayerManager.Instance.Backpack : null;
 
@@ -38,24 +39,22 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (!UI || !UI.gameObject) return;
         if (Backpack != null)
         {
-            foreach (ItemAgent ia in itemAgents)
+            foreach (ItemSlot ia in itemSlots)
                 ia.Empty();
-            while (Backpack.size.Max > itemAgents.Count)
+            while (Backpack.size.Max > itemSlots.Count)
             {
-                ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-                itemAgents.Add(ia);
-                ia.Init(ItemAgentType.Backpack, itemAgents.Count - 1, UI.gridScrollRect);
+                MakeSlot();
             }
-            while (Backpack.size.Max < itemAgents.Count)
+            while (Backpack.size.Max < itemSlots.Count)
             {
-                itemAgents[itemAgents.Count - 1].Clear(true);
-                itemAgents.RemoveAt(itemAgents.Count - 1);
+                slotsMap.Remove(itemSlots[itemSlots.Count - 1]);
+                itemSlots[itemSlots.Count - 1].Recycle();
+                itemSlots.RemoveAt(itemSlots.Count - 1);
             }
             UpdateUI();
         }
         UI.pageSelector.SetValueWithoutNotify(0);
     }
-
     #region 道具获得相关
     /// <summary>
     /// 求取道具最大可获取数量
@@ -205,12 +204,18 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (item.StackAble)
         {
             Backpack.GetItemSimple(item, amount);
-            ItemAgent ia = itemAgents.Find(x => !x.IsEmpty && (x.MItemInfo.item == item || x.MItemInfo.ItemID == item.ID));
+            ItemSlot ia = itemSlots.Find(x => !x.IsEmpty && (x.MItemInfo.item == item || x.MItemInfo.ItemID == item.ID));
             if (ia) ia.UpdateInfo();
             else//如果找不到，说明该物品是新的，是原来背包里没有的
             {
-                ia = itemAgents.Find(x => x.IsEmpty);
-                if (ia) ia.SetItem(Backpack.LatestInfo);
+                ia = itemSlots.Find(x => x.IsEmpty);
+                if (ia)
+                {
+                    ia.SetItem(Backpack.LatestInfo);
+                    if (partCondition != null)
+                        if (!partCondition(Backpack.LatestInfo))
+                            ia.Dark();
+                }
                 else
                 {
                     MessageManager.Instance.New("发生内部错误！");
@@ -221,10 +226,13 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         else for (int i = 0; i < amount; i++)
             {
                 Backpack.GetItemSimple(item);
-                foreach (ItemAgent ia in itemAgents)
+                foreach (ItemSlot ia in itemSlots)
                     if (ia.IsEmpty)
                     {
                         ia.SetItem(Backpack.LatestInfo);
+                        if (partCondition != null)
+                            if (!partCondition(Backpack.LatestInfo))
+                                ia.Dark();
                         break;
                     }
             }
@@ -259,12 +267,18 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (info.item.StackAble)
         {
             Backpack.GetItemSimple(info, amount);
-            ItemAgent ia = itemAgents.Find(x => !x.IsEmpty && (x.MItemInfo.item == info.item || x.MItemInfo.ItemID == info.ItemID));
+            ItemSlot ia = itemSlots.Find(x => !x.IsEmpty && (x.MItemInfo.item == info.item || x.MItemInfo.ItemID == info.ItemID));
             if (ia) ia.UpdateInfo();
             else//如果找不到，说明该物品是新的，原来背包里没有的
             {
-                ia = itemAgents.Find(x => x.IsEmpty);
-                if (ia) ia.SetItem(Backpack.LatestInfo);
+                ia = itemSlots.Find(x => x.IsEmpty);
+                if (ia)
+                {
+                    ia.SetItem(Backpack.LatestInfo);
+                    if (partCondition != null)
+                        if (!partCondition(Backpack.LatestInfo))
+                            ia.Dark();
+                }
                 else
                 {
                     MessageManager.Instance.New("发生内部错误！");
@@ -275,10 +289,13 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         else for (int i = 0; i < amount; i++)
             {
                 Backpack.GetItemSimple(info);
-                foreach (ItemAgent ia in itemAgents)
+                foreach (ItemSlot ia in itemSlots)
                     if (ia.IsEmpty)
                     {
                         ia.SetItem(Backpack.LatestInfo);
+                        if (partCondition != null)
+                            if (!partCondition(Backpack.LatestInfo))
+                                ia.Dark();
                         break;
                     }
             }
@@ -396,10 +413,10 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             foreach (var si in simulGetItems)
                 if (!TryGetItem_Boolean(si, new ItemInfo(info.item, amount))) return false;
         Backpack.LoseItemSimple(info, amount);
-        ItemAgent ia = itemAgents.Find(x => x.MItemInfo == info);
+        ItemSlot ia = itemSlots.Find(x => x.MItemInfo == info);
         if (ia) ia.UpdateInfo();
         OnLoseItemEvent?.Invoke(info.ItemID, GetItemAmount(info.item));
-        if (ItemWindowManager.Instance.MItemInfo == info && info.Amount < 1) ItemWindowManager.Instance.CloseWindow();
+        if (ItemWindowManager.Instance.Info == info && info.Amount < 1) ItemWindowManager.Instance.CloseWindow();
         if (simulGetItems != null)
             foreach (var si in simulGetItems)
                 GetItem(si);
@@ -466,19 +483,19 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     #endregion
 
     #region 道具使用相关
-    public void UseItem(ItemInfo MItemInfo)
+    public void UseItem(ItemInfo itemInfo)
     {
-        if (!MItemInfo.item.Usable)
+        if (!itemInfo.item.Usable)
         {
             MessageManager.Instance.New("该物品不可使用");
             return;
         }
-        if (MItemInfo.item.IsBox) UseBox(MItemInfo);
-        else if (MItemInfo.item.IsEquipment) UseEuipment(MItemInfo);
-        else if (MItemInfo.item.IsBook) UseBook(MItemInfo);
-        else if (MItemInfo.item.IsBag) UseBag(MItemInfo);
-        else if (MItemInfo.item.IsForQuest) UseQuest(MItemInfo);
-        if (ItemWindowManager.Instance.MItemInfo == MItemInfo) ItemWindowManager.Instance.CloseWindow();
+        if (itemInfo.item.IsBox) UseBox(itemInfo);
+        else if (itemInfo.item.IsEquipment) UseEuipment(itemInfo);
+        else if (itemInfo.item.IsBook) UseBook(itemInfo);
+        else if (itemInfo.item.IsBag) UseBag(itemInfo);
+        else if (itemInfo.item.IsForQuest) UseQuest(itemInfo);
+        if (ItemWindowManager.Instance.Info == itemInfo) ItemWindowManager.Instance.CloseWindow();
     }
 
     void UseBox(ItemInfo MItemInfo)
@@ -617,7 +634,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     {
         base.CloseWindow();
         if (IsUIOpen) return;
-        foreach (ItemAgent ia in itemAgents)
+        foreach (ItemSlot ia in itemSlots)
             ia.FinishDrag();
         AmountManager.Instance.Cancel();
         ItemWindowManager.Instance.CloseWindow();
@@ -645,45 +662,151 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
 
     public void OpenDiscardWindow()
     {
-        bool condition(ItemAgent ia)
+        bool select(ItemInfo info)
         {
-            return ia.IsEmpty || ia.MItemInfo.item.DiscardAble;
+            return info && info.item.DiscardAble;
         }
-        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Discard, "丢弃物品", "确定要丢掉这些道具吗？", condition, DiscardItems);
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.SelectAll, "丢弃物品", "确定要丢掉这些道具吗？", select, DiscardItems);
     }
 
-    public void PartSelectable(bool mark, System.Func<ItemAgent, bool> condition = null)
+    private System.Func<ItemInfo, bool> partCondition;
+    public void PartSelectable(bool part, System.Func<ItemInfo, bool> condition = null)
     {
-        if (mark && condition != null)
-            foreach (var ia in itemAgents.Where(x => !x.IsEmpty))
+        if (part && condition != null)
+        {
+            partCondition = condition;
+            foreach (var ia in itemSlots.Where(x => !x.IsEmpty))
             {
-                if (condition(ia)) ia.Light();
+                if (condition(ia.MItemInfo)) ia.Light();
                 else ia.Dark();
             }
-        else foreach (var ia in itemAgents.Where(x => !x.IsEmpty))
+        }
+        else
+        {
+            partCondition = null;
+            foreach (var ia in itemSlots.Where(x => !x.IsEmpty))
             {
                 ia.Light();
             }
+        }
     }
 
-    public void MarkSlot(ItemInfo info, bool mark)
+    private void MakeSlot()
     {
-        if (!info || !info.item) return;
-        ItemAgent ia = null;
-        if (!info.item.StackAble)
-            ia = itemAgents.Find(x => x.MItemInfo == info);
+        ItemSlot ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemSlot>();
+        itemSlots.Add(ia);
+        slotsMap.Add(ia);
+        ia.Init(itemSlots.Count - 1, UI.gridScrollRect, GetHandleButtons, OnSlotRightClick, OnSlotEndDrag);
+    }
+    private void OnSlotEndDrag(GameObject gameObject, ItemSlot slot)
+    {
+        bool swapable(ItemSlot target)
+        {
+            return slot != target && ContainsSlot(target);
+        }
+        ItemSlot target = gameObject.GetComponentInParent<ItemSlot>();
+        if (target && swapable(target)) slot.SwapInfoTo(target);
+        else if (gameObject.GetComponentInParent<DiscardButton>() == UI.discardButton)
+        {
+            DiscardItem(slot.MItemInfo);
+            AmountManager.Instance.SetPosition(UI.discardButton.transform.position);
+        }
+        else if (target && ItemSelectionManager.Instance.ContainsSlot(target) || gameObject == ItemSelectionManager.Instance.PlacementArea)
+            if (ItemSelectionManager.Instance.Place(slot))
+                slot.Mark(true);
+    }
+    private void OnSlotRightClick(ItemSlot slot)
+    {
+        if (WarehouseManager.Instance.IsUIOpen)
+        {
+            WarehouseManager.Instance.StoreItem(slot.MItemInfo, true);
+        }
+        else if (ShopManager.Instance.IsUIOpen)
+        {
+            ShopManager.Instance.PurchaseItem(slot.MItemInfo);
+        }
+        else if (ItemSelectionManager.Instance.IsUIOpen)
+        {
+            if (ItemSelectionManager.Instance.Place(slot))
+                slot.Mark(true);
+        }
         else
-            ia = itemAgents.Find(x => x.MItemInfo && x.MItemInfo.ItemID == info.ItemID);
-        if (ia) ia.Mark(mark);
+        {
+            if (slot.MItemInfo.item.Usable)
+            {
+                UseItem(slot.MItemInfo);
+                slot.UpdateInfo();
+            }
+        }
+    }
+    private ButtonWithTextData[] GetHandleButtons(ItemSlot slot)
+    {
+        if (!slot || slot.IsEmpty) return null;
+
+        List<ButtonWithTextData> buttons = new List<ButtonWithTextData>();
+        if (ItemSelectionManager.Instance.IsUIOpen)
+        {
+            if (!slot.IsDark)
+                buttons.Add(new ButtonWithTextData("选取", delegate
+                {
+                    if (ItemSelectionManager.Instance.Place(slot))
+                        slot.Mark(true);
+                }));
+        }
+        else if (WarehouseManager.Instance.IsUIOpen)
+        {
+            buttons.Add(new ButtonWithTextData("存入", delegate
+            {
+                WarehouseManager.Instance.StoreItem(slot.MItemInfo);
+            }));
+            if (slot.MItemInfo.Amount > 1)
+                buttons.Add(new ButtonWithTextData("全部存入", delegate
+                {
+                    WarehouseManager.Instance.StoreItem(slot.MItemInfo, true);
+                }));
+        }
+        else if (ShopManager.Instance.IsUIOpen)
+        {
+            if (slot.MItemInfo.item.SellAble)
+                buttons.Add(new ButtonWithTextData("出售", delegate
+                {
+                    ShopManager.Instance.PurchaseItem(slot.MItemInfo);
+                }));
+        }
+        else
+        {
+            if (slot.MItemInfo.item.Usable)
+                buttons.Add(new ButtonWithTextData("使用", delegate
+                {
+                    UseItem(slot.MItemInfo);
+                }));
+            if (slot.MItemInfo.item.DiscardAble)
+                buttons.Add(new ButtonWithTextData("丢弃", delegate
+                {
+                    DiscardItem(slot.MItemInfo);
+                    AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
+                }));
+        }
+        return buttons.ToArray();
+    }
+
+    public bool ContainsSlot(ItemSlot slot)
+    {
+        return slotsMap.Contains(slot);
     }
 
     public void Arrange()
     {
         if (!UI || !UI.gameObject) return;
+        if (ItemSelectionManager.Instance.IsUIOpen)
+        {
+            MessageManager.Instance.New("当前不可用");
+            return;
+        }
         Backpack.Arrange();
         Init();
         for (int i = 0; i < Backpack.Items.Count; i++)
-            itemAgents[i].SetItem(Backpack.Items[i]);
+            itemSlots[i].SetItem(Backpack.Items[i]);
         ItemWindowManager.Instance.CloseWindow();
         UpdateUI();
     }
@@ -709,9 +832,11 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
 
     public override void SetUI(BackpackUI UI)
     {
-        itemAgents.RemoveAll(x => !x || !x.gameObject);
-        foreach (var ia in itemAgents)
-            ia.Empty();
+        itemSlots.RemoveAll(x => !x || !x.gameObject);
+        foreach (var ia in itemSlots)
+            ia.Recycle();
+        itemSlots.Clear();
+        slotsMap.Clear();
         IsPausing = false;
         CloseWindow();
         base.SetUI(UI);
@@ -735,7 +860,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     private void ShowAll()
     {
         if (!UI || !UI.gameObject) return;
-        foreach (ItemAgent ia in itemAgents)
+        foreach (ItemSlot ia in itemSlots)
         {
             ZetanUtility.SetActive(ia.gameObject, true);
         }
@@ -744,7 +869,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     private void ShowEquipments()
     {
         if (!UI || !UI.gameObject) return;
-        foreach (ItemAgent ia in itemAgents)
+        foreach (ItemSlot ia in itemSlots)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsEquipment)
                 ZetanUtility.SetActive(ia.gameObject, true);
@@ -755,7 +880,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     private void ShowConsumables()
     {
         if (!UI || !UI.gameObject) return;
-        foreach (ItemAgent ia in itemAgents)
+        foreach (ItemSlot ia in itemSlots)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsConsumable)
                 ZetanUtility.SetActive(ia.gameObject, true);
@@ -766,7 +891,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     private void ShowMaterials()
     {
         if (!UI || !UI.gameObject) return;
-        foreach (ItemAgent ia in itemAgents)
+        foreach (ItemSlot ia in itemSlots)
         {
             if (!ia.IsEmpty && ia.MItemInfo.item.IsMaterial)
                 ZetanUtility.SetActive(ia.gameObject, true);
@@ -893,11 +1018,11 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             }
         return amounts.Min();
     }
-    public int GetAmountCanMake(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<ItemInfo> materials)
+    public int GetAmountCanMake(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfo> materials)
     {
-        if (materials == null || materials.Count() < 1 || itemMaterials == null || itemMaterials.Count() < 1 || itemMaterials.Count() != materials.Count()) return 0;
+        if (materials == null || materials.Count() < 1 || targetMaterials == null || targetMaterials.Count() < 1 || targetMaterials.Count() != materials.Count()) return 0;
         List<int> amounts = new List<int>();
-        foreach (var material in itemMaterials)
+        foreach (var material in targetMaterials)
         {
             if (material.MakingType == MakingType.SingleItem)
             {
@@ -980,9 +1105,9 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         return GetItemAmount(item) > 0;
     }
 
-    public IEnumerable<ItemAgent> GetItemAgentsByItem(ItemBase item)
+    public IEnumerable<ItemSlot> GetItemAgentsByItem(ItemBase item)
     {
-        return itemAgents.FindAll(x => !x.IsEmpty && x.MItemInfo.item == item).AsEnumerable();
+        return itemSlots.FindAll(x => !x.IsEmpty && x.MItemInfo.item == item).AsEnumerable();
     }
 
     /// <summary>
@@ -1002,13 +1127,12 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         Backpack.size.Max += finallyExpand;
         for (int i = 0; i < finallyExpand; i++)
         {
-            ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-            itemAgents.Add(ia);
-            ia.Init(ItemAgentType.Backpack, itemAgents.Count - 1, UI.gridScrollRect);
+            MakeSlot();
         }
         MessageManager.Instance.New(GameManager.BackpackName + "空间增加了");
         return true;
     }
+
     /// <summary>
     /// 扩展负重
     /// </summary>
@@ -1079,7 +1203,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             SetPage(currentPage);
             return;
         }
-        foreach (var ia in itemAgents)
+        foreach (var ia in itemSlots)
         {
             if (!ia.IsEmpty && ia.MItemInfo.ItemName.Contains(UI.searchInput.text)) continue;
             else ia.Hide();
@@ -1118,9 +1242,9 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             ItemInfo newInfo = new ItemInfo(GameManager.GetItemByID(id.itemID), id.amount);
             //TODO 把newInfo的耐久度等信息处理
             Backpack.Items.Add(newInfo);
-            if (id.indexInGrid > -1 && id.indexInGrid < itemAgents.Count)
-                itemAgents[id.indexInGrid].SetItem(newInfo);
-            else foreach (ItemAgent ia in itemAgents)
+            if (id.indexInGrid > -1 && id.indexInGrid < itemSlots.Count)
+                itemSlots[id.indexInGrid].SetItem(newInfo);
+            else foreach (ItemSlot ia in itemSlots)
                 {
                     if (ia.IsEmpty) { ia.SetItem(newInfo); break; }
                 }

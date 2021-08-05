@@ -42,7 +42,7 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
     {
         if (Current != null)
         {
-            if (Input.GetMouseButtonDown(1))
+            if (Input.GetMouseButtonDown(1) || Input.touches.Length > 1)
             {
                 CancelDrag();
             }
@@ -50,7 +50,7 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
         }
     }
 
-    public void GetDragable(IDragAble dragable, UnityAction cancelDragAction = null, float width = 100, float height = 100)
+    public void StartDrag(IDragAble dragable, UnityAction cancelDragAction = null, float width = 100, float height = 100)
     {
         if (!dragable.DragAbleIcon) return;
         iconSortCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;

@@ -12,7 +12,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
     private LootAgent defaultLootPrefab;
     public static LootAgent DefaultLootPrefab => Instance.defaultLootPrefab;
 
-    private readonly List<ItemAgent> itemAgents = new List<ItemAgent>();
+    private readonly List<ItemSlot> itemAgents = new List<ItemSlot>();
 
     public LootAgent LootAgent { get; private set; }
 
@@ -25,23 +25,41 @@ public class LootManager : WindowHandler<LootUI, LootManager>
             ia.Empty();
         while (itemAgents.Count < slotCount)
         {
-            ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-            ia.Init(ItemAgentType.Loot);
+            ItemSlot ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemSlot>();
+            ia.Init(GetHandleButtons, delegate (ItemSlot slot) { TakeItem(slot.MItemInfo, true); });
             itemAgents.Add(ia);
         }
         while (itemAgents.Count > slotCount)
         {
-            itemAgents[itemAgents.Count - 1].Clear(true);
+            itemAgents[itemAgents.Count - 1].Recycle();
             itemAgents.RemoveAt(itemAgents.Count - 1);
         }
         if (LootAgent)
             foreach (ItemInfo li in LootAgent.lootItems)
-                foreach (ItemAgent ia in itemAgents)
+                foreach (ItemSlot ia in itemAgents)
                     if (ia.IsEmpty)
                     {
                         ia.SetItem(li);
                         break;
                     }
+    }
+
+    private ButtonWithTextData[] GetHandleButtons(ItemSlot slot)
+    {
+        if (!slot || slot.IsEmpty) return null;
+
+        List<ButtonWithTextData> buttons = new List<ButtonWithTextData>
+        {
+            new ButtonWithTextData("取出", delegate
+            {
+                TakeItem(slot.MItemInfo);
+            }),
+            new ButtonWithTextData("全部取出", delegate
+            {
+                TakeItem(slot.MItemInfo, true);
+            })
+        };
+        return buttons.ToArray();
     }
 
     public void TakeItem(ItemInfo info, bool all = false)
@@ -68,7 +86,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
         int takeAmount = BackpackManager.Instance.TryGetItem_Integer(item, amount);
         if (BackpackManager.Instance.GetItem(item.item, takeAmount)) item.Amount -= takeAmount;
         if (item.Amount < 1) LootAgent.lootItems.Remove(item);
-        ItemAgent ia = GetItemAgentByInfo(item);
+        ItemSlot ia = GetItemAgentByInfo(item);
         if (ia) ia.UpdateInfo();
         if (LootAgent.lootItems.Count < 1)
         {
@@ -84,7 +102,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
         {
             int takeAmount = BackpackManager.Instance.TryGetItem_Integer(item);
             if (BackpackManager.Instance.GetItem(item.item, takeAmount)) item.Amount -= takeAmount;
-            ItemAgent ia = GetItemAgentByInfo(item);
+            ItemSlot ia = GetItemAgentByInfo(item);
             if (ia) ia.UpdateInfo();
         }
         LootAgent.lootItems.RemoveAll(x => x.Amount < 1);
@@ -95,7 +113,7 @@ public class LootManager : WindowHandler<LootUI, LootManager>
         }
     }
 
-    private ItemAgent GetItemAgentByInfo(ItemInfo info)
+    private ItemSlot GetItemAgentByInfo(ItemInfo info)
     {
         return itemAgents.Find(x => x.MItemInfo == info);
     }
@@ -103,12 +121,12 @@ public class LootManager : WindowHandler<LootUI, LootManager>
     #region UI相关
     public bool Pick(LootAgent lootAgent)
     {
-        if(IsPicking)
+        if (IsPicking)
         {
             MessageManager.Instance.New("请先拾取完上一个物品");
             return false;
         }
-        if(GatherManager.Instance.IsGathering)
+        if (GatherManager.Instance.IsGathering)
         {
             MessageManager.Instance.New("请先等待采集完成");
             return false;

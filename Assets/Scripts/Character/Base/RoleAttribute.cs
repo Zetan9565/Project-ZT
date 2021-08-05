@@ -164,6 +164,27 @@ public class RoleAttribute
                 return false;
         }
     }
+    public static bool IsUsingIntValue(RoleAttribute attr)
+    {
+        switch (attr.type)
+        {
+            case RoleAttributeType.HP:
+            case RoleAttributeType.MP:
+            case RoleAttributeType.SP:
+            case RoleAttributeType.CutATK:
+            case RoleAttributeType.PunATK:
+            case RoleAttributeType.BluATK:
+            case RoleAttributeType.DEF:
+                return true;
+            case RoleAttributeType.Hit:
+            case RoleAttributeType.Crit:
+            case RoleAttributeType.ATKSpeed:
+            case RoleAttributeType.MoveSpeed:
+            case RoleAttributeType.TestBool:
+            default:
+                return false;
+        }
+    }
 
     public static bool IsUsingFloatValue(RoleAttributeType type)
     {
@@ -187,10 +208,54 @@ public class RoleAttribute
                 return false;
         }
     }
+    public static bool IsUsingFloatValue(RoleAttribute attr)
+    {
+        switch (attr.type)
+        {
+            case RoleAttributeType.HP:
+            case RoleAttributeType.MP:
+            case RoleAttributeType.SP:
+            case RoleAttributeType.CutATK:
+            case RoleAttributeType.PunATK:
+            case RoleAttributeType.BluATK:
+            case RoleAttributeType.DEF:
+                return false;
+            case RoleAttributeType.Hit:
+            case RoleAttributeType.Crit:
+            case RoleAttributeType.ATKSpeed:
+            case RoleAttributeType.MoveSpeed:
+                return true;
+            case RoleAttributeType.TestBool:
+            default:
+                return false;
+        }
+    }
 
     public static bool IsUsingBoolValue(RoleAttributeType type)
     {
         switch (type)
+        {
+            case RoleAttributeType.HP:
+            case RoleAttributeType.MP:
+            case RoleAttributeType.SP:
+            case RoleAttributeType.CutATK:
+            case RoleAttributeType.PunATK:
+            case RoleAttributeType.BluATK:
+            case RoleAttributeType.DEF:
+            case RoleAttributeType.Hit:
+            case RoleAttributeType.Crit:
+            case RoleAttributeType.ATKSpeed:
+            case RoleAttributeType.MoveSpeed:
+                return false;
+            case RoleAttributeType.TestBool:
+                return true;
+            default:
+                return false;
+        }
+    }
+    public static bool IsUsingBoolValue(RoleAttribute attr)
+    {
+        switch (attr.type)
         {
             case RoleAttributeType.HP:
             case RoleAttributeType.MP:
@@ -252,7 +317,6 @@ public class RoleAttributeGroup
 {
     [SerializeField, NonReorderable]
     private List<RoleAttribute> attributes = new List<RoleAttribute>();
-
     public List<RoleAttribute> Attributes => attributes;
 
     public ValueType this[RoleAttributeType type]

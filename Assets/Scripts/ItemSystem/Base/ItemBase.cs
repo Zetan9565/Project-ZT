@@ -156,7 +156,7 @@ public abstract class ItemBase : ScriptableObject
 
     public bool IsMedicine => this is MedicineItem;
 
-    public bool IsEquipment => this is WeaponItem || this is ArmorItem;
+    public bool IsEquipment => this is EquipmentItem;
 
     /// <summary>
     /// 是消耗品

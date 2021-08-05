@@ -13,7 +13,7 @@ public class MakingUI : WindowUI
 
     public Text nameText;
 
-    public ItemAgent icon;
+    public ItemSlot icon;
 
     public Button makeButton;
     public Toggle loopToggle;
@@ -25,7 +25,6 @@ public class MakingUI : WindowUI
     protected override void Awake()
     {
         base.Awake();
-        icon.Init(ItemAgentType.Making);
         closeButton.onClick.AddListener(MakingManager.Instance.CloseWindow);
         makeButton.onClick.AddListener(MakingManager.Instance.MakeCurrent);
         DIYButton.onClick.AddListener(MakingManager.Instance.DIY);

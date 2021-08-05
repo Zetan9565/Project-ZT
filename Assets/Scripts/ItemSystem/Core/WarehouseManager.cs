@@ -8,7 +8,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
 {
     public Transform CellsParent { get { return UI.itemCellsParent; } }
 
-    private readonly List<ItemAgent> itemAgents = new List<ItemAgent>();
+    private readonly List<ItemSlot> itemAgents = new List<ItemSlot>();
 
     public WarehouseData CurrentData { get; private set; }
 
@@ -22,26 +22,20 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         base.Awake();
         for (int i = 0; i < 100; i++)
         {
-            ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-            itemAgents.Add(ia);
-            ia.Init(ItemAgentType.Warehouse, itemAgents.Count - 1, UI.gridRect);
-            ia.Empty();
-            ZetanUtility.SetActive(ia.gameObject, false);
+            MakeSlot();
         }
     }
+
 
     public void Init()
     {
         if (CurrentData != null)
         {
-            foreach (ItemAgent ia in itemAgents)
+            foreach (ItemSlot ia in itemAgents)
                 ia.Empty();
             while (itemAgents.Count < CurrentData.size.Max)//格子不够用，新建
             {
-                ItemAgent ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemAgent>();
-                itemAgents.Add(ia);
-                ia.Empty();
-                ia.Init(ItemAgentType.Warehouse, itemAgents.Count - 1, UI.gridRect);
+                MakeSlot();
             }
             int originalSize = itemAgents.Count;
             for (int i = CurrentData.size.Max; i < originalSize - CurrentData.size.Max; i++)//用不到的格子隐藏
@@ -64,6 +58,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         UI.pageSelector.SetValueWithoutNotify(0);
         SetPage(0);
     }
+
 
     public void Search()
     {
@@ -132,7 +127,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         if (info.item.StackAble)
         {
             CurrentData.GetItemSimple(info, amount);
-            ItemAgent ia = itemAgents.Find(x => !x.IsEmpty && x.MItemInfo.item == info.item);
+            ItemSlot ia = itemAgents.Find(x => !x.IsEmpty && x.MItemInfo.item == info.item);
             if (ia) ia.UpdateInfo();
             else
             {
@@ -148,7 +143,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         else for (int i = 0; i < amount; i++)
             {
                 CurrentData.GetItemSimple(info);
-                foreach (ItemAgent ia in itemAgents)
+                foreach (ItemSlot ia in itemAgents)
                     if (ia.IsEmpty)
                     {
                         ia.SetItem(CurrentData.Latest);
@@ -197,7 +192,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         if (!BackpackManager.Instance.TryGetItem_Boolean(info, amount)) return false;
         BackpackManager.Instance.GetItem(info, amount);
         CurrentData.LoseItemSimple(info, amount);
-        ItemAgent ia = GetItemAgentByInfo(info);
+        ItemSlot ia = GetItemAgentByInfo(info);
         if (ia) ia.UpdateInfo();
         UpdateUI();
         if (!BackpackManager.Instance.IsUIOpen)
@@ -218,7 +213,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         return GetItemAmount(id) > 0;
     }
 
-    public ItemAgent GetItemAgentByInfo(ItemInfo info)
+    public ItemSlot GetItemAgentByInfo(ItemInfo info)
     {
         return itemAgents.Find(x => x.MItemInfo == info);
     }
@@ -243,7 +238,7 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         if (CurrentData && CurrentData.entity) CurrentData.entity.OnDoneManage();
         CurrentData = null;
         Managing = false;
-        foreach (ItemAgent ia in itemAgents)
+        foreach (ItemSlot ia in itemAgents)
         {
             ia.FinishDrag();
             ia.Empty();
@@ -264,10 +259,37 @@ public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
         SetPage(currentPage);
     }
 
+    private void MakeSlot()
+    {
+        ItemSlot ia = ObjectPool.Get(UI.itemCellPrefab, UI.itemCellsParent).GetComponent<ItemSlot>();
+        ia.Init(itemAgents.Count - 1, UI.gridRect, GetHandleButtons, delegate (ItemSlot slot) { TakeOutItem(slot.MItemInfo, true); });
+        ia.Empty();
+        ia.Hide();
+        itemAgents.Add(ia);
+    }
+    private ButtonWithTextData[] GetHandleButtons(ItemSlot slot)
+    {
+        if (!slot || slot.IsEmpty) return null;
+
+        List<ButtonWithTextData> buttons = new List<ButtonWithTextData>
+        {
+            new ButtonWithTextData("取出", delegate
+            {
+                TakeOutItem(slot.MItemInfo);
+            }),
+        };
+        if (slot.MItemInfo.Amount > 1)
+            buttons.Add(new ButtonWithTextData("全部取出", delegate
+            {
+                TakeOutItem(slot.MItemInfo, true);
+            }));
+        return buttons.ToArray();
+    }
+
     public void Arrange()
     {
         CurrentData.Arrange();
-        foreach (ItemAgent ia in itemAgents)
+        foreach (ItemSlot ia in itemAgents)
             ia.Empty();
         for (int i = 0; i < CurrentData.Items.Count; i++)
             itemAgents[i].SetItem(CurrentData.Items[i]);

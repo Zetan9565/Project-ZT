@@ -10,7 +10,7 @@ public class PlantUI : WindowUI
 
     public CanvasGroup descriptionWindow;
     public Text nameText;
-    public ItemAgent icon;
+    public ItemSlot icon;
     public Text amount;
     public Text description;
 

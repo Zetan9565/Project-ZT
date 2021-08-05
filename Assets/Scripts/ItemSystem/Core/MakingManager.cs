@@ -13,7 +13,8 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
 
     private ItemBase currentItem;
 
-    private bool backpackOpenBef;
+    private bool bagPausingBef;
+    private bool bagOpenBef;
 
     public MakingTool CurrentTool { get; private set; }
 
@@ -122,9 +123,9 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         }
         else
         {
-            ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", delegate (ItemAgent ia)
+            ItemSelectionManager.Instance.StartSelection(ItemSelectionType.SelectNum, "放入一份材料", delegate (ItemInfo info)
             {
-                return ia.MItemInfo.item.MaterialType != MaterialType.None;
+                return info && info.item.MaterialType != MaterialType.None;
             }, MakeCurrent);
         }
     }
@@ -182,11 +183,11 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
 
     public void DIY()
     {
-        bool condition(ItemAgent ia)
+        bool select(ItemInfo info)
         {
-            return ia.MItemInfo.item.MaterialType != MaterialType.None;
+            return info && info.item.MaterialType != MaterialType.None;
         }
-        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Making, "放入一份材料", condition, DIYMake);
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.SelectNum, "放入一份材料", select, DIYMake);
         HideDescription();
     }
     public void DIYMake(IEnumerable<ItemInfo> materials)
@@ -354,7 +355,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         foreach (var item in items)
             if (CheckMaterialsMatch(item.Materials, materials))
                 return MakeItem(item, materials);
-        MessageManager.Instance.New("这样什么也做不了");
+        MessageManager.Instance.New("这样似乎什么也做不了");
         return false;
     }
 
@@ -390,8 +391,14 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         Init();
         UI.pageSelector.SetValueWithoutNotify(0);
         SetPage(0);
-        backpackOpenBef = BackpackManager.Instance.IsUIOpen;
-        if (!BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.OpenWindow();
+        bagPausingBef = BackpackManager.Instance.IsPausing;
+        bagOpenBef = BackpackManager.Instance.IsUIOpen;
+        if (!BackpackManager.Instance.IsUIOpen)
+        {
+            if (bagPausingBef)
+                BackpackManager.Instance.PauseDisplay(false);
+            BackpackManager.Instance.OpenWindow();
+        }
         if (ItemWindowManager.Instance.IsUIOpen) ItemWindowManager.Instance.CloseWindow();
         BackpackManager.Instance.EnableHandwork(false);
     }
@@ -408,9 +415,18 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         HideDescription();
         AmountManager.Instance.Cancel();
         ItemWindowManager.Instance.CloseWindow();
-        if (ItemSelectionManager.Instance.SelectionType == ItemSelectionType.Making) ItemSelectionManager.Instance.CloseWindow();
-        if (BackpackManager.Instance.IsUIOpen && !backpackOpenBef) BackpackManager.Instance.CloseWindow();
-        else if (backpackOpenBef) BackpackManager.Instance.EnableHandwork(true);
+        if (ItemSelectionManager.Instance.IsUIOpen) ItemSelectionManager.Instance.CloseWindow();
+        if (bagPausingBef)
+            BackpackManager.Instance.PauseDisplay(true);
+        else if (!bagOpenBef)
+        {
+            if (BackpackManager.Instance.IsPausing)
+                BackpackManager.Instance.PauseDisplay(false);
+            BackpackManager.Instance.CloseWindow();
+        }
+        bagPausingBef = false;
+        bagOpenBef = false;
+        BackpackManager.Instance.EnableHandwork(true);
     }
 
     public override void PauseDisplay(bool pause)
@@ -553,6 +569,10 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         IsPausing = false;
         CloseWindow();
         this.UI = UI;
+        UI.icon.Init(delegate (ItemSlot slot)
+        {
+            return new ButtonWithTextData[] { new ButtonWithTextData("制作", delegate { MakeCurrent(); }) };
+        });
     }
     #endregion
 

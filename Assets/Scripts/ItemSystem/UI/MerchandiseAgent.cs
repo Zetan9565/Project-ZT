@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class MerchandiseAgent : MonoBehaviour, IPointerClickHandler
 {
@@ -23,7 +24,7 @@ public class MerchandiseAgent : MonoBehaviour, IPointerClickHandler
     private Text amountText;
 
     [SerializeField]
-    private ItemAgent itemAgentSon;
+    private ItemSlot itemAgentSon;
 
     public bool IsEmpty { get { return merchandiseInfo == null || !merchandiseInfo.Item; } }
 
@@ -38,10 +39,27 @@ public class MerchandiseAgent : MonoBehaviour, IPointerClickHandler
         if (info == null || !info.Item) return;
         merchandiseInfo = info;
         merchandiseType = type;
-        if (type == MerchandiseType.SellToPlayer) itemAgentSon.Init(ItemAgentType.Selling);
-        else itemAgentSon.Init(ItemAgentType.Purchasing);
+        itemAgentSon.Init(GetHandleButtons);
         itemAgentSon.SetItem(new ItemInfo(info.Item));
         UpdateInfo();
+    }
+
+    private ButtonWithTextData[] GetHandleButtons(ItemSlot slot)
+    {
+        if (!slot || slot.IsEmpty) return null;
+
+        List<ButtonWithTextData> buttons = new List<ButtonWithTextData>();
+        if (merchandiseType == MerchandiseType.SellToPlayer)
+            buttons.Add(new ButtonWithTextData("购买", delegate
+            {
+                ShopManager.Instance.SellItem(merchandiseInfo);
+            }));
+        else
+            buttons.Add(new ButtonWithTextData("出售", delegate
+            {
+                ShopManager.Instance.PurchaseItem(merchandiseInfo);
+            }));
+        return buttons.ToArray();
     }
 
     public void UpdateInfo()

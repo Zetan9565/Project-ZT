@@ -111,7 +111,7 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
         EscapeMenuManager.Instance.SetUI(FindObjectOfType<EscapeUI>());
         FieldManager.Instance.SetUI(FindObjectOfType<FieldUI>());
         InteractionManager.Instance.SetUI(FindObjectOfType<InteractionUI>());
-        ItemSelectionManager.Instance.SetUI(FindObjectOfType<ItemSeletionUI>());
+        ItemSelectionManager.Instance.SetUI(FindObjectOfType<ItemSelectionUI>());
         ItemWindowManager.Instance.SetUI(FindObjectOfType<ItemWindowUI>());
         LootManager.Instance.SetUI(FindObjectOfType<LootUI>());
         MakingManager.Instance.SetUI(FindObjectOfType<MakingUI>());

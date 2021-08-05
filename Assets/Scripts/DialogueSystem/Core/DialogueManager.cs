@@ -37,7 +37,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     private readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
 
     #region 选项相关
-    private readonly List<OptionButtonData> buttonDatas = new List<OptionButtonData>();
+    private readonly List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
 
     private readonly List<ButtonWithText> optionAgents = new List<ButtonWithText>();
     public int OptionsCount => optionAgents.Count;
@@ -71,7 +71,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     private QuestData currentQuest;
     private TalkObjectiveData currentTalkObj;
     private SubmitObjectiveData currentSubmitObj;
-    private readonly List<ItemAgent> rewardCells = new List<ItemAgent>();
+    private readonly List<ItemSlot> rewardCells = new List<ItemSlot>();
     #endregion
 
     #region 开始新对话
@@ -132,7 +132,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         buttonDatas.Clear();
         if (dialogueToSay.Count > 0 || wordsToSay.Count > 0 && (!currentWords.origin.NeedToChusCorrectOption || currentWords.IsDone))
         {
-            buttonDatas.Add(new OptionButtonData("继续", delegate { SayNextWords(); }));
+            buttonDatas.Add(new ButtonWithTextData("继续", delegate { SayNextWords(); }));
         }
 
         if (!currentOption && !currentQuest)
@@ -143,7 +143,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             {
                 foreach (var quest in cmpltQuest)
                 {
-                    buttonDatas.Add(new OptionButtonData($"{quest.Info.Title}(已完成)", delegate
+                    buttonDatas.Add(new ButtonWithTextData($"{quest.Info.Title}(已完成)", delegate
                     {
                         currentQuest = quest;
                         ShowButtons(false, false, false);
@@ -157,7 +157,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             //完成剧情用对话时，结束对话
             if (currentWords && currentWords.parent && currentWords.parent.origin.StoryDialogue && currentWords.IsDone)
             {
-                buttonDatas.Add(new OptionButtonData("结束", delegate
+                buttonDatas.Add(new ButtonWithTextData("结束", delegate
                 {
                     OnFinishDialogueEvent?.Invoke();
                     CloseWindow();
@@ -192,7 +192,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                     string title = option.origin.Title;
                     if (option.origin.OptionType == WordsOptionType.SubmitAndGet)
                         title += $"(需[{option.origin.ItemToSubmit.ItemName}]{option.origin.ItemToSubmit.Amount}个)";
-                    buttonDatas.Add(new OptionButtonData(title, delegate
+                    buttonDatas.Add(new ButtonWithTextData(title, delegate
                     {
                         DoOption(option);
                     }));
@@ -215,7 +215,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         buttonDatas.Clear();
         foreach (var quest in cmpltQuests)
         {
-            buttonDatas.Add(new OptionButtonData(quest.Info.Title + "(完成)", delegate
+            buttonDatas.Add(new ButtonWithTextData(quest.Info.Title + "(完成)", delegate
             {
                 currentQuest = quest;
                 CurrentType = DialogueType.Quest;
@@ -225,7 +225,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         }
         foreach (var quest in norQuests)
         {
-            buttonDatas.Add(new OptionButtonData(quest.Info.Title + (quest.InProgress ? "(进行中)" : string.Empty), delegate
+            buttonDatas.Add(new ButtonWithTextData(quest.Info.Title + (quest.InProgress ? "(进行中)" : string.Empty), delegate
             {
                 currentQuest = quest;
                 CurrentType = DialogueType.Quest;
@@ -241,7 +241,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         ShowQuestDescription(currentQuest);
         if (!currentQuest.IsComplete && !currentQuest.InProgress)
         {
-            buttonDatas.Add(new OptionButtonData("接受", delegate
+            buttonDatas.Add(new ButtonWithTextData("接受", delegate
             {
                 if (QuestManager.Instance.AcceptQuest(currentQuest))
                 {
@@ -252,7 +252,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         }
         else if (currentQuest.IsComplete && currentQuest.InProgress)
         {
-            buttonDatas.Add(new OptionButtonData("完成", delegate
+            buttonDatas.Add(new ButtonWithTextData("完成", delegate
             {
                 if (QuestManager.Instance.CompleteQuest(currentQuest))
                 {
@@ -261,7 +261,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 }
             }));
         }
-        buttonDatas.Add(new OptionButtonData("返回", delegate
+        buttonDatas.Add(new ButtonWithTextData("返回", delegate
         {
             CurrentType = DialogueType.Normal;
             ShowTalkerQuest();
@@ -277,7 +277,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             //该目标是任务的最后一个目标，则可以直接提交任务
             if (qParent.currentQuestHolder == CurrentTalker.Data && qParent.IsComplete && qParent.ObjectiveInstances.IndexOf(currentTalkObj) == qParent.ObjectiveInstances.Count - 1)
             {
-                buttonDatas.Add(new OptionButtonData("继续", delegate
+                buttonDatas.Add(new ButtonWithTextData("继续", delegate
                 {
                     currentQuest = qParent;
                     CurrentType = DialogueType.Quest;
@@ -302,7 +302,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             //若该目标是任务的最后一个目标，则可以直接提交任务
             if (qParent.currentQuestHolder == CurrentTalker.Data && qParent.IsComplete && qParent.ObjectiveInstances.IndexOf(currentSubmitObj) == qParent.ObjectiveInstances.Count - 1)
             {
-                buttonDatas.Add(new OptionButtonData("继续", delegate
+                buttonDatas.Add(new ButtonWithTextData("继续", delegate
                 {
                     currentQuest = qParent;
                     CurrentType = DialogueType.Quest;
@@ -336,7 +336,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
             {
-                buttonDatas.Add(new OptionButtonData(to.runtimeParent.Info.Title, delegate
+                buttonDatas.Add(new ButtonWithTextData(to.runtimeParent.Info.Title, delegate
                 {
                     currentTalkObj = to;
                     CurrentType = DialogueType.Objective;
@@ -349,7 +349,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             if (so.AllPrevObjCmplt && !so.HasNextObjOngoing)
             {
-                buttonDatas.Add(new OptionButtonData(so.Info.DisplayName, delegate
+                buttonDatas.Add(new ButtonWithTextData(so.Info.DisplayName, delegate
                 {
                     if (CheckSumbitAble(so))
                     {
@@ -670,14 +670,14 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         int befCount = rewardCells.Count;
         for (int i = 0; i < 10 - befCount; i++)
         {
-            ItemAgent rwc = ObjectPool.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemAgent>();
+            ItemSlot rwc = ObjectPool.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemSlot>();
             rwc.Init();
             rewardCells.Add(rwc);
         }
-        foreach (ItemAgent rwc in rewardCells)
+        foreach (ItemSlot rwc in rewardCells)
             if (rwc) rwc.Empty();
         foreach (ItemInfo info in quest.Info.RewardItems)
-            foreach (ItemAgent rw in rewardCells)
+            foreach (ItemSlot rw in rewardCells)
             {
                 if (rw.IsEmpty)
                 {
@@ -715,12 +715,12 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     public void OpenGiftWindow()
     {
         //TODO 把玩家背包道具读出并展示
-        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.Gift, "选择礼物", "确定要送出这些礼物吗？", null, OnSendGift, delegate
-        {
-            BackpackManager.Instance.PauseDisplay(false);
-            BackpackManager.Instance.CloseWindow();
-            PauseDisplay(false);
-        });
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.SelectNum, "选择礼物", "确定要送出这些礼物吗？", null, OnSendGift, delegate
+         {
+             BackpackManager.Instance.PauseDisplay(false);
+             BackpackManager.Instance.CloseWindow();
+             PauseDisplay(false);
+         });
         PauseDisplay(true);
     }
     private void OnSendGift(IEnumerable<ItemInfo> items)
@@ -907,18 +907,6 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         }
     }
     #endregion
-}
-
-public class OptionButtonData
-{
-    public readonly string text;
-    public readonly Action callback;
-
-    public OptionButtonData(string text, Action callback)
-    {
-        this.text = text;
-        this.callback = callback;
-    }
 }
 
 public enum DialogueType
