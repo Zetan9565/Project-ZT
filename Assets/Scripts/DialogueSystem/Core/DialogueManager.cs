@@ -71,7 +71,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     private QuestData currentQuest;
     private TalkObjectiveData currentTalkObj;
     private SubmitObjectiveData currentSubmitObj;
-    private readonly List<ItemSlot> rewardCells = new List<ItemSlot>();
+    private readonly List<ItemSlotBase> rewardCells = new List<ItemSlotBase>();
     #endregion
 
     #region 开始新对话
@@ -670,14 +670,14 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         int befCount = rewardCells.Count;
         for (int i = 0; i < 10 - befCount; i++)
         {
-            ItemSlot rwc = ObjectPool.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemSlot>();
+            ItemSlotBase rwc = ObjectPool.Get(UI.rewardCellPrefab, UI.rewardCellsParent).GetComponent<ItemSlotBase>();
             rwc.Init();
             rewardCells.Add(rwc);
         }
-        foreach (ItemSlot rwc in rewardCells)
+        foreach (ItemSlotBase rwc in rewardCells)
             if (rwc) rwc.Empty();
         foreach (ItemInfo info in quest.Info.RewardItems)
-            foreach (ItemSlot rw in rewardCells)
+            foreach (ItemSlotBase rw in rewardCells)
             {
                 if (rw.IsEmpty)
                 {

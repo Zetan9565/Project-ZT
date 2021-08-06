@@ -20,7 +20,6 @@ public class BuildingInspector : Editor
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.LabelField("识别码", building.EntityID);
         EditorGUILayout.PropertyField(onDestroy, new GUIContent("销毁时"));
-        if (target is Field) EditorGUILayout.PropertyField(serializedObject.FindProperty("collider"));
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
     }
 }
