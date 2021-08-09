@@ -35,9 +35,6 @@ public class Building : InteractiveObject
 
     public BuildingInformation Info => Data ? Data.Info : null;
 
-    private Dictionary<Behaviour, bool> components = new Dictionary<Behaviour, bool>();
-    private Dictionary<Collider, bool> colliders = new Dictionary<Collider, bool>();
-
     [SerializeField]
     protected UnityEvent onDestroy = new UnityEvent();
 

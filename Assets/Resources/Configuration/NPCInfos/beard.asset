@@ -16,6 +16,16 @@ MonoBehaviour:
   _Name: "\u6069\u683C\u65AF"
   sex: 1
   defaultDialogue: {fileID: 11400000, guid: 982521bacf361f14289d5658a605bca4, type: 2}
+  conditionDialogues:
+  - condition:
+      conditions:
+      - type: 5
+        level: 1
+        relatedQuest: {fileID: 0}
+        relatedItem: {fileID: 11400000, guid: 9bf6e2de6c467ad4db090168944f60bc, type: 2}
+        triggerName: 
+      relational: 
+    dialogue: {fileID: 11400000, guid: ee87b06aec0879548b1c88221a4c5e8e, type: 2}
   isWarehouseAgent: 1
   warehouseCapcity: 30
   isVendor: 0
@@ -26,9 +36,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 75021802295611e4bb73ffff88713358, type: 2}
   canDEV_RLAT: 1
   normalItemDialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
+  normalIntimacyValue: 5
   giftDialogues:
-  - lowerBound: 0
-    upperBound: 0
-    dialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
-  affectiveItems: []
+  - lowerBound: 6
+    upperBound: 30
+    dialogue: {fileID: 11400000, guid: 9d3cef39d7a19e944b6a7b2556195be9, type: 2}
+  affectiveItems:
+  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+    intimacyValue: 25
   canMarry: 0

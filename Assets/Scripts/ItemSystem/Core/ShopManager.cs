@@ -182,11 +182,12 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
             MessageManager.Instance.New("这种物品不可出售");
             return;
         }
-        if (info.gemstone1 != null || info.gemstone2 != null)
-        {
-            MessageManager.Instance.New("镶嵌宝石的物品不可出售");
-            return;
-        }
+        if (info is EquipmentInfo eqm)
+            if (eqm.gemstone1 != null || eqm.gemstone2 != null)
+            {
+                MessageManager.Instance.New("镶嵌宝石的物品不可出售");
+                return;
+            }
         MerchandiseInfo find = MShop.Acquisitions.Find(x => x.Item == info.item);
         if (find != null && !force)//采购品列表里有该道具，说明对该道具有特殊购价
         {

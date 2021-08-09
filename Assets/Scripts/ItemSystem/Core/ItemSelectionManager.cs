@@ -15,8 +15,10 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
 
     public ItemSelectionType SelectionType { get; private set; }
 
+    private int typeLimit;
+    private int amountLimit;
     private Func<ItemInfo, bool> canSelect;
-    private Action<IEnumerable<ItemInfo>> onConfirm;
+    private Action<IEnumerable<ItemSelectionData>> onConfirm;
     private Action onCancel;
 
     private string dialog;
@@ -24,25 +26,49 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
     private bool bagPausingBef;
     private bool bagOpenBef;
 
-    public void StartSelection(ItemSelectionType selectionType, string title, string confirmDialog, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemInfo>> confirm, Action cancel = null)
+    public void StartSelection(ItemSelectionType selectionType, string title, string confirmDialog, int typeLimit, int amountLimit, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemSelectionData>> confirm, Action cancel = null)
     {
         if (IsUIOpen) CloseWindow();
         SelectionType = selectionType;
         UI.windowTitle.text = title;
         dialog = confirmDialog;
+        this.typeLimit = typeLimit;
+        this.amountLimit = amountLimit;
         if (selectCondition != null) canSelect = selectCondition;
         else canSelect = delegate (ItemInfo _) { return true; };
         onConfirm = confirm;
         onCancel = cancel;
         OpenWindow();
     }
-
-    public void StartSelection(ItemSelectionType selectionType, string title, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemInfo>> confirm, Action cancel = null)
+    public void StartSelection(ItemSelectionType selectionType, string title, string confirmDialog, int typeLimit, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemSelectionData>> confirm, Action cancel = null)
+    {
+        StartSelection(selectionType, title, confirmDialog, typeLimit, -1, selectCondition, confirm, cancel);
+    }
+    public void StartSelection(ItemSelectionType selectionType, string title, string confirmDialog, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemSelectionData>> confirm, Action cancel = null)
+    {
+        StartSelection(selectionType, title, confirmDialog, -1, selectCondition, confirm, cancel);
+    }
+    public void StartSelection(ItemSelectionType selectionType, string title, int typeLimit, int amountLimit, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemSelectionData>> confirm, Action cancel = null)
+    {
+        StartSelection(selectionType, title, string.Empty, typeLimit, amountLimit, selectCondition, confirm, cancel);
+    }
+    public void StartSelection(ItemSelectionType selectionType, string title, int typeLimit, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemSelectionData>> confirm, Action cancel = null)
+    {
+        StartSelection(selectionType, title, string.Empty, typeLimit, selectCondition, confirm, cancel);
+    }
+    public void StartSelection(ItemSelectionType selectionType, string title, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemSelectionData>> confirm, Action cancel = null)
     {
         StartSelection(selectionType, title, string.Empty, selectCondition, confirm, cancel);
     }
-
-    public void StartSelection(ItemSelectionType selectionType, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemInfo>> confirm, Action cancel = null)
+    public void StartSelection(ItemSelectionType selectionType, int typeLimit, int amountLimit, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemSelectionData>> confirm, Action cancel = null)
+    {
+        StartSelection(selectionType, "选择物品", typeLimit, amountLimit, selectCondition, confirm, cancel);
+    }
+    public void StartSelection(ItemSelectionType selectionType, int typeLimit, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemSelectionData>> confirm, Action cancel = null)
+    {
+        StartSelection(selectionType, "选择物品", typeLimit, selectCondition, confirm, cancel);
+    }
+    public void StartSelection(ItemSelectionType selectionType, Func<ItemInfo, bool> selectCondition, Action<IEnumerable<ItemSelectionData>> confirm, Action cancel = null)
     {
         StartSelection(selectionType, "选择物品", selectCondition, confirm, cancel);
     }
@@ -54,10 +80,10 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
             MessageManager.Instance.New("未选择任何道具");
             return;
         }
-        List<ItemInfo> infos = new List<ItemInfo>();
+        List<ItemSelectionData> infos = new List<ItemSelectionData>();
         foreach (var ia in itemSlots)
         {
-            infos.Add(ia.current.MItemInfo);
+            infos.Add(new ItemSelectionData(ia.source.MItemInfo, ia.current.MItemInfo.Amount));
         }
         if (string.IsNullOrEmpty(dialog))
         {
@@ -66,7 +92,7 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
         }
         else ConfirmManager.Instance.New(dialog, delegate
         {
-            onConfirm?.Invoke(itemSlots.Select(x => x.source.MItemInfo.item.StackAble ? x.current.MItemInfo : x.source.MItemInfo));
+            onConfirm?.Invoke(infos);
             CloseWindow();
         });
     }
@@ -83,26 +109,33 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
         ItemWindowManager.Instance.CloseWindow();
     }
 
-    public bool Place(ItemSlot source)
+    public void Place(ItemSlot source)
     {
-        if (!source) return false;
+        if (!source) return;
         var info = source.MItemInfo;
-        if (info == null || info.item == null || info.Amount < 0) return false;
+        if (info == null || info.item == null || info.Amount < 0) return;
         if (info.item.StackAble && SelectionType == ItemSelectionType.SelectNum)
         {
-            if (!canSelect(info)) return false;
+            if (!canSelect(info)) return;
             if (itemSlots.Exists(x => x.source.MItemInfo == info || x.source.MItemInfo.item == info.item))
             {
                 MessageManager.Instance.New("已选择该道具");
-                return false;
+                return;
+            }
+            if (typeLimit > 0 && itemSlots.Count >= typeLimit)
+            {
+                MessageManager.Instance.New($"每次最多只能选择{typeLimit}样道具");
+                return;
             }
             if (info.Amount < 2)
             {
                 if (BackpackManager.Instance.TryLoseItem_Boolean(info))
-                {
                     MakeSlot(info);
-                    return true;
-                }
+            }
+            else if (amountLimit == 1)
+            {
+                if (BackpackManager.Instance.TryLoseItem_Boolean(info, 1))
+                    MakeSlot(new ItemInfo(info.item));
             }
             else
             {
@@ -118,8 +151,7 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
                         }
                         if (itemSlots.Count > 0) ZetanUtility.SetActive(UI.tips, false);
                     }
-                }, info.Amount);
-                return true;
+                }, amountLimit > 0 ? amountLimit : info.Amount);
             }
         }
         else if ((!info.item.StackAble && SelectionType == ItemSelectionType.SelectNum || SelectionType == ItemSelectionType.SelectAll)
@@ -128,12 +160,14 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
             if (itemSlots.Exists(x => x.source.MItemInfo == info))
             {
                 MessageManager.Instance.New("已选择该道具");
-                return false;
+                return;
             }
-            MakeSlot(info);
-            return true;
+            if (typeLimit > 0 && itemSlots.Count >= typeLimit)
+            {
+                MessageManager.Instance.New($"每次最多只能选择{typeLimit}样道具");
+            }
+            else MakeSlot(info);
         }
-        return false;
 
         void MakeSlot(ItemInfo info)
         {
@@ -142,6 +176,7 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
             itemSlots.Add(new ItemSlotCopy(ia, source));
             slotsMap.Add(ia);
             ia.SetItem(info);
+            source.Mark(true);
             if (itemSlots.Count > 0) ZetanUtility.SetActive(UI.tips, false);
         }
     }
@@ -183,7 +218,7 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
         var find = itemSlots.Find(x => x.current == slot);
         if (find != null)
         {
-            if (all)
+            if (all || slot.MItemInfo.Amount < 2)
                 Remove(find);
             else
             {
@@ -213,13 +248,9 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
         if (!IsUIOpen) return;
         if (ItemWindowManager.Instance.IsUIOpen) ItemWindowManager.Instance.CloseWindow();
         bagPausingBef = BackpackManager.Instance.IsPausing;
+        if (bagPausingBef) BackpackManager.Instance.PauseDisplay(false);
         bagOpenBef = BackpackManager.Instance.IsUIOpen;
-        if (!BackpackManager.Instance.IsUIOpen)
-        {
-            if (bagPausingBef)
-                BackpackManager.Instance.PauseDisplay(false);
-            BackpackManager.Instance.OpenWindow();
-        }
+        if (!BackpackManager.Instance.IsUIOpen) BackpackManager.Instance.OpenWindow();
         BackpackManager.Instance.PartSelectable(true, canSelect);
     }
 
@@ -249,6 +280,7 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
         bagPausingBef = false;
         bagOpenBef = false;
         canSelect = null;
+        ItemWindowManager.Instance.CloseWindow();
     }
 }
 public class ItemSlotCopy
@@ -267,4 +299,21 @@ public enum ItemSelectionType
 {
     SelectNum,
     SelectAll
+}
+
+public class ItemSelectionData
+{
+    public readonly ItemInfo source;
+    public readonly int amount;
+
+    public ItemSelectionData(ItemInfo source, int amount)
+    {
+        this.source = source;
+        this.amount = amount;
+    }
+
+    public static implicit operator bool(ItemSelectionData self)
+    {
+        return self != null;
+    }
 }

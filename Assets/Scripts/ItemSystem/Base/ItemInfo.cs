@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 #region 道具信息相关
 [Serializable]
-public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
+public class ItemInfoBase
 {
     public string ItemID
     {
@@ -25,16 +25,11 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
         }
     }
 
-    public ItemInfo()
-    {
-        amount = 1;
-    }
-
     [SerializeField]
     public ItemBase item;
 
     [SerializeField]
-    private int amount;
+    protected int amount;
     public int Amount
     {
         get
@@ -48,6 +43,28 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
             else amount = value;
         }
     }
+
+    public ItemInfoBase()
+    {
+        amount = 1;
+    }
+
+    public ItemInfoBase(ItemBase item, int amount = 1)
+    {
+        this.item = item;
+        this.amount = amount;
+    }
+
+    public static implicit operator bool(ItemInfoBase self)
+    {
+        return self != null;
+    }
+}
+
+[Serializable]
+public class ItemInfo : ItemInfoBase //在这个类进行拓展，如强化、词缀、附魔
+{
+    public ItemInfo(ItemBase item, int amount = 1) : base(item, amount) { }
 
     [HideInInspector]
     public int indexInGrid;
@@ -65,12 +82,6 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
 
     public bool IsValid => item && Amount >= 1;
 
-    public ItemInfo(ItemBase item, int amount = 1)
-    {
-        this.item = item;
-        this.amount = amount;
-    }
-
     public ItemInfo Cloned
     {
         get
@@ -79,6 +90,14 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
         }
     }
 
+    public static implicit operator bool(ItemInfo self)
+    {
+        return self != null;
+    }
+}
+
+public class EquipmentInfo : ItemInfo
+{
     #region 装备相关
     [HideInInspector]
     public ScopeInt durability;//耐久度
@@ -88,12 +107,9 @@ public class ItemInfo //在这个类进行拓展，如强化、词缀、附魔
     public GemItem gemstone1;
 
     public GemItem gemstone2;
-    #endregion
 
-    public static implicit operator bool(ItemInfo self)
-    {
-        return self != null;
-    }
+    public EquipmentInfo(ItemBase item, int amount = 1) : base(item, amount) { }
+    #endregion
 }
 
 [Serializable]
@@ -201,9 +217,9 @@ public class DropItemInfo
 
     public bool IsValid => item && MinAmount >= 1;
 
-    public static List<ItemInfo> Drop(IEnumerable<DropItemInfo> DropItems)
+    public static List<ItemInfoBase> Drop(IEnumerable<DropItemInfo> DropItems)
     {
-        List<ItemInfo> lootItems = new List<ItemInfo>();
+        List<ItemInfoBase> lootItems = new List<ItemInfoBase>();
         foreach (DropItemInfo di in DropItems)
             if (ZetanUtility.Probability(di.DropRate))
                 if (!di.OnlyDropForQuest || (di.OnlyDropForQuest && QuestManager.Instance.HasOngoingQuestWithID(di.BindedQuest.ID)))

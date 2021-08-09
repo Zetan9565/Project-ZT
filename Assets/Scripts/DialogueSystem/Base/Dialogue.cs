@@ -191,12 +191,12 @@ public class WordsOption
     public int IndexToGoBack => indexToGoBack;
 
     [SerializeField]
-    private ItemInfo itemToSubmit;
-    public ItemInfo ItemToSubmit => itemToSubmit;
+    private ItemInfoBase itemToSubmit;
+    public ItemInfoBase ItemToSubmit => itemToSubmit;
 
     [SerializeField]
-    private ItemInfo itemCanGet;
-    public ItemInfo ItemCanGet => itemCanGet;
+    private ItemInfoBase itemCanGet;
+    public ItemInfoBase ItemCanGet => itemCanGet;
     [SerializeField]
     private bool showOnlyWhenNotHave;
     public bool ShowOnlyWhenNotHave => showOnlyWhenNotHave;
@@ -308,7 +308,7 @@ public enum WordsEventType
 
 public enum TalkerType
 {
-    [InspectorName("提交处NPC")]
+    [InspectorName("NPC")]
     NPC,
 
     [InspectorName("玩家角色")]
@@ -316,4 +316,32 @@ public enum TalkerType
 
     [InspectorName("统一的NPC")]
     UnifiedNPC
+}
+
+[Serializable]
+public class AffectiveDialogue
+{
+    [SerializeField]
+    private int lowerBound = 10;
+    public int LowerBound => lowerBound;
+
+    [SerializeField]
+    private int upperBound = 20;
+    public int UpperBound => upperBound;
+
+    [SerializeField]
+    private Dialogue dialogue;
+    public Dialogue Dialogue => dialogue;
+}
+
+[Serializable]
+public class ConditionDialogue
+{
+    [SerializeField]
+    private ConditionGroup condition;
+    public ConditionGroup Condition => condition;
+
+    [SerializeField]
+    private Dialogue dialogue;
+    public Dialogue Dialogue => dialogue;
 }

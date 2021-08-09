@@ -49,7 +49,7 @@ public class TalkerData : CharacterData
 
     public TalkerData(TalkerInformation info) : base(info)
     {
-
+        relationshipInstance = new Relationship();
     }
 
     public virtual void OnTalkBegin()
@@ -62,17 +62,25 @@ public class TalkerData : CharacterData
         OnTalkFinishedEvent?.Invoke();
     }
 
-    public void OnGetGift(ItemBase gift)
+    public Dialogue OnGetGift(ItemBase gift)
     {
+        int add = 0;
         if (Info.AffectiveItems.Exists(x => x.Item.ID == gift.ID))
         {
             AffectiveItemInfo find = Info.AffectiveItems.Find(x => x.Item.ID == gift.ID);
-            relationshipInstance.RelationshipValue.Current += (int)find.IntimacyValue;
+            add = find.IntimacyValue;
         }
         else
         {
-            relationshipInstance.RelationshipValue.Current += 5;
+            add = Info.NormalIntimacyValue;
         }
+        relationshipInstance.RelationshipValue.Current += add;
+        foreach (var ad in Info.GiftDialogues)
+        {
+            if (ad.LowerBound < add && add < ad.UpperBound)
+                return ad.Dialogue;
+        }
+        return Info.NormalItemDialogue;
     }
 
     public void InitQuest(List<Quest> questsStored)

@@ -20,7 +20,7 @@ public class ShopInfoInspector : Editor
     private void OnEnable()
     {
         lineHeight = EditorGUIUtility.singleLineHeight;
-        lineHeightSpace = lineHeight + 5;
+        lineHeightSpace = lineHeight + 2;
 
         shop = target as ShopInformation;
         shopName = serializedObject.FindProperty("shopName");

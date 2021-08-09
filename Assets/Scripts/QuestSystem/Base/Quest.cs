@@ -62,8 +62,8 @@ public class Quest : ScriptableObject
     public int RewardEXP => rewardEXP;
 
     [SerializeField]
-    private List<ItemInfo> rewardItems = new List<ItemInfo>();
-    public List<ItemInfo> RewardItems => rewardItems;
+    private List<ItemInfoBase> rewardItems = new List<ItemInfoBase>();
+    public List<ItemInfoBase> RewardItems => rewardItems;
 
     [SerializeField]
     private TalkerInformation _NPCToSubmit;

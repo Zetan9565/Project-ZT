@@ -28,7 +28,7 @@ public class CropInfoInspector : Editor
     private void OnEnable()
     {
         lineHeight = EditorGUIUtility.singleLineHeight;
-        lineHeightSpace = lineHeight + 5;
+        lineHeightSpace = lineHeight + 2;
 
         crop = target as CropInformation;
 
@@ -164,11 +164,12 @@ public class CropInfoInspector : Editor
                     }
                     else if (GUI.Button(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), "新建"))
                     {
-                        if (EditorUtility.DisplayDialog("新建", "将在Assets/Resources/Assets/Gatherting目录新建一个采集物信息，是否继续？", "确定", "取消"))
+                        if (EditorUtility.DisplayDialog("新建", "将在Assets/Resources/Configuration/Gatherting目录新建一个采集物信息，是否继续？", "确定", "取消"))
                         {
                             GatheringInformation infoInstance = CreateInstance<GatheringInformation>();
-                            AssetDatabase.CreateAsset(infoInstance, AssetDatabase.GenerateUniqueAssetPath("Assets/Resources/Assets/Gatherting/gathering info.asset"));
+                            AssetDatabase.CreateAsset(infoInstance, AssetDatabase.GenerateUniqueAssetPath("Assets/Resources/Configuration/Gatherting/gathering info.asset"));
                             AssetDatabase.SaveAssets();
+                            AssetDatabase.Refresh();
 
                             gatherInfo.objectReferenceValue = infoInstance;
                             SerializedObject gInfoObj = new SerializedObject(gatherInfo.objectReferenceValue);

@@ -20,10 +20,10 @@ public class ItemSlot : ItemSlotBase, IDragAble,
     private Action<ItemSlot> onRightClick;
     private Func<ItemSlot, ButtonWithTextData[]> getButtonsCallback;
     private bool dragable;
-    Action<GameObject, ItemSlot> onEndDrag;
+    private Action<GameObject, ItemSlot> onEndDrag;
 
     #region 操作相关
-    public void Init(int index, ScrollRect parentScrollRect, Func<ItemSlot, ButtonWithTextData[]> getButtons = null, Action<ItemSlot> rightClick = null, Action<GameObject, ItemSlot> onEndDrag = null)
+    public void Init(int index, ScrollRect parentScrollRect, Func<ItemSlot, ButtonWithTextData[]> getButtons, Action<ItemSlot> rightClick = null, Action<GameObject, ItemSlot> onEndDrag = null)
     {
         Empty();
         indexInGrid = index;
@@ -33,7 +33,7 @@ public class ItemSlot : ItemSlotBase, IDragAble,
         this.onEndDrag = onEndDrag;
         dragable = onEndDrag != null;
     }
-    public void Init(Func<ItemSlot, ButtonWithTextData[]> getButtons = null, Action<ItemSlot> rightClick = null, Action<GameObject, ItemSlot> onEndDrag = null)
+    public void Init(Func<ItemSlot, ButtonWithTextData[]> getButtons, Action<ItemSlot> rightClick = null, Action<GameObject, ItemSlot> onEndDrag = null)
     {
         Init(-1, null, getButtons, rightClick, onEndDrag);
     }

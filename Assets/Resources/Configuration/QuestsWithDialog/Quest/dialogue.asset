@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: dialogue
   m_EditorClassIdentifier: 
   _ID: DIALG000004
+  storyDialogue: 0
   useUnifiedNPC: 1
   useCurrentTalkerInfo: 0
   unifiedNPC: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
@@ -35,30 +36,13 @@ MonoBehaviour:
       itemToSubmit:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       itemCanGet:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       showOnlyWhenNotHave: 0
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 0
-      runtimeDialogParent: {fileID: 0}
-      runtimeWordsParentIndex: 0
-      runtimeIndexToGoBack: 0
     - title: "\u6709\u4E8B"
       optionType: 2
       hasWordsToSay: 0
@@ -71,30 +55,13 @@ MonoBehaviour:
       itemToSubmit:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       itemCanGet:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       showOnlyWhenNotHave: 0
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 1
-      runtimeDialogParent: {fileID: 0}
-      runtimeWordsParentIndex: 0
-      runtimeIndexToGoBack: 0
     events: []
   - talkerType: 1
     talkerInfo: {fileID: 0}
@@ -128,30 +95,13 @@ MonoBehaviour:
       itemToSubmit:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       itemCanGet:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       showOnlyWhenNotHave: 0
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 1
-      runtimeDialogParent: {fileID: 0}
-      runtimeWordsParentIndex: 0
-      runtimeIndexToGoBack: 0
     - title: "\u4E0D\u76F8\u4FE1\u5979\u7684\u8BDD"
       optionType: 2
       hasWordsToSay: 1
@@ -164,30 +114,13 @@ MonoBehaviour:
       itemToSubmit:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       itemCanGet:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       showOnlyWhenNotHave: 0
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
       deleteWhenCmplt: 1
-      runtimeDialogParent: {fileID: 0}
-      runtimeWordsParentIndex: 0
-      runtimeIndexToGoBack: 0
     events: []
   - talkerType: 2
     talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}

@@ -49,7 +49,7 @@ public partial class ItemInspector : Editor
         items = Resources.LoadAll<ItemBase>("");
 
         lineHeight = EditorGUIUtility.singleLineHeight;
-        lineHeightSpace = lineHeight + 5;
+        lineHeightSpace = lineHeight + 2;
 
         item = target as ItemBase;
         _ID = serializedObject.FindProperty("_ID");

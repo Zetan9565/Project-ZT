@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("ZetanStudio/管理器/背包管理器")]
@@ -11,10 +12,6 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     private Color overColor = Color.yellow;
     [SerializeField]
     private Color maxColor = Color.red;
-
-#if UNITY_ANDROID
-    public DiscardButton DiscardButton { get { return UI.discardButton; } }
-#endif
 
     public bool IsInputFocused => UI ? IsUIOpen && UI.searchInput.isFocused : false;
 
@@ -93,7 +90,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="info">道具信息</param>
     /// <param name="amount">目标获取量</param>
     /// <returns>实际获取量</returns>
-    public int TryGetItem_Integer(ItemInfo info, int amount)
+    public int TryGetItem_Integer(ItemInfoBase info, int amount)
     {
         return TryGetItem_Integer(info.item, amount);
     }
@@ -102,7 +99,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// </summary>
     /// <param name="info">道具信息（包括数量）</param>
     /// <returns>实际获取量</returns>
-    public int TryGetItem_Integer(ItemInfo info)
+    public int TryGetItem_Integer(ItemInfoBase info)
     {
         return TryGetItem_Integer(info, info.Amount);
     }
@@ -114,7 +111,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="amount">获取数量</param>
     /// <param name="simulLoseItems">会同时失去的道具</param>
     /// <returns>可否获取</returns>
-    public bool TryGetItem_Boolean(ItemBase item, int amount, params ItemInfo[] simulLoseItems)
+    public bool TryGetItem_Boolean(ItemBase item, int amount, params ItemSelectionData[] simulLoseItems)
     {
         if (Backpack == null || !item)
         {
@@ -132,15 +129,15 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             if (HasItemToLose())
                 foreach (var info in simulLoseItems)
                 {
-                    if (!TryLoseItem_Boolean(info.item, info.Amount)) return false;//有一个要失去的道具不能失去，则直接不能获取该道具
-                    if (info.item.StackAble && info.Amount - GetItemAmount(info.item) == 0)//只要该可叠加道具会全部失去，则能留出一个位置
+                    if (!TryLoseItem_Boolean(info.source.item, info.amount)) return false;//有一个要失去的道具不能失去，则直接不能获取该道具
+                    if (info.source.item.StackAble && info.amount - GetItemAmount(info.source.item) == 0)//只要该可叠加道具会全部失去，则能留出一个位置
                         vacateSize++;
-                    else if (!info.item.StackAble)//若该道具不可叠加，则失去多少个就能空出多少位置
-                        vacateSize += info.Amount;
+                    else if (!info.source.item.StackAble)//若该道具不可叠加，则失去多少个就能空出多少位置
+                        vacateSize += info.amount;
                 }
             if (amount > Backpack.size.Rest + vacateSize)//如果留出位置还不能放下
             {
-                MessageManager.Instance.New($"请至少多留出{(amount - Backpack.size.Rest - vacateSize).ToString()}个{GameManager.BackpackName}空间");
+                MessageManager.Instance.New($"请至少再留出{(amount - Backpack.size.Rest - vacateSize).ToString()}个{GameManager.BackpackName}空间");
                 return false;
             }
         }
@@ -148,8 +145,8 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (HasItemToLose())
             foreach (var info in simulLoseItems)
             {
-                if (!TryLoseItem_Boolean(info.item, info.Amount)) return false;
-                vacateWeightload += info.item.Weight * info.Amount;
+                if (!TryLoseItem_Boolean(info.source, info.amount)) return false;
+                vacateWeightload += info.source.item.Weight * info.amount;
             }
         if (Backpack.weight - vacateWeightload + amount * item.Weight > Backpack.WeightLimit)//如果留出负重还不能放下
         {
@@ -170,7 +167,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="amount">获取数量</param>
     /// <param name="simulLoseItems">会同时失去的道具</param>
     /// <returns>可否获取</returns>
-    public bool TryGetItem_Boolean(ItemInfo info, int amount, params ItemInfo[] simulLoseItems)
+    public bool TryGetItem_Boolean(ItemInfoBase info, int amount, params ItemSelectionData[] simulLoseItems)
     {
         if (info == null || amount < 1) return false;
         return TryGetItem_Boolean(info.item, amount, simulLoseItems);
@@ -181,10 +178,10 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="info">道具信息（包括数量）</param>
     /// <param name="simulLoseItems">会同时失去的道具</param>
     /// <returns>可否获取</returns>
-    public bool TryGetItem_Boolean(ItemInfo info, params ItemInfo[] simulLoseItems)
+    public bool TryGetItem_Boolean(ItemInfoBase info, params ItemSelectionData[] simulLoseItems)
     {
         if (info == null) return false;
-        return TryGetItem_Boolean(info, info.Amount, simulLoseItems);
+        return TryGetItem_Boolean(info.item, info.Amount, simulLoseItems);
     }
 
     /// <summary>
@@ -194,13 +191,13 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="amount">获取数量</param>
     /// <param name="simulLoseItems">会同时失去的道具</param>
     /// <returns>是否成功</returns>
-    public bool GetItem(ItemBase item, int amount, params ItemInfo[] simulLoseItems)
+    public bool GetItem(ItemBase item, int amount, params ItemSelectionData[] simulLoseItems)
     {
         if (Backpack == null || !item || amount < 1) return false;
         if (!TryGetItem_Boolean(item, amount, simulLoseItems)) return false;
         if (simulLoseItems != null)
             foreach (var si in simulLoseItems)
-                LoseItem(si.item, si.Amount);
+                LoseItem(si.source, si.amount);
         if (item.StackAble)
         {
             Backpack.GetItemSimple(item, amount);
@@ -219,7 +216,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 else
                 {
                     MessageManager.Instance.New("发生内部错误！");
-                    Debug.Log("[Get Item Error: Can't find ItemAgent] ID: " + item.ID + "[" + System.DateTime.Now.ToString() + "]");
+                    Debug.Log("[Get Item Error: Can't find ItemSlot] ID: " + item.ID + "[" + System.DateTime.Now.ToString() + "]");
                 }
             }
         }
@@ -246,24 +243,24 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="info">道具信息（包括数量）</param>
     /// <param name="simulLoseItems">会同时失去的道具</param>
     /// <returns>是否成功</returns>
-    public bool GetItem(ItemInfo info, params ItemInfo[] simulLoseItems)
+    public bool GetItem(ItemInfoBase info, params ItemSelectionData[] simulLoseItems)
     {
         return GetItem(info.item, info.Amount, simulLoseItems);
     }
     /// <summary>
-    /// 仓库、装备专用获取道具
+    /// 仓库、装备专用获取道具（精确到个例）
     /// </summary>
     /// <param name="info">道具信息</param>
     /// <param name="amount">获取数量</param>
     /// <param name="simulLoseItems">会同时失去的道具</param>
     /// <returns>是否成功</returns>
-    public bool GetItem(ItemInfo info, int amount, params ItemInfo[] simulLoseItems)//仓库、装备专用
+    public bool GetItem(ItemInfo info, int amount, params ItemSelectionData[] simulLoseItems)//仓库、装备专用
     {
         if (Backpack == null || info == null || !info.item || amount < 1) return false;
         if (!TryGetItem_Boolean(info, amount, simulLoseItems)) return false;
         if (simulLoseItems != null)
             foreach (var si in simulLoseItems)
-                LoseItem(si.item, si.Amount);
+                LoseItem(si.source, si.amount);
         if (info.item.StackAble)
         {
             Backpack.GetItemSimple(info, amount);
@@ -313,12 +310,12 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="amount">失去数量</param>
     /// <param name="simulGetItems">会同时获得的道具</param>
     /// <returns>可否失去</returns>
-    public bool TryLoseItem_Boolean(ItemBase item, int amount, params ItemInfo[] simulGetItems)
+    public bool TryLoseItem_Boolean(ItemBase item, int amount, params ItemInfoBase[] simulGetItems)
     {
         if (Backpack == null || !item || amount < 1) return false;
         if (simulGetItems != null)
             foreach (var si in simulGetItems)
-                if (!TryGetItem_Boolean(si, new ItemInfo(item, amount))) return false;
+                if (!TryGetItem_Boolean(si, new ItemSelectionData(GetItemInfo(item), amount))) return false;
         if (GetItemAmount(item) < amount)
         {
             MessageManager.Instance.New($"{GameManager.BackpackName}中没有这么多的 [{item.name}]");
@@ -332,13 +329,13 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         return true;
     }
     /// <summary>
-    /// 尝试可否失去道具（精确到背包中的道具）
+    /// 尝试可否失去道具（精确到个例）
     /// </summary>
     /// <param name="info">背包中的道具信息</param>
     /// <param name="amount">失去数量</param>
     /// <param name="simulGetItems">会同时获得的道具</param>
     /// <returns>可否失去</returns>
-    public bool TryLoseItem_Boolean(ItemInfo info, int amount, params ItemInfo[] simulGetItems)
+    public bool TryLoseItem_Boolean(ItemInfo info, int amount, params ItemInfoBase[] simulGetItems)
     {
         if (!info) return false;
         if (Backpack.Items.Contains(info))
@@ -351,8 +348,9 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="info">道具信息（包括数量）</param>
     /// <param name="simulGetItems">会同时获得的道具</param>
     /// <returns>可否失去</returns>
-    public bool TryLoseItem_Boolean(ItemInfo info, params ItemInfo[] simulGetItems)
+    public bool TryLoseItem_Boolean(ItemInfoBase info, params ItemInfoBase[] simulGetItems)
     {
+        if (!info) return false;
         return TryLoseItem_Boolean(info.item, info.Amount, simulGetItems);
     }
     public bool TryLoseItems_Boolean(IEnumerable<ItemInfo> infos)
@@ -360,6 +358,15 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         foreach (ItemInfo info in infos)
         {
             if (!TryLoseItem_Boolean(info))
+                return false;
+        }
+        return true;
+    }
+    public bool TryLoseItems_Boolean(IEnumerable<ItemSelectionData> infos)
+    {
+        foreach (ItemSelectionData info in infos)
+        {
+            if (!TryLoseItem_Boolean(info.source, info.amount))
                 return false;
         }
         return true;
@@ -372,7 +379,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="amount">失去数量</param>
     /// <param name="simulGetItems">会同时获得的道具</param>
     /// <returns>是否成功</returns>
-    public bool LoseItem(ItemBase item, int amount, params ItemInfo[] simulGetItems)
+    public bool LoseItem(ItemBase item, int amount, params ItemInfoBase[] simulGetItems)
     {
         if (item.StackAble)
         {
@@ -382,7 +389,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         {
             if (simulGetItems != null)
                 foreach (var si in simulGetItems)
-                    if (!TryGetItem_Boolean(si, new ItemInfo(item, amount))) return false;
+                    if (!TryGetItem_Boolean(si, new ItemSelectionData(GetItemInfo(item), amount))) return false;
             ItemInfo[] finds = Backpack.FindAll(item).ToArray();
             if (finds.Length < 1)
             {
@@ -405,13 +412,13 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="amount">失去数量</param>
     /// <param name="simulGetItems">会同时获得的道具</param>
     /// <returns>是否成功</returns>
-    public bool LoseItem(ItemInfo info, int amount, params ItemInfo[] simulGetItems)
+    public bool LoseItem(ItemInfo info, int amount, params ItemInfoBase[] simulGetItems)
     {
         if (Backpack == null || info == null || !info.item || amount < 1) return false;
         if (!TryLoseItem_Boolean(info, amount)) return false;
         if (simulGetItems != null)
             foreach (var si in simulGetItems)
-                if (!TryGetItem_Boolean(si, new ItemInfo(info.item, amount))) return false;
+                if (!TryGetItem_Boolean(si, new ItemSelectionData(info, amount))) return false;
         Backpack.LoseItemSimple(info, amount);
         ItemSlot ia = itemSlots.Find(x => x.MItemInfo == info);
         if (ia) ia.UpdateInfo();
@@ -429,8 +436,9 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// <param name="info">道具信息（包括数量）</param>
     /// <param name="simulGetItems">会同时获得的道具</param>
     /// <returns>是否成功</returns>
-    public bool LoseItem(ItemInfo info, params ItemInfo[] simulGetItems)
+    public bool LoseItem(ItemInfoBase info, params ItemInfoBase[] simulGetItems)
     {
+        if (!info) return false;
         return LoseItem(info.item, info.Amount, simulGetItems);
     }
 
@@ -474,11 +482,11 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     /// 批量丢弃道具
     /// </summary>
     /// <param name="items">道具列表</param>
-    public void DiscardItems(IEnumerable<ItemInfo> items)
+    public void DiscardItems(IEnumerable<ItemSelectionData> items)
     {
         if (items == null) return;
         foreach (var item in items)
-            LoseItem(item);
+            LoseItem(item.source, item.amount);
     }
     #endregion
 
@@ -556,11 +564,12 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     public void Equip(ItemInfo toEquip)
     {
         if (toEquip == null || !toEquip.item) return;
+        if (!TryLoseItem_Boolean(toEquip))
+            return;
         ItemInfo equiped = null;
         switch (toEquip.item.ItemType)
         {
             case ItemType.Weapon:
-                Backpack.size--;//模拟为将要替换出来的武器留出空间
                 if (PlayerManager.Instance.PlayerInfo.HasPrimaryWeapon && (toEquip.item as WeaponItem).IsPrimary)
                 {
                     equiped = PlayerManager.Instance.PlayerInfo.UnequipWeapon(true);
@@ -569,10 +578,24 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                 {
                     equiped = PlayerManager.Instance.PlayerInfo.UnequipWeapon(false);
                 }
-                if ((equiped && !TryGetItem_Boolean(equiped, 1)) || !PlayerManager.Instance.PlayerInfo.EquipWeapon(toEquip))
+                if (equiped)
                 {
+                    Backpack.weight.Current -= equiped.item.Weight;
+                    Backpack.size--;//模拟为将要替换出来的武器留出空间
+                    if (!TryGetItem_Boolean(equiped, 1))
+                    {
+                        PlayerManager.Instance.PlayerInfo.EquipWeapon(equiped);
+                        Backpack.weight.Current += equiped.item.Weight;
+                        Backpack.size++;
+                        return;
+                    }
+                    Backpack.weight.Current += equiped.item.Weight;
+                    Backpack.size++;//结束模拟
+                }
+                if (!PlayerManager.Instance.PlayerInfo.EquipWeapon(toEquip))//装备失败
+                {
+                    Debug.Log("aaaa");
                     PlayerManager.Instance.PlayerInfo.EquipWeapon(equiped);
-                    Backpack.size++;
                     return;
                 }
                 break;
@@ -592,12 +615,13 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     public void Unequip(ItemInfo toUnequip)
     {
         if (toUnequip == null) return;
+        if (!TryLoseItem_Boolean(toUnequip, 1))
+            return;
         ItemInfo equiped = toUnequip;
         switch (toUnequip.item.ItemType)
         {
             case ItemType.Weapon:
                 Backpack.weight.Current -= equiped.item.Weight;
-                Backpack.size--;
                 if (PlayerManager.Instance.PlayerInfo.HasPrimaryWeapon && (equiped.item as WeaponItem).IsPrimary)
                 {
                     equiped = PlayerManager.Instance.PlayerInfo.UnequipWeapon(true);
@@ -614,8 +638,6 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         {
             PlayerManager.Instance.PlayerInfo.EquipWeapon(equiped);
             Backpack.weight.Current += equiped.item.Weight;
-            Backpack.size++;
-            return;
         }
         else GetItem(equiped, 1);
     }
@@ -669,8 +691,8 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         ItemSelectionManager.Instance.StartSelection(ItemSelectionType.SelectAll, "丢弃物品", "确定要丢掉这些道具吗？", select, DiscardItems);
     }
 
-    private System.Func<ItemInfo, bool> partCondition;
-    public void PartSelectable(bool part, System.Func<ItemInfo, bool> condition = null)
+    private Func<ItemInfo, bool> partCondition;
+    public void PartSelectable(bool part, Func<ItemInfo, bool> condition = null)
     {
         if (part && condition != null)
         {
@@ -712,8 +734,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             AmountManager.Instance.SetPosition(UI.discardButton.transform.position);
         }
         else if (target && ItemSelectionManager.Instance.ContainsSlot(target) || gameObject == ItemSelectionManager.Instance.PlacementArea)
-            if (ItemSelectionManager.Instance.Place(slot))
-                slot.Mark(true);
+            ItemSelectionManager.Instance.Place(slot);
     }
     private void OnSlotRightClick(ItemSlot slot)
     {
@@ -727,8 +748,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         }
         else if (ItemSelectionManager.Instance.IsUIOpen)
         {
-            if (ItemSelectionManager.Instance.Place(slot))
-                slot.Mark(true);
+            ItemSelectionManager.Instance.Place(slot);
         }
         else
         {
@@ -749,8 +769,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             if (!slot.IsDark)
                 buttons.Add(new ButtonWithTextData("选取", delegate
                 {
-                    if (ItemSelectionManager.Instance.Place(slot))
-                        slot.Mark(true);
+                    ItemSelectionManager.Instance.Place(slot);
                 }));
         }
         else if (WarehouseManager.Instance.IsUIOpen)
@@ -776,10 +795,15 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         else
         {
             if (slot.MItemInfo.item.Usable)
-                buttons.Add(new ButtonWithTextData("使用", delegate
+            {
+                string btn = "使用";
+                if (slot.MItemInfo.item.IsEquipment)
+                    btn = "装备";
+                buttons.Add(new ButtonWithTextData(btn, delegate
                 {
                     UseItem(slot.MItemInfo);
                 }));
+            }
             if (slot.MItemInfo.item.DiscardAble)
                 buttons.Add(new ButtonWithTextData("丢弃", delegate
                 {
@@ -922,14 +946,14 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         }
         return true;
     }
-    public bool IsMaterialsEnough(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfo> materials)
+    public bool IsMaterialsEnough(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfoBase> materials)
     {
         if (targetMaterials == null || targetMaterials.Count() < 1 || materials == null || materials.Count() < 1 || targetMaterials.Count() != materials.Count()) return false;
         foreach (var material in targetMaterials)
         {
             if (material.MakingType == MakingType.SingleItem)
             {
-                ItemInfo find = materials.FirstOrDefault(x => x.ItemID == material.ItemID);
+                ItemInfoBase find = materials.FirstOrDefault(x => x.ItemID == material.ItemID);
                 if (!find) return false;//所提供的材料中没有这种材料
                 if (find.Amount != material.Amount) return false;//若材料数量不符合，则无法制作
                 else if (GetItemAmount(find.ItemID) < material.Amount) return false;//背包中材料数量不足
@@ -954,11 +978,11 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         return true;
     }
 
-    public List<ItemInfo> GetMaterialsFromBackpack(IEnumerable<MaterialInfo> targetMaterials)
+    public List<ItemSelectionData> GetMaterialsFromBackpack(IEnumerable<MaterialInfo> targetMaterials)
     {
         if (targetMaterials == null) return null;
 
-        List<ItemInfo> items = new List<ItemInfo>();
+        List<ItemSelectionData> items = new List<ItemSelectionData>();
         if (targetMaterials.Count() < 1) return items;
 
         var materialEnum = targetMaterials.GetEnumerator();
@@ -966,14 +990,14 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         {
             if (materialEnum.Current.MakingType == MakingType.SingleItem)
             {
-                int have = GetItemAmount(materialEnum.Current.Item);
-                have = have > materialEnum.Current.Amount ? materialEnum.Current.Amount : have;
-                items.Add(new ItemInfo(materialEnum.Current.Item, have));
+                int amount = GetItemAmount(materialEnum.Current.Item);
+                amount = amount > materialEnum.Current.Amount ? materialEnum.Current.Amount : amount;
+                items.Add(new ItemSelectionData(GetItemInfo(materialEnum.Current.Item), amount));
             }
             else
             {
                 ItemInfo item = Backpack.Items.Find(x => x.item.MaterialType == materialEnum.Current.MaterialType && x.Amount >= materialEnum.Current.Amount);
-                if (item) items.Add(new ItemInfo(item.item, materialEnum.Current.Amount));
+                if (item) items.Add(new ItemSelectionData(GetItemInfo(item.item), materialEnum.Current.Amount));
             }
         }
         return items;
@@ -1052,6 +1076,15 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         return amounts.Min();
     }
     #endregion
+    public ItemInfo[] GetContrast(ItemInfo mItemInfo)
+    {
+        //TODO 获取可以比较的道具信息
+        if (mItemInfo.item is WeaponItem weapon)
+            if (weapon.IsPrimary)
+                return new ItemInfo[] { PlayerManager.Instance.PlayerInfo.primaryWeapon };
+            else return new ItemInfo[] { PlayerManager.Instance.PlayerInfo.secondaryWeapon };
+        return null;
+    }
 
     public void GetMoney(long value)
     {
@@ -1087,10 +1120,20 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         return Backpack.GetItemAmount(item);
     }
 
+    /// <summary>
+    /// 获取背包中对应道具信息（精确到个例）
+    /// </summary>
+    /// <param name="id">查找ID</param>
+    /// <returns>找到的道具实例</returns>
     public ItemInfo GetItemInfo(string id)
     {
         return Backpack.Find(id);
     }
+    /// <summary>
+    /// 获取背包中对应道具信息（精确到个例）
+    /// </summary>
+    /// <param name="item">查找原型</param>
+    /// <returns>找到的道具实例</returns>
     public ItemInfo GetItemInfo(ItemBase item)
     {
         return Backpack.Find(item);

@@ -49,10 +49,7 @@ public class QuestInspector : Editor
 
     int barIndex;
 
-    Quest[] Quests
-    {
-        get => Resources.LoadAll<Quest>("");
-    }
+    Quest[] allQuests;
 
     TalkerInformation[] npcs;
     string[] npcNames;
@@ -60,16 +57,20 @@ public class QuestInspector : Editor
     QuestGroup[] groups;
     string[] groupNames;
 
+    TalkerInformation holder;
+
     private void OnEnable()
     {
+        allQuests = Resources.LoadAll<Quest>("");
         quest = target as Quest;
         npcs = Resources.LoadAll<TalkerInformation>("");
         npcNames = npcs.Select(x => x.name).ToArray();//Linq分离出NPC名字
         groups = Resources.LoadAll<QuestGroup>("");
         groupNames = groups.Select(x => x.name).ToArray();
+        holder = Resources.LoadAll<TalkerInformation>("").FirstOrDefault(x => x.QuestsStored.Contains(quest));
 
         lineHeight = EditorGUIUtility.singleLineHeight;
-        lineHeightSpace = lineHeight + 5;
+        lineHeightSpace = lineHeight + 2;
         _ID = serializedObject.FindProperty("_ID");
         title = serializedObject.FindProperty("title");
         description = serializedObject.FindProperty("description");
@@ -141,7 +142,6 @@ public class QuestInspector : Editor
                     EditorGUILayout.PropertyField(timeUnit, new GUIContent(string.Empty));
                     EditorGUILayout.EndHorizontal();
                 }
-                EditorGUILayout.Space();
                 int oIndex = GetGroupIndex(group.objectReferenceValue as QuestGroup) + 1;
                 List<int> indexes = new List<int>() { 0 };
                 List<string> names = new List<string>() { "未指定" };
@@ -159,7 +159,6 @@ public class QuestInspector : Editor
                     EditorGUILayout.PropertyField(group, new GUIContent("引用资源"));
                     GUI.enabled = true;
                 }
-                EditorGUILayout.Space();
                 oIndex = GetNPCIndex(_NPCToSubmit.objectReferenceValue as TalkerInformation) + 1;
                 indexes = new List<int>() { 0 };
                 names = new List<string>() { "接取处NPC" };
@@ -178,6 +177,15 @@ public class QuestInspector : Editor
                     GUI.enabled = true;
                 }
                 if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();//这一步一定要在DoLayoutList()之前做！否则无法修改DoList之前的数据
+                if (holder)
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.BeginHorizontal();
+                    GUI.enabled = false;
+                    EditorGUILayout.ObjectField(new GUIContent("持有该任务的NPC"), holder, typeof(TalkerInformation), false);
+                    GUI.enabled = true;
+                    EditorGUILayout.EndHorizontal();
+                }
                 #endregion
                 break;
             case 1:
@@ -204,7 +212,7 @@ public class QuestInspector : Editor
                 EditorGUILayout.PropertyField(beginDialogue, new GUIContent("开始时的对话"));
                 if (quest.BeginDialogue)
                 {
-                    Quest find = Array.Find(Quests, x => x != quest && (x.BeginDialogue == quest.BeginDialogue || x.CompleteDialogue == quest.BeginDialogue
+                    Quest find = Array.Find(allQuests, x => x != quest && (x.BeginDialogue == quest.BeginDialogue || x.CompleteDialogue == quest.BeginDialogue
                                            || x.OngoingDialogue == quest.BeginDialogue));
                     if (find)
                     {
@@ -228,7 +236,7 @@ public class QuestInspector : Editor
                 EditorGUILayout.PropertyField(ongoingDialogue, new GUIContent("进行中的对话"));
                 if (quest.OngoingDialogue)
                 {
-                    Quest find = Array.Find(Quests, x => x != quest && (x.BeginDialogue == quest.OngoingDialogue || x.CompleteDialogue == quest.OngoingDialogue
+                    Quest find = Array.Find(allQuests, x => x != quest && (x.BeginDialogue == quest.OngoingDialogue || x.CompleteDialogue == quest.OngoingDialogue
                                            || x.OngoingDialogue == quest.OngoingDialogue));
                     if (find)
                     {
@@ -252,7 +260,7 @@ public class QuestInspector : Editor
                 EditorGUILayout.PropertyField(completeDialogue, new GUIContent("完成时的对话"));
                 if (quest.CompleteDialogue)
                 {
-                    Quest find = Array.Find(Quests, x => x != quest && (x.BeginDialogue == quest.CompleteDialogue || x.CompleteDialogue == quest.CompleteDialogue
+                    Quest find = Array.Find(allQuests, x => x != quest && (x.BeginDialogue == quest.CompleteDialogue || x.CompleteDialogue == quest.CompleteDialogue
                                            || x.OngoingDialogue == quest.CompleteDialogue));
                     if (find)
                     {
@@ -372,15 +380,6 @@ public class QuestInspector : Editor
         rewardItemList.elementHeightCallback = (int index) =>
         {
             return 2 * lineHeightSpace;
-        };
-
-        rewardItemList.onAddCallback = (list) =>
-        {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            quest.RewardItems.Add(new ItemInfo());
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
         };
 
         rewardItemList.onCanAddCallback = (list) =>
@@ -769,7 +768,7 @@ public class QuestInspector : Editor
                 lineCount++;
                 if (quest.TalkObjectives[index].Dialogue)
                 {
-                    Quest find = Array.Find(Quests, x => x != quest && x.TalkObjectives.Exists(y => y.Dialogue == quest.TalkObjectives[index].Dialogue));
+                    Quest find = Array.Find(allQuests, x => x != quest && x.TalkObjectives.Exists(y => y.Dialogue == quest.TalkObjectives[index].Dialogue));
                     if (find)
                     {
                         EditorGUI.HelpBox(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight * 2.4f),
@@ -809,7 +808,7 @@ public class QuestInspector : Editor
                 lineCount += 2;//执行顺序、目标NPC
                 if (objective.FindPropertyRelative("_NPCToTalk").objectReferenceValue) lineCount++;//引用资源
                 lineCount++; //交谈时对话
-                if (quest.TalkObjectives[index].Dialogue && Array.Exists(Quests, x => x != quest && x.TalkObjectives.Exists(y => y.Dialogue == quest.TalkObjectives[index].Dialogue)))
+                if (quest.TalkObjectives[index].Dialogue && Array.Exists(allQuests, x => x != quest && x.TalkObjectives.Exists(y => y.Dialogue == quest.TalkObjectives[index].Dialogue)))
                     lineCount += 2;//逻辑错误
                 if (quest.TalkObjectives[index].Dialogue && quest.TalkObjectives[index].Dialogue.Words[0] != null)
                     lineCount += 1;//对话的第一句
@@ -1230,7 +1229,7 @@ public class QuestInspector : Editor
         };
     }
 
-    string GetAutoID()
+    public static string GetAutoID()
     {
         string newID = string.Empty;
         Quest[] quests = Resources.LoadAll<Quest>("");

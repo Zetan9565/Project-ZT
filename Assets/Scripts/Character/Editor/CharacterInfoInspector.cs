@@ -22,8 +22,6 @@ public partial class CharacterInfoInspector : Editor
     float lineHeightSpace;
 
     CharacterInformation[] characters;
-    List<TalkerInformation> allTalkers;
-
 
     private void OnEnable()
     {
@@ -32,17 +30,12 @@ public partial class CharacterInfoInspector : Editor
         talker = target as TalkerInformation;
         player = target as PlayerInformation;
         characters = Resources.LoadAll<CharacterInformation>("");
-        if (talker)
-        {
-            allTalkers = Resources.LoadAll<TalkerInformation>("").ToList();
-            allTalkers.Remove(talker);
-        }
         _ID = serializedObject.FindProperty("_ID");
         _Name = serializedObject.FindProperty("_Name");
         sex = serializedObject.FindProperty("sex");
 
         lineHeight = EditorGUIUtility.singleLineHeight;
-        lineHeightSpace = lineHeight + 5;
+        lineHeightSpace = lineHeight + 2;
 
         if (enemy)
         {

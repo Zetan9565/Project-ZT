@@ -52,7 +52,7 @@ public class ItemSlotBase : MonoBehaviour, IPointerClickHandler
     public void Recycle()
     {
         Empty();
-            ObjectPool.Put(gameObject);
+        ObjectPool.Put(gameObject);
     }
 
     public void Dark()
@@ -66,7 +66,7 @@ public class ItemSlotBase : MonoBehaviour, IPointerClickHandler
         IsDark = false;
     }
 
-     public void Select()
+    public void Select()
     {
         if (IsDark)
         {
@@ -77,7 +77,7 @@ public class ItemSlotBase : MonoBehaviour, IPointerClickHandler
             icon.color = Color.yellow;
         }
     }
-   public void DeSelect()
+    public void DeSelect()
     {
         if (IsDark)
         {
@@ -107,7 +107,17 @@ public class ItemSlotBase : MonoBehaviour, IPointerClickHandler
     {
         if (info == null) return;
         MItemInfo = info;
-        MItemInfo.indexInGrid = -1;
+        if (GameManager.QualityColors.Count >= 5)
+        {
+            qualityEdge.color = GameManager.QualityColors[(int)info.item.Quality];
+        }
+        UpdateInfo();
+    }
+
+    public virtual void SetItem(ItemInfoBase info)
+    {
+        if (info == null) return;
+        MItemInfo = new ItemInfo(info.item, info.Amount);
         if (GameManager.QualityColors.Count >= 5)
         {
             qualityEdge.color = GameManager.QualityColors[(int)info.item.Quality];

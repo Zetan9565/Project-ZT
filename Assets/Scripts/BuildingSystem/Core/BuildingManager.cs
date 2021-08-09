@@ -143,16 +143,16 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         {
             if (BackpackManager.Instance.IsMaterialsEnough(currentInfo.Materials))
             {
-                List<ItemInfo> materials = BackpackManager.Instance.GetMaterialsFromBackpack(currentInfo.Materials);
+                List<ItemSelectionData> materials = BackpackManager.Instance.GetMaterialsFromBackpack(currentInfo.Materials);
                 if (materials != null && BackpackManager.Instance.TryLoseItems_Boolean(materials))
                 {
                     BuildingData data = new BuildingData(currentInfo, preview.transform.position);
                     if (data.StartBuild())
                     {
                         preview.StartBuild(data);
-                        foreach (ItemInfo m in materials)
+                        foreach (ItemSelectionData m in materials)
                         {
-                            BackpackManager.Instance.LoseItem(m);
+                            BackpackManager.Instance.LoseItem(m.source, m.amount);
                         }
                         if (!buildings.ContainsKey(currentInfo))
                             buildings.Add(currentInfo, new List<BuildingData>());
@@ -204,6 +204,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     }
     private void FinishPreview(bool destroyPreview = false)
     {
+        if (!IsPreviewing) return;
         if (destroyPreview) Destroy(preview.gameObject);
         preview = null;
         currentInfo = null;
@@ -244,7 +245,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         var horizontal = Input.GetAxisRaw("Horizontal");
         var vertical = Input.GetAxisRaw("Vertical");
         var move = new Vector2(horizontal, vertical).normalized;
-        if (move.sqrMagnitude > 0)
+        if (move.sqrMagnitude > 0.25)
             moveTime += Time.deltaTime;
         if (moveTime >= 0.1f)
         {

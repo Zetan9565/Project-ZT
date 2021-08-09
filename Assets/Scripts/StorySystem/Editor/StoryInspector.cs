@@ -21,7 +21,7 @@ public class StoryInspector : Editor
     private void OnEnable()
     {
         lineHeight = EditorGUIUtility.singleLineHeight;
-        lineHeightSpace = lineHeight + 5;
+        lineHeightSpace = lineHeight + 2;
 
         story = target as Story;
 

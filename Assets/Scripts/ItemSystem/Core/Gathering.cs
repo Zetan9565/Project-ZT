@@ -34,7 +34,7 @@ public class Gathering : InteractiveObject
         if (hideOnGathered) GetComponent<Renderer>().enabled = false;
         if (GatheringInfo.ProductItems.Count > 0)
         {
-            List<ItemInfo> lootItems = DropItemInfo.Drop(GatheringInfo.ProductItems);
+            List<ItemInfoBase> lootItems = DropItemInfo.Drop(GatheringInfo.ProductItems);
             if (lootItems.Count > 0)
             {
                 LootAgent la = ObjectPool.Get(GatheringInfo.LootPrefab).GetComponent<LootAgent>();

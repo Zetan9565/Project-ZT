@@ -36,13 +36,6 @@ MonoBehaviour:
   rewardItems:
   - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
     amount: 2
-    indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 1
   collectObjectives: []

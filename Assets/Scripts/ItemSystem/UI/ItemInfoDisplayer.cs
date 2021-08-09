@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class ItemInfoDisplayer : MonoBehaviour
 {
     public Image icon;
+    public GameObject contrastMark;
     public Text nameText;
     public Text typeText;
 
@@ -27,16 +28,22 @@ public class ItemInfoDisplayer : MonoBehaviour
     private Stack<Text> contentCache = new Stack<Text>();
     private Stack<RoleAttributeAgent> attrCache = new Stack<RoleAttributeAgent>();
 
-    private int lineCount;
+    private int elementsCount;
 
     private ItemInfo info;
 
-    public void ShowItemInfo(ItemInfo info)
+    public void ShowItemInfo(ItemInfo info, bool contrast = false)
     {
+        if (!info || !info.item)
+        {
+            Hide(true);
+            return;
+        }
         if (this.info == info) return;
         Clear();
         this.info = info;
         icon.overrideSprite = info.item.Icon;
+        ZetanUtility.SetActive(contrastMark, contrast);
         nameText.text = info.ItemName;
         nameText.color = GameManager.QualityToColor(info.item.Quality);
         typeText.text = ItemBase.GetItemTypeString(info.item.ItemType);
@@ -63,9 +70,9 @@ public class ItemInfoDisplayer : MonoBehaviour
         else find = titleCache.Pop();
         ZetanUtility.SetActive(find.gameObject, true);
         find.text = content;
-        find.transform.SetSiblingIndex(lineCount);
+        find.transform.SetSiblingIndex(elementsCount);
         titles.Add(find);
-        lineCount++;
+        elementsCount++;
     }
 
     private void PushContent(string content)
@@ -76,9 +83,9 @@ public class ItemInfoDisplayer : MonoBehaviour
         else find = contentCache.Pop();
         ZetanUtility.SetActive(find.gameObject, true);
         find.text = content;
-        find.transform.SetSiblingIndex(lineCount);
+        find.transform.SetSiblingIndex(elementsCount);
         contents.Add(find);
-        lineCount++;
+        elementsCount++;
     }
 
     private void PushAttribute(RoleAttribute left, RoleAttribute right = null)
@@ -89,9 +96,9 @@ public class ItemInfoDisplayer : MonoBehaviour
         else find = attrCache.Pop();
         ZetanUtility.SetActive(find, true);
         find.Init(left, right);
-        find.transform.SetSiblingIndex(lineCount);
+        find.transform.SetSiblingIndex(elementsCount);
         attributes.Add(find);
-        lineCount++;
+        elementsCount++;
     }
 
     private void PushGem()
@@ -122,7 +129,7 @@ public class ItemInfoDisplayer : MonoBehaviour
             ZetanUtility.SetActive(attribute, false);
         }
         attributes.Clear();
-        lineCount = 0;
+        elementsCount = 0;
         info = null;
         icon.overrideSprite = null;
         nameText.text = string.Empty;

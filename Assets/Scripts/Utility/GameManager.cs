@@ -139,7 +139,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     }
 
     /// <summary>
-    /// 尝试获取道具（非新的实例）
+    /// 尝试获取道具（原型，非实例）
     /// </summary>
     /// <param name="id">道具ID</param>
     /// <returns>获得的道具</returns>

@@ -30,7 +30,7 @@ public class Enemy : MonoBehaviour
         QuestManager.Instance.UpdateUI();
         if (info.DropItems.Count > 0)
         {
-            List<ItemInfo> lootItems = DropItemInfo.Drop(info.DropItems);
+            List<ItemInfoBase> lootItems = DropItemInfo.Drop(info.DropItems);
             if (lootItems.Count > 0)
             {
                 LootAgent la = ObjectPool.Get(info.LootPrefab).GetComponent<LootAgent>();

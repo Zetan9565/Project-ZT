@@ -87,13 +87,9 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (!UI) return;
         CurrentTalker = talker;
         CurrentType = DialogueType.Normal;
-        if (talker.QuestInstances.FindAll(q => q.Info.AcceptCondition.IsMeet()).Count > 0)
-            ZetanUtility.SetActive(UI.questButton.gameObject, true);
-        else ZetanUtility.SetActive(UI.questButton.gameObject, false);
-        ZetanUtility.SetActive(UI.warehouseButton.gameObject, talker.Info.IsWarehouseAgent);
-        ZetanUtility.SetActive(UI.shopButton.gameObject, talker.Info.IsVendor);
+        ShowButtons(talker.Info.CanDEV_RLAT, talker.Info.IsVendor, talker.Info.IsWarehouseAgent, talker.QuestInstances.FindAll(q => !q.IsFinished && q.Info.AcceptCondition.IsMeet()).Count > 0);
         HideQuestDescription();
-        StartDialogue(talker.Info.DefaultDialogue);
+        StartDialogue(talker.DefaultDialogue);
         talker.OnTalkBegin();
     }
 
@@ -146,7 +142,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                     buttonDatas.Add(new ButtonWithTextData($"{quest.Info.Title}(已完成)", delegate
                     {
                         currentQuest = quest;
-                        ShowButtons(false, false, false);
+                        ShowButtons(false, false, false, false);
                         StartDialogue(quest.Info.CompleteDialogue);
                     }));
                 }
@@ -165,25 +161,32 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 RefreshOptionUI();
                 return;
             }
-            if (currentQuest)//这是由任务引发的对话
+            if (CurrentType == DialogueType.Gift)
             {
-                HandlingLast_Quest();
+                buttonDatas.Add(new ButtonWithTextData("返回", delegate { GoBackDefault(); }));
             }
-            else if (currentSubmitObj)//这是由提交目标引发的对话
+            else
             {
-                HandlingLast_SumbitObj();
-            }
-            else if (currentTalkObj)//这是由对话目标引发的对话
-            {
-                HandlingLast_TalkObj();
-            }
-            else if (CurrentTalker)//普通对话
-            {
-                HandlingLast_Normal();
+                if (currentQuest)//这是由任务引发的对话
+                {
+                    HandlingLast_Quest();
+                }
+                else if (currentSubmitObj)//这是由提交目标引发的对话
+                {
+                    HandlingLast_SumbitObj();
+                }
+                else if (currentTalkObj)//这是由对话目标引发的对话
+                {
+                    HandlingLast_TalkObj();
+                }
+                else if (CurrentTalker)//普通对话
+                {
+                    HandlingLast_Normal();
+                }
             }
             OnFinishDialogueEvent?.Invoke();
         }
-        if (currentWords && CurrentType == DialogueType.Normal)
+        if (currentWords)
         {
             foreach (var option in currentWords.optionDatas)
             {
@@ -219,7 +222,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             {
                 currentQuest = quest;
                 CurrentType = DialogueType.Quest;
-                ShowButtons(false, false, false);
+                ShowButtons(false, false, false, false);
                 StartDialogue(quest.Info.CompleteDialogue);
             }));
         }
@@ -229,7 +232,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             {
                 currentQuest = quest;
                 CurrentType = DialogueType.Quest;
-                ShowButtons(false, false, false);
+                ShowButtons(false, false, false, false);
                 StartDialogue(quest.InProgress ? quest.Info.OngoingDialogue : quest.Info.BeginDialogue);
             }));
         }
@@ -238,7 +241,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     private void HandlingLast_Quest()
     {
-        ShowQuestDescription(currentQuest);
+        if (!currentQuest.InProgress || currentQuest.IsComplete) ShowQuestDescription(currentQuest);
         if (!currentQuest.IsComplete && !currentQuest.InProgress)
         {
             buttonDatas.Add(new ButtonWithTextData("接受", delegate
@@ -261,7 +264,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 }
             }));
         }
-        buttonDatas.Add(new ButtonWithTextData("返回", delegate
+        buttonDatas.Add(new ButtonWithTextData(currentQuest.InProgress ? "返回" : "拒绝", delegate
         {
             CurrentType = DialogueType.Normal;
             ShowTalkerQuest();
@@ -340,7 +343,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 {
                     currentTalkObj = to;
                     CurrentType = DialogueType.Objective;
-                    ShowButtons(false, false, false);
+                    ShowButtons(false, false, false, false);
                     StartDialogue(currentTalkObj.Info.Dialogue);
                 }));
             }
@@ -355,7 +358,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                     {
                         currentSubmitObj = so;
                         CurrentType = DialogueType.Objective;
-                        ShowButtons(false, false, false);
+                        ShowButtons(false, false, false, false);
                         StartOneWords(new DialogueWords(currentWords.origin.TalkerInfo, currentSubmitObj.Info.WordsWhenSubmit));
                     }
                 }));
@@ -676,7 +679,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         }
         foreach (ItemSlotBase rwc in rewardCells)
             if (rwc) rwc.Empty();
-        foreach (ItemInfo info in quest.Info.RewardItems)
+        foreach (ItemInfoBase info in quest.Info.RewardItems)
             foreach (ItemSlotBase rw in rewardCells)
             {
                 if (rw.IsEmpty)
@@ -715,21 +718,36 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     public void OpenGiftWindow()
     {
         //TODO 把玩家背包道具读出并展示
-        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.SelectNum, "选择礼物", "确定要送出这些礼物吗？", null, OnSendGift, delegate
-         {
-             BackpackManager.Instance.PauseDisplay(false);
-             BackpackManager.Instance.CloseWindow();
-             PauseDisplay(false);
-         });
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.SelectNum, "挑选一件礼物", "确定要送出这个礼物吗？", 1, 1, null, OnSendGift, delegate
+           {
+               BackpackManager.Instance.PauseDisplay(false);
+               BackpackManager.Instance.CloseWindow();
+               PauseDisplay(false);
+           });
         PauseDisplay(true);
     }
-    private void OnSendGift(IEnumerable<ItemInfo> items)
+    private void OnSendGift(IEnumerable<ItemSelectionData> items)
     {
-
+        if (items != null && items.Count() > 0)
+        {
+            var isd = items.ElementAt(0);
+            Dialogue dialogue = CurrentTalker.OnGetGift(isd.source.item);
+            if (dialogue)
+            {
+                BackpackManager.Instance.LoseItem(isd.source, isd.amount);
+                CurrentType = DialogueType.Gift;
+                ShowButtons(false, false, false, false);
+                StartDialogue(dialogue);
+            }
+        }
+        BackpackManager.Instance.PauseDisplay(false);
+        BackpackManager.Instance.CloseWindow();
+        PauseDisplay(false);
     }
 
-    private void ShowButtons(bool shop, bool warehouse, bool quest, bool back = true)
+    private void ShowButtons(bool gift, bool shop, bool warehouse, bool quest, bool back = true)
     {
+        ZetanUtility.SetActive(UI.giftButton.gameObject, gift);
         ZetanUtility.SetActive(UI.shopButton.gameObject, shop);
         ZetanUtility.SetActive(UI.warehouseButton.gameObject, warehouse);
         ZetanUtility.SetActive(UI.questButton.gameObject, quest);
@@ -913,5 +931,6 @@ public enum DialogueType
 {
     Normal,
     Quest,
-    Objective
+    Objective,
+    Gift,
 }

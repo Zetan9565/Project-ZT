@@ -158,7 +158,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         {
             if (!SaveManager.Instance.IsLoading)
             {
-                foreach (ItemInfo rwi in quest.Info.RewardItems)
+                foreach (ItemInfoBase rwi in quest.Info.RewardItems)
                     if (!BackpackManager.Instance.TryGetItem_Boolean(rwi)) return false;
                 List<QuestData> questsReqThisQuestItem = new List<QuestData>();
                 foreach (ObjectiveData o in quest.ObjectiveInstances)
@@ -260,7 +260,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             {
                 //TODO 经验的处理
                 BackpackManager.Instance.GetMoney(quest.Info.RewardMoney);
-                foreach (ItemInfo info in quest.Info.RewardItems)
+                foreach (ItemInfoBase info in quest.Info.RewardItems)
                 {
                     BackpackManager.Instance.GetItem(info);
                 }
@@ -614,7 +614,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         }
         foreach (ItemSlotBase rwc in rewardCells)
             if (rwc) rwc.Empty();
-        foreach (ItemInfo info in selectedQuest.Info.RewardItems)
+        foreach (ItemInfoBase info in selectedQuest.Info.RewardItems)
             foreach (ItemSlotBase rwc in rewardCells)
             {
                 if (rwc.IsEmpty)

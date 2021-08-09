@@ -1,7 +1,7 @@
-﻿using System.Collections;
+﻿using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
@@ -18,20 +18,8 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
     public void ShowItemInfo(ItemSlotBase itemSlot, params ButtonWithTextData[] buttonDatas)
     {
         this.itemSlot = itemSlot;
-        MakeWindows(1);
-        ShowWindows(itemSlot.MItemInfo, null, null, buttonDatas);
-    }
-    public void ShowItemInfo(ItemSlotBase itemSlot, ItemInfo contrast, params ButtonWithTextData[] buttonDatas)
-    {
-        this.itemSlot = itemSlot;
-        MakeWindows(2);
-        ShowWindows(itemSlot.MItemInfo, contrast, null, buttonDatas);
-    }
-    public void ShowItemInfo(ItemSlotBase itemSlot, ItemInfo contrast1, ItemInfo contrast2, params ButtonWithTextData[] buttonDatas)
-    {
-        this.itemSlot = itemSlot;
-        MakeWindows(3);
-        ShowWindows(itemSlot.MItemInfo, contrast1, contrast2, buttonDatas);
+        base.CloseWindow();
+        ShowWindows(itemSlot.MItemInfo, BackpackManager.Instance.GetContrast(itemSlot.MItemInfo), buttonDatas);
     }
 
     private void MakeWindows(int count)
@@ -39,33 +27,43 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
         if (windows.Count < count)
         {
             if (windows.Count < 1)
-            {
-                ItemInfoDisplayer window;
-                if (ZetanUtility.IsPrefab(UI.windowPrefab.gameObject))
-                    window = ObjectPool.Get(UI.windowPrefab, UI.windowParent);
-                else window = UI.windowPrefab;
-                windows.Add(window);
-            }
+                InitWindow(ZetanUtility.IsPrefab(UI.windowPrefab.gameObject) ? ObjectPool.Get(UI.windowPrefab, UI.windowParent) : UI.windowPrefab);
             else
                 while (windows.Count < count)
                 {
-                    ItemInfoDisplayer window = ObjectPool.Get(UI.windowPrefab, UI.windowParent);
-                    window.Clear();
-                    windows.Add(ObjectPool.Get(UI.windowPrefab, UI.windowParent));
+                    InitWindow(ObjectPool.Get(UI.windowPrefab, UI.windowParent));
                 }
         }
+
+        void InitWindow(ItemInfoDisplayer window)
+        {
+            window.Clear();
+            window.Hide();
+            windows.Add(window);
+        }
     }
-    private void ShowWindows(ItemInfo info, ItemInfo contrast1, ItemInfo contrast2, params ButtonWithTextData[] buttonDatas)
+    private void ShowWindows(ItemInfo info, ItemInfo[] contrast = null, params ButtonWithTextData[] buttonDatas)
     {
-        if (windows.Count > 0)
-            if (info) windows[0].ShowItemInfo(info);
-            else windows[0].Hide(true);
-        if (windows.Count > 1)
-            if (contrast1) windows[1].ShowItemInfo(contrast1);
-            else windows[1].Hide(true);
-        if (windows.Count > 2)
-            if (contrast2) windows[2].ShowItemInfo(contrast2);
-            else windows[2].Hide(true);
+        if (contrast != null)
+        {
+            contrast = contrast.Where(x => x && x.item).ToArray();
+            MakeWindows(contrast.Length + 1);
+        }
+        else MakeWindows(1);
+        foreach (var window in windows)
+        {
+            window.Hide(true);
+        }
+
+        if (info)
+        {
+            windows[0].ShowItemInfo(info);
+        }
+        if (contrast != null)
+            for (int i = 0; i < contrast.Length; i++)
+            {
+                windows[i + 1].ShowItemInfo(contrast[i], true);
+            }
 
         LeftOrRight(itemSlot.transform.position);
 
@@ -144,11 +142,19 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
 #endif
         if (Screen.width * 0.5f < position.x)//在屏幕右半边
         {
+            foreach (var window in windows)
+            {
+                window.transform.SetAsFirstSibling();
+            }
             UI.buttonArea.transform.SetAsLastSibling();
             UI.window.transform.position = new Vector2(position.x - rectAgent.width * 0.5f - (winWidth + rectButton.width) * 0.5f, UI.window.transform.position.y);
         }
         else
         {
+            foreach (var window in windows)
+            {
+                window.transform.SetAsLastSibling();
+            }
             UI.buttonArea.transform.SetAsFirstSibling();
             UI.window.transform.position = new Vector2(position.x + rectAgent.width * 0.5f + (winWidth + rectButton.width) * 0.5f, UI.window.transform.position.y);
         }
@@ -182,5 +188,4 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
         ZetanUtility.SetActive(UI.buttonArea, true);
 #endif
     }
-
 }

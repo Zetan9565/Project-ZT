@@ -241,7 +241,7 @@ public class DropItemListDrawer
                     EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
                         maxAmount, new GUIContent("最多产出"));
                     if (minAmount.intValue < 1) minAmount.intValue = 1;
-                    if(minAmount.intValue > maxAmount.intValue)
+                    if (minAmount.intValue > maxAmount.intValue)
                     {
                         minAmount.intValue = maxAmount.intValue + minAmount.intValue;
                         maxAmount.intValue = minAmount.intValue - maxAmount.intValue;
@@ -359,42 +359,9 @@ public class ConditionGroupDrawer
                 SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
                 SerializedProperty type = condition.FindPropertyRelative("type");
                 ConditionType conditionType = (ConditionType)type.enumValueIndex;
-                if (condition != null)
-                {
-                    switch (conditionType)
-                    {
-                        case ConditionType.CompleteQuest:
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "完成任务");
-                            break;
-                        case ConditionType.AcceptQuest:
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "接取任务");
-                            break;
-                        case ConditionType.HasItem:
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "拥有道具");
-                            break;
-                        case ConditionType.LevelEquals:
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级等于");
-                            break;
-                        case ConditionType.LevelLargeThen:
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级大于");
-                            break;
-                        case ConditionType.LevelLessThen:
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "等级小于");
-                            break;
-                        case ConditionType.TriggerSet:
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "触发器开启");
-                            break;
-                        case ConditionType.TriggerReset:
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "触发器关闭");
-                            break;
-                        default:
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "[" + index + "]" + "未定义条件");
-                            break;
-                    }
-                }
-                else EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
+                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width * 0.2f, lineHeight), "条件[" + index + "]");
                 EditorGUI.BeginChangeCheck();
-                EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
+                EditorGUI.PropertyField(new Rect(rect.x + rect.width * 0.2f, rect.y, rect.width * 0.8f, lineHeight),
                     type, new GUIContent(string.Empty), true);
 
                 switch (conditionType)
@@ -402,7 +369,7 @@ public class ConditionGroupDrawer
                     case ConditionType.CompleteQuest:
                     case ConditionType.AcceptQuest:
                         SerializedProperty relatedQuest = condition.FindPropertyRelative("relatedQuest");
-                        EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), relatedQuest, new GUIContent("需完成的任务"));
+                        EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), relatedQuest, new GUIContent("对应任务"));
                         if (relatedQuest.objectReferenceValue == owner.targetObject as Quest) relatedQuest.objectReferenceValue = null;
                         if (relatedQuest.objectReferenceValue)
                         {
@@ -412,7 +379,7 @@ public class ConditionGroupDrawer
                         break;
                     case ConditionType.HasItem:
                         SerializedProperty relatedItem = condition.FindPropertyRelative("relatedItem");
-                        EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), relatedItem, new GUIContent("需拥有的道具"));
+                        EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), relatedItem, new GUIContent("对应道具"));
                         if (relatedItem.objectReferenceValue)
                         {
                             ItemBase item = relatedItem.objectReferenceValue as ItemBase;
@@ -423,7 +390,7 @@ public class ConditionGroupDrawer
                     case ConditionType.LevelLargeThen:
                     case ConditionType.LevelLessThen:
                         SerializedProperty level = condition.FindPropertyRelative("level");
-                        EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), level, new GUIContent("限制的等级"));
+                        EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), level, new GUIContent("对应等级"));
                         if (level.intValue < 1) level.intValue = 1;
                         break;
                     case ConditionType.TriggerSet:
@@ -517,9 +484,6 @@ public class ConditionGroupDrawer
 
     public void DoLayoutDraw()
     {
-        owner?.Update();
-        List?.DoLayoutList();
-        owner?.ApplyModifiedProperties();
         if (List != null && List.count > 0)
         {
             owner?.Update();
@@ -528,21 +492,24 @@ public class ConditionGroupDrawer
             if (EditorGUI.EndChangeCheck())
                 owner?.ApplyModifiedProperties();
         }
+        owner?.Update();
+        List?.DoLayoutList();
+        owner?.ApplyModifiedProperties();
     }
 
     public void DoDraw(Rect rect)
     {
-        owner?.Update();
-        List?.DoList(rect);
-        owner?.ApplyModifiedProperties();
         if (List != null && List.count > 0)
         {
             owner?.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUI.PropertyField(new Rect(rect.x, rect.y + List.GetHeight(), rect.width, lineHeightSpace), property.FindPropertyRelative("relational"), new GUIContent("(?)条件关系表达式"));
+            EditorGUI.PropertyField(rect, property.FindPropertyRelative("relational"), new GUIContent("(?)条件关系表达式"));
             if (EditorGUI.EndChangeCheck())
                 owner?.ApplyModifiedProperties();
         }
+        owner?.Update();
+        List?.DoList(List != null && List.count > 0 ? new Rect(rect.x, rect.y + lineHeightSpace, rect.width, rect.height) : rect);
+        owner?.ApplyModifiedProperties();
     }
 
     public float GetDrawHeight()

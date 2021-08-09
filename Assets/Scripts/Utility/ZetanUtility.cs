@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using System.Reflection;
 
 public class ZetanUtility
 {
@@ -163,6 +164,22 @@ public class ZetanUtility
             sb.Append(target);
             return sb.ToString();
         }
+    }
+
+    public static string GetEnumInspectorName(ValueType enumValue)
+    {
+        if (enumValue != null)
+        {
+            MemberInfo[] mi = enumValue.GetType().GetMember(enumValue.ToString());
+            if (mi != null && mi.Length > 0)
+            {
+                if (Attribute.GetCustomAttribute(mi[0], typeof(InspectorNameAttribute)) is InspectorNameAttribute attr)
+                {
+                    return attr.displayName;
+                }
+            }
+        }
+        return null;
     }
 
     #region Vector相关

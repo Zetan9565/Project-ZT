@@ -74,10 +74,12 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     public void EnableJoyStick(bool value)
     {
-        if (Application.platform != RuntimePlatform.Android) joyStick.enabled = false;
-        else
-            JoyStick.enabled = value && !(DialogueManager.Instance.IsUIOpen || ShopManager.Instance.IsUIOpen ||
-                WarehouseManager.Instance.IsUIOpen || QuestManager.Instance.IsUIOpen || BuildingManager.Instance.IsPreviewing);
+#if UNITY_STANDALONE
+        joyStick.enabled = false;
+#elif UNITY_ANDROID
+        JoyStick.enabled = value && !(DialogueManager.Instance.IsUIOpen || ShopManager.Instance.IsUIOpen ||
+            WarehouseManager.Instance.IsUIOpen || QuestManager.Instance.IsUIOpen || BuildingManager.Instance.IsPreviewing);
+#endif
         if (!JoyStick.enabled) JoyStick.Stop();
     }
 

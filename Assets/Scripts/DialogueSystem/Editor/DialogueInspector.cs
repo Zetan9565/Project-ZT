@@ -31,7 +31,7 @@ public class DialogueInspector : Editor
         npcNames = npcs.Select(x => x.name).ToArray();//Linq分离出NPC名字
 
         lineHeight = EditorGUIUtility.singleLineHeight;
-        lineHeightSpace = lineHeight + 5;
+        lineHeightSpace = lineHeight + 2;
 
         dialogue = target as Dialogue;
 
@@ -650,9 +650,10 @@ public class DialogueInspector : Editor
             }
             else
             {
-                GUI.enabled = false;
-                EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), content.stringValue);
-                GUI.enabled = true;
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                content.stringValue = EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), content.stringValue);
+                if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             }
         };
 

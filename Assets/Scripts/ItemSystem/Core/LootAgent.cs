@@ -10,7 +10,7 @@ public class LootAgent : InteractiveObject
     private Coroutine recycleRoutine;
 
     [HideInInspector]
-    public List<ItemInfo> lootItems = new List<ItemInfo>();
+    public List<ItemInfoBase> lootItems = new List<ItemInfoBase>();
 
     public override bool IsInteractive
     {
@@ -25,8 +25,13 @@ public class LootAgent : InteractiveObject
         }
     }
 
-    public void Init(List<ItemInfo> lootItems, Vector3 position)
+    public void Init(List<ItemInfoBase> lootItems, Vector3 position)
     {
+        if (lootItems == null)
+        {
+            Recycle();
+            return;
+        }
         this.lootItems = lootItems;
         transform.position = position;
         if (this.lootItems.Count < 1) Recycle();//没有产出，直接消失

@@ -8,6 +8,10 @@ public class TalkerInformation : CharacterInformation
     private Dialogue defaultDialogue;
     public Dialogue DefaultDialogue => defaultDialogue;
 
+    [SerializeField, NonReorderable]
+    private List<ConditionDialogue> conditionDialogues = new List<ConditionDialogue>();
+    public List<ConditionDialogue> ConditionDialogues => conditionDialogues;
+
     [SerializeField]
     private bool isWarehouseAgent;
     public bool IsWarehouseAgent => isWarehouseAgent;
@@ -28,11 +32,18 @@ public class TalkerInformation : CharacterInformation
 
     [SerializeField]
     private bool canDEV_RLAT;
+    /// <summary>
+    /// 可培养感情
+    /// </summary>
     public bool CanDEV_RLAT => canDEV_RLAT;
 
     [SerializeField]
     private Dialogue normalItemDialogue;
     public Dialogue NormalItemDialogue => normalItemDialogue;
+
+    [SerializeField]
+    private int normalIntimacyValue = 5;
+    public int NormalIntimacyValue => normalIntimacyValue;
 
     [SerializeField, NonReorderable]
     private List<AffectiveDialogue> giftDialogues = new List<AffectiveDialogue>();
@@ -46,22 +57,6 @@ public class TalkerInformation : CharacterInformation
     [SerializeField]
     private bool canMarry;
     public bool CanMarry => canMarry;
-}
-
-[System.Serializable]
-public class AffectiveDialogue
-{
-    [SerializeField]
-    private int lowerBound;
-    public int LowerBound => lowerBound;
-
-    [SerializeField]
-    private int upperBound;
-    public int UpperBound => upperBound;
-
-    [SerializeField]
-    private Dialogue dialogue;
-    public Dialogue Dialogue => dialogue;
 }
 
 [System.Serializable]

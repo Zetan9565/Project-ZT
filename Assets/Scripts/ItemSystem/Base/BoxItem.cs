@@ -28,9 +28,9 @@ public class BoxItem : ItemBase
         itemType = ItemType.Box;
     }
 
-    public ItemInfo[] GetItems()
+    public ItemInfoBase[] GetItems()
     {
-        List<ItemInfo> lootItems = DropItemInfo.Drop(itemsInBox);
+        List<ItemInfoBase> lootItems = DropItemInfo.Drop(itemsInBox);
         return lootItems.ToArray();
     }
 }

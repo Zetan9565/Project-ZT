@@ -39,6 +39,19 @@ public class Talker : Character
         }
     }
 
+    public Dialogue DefaultDialogue
+    {
+        get
+        {
+            foreach (var cd in Info.ConditionDialogues)
+            {
+                if (cd.Condition.IsMeet())
+                    return cd.Dialogue;
+            }
+            return Info.DefaultDialogue;
+        }
+    }
+
     public override bool Init()
     {
         if (!GameManager.Talkers.ContainsKey(TalkerID)) GameManager.Talkers.Add(TalkerID, this);
@@ -80,9 +93,9 @@ public class Talker : Character
         Data.OnTalkFinished();
     }
 
-    public void OnGetGift(ItemBase gift)
+    public Dialogue OnGetGift(ItemBase gift)
     {
-        Data.OnGetGift(gift);
+        return Data?.OnGetGift(gift);
     }
 
     public bool DoInteract()
