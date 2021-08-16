@@ -30,14 +30,14 @@ public class FormulationInspector : Editor
     public override void OnInspectorGUI()
     {
         var other = Array.Find(formulations, x => x != formulation && Formulation.CheckMaterialsDuplicate(formulation, x));
-        if (other) EditorGUILayout.HelpBox($"配方材料重复！配置路径：\n{AssetDatabase.GetAssetPath(other)}", MessageType.Error);
+        if (other) EditorGUILayout.HelpBox($"閰嶆柟鏉愭枡閲嶅锛侀厤缃矾寰勶細\n{AssetDatabase.GetAssetPath(other)}", MessageType.Error);
         for (int i = 0; i < formulation.Materials.Count; i++)
         {
             bool bre = false;
             var left = formulation.Materials[i];
             if (!left.IsValid)
             {
-                EditorGUILayout.HelpBox("该配方未补充完整", MessageType.Warning);
+                EditorGUILayout.HelpBox("璇ラ厤鏂规湭琛ュ厖瀹屾暣", MessageType.Warning);
                 break;
             }
             for (int j = 0; j < formulation.Materials.Count; j++)
@@ -47,7 +47,7 @@ public class FormulationInspector : Editor
                 {
                     if (left.MakingType == MakingType.SingleItem && left.Item == right.Item || left.MakingType == MakingType.SameType && left.MaterialType == right.MaterialType)
                     {
-                        EditorGUILayout.HelpBox($"第[{i + 1}]和第[{j + 1}]个材料重复！", MessageType.Error);
+                        EditorGUILayout.HelpBox($"绗琜{i + 1}]鍜岀[{j + 1}]涓潗鏂欓噸澶嶏紒", MessageType.Error);
                         bre = true;
                     }
                 }
@@ -57,7 +57,7 @@ public class FormulationInspector : Editor
         }
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(remark, new GUIContent("备注"));
+        EditorGUILayout.PropertyField(remark, new GUIContent("澶囨敞"));
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         listDrawer.DoLayoutDraw();
     }

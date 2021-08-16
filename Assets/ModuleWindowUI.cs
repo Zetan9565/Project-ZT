@@ -44,7 +44,7 @@ public class ModuleWindowUI : MonoBehaviour
             return gameObject;
         else
         {
-            Debug.LogWarning($"ÕÒ²»µ½Ãû×ÖÎª[{name}]µÄUI£¬ÒÑ·µ»Ø´°¿Ú×ÔÉí");
+            Debug.LogWarning($"æ‰¾ä¸åˆ°åå­—ä¸º[{name}]çš„UIï¼Œå·²è¿”å›çª—å£è‡ªèº«");
             return this.gameObject;
         }
     }
@@ -54,7 +54,7 @@ public class ModuleWindowUI : MonoBehaviour
             return rectTrans;
         else
         {
-            Debug.LogWarning($"ÕÒ²»µ½Ãû×ÖÎª[{name}]µÄ¾ØĞÎ±ä»»£¬ÒÑ·µ»Ø´°¿Ú×ÔÉí");
+            Debug.LogWarning($"æ‰¾ä¸åˆ°åå­—ä¸º[{name}]çš„çŸ©å½¢å˜æ¢ï¼Œå·²è¿”å›çª—å£è‡ªèº«");
             return GetComponent<RectTransform>();
         }
     }
@@ -64,7 +64,7 @@ public class ModuleWindowUI : MonoBehaviour
             return text;
         else
         {
-            Debug.LogWarning($"ÕÒ²»µ½Ãû×ÖÎª[{name}]µÄÎÄ×Ö£¬ÒÑ·µ»Ø´°¿Ú×ÔÉí");
+            Debug.LogWarning($"æ‰¾ä¸åˆ°åå­—ä¸º[{name}]çš„æ–‡å­—ï¼Œå·²è¿”å›çª—å£è‡ªèº«");
             return GetComponent<Text>();
         }
     }
@@ -74,7 +74,7 @@ public class ModuleWindowUI : MonoBehaviour
             return image;
         else
         {
-            Debug.LogWarning($"ÕÒ²»µ½Ãû×ÖÎª[{name}]µÄÍ¼Ïñ£¬ÒÑ·µ»Ø´°¿Ú×ÔÉí");
+            Debug.LogWarning($"æ‰¾ä¸åˆ°åå­—ä¸º[{name}]çš„å›¾åƒï¼Œå·²è¿”å›çª—å£è‡ªèº«");
             return GetComponent<Image>();
         }
     }
@@ -84,7 +84,7 @@ public class ModuleWindowUI : MonoBehaviour
             return button;
         else
         {
-            Debug.LogWarning($"ÕÒ²»µ½Ãû×ÖÎª[{name}]µÄ°´Å¥£¬ÒÑ·µ»Ø´°¿Ú×ÔÉí");
+            Debug.LogWarning($"æ‰¾ä¸åˆ°åå­—ä¸º[{name}]çš„æŒ‰é’®ï¼Œå·²è¿”å›çª—å£è‡ªèº«");
             return GetComponent<Button>();
         }
     }

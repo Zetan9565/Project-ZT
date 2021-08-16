@@ -4,18 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "formulation", menuName = "Zetan Studio/Åä·½")]
+[CreateAssetMenu(fileName = "formulation", menuName = "Zetan Studio/é…æ–¹")]
 public class Formulation : ScriptableObject
 {
     /**
-    * Éè¼ÆË¼Â·£º
-    * ²ÄÁÏÁĞ±íÀïÃæµÄ²ÄÁÏ·ÖÎª¡¾µ¥ÖÖ¡¿ºÍ¡¾Í¬Àà¡¿£¬¡¾µ¥ÖÖ¡¿ÏŞÖÆÒ»ÖÖµÀ¾ß£¬±ÈÈçÌú¿é£¬¶øÎªÍ¬ÀàÊ±£¬¿ÉÒÔÊÇÌú¿é¡¢Í­¿éµÈ¡°½ğÊô¡±
-    * µ±²ÄÁÏÖĞÄ³¸öÍ¬Àà²ÄÁÏÊ±£¬¾Í²»Ó¦¸ÃÔÙÔö¼ÓÈÎºÎ¸ÃÀàĞÍÏÂÃæµÄµ¥ÖÖµÀ¾ß²ÄÁÏ£¬ºÜÃ÷ÏÔ»á³åÍ»
-    * Í¬Àí£¬µ±²ÄÁÏÁĞ±íÒÑ¾­ÓÃÁËÄ³ÖÖµ¥ÖÖ²ÄÁÏ£¬Ôò²»Ó¦¸ÃÔÙÔö¼ÓÓë²ÄÁÏÀàĞÍÒ»ÑùµÄ¡¾Í¬Àà¡¿²ÄÁÏ
-    * ²ÄÁÏÖĞ£¬ÎŞÂÛÊÇ¡¾µ¥ÖÖ¡¿ºÍ¡¾Í¬Àà¡¿£¬¶¼²»Ó¦¸ÃÔÙÔö¼ÓÏàÍ¬µÄÅäÖÃ£¬ÀıÈç£¬ÒÑ¾­Ê¹ÓÃÁËÌú¿éX3£¬Ôò²»ÄÜÔÙĞÂÔöÒ»¸öÌú¿éX2µÄ²ÄÁÏÅäÖÃ
+    * è®¾è®¡æ€è·¯ï¼š
+    * ææ–™åˆ—è¡¨é‡Œé¢çš„ææ–™åˆ†ä¸ºã€å•ç§ã€‘å’Œã€åŒç±»ã€‘ï¼Œã€å•ç§ã€‘é™åˆ¶ä¸€ç§é“å…·ï¼Œæ¯”å¦‚é“å—ï¼Œè€Œä¸ºåŒç±»æ—¶ï¼Œå¯ä»¥æ˜¯é“å—ã€é“œå—ç­‰â€œé‡‘å±â€
+    * å½“ææ–™ä¸­æŸä¸ªåŒç±»ææ–™æ—¶ï¼Œå°±ä¸åº”è¯¥å†å¢åŠ ä»»ä½•è¯¥ç±»å‹ä¸‹é¢çš„å•ç§é“å…·ææ–™ï¼Œå¾ˆæ˜æ˜¾ä¼šå†²çª
+    * åŒç†ï¼Œå½“ææ–™åˆ—è¡¨å·²ç»ç”¨äº†æŸç§å•ç§ææ–™ï¼Œåˆ™ä¸åº”è¯¥å†å¢åŠ ä¸ææ–™ç±»å‹ä¸€æ ·çš„ã€åŒç±»ã€‘ææ–™
+    * ææ–™ä¸­ï¼Œæ— è®ºæ˜¯ã€å•ç§ã€‘å’Œã€åŒç±»ã€‘ï¼Œéƒ½ä¸åº”è¯¥å†å¢åŠ ç›¸åŒçš„é…ç½®ï¼Œä¾‹å¦‚ï¼Œå·²ç»ä½¿ç”¨äº†é“å—X3ï¼Œåˆ™ä¸èƒ½å†æ–°å¢ä¸€ä¸ªé“å—X2çš„ææ–™é…ç½®
     * **/
     [SerializeField]
-    private string remark;//µ¥´¿ÓÃÓÚ±¸×¢
+    private string remark;//å•çº¯ç”¨äºå¤‡æ³¨
 
     [SerializeField, NonReorderable]
     private List<MaterialInfo> materials = new List<MaterialInfo>();
@@ -67,14 +67,14 @@ public class Formulation : ScriptableObject
                 {
                     sb.Append("[");
                     sb.Append(material.ItemName);
-                    sb.Append("] ¡Á ");
+                    sb.Append("] Ã— ");
                     sb.Append(material.Amount);
                 }
                 else
                 {
                     sb.Append("<");
                     sb.Append(ZetanUtility.GetEnumInspectorName(material.MaterialType));
-                    sb.Append("> ¡Á ");
+                    sb.Append("> Ã— ");
                     sb.Append(material.Amount);
                 }
                 if (materials.IndexOf(material) != materials.Count - 1) sb.Append("\n");

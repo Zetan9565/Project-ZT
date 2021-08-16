@@ -87,7 +87,7 @@ public class NotifyCenter : SingletonMonoBehaviour<NotifyCenter>
 
         public void AddListener(NotifyListener listener)
         {
-            Event -= listener;//Ô¤·ÀÖØ¸´¼àÌı
+            Event -= listener;//é¢„é˜²é‡å¤ç›‘å¬
             Event += listener;
         }
 

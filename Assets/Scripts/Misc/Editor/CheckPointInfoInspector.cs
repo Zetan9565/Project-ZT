@@ -31,18 +31,18 @@ public class CheckPointInfoInspector : Editor
     {
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(_ID, new GUIContent("Ê¶±ğÂë"));
-        EditorGUILayout.PropertyField(targetTag, new GUIContent("¼ì²â¶ÔÏó±êÇ©"));
-        layer.intValue = EditorGUILayout.LayerField("¼ì²â²ã", layer.intValue);
-        EditorGUILayout.PropertyField(scene, new GUIContent("Ä¿±ê³¡¾°"));
-        EditorGUILayout.PropertyField(triggerType, new GUIContent("Åö×²Æ÷ÀàĞÍ"));
+        EditorGUILayout.PropertyField(_ID, new GUIContent("è¯†åˆ«ç "));
+        EditorGUILayout.PropertyField(targetTag, new GUIContent("æ£€æµ‹å¯¹è±¡æ ‡ç­¾"));
+        layer.intValue = EditorGUILayout.LayerField("æ£€æµ‹å±‚", layer.intValue);
+        EditorGUILayout.PropertyField(scene, new GUIContent("ç›®æ ‡åœºæ™¯"));
+        EditorGUILayout.PropertyField(triggerType, new GUIContent("ç¢°æ’å™¨ç±»å‹"));
         if (triggerType.enumValueIndex == (int)CheckPointTriggerType.Box)
-            EditorGUILayout.PropertyField(size, new GUIContent("Åö×²Æ÷´óĞ¡"));
+            EditorGUILayout.PropertyField(size, new GUIContent("ç¢°æ’å™¨å¤§å°"));
         if (triggerType.enumValueIndex == (int)CheckPointTriggerType.Circle || triggerType.enumValueIndex == (int)CheckPointTriggerType.Capsule)
-            EditorGUILayout.PropertyField(radius, new GUIContent("Åö×²Æ÷°ë¾¶"));
+            EditorGUILayout.PropertyField(radius, new GUIContent("ç¢°æ’å™¨åŠå¾„"));
         if (triggerType.enumValueIndex == (int)CheckPointTriggerType.Capsule)
-            EditorGUILayout.PropertyField(height, new GUIContent("Åö×²Æ÷¸ß¶È"));
-        EditorGUILayout.PropertyField(positions, new GUIContent("Î»ÖÃ±í"));
+            EditorGUILayout.PropertyField(height, new GUIContent("ç¢°æ’å™¨é«˜åº¦"));
+        EditorGUILayout.PropertyField(positions, new GUIContent("ä½ç½®è¡¨"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
     }
