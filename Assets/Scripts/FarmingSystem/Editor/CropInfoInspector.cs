@@ -179,7 +179,7 @@ public class CropInfoInspector : Editor
                             _Name.stringValue = _name.stringValue;
                             gInfoObj.ApplyModifiedProperties();
 
-                            GatheringInfoEditor.CreateWindow(gatherInfo.objectReferenceValue as GatheringInformation);
+                            GatheringInfoEditor.CreateWindow(infoInstance);
                         }
                     }
                     lineCount++;
@@ -273,7 +273,7 @@ public class CropInfoInspector : Editor
     string GetAutoID()
     {
         string newID = string.Empty;
-        CropInformation[] crops = Resources.LoadAll<CropInformation>("");
+        CropInformation[] crops = Resources.LoadAll<CropInformation>("Configuration");
         for (int i = 1; i < 1000; i++)
         {
             newID = "CROP" + i.ToString().PadLeft(3, '0');
@@ -285,7 +285,7 @@ public class CropInfoInspector : Editor
 
     bool ExistsID()
     {
-        CropInformation[] crops = Resources.LoadAll<CropInformation>("");
+        CropInformation[] crops = Resources.LoadAll<CropInformation>("Configuration");
 
         CropInformation find = Array.Find(crops, x => x.ID == _ID.stringValue);
         if (!find) return false;//若没有找到，则ID可用

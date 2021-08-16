@@ -1,22 +1,86 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Collections.Generic;
+using System.Reflection;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using System.Reflection;
+using UnityEngine.SceneManagement;
+using ZetanExtends;
 
-public class ZetanUtility
+namespace ZetanExtends
+{
+    public static class TransformExtend
+    {
+        public static Transform CreateChild(this Transform source, string name = null)
+        {
+            if (string.IsNullOrEmpty(name)) name = $"Child of {source.gameObject.name}";
+            GameObject child = new GameObject(name);
+            child.transform.SetParent(source);
+            return child.transform;
+        }
+    }
+
+    public static class ComponentExtend
+    {
+        public static RectTransform GetRectTransform(this Component source)
+        {
+            return source.GetComponent<RectTransform>();
+        }
+    }
+
+    public static class GameObjectExtend
+    {
+        public static RectTransform GetRectTransform(this GameObject source)
+        {
+            return source.GetComponent<RectTransform>();
+        }
+
+        public static GameObject CreateChild(this GameObject source, string name = null)
+        {
+            if (string.IsNullOrEmpty(name)) name = $"Child of {source.name}";
+            GameObject child = new GameObject(name);
+            child.transform.SetParent(source.transform);
+            return child;
+        }
+
+        public static GameObject Instantiate(this GameObject source)
+        {
+            return UnityEngine.Object.Instantiate(source);
+        }
+        public static GameObject Instantiate(this GameObject source, Transform parent)
+        {
+            return UnityEngine.Object.Instantiate(source, parent);
+        }
+        public static GameObject Instantiate(this GameObject source, Transform parent, bool worldPositionStays)
+        {
+            return UnityEngine.Object.Instantiate(source, parent, worldPositionStays);
+        }
+        public static GameObject Instantiate(this GameObject source, Vector3 position, Quaternion rotation)
+        {
+            return UnityEngine.Object.Instantiate(source, position, rotation);
+        }
+        public static GameObject Instantiate(this GameObject source, Vector3 position, Quaternion rotation, Transform parent)
+        {
+            return UnityEngine.Object.Instantiate(source, position, rotation, parent);
+        }
+    }
+}
+
+public sealed class ZetanUtility
 {
     public static bool IsMouseInsideScreen => Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height;
+
+    public static Scene ActiveScene => SceneManager.GetActiveScene();
 
     /// <summary>
     /// 概率计算
     /// </summary>
     /// <param name="probability">百分比数值</param>
-    /// <returns>概率命中</returns>
+    /// <returns>是否命中</returns>
     public static bool Probability(float probability)
     {
         if (probability < 0) return false;
@@ -31,6 +95,15 @@ public class ZetanUtility
     public static bool IsPrefab(GameObject gameObject)
     {
         return gameObject.scene.name == null;
+    }
+
+    public static Transform CreateChild(Transform parent, string name = null)
+    {
+        return parent.CreateChild(name);
+    }
+    public static GameObject CreateChild(GameObject parent, string name = null)
+    {
+        return parent.CreateChild(name);
     }
 
     public static void SetActive(GameObject gameObject, bool value)
@@ -136,37 +209,91 @@ public class ZetanUtility
         scaler.ScaleCoroutine = scaler.MonoBehaviour.StartCoroutine(scaler.Scale(scale, duration));
     }
 
-    public static string SerializeObject(object target)
+    private static string SerializeObject(object target, bool includeProperty, int depth, int indentation)
     {
+        if (target == null) return "空";
+        if (depth < 0) return target.ToString();
         Type type = target.GetType();
-        if (!type.IsValueType && target == null) return string.Empty;
-        StringBuilder sb = new StringBuilder("[");
-        sb.Append(type.Name);
-        sb.Append("] = ");
-        if (type.IsClass)
+        if (type.IsEnum) return $"{type}.{target}";
+        if (type.IsValueType) return target.ToString();
+        StringBuilder sb = new StringBuilder();
+        if (type == typeof(string))
         {
+            sb.Append("\"");
+            sb.Append(target);
+            sb.Append("\"");
+        }
+        else if (type.GetInterfaces().Contains(typeof(IEnumerable)))
+        {
+            bool canIndex = type.IsArray || type.GetInterfaces().Contains(typeof(IList));
+            var tEnum = (target as IEnumerable).GetEnumerator();
             sb.Append("{\n");
-            foreach (var fie in type.GetFields())
+            int index = 0;
+            while (tEnum.MoveNext())
             {
-                sb.Append(SerializeObject(fie.GetValue(target)));
-                sb.Append("\n");
+                for (int i = 0; i < indentation + 1; i++)
+                {
+                    sb.Append("    ");
+                }
+                sb.Append("[");
+                sb.Append(canIndex ? index.ToString() : "?");
+                sb.Append("] = ");
+                sb.Append(SerializeObject(tEnum.Current, includeProperty, depth - 1, indentation + 1));
+                sb.Append(",\n");
+                index++;
             }
-            foreach (var pro in type.GetProperties())
+            for (int i = 0; i < indentation; i++)
             {
-                sb.Append(SerializeObject(pro.GetValue(target)));
-                sb.Append("\n");
+                sb.Append("    ");
             }
             sb.Append("}");
-            return sb.ToString();
+        }
+        else if (type.IsClass)
+        {
+            sb.Append("{\n");
+            foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            {
+                for (int i = 0; i < indentation + 1; i++)
+                {
+                    sb.Append("    ");
+                }
+                sb.Append("[");
+                sb.Append(field.Name);
+                sb.Append("] = ");
+                sb.Append(SerializeObject(field.GetValue(target), includeProperty, depth - 1, indentation + 1));
+                sb.Append(",\n");
+            }
+            if (includeProperty)
+                foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetProperty))
+                {
+                    for (int i = 0; i < indentation + 1; i++)
+                    {
+                        sb.Append("    ");
+                    }
+                    sb.Append("[");
+                    sb.Append(property.Name);
+                    sb.Append("] = ");
+                    sb.Append(SerializeObject(property.GetValue(target), includeProperty, depth - 1, indentation + 1));
+                    sb.Append(",\n");
+                }
+            for (int i = 0; i < indentation; i++)
+            {
+                sb.Append("    ");
+            }
+            sb.Append("}");
         }
         else
         {
             sb.Append(target);
-            return sb.ToString();
         }
+        return sb.ToString();
+    }
+    public static string SerializeObject(object target, bool includeProperty, int depth = 3)
+    {
+        return SerializeObject(target, includeProperty, depth, 0);
     }
 
-    public static string GetEnumInspectorName(ValueType enumValue)
+    public static string GetEnumInspectorName(Enum enumValue)
     {
         if (enumValue != null)
         {
@@ -179,13 +306,13 @@ public class ZetanUtility
                 }
             }
         }
-        return null;
+        return enumValue.ToString();
     }
 
     #region Vector相关
     public static Vector2 ScreenCenter => new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
 
-    public static Vector3 MousePositionAsWorld => Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    public static Vector3 MousePositionToWorld => Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
     public static Vector3 PositionToGrid(Vector3 originalPos, float gridSize = 1.0f, float offset = 1.0f)
     {

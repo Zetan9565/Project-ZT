@@ -7,7 +7,7 @@ using Pathfinding;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Seeker))]
-[AddComponentMenu("ZetanStudio/AI/A*寻路单位")]
+[AddComponentMenu("Zetan Studio/AI/A*寻路单位")]
 public class AStarUnit : MonoBehaviour
 {
     [SerializeField, Tooltip("以单元格倍数为单位，至少是 1 倍，2D空间下 Y 数值无效")]

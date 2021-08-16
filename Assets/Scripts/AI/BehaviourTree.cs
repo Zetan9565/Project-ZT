@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "behaviour tree", menuName = "ZetanStudio/AI/行为树")]
+[CreateAssetMenu(fileName = "behaviour tree", menuName = "Zetan Studio/AI/行为树")]
 [System.Serializable]
 public class BehaviourTree : ScriptableObject
 {

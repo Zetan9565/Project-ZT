@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "Weapon", menuName = "ZetanStudio/道具/武器")]
+[CreateAssetMenu(fileName = "weapon", menuName = "Zetan Studio/道具/武器")]
 [System.Serializable]
 public class WeaponItem : EquipmentItem
 {
@@ -11,54 +11,6 @@ public class WeaponItem : EquipmentItem
         get
         {
             return weaponType;
-        }
-    }
-
-    [SerializeField]
-    private int cutATK;
-    public int CutATK
-    {
-        get
-        {
-            return cutATK;
-        }
-    }
-    [SerializeField]
-    private int punATK;
-    public int PunATK
-    {
-        get
-        {
-            return punATK;
-        }
-    }
-    [SerializeField]
-    private int bluATK;
-    public int BluATK
-    {
-        get
-        {
-            return bluATK;
-        }
-    }
-
-    [SerializeField]
-    private int _DEF;
-    public int DEF
-    {
-        get
-        {
-            return _DEF;
-        }
-    }
-
-    [SerializeField]
-    private int hit;
-    public int Hit
-    {
-        get
-        {
-            return hit;
         }
     }
 

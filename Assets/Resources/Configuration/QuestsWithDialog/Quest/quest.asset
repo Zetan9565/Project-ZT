@@ -29,6 +29,10 @@ MonoBehaviour:
   rewardMoney: 50
   rewardEXP: 0
   rewardItems:
+  - item: {fileID: 11400000, guid: 6c7872e2f8dbf2948bc18ceed18c26ad, type: 2}
+    amount: 1000
+  - item: {fileID: 11400000, guid: e7d15132e142bc34ab9b56e50a6f4539, type: 2}
+    amount: 300
   - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
     amount: 3
   - item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
@@ -67,6 +71,7 @@ MonoBehaviour:
     objectiveType: 0
     enemy: {fileID: 11400000, guid: 1f8636ab8a7c2a443b85d27f63bd2394, type: 2}
     race: {fileID: 0}
+    group: {fileID: 0}
   - displayName: "\u6D88\u706D\u50F5\u5C38"
     display: 1
     canNavigate: 1
@@ -77,6 +82,7 @@ MonoBehaviour:
     objectiveType: 0
     enemy: {fileID: 11400000, guid: fcbcd965e0bc2e14cbc0e99863634cff, type: 2}
     race: {fileID: 0}
+    group: {fileID: 0}
   talkObjectives:
   - displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
     display: 1
@@ -91,10 +97,10 @@ MonoBehaviour:
   - displayName: "\u53BB\u5230\u6751\u5B50\u5317\u90E8\u8C03\u67E5"
     display: 1
     canNavigate: 1
-    showMapIcon: 1
+    showMapIcon: 0
     amount: 1
     inOrder: 1
     orderIndex: 2
-    pointID: POIT001
+    checkPoint: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
   submitObjectives: []
   customObjectives: []

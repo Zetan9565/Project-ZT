@@ -390,6 +390,7 @@ public class StoryInspector : Editor
             EditorGUI.BeginChangeCheck();
             if (EditorUtility.DisplayDialog("删除", "确定删除这个情节吗？", "确定", "取消"))
             {
+                plotActionLists.Remove(story.Plots[list.index]);
                 story.Plots.RemoveAt(list.index);
             }
             if (EditorGUI.EndChangeCheck())

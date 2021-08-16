@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-[AddComponentMenu("ZetanStudio/事件/行为执行器")]
+[AddComponentMenu("Zetan Studio/事件/行为执行器")]
 public class ActionExecutor : MonoBehaviour
 {
     [SerializeField]

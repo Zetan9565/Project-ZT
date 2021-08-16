@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "armor", menuName = "ZetanStudio/道具/防具")]
+[CreateAssetMenu(fileName = "armor", menuName = "Zetan Studio/道具/防具")]
 public class ArmorItem : EquipmentItem
 {
     [SerializeField]

@@ -30,10 +30,6 @@ MonoBehaviour:
   maxDurability: 100
   makingMethod: 1
   minYield: 1
-  maxYield: 5
+  maxYield: 1
   materialType: 0
-  materials:
-  - item: {fileID: 11400000, guid: a7d72e2d91b0a664392e7855e2e4d192, type: 2}
-    amount: 5
-    makingType: 0
-    materialType: 0
+  formulation: {fileID: 11400000, guid: 8f067eea454364f40b9fbb18e805cfa1, type: 2}

@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.Events;
 
-[AddComponentMenu("ZetanStudio/地图图标生成器")]
+[AddComponentMenu("Zetan Studio/地图图标生成器")]
 public class MapIconHolder : MonoBehaviour
 {
     public Sprite icon;

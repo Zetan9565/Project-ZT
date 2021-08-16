@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "character info", menuName = "ZetanStudio/角色/角色信息")]
+[CreateAssetMenu(fileName = "character info", menuName = "Zetan Studio/角色/角色信息")]
 public class CharacterInformation : ScriptableObject
 {
     [SerializeField]

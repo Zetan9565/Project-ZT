@@ -28,40 +28,20 @@ MonoBehaviour:
   usable: 1
   inexhaustible: 0
   maxDurability: 100
-  makingMethod: 3
+  makingMethod: 0
   minYield: 1
   maxYield: 1
-  materialType: 0
-  materials:
-  - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
-    amount: 1
-    makingType: 0
-    materialType: 0
+  materialType: 2
+  formulation: {fileID: 0}
   attribute:
     attributes:
     - type: 3
-      intValue: 100
+      intValue: 150
       floatValue: 0
       boolValue: 0
-    - type: 5
+    - type: 4
       intValue: 100
       floatValue: 100
       boolValue: 0
   gemSlotAmount: 0
   weaponType: 0
-  cutATK: 8
-  punATK: 2
-  bluATK: 1
-  _DEF: 0
-  hit: 2
-  powerup:
-    _ATK_Add: 0
-    _DEF_Add: 0
-    hit_Add: 0
-    dodge_Add: 0
-    crit_Add: 0
-    _HP_Add: 0
-    _MP_Add: 0
-    weightLoadAdd: 0
-    _EXP_AddPer: 0
-    liveEXP_AddPer: 0

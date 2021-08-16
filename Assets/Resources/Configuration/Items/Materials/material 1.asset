@@ -32,4 +32,4 @@ MonoBehaviour:
   minYield: 1
   maxYield: 1
   materialType: 1
-  materials: []
+  formulation: {fileID: 0}

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1393819643250639706}
   - component: {fileID: 1393819643250639705}
   - component: {fileID: 2889081294302849595}
+  - component: {fileID: 226147590658681838}
   m_Layer: 10
   m_Name: ForgingPre
   m_TagString: Untagged
@@ -46,6 +47,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0efa812d414eef04697fac6aa08a278a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activated: 1
+  customName: 0
+  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
+  icon: {fileID: 0}
+  hidePanelOnInteract: 0
   preview: {fileID: 4238068858270538964}
   building: {fileID: 8346288123337436545}
   ignoreLayer:
@@ -74,6 +80,22 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!58 &226147590658681838
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1393819643250639702}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 1.285
 --- !u!1 &4238068858270538964
 GameObject:
   m_ObjectHideFlags: 0

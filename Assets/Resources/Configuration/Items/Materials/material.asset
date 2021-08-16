@@ -32,8 +32,4 @@ MonoBehaviour:
   minYield: 1
   maxYield: 1
   materialType: 2
-  materials:
-  - item: {fileID: 11400000, guid: eb68c8a7b1bbeb8408eed1d2af6b8ad6, type: 2}
-    amount: 1
-    makingType: 1
-    materialType: 1
+  formulation: {fileID: 11400000, guid: b80b5e19edff58a4886d209e02e5dc0a, type: 2}

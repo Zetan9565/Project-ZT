@@ -7,7 +7,7 @@ using System;
 
 public delegate void DialogueListner();
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/对话管理器")]
+[AddComponentMenu("Zetan Studio/管理器/对话管理器")]
 public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 {
     public event DialogueListner OnBeginDialogueEvent;
@@ -287,7 +287,6 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                     StartDialogue(qParent.Info.CompleteDialogue);
                 }));
             }
-            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.ObjectiveChange);
         }
         currentTalkObj = null;//重置管理器的对话目标以防出错
     }
@@ -582,7 +581,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         }
         else if (option.origin.OptionType == WordsOptionType.BranchDialogue)
         {
-            DoDialogue(option.origin.Dialogue);
+            DoDialogue(option.origin.Dialogue, option.origin.SpecifyIndex);
         }
         SayNextWords();
 
@@ -905,7 +904,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     public void LoadData(SaveData data)
     {
         dialogueDatas.Clear();
-        Dialogue[] dialogues = Resources.LoadAll<Dialogue>("");
+        Dialogue[] dialogues = Resources.LoadAll<Dialogue>("Configuration");
         foreach (DialogueSaveData dsd in data.dialogueDatas)
         {
             Dialogue find = dialogues.FirstOrDefault(x => x.ID == dsd.dialogID);

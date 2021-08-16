@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using System;
 
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/背包管理器")]
+[AddComponentMenu("Zetan Studio/管理器/背包管理器")]
 public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpenCloseAbleWindow
 {
     [SerializeField]
@@ -129,15 +129,18 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             if (HasItemToLose())
                 foreach (var info in simulLoseItems)
                 {
-                    if (!TryLoseItem_Boolean(info.source.item, info.amount)) return false;//有一个要失去的道具不能失去，则直接不能获取该道具
-                    if (info.source.item.StackAble && info.amount - GetItemAmount(info.source.item) == 0)//只要该可叠加道具会全部失去，则能留出一个位置
-                        vacateSize++;
-                    else if (!info.source.item.StackAble)//若该道具不可叠加，则失去多少个就能空出多少位置
-                        vacateSize += info.amount;
+                    if (info && info.IsValid)
+                    {
+                        if (!TryLoseItem_Boolean(info.source.item, info.amount)) return false;//有一个要失去的道具不能失去，则直接不能获取该道具
+                        if (info.source.item.StackAble && info.amount - GetItemAmount(info.source.item) == 0)//只要该可叠加道具会全部失去，则能留出一个位置
+                            vacateSize++;
+                        else if (!info.source.item.StackAble)//若该道具不可叠加，则失去多少个就能空出多少位置
+                            vacateSize += info.amount;
+                    }
                 }
             if (amount > Backpack.size.Rest + vacateSize)//如果留出位置还不能放下
             {
-                MessageManager.Instance.New($"请至少再留出{(amount - Backpack.size.Rest - vacateSize).ToString()}个{GameManager.BackpackName}空间");
+                MessageManager.Instance.New($"请至少再留出{(amount - Backpack.size.Rest - vacateSize)}个{GameManager.BackpackName}空间");
                 return false;
             }
         }
@@ -145,8 +148,11 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (HasItemToLose())
             foreach (var info in simulLoseItems)
             {
-                if (!TryLoseItem_Boolean(info.source, info.amount)) return false;
-                vacateWeightload += info.source.item.Weight * info.amount;
+                if (info)
+                {
+                    if (!TryLoseItem_Boolean(info.source, info.amount)) return false;
+                    vacateWeightload += info.source.item.Weight * info.amount;
+                }
             }
         if (Backpack.weight - vacateWeightload + amount * item.Weight > Backpack.WeightLimit)//如果留出负重还不能放下
         {
@@ -197,7 +203,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (!TryGetItem_Boolean(item, amount, simulLoseItems)) return false;
         if (simulLoseItems != null)
             foreach (var si in simulLoseItems)
-                LoseItem(si.source, si.amount);
+                if (si) LoseItem(si.source, si.amount);
         if (item.StackAble)
         {
             Backpack.GetItemSimple(item, amount);
@@ -260,7 +266,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (!TryGetItem_Boolean(info, amount, simulLoseItems)) return false;
         if (simulLoseItems != null)
             foreach (var si in simulLoseItems)
-                LoseItem(si.source, si.amount);
+                if (si) LoseItem(si.source, si.amount);
         if (info.item.StackAble)
         {
             Backpack.GetItemSimple(info, amount);
@@ -313,9 +319,18 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     public bool TryLoseItem_Boolean(ItemBase item, int amount, params ItemInfoBase[] simulGetItems)
     {
         if (Backpack == null || !item || amount < 1) return false;
+        var find = GetItemInfo(item);
+        if (!find)
+        {
+            MessageManager.Instance.New($"{GameManager.BackpackName}中没有 [{item.name}]");
+            return false;
+        }
         if (simulGetItems != null)
+        {
             foreach (var si in simulGetItems)
-                if (!TryGetItem_Boolean(si, new ItemSelectionData(GetItemInfo(item), amount))) return false;
+                if (si && si.IsValid)
+                    if (find && !TryGetItem_Boolean(si, new ItemSelectionData(find, amount))) return false;
+        }
         if (GetItemAmount(item) < amount)
         {
             MessageManager.Instance.New($"{GameManager.BackpackName}中没有这么多的 [{item.name}]");
@@ -440,6 +455,21 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     {
         if (!info) return false;
         return LoseItem(info.item, info.Amount, simulGetItems);
+    }
+    /// <summary>
+    /// 失去多个道具
+    /// </summary>
+    /// <param name="items">失去的道具</param>
+    /// <returns>是否成功</returns>
+    public bool LoseItems(IEnumerable<ItemSelectionData> items)
+    {
+        if (!TryLoseItems_Boolean(items)) return false;
+        foreach (ItemSelectionData isd in items)
+        {
+            if (!LoseItem(isd.source, isd.amount))
+                LoseItem(isd.source.item, isd.amount);
+        }
+        return true;
     }
 
     /// <summary>
@@ -814,7 +844,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         return buttons.ToArray();
     }
 
-    public bool ContainsSlot(ItemSlot slot)
+    private bool ContainsSlot(ItemSlot slot)
     {
         return slotsMap.Contains(slot);
     }
@@ -983,6 +1013,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         if (targetMaterials == null) return null;
 
         List<ItemSelectionData> items = new List<ItemSelectionData>();
+        HashSet<ItemInfo> itemsToken = new HashSet<ItemInfo>();
         if (targetMaterials.Count() < 1) return items;
 
         var materialEnum = targetMaterials.GetEnumerator();
@@ -990,20 +1021,97 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         {
             if (materialEnum.Current.MakingType == MakingType.SingleItem)
             {
-                int amount = GetItemAmount(materialEnum.Current.Item);
-                amount = amount > materialEnum.Current.Amount ? materialEnum.Current.Amount : amount;
-                items.Add(new ItemSelectionData(GetItemInfo(materialEnum.Current.Item), amount));
+                if (materialEnum.Current.Item.StackAble)
+                {
+                    ItemInfo item = GetItemInfo(materialEnum.Current.Item);
+                    int need = materialEnum.Current.Amount;
+                    int takeAmount = 0;
+                    if (itemsToken.Contains(item))//被选取过了
+                    {
+                        ItemSelectionData find = items.Find(x => x.source == item);
+                        int left = item.Amount - find.amount;
+                        left = left > need ? need : left;
+                        takeAmount = left;
+                    }
+                    else
+                    {
+                        takeAmount = item.Amount > need ? need : item.Amount;
+                    }
+                    TakeItem(item, takeAmount);
+                }
+                else
+                {
+                    int need = materialEnum.Current.Amount;
+                    var finds = Backpack.Items.FindAll(x => x.item == materialEnum.Current.Item);
+                    foreach (var find in finds)
+                    {
+                        if (need > 0)
+                        {
+                            if (!itemsToken.Contains(find))
+                            {
+                                TakeItem(find, 1);
+                                need--;
+                            }
+                        }
+                        else break;
+                    }
+                }
             }
             else
             {
-                ItemInfo item = Backpack.Items.Find(x => x.item.MaterialType == materialEnum.Current.MaterialType && x.Amount >= materialEnum.Current.Amount);
-                if (item) items.Add(new ItemSelectionData(GetItemInfo(item.item), materialEnum.Current.Amount));
+                var finds = Backpack.Items.FindAll(x => x.item.MaterialType == materialEnum.Current.MaterialType);
+                if (finds.Count > 0)
+                {
+                    int need = materialEnum.Current.Amount;
+                    foreach (var find in finds)
+                    {
+                        int takeAmount = 0;
+                        int leftAmount = find.Amount;
+                        if (itemsToken.Contains(find))
+                        {
+                            if (!find.item.StackAble) continue;//不可叠加且选取过了，则跳过选取
+                            else
+                            {
+                                ItemSelectionData find2 = items.Find(x => x.source == find);
+                                leftAmount = find.Amount - find2.amount;
+                            }
+                        }
+                        if (leftAmount < need)
+                        {
+                            takeAmount = leftAmount;
+                            need -= takeAmount;
+                        }
+                        else
+                        {
+                            takeAmount = need;
+                            need = 0;
+                        }
+                        TakeItem(find, takeAmount);
+                    }
+                }
             }
         }
         return items;
+
+        void TakeItem(ItemInfo item, int amount)
+        {
+            if (itemsToken.Contains(item))
+            {
+                if (item.item.StackAble)
+                {
+                    ItemSelectionData find = items.Find(x => x.source == item);
+                    find.amount += amount;
+                }
+            }
+            else
+            {
+                items.Add(new ItemSelectionData(item, amount));
+                itemsToken.Add(item);
+            }
+        }
     }
 
-    public IEnumerable<string> GetMaterialsInfoString(IEnumerable<MaterialInfo> materials)
+    public List<string> GetMaterialsInfoString(IEnumerable<MaterialInfo> materials)
     {
         List<string> info = new List<string>();
         using (var materialEnum = materials.GetEnumerator())
@@ -1018,7 +1126,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
                         amount += item.Amount;
                     info.Add(string.Format("{0}\t[{1}/{2}]", MaterialItem.GetMaterialTypeString(materialEnum.Current.MaterialType), amount, materialEnum.Current.Amount));
                 }
-        return info.AsEnumerable();
+        return info;
     }
 
     public int GetAmountCanMake(IEnumerable<MaterialInfo> materials)

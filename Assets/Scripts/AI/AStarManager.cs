@@ -4,7 +4,7 @@ using Pathfinding;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(AstarPath))]
-[AddComponentMenu("ZetanStudio/AI/A*寻路管理器")]
+[AddComponentMenu("Zetan Studio/AI/A*寻路管理器")]
 public class AStarManager : SingletonMonoBehaviour<AStarManager>
 {
     #region Gizmos相关
@@ -345,7 +345,7 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
     #endregion
 
 #if UNITY_EDITOR
-    [UnityEditor.MenuItem("ZetanStudio/添加寻路管理器")]
+    [UnityEditor.MenuItem("Zetan Studio/添加寻路管理器")]
     private static void MakeAStar()
     {
         if (Instance)

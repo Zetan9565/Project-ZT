@@ -46,7 +46,7 @@ public class QuestGroupInspector : Editor
     private string GetAutoID()
     {
         string newID = string.Empty;
-        QuestGroup[] groups = Resources.LoadAll<QuestGroup>("");
+        QuestGroup[] groups = Resources.LoadAll<QuestGroup>("Configuration");
         for (int i = 1; i < 1000; i++)
         {
             newID = "QGRP" + i.ToString().PadLeft(3, '0');
@@ -58,7 +58,7 @@ public class QuestGroupInspector : Editor
 
     private bool ExistsID()
     {
-        QuestGroup[] groups = Resources.LoadAll<QuestGroup>("");
+        QuestGroup[] groups = Resources.LoadAll<QuestGroup>("Configuration");
 
         QuestGroup find = Array.Find(groups, x => x.ID == _ID.stringValue);
         if (!find) return false;//若没有找到，则ID可用
@@ -68,7 +68,7 @@ public class QuestGroupInspector : Editor
 
     private void ShowGroupQuests()
     {
-        Quest[] quests = Resources.LoadAll<Quest>("").Where(x=>x.Group == group).ToArray();
+        Quest[] quests = Resources.LoadAll<Quest>("Configuration").Where(x=>x.Group == group).ToArray();
 
         if (quests.Length > 0)
         {

@@ -18,7 +18,6 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
     public void ShowItemInfo(ItemSlotBase itemSlot, params ButtonWithTextData[] buttonDatas)
     {
         this.itemSlot = itemSlot;
-        base.CloseWindow();
         ShowWindows(itemSlot.MItemInfo, BackpackManager.Instance.GetContrast(itemSlot.MItemInfo), buttonDatas);
     }
 

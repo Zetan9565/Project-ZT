@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "npc info", menuName = "ZetanStudio/角色/NPC信息")]
+[CreateAssetMenu(fileName = "npc info", menuName = "Zetan Studio/角色/NPC信息")]
 public class TalkerInformation : CharacterInformation
 {
     [SerializeField]

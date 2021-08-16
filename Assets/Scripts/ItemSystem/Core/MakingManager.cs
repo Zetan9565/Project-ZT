@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/制作管理器")]
+[AddComponentMenu("Zetan Studio/管理器/制作管理器")]
 public class MakingManager : WindowHandler<MakingUI, MakingManager>
 {
     private readonly HashSet<ItemBase> learnedItems = new HashSet<ItemBase>();
@@ -53,7 +53,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
             MessageManager.Instance.New("正在制作中");
             return;
         }
-        int amountCanMake = BackpackManager.Instance.GetAmountCanMake(currentItem.Materials);
+        int amountCanMake = BackpackManager.Instance.GetAmountCanMake(currentItem.Formulation.Materials);
         if (amountCanMake < 1)
         {
             MessageManager.Instance.New("材料不足");
@@ -140,7 +140,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
             ProgressBar.Instance.New(ToolInfo.MakingTime,
             delegate
             {
-                bool enough = BackpackManager.Instance.IsMaterialsEnough(currentItem.Materials, materials);
+                bool enough = BackpackManager.Instance.IsMaterialsEnough(currentItem.Formulation.Materials, materials);
                 if (!enough) MessageManager.Instance.New("材料不足，无法继续制作");
                 return !enough && UI.loopToggle.isOn;
             },
@@ -225,7 +225,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
     public bool Learn(ItemBase item)
     {
         if (!item) return false;
-        if (item.MakingMethod == MakingMethod.None || item.Materials.Count < 1)
+        if (item.MakingMethod == MakingMethod.None || !item.Formulation || item.Formulation.Materials.Count < 1)
         {
             MessageManager.Instance.New("无法制作的道具");
             return false;
@@ -255,10 +255,10 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
     /// <returns>是否成功制作</returns>
     private bool MakeItem(ItemBase itemToMake)
     {
-        if (!itemToMake || itemToMake.Materials.Count < 1) return false;
+        if (!itemToMake || !itemToMake.Formulation || itemToMake.Formulation.Materials.Count < 1) return false;
         if (itemToMake.DIYAble) return false;
-        List<ItemSelectionData> materialsRaw = BackpackManager.Instance.GetMaterialsFromBackpack(itemToMake.Materials);
-        if (BackpackManager.Instance.IsMaterialsEnough(itemToMake.Materials, ConvertRawMatList(materialsRaw)))
+        List<ItemSelectionData> materialsRaw = BackpackManager.Instance.GetMaterialsFromBackpack(itemToMake.Formulation.Materials);
+        if (BackpackManager.Instance.IsMaterialsEnough(itemToMake.Formulation.Materials, ConvertRawMatList(materialsRaw)))
             return BackpackManager.Instance.GetItem(itemToMake, Random.Range(itemToMake.MinYield, itemToMake.MaxYield + 1), materialsRaw.ToArray());
         else
         {
@@ -273,16 +273,16 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
     /// <param name="materialsRaw">放入的材料</param>
     private bool MakeItem(ItemBase item, IEnumerable<ItemSelectionData> materialsRaw)
     {
-        if (!item || materialsRaw == null || materialsRaw.Count() < 1)
+        if (!item || !item.Formulation || materialsRaw == null || materialsRaw.Count() < 1)
         {
             MessageManager.Instance.New("无效的制作");
             return false;
         }
-        if (CheckMaterialsMatch(item.Materials, ConvertRawMatList(materialsRaw)))
+        if (CheckMaterialsMatch(item.Formulation.Materials, ConvertRawMatList(materialsRaw)))
         {
             ItemInfo production = new ItemInfo(item, Random.Range(item.MinYield, item.MaxYield + 1));
             List<ItemSelectionData> itemsToLose = new List<ItemSelectionData>();
-            foreach (var material in item.Materials)
+            foreach (var material in item.Formulation.Materials)
             {
                 if (material.MakingType == MakingType.SingleItem)
                 {
@@ -351,11 +351,11 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
     {
         List<ItemInfoBase> materials = ConvertRawMatList(materialsRaw);
         foreach (var item in learnedItems.Where(x => x.MakingTool == ToolInfo.ToolType))
-            if (CheckMaterialsMatch(item.Materials, materials))
+            if (CheckMaterialsMatch(item.Formulation.Materials, materials))
                 return MakeItem(item, materialsRaw);
-        var items = Resources.LoadAll<ItemBase>("").Where(x => x.Makable && x.MakingTool == ToolInfo.ToolType).Except(learnedItems);
+        var items = Resources.LoadAll<ItemBase>("Configuration").Where(x => x.Makable && x.MakingTool == ToolInfo.ToolType).Except(learnedItems);
         foreach (var item in items)
-            if (CheckMaterialsMatch(item.Materials, materials))
+            if (CheckMaterialsMatch(item.Formulation.Materials, materials))
                 return MakeItem(item, materialsRaw);
         MessageManager.Instance.New("这样似乎什么也做不了");
         return false;
@@ -443,14 +443,14 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
     {
         if (!item) return;
         currentItem = item;
-        List<string> info = BackpackManager.Instance.GetMaterialsInfoString(currentItem.Materials).ToList();
+        List<string> info = BackpackManager.Instance.GetMaterialsInfoString(currentItem.Formulation.Materials);
         StringBuilder materials = new StringBuilder("<b>持有数量：</b>" + BackpackManager.Instance.GetItemAmount(item));
         materials.Append("\n<b>制作材料：</b>");
-        materials.Append(BackpackManager.Instance.IsMaterialsEnough(item.Materials) ? "<color=green>(可制作)</color>\n" : "<color=red>(耗材不足)</color>\n");
+        materials.Append(BackpackManager.Instance.IsMaterialsEnough(item.Formulation.Materials) ? "<color=green>(可制作)</color>\n" : "<color=red>(耗材不足)</color>\n");
         for (int i = 0; i < info.Count; i++)
             materials.Append(info[i] + (i == info.Count - 1 ? string.Empty : "\n"));
         UI.description.text = materials.ToString();
-        int makeAmount = BackpackManager.Instance.GetAmountCanMake(currentItem.Materials);
+        int makeAmount = BackpackManager.Instance.GetAmountCanMake(currentItem.Formulation.Materials);
         UI.icon.SetItem(new ItemInfo(currentItem, makeAmount));
         UI.nameText.text = item.name;
         UI.makeButton.interactable = makeAmount > 0;
@@ -504,7 +504,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
 
     public void CancelMake()
     {
-        if (IsMaking) ProgressBar.Instance.CancelWithoutNotify();
+        if (IsMaking) ProgressBar.Instance.CancelWithoutAction();
         PauseDisplay(false);
         UI.window.alpha = 0;
         CloseWindow();

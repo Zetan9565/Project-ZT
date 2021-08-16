@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "material", menuName = "ZetanStudio/道具/材料")]
+[CreateAssetMenu(fileName = "material", menuName = "Zetan Studio/道具/材料")]
 public class MaterialItem : ItemBase
 {
     public MaterialItem()

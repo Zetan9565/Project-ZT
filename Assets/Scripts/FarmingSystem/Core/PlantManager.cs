@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 
-[AddComponentMenu("ZetanStudio/管理器/种植管理器")]
+[AddComponentMenu("Zetan Studio/管理器/种植管理器")]
 public class PlantManager : WindowHandler<PlantUI, PlantManager>
 {
     public List<SeedAgent> SeedAgents { get; private set; } = new List<SeedAgent>();

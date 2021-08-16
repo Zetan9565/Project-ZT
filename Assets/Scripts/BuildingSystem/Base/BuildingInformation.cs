@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "building info", menuName = "ZetanStudio/建筑物信息")]
+[CreateAssetMenu(fileName = "building info", menuName = "Zetan Studio/建筑物信息")]
 public class BuildingInformation : ScriptableObject
 {
     [SerializeField]
@@ -50,4 +50,39 @@ public class BuildingInformation : ScriptableObject
     [SerializeField]
     private List<Object> addendas = new List<Object>();
     public virtual List<Object> Addendas => addendas;
+
+    [SerializeField]
+    private bool autoBuild;
+    public bool AutoBuild => autoBuild;
+
+    [SerializeField]
+    private List<BuildingStage> stages = new List<BuildingStage>() { new BuildingStage() };
+    public List<BuildingStage> Stages => stages;
+
+    [SerializeField]
+    private Formulation formulation;
+}
+
+[System.Serializable]
+public class BuildingStage
+{
+    [SerializeField]
+    private List<MaterialInfo> materials = new List<MaterialInfo>();
+    public List<MaterialInfo> Materials => materials;
+
+    [SerializeField]
+    private Sprite graph;
+    public Sprite Graph => graph;
+
+    [SerializeField]
+    private float buildTime = 10.0f;
+    public float BuildTime => buildTime;
+
+    [SerializeField, Range(0, 1)]
+    private float destroyReturnRate = 0.5f;
+    public float DestroyReturnRate => destroyReturnRate;
+
+    [SerializeField]
+    private Formulation formulation;
+    public Formulation Formulation => formulation;
 }

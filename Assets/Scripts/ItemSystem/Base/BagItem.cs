@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "bag", menuName = "ZetanStudio/道具/袋子")]
+[CreateAssetMenu(fileName = "bag", menuName = "Zetan Studio/道具/袋子")]
 public class BagItem : ItemBase
 {
     [SerializeField]

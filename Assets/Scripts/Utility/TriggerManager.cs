@@ -4,7 +4,7 @@ using System.Linq;
 
 public delegate void TriggerStateListner(string name, bool value);
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/触发器管理器")]
+[AddComponentMenu("Zetan Studio/管理器/触发器管理器")]
 public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
 {
     private readonly Dictionary<string, TriggerState> triggers = new Dictionary<string, TriggerState>();

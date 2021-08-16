@@ -44,7 +44,9 @@ public class Warehouse : Building
         WData = new WarehouseData(defaultSize)
         {
             entity = this,
-            entityID = EntityID
+            entityID = EntityID,
+            scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,
+            position = transform.position
         };
     }
 

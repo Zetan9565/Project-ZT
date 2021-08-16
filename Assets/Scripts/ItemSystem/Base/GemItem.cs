@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "gemstone", menuName = "ZetanStudio/道具/宝石")]
+[CreateAssetMenu(fileName = "gemstone", menuName = "Zetan Studio/道具/宝石")]
 public class GemItem : ItemBase
 {
     [SerializeField]

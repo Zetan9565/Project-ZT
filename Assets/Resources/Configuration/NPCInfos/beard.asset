@@ -19,10 +19,12 @@ MonoBehaviour:
   conditionDialogues:
   - condition:
       conditions:
-      - type: 5
-        level: 1
+      - type: 3
+        intValue: 1
+        compareType: 0
         relatedQuest: {fileID: 0}
         relatedItem: {fileID: 11400000, guid: 9bf6e2de6c467ad4db090168944f60bc, type: 2}
+        relatedCharInfo: {fileID: 0}
         triggerName: 
       relational: 
     dialogue: {fileID: 11400000, guid: ee87b06aec0879548b1c88221a4c5e8e, type: 2}

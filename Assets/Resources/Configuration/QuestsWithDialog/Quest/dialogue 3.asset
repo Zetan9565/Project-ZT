@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: dialogue 3
   m_EditorClassIdentifier: 
   _ID: DIALG000005
+  storyDialogue: 0
   useUnifiedNPC: 0
   useCurrentTalkerInfo: 0
   unifiedNPC: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
@@ -21,20 +22,20 @@ MonoBehaviour:
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     content: "\u54DF\uFF0C\u4F60\u56DE\u6765\u4E86\u3002"
     indexOfCorrectOption: 0
-    wordsWhenChusWB: 
-    branches: []
+    wrongChoiceWords: 
+    options: []
     events: []
   - talkerType: 1
     talkerInfo: {fileID: 0}
     content: "\u4F60\u62DC\u6258\u7684\u4E8B\u529E\u59A5\u4E86\u3002"
     indexOfCorrectOption: 0
-    wordsWhenChusWB: 
-    branches: []
+    wrongChoiceWords: 
+    options: []
     events: []
   - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     content: "\u662F\u5417\uFF1F"
     indexOfCorrectOption: 0
-    wordsWhenChusWB: 
-    branches: []
+    wrongChoiceWords: 
+    options: []
     events: []

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+//using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelectionManager>
@@ -282,6 +282,60 @@ public class ItemSelectionManager : WindowHandler<ItemSelectionUI, ItemSelection
         canSelect = null;
         ItemWindowManager.Instance.CloseWindow();
     }
+
+    //private class ItemSelectionUI
+    //{
+    //    public CanvasGroup window;
+
+    //    public Canvas windowCanvas;
+
+    //    public Button closeButton;
+
+    //    public Text windowTitle;
+    //    public GameObject tips;
+
+    //    public GameObject itemCellPrefab;
+    //    public Transform itemCellsParent;
+
+    //    public ScrollRect gridScrollRect;
+    //    public GameObject placementArea;
+
+    //    public Button confirmButton;
+    //    public Button clearButton;
+
+    //    public void Init(ModuleWindowUI UI)
+    //    {
+    //        window = UI.GetElement("window").GetComponent<CanvasGroup>();
+    //        closeButton = UI.GetButton("closeButton");
+
+    //        windowTitle = UI.GetText("windowTitle");
+    //        tips = UI.GetElement("tips");
+
+    //        itemCellPrefab = UI.GetElement("itemCellPrefab");
+    //        itemCellsParent = UI.GetRectTranstrom("itemCellsParent");
+
+    //        gridScrollRect = UI.GetElement("gridScrollRect").GetComponent<ScrollRect>();
+    //        placementArea = UI.GetElement("placementArea");
+
+    //        confirmButton = UI.GetButton("confirmButton");
+    //        clearButton = UI.GetButton("clearButton");
+
+    //        closeButton.onClick.AddListener(Instance.CloseWindow);
+    //        confirmButton.onClick.AddListener(Instance.Confirm);
+    //        clearButton.onClick.AddListener(Instance.Clear);
+
+    //        if (!window.gameObject.GetComponent<GraphicRaycaster>())
+    //            window.gameObject.AddComponent<GraphicRaycaster>();
+    //        windowCanvas = window.GetComponent<Canvas>();
+    //        windowCanvas.overrideSorting = true;
+    //        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
+    //    }
+
+    //    public static implicit operator bool(ItemSelectionUI self)
+    //    {
+    //        return self != null;
+    //    }
+    //}
 }
 public class ItemSlotCopy
 {
@@ -304,7 +358,9 @@ public enum ItemSelectionType
 public class ItemSelectionData
 {
     public readonly ItemInfo source;
-    public readonly int amount;
+    public int amount;
+
+    public bool IsValid => source && amount > 0;
 
     public ItemSelectionData(ItemInfo source, int amount)
     {

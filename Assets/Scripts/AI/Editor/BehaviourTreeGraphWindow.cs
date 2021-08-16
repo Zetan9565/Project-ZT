@@ -9,7 +9,7 @@ public class BehaviourTreeGraphWindow : EditorWindow
 {
     private BehaviourTreeGraphView graphView;
 
-    [MenuItem("ZetanStudio/行为树窗口")]
+    [MenuItem("Zetan Studio/行为树窗口")]
     public static void OpenBehaviourTreeWindow()
     {
         var window = GetWindow<BehaviourTreeGraphWindow>();

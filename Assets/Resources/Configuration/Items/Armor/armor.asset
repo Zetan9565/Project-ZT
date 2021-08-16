@@ -32,11 +32,7 @@ MonoBehaviour:
   minYield: 1
   maxYield: 1
   materialType: 0
-  materials:
-  - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
-    amount: 5
-    makingType: 0
-    materialType: 2
+  formulation: {fileID: 11400000, guid: 6448c4074893df14e9781f75b7dde63c, type: 2}
   attribute:
     attributes:
     - type: 4
@@ -52,14 +48,3 @@ MonoBehaviour:
   _DEF: 0
   hit: 0
   flee: 0
-  powerup:
-    _ATK_Add: 0
-    _DEF_Add: 0
-    hit_Add: 0
-    dodge_Add: 0
-    crit_Add: 0
-    _HP_Add: 0
-    _MP_Add: 0
-    weightLoadAdd: 0
-    _EXP_AddPer: 0
-    liveEXP_AddPer: 0

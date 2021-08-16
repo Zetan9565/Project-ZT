@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
-[DisallowMultipleComponent, AddComponentMenu("ZetanStudio/管理器/建筑管理器")]
+[DisallowMultipleComponent, AddComponentMenu("Zetan Studio/管理器/建筑管理器")]
 public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpenCloseAbleWindow
 {
     private BuildingInformation currentInfo;
@@ -41,6 +41,8 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     public Building CurrentBuilding { get; private set; }
     private bool isInfoPausing;
 
+    public BuildingPreview CurrentPreview { get; private set; }
+
     public bool IsLocating { get; private set; }
     public Building LocatingBuilding { get; private set; }
 
@@ -76,7 +78,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     public void LoadData(BuildingSystemSaveData buildingSystemData)
     {
         buildingsLearned.Clear();
-        BuildingInformation[] buildingInfos = Resources.LoadAll<BuildingInformation>("");
+        BuildingInformation[] buildingInfos = Resources.LoadAll<BuildingInformation>("Configuration");
         foreach (string learned in buildingSystemData.learneds)
         {
             BuildingInformation find = Array.Find(buildingInfos, x => x.IDPrefix == learned);
@@ -97,6 +99,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
                 {
                     BuildingPreview building = Instantiate(find.Preview);
                     building.StartBuild(data);
+                    MakeFlag(building);
                 }
                 if (!buildings.ContainsKey(find))
                     buildings.Add(find, new List<BuildingData>());
@@ -149,11 +152,9 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
                     BuildingData data = new BuildingData(currentInfo, preview.transform.position);
                     if (data.StartBuild())
                     {
+                        //data.StartConstruct();
                         preview.StartBuild(data);
-                        foreach (ItemSelectionData m in materials)
-                        {
-                            BackpackManager.Instance.LoseItem(m.source, m.amount);
-                        }
+                        BackpackManager.Instance.LoseItems(materials);
                         if (!buildings.ContainsKey(currentInfo))
                             buildings.Add(currentInfo, new List<BuildingData>());
                         buildings[currentInfo].Add(data);
@@ -303,7 +304,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     {
         if (buildingInfo == null) return;
         currentInfo = buildingInfo;
-        List<string> materialsInfo = BackpackManager.Instance.GetMaterialsInfoString(buildingInfo.Materials).ToList();
+        List<string> materialsInfo = BackpackManager.Instance.GetMaterialsInfoString(buildingInfo.Materials);
         string materials = string.Empty;
         int lineCount = materialsInfo.Count;
         for (int i = 0; i < materialsInfo.Count; i++)
@@ -368,31 +369,60 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
 
     public void ShowInfo()
     {
-        if (!CurrentBuilding || !CurrentBuilding.Info || isInfoPausing) return;
-        UI.infoWindow.alpha = 1;
-        UI.infoWindow.blocksRaycasts = true;
-        UI.infoNameText.text = CurrentBuilding.name;
-        UI.infoDesText.text = CurrentBuilding.Info.Description;
-        ZetanUtility.SetActive(UI.manageButton, CurrentBuilding.Info.Manageable);
-        UI.manageButton.onClick.AddListener(CurrentBuilding.OnManage);
-        UI.manageBtnName.text = CurrentBuilding.Info.ManageBtnName;
-        UI.destroyButton.onClick.AddListener(delegate { DestroyBuilding(CurrentBuilding.Data); });
-        NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.WindowStateChange, typeof(BuildingManager), true);
+        if (CurrentBuilding)
+        {
+            if (!CurrentBuilding.Info || isInfoPausing) return;
+            UI.infoNameText.text = CurrentBuilding.name;
+            UI.infoDesText.text = CurrentBuilding.Info.Description;
+            ZetanUtility.SetActive(UI.manageButton, CurrentBuilding.Info.Manageable);
+            UI.manageButton.onClick.AddListener(CurrentBuilding.OnManage);
+            UI.manageBtnName.text = CurrentBuilding.Info.ManageBtnName;
+            UI.destroyButton.onClick.AddListener(delegate { DestroyBuilding(CurrentBuilding.Data); });
+            SetInfoShowState(true);
+            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.WindowStateChange, typeof(BuildingManager), true);
+        }
+        else if (CurrentPreview)
+        {
+            if (!CurrentPreview.Data || isInfoPausing) return;
+            UI.infoNameText.text = CurrentPreview.Data.Info.name;
+            UI.infoDesText.text = CurrentPreview.Data.Info.Description;
+            ZetanUtility.SetActive(UI.manageButton, !CurrentPreview.Data.Info.AutoBuild);
+            UI.manageButton.onClick.AddListener(SwitchMorePanel);
+            UI.manageBtnName.text = "更多";
+            SetInfoShowState(true);
+            UI.destroyButton.onClick.AddListener(delegate { DestroyBuilding(CurrentPreview.Data); });
+        }
     }
+
     public void HideInfo()
     {
-        UI.infoWindow.alpha = 0;
-        UI.infoWindow.blocksRaycasts = false;
+        SetInfoShowState(false);
+        ZetanUtility.SetActive(UI.morePanel, false);
         UI.infoNameText.text = string.Empty;
         UI.infoDesText.text = string.Empty;
         UI.manageButton.onClick.RemoveAllListeners();
         UI.destroyButton.onClick.RemoveAllListeners();
         if (CurrentBuilding) CurrentBuilding.OnCancelManage();
         CurrentBuilding = null;
+        if (CurrentPreview) CurrentPreview.OnCancelManage();
+        CurrentPreview = null;
         IsManaging = false;
         isInfoPausing = false;
         if (ConfirmManager.Instance.IsUIOpen) ConfirmManager.Instance.CloseWindow();
         NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.WindowStateChange, typeof(BuildingManager), false);
+    }
+    public void SetInfoShowState(bool show)
+    {
+        if (show)
+        {
+            UI.infoWindow.alpha = 1;
+            UI.infoWindow.blocksRaycasts = true;
+        }
+        else
+        {
+            UI.infoWindow.alpha = 0;
+            UI.infoWindow.blocksRaycasts = false;
+        }
     }
 
     public void PauseDisplayInfo(bool pause)
@@ -435,6 +465,66 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     {
         if (ConfirmManager.Instance.IsUIOpen) ConfirmManager.Instance.CloseWindow();
         HideInfo();
+    }
+
+    public bool Manage(BuildingPreview preview)
+    {
+        if (GatherManager.Instance.IsGathering)
+        {
+            MessageManager.Instance.New("请先等待采集完成");
+            return false;
+        }
+        if (CurrentPreview == preview || !preview) return false;
+        CurrentPreview = preview;
+        IsManaging = true;
+        ShowInfo();
+        return true;
+    }
+
+    private void SwitchMorePanel()
+    {
+        ZetanUtility.SetActive(UI.morePanel, !UI.morePanel.activeSelf);
+    }
+    public void StartConstruct()
+    {
+        if (!CurrentPreview) return;
+        if (CurrentPreview.StartConstruct())
+            ProgressBar.Instance.New(CurrentPreview.Data.currentStage.BuildTime, delegate
+            {
+                return CurrentPreview.Data.currentStage.BuildTime - CurrentPreview.Data.leftBuildTime;
+            },
+            delegate
+            {
+                return CurrentPreview == null || CurrentPreview.Data == null || !CurrentPreview.Data.IsBuilding;
+            },
+            delegate
+            {
+                if (CurrentPreview)
+                    CurrentPreview.PauseConstruct();
+            }, "施工中");
+        ZetanUtility.SetActive(UI.morePanel, false);
+    }
+    public void SetMaterials()
+    {
+        ZetanUtility.SetActive(UI.morePanel, false);
+        ItemSelectionManager.Instance.StartSelection(ItemSelectionType.SelectNum, "预留材料", (info) => { return info && info.item && info.item.MaterialType != MaterialType.None; }, OnPutMaterials);
+    }
+    public void OnPutMaterials(IEnumerable<ItemSelectionData> materials)
+    {
+        List<ItemInfoBase> materialsConvert = new List<ItemInfoBase>();
+        foreach (var isd in materials)
+        {
+            materialsConvert.Add(new ItemInfoBase(isd.source.item, isd.amount));
+        }
+        CurrentPreview.PutMaterials(materialsConvert);
+    }
+    public void SendWorker()
+    {
+        ZetanUtility.SetActive(UI.morePanel, false);
+    }
+    public void SetWarehouse()
+    {
+        ZetanUtility.SetActive(UI.morePanel, false);
     }
 
     public override void SetUI(BuildingUI UI)
@@ -509,7 +599,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     public void DestroyBuilding(BuildingData building)
     {
         if (!building || !building.entity || !building.entity.gameObject) return;
-        ConfirmManager.Instance.New(string.Format("确定拆毁{0}{1}吗？", name, (Vector2)transform.position),
+        ConfirmManager.Instance.New(string.Format("确定拆毁{0}{1}吗？", building.name, (Vector2)transform.position),
         delegate
         {
             if (building && building.entity && building.entity.gameObject)
@@ -529,45 +619,55 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
                 if (buildingAgents.Count < 1 && currentInfo == building.Info && UI.listWindow.alpha > 0) HideBuiltList();
                 if (building.entity && building.entity.gameObject)
                 {
-                    if (AStarManager.Instance)
-                    {
-                        var colliders = building.entity.GetComponentsInChildren<Collider>();
-                        if (colliders.Length > 0)
-                        {
-                            Vector3 min = colliders[0].bounds.min;
-                            Vector3 max = colliders[0].bounds.max;
-                            for (int i = 1; i < colliders.Length; i++)
-                            {
-                                if (ZetanUtility.Vector3LessThan(colliders[i].bounds.min, min))
-                                    min = colliders[i].bounds.min;
-                                if (ZetanUtility.Vector3LargeThan(colliders[i].bounds.max, max))
-                                    max = colliders[i].bounds.max;
-                            }
-                            AStarManager.Instance.UpdateGraphs(min, max);
-                        }
-                        else
-                        {
-                            var collider2Ds = building.entity.GetComponentsInChildren<Collider2D>();
-                            if (collider2Ds.Length > 0)
-                            {
-                                Vector3 min = collider2Ds[0].bounds.min;
-                                Vector3 max = collider2Ds[0].bounds.max;
-                                for (int i = 1; i < collider2Ds.Length; i++)
-                                {
-                                    if (ZetanUtility.Vector3LessThan(collider2Ds[i].bounds.min, min))
-                                        min = collider2Ds[i].bounds.min;
-                                    if (ZetanUtility.Vector3LargeThan(collider2Ds[i].bounds.max, max))
-                                        max = collider2Ds[i].bounds.max;
-                                }
-                                AStarManager.Instance.UpdateGraphs(min, max);
-                            }
-                        }
-                    }
+                    UpdateAStar(building.entity);
                     building.entity.Destroy();
+                }
+                else if (building.preview && building.preview.gameObject)
+                {
+                    UpdateAStar(building.preview);
+                    building.preview.Destroy();
                 }
             }
             CancelManage();
         });
+
+        static void UpdateAStar(Component comp)
+        {
+            if (AStarManager.Instance)
+            {
+                var colliders = comp.GetComponentsInChildren<Collider>();
+                if (colliders.Length > 0)
+                {
+                    Vector3 min = colliders[0].bounds.min;
+                    Vector3 max = colliders[0].bounds.max;
+                    for (int i = 1; i < colliders.Length; i++)
+                    {
+                        if (ZetanUtility.Vector3LessThan(colliders[i].bounds.min, min))
+                            min = colliders[i].bounds.min;
+                        if (ZetanUtility.Vector3LargeThan(colliders[i].bounds.max, max))
+                            max = colliders[i].bounds.max;
+                    }
+                    AStarManager.Instance.UpdateGraphs(min, max);
+                }
+                else
+                {
+                    var collider2Ds = comp.GetComponentsInChildren<Collider2D>();
+                    if (collider2Ds.Length > 0)
+                    {
+                        Vector3 min = collider2Ds[0].bounds.min;
+                        Vector3 max = collider2Ds[0].bounds.max;
+                        for (int i = 1; i < collider2Ds.Length; i++)
+                        {
+                            if (ZetanUtility.Vector3LessThan(collider2Ds[i].bounds.min, min))
+                                min = collider2Ds[i].bounds.min;
+                            if (ZetanUtility.Vector3LargeThan(collider2Ds[i].bounds.max, max))
+                                max = collider2Ds[i].bounds.max;
+                        }
+                        AStarManager.Instance.UpdateGraphs(min, max);
+                    }
+                }
+            }
+        }
     }
     #endregion
 }

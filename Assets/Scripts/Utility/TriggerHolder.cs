@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-[AddComponentMenu("ZetanStudio/事件/实体触发器")]
+[AddComponentMenu("Zetan Studio/事件/实体触发器")]
 public class TriggerHolder : MonoBehaviour
 {
     [SerializeField]

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-[AddComponentMenu("ZetanStudio/管理器/农田管理器")]
+[AddComponentMenu("Zetan Studio/管理器/农田管理器")]
 public class FieldManager : WindowHandler<FieldUI, FieldManager>
 {
     public Field CurrentField { get; private set; }

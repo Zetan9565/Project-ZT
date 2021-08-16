@@ -29,6 +29,8 @@
         }
     }
 
+    public string AmountString => $"{CurrentAmount}/{Info.Amount}";
+
     public bool IsComplete
     {
         get
@@ -46,7 +48,7 @@
 
     public QuestData runtimeParent;
 
-    public ObjectiveStateListner OnStateChangeEvent;
+    public System.Action<ObjectiveData, bool> OnStateChangeEvent;
 
     protected virtual void UpdateAmountUp(int amount = 1)
     {
@@ -186,11 +188,13 @@ public class MoveObjectiveData : ObjectiveData
         }
     }
 
+    public CheckPointData targetPoint;
+
     public MoveObjectiveData(MoveObjective objective) : base(objective) { }
 
-    public void UpdateMoveState(QuestPoint point)
+    public void UpdateMoveState(CheckPointInformation point)
     {
-        if (point.ID == Info.PointID) UpdateAmountUp();
+        if (point == Info.CheckPoint) UpdateAmountUp();
     }
 }
 

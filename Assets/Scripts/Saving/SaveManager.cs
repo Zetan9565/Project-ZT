@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/存档管理器")]
+[AddComponentMenu("Zetan Studio/管理器/存档管理器")]
 public class SaveManager : SingletonMonoBehaviour<SaveManager>
 {
     [SerializeField]

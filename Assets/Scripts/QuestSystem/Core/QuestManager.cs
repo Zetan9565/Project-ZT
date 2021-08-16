@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/任务管理器")]
+[AddComponentMenu("Zetan Studio/管理器/任务管理器")]
 public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAbleWindow
 {
     public QuestFlag QuestFlagsPrefab => UI ? UI.questFlagPrefab : null;
@@ -15,7 +15,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     private readonly List<QuestGroupAgent> questGroupAgents = new List<QuestGroupAgent>();
     private readonly List<QuestGroupAgent> cmpltQuestGroupAgents = new List<QuestGroupAgent>();
     private readonly List<QuestBoardAgent> questBoardAgents = new List<QuestBoardAgent>();
-    private readonly Dictionary<ObjectiveData, MapIcon> questIcons = new Dictionary<ObjectiveData, MapIcon>();
+    private readonly Dictionary<ObjectiveData, List<MapIcon>> questIcons = new Dictionary<ObjectiveData, List<MapIcon>>();
 
     public delegate void QuestStatusListener();
     public event QuestStatusListener OnQuestStatusChange;
@@ -112,7 +112,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     o.OnStateChangeEvent += talker.TryRemoveObjective;
                 }
             if (o is MoveObjectiveData mo)
-                GameManager.QuestPoints[mo.Info.PointID].ForEach(x => x.OnMoveIntoEvent += mo.UpdateMoveState);
+                mo.targetPoint = CheckPointManager.Instance.CreateCheckPoint(mo.Info.CheckPoint, mo.UpdateMoveState);
             if (o is SubmitObjectiveData so)
                 if (!o.IsComplete)
                 {
@@ -242,7 +242,8 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 }
                 if (o is MoveObjectiveData mo)
                 {
-                    GameManager.QuestPoints[mo.Info.PointID].ForEach(x => x.OnMoveIntoEvent -= mo.UpdateMoveState);
+                    mo.targetPoint = null;
+                    CheckPointManager.Instance.RemoveCheckPointListener(mo.Info.CheckPoint, mo.UpdateMoveState);
                 }
                 if (o is SubmitObjectiveData so)
                 {
@@ -337,7 +338,8 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     if (o is MoveObjectiveData mo)
                     {
                         mo.CurrentAmount = 0;
-                        GameManager.QuestPoints[mo.Info.PointID].ForEach(x => x.OnMoveIntoEvent -= mo.UpdateMoveState);
+                        mo.targetPoint = null;
+                        CheckPointManager.Instance.RemoveCheckPointListener(mo.Info.CheckPoint, mo.UpdateMoveState);
                     }
                     if (o is SubmitObjectiveData so)
                     {
@@ -438,11 +440,8 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 }
                 else if (currentObj is MoveObjectiveData mo)
                 {
-                    if (GameManager.QuestPoints.TryGetValue(mo.Info.PointID, out var pointsFound))
-                    {
-                        destination = pointsFound[Random.Range(0, pointsFound.Count)].transform.position;
-                        SetDestination();
-                    }
+                    destination = mo.Info.CheckPoint.Positions[Random.Range(0, mo.Info.CheckPoint.Positions.Length)];
+                    SetDestination();
                 }
                 else if (currentObj is SubmitObjectiveData so)
                 {
@@ -475,7 +474,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         {
             if (objective.CurrentAmount > 0)
             {
-                string message = objective.Info.DisplayName + (objective.IsComplete ? "(完成)" : $"[{objective.CurrentAmount}/{objective.Info.Amount}]");
+                string message = objective.Info.DisplayName + (objective.IsComplete ? "(完成)" : $"[{objective.AmountString}]");
                 MessageManager.Instance.New(message);
             }
             if (objective.runtimeParent.IsComplete) MessageManager.Instance.New($"[任务]{objective.runtimeParent.Info.Title}(已完成)");
@@ -522,10 +521,10 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             else CreateObjectiveMapIcon(nextToDo);
             RemoveObjectiveMapIcon(objective);
             OnQuestStatusChange?.Invoke();
-            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.ObjectiveChange, objective);
+            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.ObjectiveChange, objective.runtimeParent, objective, befCmplt);
         }
-        UpdateUI();
         //else Debug.Log("无操作");
+        UpdateUI();
     }
     #endregion
 
@@ -702,13 +701,11 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     {
         if (!objective || !objective.Info.ShowMapIcon) return;
         //Debug.Log("Create icon for " + objective.DisplayName);
-        Vector3 destination;
         if (objective is TalkObjectiveData to)
         {
             if (GameManager.TalkerDatas.TryGetValue(to.Info.NPCToTalk.ID, out TalkerData talkerFound))
             {
-                destination = talkerFound.currentPosition;
-                CreateIcon();
+                CreateIcon(talkerFound.currentPosition);
             }
         }
         else if (objective is KillObjectiveData ko)
@@ -718,29 +715,26 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 Enemy enemy = enemiesFound.FirstOrDefault();
                 if (enemy)
                 {
-                    destination = enemy.transform.position;
-                    CreateIcon();
+                    CreateIcon(enemy.transform.position);
                 }
             }
         }
         else if (objective is MoveObjectiveData mo)
         {
-            if (GameManager.QuestPoints.TryGetValue(mo.Info.PointID, out var pointsFound))
+            foreach (var position in mo.Info.CheckPoint.Positions)
             {
-                destination = pointsFound[Random.Range(0, pointsFound.Count)].transform.position;
-                CreateIcon();
+                CreateIcon(position);
             }
         }
         else if (objective is SubmitObjectiveData so)
         {
             if (GameManager.TalkerDatas.TryGetValue(so.Info.NPCToSubmit.ID, out TalkerData talkerFound))
             {
-                destination = talkerFound.currentPosition;
-                CreateIcon();
+                CreateIcon(talkerFound.currentPosition);
             }
         }
 
-        void CreateIcon()
+        void CreateIcon(Vector3 destination)
         {
             var icon = UI.questIcon ? (objective is KillObjectiveData ?
                 MapManager.Instance.CreateMapIcon(UI.questIcon, new Vector2(48, 48), destination, true, 144f, MapIconType.Objective, false, objective.Info.DisplayName) :
@@ -748,22 +742,24 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 MapManager.Instance.CreateDefaultMark(destination, true, false, objective.Info.DisplayName);
             if (icon)
             {
-                if (questIcons.TryGetValue(objective, out MapIcon iconExist))
+                if (questIcons.TryGetValue(objective, out var iconsExist))
                 {
-                    MapManager.Instance.RemoveMapIcon(iconExist, true);
-                    questIcons[objective] = icon;
+                    iconsExist.Add(icon);
                 }
-                else questIcons.Add(objective, icon);
+                else questIcons.Add(objective, new List<MapIcon>() { icon });
             }
         }
     }
     private void RemoveObjectiveMapIcon(ObjectiveData objective)
     {
         if (!objective) return;
-        if (questIcons.TryGetValue(objective, out MapIcon icon))
+        if (questIcons.TryGetValue(objective, out var icons))
         {
+            foreach (var icon in icons)
+            {
+                MapManager.Instance.RemoveMapIcon(icon, true);
+            }
             questIcons.Remove(objective);
-            MapManager.Instance.RemoveMapIcon(icon, true);
         }
     }
 
@@ -849,9 +845,9 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         foreach (var to in quest.TalkObjectives)
             if (!to.IsValid) return false;
             else if (!GameManager.TalkerDatas.ContainsKey(to.NPCToTalk.ID)) return false;
-        foreach (var mo in quest.MoveObjectives)
-            if (!mo.IsValid) return false;
-            else if (!GameManager.QuestPoints.ContainsKey(mo.PointID)) return false;
+        //foreach (var mo in quest.MoveObjectives)
+        //    if (!mo.IsValid) return false;
+        //    else if (!GameManager.QuestPoints.ContainsKey(mo.CheckPoint)) return false;
         foreach (var so in quest.SubmitObjectives)
             if (!so.IsValid) return false;
             else if (!GameManager.TalkerDatas.ContainsKey(so.NPCToSubmit.ID)) return false;

@@ -72,7 +72,7 @@ public class MapIconHolderInspector : Editor
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.PropertyField(showRange, new GUIContent("显示范围"));
         if (Application.isPlaying) GUI.enabled = false;
-        EditorGUILayout.PropertyField(gizmos, new GUIContent("显示预览"));
+        EditorGUILayout.PropertyField(gizmos, new GUIContent("显示Gizmos"));
         if (Application.isPlaying) GUI.enabled = true;
         EditorGUILayout.EndHorizontal();
         if (showRange.boolValue)

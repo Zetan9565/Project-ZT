@@ -24,10 +24,11 @@ public class DialogueInspector : Editor
 
     TalkerInformation[] npcs;
     string[] npcNames;
+    CharacterSelectionDrawer<TalkerInformation> npcSelector;
 
     private void OnEnable()
     {
-        npcs = Resources.LoadAll<TalkerInformation>("");
+        npcs = Resources.LoadAll<TalkerInformation>("Configuration");
         npcNames = npcs.Select(x => x.name).ToArray();//Linq分离出NPC名字
 
         lineHeight = EditorGUIUtility.singleLineHeight;
@@ -41,7 +42,7 @@ public class DialogueInspector : Editor
         useCurrentTalkerInfo = serializedObject.FindProperty("useCurrentTalkerInfo");
         unifiedNPC = serializedObject.FindProperty("unifiedNPC");
         dialogWords = serializedObject.FindProperty("words");
-
+        npcSelector = new CharacterSelectionDrawer<TalkerInformation>(serializedObject, unifiedNPC);
         HandlingWordsList();
     }
 
@@ -56,13 +57,13 @@ public class DialogueInspector : Editor
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
-        if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID())
+        if (string.IsNullOrEmpty(_ID.stringValue) || Dialogue.IsIDDuplicate(dialogue))
         {
-            if (!string.IsNullOrEmpty(_ID.stringValue) && ExistsID()) EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
+            if (!string.IsNullOrEmpty(_ID.stringValue) && Dialogue.IsIDDuplicate(dialogue)) EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
             else EditorGUILayout.HelpBox("识别码为空！", MessageType.Error);
             if (GUILayout.Button("自动生成识别码"))
             {
-                _ID.stringValue = GetAutoID();
+                _ID.stringValue = Dialogue.GetAutoID();
                 EditorGUI.FocusTextInControl(null);
             }
         }
@@ -78,18 +79,17 @@ public class DialogueInspector : Editor
             EditorGUILayout.PropertyField(useCurrentTalkerInfo, new GUIContent("统一为当前对话人"));
         }
         EditorGUILayout.EndHorizontal();
+        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         if (useUnifiedNPC.boolValue && !useCurrentTalkerInfo.boolValue)
         {
+            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.BeginHorizontal();
-            if (dialogue.UnifiedNPC) unifiedNPC.objectReferenceValue = npcs[EditorGUILayout.Popup(GetNPCIndex(dialogue.UnifiedNPC), npcNames)];
-            else if (npcs.Length > 0) unifiedNPC.objectReferenceValue = npcs[EditorGUILayout.Popup(0, npcNames)];
-            else EditorGUILayout.Popup(0, new string[] { "无可用谈话人" });
-            GUI.enabled = false;
+            npcSelector.DoLayoutDraw(string.Empty);
             EditorGUILayout.PropertyField(unifiedNPC, new GUIContent(string.Empty));
-            GUI.enabled = true;
             EditorGUILayout.EndVertical();
+            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         }
-        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         serializedObject.Update();
         wordsList.DoLayoutList();
         serializedObject.ApplyModifiedProperties();
@@ -183,16 +183,16 @@ public class DialogueInspector : Editor
                     content, new GUIContent(string.Empty));
                 lineCount += 2;
                 if (EditorGUI.EndChangeCheck()) words.serializedObject.ApplyModifiedProperties();
-                if (GUI.Button(new Rect(rect.x, rect.y + lineHeightSpace * (lineCount + 0.5f), rect.width, lineHeight), "插入关键字"))
+                if (GUI.Button(new Rect(rect.x, rect.y + lineHeightSpace * (lineCount + 0.8f), rect.width, lineHeight), "插入关键字"))
                 {
                     GUI.FocusControl(null);
                     GenericMenu menu = new GenericMenu();
                     for (int i = 0; i < npcs.Length; i++)
                         menu.AddItem(new GUIContent($"人名/{CharacterInformation.GetSexString(npcs[i].Sex)}/{npcs[i].name}"), false, OnSelectNpc, i);
-                    var items = Resources.LoadAll<ItemBase>("");
+                    var items = Resources.LoadAll<ItemBase>("Configuration");
                     for (int i = 0; i < items.Length; i++)
                         menu.AddItem(new GUIContent($"道具/{ItemBase.GetItemTypeString(items[i].ItemType)}/{items[i].name}"), false, OnSelectItem, i);
-                    var enemies = Resources.LoadAll<EnemyInformation>("");
+                    var enemies = Resources.LoadAll<EnemyInformation>("Configuration");
                     for (int i = 0; i < enemies.Length; i++)
                         menu.AddItem(new GUIContent(string.Format("敌人/{0}{1}", enemies[i].Race ? enemies[i].Race.name + "/" : string.Empty, enemies[i].name)),
                             false, OnSelectEnemy, i);
@@ -714,7 +714,12 @@ public class DialogueInspector : Editor
             {
                 if (dialogue.Words.Count > 1 && list.index == dialogue.Words.Count - 1 && dialogue.Words[dialogue.Words.Count - 2].Options.Exists(x => x && x.OptionType == WordsOptionType.Choice))
                     EditorUtility.DisplayDialog("错误", "上一句存在选择型选项，无法删除该句。", "确定");
-                else dialogue.Words.RemoveAt(list.index);
+                else
+                {
+                    wordsOptionsLists.Remove(dialogue.Words[list.index]);
+                    wordsEventsLists.Remove(dialogue.Words[list.index]);
+                    dialogue.Words.RemoveAt(list.index);
+                }
             }
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         };
@@ -735,28 +740,5 @@ public class DialogueInspector : Editor
     int GetNPCIndex(TalkerInformation npc)
     {
         return Array.IndexOf(npcs, npc);
-    }
-
-    string GetAutoID()
-    {
-        string newID = string.Empty;
-        Dialogue[] dialogues = Resources.LoadAll<Dialogue>("");
-        for (int i = 1; i < 1000000; i++)
-        {
-            newID = "DIALG" + i.ToString().PadLeft(6, '0');
-            if (!Array.Exists(dialogues, x => x.ID == newID))
-                break;
-        }
-        return newID;
-    }
-
-    bool ExistsID()
-    {
-        Dialogue[] dialogues = Resources.LoadAll<Dialogue>("");
-
-        Dialogue find = Array.Find(dialogues, x => x.ID == _ID.stringValue);
-        if (!find) return false;//若没有找到，则ID可用
-        //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
-        return find != dialogue || (find == dialogue && Array.FindAll(dialogues, x => x.ID == _ID.stringValue).Length > 1);
     }
 }

@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-[CreateAssetMenu(fileName = "quest", menuName = "ZetanStudio/任务/任务", order = 1)]
+[CreateAssetMenu(fileName = "quest", menuName = "Zetan Studio/任务/任务", order = 1)]
 public class Quest : ScriptableObject
 {
     [SerializeField]
@@ -96,6 +97,29 @@ public class Quest : ScriptableObject
     [SerializeField, NonReorderable]
     private List<CustomObjective> customObjectives = new List<CustomObjective>();
     public List<CustomObjective> CustomObjectives => customObjectives;
+
+    public static string GetAutoID(int length = 3)
+    {
+        string newID = string.Empty;
+        var len = Mathf.Pow(10, length);
+        Quest[] all = Resources.LoadAll<Quest>("Configuration");
+        for (int i = 1; i < len; i++)
+        {
+            newID = "QEST" + i.ToString().PadLeft(length, '0');
+            if (!Array.Exists(all, x => x.ID == newID))
+                break;
+        }
+        return newID;
+    }
+
+    public static bool IsIDDuplicate(Quest quest, Quest[] all = null)
+    {
+        if (all == null) all = Resources.LoadAll<Quest>("Configuration");
+        Quest find = Array.Find(all, x => x.ID == quest.ID);
+        if (!find) return false;//若没有找到，则ID可用
+        //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
+        return find != quest || (find == quest && Array.FindAll(all, x => x.ID == quest.ID).Length > 1);
+    }
 }
 
 public enum QuestType

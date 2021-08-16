@@ -63,6 +63,10 @@ public class BackpackSaveData
 public class WarehouseSaveData
 {
     public string handlerID;
+    public string scene;
+    public float posX;
+    public float posY;
+    public float posZ;
 
     public long money;
 
@@ -74,6 +78,10 @@ public class WarehouseSaveData
     public WarehouseSaveData(string id, WarehouseData warehouse)
     {
         handlerID = id;
+        scene = warehouse.scene;
+        posX = warehouse.position.x;
+        posY = warehouse.position.y;
+        posZ = warehouse.position.z;
         money = warehouse.Money;
         currentSize = (int)warehouse.size;
         maxSize = warehouse.size.Max;
@@ -124,6 +132,7 @@ public class BuildingSaveData
     public float posZ;
 
     public float leftBuildTime;
+    public int stageIndex;
 
     public BuildingSaveData(BuildingData building)
     {

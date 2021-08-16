@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-[CreateAssetMenu(fileName = "shop info", menuName = "ZetanStudio/商店信息")]
+[CreateAssetMenu(fileName = "shop info", menuName = "Zetan Studio/商店信息")]
 public class ShopInformation : ScriptableObject
 {
     [SerializeField]

@@ -8,8 +8,10 @@ public class QuestEditor : EditorWindow
 
     public static void CreateWindow(Quest serializedObject)
     {
+        if (!serializedObject) return;
         QuestEditor window = GetWindow<QuestEditor>("编辑任务");
         window.editor = Editor.CreateEditor(serializedObject);
+        (window.editor as QuestInspector).AddAnimaListener(window.Repaint);
         window.Show();
     }
 
@@ -22,6 +24,7 @@ public class QuestEditor : EditorWindow
 
     private void OnDestroy()
     {
+        if (editor) (editor as QuestInspector).RemoveAnimaListener(Repaint);
         DestroyImmediate(editor);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "tool info", menuName = "ZetanStudio/制作工具信息")]
+[CreateAssetMenu(fileName = "tool info", menuName = "Zetan Studio/制作工具信息")]
 public class MakingToolInformation : ScriptableObject
 {
 #if UNITY_EDITOR

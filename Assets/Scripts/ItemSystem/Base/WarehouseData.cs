@@ -6,6 +6,8 @@ public class WarehouseData
 {
     public Warehouse entity;
     public string entityID;
+    public string scene;
+    public Vector3 position;
 
     private long money;
     public long Money
@@ -21,7 +23,6 @@ public class WarehouseData
         }
     }
 
-    [HideInInspector]
     public ScopeInt size = new ScopeInt(50);
 
     public bool IsFull { get { return size.IsMax; } }

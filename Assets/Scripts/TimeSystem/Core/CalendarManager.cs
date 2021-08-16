@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/日历管理器")]
+[AddComponentMenu("Zetan Studio/管理器/日历管理器")]
 public class CalendarManager : WindowHandler<CalendarUI, CalendarManager>, IOpenCloseAbleWindow
 {
     private readonly List<DateAgent> dateAgents = new List<DateAgent>();

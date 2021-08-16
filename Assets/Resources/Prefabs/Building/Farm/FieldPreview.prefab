@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 2418543713497521692}
   - component: {fileID: 7034579680335251296}
   - component: {fileID: 7689258638453029864}
+  - component: {fileID: 6753297943882793911}
   m_Layer: 8
   m_Name: FieldPreview
   m_TagString: Untagged
@@ -170,6 +171,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0efa812d414eef04697fac6aa08a278a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activated: 1
+  customName: 0
+  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
+  icon: {fileID: 0}
+  hidePanelOnInteract: 0
   preview: {fileID: 8355541123688651094}
   building: {fileID: 5135588854725394626}
   ignoreLayer:
@@ -198,6 +204,32 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!61 &6753297943882793911
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7486756961091758034}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 2.95, y: 2.95}
+  m_EdgeRadius: 0
 --- !u!1 &8355541123688651094
 GameObject:
   m_ObjectHideFlags: 0

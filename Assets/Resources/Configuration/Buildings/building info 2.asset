@@ -27,3 +27,11 @@ MonoBehaviour:
     materialType: 0
   addendas:
   - {fileID: 11400000, guid: c66551966307bfc40a8791e089bf06ee, type: 2}
+  autoBuild: 0
+  stages:
+  - materials: []
+    graph: {fileID: 0}
+    buildTime: 10
+    destroyReturnRate: 0.5
+    formulation: {fileID: 0}
+  formulation: {fileID: 0}

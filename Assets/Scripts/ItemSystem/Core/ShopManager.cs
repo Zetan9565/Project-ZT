@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/商铺管理器")]
+[AddComponentMenu("Zetan Studio/管理器/商铺管理器")]
 public class ShopManager : WindowHandler<ShopUI, ShopManager>
 {
     public static List<TalkerData> Vendors { get; } = new List<TalkerData>();

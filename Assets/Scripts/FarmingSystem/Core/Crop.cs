@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[AddComponentMenu("ZetanStudio/农牧/农作物")]
+[AddComponentMenu("Zetan Studio/农牧/农作物")]
 public class Crop : Gathering
 {
     public string EntityID => Data ? Data.entityID : string.Empty;

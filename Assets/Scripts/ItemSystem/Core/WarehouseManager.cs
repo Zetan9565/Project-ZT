@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/仓库管理器")]
+[AddComponentMenu("Zetan Studio/管理器/仓库管理器")]
 public class WarehouseManager : WindowHandler<WarehouseUI, WarehouseManager>
 {
     public Transform CellsParent { get { return UI.itemCellsParent; } }

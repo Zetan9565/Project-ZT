@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 
-public delegate void ObjectiveStateListner(ObjectiveData objective, bool cmpltStateBef);
 /// <summary>
 /// 任务目标
 /// </summary>
@@ -26,7 +25,7 @@ public abstract class Objective
 
     [SerializeField]
     private bool showMapIcon = true;
-    public bool ShowMapIcon => this is CollectObjective || this is CustomObjective ? false : showMapIcon || canNavigate;//可以导航，则一定能显示地图图标
+    public bool ShowMapIcon => (this is CollectObjective || this is CustomObjective) ? false : showMapIcon;
 
     [SerializeField]
     private int amount = 1;
@@ -40,34 +39,11 @@ public abstract class Objective
     private int orderIndex = 1;
     public int OrderIndex => orderIndex;
 
-    public bool IsValid
+    public virtual bool IsValid
     {
         get
         {
-            if (Amount < 0) return false;
-            if (this is CollectObjective && !(this as CollectObjective).Item)
-                return false;
-            if (this is KillObjective)
-            {
-                var ko = this as KillObjective;
-                if (ko.ObjectiveType == KillObjectiveType.Specific && !ko.Enemy)
-                    return false;
-                else if (ko.ObjectiveType == KillObjectiveType.Race && !ko.Race)
-                    return false;
-            }
-            if (this is TalkObjective && (!(this as TalkObjective).NPCToTalk || !(this as TalkObjective).Dialogue))
-                return false;
-            if (this is MoveObjective && string.IsNullOrEmpty((this as MoveObjective).PointID))
-                return false;
-            if (this is SubmitObjective)
-            {
-                var so = this as SubmitObjective;
-                if (!so.NPCToSubmit || !so.ItemToSubmit || string.IsNullOrEmpty(so.WordsWhenSubmit))
-                    return false;
-            }
-            if (this is CustomObjective && string.IsNullOrEmpty((this as CustomObjective).TriggerName))
-                return false;
-            return true;
+            return amount > 0;
         }
     }
 
@@ -99,6 +75,14 @@ public class CollectObjective : Objective
     /// 是否在提交任务时失去相应道具
     /// </summary>
     public bool LoseItemAtSbmt => loseItemAtSbmt;
+
+    public override bool IsValid
+    {
+        get
+        {
+            return base.IsValid && item;
+        }
+    }
 }
 /// <summary>
 /// 打怪类目标
@@ -135,6 +119,24 @@ public class KillObjective : Objective
             return race;
         }
     }
+
+    [SerializeField]
+    private EnemyGroup group;
+    public EnemyGroup Group => group;
+
+    public override bool IsValid
+    {
+        get
+        {
+            if (objectiveType == KillObjectiveType.Specific && !enemy)
+                return false;
+            else if (objectiveType == KillObjectiveType.Race && !race)
+                return false;
+            else if (objectiveType == KillObjectiveType.Group && !group)
+                return false;
+            else return base.IsValid;
+        }
+    }
 }
 public enum KillObjectiveType
 {
@@ -149,6 +151,12 @@ public enum KillObjectiveType
     /// </summary>
     [InspectorName("特定种族")]
     Race,
+
+    /// <summary>
+    /// 特定组合
+    /// </summary>
+    [InspectorName("特定组合")]
+    Group,
 
     /// <summary>
     /// 任意
@@ -181,6 +189,14 @@ public class TalkObjective : Objective
             return dialogue;
         }
     }
+
+    public override bool IsValid
+    {
+        get
+        {
+            return base.IsValid && _NPCToTalk && dialogue;
+        }
+    }
 }
 /// <summary>
 /// 移动到点类目标
@@ -189,12 +205,20 @@ public class TalkObjective : Objective
 public class MoveObjective : Objective
 {
     [SerializeField]
-    private string pointID = string.Empty;
-    public string PointID
+    private CheckPointInformation checkPoint;
+    public CheckPointInformation CheckPoint
     {
         get
         {
-            return pointID;
+            return checkPoint;
+        }
+    }
+
+    public override bool IsValid
+    {
+        get
+        {
+            return base.IsValid && CheckPoint;
         }
     }
 }
@@ -243,6 +267,14 @@ public class SubmitObjective : Objective
             return talkerType;
         }
     }
+
+    public override bool IsValid
+    {
+        get
+        {
+            return base.IsValid && _NPCToSubmit && itemToSubmit && !string.IsNullOrEmpty(wordsWhenSubmit);
+        }
+    }
 }
 /// <summary>
 /// 自定义目标
@@ -267,6 +299,14 @@ public class CustomObjective : Objective
         get
         {
             return checkStateAtAcpt;
+        }
+    }
+
+    public override bool IsValid
+    {
+        get
+        {
+            return base.IsValid && !string.IsNullOrEmpty(triggerName);
         }
     }
 }

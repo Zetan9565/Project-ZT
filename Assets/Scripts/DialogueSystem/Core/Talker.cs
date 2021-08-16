@@ -69,14 +69,22 @@ public class Talker : Character
                 Data.shop = Instantiate(Info.Shop);
                 Data.shop.Init();
             }
-            else if (Info.IsWarehouseAgent) Data.warehouse = new WarehouseData(Info.WarehouseCapcity);
-            Data.Info = Info;
-            Data.InitQuest(Info.QuestsStored);
+            else if (Info.IsWarehouseAgent)
+            {
+                Data.warehouse = new WarehouseData(Info.WarehouseCapcity);
+                Data.warehouse.scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+                Data.warehouse.position = transform.position;
+            }
             GameManager.TalkerDatas.Add(TalkerID, Data);
         }
         else Data = dataFound;
         Data.currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         Data.currentPosition = transform.position;
+        if (Info.IsWarehouseAgent)
+        {
+            Data.warehouse.scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            Data.warehouse.position = transform.position;
+        }
         if (Info.IsVendor && !ShopManager.Vendors.Contains(Data)) ShopManager.Vendors.Add(Data);
         flagAgent = ObjectPool.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject, UIManager.Instance.QuestFlagParent).GetComponent<QuestFlag>();
         flagAgent.Init(this);

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "crop info", menuName = "ZetanStudio/种植/农作物信息")]
+[CreateAssetMenu(fileName = "crop info", menuName = "Zetan Studio/种植/农作物信息")]
 public class CropInformation : ScriptableObject
 {
     [SerializeField]
@@ -80,7 +80,7 @@ public class CropInformation : ScriptableObject
     {
         get
         {
-            return Stages.Count > 0 && !Stages.Exists(x => !x.graph);
+            return Stages.Count > 0 && !Stages.Exists(x => !x.Graph);
         }
     }
 
@@ -163,7 +163,8 @@ public class CropStage
     private int lastingDays = 1;
     public int LastingDays => lastingDays;
 
-    public Sprite graph;
+    private Sprite graph;
+    public Sprite Graph => graph;
 
     public bool HarvestAble => gatherInfo && gatherInfo.ProductItems.Count > 0 && repeatTimes != 0;
     public bool RepeatAble
@@ -185,6 +186,7 @@ public class CropStage
     [SerializeField]
     private GatheringInformation gatherInfo;
     public GatheringInformation GatherInfo => gatherInfo;
+
 
     public CropStage(int lastingDays, CropStageType stage)
     {

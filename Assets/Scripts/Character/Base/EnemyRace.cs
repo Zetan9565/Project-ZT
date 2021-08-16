@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "enemy race", menuName = "ZetanStudio/角色/敌人种族")]
+[CreateAssetMenu(fileName = "enemy race", menuName = "Zetan Studio/敌人/敌人种族", order = 1)]
 public class EnemyRace : ScriptableObject
 {
     [SerializeField]

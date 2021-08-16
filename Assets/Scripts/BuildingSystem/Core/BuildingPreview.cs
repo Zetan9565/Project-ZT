@@ -3,8 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 
 [DisallowMultipleComponent]
-public class BuildingPreview : MonoBehaviour
+public class BuildingPreview : InteractiveObject
 {
+    public override string name
+    {
+        get
+        {
+            return Data ? Data.Info.name : gameObject.name;
+        }
+    }
+
+    public override bool IsInteractive
+    {
+        get
+        {
+            return base.IsInteractive && Data && !BuildingManager.Instance.IsManaging;
+        }
+    }
+
     public BuildingData Data { get; private set; }
 
     private readonly HashSet<Collider> colliders = new HashSet<Collider>();
@@ -33,9 +49,11 @@ public class BuildingPreview : MonoBehaviour
     public Vector3 BuildingFlagOffset => buildingFlagOffset;
 
     private Renderer[] renderers;
-
     private readonly Dictionary<Renderer, Color> oriColors = new Dictionary<Renderer, Color>();
     private readonly Dictionary<Renderer, Color> redColors = new Dictionary<Renderer, Color>();
+
+    [HideInInspector]
+    public BuildingFlag flag;
 
     private void Awake()
     {
@@ -46,8 +64,8 @@ public class BuildingPreview : MonoBehaviour
             colliderEvent.OnStay2D.AddListener(OnObstacleStay);
             colliderEvent.OnExit2D.AddListener(OnObstacleExit);
         }
-        if (preview.gameObject.layer != LayerMask.NameToLayer("BuildingPreview"))
-            preview.gameObject.layer = LayerMask.NameToLayer("BuildingPreview");
+        if (preview.layer != LayerMask.NameToLayer("BuildingPreview"))
+            preview.layer = LayerMask.NameToLayer("BuildingPreview");
 
         ZetanUtility.SetActive(preview, true);
         ZetanUtility.SetActive(building, false);
@@ -85,7 +103,7 @@ public class BuildingPreview : MonoBehaviour
     //        colliders.Add(other);
     //    CheckObstacle();
     //}
-    
+
     //public void OnObstacleStay(Collider other)
     //{
     //    if (!other.isTrigger)
@@ -166,7 +184,63 @@ public class BuildingPreview : MonoBehaviour
         MessageManager.Instance.New($"[{Data.name}] 建造完成了");
         BuildingManager.Instance.Build(Data);
         Data = null;
-        ZetanUtility.SetActive(gameObject, false);
-        Destroy(gameObject, 2);
+        if (flag) flag.OnBuilt();
+        Destroy(gameObject);
+    }
+
+    public void OnCancelManage()
+    {
+        FinishInteraction();
+        if (Data) Data.PauseConstruct();
+    }
+
+    public void OnDoneConstruct()
+    {
+        if (BuildingManager.Instance.CurrentPreview == this)
+            BuildingManager.Instance.PauseDisplayInfo(false);
+    }
+
+    public bool StartConstruct()
+    {
+        if (Data && !Data.Info.AutoBuild)
+        {
+            if (BuildingManager.Instance.CurrentPreview == this)
+                BuildingManager.Instance.PauseDisplayInfo(true);
+            Data.StartConstruct();
+            return true;
+        }
+        return false;
+    }
+
+    public void PauseConstruct()
+    {
+        OnDoneConstruct();
+        if (Data) Data.PauseConstruct();
+    }
+
+    public void PutMaterials(IEnumerable<ItemInfoBase> materials)
+    {
+        if (Data) Data.PutMaterials(materials);
+    }
+
+    public override bool DoInteract()
+    {
+        if (BuildingManager.Instance.Manage(this))
+            return base.DoInteract();
+        return false;
+    }
+
+    protected override void OnExit(Collider2D collision)
+    {
+        if (collision.CompareTag("Player") && BuildingManager.Instance.CurrentPreview == this)
+        {
+            BuildingManager.Instance.CancelManage();
+        }
+    }
+
+    public virtual void Destroy()
+    {
+        if (flag) flag.Destroy();
+        Destroy(gameObject);
     }
 }

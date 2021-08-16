@@ -50,6 +50,7 @@ public class TalkerData : CharacterData
     public TalkerData(TalkerInformation info) : base(info)
     {
         relationshipInstance = new Relationship();
+        InitQuest();
     }
 
     public virtual void OnTalkBegin()
@@ -83,11 +84,11 @@ public class TalkerData : CharacterData
         return Info.NormalItemDialogue;
     }
 
-    public void InitQuest(List<Quest> questsStored)
+    private void InitQuest()
     {
-        if (questsStored == null) return;
+        if (!Info || Info.QuestsStored == null) return;
         if (questInstances.Count > 0) questInstances.Clear();
-        foreach (Quest quest in questsStored)
+        foreach (Quest quest in Info.QuestsStored)
         {
             if (quest)
             {

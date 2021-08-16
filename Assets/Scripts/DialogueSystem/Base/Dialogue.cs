@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "dialogue", menuName = "ZetanStudio/剧情/对话")]
+[CreateAssetMenu(fileName = "dialogue", menuName = "Zetan Studio/剧情/对话")]
 public class Dialogue : ScriptableObject
 {
     [SerializeField]
@@ -28,6 +29,30 @@ public class Dialogue : ScriptableObject
     [SerializeField, NonReorderable]
     private List<DialogueWords> words = new List<DialogueWords>();
     public List<DialogueWords> Words => words;
+
+    public static string GetAutoID(int length = 6)
+    {
+        string newID = string.Empty;
+        var len = Mathf.Pow(10, length);
+        Dialogue[] all = Resources.LoadAll<Dialogue>("Configuration");
+        for (int i = 1; i < len; i++)
+        {
+            newID = "DIALG" + i.ToString().PadLeft(length, '0');
+            if (!Array.Exists(all, x => x.ID == newID))
+                break;
+        }
+        return newID;
+    }
+
+    public static bool IsIDDuplicate(Dialogue dialogue, Dialogue[] all = null)
+    {
+        if (all == null) all = Resources.LoadAll<Dialogue>("Configuration");
+
+        Dialogue find = Array.Find(all, x => x.ID == dialogue.ID);
+        if (!find) return false;//若没有找到，则ID可用
+        //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
+        return find != dialogue || (find == dialogue && Array.FindAll(all, x => x.ID == dialogue.ID).Length > 1);
+    }
 }
 [Serializable]
 public class DialogueWords
@@ -114,11 +139,6 @@ public class DialogueWords
         else if (TalkerType == TalkerType.Player)
             return "[玩家]说：" + content;
         else return "[Unnamed]说：" + content;
-    }
-
-    public int IndexOfOption(WordsOption option)
-    {
-        return Options.IndexOf(option);
     }
 
     public static implicit operator bool(DialogueWords self)

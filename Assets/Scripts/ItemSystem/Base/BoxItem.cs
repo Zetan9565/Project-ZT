@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "item box", menuName = "ZetanStudio/道具/箱子")]
+[CreateAssetMenu(fileName = "item box", menuName = "Zetan Studio/道具/箱子")]
 [System.Serializable]
 public class BoxItem : ItemBase
 {

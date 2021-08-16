@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -44,6 +45,8 @@ public class ItemInfoBase
         }
     }
 
+    public bool IsValid => item;
+
     public ItemInfoBase()
     {
         amount = 1;
@@ -80,7 +83,7 @@ public class ItemInfo : ItemInfoBase //在这个类进行拓展，如强化、�
         }
     }
 
-    public bool IsValid => item && Amount >= 1;
+    public new bool IsValid => item && Amount >= 1;
 
     public ItemInfo Cloned
     {
@@ -182,18 +185,7 @@ public class DropItemInfo
 
     [SerializeField]
     private float dropRate = 100.0f;
-    public float DropRate
-    {
-        get
-        {
-            return dropRate;
-        }
-        set
-        {
-            if (value < 0) dropRate = 0;
-            else dropRate = value;
-        }
-    }
+    public float DropRate => dropRate;
 
     [SerializeField]
     private bool onlyDropForQuest;
@@ -270,22 +262,19 @@ public class MaterialInfo
     private MaterialType materialType;
     public MaterialType MaterialType => materialType;
 
-    public bool IsInvalid
+    public bool IsValid
     {
         get
         {
-            return !(makingType == MakingType.SingleItem && Item || makingType == MakingType.SameType);
+            return (makingType == MakingType.SingleItem && item || makingType == MakingType.SameType && materialType != MaterialType.None) && amount > 0;
         }
     }
-
-    public ItemInfo ItemInfo => new ItemInfo(item, amount);
 
     public static implicit operator bool(MaterialInfo self)
     {
         return self != null;
     }
 }
-
 #endregion
 
 #region 喜厌道具信息相关

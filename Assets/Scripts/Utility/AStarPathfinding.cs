@@ -1,4 +1,4 @@
-﻿//namespace ZetanStudio.Pathfinding
+﻿//namespace Zetan Studio.Pathfinding
 //{
 //    using Unity.Mathematics;
 //    using Unity.Jobs;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/地图管理器")]
+[AddComponentMenu("Zetan Studio/管理器/地图管理器")]
 public class MapManager : SingletonMonoBehaviour<MapManager>
 {
     [SerializeField]

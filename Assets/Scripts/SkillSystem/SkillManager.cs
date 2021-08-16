@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 [DisallowMultipleComponent]
-[AddComponentMenu("ZetanStudio/管理器/技能管理器")]
+[AddComponentMenu("Zetan Studio/管理器/技能管理器")]
 public class SkillManager : SingletonMonoBehaviour<SkillManager>
 {
     [SerializeField]
@@ -30,7 +30,7 @@ public class SkillManager : SingletonMonoBehaviour<SkillManager>
 
     private void Awake()
     {
-        var skillInfos = Resources.LoadAll<SkillInformation>("");
+        var skillInfos = Resources.LoadAll<SkillInformation>("Configuration");
         foreach (var info in skillInfos)
         {
             if (!allSkillInfos.ContainsKey(info.ID))

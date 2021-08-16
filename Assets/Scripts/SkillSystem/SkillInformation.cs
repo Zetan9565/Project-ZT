@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "skill info", menuName = "ZetanStudio/技能信息")]
+[CreateAssetMenu(fileName = "skill info", menuName = "Zetan Studio/技能信息")]
 public class SkillInformation : ScriptableObject
 {
     [SerializeField]

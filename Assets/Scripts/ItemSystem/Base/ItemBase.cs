@@ -97,9 +97,9 @@ public abstract class ItemBase : ScriptableObject
         }
     }
 
-    [SerializeField, NonReorderable]
-    private List<MaterialInfo> materials = new List<MaterialInfo>();
-    public virtual List<MaterialInfo> Materials => materials;
+    [SerializeField]
+    protected Formulation formulation;
+    public Formulation Formulation => formulation;
 
     public MakingToolType MakingTool
     {
@@ -131,10 +131,9 @@ public abstract class ItemBase : ScriptableObject
         }
     }
 
-    public bool DIYAble => MakingTool != MakingToolType.None && !Materials.TrueForAll(x => x.MakingType == MakingType.SingleItem);
+    public bool DIYAble => MakingTool != MakingToolType.None && formulation && !formulation.Materials.TrueForAll(x => x.MakingType == MakingType.SingleItem);
 
-    public bool Makable => MakingMethod != MakingMethod.None && Materials != null && Materials.Count > 0 && 
-        !Materials.Exists(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.None);
+    public bool Makable => MakingMethod != MakingMethod.None && formulation && formulation.IsValid;
     #endregion
 
     #region 类型判断相关
@@ -162,6 +161,8 @@ public abstract class ItemBase : ScriptableObject
     /// 是消耗品
     /// </summary>
     public bool IsConsumable => this is BoxItem || this is BagItem || this is MedicineItem;
+
+    public bool IsCurrency => this is CurrencyItem;
     #endregion
 
     public static string GetItemTypeString(ItemType itemType)
@@ -184,6 +185,8 @@ public abstract class ItemBase : ScriptableObject
             case ItemType.Elixir:
             case ItemType.Cuisine:
                 return "消耗品";
+            case ItemType.Currency:
+                return "特殊";
             default: return "普通";
         }
     }

@@ -29,7 +29,7 @@ public partial class CharacterInfoInspector : Editor
         enemy = target as EnemyInformation;
         talker = target as TalkerInformation;
         player = target as PlayerInformation;
-        characters = Resources.LoadAll<CharacterInformation>("");
+        characters = Resources.LoadAll<CharacterInformation>("Configuration");
         _ID = serializedObject.FindProperty("_ID");
         _Name = serializedObject.FindProperty("_Name");
         sex = serializedObject.FindProperty("sex");
@@ -114,7 +114,7 @@ public partial class CharacterInfoInspector : Editor
         string newID = string.Empty;
         if (enemy)
         {
-            EnemyInformation[] enemies = Resources.LoadAll<EnemyInformation>("");
+            EnemyInformation[] enemies = Resources.LoadAll<EnemyInformation>("Configuration");
             for (int i = 1; i < 1000; i++)
             {
                 newID = "ENMY" + i.ToString().PadLeft(3, '0');
@@ -124,7 +124,7 @@ public partial class CharacterInfoInspector : Editor
         }
         else if (talker)
         {
-            TalkerInformation[] talkers = Resources.LoadAll<TalkerInformation>("");
+            TalkerInformation[] talkers = Resources.LoadAll<TalkerInformation>("Configuration");
             for (int i = 1; i < 1000; i++)
             {
                 newID = "NPC" + i.ToString().PadLeft(3, '0');
@@ -134,7 +134,7 @@ public partial class CharacterInfoInspector : Editor
         }
         else if (player)
         {
-            PlayerInformation[] players = Resources.LoadAll<PlayerInformation>("");
+            PlayerInformation[] players = Resources.LoadAll<PlayerInformation>("Configuration");
             for (int i = 1; i < 1000; i++)
             {
                 newID = "PLAY" + i.ToString().PadLeft(3, '0');
@@ -144,7 +144,7 @@ public partial class CharacterInfoInspector : Editor
         }
         else
         {
-            CharacterInformation[] characters = Resources.LoadAll<CharacterInformation>("").Where(x => !(x is EnemyInformation) && !(x is TalkerInformation)).ToArray();
+            CharacterInformation[] characters = Resources.LoadAll<CharacterInformation>("Configuration").Where(x => !(x is EnemyInformation) && !(x is TalkerInformation)).ToArray();
             for (int i = 1; i < 1000; i++)
             {
                 newID = "CHAR" + i.ToString().PadLeft(3, '0');

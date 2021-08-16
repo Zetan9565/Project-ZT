@@ -80,7 +80,12 @@ public enum ItemType
     /// <summary>
     /// 种子
     /// </summary>
-    [InspectorName("种子")] Seed
+    [InspectorName("种子")] Seed,
+
+    /// <summary>
+    /// 货币
+    /// </summary>
+    [InspectorName("货币")] Currency,
 }
 
 public enum ItemQuality

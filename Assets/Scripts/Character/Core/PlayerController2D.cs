@@ -64,7 +64,7 @@ public class PlayerController2D : MonoBehaviour
             {
                 Unit.IsFollowingTarget = false;
                 Unit.ShowPath(true);
-                Unit.SetDestination(ZetanUtility.MousePositionAsWorld);
+                Unit.SetDestination(ZetanUtility.MousePositionToWorld);
             }
         }
     }

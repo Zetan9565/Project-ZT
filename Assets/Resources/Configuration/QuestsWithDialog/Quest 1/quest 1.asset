@@ -19,10 +19,12 @@ MonoBehaviour:
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptCondition:
     conditions:
-    - type: 3
-      level: 1
+    - type: 1
+      intValue: 0
+      compareType: 0
       relatedQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
       relatedItem: {fileID: 0}
+      relatedCharInfo: {fileID: 0}
       triggerName: 
     relational: 
   questType: 0
@@ -34,6 +36,10 @@ MonoBehaviour:
   rewardMoney: 50
   rewardEXP: 0
   rewardItems:
+  - item: {fileID: 11400000, guid: 6c7872e2f8dbf2948bc18ceed18c26ad, type: 2}
+    amount: 1000
+  - item: {fileID: 11400000, guid: e7d15132e142bc34ab9b56e50a6f4539, type: 2}
+    amount: 300
   - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
     amount: 2
   _NPCToSubmit: {fileID: 0}
@@ -50,6 +56,7 @@ MonoBehaviour:
     objectiveType: 0
     enemy: {fileID: 11400000, guid: 1f8636ab8a7c2a443b85d27f63bd2394, type: 2}
     race: {fileID: 0}
+    group: {fileID: 0}
   talkObjectives:
   - displayName: "\u5B89\u6170\u739B\u4E3D\u4E9A"
     display: 1

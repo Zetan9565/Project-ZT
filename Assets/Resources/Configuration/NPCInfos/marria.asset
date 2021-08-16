@@ -16,14 +16,15 @@ MonoBehaviour:
   _Name: "\u739B\u4E3D\u4E9A"
   sex: 2
   defaultDialogue: {fileID: 11400000, guid: 443c980ec87b8384e87fa0711e323969, type: 2}
+  conditionDialogues: []
   isWarehouseAgent: 0
   warehouseCapcity: 30
   isVendor: 1
   shop: {fileID: 11400000, guid: 3bad6ec80d1443e44b45ff9d3ffca6a3, type: 2}
-  questsStored:
-  - {fileID: 11400000, guid: b43b38f75b24cf546821f2dc061af398, type: 2}
+  questsStored: []
   canDEV_RLAT: 1
   normalItemDialogue: {fileID: 11400000, guid: c761d5a3c1f0b214395f27054fb51f08, type: 2}
+  normalIntimacyValue: 5
   giftDialogues: []
   affectiveItems: []
   canMarry: 0

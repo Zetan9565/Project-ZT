@@ -22,7 +22,6 @@ public class BuildingUI : WindowUI
 
     public CanvasGroup infoWindow;
     [HideInInspector]
-    public Canvas infoCanvas;
     public Text infoNameText;
     public Text infoDesText;
     public Button manageButton;
@@ -34,17 +33,24 @@ public class BuildingUI : WindowUI
     public Button backButton;
     public GameObject joyStick;
 
+    public GameObject morePanel;
+    public Button constructButton;
+    public Button materialButton;
+    public Button warehouseButton;
+    public Button workerButton;
+
     protected override void Awake()
     {
         base.Awake();
         closeButton.onClick.AddListener(BuildingManager.Instance.CloseWindow);
         closeListButton.onClick.AddListener(BuildingManager.Instance.HideBuiltList);
         if (!infoWindow.gameObject.GetComponent<GraphicRaycaster>()) infoWindow.gameObject.AddComponent<GraphicRaycaster>();
-        infoCanvas = infoWindow.GetComponent<Canvas>();
-        infoCanvas.overrideSorting = true;
-        infoCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         closeInfoButton.onClick.AddListener(BuildingManager.Instance.HideInfo);
         buildButton.onClick.AddListener(BuildingManager.Instance.DoBuild);
         backButton.onClick.AddListener(BuildingManager.Instance.GoBack);
+        constructButton.onClick.AddListener(BuildingManager.Instance.StartConstruct);
+        materialButton.onClick.AddListener(BuildingManager.Instance.SetMaterials);
+        warehouseButton.onClick.AddListener(BuildingManager.Instance.SetWarehouse);
+        workerButton.onClick.AddListener(BuildingManager.Instance.SendWorker);
     }
 }

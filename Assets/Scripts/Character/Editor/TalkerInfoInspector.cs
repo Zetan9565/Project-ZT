@@ -37,7 +37,7 @@ public partial class CharacterInfoInspector
     {
         if (talker)
         {
-            allTalkers = Resources.LoadAll<TalkerInformation>("").ToList();
+            allTalkers = Resources.LoadAll<TalkerInformation>("Configuration").ToList();
             allTalkers.Remove(talker);
         }
 
@@ -137,7 +137,10 @@ public partial class CharacterInfoInspector
                 serializedObject.Update();
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个对话吗？", "确定", "取消"))
+                {
+                    conditionDrawers.Remove(talker.ConditionDialogues[list.index]);
                     conditionDialogues.DeleteArrayElementAtIndex(list.index);
+                }
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
             },
@@ -313,11 +316,11 @@ public partial class CharacterInfoInspector
                             SerializedObject newQuest = new SerializedObject(quest.objectReferenceValue);
                             SerializedProperty _ID = newQuest.FindProperty("_ID");
                             SerializedProperty title = newQuest.FindProperty("title");
-                            _ID.stringValue = QuestInspector.GetAutoID();
+                            _ID.stringValue = Quest.GetAutoID();
                             title.stringValue = $"{_Name.stringValue}的委托";
                             newQuest.ApplyModifiedProperties();
 
-                            QuestEditor.CreateWindow(quest.objectReferenceValue as Quest);
+                            QuestEditor.CreateWindow(questInstance);
                         }
                     }
                 }

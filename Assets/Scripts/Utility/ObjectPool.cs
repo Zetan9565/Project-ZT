@@ -238,7 +238,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
     }
 
 #if UNITY_EDITOR
-    [UnityEditor.MenuItem("ZetanStudio/添加对象池")]
+    [UnityEditor.MenuItem("Zetan Studio/添加对象池")]
     private static void MakePool()
     {
         if (Instance)
@@ -246,7 +246,7 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             UnityEngine.Debug.Log("已存在对象池");
             return;
         }
-        new GameObject("ObjectPool").AddComponent<ObjectPool>();
+        new GameObject("ObjectPool", typeof(ObjectPool));
     }
 #endif
 }

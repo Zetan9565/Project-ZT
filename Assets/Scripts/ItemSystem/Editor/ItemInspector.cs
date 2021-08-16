@@ -34,7 +34,7 @@ public partial class ItemInspector : Editor
     SerializedProperty makingMethod;
     SerializedProperty minYield;
     SerializedProperty maxYield;
-    SerializedProperty materials;
+    SerializedProperty formulation;
 
     SerializedProperty materialType;
 
@@ -42,11 +42,10 @@ public partial class ItemInspector : Editor
 
     SerializedProperty attribute;
     RoleAttributeGroupDrawer attrDrawer;
-    MaterialListDrawer materialsDrawer;
 
     private void OnEnable()
     {
-        items = Resources.LoadAll<ItemBase>("");
+        items = Resources.LoadAll<ItemBase>("Configuration");
 
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 2;
@@ -68,11 +67,10 @@ public partial class ItemInspector : Editor
         usable = serializedObject.FindProperty("usable");
         inexhaustible = serializedObject.FindProperty("inexhaustible");
         maxDurability = serializedObject.FindProperty("maxDurability");
-        materials = serializedObject.FindProperty("materials");
+        formulation = serializedObject.FindProperty("formulation");
         makingMethod = serializedObject.FindProperty("makingMethod");
         minYield = serializedObject.FindProperty("minYield");
         maxYield = serializedObject.FindProperty("maxYield");
-        materialsDrawer = new MaterialListDrawer(serializedObject, materials, lineHeight, lineHeightSpace);
 
         box = target as BoxItem;
         if (box)
@@ -107,9 +105,8 @@ public partial class ItemInspector : Editor
             if (!string.IsNullOrEmpty(_ID.stringValue) && ExistsID())
                 EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
             else if (!string.IsNullOrEmpty(_ID.stringValue) && (string.IsNullOrEmpty(Regex.Replace(_ID.stringValue, @"[^0-9]+", "")) || !Regex.IsMatch(_ID.stringValue, @"(\d+)$")))
-            {
                 EditorGUILayout.HelpBox("此识别码非法！", MessageType.Error);
-            }
+            else EditorGUILayout.HelpBox("识别码为空！", MessageType.Error);
             if (GUILayout.Button("自动生成识别码"))
             {
                 _ID.stringValue = GetAutoID();
@@ -123,7 +120,7 @@ public partial class ItemInspector : Editor
         EditorGUILayout.PropertyField(itemType, new GUIContent(string.Empty));
         GUI.enabled = true;
         EditorGUILayout.EndHorizontal();
-        EditorGUILayout.PropertyField(materialType, new GUIContent("作为材料时的类型"));
+        if (!item.IsCurrency) EditorGUILayout.PropertyField(materialType, new GUIContent("作为材料时的类型"));
         if (item.ItemType != ItemType.Quest)
             EditorGUILayout.PropertyField(quality, new GUIContent("道具品质"));
         EditorGUILayout.PropertyField(weight, new GUIContent("道具重量"));
@@ -148,7 +145,7 @@ public partial class ItemInspector : Editor
         EditorGUILayout.LabelField("附加信息", new GUIStyle() { fontStyle = FontStyle.Bold });
         HandlingItemType();
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
-        if (!(item is BoxItem) && !(item is BookItem))
+        if (!(item is BoxItem) && !(item is BookItem) && !(item is CurrencyItem))
         {
             EditorGUILayout.Space();
             serializedObject.Update();
@@ -162,29 +159,44 @@ public partial class ItemInspector : Editor
             if (minYield.intValue < 1) minYield.intValue = 1;
             if (maxYield.intValue < 1) maxYield.intValue = 1;
             if (minYield.intValue > maxYield.intValue) minYield.intValue = maxYield.intValue;
-            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (makingMethod.enumValueIndex != (int)MakingMethod.None)
             {
-                EditorGUILayout.PropertyField(materials, new GUIContent("制作材料\t\t" + (materials.arraySize > 0 ? "数量：" + materials.arraySize : "无")), false);
-                if (item.Materials.Exists(x => (x.MakingType == MakingType.SingleItem && item.Materials.FindAll(y => y.MakingType == MakingType.SingleItem && y.Item == x.Item).Count > 1) ||
-                   (x.MakingType == MakingType.SameType && item.Materials.FindAll(y => y.MakingType == MakingType.SameType && y.MaterialType == x.MaterialType).Count > 1)))
+                EditorGUILayout.PropertyField(formulation, new GUIContent("制作配方"), false);
+                if (!formulation.objectReferenceValue)
                 {
-                    EditorGUILayout.HelpBox("制作材料存在重复。", MessageType.Error);
-                }
-                else if (item.Materials.Exists(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.None))
-                {
-                    EditorGUILayout.HelpBox("制作材料存在未定义材料。", MessageType.Warning);
+                    if (GUILayout.Button("新建"))
+                    {
+                        if (EditorUtility.DisplayDialog("新建", "将在Assets/Resources/Configuration/Formulation/Item目录新建一个配方，是否继续？", "确定", "取消"))
+                        {
+                            Formulation formuInstance = CreateInstance<Formulation>();
+                            AssetDatabase.CreateAsset(formuInstance, AssetDatabase.GenerateUniqueAssetPath("Assets/Resources/Configuration/Formulation/formulation.asset"));
+                            AssetDatabase.SaveAssets();
+                            AssetDatabase.Refresh();
+
+                            formulation.objectReferenceValue = formuInstance;
+
+                            FormulationEditor.CreateWindow(formuInstance);
+                        }
+                    }
+                    EditorGUILayout.HelpBox("未设置配方", MessageType.Error);
                 }
                 else
                 {
-                    var other = Array.Find(items, x => x.MakingMethod != MakingMethod.None && x.MakingMethod == item.MakingMethod && x != item && CheckMaterialsDuplicate(item.Materials, x.Materials));
-                    if (other) EditorGUILayout.HelpBox(string.Format("其它道具与此道具的制作材料重复！其它道具ID：{0}", other.ID), MessageType.Error);
-                }
-                if (materials.isExpanded)
-                {
-                    materialsDrawer.DoLayoutDraw();
+                    if (GUILayout.Button("编辑"))
+                        FormulationEditor.CreateWindow(formulation.objectReferenceValue as Formulation);
+                    if (!(formulation.objectReferenceValue as Formulation).IsValid)
+                        EditorGUILayout.HelpBox("配方信息不完整。", MessageType.Error);
+                    else if (item.Formulation)
+                    {
+                        var other = Array.Find(items, x => x.MakingMethod != MakingMethod.None && x.MakingMethod == item.MakingMethod && x != item && item.Formulation == x.Formulation);
+                        if (other) EditorGUILayout.HelpBox($"其它道具与此道具的制作材料重复！配置路径：\n{AssetDatabase.GetAssetPath(other)}", MessageType.Error);
+                        GUI.enabled = false;
+                        EditorGUILayout.TextArea(item.Formulation.ToString());
+                        GUI.enabled = true;
+                    }
                 }
             }
+            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         }
         if (box)
         {
@@ -209,7 +221,7 @@ public partial class ItemInspector : Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("gemSlotAmount"), new GUIContent("默认宝石槽数"));
                 goto case ItemType.Gemstone;
             case ItemType.Gemstone:
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("powerup"), new GUIContent("附加效果"), true);
+                //EditorGUILayout.PropertyField(serializedObject.FindProperty("powerup"), new GUIContent("附加效果"), true);
                 break;
             case ItemType.Book:
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("bookType"), new GUIContent("书籍/图纸类型"), true);
@@ -257,6 +269,10 @@ public partial class ItemInspector : Editor
                 attrDrawer?.DoLayoutDraw();
             EditorGUILayout.PropertyField(maxDurability, new GUIContent("最大耐久度"));
             if (maxDurability.intValue < 1) maxDurability.intValue = 1;
+        }
+        else if (item.IsCurrency)
+        {
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("valueEach"), new GUIContent("面额"));
         }
     }
 
@@ -314,10 +330,7 @@ public partial class ItemInspector : Editor
 
         if (item.MakingMethod != MakingMethod.None)
         {
-            editComplete &= !item.Materials.Exists(x => x.MakingType == MakingType.SingleItem && x.Item == null || x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.None);
-            editComplete &= !item.Materials.Exists(x => (x.MakingType == MakingType.SingleItem && item.Materials.FindAll(y => y.MakingType == MakingType.SingleItem && y.Item == x.Item).Count > 1) ||
-                                (x.MakingType == MakingType.SameType && item.Materials.FindAll(y => y.MakingType == MakingType.SameType && y.MaterialType == x.MaterialType).Count > 1));
-
+            editComplete &= formulation.objectReferenceValue && (formulation.objectReferenceValue as Formulation).IsValid;
         }
 
         return editComplete;
@@ -326,7 +339,7 @@ public partial class ItemInspector : Editor
     string GetAutoID()
     {
         string newID = string.Empty;
-        ItemBase[] items = Resources.LoadAll<ItemBase>("");
+        ItemBase[] items = Resources.LoadAll<ItemBase>("Configuration");
         for (int i = 1; i < 1000; i++)
         {
             switch (item.ItemType)
@@ -361,6 +374,9 @@ public partial class ItemInspector : Editor
                 case ItemType.Seed:
                     newID = "SEED" + i.ToString().PadLeft(3, '0');
                     break;
+                case ItemType.Currency:
+                    newID = "CURR" + i.ToString().PadLeft(3, '0');
+                    break;
                 default:
                     newID = "ITEM" + i.ToString().PadLeft(3, '0');
                     break;
@@ -377,54 +393,5 @@ public partial class ItemInspector : Editor
         if (!find) return false;//若没有找到，则ID可用
         //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
         return find != item || (find == item && Array.FindAll(items, x => x.ID == _ID.stringValue).Length > 1);
-    }
-
-    bool CheckMaterialsDuplicate(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<MaterialInfo> otherMaterials)
-    {
-        if (itemMaterials == null || itemMaterials.Count() < 1 || otherMaterials == null || otherMaterials.Count() < 1 || itemMaterials.Count() != otherMaterials.Count()) return false;
-        using (var materialEnum = itemMaterials.GetEnumerator())
-            while (materialEnum.MoveNext())
-            {
-                var material = materialEnum.Current;
-                if (material.MakingType == MakingType.SingleItem)
-                {
-                    var find = otherMaterials.FirstOrDefault(x => x.ItemID == material.ItemID);
-                    if (!find || find.Amount != material.Amount) return false;
-                }
-            }
-        int amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.None).Select(x => x.Amount).Sum();
-        int amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.None).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Ore).Select(x => x.Amount).Sum();
-        amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Ore).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Metal).Select(x => x.Amount).Sum();
-        amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Metal).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Cloth).Select(x => x.Amount).Sum();
-        amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Cloth).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Meat).Select(x => x.Amount).Sum();
-        amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Meat).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Fur).Select(x => x.Amount).Sum();
-        amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Fur).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Fruit).Select(x => x.Amount).Sum();
-        amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Fruit).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Blueprint).Select(x => x.Amount).Sum();
-        amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Blueprint).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Liquid).Select(x => x.Amount).Sum();
-        amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Liquid).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Condiment).Select(x => x.Amount).Sum();
-        amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Condiment).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Any).Select(x => x.Amount).Sum();
-        amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == MaterialType.Any).Select(x => x.Amount).Sum();
-        if (amout1 != amout2) return false;
-        return true;
     }
 }

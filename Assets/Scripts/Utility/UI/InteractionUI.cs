@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class InteractionUI : WindowUI
 {
@@ -9,4 +6,10 @@ public class InteractionUI : WindowUI
 
     public GameObject buttonPrefab;
     public Transform buttonParent;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        windowCanvas.overrideSorting = false;
+    }
 }

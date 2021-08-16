@@ -15,6 +15,8 @@ public class ItemInfoDisplayer : MonoBehaviour
 
     public Transform contentParent;
 
+    public DurabilityAgent durability;
+
     public Text titlePrefab;
     public Text contentPrefab;
     public RoleAttributeAgent attributePrefab;
@@ -59,6 +61,7 @@ public class ItemInfoDisplayer : MonoBehaviour
         }
         PushTitle("描述：");
         PushContent(info.item.Description);
+        ZetanUtility.SetActive(durability, info.item.IsEquipment);
         Show();
     }
 
