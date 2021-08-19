@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ZetanExtends;
@@ -12,7 +12,7 @@ public class CheckPointManager : SingletonMonoBehaviour<CheckPointManager>
 
     public CheckPointData CreateCheckPoint(CheckPointInformation info, Action<CheckPointInformation> moveIntoAction, Action<CheckPointInformation> leaveAction = null)
     {
-        if (!info || !info.IsValid || info.Scene.name != ZetanUtility.ActiveScene.name) return null;
+        if (!info || !info.IsValid || info.Scene != ZetanUtility.ActiveScene.name) return null;
         CheckPointData checkPointData = new CheckPointData(info);
         checkPointData.AddListener(moveIntoAction, leaveAction);
         foreach (var position in info.Positions)

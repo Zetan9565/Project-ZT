@@ -25,21 +25,25 @@ MonoBehaviour:
   stages:
   - stage: 1
     lastingDays: 1
+    graph: {fileID: 0}
     repeatTimes: 0
     indexToReturn: 0
     gatherInfo: {fileID: 0}
   - stage: 5
     lastingDays: 1
+    graph: {fileID: 0}
     repeatTimes: 1
     indexToReturn: 0
     gatherInfo: {fileID: 11400000, guid: f8d493d6b3173974d818047699d10d9b, type: 2}
   - stage: 7
     lastingDays: 1
+    graph: {fileID: 0}
     repeatTimes: 0
     indexToReturn: 0
     gatherInfo: {fileID: 0}
   - stage: 8
     lastingDays: 1
+    graph: {fileID: 0}
     repeatTimes: 0
     indexToReturn: 0
     gatherInfo: {fileID: 0}

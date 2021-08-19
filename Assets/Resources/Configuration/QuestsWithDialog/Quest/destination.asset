@@ -9,17 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea42c7572c4450649932d9b2abf9ee4c, type: 3}
-  m_Name: check point
+  m_Script: {fileID: 11500000, guid: f0a4a12a7ce255048ac22a15845265c4, type: 3}
+  m_Name: destination
   m_EditorClassIdentifier: 
-  _ID: POIN0001
+  _ID: POIN002
   scene: UI
   positions:
   - {x: 5.19, y: 10.59, z: -0.01938761}
   - {x: 11, y: 10.59, z: -0.01938761}
-  targetTag: Player
-  layer: 0
-  triggerType: 0
-  size: {x: 1, y: 1, z: 1}
-  radius: 0.5
-  height: 2

@@ -13,5 +13,4 @@ MonoBehaviour:
   m_Name: quest group
   m_EditorClassIdentifier: 
   _ID: QGRP001
-  _Name: "\u6069\u683C\u65AF\u4E0E\u739B\u4E3D\u4E9A"
-  questsInGoup: []
+  _name: "\u4E0D\u6B7B"

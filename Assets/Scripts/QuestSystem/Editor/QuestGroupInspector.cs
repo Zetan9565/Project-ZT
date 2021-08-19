@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -18,7 +18,7 @@ public class QuestGroupInspector : Editor
         group = target as QuestGroup;
 
         _ID = serializedObject.FindProperty("_ID");
-        _Name = serializedObject.FindProperty("_Name");
+        _Name = serializedObject.FindProperty("_name");
         questsInGoup = serializedObject.FindProperty("questsInGoup");
     }
 

@@ -24721,8 +24721,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 1041.3706, y: 0}
-  m_SizeDelta: {x: 2082.7412, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &863408216
 MonoBehaviour:
@@ -37673,7 +37673,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 300, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 600, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1321751988
@@ -40377,6 +40377,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dataName: SaveData.zdat
   encryptKey: zetangamedatezetangamdatezetanga
+  objective:
+  - id: 0
+  - id: 1
+  references:
+    version: 1
+    00000000:
+      type: {class: MoveObjective, ns: , asm: Assembly-CSharp}
+      data:
+        displayName: 
+        display: 1
+        canNavigate: 1
+        showMapIcon: 1
+        auxiliaryPos: {fileID: 0}
+        amount: 1
+        inOrder: 0
+        orderIndex: 1
+        itemToUseHere: {fileID: 0}
+    00000001:
+      type: {class: KillObjective, ns: , asm: Assembly-CSharp}
+      data:
+        displayName: 
+        display: 1
+        canNavigate: 1
+        showMapIcon: 1
+        auxiliaryPos: {fileID: 0}
+        amount: 1
+        inOrder: 0
+        orderIndex: 1
+        killType: 0
+        enemy: {fileID: 0}
+        race: {fileID: 0}
+        group: {fileID: 0}
 --- !u!4 &1409990641
 Transform:
   m_ObjectHideFlags: 0
@@ -48646,8 +48678,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 1041.3706, y: 0}
-  m_SizeDelta: {x: 2082.7412, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &1723881631
 GameObject:

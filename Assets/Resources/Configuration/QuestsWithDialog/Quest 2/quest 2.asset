@@ -41,42 +41,56 @@ MonoBehaviour:
     amount: 1000
   - item: {fileID: 11400000, guid: e7d15132e142bc34ab9b56e50a6f4539, type: 2}
     amount: 300
-  _NPCToSubmit: {fileID: 0}
+  _NPCToSubmit: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
   cmpltObjctvInOrder: 1
-  collectObjectives:
-  - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5251"
-    display: 1
-    canNavigate: 1
-    showMapIcon: 0
-    amount: 5
-    inOrder: 1
-    orderIndex: 1
-    item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    checkBagAtStart: 1
-    loseItemAtSbmt: 0
-  - displayName: "\u6536\u96C6\u7834\u65E7\u7684\u5200"
-    display: 1
-    canNavigate: 1
-    showMapIcon: 0
-    amount: 5
-    inOrder: 1
-    orderIndex: 1
-    item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
-    checkBagAtStart: 1
-    loseItemAtSbmt: 0
-  killObjectives: []
-  talkObjectives: []
-  moveObjectives: []
-  submitObjectives:
-  - displayName: "\u4E0A\u4EA4\u7834\u65E7\u7684\u5251"
-    display: 1
-    canNavigate: 1
-    showMapIcon: 1
-    amount: 1
-    inOrder: 1
-    orderIndex: 3
-    _NPCToSubmit: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    itemToSubmit: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
-    wordsWhenSubmit: "\u8FD9\u662F\u4EC0\u4E48\u4E1C\u897F\uFF0C\u54EA\u6765\u7684\uFF1F"
-    talkerType: 0
-  customObjectives: []
+  objectives:
+  - id: 0
+  - id: 1
+  - id: 2
+  references:
+    version: 1
+    00000000:
+      type: {class: CollectObjective, ns: , asm: Assembly-CSharp}
+      data:
+        displayName: "\u6536\u96C6\u602A\u7269\u7684\u5251"
+        display: 1
+        canNavigate: 1
+        showMapIcon: 1
+        auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
+        amount: 1
+        inOrder: 1
+        orderIndex: 1
+        itemToCollect: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75,
+          type: 2}
+        checkBagAtStart: 1
+        loseItemAtSbmt: 0
+    00000001:
+      type: {class: CollectObjective, ns: , asm: Assembly-CSharp}
+      data:
+        displayName: "\u6536\u96C6\u602A\u7269\u7684\u5200"
+        display: 1
+        canNavigate: 1
+        showMapIcon: 1
+        auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
+        amount: 1
+        inOrder: 1
+        orderIndex: 1
+        itemToCollect: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17,
+          type: 2}
+        checkBagAtStart: 1
+        loseItemAtSbmt: 0
+    00000002:
+      type: {class: SubmitObjective, ns: , asm: Assembly-CSharp}
+      data:
+        displayName: "\u628A\u6536\u96C6\u7684\u5251\u7ED9\u739B\u4E3D\u4E9A\u770B"
+        display: 1
+        canNavigate: 1
+        showMapIcon: 1
+        auxiliaryPos: {fileID: 0}
+        amount: 1
+        inOrder: 1
+        orderIndex: 2
+        _NPCToSubmit: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+        itemToSubmit: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+        wordsWhenSubmit: "\u8FD9\u662F\u4EC0\u4E48\u4E1C\u897F\uFF0C\u54EA\u6765\u7684\uFF1F"
+        talkerType: 0

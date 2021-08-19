@@ -32,6 +32,6 @@ MonoBehaviour:
   minYield: 1
   maxYield: 1
   materialType: 0
-  materials: []
+  formulation: {fileID: 0}
   triggerName: qwe
   stateToSet: 0

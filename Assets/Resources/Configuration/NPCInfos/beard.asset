@@ -28,6 +28,8 @@ MonoBehaviour:
         triggerName: 
       relational: 
     dialogue: {fileID: 11400000, guid: ee87b06aec0879548b1c88221a4c5e8e, type: 2}
+  scene: 
+  positions: {x: 0, y: 0, z: 0}
   isWarehouseAgent: 1
   warehouseCapcity: 30
   isVendor: 0

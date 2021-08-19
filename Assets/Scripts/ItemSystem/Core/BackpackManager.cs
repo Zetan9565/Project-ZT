@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -200,6 +200,21 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
     public bool GetItem(ItemBase item, int amount, params ItemSelectionData[] simulLoseItems)
     {
         if (Backpack == null || !item || amount < 1) return false;
+        if (item is CurrencyItem currency)
+        {
+            switch (currency.CurrencyType)
+            {
+                case CurrencyType.Money:
+                    GetMoney(amount);
+                    return true;
+                case CurrencyType.EXP:
+                    return true;
+                case CurrencyType.SkillPoint:
+                    return true;
+                default:
+                    return true;
+            }
+        }
         if (!TryGetItem_Boolean(item, amount, simulLoseItems)) return false;
         if (simulLoseItems != null)
             foreach (var si in simulLoseItems)
@@ -1315,7 +1330,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
             foreach (ObjectiveData o in quest.ObjectiveInstances)
             {
                 //当目标是收集类目标且在提交任务同时会失去相应道具时，才进行判断
-                if (o is CollectObjectiveData co && item == co.Info.Item && co.Info.LoseItemAtSbmt)
+                if (o is CollectObjectiveData co && item == co.Info.ItemToCollect && co.Info.LoseItemAtSbmt)
                 {
                     if (o.IsComplete && o.Info.InOrder)
                     {

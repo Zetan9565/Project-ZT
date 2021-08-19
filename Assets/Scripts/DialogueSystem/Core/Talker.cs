@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent, RequireComponent(typeof(MapIconHolder), typeof(Interactive))]
@@ -45,7 +45,7 @@ public class Talker : Character
         {
             foreach (var cd in Info.ConditionDialogues)
             {
-                if (cd.Condition.IsMeet())
+                if (MiscFuntion.CheckCondition(cd.Condition))
                     return cd.Dialogue;
             }
             return Info.DefaultDialogue;

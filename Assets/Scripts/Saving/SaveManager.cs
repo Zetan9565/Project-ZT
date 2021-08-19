@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Collections;
@@ -22,6 +22,9 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     [DisplayName("16或32字符密钥")]
 #endif
     private string encryptKey = "zetangamedatezetangamdatezetanga";
+
+    [SerializeReference]
+    private List<Objective> objective = new List<Objective>() { new MoveObjective(), new KillObjective() };
 
     public bool IsLoading { get; private set; }
 

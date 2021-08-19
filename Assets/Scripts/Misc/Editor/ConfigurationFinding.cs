@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -354,49 +354,37 @@ public class ConfigurationFinding : EditorWindow
                         take = true;
                     break;
                 case QuestKeyType.ObjTitle:
+                    #region 对比标题目标
+                    int index = quest.Objectives.FindIndex(obj => CompareString(obj.DisplayName, strKeys[0]));
+                    if (index >= 0)
+                    {
+                        take = true;
+                        remark = $"第[{index + 1}]个目标";
+                        break;
+                    }
+                    #endregion
+                    break;
                 case QuestKeyType.ObjItem:
+                    #region 对比目标道具
+                    index = quest.Objectives.FindIndex(obj => obj is CollectObjective co && co.ItemToCollect == objKeys[0] ||
+                                                       obj is SubmitObjective so && so.ItemToSubmit == objKeys[0] ||
+                                                       obj is MoveObjective mo && mo.ItemToUseHere == objKeys[0]);
+                    if (index >= 0)
+                    {
+                        take = true;
+                        remark = $"第[{index + 1}]个目标";
+                        break;
+                    }
+                    #endregion
+                    break;
                 case QuestKeyType.ObjTalker:
-                    #region 对比目标
-                    int index = quest.CollectObjectives.FindIndex(obj => questType == QuestKeyType.ObjTitle && CompareString(obj.DisplayName, strKeys[0]) || questType == QuestKeyType.ObjItem && obj.Item == objKeys[0]);
+                    #region 对比目标谈话人
+                    index = quest.Objectives.FindIndex(obj => obj is TalkObjective to && to.NPCToTalk == objKeys[0] ||
+                                   obj is SubmitObjective so && so.NPCToSubmit == objKeys[0]);
                     if (index >= 0)
                     {
                         take = true;
-                        remark = $"第[{index + 1}]个收集类目标";
-                        break;
-                    }
-                    index = quest.KillObjectives.FindIndex(obj => questType == QuestKeyType.ObjTitle && CompareString(obj.DisplayName, strKeys[0]));
-                    if (index >= 0)
-                    {
-                        take = true;
-                        remark = $"第[{index + 1}]个杀敌类目标";
-                        break;
-                    }
-                    index = quest.TalkObjectives.FindIndex(obj => questType == QuestKeyType.ObjTitle && CompareString(obj.DisplayName, strKeys[0]) || questType == QuestKeyType.ObjTalker && obj.NPCToTalk == objKeys[0]);
-                    if (index >= 0)
-                    {
-                        take = true;
-                        remark = $"第[{index + 1}]个谈话类目标";
-                        break;
-                    }
-                    index = quest.MoveObjectives.FindIndex(obj => questType == QuestKeyType.ObjTitle && CompareString(obj.DisplayName, strKeys[0]));
-                    if (index >= 0)
-                    {
-                        take = true;
-                        remark = $"第[{index + 1}]个检查点目标";
-                        break;
-                    }
-                    index = quest.SubmitObjectives.FindIndex(obj => questType == QuestKeyType.ObjTitle && CompareString(obj.DisplayName, strKeys[0]) || questType == QuestKeyType.ObjItem && obj.ItemToSubmit == objKeys[0]);
-                    if (index >= 0)
-                    {
-                        take = true;
-                        remark = $"第[{index + 1}]个提交类目标";
-                        break;
-                    }
-                    index = quest.CustomObjectives.FindIndex(obj => questType == QuestKeyType.ObjTitle && CompareString(obj.DisplayName, strKeys[0]));
-                    if (index >= 0)
-                    {
-                        take = true;
-                        remark = $"第[{index + 1}]个自定义目标";
+                        remark = $"第[{index + 1}]个目标";
                         break;
                     }
                     #endregion

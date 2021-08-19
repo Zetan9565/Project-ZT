@@ -1,10 +1,15 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("Zetan Studio/管理器/时间管理器")]
 public class TimeManager : SingletonMonoBehaviour<TimeManager>
 {
+    //**
+    //设计思路：
+    //一年固定360天，一月固定30天
+    //**/
+
     #region 常量
     public const int HourToSeconds = 3600;
     public const int DayToSeconds = 86400;
@@ -17,27 +22,27 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     /// <summary>
     /// 一个游戏分在现实中的耗时(秒)
     /// </summary>
-    public static float OneMinute => Instance ? 60 / Instance.multiples : 1;
+    public float ScaleMinuteToReal => 60 / multiples;
     /// <summary>
     /// 一个游戏时在现实中的耗时(秒)
     /// </summary>
-    public static float OneHour => OneMinute * 60;
+    public float ScaleHourToReal => ScaleMinuteToReal * 60;
     /// <summary>
     /// 一个游戏日在现实中的耗时(秒)
     /// </summary>
-    public static float OneDay => OneHour * 24;
+    public float ScaleDayToReal => ScaleHourToReal * 24;
     /// <summary>
     /// 一个游戏月在现实中的耗时(秒)
     /// </summary>
-    public static float OneMonth => OneDay * 30;
+    public float ScaleMonthToReal => ScaleDayToReal * 30;
     /// <summary>
     /// 一个游戏季在现实中的耗时(秒)
     /// </summary>
-    public static float OneSeason => OneMonth * 3;
+    public float ScaleSeasonToReal => ScaleMonthToReal * 3;
     /// <summary>
     /// 一个游戏年在现实中的耗时(秒)
     /// </summary>
-    public static float OneYear => OneSeason * 4;
+    public float ScaleYearToReal => ScaleSeasonToReal * 4;
 
     public static string WeekDayToString(DayOfWeek dayOfWeek, TimeSystem timeSystem = TimeSystem.System24)
     {
@@ -102,7 +107,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         set
         {
             timeline = value % 24;
-            totalTime = ((Days - 1) * DayToSeconds + (decimal)timeline * HourToSeconds) / multiples;
+            timeStamp = ((Days - 1) * DayToSeconds + (decimal)timeline * HourToSeconds) / multiples;
         }
     }
 
@@ -231,7 +236,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         {
             value = (value < 1 ? 1 : value) % 360;
             value = value == 0 ? 360 : value;
-            totalTime = ((Years - 1) * YearToSeconds + (value - 1) * DayToSeconds + (decimal)timeline * HourToSeconds) / multiples;
+            timeStamp = ((Years - 1) * YearToSeconds + (value - 1) * DayToSeconds + (decimal)timeline * HourToSeconds) / multiples;
         }
     }
     public Month CurrentMonth
@@ -264,7 +269,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     {
         get
         {
-            int days = Mathf.CeilToInt((float)(totalTime * multiples / DayToSeconds));
+            int days = Mathf.CeilToInt((float)(timeStamp * multiples / DayToSeconds));
             return days < 1 ? 1 : days;
         }
     }//从1开始计
@@ -272,7 +277,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     {
         get
         {
-            int weeks = Mathf.CeilToInt((float)(totalTime * multiples / WeekToSeconds));
+            int weeks = Mathf.CeilToInt((float)(timeStamp * multiples / WeekToSeconds));
             return weeks < 1 ? 1 : weeks;
         }
     }//从1开始计
@@ -280,7 +285,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     {
         get
         {
-            int months = Mathf.CeilToInt((float)(totalTime * multiples / MonthToSeconds));
+            int months = Mathf.CeilToInt((float)(timeStamp * multiples / MonthToSeconds));
             return months < 1 ? 1 : months;
         }
     }
@@ -288,7 +293,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     {
         get
         {
-            int years = Mathf.CeilToInt((float)(totalTime * multiples / YearToSeconds));
+            int years = Mathf.CeilToInt((float)(timeStamp * multiples / YearToSeconds));
             return years < 1 ? 1 : years;
         }
     }//从1开始计
@@ -298,14 +303,14 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     public float NormalizeTimeline => timeline / 24;
 
     [SerializeField]
-    private decimal totalTime = 0;
-    public decimal TotalTime
+    private decimal timeStamp = 0;
+    public decimal TimeStamp
     {
-        get => totalTime;
+        get => timeStamp;
         set
         {
-            OnTimePassed?.Invoke(value - totalTime);
-            totalTime = value;
+            OnTimePassed?.Invoke(value - timeStamp);
+            timeStamp = value;
         }
     }
 
@@ -335,8 +340,8 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     public void TimePase(decimal realSecond)
     {
         OnTimePassed?.Invoke(realSecond);
-        totalTime += realSecond;
-        timeline = (float)(totalTime * multiples / HourToSeconds % 24);
+        timeStamp += realSecond;
+        timeline = (float)(timeStamp * multiples / HourToSeconds % 24);
         CheckDayChange();
         UpdateTime();
     }
@@ -353,22 +358,42 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
 
     public void SaveData(SaveData data)
     {
-        data.totalTime = TotalTime;
+        data.totalTime = TimeStamp;
     }
     public void LoadData(SaveData data)
     {
-        totalTime = data.totalTime;
+        timeStamp = data.totalTime;
         SetTime(data.totalTime);
     }
 
-    private void SetTime(decimal totalTime)
+    public int GetDaysSince(decimal timeStamp)
+    {
+        int days = (int)((this.timeStamp - timeStamp) / (decimal)ScaleDayToReal / DayToSeconds);
+        return days;
+    }
+
+    public decimal GetRealTimeUntil(float timeline)
+    {
+        if (timeline == 0) timeline = 24;
+        if (timeline > this.timeline)
+            return (decimal)(DayToSeconds * (timeline - this.timeline) * ScaleDayToReal);
+        else
+            return (decimal)(DayToSeconds * (24 - this.timeline + timeline) * ScaleDayToReal);
+    }
+
+    public void SkipToday()
+    {
+        TimeStamp += GetRealTimeUntil(0f);
+    }
+
+    private void SetTime(decimal timeStamp)
     {
         ResetTime();
-        TimePase(totalTime);
+        TimePase(timeStamp);
     }
     private void ResetTime()
     {
-        totalTime = 0;
+        timeStamp = 0;
         timeline = 0;
         dayBefore = 0;
         UpdateUI();
@@ -404,22 +429,22 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
             string monthString = (int)month + "月";
             if (timeSystem == TimeSystem.Twelve)
             {
-                switch (month)
+                monthString = month switch
                 {
-                    case Month.January: monthString = "正月"; break;
-                    case Month.February: monthString = "二月"; break;
-                    case Month.March: monthString = "三月"; break;
-                    case Month.April: monthString = "四月"; break;
-                    case Month.May: monthString = "五月"; break;
-                    case Month.June: monthString = "六月"; break;
-                    case Month.July: monthString = "七月"; break;
-                    case Month.August: monthString = "八月"; break;
-                    case Month.September: monthString = "九月"; break;
-                    case Month.October: monthString = "十月"; break;
-                    case Month.November: monthString = "冬月"; break;
-                    case Month.Decamber: monthString = "腊月"; break;
-                    default: monthString = string.Empty; break;
-                }
+                    Month.January => "正月",
+                    Month.February => "二月",
+                    Month.March => "三月",
+                    Month.April => "四月",
+                    Month.May => "五月",
+                    Month.June => "六月",
+                    Month.July => "七月",
+                    Month.August => "八月",
+                    Month.September => "九月",
+                    Month.October => "十月",
+                    Month.November => "冬月",
+                    Month.Decamber => "腊月",
+                    _ => monthString,
+                };
             }
             return monthString;
         }
@@ -431,44 +456,44 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
             {
                 int dayOfDate = dayOfMonth;
                 if (dayOfDate < 20)
-                    switch (dayOfDate)
+                    dayString = dayOfDate switch
                     {
-                        case 1: dayString = "初一"; break;
-                        case 2: dayString = "初二"; break;
-                        case 3: dayString = "初三"; break;
-                        case 4: dayString = "初四"; break;
-                        case 5: dayString = "初五"; break;
-                        case 6: dayString = "初六"; break;
-                        case 7: dayString = "初七"; break;
-                        case 8: dayString = "初八"; break;
-                        case 9: dayString = "初九"; break;
-                        case 10: dayString = "初十"; break;
-                        case 11: dayString = "十一"; break;
-                        case 12: dayString = "十二"; break;
-                        case 13: dayString = "十三"; break;
-                        case 14: dayString = "十四"; break;
-                        case 15: dayString = "十五"; break;
-                        case 16: dayString = "十六"; break;
-                        case 17: dayString = "十七"; break;
-                        case 18: dayString = "十八"; break;
-                        case 19: dayString = "十九"; break;
-                        case 20: dayString = "二十"; break;
-                        default: dayString = string.Empty; break;
-                    }
+                        1 => "初一",
+                        2 => "初二",
+                        3 => "初三",
+                        4 => "初四",
+                        5 => "初五",
+                        6 => "初六",
+                        7 => "初七",
+                        8 => "初八",
+                        9 => "初九",
+                        10 => "初十",
+                        11 => "十一",
+                        12 => "十二",
+                        13 => "十三",
+                        14 => "十四",
+                        15 => "十五",
+                        16 => "十六",
+                        17 => "十七",
+                        18 => "十八",
+                        19 => "十九",
+                        20 => "二十",
+                        _ => dayString,
+                    };
                 else if (dayOfDate > 20 && dayOfDate < 30)
-                    switch (dayOfDate)
+                    dayString = dayOfDate switch
                     {
-                        case 21: dayString = "廿一"; break;
-                        case 22: dayString = "廿二"; break;
-                        case 23: dayString = "廿三"; break;
-                        case 24: dayString = "廿四"; break;
-                        case 25: dayString = "廿五"; break;
-                        case 26: dayString = "廿六"; break;
-                        case 27: dayString = "廿七"; break;
-                        case 28: dayString = "廿八"; break;
-                        case 29: dayString = "廿九"; break;
-                        default: dayString = string.Empty; break;
-                    }
+                        21 => "廿一",
+                        22 => "廿二",
+                        23 => "廿三",
+                        24 => "廿四",
+                        25 => "廿五",
+                        26 => "廿六",
+                        27 => "廿七",
+                        28 => "廿八",
+                        29 => "廿九",
+                        _ => dayString,
+                    };
                 else if (dayOfDate == 30) dayString = "三十";
             }
             return dayString;
@@ -476,24 +501,16 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
 
         public string GetWeekDayString(TimeSystem timeSystem)
         {
-            switch (dayOfWeek)
+            return dayOfWeek switch
             {
-                case DayOfWeek.Monday:
-                    return timeSystem == TimeSystem.Twelve ? "月曜" : "星期一";
-                case DayOfWeek.Tuesday:
-                    return timeSystem == TimeSystem.Twelve ? "金曜" : "星期二";
-                case DayOfWeek.Wednesday:
-                    return timeSystem == TimeSystem.Twelve ? "木曜" : "星期三";
-                case DayOfWeek.Thursday:
-                    return timeSystem == TimeSystem.Twelve ? "水曜" : "星期四";
-                case DayOfWeek.Friday:
-                    return timeSystem == TimeSystem.Twelve ? "火曜" : "星期五";
-                case DayOfWeek.Saturday:
-                    return timeSystem == TimeSystem.Twelve ? "土曜" : "星期六";
-                case DayOfWeek.Sunday:
-                default:
-                    return timeSystem == TimeSystem.Twelve ? "日曜" : "星期日";
-            }
+                DayOfWeek.Monday => timeSystem == TimeSystem.Twelve ? "月曜" : "星期一",
+                DayOfWeek.Tuesday => timeSystem == TimeSystem.Twelve ? "金曜" : "星期二",
+                DayOfWeek.Wednesday => timeSystem == TimeSystem.Twelve ? "木曜" : "星期三",
+                DayOfWeek.Thursday => timeSystem == TimeSystem.Twelve ? "水曜" : "星期四",
+                DayOfWeek.Friday => timeSystem == TimeSystem.Twelve ? "火曜" : "星期五",
+                DayOfWeek.Saturday => timeSystem == TimeSystem.Twelve ? "土曜" : "星期六",
+                _ => timeSystem == TimeSystem.Twelve ? "日曜" : "星期日",
+            };
         }
 
         public string ToString(TimeSystem timeSystem = TimeSystem.System24)

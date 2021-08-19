@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -151,8 +151,8 @@ public class CropInfoInspector : Editor
                 int lineCount = 1;
                 serializedObject.Update();
                 EditorGUI.BeginChangeCheck();
-                graph.objectReferenceValue = EditorGUI.ObjectField(new Rect(rect.x - rect.width + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight * 3.5f),
-                    string.Empty, graph.objectReferenceValue as Sprite, typeof(Sprite), false);
+                graph.objectReferenceValue = EditorGUI.ObjectField(new Rect(rect.x - rect.width + lineHeight * 4.2f, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight * 3.2f),
+                    string.Empty, graph.objectReferenceValue, typeof(Sprite), false);
                 if (repeatTimes.intValue != 0)
                 {
                     EditorGUI.PropertyField(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), gatherInfo, new GUIContent("对应采集物信息"));
@@ -160,26 +160,33 @@ public class CropInfoInspector : Editor
                     if (gatherInfo.objectReferenceValue)
                     {
                         if (GUI.Button(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), "编辑"))
-                            GatheringInfoEditor.CreateWindow(gatherInfo.objectReferenceValue as GatheringInformation);
+                            EditorUtility.OpenPropertyEditor(gatherInfo.objectReferenceValue);
                     }
                     else if (GUI.Button(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), "新建"))
                     {
-                        if (EditorUtility.DisplayDialog("新建", "将在Assets/Resources/Configuration/Gatherting目录新建一个采集物信息，是否继续？", "确定", "取消"))
+                        string folder = EditorUtility.OpenFolderPanel("选择保存文件夹", ZetanEditorUtility.GetDirectoryName(target), "");
+                        if (!string.IsNullOrEmpty(folder))
                         {
-                            GatheringInformation infoInstance = CreateInstance<GatheringInformation>();
-                            AssetDatabase.CreateAsset(infoInstance, AssetDatabase.GenerateUniqueAssetPath("Assets/Resources/Configuration/Gatherting/gathering info.asset"));
-                            AssetDatabase.SaveAssets();
-                            AssetDatabase.Refresh();
+                            try
+                            {
+                                GatheringInformation infoInstance = CreateInstance<GatheringInformation>();
+                                AssetDatabase.CreateAsset(infoInstance, AssetDatabase.GenerateUniqueAssetPath($"{folder.Replace(Application.dataPath, "Assets")}/gathering info.asset"));
+                                AssetDatabase.Refresh();
 
-                            gatherInfo.objectReferenceValue = infoInstance;
-                            SerializedObject gInfoObj = new SerializedObject(gatherInfo.objectReferenceValue);
-                            SerializedProperty _ID = gInfoObj.FindProperty("_ID");
-                            SerializedProperty _Name = gInfoObj.FindProperty("_name");
-                            _ID.stringValue = this._ID.stringValue + "S" + index;
-                            _Name.stringValue = _name.stringValue;
-                            gInfoObj.ApplyModifiedProperties();
+                                gatherInfo.objectReferenceValue = infoInstance;
+                                SerializedObject gInfoObj = new SerializedObject(gatherInfo.objectReferenceValue);
+                                SerializedProperty _ID = gInfoObj.FindProperty("_ID");
+                                SerializedProperty _Name = gInfoObj.FindProperty("_name");
+                                _ID.stringValue = this._ID.stringValue + "S" + index;
+                                _Name.stringValue = _name.stringValue;
+                                gInfoObj.ApplyModifiedProperties();
 
-                            GatheringInfoEditor.CreateWindow(infoInstance);
+                                EditorUtility.OpenPropertyEditor(infoInstance);
+                            }
+                            catch
+                            {
+                                EditorUtility.DisplayDialog("新建失败", "请选择Assets目录以下的文件夹。", "确定");
+                            }
                         }
                     }
                     lineCount++;

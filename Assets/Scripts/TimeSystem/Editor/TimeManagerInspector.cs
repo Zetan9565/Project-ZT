@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 
 [CustomEditor(typeof(TimeManager))]
@@ -42,21 +42,21 @@ public class TimeManagerInspector : SingletonMonoBehaviourInspector
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("天-") && manager.Days > 1)
-            manager.TotalTime -= TimeManager.DayToSeconds / multiples.intValue;
+            manager.TimeStamp -= TimeManager.DayToSeconds / multiples.intValue;
         if (GUILayout.Button("天+"))
-            manager.TotalTime += TimeManager.DayToSeconds / multiples.intValue;
+            manager.TimeStamp += TimeManager.DayToSeconds / multiples.intValue;
         if (GUILayout.Button("周-") && manager.Weeks > 1)
-            manager.TotalTime -= TimeManager.WeekToSeconds / multiples.intValue;
+            manager.TimeStamp -= TimeManager.WeekToSeconds / multiples.intValue;
         if (GUILayout.Button("周+") && manager.Weeks % 52 != 0)
-            manager.TotalTime += TimeManager.WeekToSeconds / multiples.intValue;
+            manager.TimeStamp += TimeManager.WeekToSeconds / multiples.intValue;
         if (GUILayout.Button("月-") && manager.Months > 1)
-            manager.TotalTime -= TimeManager.MonthToSeconds / multiples.intValue;
+            manager.TimeStamp -= TimeManager.MonthToSeconds / multiples.intValue;
         if (GUILayout.Button("月+") && manager.Months % 12 != 0)
-            manager.TotalTime += TimeManager.MonthToSeconds / multiples.intValue;
+            manager.TimeStamp += TimeManager.MonthToSeconds / multiples.intValue;
         if (GUILayout.Button("年-") && manager.Years > 1)
-            manager.TotalTime -= TimeManager.YearToSeconds / multiples.intValue;
+            manager.TimeStamp -= TimeManager.YearToSeconds / multiples.intValue;
         if (GUILayout.Button("年+"))
-            manager.TotalTime += TimeManager.YearToSeconds / multiples.intValue;
+            manager.TimeStamp += TimeManager.YearToSeconds / multiples.intValue;
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.BeginVertical("Box");
@@ -66,7 +66,7 @@ public class TimeManagerInspector : SingletonMonoBehaviourInspector
         EditorGUILayout.LabelField("总月数", "第 " + manager.Months + " 月");
         EditorGUILayout.LabelField("总年数", "第 " + manager.Years + " 年");
         EditorGUILayout.LabelField("当月第一天", TimeManager.WeekDayToString(manager.WeekDayOfTheFirstDayOfCurrentMonth, manager.TimeSystem));
-        EditorGUILayout.LabelField("折合现实总时间(秒)", manager.TotalTime.ToString("F0"));
+        EditorGUILayout.LabelField("折合现实总时间(秒)", manager.TimeStamp.ToString("F0"));
         EditorGUILayout.EndVertical();
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
     }

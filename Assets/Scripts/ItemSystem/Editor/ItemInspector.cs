@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -166,16 +166,24 @@ public partial class ItemInspector : Editor
                 {
                     if (GUILayout.Button("新建"))
                     {
-                        if (EditorUtility.DisplayDialog("新建", "将在Assets/Resources/Configuration/Formulation/Item目录新建一个配方，是否继续？", "确定", "取消"))
+                        string folder = EditorUtility.OpenFolderPanel("选择保存文件夹", ZetanEditorUtility.GetDirectoryName(target), "");
+                        if (!string.IsNullOrEmpty(folder))
                         {
-                            Formulation formuInstance = CreateInstance<Formulation>();
-                            AssetDatabase.CreateAsset(formuInstance, AssetDatabase.GenerateUniqueAssetPath("Assets/Resources/Configuration/Formulation/formulation.asset"));
-                            AssetDatabase.SaveAssets();
-                            AssetDatabase.Refresh();
+                            try
+                            {
+                                Formulation formuInstance = CreateInstance<Formulation>();
+                                AssetDatabase.CreateAsset(formuInstance, AssetDatabase.GenerateUniqueAssetPath("Assets/Resources/Configuration/Formulation/formulation.asset"));
+                                AssetDatabase.SaveAssets();
+                                AssetDatabase.Refresh();
 
-                            formulation.objectReferenceValue = formuInstance;
+                                formulation.objectReferenceValue = formuInstance;
 
-                            FormulationEditor.CreateWindow(formuInstance);
+                                EditorUtility.OpenPropertyEditor(formuInstance);
+                            }
+                            catch
+                            {
+                                EditorUtility.DisplayDialog("新建失败", "请选择Assets目录以下的文件夹。", "确定");
+                            }
                         }
                     }
                     EditorGUILayout.HelpBox("未设置配方", MessageType.Error);
@@ -183,7 +191,7 @@ public partial class ItemInspector : Editor
                 else
                 {
                     if (GUILayout.Button("编辑"))
-                        FormulationEditor.CreateWindow(formulation.objectReferenceValue as Formulation);
+                        EditorUtility.OpenPropertyEditor(formulation.objectReferenceValue as Formulation);
                     if (!(formulation.objectReferenceValue as Formulation).IsValid)
                         EditorGUILayout.HelpBox("配方信息不完整。", MessageType.Error);
                     else if (item.Formulation)

@@ -1,16 +1,17 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /// <summary>
 /// 任务目标
 /// </summary>
+[System.Serializable]
 public abstract class Objective
 {
     [SerializeField]
-    private string displayName = string.Empty;
+    protected string displayName = string.Empty;
     public string DisplayName => displayName;
 
     [SerializeField]
-    private bool display = true;
+    protected bool display = true;
     public bool Display
     {
         get
@@ -20,23 +21,36 @@ public abstract class Objective
     }
 
     [SerializeField]
-    private bool canNavigate = true;
-    public bool CanNavigate => this is CollectObjective || this is CustomObjective ? false : canNavigate;
+    protected bool canNavigate = true;
+    public bool CanNavigate => this is CollectObjective || this is TriggerObjective ? false : canNavigate;
 
     [SerializeField]
-    private bool showMapIcon = true;
-    public bool ShowMapIcon => (this is CollectObjective || this is CustomObjective) ? false : showMapIcon;
+    protected bool showMapIcon = true;
+    public bool ShowMapIcon => (this is CollectObjective || this is TriggerObjective) ? false : showMapIcon;
 
     [SerializeField]
-    private int amount = 1;
+    protected DestinationInformation auxiliaryPos;
+    /// <summary>
+    /// 辅助位置，用于地图图标、导航等
+    /// </summary>
+    public DestinationInformation AuxiliaryPos
+    {
+        get
+        {
+            return auxiliaryPos;
+        }
+    }
+
+    [SerializeField]
+    protected int amount = 1;
     public int Amount => amount;
 
     [SerializeField]
-    private bool inOrder;
+    protected bool inOrder;
     public bool InOrder => inOrder;
 
     [SerializeField]
-    private int orderIndex = 1;
+    protected int orderIndex = 1;
     public int OrderIndex => orderIndex;
 
     public virtual bool IsValid
@@ -59,8 +73,8 @@ public abstract class Objective
 public class CollectObjective : Objective
 {
     [SerializeField]
-    private ItemBase item;
-    public ItemBase Item => item;
+    private ItemBase itemToCollect;
+    public ItemBase ItemToCollect => itemToCollect;
 
     [SerializeField]
     private bool checkBagAtStart = true;
@@ -80,7 +94,7 @@ public class CollectObjective : Objective
     {
         get
         {
-            return base.IsValid && item;
+            return base.IsValid && itemToCollect && (!showMapIcon || showMapIcon && auxiliaryPos);
         }
     }
 }
@@ -91,12 +105,12 @@ public class CollectObjective : Objective
 public class KillObjective : Objective
 {
     [SerializeField]
-    private KillObjectiveType objectiveType;
-    public KillObjectiveType ObjectiveType
+    private KillObjectiveType killType;
+    public KillObjectiveType KillType
     {
         get
         {
-            return objectiveType;
+            return killType;
         }
     }
 
@@ -128,13 +142,13 @@ public class KillObjective : Objective
     {
         get
         {
-            if (objectiveType == KillObjectiveType.Specific && !enemy)
+            if (killType == KillObjectiveType.Specific && !enemy)
                 return false;
-            else if (objectiveType == KillObjectiveType.Race && !race)
+            else if (killType == KillObjectiveType.Race && !race)
                 return false;
-            else if (objectiveType == KillObjectiveType.Group && !group)
+            else if (killType == KillObjectiveType.Group && !group)
                 return false;
-            else return base.IsValid;
+            else return base.IsValid && (!showMapIcon || showMapIcon && auxiliaryPos);
         }
     }
 }
@@ -205,20 +219,17 @@ public class TalkObjective : Objective
 public class MoveObjective : Objective
 {
     [SerializeField]
-    private CheckPointInformation checkPoint;
-    public CheckPointInformation CheckPoint
-    {
-        get
-        {
-            return checkPoint;
-        }
-    }
+    public new CheckPointInformation AuxiliaryPos => auxiliaryPos as CheckPointInformation;
+
+    [SerializeField]
+    private QuestItem itemToUseHere;
+    public QuestItem ItemToUseHere => itemToUseHere;
 
     public override bool IsValid
     {
         get
         {
-            return base.IsValid && CheckPoint;
+            return base.IsValid && AuxiliaryPos;
         }
     }
 }
@@ -277,10 +288,10 @@ public class SubmitObjective : Objective
     }
 }
 /// <summary>
-/// 自定义目标
+/// 触发器目标
 /// </summary>
 [System.Serializable]
-public class CustomObjective : Objective
+public class TriggerObjective : Objective
 {
     [SerializeField]
     private string triggerName;
@@ -291,6 +302,10 @@ public class CustomObjective : Objective
             return triggerName;
         }
     }
+
+    [SerializeField]
+    private bool stateToCheck;
+    public bool StateToCheck => stateToCheck;
 
     [SerializeField]
     private bool checkStateAtAcpt = true;//用于标识是否在接取任务时检触发器状态看是否满足目标，否则目标重头开始等待触发

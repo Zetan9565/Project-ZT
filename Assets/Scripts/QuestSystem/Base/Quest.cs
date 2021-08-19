@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,7 +11,7 @@ public class Quest : ScriptableObject
     public string ID => _ID;
 
     [SerializeField, TextArea(2, 3)]
-    private string title = string.Empty;
+    private string title = "未定名任务";
     public string Title => title;
 
     public new string name => title;
@@ -74,29 +74,10 @@ public class Quest : ScriptableObject
     private bool cmpltObjctvInOrder = false;
     public bool CmpltObjctvInOrder => cmpltObjctvInOrder;
 
-    [SerializeField, NonReorderable]
-    private List<CollectObjective> collectObjectives = new List<CollectObjective>();
-    public List<CollectObjective> CollectObjectives => collectObjectives;
+    [SerializeReference]
+    private List<Objective> objectives = new List<Objective>();
+    public List<Objective> Objectives => objectives;
 
-    [SerializeField, NonReorderable]
-    private List<KillObjective> killObjectives = new List<KillObjective>();
-    public List<KillObjective> KillObjectives => killObjectives;
-
-    [SerializeField, NonReorderable]
-    private List<TalkObjective> talkObjectives = new List<TalkObjective>();
-    public List<TalkObjective> TalkObjectives => talkObjectives;
-
-    [SerializeField, NonReorderable]
-    private List<MoveObjective> moveObjectives = new List<MoveObjective>();
-    public List<MoveObjective> MoveObjectives => moveObjectives;
-
-    [SerializeField, NonReorderable]
-    private List<SubmitObjective> submitObjectives = new List<SubmitObjective>();
-    public List<SubmitObjective> SubmitObjectives => submitObjectives;
-
-    [SerializeField, NonReorderable]
-    private List<CustomObjective> customObjectives = new List<CustomObjective>();
-    public List<CustomObjective> CustomObjectives => customObjectives;
 
     public static string GetAutoID(int length = 3)
     {
@@ -119,6 +100,27 @@ public class Quest : ScriptableObject
         if (!find) return false;//若没有找到，则ID可用
         //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
         return find != quest || (find == quest && Array.FindAll(all, x => x.ID == quest.ID).Length > 1);
+    }
+
+    public string GetObjectiveString()
+    {
+        List<Objective> objectives = new List<Objective>();
+        objectives.AddRange(this.objectives);
+        objectives.Sort((x, y) =>
+        {
+            if (x.OrderIndex > y.OrderIndex) return 1;
+            else if (x.OrderIndex < y.OrderIndex) return -1;
+            else return 0;
+        });
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        foreach (var objective in objectives)
+        {
+            sb.Append("-");
+            sb.Append(objective.DisplayName);
+            sb.Append("\n");
+        }
+        if (sb.Length > 1) sb.Remove(sb.Length - 1, 1);
+        return sb.ToString();
     }
 }
 

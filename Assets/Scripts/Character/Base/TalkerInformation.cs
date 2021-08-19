@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "npc info", menuName = "Zetan Studio/角色/NPC信息")]
@@ -11,6 +11,15 @@ public class TalkerInformation : CharacterInformation
     [SerializeField, NonReorderable]
     private List<ConditionDialogue> conditionDialogues = new List<ConditionDialogue>();
     public List<ConditionDialogue> ConditionDialogues => conditionDialogues;
+
+    [SerializeField]
+    private string scene;
+    public string Scene => scene;
+
+    [SerializeField]
+    private Vector3 positions;
+    public Vector3 Positions => positions;
+
 
     [SerializeField]
     private bool isWarehouseAgent;

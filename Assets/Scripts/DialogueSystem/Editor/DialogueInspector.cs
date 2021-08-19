@@ -1,4 +1,4 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using System.Linq;
@@ -42,7 +42,7 @@ public class DialogueInspector : Editor
         useCurrentTalkerInfo = serializedObject.FindProperty("useCurrentTalkerInfo");
         unifiedNPC = serializedObject.FindProperty("unifiedNPC");
         dialogWords = serializedObject.FindProperty("words");
-        npcSelector = new CharacterSelectionDrawer<TalkerInformation>(serializedObject, unifiedNPC);
+        npcSelector = new CharacterSelectionDrawer<TalkerInformation>(unifiedNPC, string.Empty);
         HandlingWordsList();
     }
 
@@ -85,7 +85,7 @@ public class DialogueInspector : Editor
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.BeginHorizontal();
-            npcSelector.DoLayoutDraw(string.Empty);
+            npcSelector.DoLayoutDraw();
             EditorGUILayout.PropertyField(unifiedNPC, new GUIContent(string.Empty));
             EditorGUILayout.EndVertical();
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +17,7 @@ namespace ZetanExtends
     {
         public static Transform CreateChild(this Transform source, string name = null)
         {
-            if (string.IsNullOrEmpty(name)) name = $"Child of {source.gameObject.name}";
+            if (string.IsNullOrEmpty(name)) name = $"Child ({source.transform.childCount})";
             GameObject child = new GameObject(name);
             child.transform.SetParent(source);
             return child.transform;
@@ -41,7 +41,7 @@ namespace ZetanExtends
 
         public static GameObject CreateChild(this GameObject source, string name = null)
         {
-            if (string.IsNullOrEmpty(name)) name = $"Child of {source.name}";
+            if (string.IsNullOrEmpty(name)) name = $"Child ({source.transform.childCount})";
             GameObject child = new GameObject(name);
             child.transform.SetParent(source.transform);
             return child;

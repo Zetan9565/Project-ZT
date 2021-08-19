@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
@@ -23,7 +23,7 @@ public class SaveData
     public List<WarehouseSaveData> warehouseDatas = new List<WarehouseSaveData>();
 
     public List<QuestSaveData> inProgressQuestDatas = new List<QuestSaveData>();
-    public List<QuestSaveData> completeQuestDatas = new List<QuestSaveData>();
+    public List<QuestSaveData> finishedQuestDatas = new List<QuestSaveData>();
 
     public List<DialogueSaveData> dialogueDatas = new List<DialogueSaveData>();
 

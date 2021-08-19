@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -79,6 +79,7 @@ public class ItemWindowManager : WindowHandler<ItemWindowUI, ItemWindowManager>
         }
         else ZetanUtility.SetActive(UI.buttonParent, false);
 #elif UNITY_STANDALONE
+        ClearButtons();
         ZetanUtility.SetActive(UI.buttonArea, false);
 #endif
         OpenWindow();

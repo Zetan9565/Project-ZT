@@ -1,9 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
-using UnityEditor.AnimatedValues;
 using UnityEngine;
 
 [CustomEditor(typeof(Formulation))]

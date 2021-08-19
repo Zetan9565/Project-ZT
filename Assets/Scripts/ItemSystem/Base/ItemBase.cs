@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -188,6 +188,48 @@ public abstract class ItemBase : ScriptableObject
             case ItemType.Currency:
                 return "特殊";
             default: return "普通";
+        }
+    }
+
+    public static Type ItemTypeToClassType(ItemType itemType)
+    {
+        switch (itemType)
+        {
+            case ItemType.Medicine:
+                return typeof(MedicineItem);
+            case ItemType.Elixir:
+                return typeof(ItemBase);
+            case ItemType.Cuisine:
+                return typeof(ItemBase);
+            case ItemType.Weapon:
+                return typeof(WeaponItem);
+            case ItemType.Armor:
+                return typeof(ArmorItem);
+            case ItemType.Jewelry:
+                return typeof(ItemBase);
+            case ItemType.Box:
+                return typeof(BoxItem);
+            case ItemType.Material:
+                return typeof(MaterialItem);
+            case ItemType.Valuables:
+                return typeof(ItemBase);
+            case ItemType.Quest:
+                return typeof(QuestItem);
+            case ItemType.Tool:
+                return typeof(ItemBase);
+            case ItemType.Gemstone:
+                return typeof(GemItem);
+            case ItemType.Book:
+                return typeof(BookItem);
+            case ItemType.Bag:
+                return typeof(BagItem);
+            case ItemType.Seed:
+                return typeof(SeedItem);
+            case ItemType.Currency:
+                return typeof(CurrencyItem);
+            case ItemType.Other:
+            default:
+                return typeof(ItemBase);
         }
     }
 }

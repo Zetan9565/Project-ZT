@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
@@ -297,7 +297,7 @@ public partial class CharacterInfoInspector
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.QuestsStored[index].Title);
                     if (GUI.Button(new Rect(rect.x + rect.width * 0.8f, rect.y, rect.width * 0.2f, lineHeight), "编辑"))
                     {
-                        QuestEditor.CreateWindow(quest.objectReferenceValue as Quest);
+                        EditorUtility.OpenPropertyEditor(quest.objectReferenceValue);
                     }
                 }
                 else
@@ -305,22 +305,29 @@ public partial class CharacterInfoInspector
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
                     if (GUI.Button(new Rect(rect.x + rect.width * 0.8f, rect.y, rect.width * 0.2f, lineHeight), "新建"))
                     {
-                        if (EditorUtility.DisplayDialog("新建", "将在Assets/Resources/Configuration/QuestsWithDialog目录新建一个任务信息，是否继续？", "确定", "取消"))
+                        string folder = EditorUtility.OpenFolderPanel("选择保存文件夹", ZetanEditorUtility.GetDirectoryName(target), "");
+                        if (!string.IsNullOrEmpty(folder))
                         {
-                            Quest questInstance = CreateInstance<Quest>();
-                            AssetDatabase.CreateAsset(questInstance, AssetDatabase.GenerateUniqueAssetPath("Assets/Resources/Configuration/QuestsWithDialog/quest.asset"));
-                            AssetDatabase.SaveAssets();
-                            AssetDatabase.Refresh();
+                            try
+                            {
+                                Quest questInstance = CreateInstance<Quest>();
+                                AssetDatabase.CreateAsset(questInstance, AssetDatabase.GenerateUniqueAssetPath($"{folder.Replace(Application.dataPath, "Assets")}/quest.asset"));
+                                AssetDatabase.Refresh();
 
-                            quest.objectReferenceValue = questInstance;
-                            SerializedObject newQuest = new SerializedObject(quest.objectReferenceValue);
-                            SerializedProperty _ID = newQuest.FindProperty("_ID");
-                            SerializedProperty title = newQuest.FindProperty("title");
-                            _ID.stringValue = Quest.GetAutoID();
-                            title.stringValue = $"{_Name.stringValue}的委托";
-                            newQuest.ApplyModifiedProperties();
+                                quest.objectReferenceValue = questInstance;
+                                SerializedObject newQuest = new SerializedObject(quest.objectReferenceValue);
+                                SerializedProperty _ID = newQuest.FindProperty("_ID");
+                                SerializedProperty title = newQuest.FindProperty("title");
+                                _ID.stringValue = Quest.GetAutoID();
+                                title.stringValue = $"{_Name.stringValue}的委托";
+                                newQuest.ApplyModifiedProperties();
 
-                            QuestEditor.CreateWindow(questInstance);
+                                EditorUtility.OpenPropertyEditor(questInstance);
+                            }
+                            catch
+                            {
+                                EditorUtility.DisplayDialog("新建失败", "请选择Assets目录以下的文件夹。", "确定");
+                            }
                         }
                     }
                 }

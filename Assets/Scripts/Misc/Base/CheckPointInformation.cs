@@ -1,14 +1,8 @@
-﻿using System;
-using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "check point", menuName = "Zetan Studio/任务/位置检查点")]
-public class CheckPointInformation : ScriptableObject
+[CreateAssetMenu(fileName = "check point", menuName = "Zetan Studio/其它/位置检查点")]
+public class CheckPointInformation : DestinationInformation
 {
-    [SerializeField]
-    private string _ID;
-    public string ID => _ID;
-
     [SerializeField]
     private string targetTag = "Player";
     public string TargetTag => targetTag;
@@ -16,14 +10,6 @@ public class CheckPointInformation : ScriptableObject
     [SerializeField]
     private int layer;
     public int Layer => layer;
-
-    [SerializeField]
-    private SceneAsset scene;
-    public SceneAsset Scene => scene;
-
-    [SerializeField]
-    private Vector3[] positions;
-    public Vector3[] Positions => positions;
 
     [SerializeField]
     private CheckPointTriggerType triggerType = CheckPointTriggerType.Box;
@@ -41,20 +27,12 @@ public class CheckPointInformation : ScriptableObject
     private float height = 2.0f;
     public float Height => height;
 
-    public bool IsValid => !string.IsNullOrEmpty(_ID) && !string.IsNullOrEmpty(targetTag) && scene;
-
-    public static string GetAutoID(int length = 5)
+    public override bool IsValid
     {
-        string newID = string.Empty;
-        CheckPointInformation[] all = Resources.LoadAll<CheckPointInformation>("Configuration");
-        int len = (int)Mathf.Pow(10, length);
-        for (int i = 0; i < len; i++)
+        get
         {
-            newID = "POINT" + i.ToString().PadLeft(length, '0');
-            if (!Array.Exists(all, x => x.ID == newID))
-                break;
+            return base.IsValid && !string.IsNullOrEmpty(targetTag);
         }
-        return newID;
     }
 }
 

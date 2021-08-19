@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -68,7 +68,7 @@ public class QuestFlag : MonoBehaviour
         }
         foreach (var quest in questHolder.QuestInstances)
         {
-            if (!quest.IsComplete && !quest.InProgress && quest.Info.AcceptCondition.IsMeet())//只要有一个没接取
+            if (!quest.IsComplete && !quest.InProgress && MiscFuntion.CheckCondition(quest.Info.AcceptCondition))//只要有一个没接取
             {
                 icon.overrideSprite = notAccepted;
                 mapIcon.iconImage.overrideSprite = notAccepted;

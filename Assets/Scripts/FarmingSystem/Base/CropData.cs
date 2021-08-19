@@ -70,7 +70,7 @@ public class CropData
         float deltaTime = realTime * growthRate;
 
         growthTime += deltaTime;
-        growthDays = Mathf.CeilToInt(growthTime / TimeManager.OneDay);
+        growthDays = Mathf.CeilToInt(growthTime / TimeManager.Instance.ScaleDayToReal);
 
         //if (realTime > 1) Debug.Log("pass: " + (float)realTime + " " + currentStage);
 
@@ -78,7 +78,7 @@ public class CropData
             return;
 
         stageTime += deltaTime;
-        stageDays = Mathf.CeilToInt(stageTime / TimeManager.OneDay);
+        stageDays = Mathf.CeilToInt(stageTime / TimeManager.Instance.ScaleDayToReal);
         while (stageDays > currentStage.LastingDays && ToNextStage()) ;
     }
 
@@ -86,9 +86,9 @@ public class CropData
     {
         if (currentStage.LastingDays < 1) return false;
 
-        stageTime -= TimeManager.OneDay * currentStage.LastingDays;
+        stageTime -= TimeManager.Instance.ScaleDayToReal * currentStage.LastingDays;
         stageTime = stageTime < 0 ? 0 : stageTime;
-        stageDays = Mathf.CeilToInt(stageTime / TimeManager.OneDay);
+        stageDays = Mathf.CeilToInt(stageTime / TimeManager.Instance.ScaleDayToReal);
 
         currentStage = nextStage;
         OnStageChange?.Invoke(currentStage);

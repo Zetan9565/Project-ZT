@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "quest group", menuName = "Zetan Studio/任务/任务组", order = 2)]
 public class QuestGroup : ScriptableObject
@@ -14,12 +14,12 @@ public class QuestGroup : ScriptableObject
     }
 
     [SerializeField]
-    private string _Name;
+    private string _name;
     public new string name
     {
         get
         {
-            return _Name;
+            return _name;
         }
     }
 }

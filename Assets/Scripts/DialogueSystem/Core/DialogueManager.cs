@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
@@ -87,7 +87,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (!UI) return;
         CurrentTalker = talker;
         CurrentType = DialogueType.Normal;
-        ShowButtons(talker.Info.CanDEV_RLAT, talker.Info.IsVendor, talker.Info.IsWarehouseAgent, talker.QuestInstances.FindAll(q => !q.IsFinished && q.Info.AcceptCondition.IsMeet()).Count > 0);
+        ShowButtons(talker.Info.CanDEV_RLAT, talker.Info.IsVendor, talker.Info.IsWarehouseAgent, talker.QuestInstances.FindAll(q => !q.IsFinished && MiscFuntion.CheckCondition(q.Info.AcceptCondition)).Count > 0);
         HideQuestDescription();
         StartDialogue(talker.DefaultDialogue);
         talker.OnTalkBegin();
@@ -210,7 +210,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         var norQuests = new List<QuestData>();
         foreach (var quest in CurrentTalker.QuestInstances)
         {
-            if (quest.Info.AcceptCondition.IsMeet() && !quest.IsFinished)
+            if (MiscFuntion.CheckCondition(quest.Info.AcceptCondition) && !quest.IsFinished)
                 if (quest.IsComplete)
                     cmpltQuests.Add(quest);
                 else norQuests.Add(quest);

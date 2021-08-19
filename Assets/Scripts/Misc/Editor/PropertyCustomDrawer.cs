@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -129,11 +129,6 @@ public class ItemAmountListDrawer
             elementHeightCallback = (int index) =>
             {
                 return 2 * lineHeightSpace;
-            },
-
-            onCanAddCallback = (list) =>
-            {
-                return list.count < 10;
             },
 
             onRemoveCallback = (list) =>
@@ -565,10 +560,10 @@ public class ConditionGroupDrawer
                             compareType = condition.FindPropertyRelative("compareType");
                             if (!npcSelectors.TryGetValue(index, out var selector))
                             {
-                                selector = new CharacterSelectionDrawer<TalkerInformation>(owner, npc);
+                                selector = new CharacterSelectionDrawer<TalkerInformation>(npc, "条件对象");
                                 npcSelectors.Add(index, selector);
                             }
-                            selector.DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "条件对象");
+                            selector.DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                             lineCount++;
                             EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), npc, new GUIContent("对象引用"), false);
                             lineCount++;
@@ -707,61 +702,255 @@ public class CharacterSelectionDrawer<T> where T : CharacterInformation
     private readonly T[] characters;
     private readonly string[] characterNames;
 
-    private readonly SerializedObject owner;
     private readonly SerializedProperty property;
+    private readonly string label;
 
-    public CharacterSelectionDrawer(SerializedObject owner, SerializedProperty property)
+    public CharacterSelectionDrawer(SerializedProperty property, string label = "角色选择", string nameNull = "未选择")
     {
-        this.owner = owner;
-        this.property = property;
         characters = Resources.LoadAll<T>("Configuration");
-        characterNames = characters.Select(x => x.name).ToArray();
+        List<string> characterNames = new List<string>() { nameNull };
+        foreach (var character in characters)
+        {
+            if (character is EnemyInformation e && e.Race)
+            {
+                characterNames.Add($"{e.Race.name}/{e.name}");
+            }
+            else characterNames.Add(character.name);
+        }
+        this.property = property;
+        this.label = label;
+        this.characterNames = characterNames.ToArray();
     }
 
-    public void DoLayoutDraw(string label = "角色选择", string nameNull = "未指定")
+    public void DoLayoutDraw()
     {
-        owner.Update();
-        EditorGUI.BeginChangeCheck();
-        List<int> indexes = new List<int>() { 0 };
-        List<string> names = new List<string>() { nameNull };
-        for (int i = 1; i <= characterNames.Length; i++)
-        {
-            indexes.Add(i);
-            names.Add(characterNames[i - 1]);
-        }
-        int oIndex = EditorGUILayout.IntPopup(label, Array.IndexOf(characters, property.objectReferenceValue) + 1, names.ToArray(), indexes.ToArray());
-        if (oIndex > 0 && oIndex <= characters.Length) property.objectReferenceValue = characters[oIndex - 1];
-        else property.objectReferenceValue = null;
-        if (EditorGUI.EndChangeCheck())
-            owner.ApplyModifiedProperties();
+        int index = Array.FindIndex(characters, x => x == property.objectReferenceValue) + 1;
+        index = index < 0 ? 0 : index;
+        index = EditorGUILayout.Popup(label, index, characterNames);
+        if (index < 1 || index > characters.Length) property.objectReferenceValue = null;
+        else property.objectReferenceValue = characters[index - 1];
     }
 
-    public void DoDraw(Rect rect, string label = "角色选择", string nameNull = "未指定")
+    public void DoDraw(Rect rect)
     {
-        owner.Update();
-        EditorGUI.BeginChangeCheck();
-        List<int> indexes = new List<int>() { 0 };
-        List<string> names = new List<string>() { nameNull };
-        for (int i = 1; i <= characterNames.Length; i++)
-        {
-            indexes.Add(i);
-            names.Add(characterNames[i - 1]);
-        }
-        int oIndex = EditorGUI.IntPopup(rect, label, Array.IndexOf(characters, property.objectReferenceValue) + 1, names.ToArray(), indexes.ToArray());
-        if (oIndex > 0 && oIndex <= characters.Length) property.objectReferenceValue = characters[oIndex - 1];
-        else property.objectReferenceValue = null;
-        if (EditorGUI.EndChangeCheck())
-            owner.ApplyModifiedProperties();
+        int index = Array.FindIndex(characters, x => x == property.objectReferenceValue) + 1;
+        index = index < 0 ? 0 : index;
+        index = EditorGUI.Popup(rect, label, index, characterNames);
+        if (index < 1 || index > characters.Length) property.objectReferenceValue = null;
+        else property.objectReferenceValue = characters[index - 1];
     }
 }
 
 public class ItemSelectionDrawer<T> where T : ItemBase
 {
-    private readonly T[] characters;
-    private readonly string[] characterNames;
+    private readonly T[] items;
+    private readonly string[] itemNames;
+
+    private readonly SerializedProperty property;
+    private readonly string label;
+
+    public ItemSelectionDrawer(SerializedProperty property, string label = "道具", string nameNull = "未选择")
+    {
+        items = Resources.LoadAll<T>("Configuration");
+        List<string> itemNames = new List<string>() { nameNull };
+        foreach (var item in items)
+        {
+            itemNames.Add($"{ZetanUtility.GetEnumInspectorName(item.ItemType)}/{item.name}");
+        }
+        this.property = property;
+        this.label = label;
+        this.itemNames = itemNames.ToArray();
+    }
+
+    public void DoLayoutDraw()
+    {
+        int index = Array.FindIndex(items, x => x == property.objectReferenceValue) + 1;
+        index = index < 0 ? 0 : index;
+        index = EditorGUILayout.Popup(label, index, itemNames);
+        if (index < 1 || index > items.Length) property.objectReferenceValue = null;
+        else property.objectReferenceValue = items[index - 1];
+    }
+
+    public void DoDraw(Rect rect)
+    {
+        int index = Array.FindIndex(items, x => x == property.objectReferenceValue) + 1;
+        index = index < 0 ? 0 : index;
+        index = EditorGUI.Popup(rect, label, index, itemNames);
+        if (index < 1 || index > items.Length) property.objectReferenceValue = null;
+        else property.objectReferenceValue = items[index - 1];
+    }
+}
+
+public class SceneSelectionDrawer
+{
+    private readonly string[] sceneNames;
 
     private readonly SerializedObject owner;
     private readonly SerializedProperty property;
     private readonly string label;
-    private readonly string nameNull;
+
+    public SceneSelectionDrawer(SerializedObject owner, SerializedProperty property, string label = "场景", string nameNull = "未选择")
+    {
+        List<string> sceneNames = new List<string>() { nameNull };
+        foreach (var scene in EditorBuildSettings.scenes)
+        {
+            var find = (AssetDatabase.LoadAssetAtPath<SceneAsset>(scene.path));
+            if (find) sceneNames.Add(find.name);
+        }
+        this.sceneNames = sceneNames.ToArray();
+        this.owner = owner;
+        this.property = property;
+        this.label = label;
+    }
+
+    public void DoLayoutDraw()
+    {
+        owner?.Update();
+        EditorGUI.BeginChangeCheck();
+        int index = Array.FindIndex(sceneNames, x => x == property.stringValue);
+        index = index < 0 ? 0 : index;
+        index = EditorGUILayout.Popup(label, index, sceneNames);
+        if (index < 1 || index > sceneNames.Length) property.stringValue = string.Empty;
+        else property.stringValue = sceneNames[index];
+        if (EditorGUI.EndChangeCheck())
+            owner?.ApplyModifiedProperties();
+    }
+
+    public void DoDraw(Rect rect)
+    {
+        owner?.Update();
+        EditorGUI.BeginChangeCheck();
+        int index = Array.FindIndex(sceneNames, x => x == property.stringValue);
+        index = index < 0 ? 0 : index;
+        index = EditorGUI.Popup(rect, label, index, sceneNames);
+        if (index < 1 || index > sceneNames.Length) property.stringValue = string.Empty;
+        else property.stringValue = sceneNames[index];
+        if (EditorGUI.EndChangeCheck())
+            owner?.ApplyModifiedProperties();
+    }
+
+}
+
+public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
+{
+    private readonly T[] objects;
+    private readonly string[] objectNames;
+
+    private readonly SerializedProperty property;
+    private readonly string label;
+
+    public ScriptableObjectSelectionDrawer(SerializedProperty property, string fieldAsName, string path, string label = "资源", string nameNull = "未选择")
+    {
+        objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
+        List<string> objectNames = new List<string>() { nameNull };
+        foreach (var obj in objects)
+        {
+            if (!string.IsNullOrEmpty(fieldAsName))
+            {
+                var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                if (field != null) objectNames.Add(field.GetValue(obj).ToString());
+                else objectNames.Add(obj.name);
+            }
+            else objectNames.Add(obj.name);
+        }
+        this.property = property;
+        this.label = label;
+        this.objectNames = objectNames.ToArray();
+    }
+    public ScriptableObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, string path, string label = "资源", string nameNull = "未选择")
+    {
+        objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
+        List<string> objectNames = new List<string>() { nameNull };
+        foreach (var obj in objects)
+        {
+            if (!string.IsNullOrEmpty(fieldAsName))
+            {
+                var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                if (field != null) objectNames.Add(GetGroupedName(obj, field.GetValue(obj).ToString()));
+                else objectNames.Add(GetGroupedName(obj, obj.name));
+            }
+            else objectNames.Add(GetGroupedName(obj, obj.name));
+        }
+        this.property = property;
+        this.label = label;
+        this.objectNames = objectNames.ToArray();
+
+        string GetGroupedName(T obj, string name)
+        {
+            if (groupPicker == null) return name;
+            string group = groupPicker(obj);
+            if (string.IsNullOrEmpty(group)) return name;
+            else return $"{group}/{name}";
+        }
+    }
+
+    public ScriptableObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, string path, string label = "资源", string nameNull = "未选择")
+    {
+        objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
+        List<string> objectNames = new List<string>() { nameNull };
+        foreach (var obj in objects)
+        {
+            if (filter == null || filter != null && filter.Invoke(obj))
+            {
+                if (!string.IsNullOrEmpty(fieldAsName))
+                {
+                    var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                    if (field != null) objectNames.Add(field.GetValue(obj).ToString());
+                    else objectNames.Add(obj.name);
+                }
+                else objectNames.Add(obj.name);
+            }
+        }
+        this.property = property;
+        this.label = label;
+        this.objectNames = objectNames.ToArray();
+    }
+    public ScriptableObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, Func<T, string> groupPicker, string path, string label = "资源", string nameNull = "未选择")
+    {
+        objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
+        List<string> objectNames = new List<string>() { nameNull };
+        foreach (var obj in objects)
+        {
+            if (filter == null || filter != null && filter.Invoke(obj))
+            {
+
+                if (!string.IsNullOrEmpty(fieldAsName))
+                {
+                    var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                    if (field != null) objectNames.Add(GetGroupedName(obj, field.GetValue(obj).ToString()));
+                    else objectNames.Add(GetGroupedName(obj, obj.name));
+                }
+                else objectNames.Add(GetGroupedName(obj, obj.name));
+            }
+        }
+        this.property = property;
+        this.label = label;
+        this.objectNames = objectNames.ToArray();
+
+        string GetGroupedName(T obj, string name)
+        {
+            if (groupPicker == null) return name;
+            string group = groupPicker(obj);
+            if (string.IsNullOrEmpty(group)) return name;
+            else return $"{group}/{name}";
+        }
+    }
+
+    public void DoLayoutDraw()
+    {
+        int index = Array.FindIndex(objects, x => x == property.objectReferenceValue) + 1;
+        index = index < 0 ? 0 : index;
+        index = EditorGUILayout.Popup(label, index, objectNames);
+        if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
+        else property.objectReferenceValue = objects[index - 1];
+    }
+
+    public void DoDraw(Rect rect)
+    {
+        int index = Array.FindIndex(objects, x => x == property.objectReferenceValue) + 1;
+        index = index < 0 ? 0 : index;
+        index = EditorGUI.Popup(rect, label, index, objectNames);
+        if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
+        else property.objectReferenceValue = objects[index - 1];
+    }
 }

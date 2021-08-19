@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -163,6 +163,7 @@ public class CropStage
     private int lastingDays = 1;
     public int LastingDays => lastingDays;
 
+    [SerializeField]
     private Sprite graph;
     public Sprite Graph => graph;
 

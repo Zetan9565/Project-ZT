@@ -1,30 +1,56 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
 
-public class QuestEditor : EditorWindow
+public class QuestEditor : ConfigurationEditor<Quest>
 {
-    private Editor editor;
-    private Vector2 scrollPos = Vector2.zero;
-
-    public static void CreateWindow(Quest serializedObject)
+    [MenuItem("Zetan Studio/配置管理/任务")]
+    public static void CreateWindow()
     {
-        if (!serializedObject) return;
-        QuestEditor window = GetWindow<QuestEditor>("编辑任务");
-        window.editor = Editor.CreateEditor(serializedObject);
-        (window.editor as QuestInspector).AddAnimaListener(window.Repaint);
+        QuestEditor window = GetWindowWithRect<QuestEditor>(new Rect(0, 0, 450, 720), false, "任务管理器");
         window.Show();
     }
 
-    private void OnGUI()
+    protected override string GetConfigurationName()
     {
-        scrollPos = GUILayout.BeginScrollView(scrollPos);
-        editor.OnInspectorGUI();
-        GUILayout.EndScrollView();
+        return "任务";
     }
 
-    private void OnDestroy()
+    protected override bool CompareKey(Quest element, out string remark)
     {
-        if (editor) (editor as QuestInspector).RemoveAnimaListener(Repaint);
-        DestroyImmediate(editor);
+        remark = string.Empty;
+        if (!element) return false;
+        if(element.Title.Contains(keyWords))
+        {
+            remark = "标题：" + ZetanEditorUtility.TrimContentByKey(element.Title, keyWords, 16);
+            return true;
+        }
+        else if (element.Description.Contains(keyWords))
+        {
+            remark = "描述：" + ZetanEditorUtility.TrimContentByKey(element.Description, keyWords, 20);
+            return true;
+        }
+        else
+        {
+            for (int i = 0; i < element.Objectives.Count; i++)
+            {
+                var obj = element.Objectives[i];
+                if(obj.DisplayName.Contains(keyWords))
+                {
+                    remark = "第[" + i + "]个目标标题：" + ZetanEditorUtility.TrimContentByKey(obj.DisplayName, keyWords, 16);
+                    return true;
+                }
+            }
+        }
+        return base.CompareKey(element, out remark);
+    }
+
+    protected override string GetElementNameLabel()
+    {
+        return "标题";
+    }
+
+    protected override string GetElementName(Quest element)
+    {
+        return element.Title;
     }
 }

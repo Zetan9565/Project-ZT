@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 public enum QuestState
 {
@@ -17,6 +17,8 @@ public class QuestData
     public TalkerData originalQuestHolder;
 
     public TalkerData currentQuestHolder;
+
+    public int latestHandleDays;
 
     public bool InProgress { get; set; }//任务是否正在执行，在运行时用到
 
@@ -47,18 +49,21 @@ public class QuestData
     public QuestData(Quest quest)
     {
         Info = quest;
-        foreach (CollectObjective co in quest.CollectObjectives)
-            if (co.IsValid) ObjectiveInstances.Add(new CollectObjectiveData(co));
-        foreach (KillObjective ko in quest.KillObjectives)
-            if (ko.IsValid) ObjectiveInstances.Add(new KillObjectiveData(ko));
-        foreach (TalkObjective to in quest.TalkObjectives)
-            if (to.IsValid) ObjectiveInstances.Add(new TalkObjectiveData(to));
-        foreach (MoveObjective mo in quest.MoveObjectives)
-            if (mo.IsValid) ObjectiveInstances.Add(new MoveObjectiveData(mo));
-        foreach (SubmitObjective so in quest.SubmitObjectives)
-            if (so.IsValid) ObjectiveInstances.Add(new SubmitObjectiveData(so));
-        foreach (CustomObjective cuo in quest.CustomObjectives)
-            if (cuo.IsValid) ObjectiveInstances.Add(new CustomObjectiveData(cuo));
+        foreach (Objective objective in Info.Objectives)
+        {
+            if (objective is CollectObjective co)
+            { if (co.IsValid) ObjectiveInstances.Add(new CollectObjectiveData(co)); }
+            else if (objective is KillObjective ko)
+            { if (ko.IsValid) ObjectiveInstances.Add(new KillObjectiveData(ko)); }
+            else if (objective is TalkObjective to)
+            { if (to.IsValid) ObjectiveInstances.Add(new TalkObjectiveData(to)); }
+            else if (objective is MoveObjective mo)
+            { if (mo.IsValid) ObjectiveInstances.Add(new MoveObjectiveData(mo)); }
+            else if (objective is SubmitObjective so)
+            { if (so.IsValid) ObjectiveInstances.Add(new SubmitObjectiveData(so)); }
+            else if (objective is TriggerObjective tgo)
+            { if (tgo.IsValid) ObjectiveInstances.Add(new TriggerObjectiveData(tgo)); }
+        }
         ObjectiveInstances.Sort((x, y) =>
         {
             if (x.Info.OrderIndex > y.Info.OrderIndex) return 1;
@@ -103,7 +108,7 @@ public class QuestData
                 o.entityID = quest.ID + "_SO" + i5;
                 i5++;
             }
-            if (o.Info is CustomObjective)
+            if (o.Info is TriggerObjective)
             {
                 o.entityID = quest.ID + "_CUO" + i6;
                 i6++;

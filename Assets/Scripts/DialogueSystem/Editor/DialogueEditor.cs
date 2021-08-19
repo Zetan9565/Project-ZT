@@ -1,28 +1,67 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
 
-public class DialogueEditor : EditorWindow
+public class DialogueEditor : ConfigurationEditor<Dialogue>
 {
-    private Editor editor;
-    private Vector2 scrollPos = Vector2.zero;
-
-    public static void CreateWindow(Dialogue serializedObject)
+    [MenuItem("Zetan Studio/配置管理/对话")]
+    public static void CreateWindow()
     {
-        if (!serializedObject) return;
-        DialogueEditor window = GetWindow<DialogueEditor>("编辑对话");
-        window.editor = Editor.CreateEditor(serializedObject);
+        DialogueEditor window = GetWindowWithRect<DialogueEditor>(new Rect(0, 0, 450, 720), false, "对话管理器");
         window.Show();
     }
 
-    private void OnGUI()
+    protected override bool CompareKey(Dialogue element, out string remark)
     {
-        scrollPos = GUILayout.BeginScrollView(scrollPos);
-        editor.OnInspectorGUI();
-        GUILayout.EndScrollView();
+        remark = string.Empty;
+        if (!element) return false;
+        if (element.ID.Contains(keyWords))
+        {
+            remark = $"识别码：{ZetanEditorUtility.TrimContentByKey(element.ID, keyWords, 16)}";
+            return true;
+        }
+        for (int i = 0; i < element.Words.Count; i++)
+        {
+            var words = element.Words[i];
+            if (words.Content.Contains(keyWords))
+            {
+                remark = $"第[{i}]句：{ZetanEditorUtility.TrimContentByKey(words.Content, keyWords, 20)}";
+                return true;
+            }
+            else if (MiscFuntion.HandlingKeyWords(words.Content).Contains(keyWords))
+            {
+                remark = $"第[{i}]句：{ZetanEditorUtility.TrimContentByKey(MiscFuntion.HandlingKeyWords(words.Content, false, objects), keyWords, 20)}";
+                return true;
+            }
+            for (int j = 0; j < words.Options.Count; j++)
+            {
+                var option = words.Options[j];
+                if (option.Title.Contains(keyWords))
+                {
+                    remark = $"第[{i}]句第[{j}]个选项标题：{ZetanEditorUtility.TrimContentByKey(option.Title, keyWords, 16)}";
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    private void OnDestroy()
+    protected override string GetNewFileName(System.Type type)
     {
-        DestroyImmediate(editor);
+        return "dialogue";
+    }
+
+    protected override string GetConfigurationName()
+    {
+        return "对话";
+    }
+
+    protected override string GetElementNameLabel()
+    {
+        return "识别码";
+    }
+
+    protected override string GetElementName(Dialogue element)
+    {
+        return element.ID;
     }
 }

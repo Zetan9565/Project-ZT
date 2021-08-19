@@ -1,4 +1,4 @@
-﻿public abstract class ObjectiveData
+public abstract class ObjectiveData
 {
     public Objective Info { get; }
 
@@ -126,7 +126,7 @@ public class CollectObjectiveData : ObjectiveData
 
     public void UpdateCollectAmount(string id, int leftAmount)//得道具时用到
     {
-        if (id == Info.Item.ID)
+        if (id == Info.ItemToCollect.ID)
         {
             if (IsComplete) return;
             if (!Info.InOrder) CurrentAmount = leftAmount - (!Info.CheckBagAtStart ? amountWhenStart : 0);
@@ -136,7 +136,7 @@ public class CollectObjectiveData : ObjectiveData
 
     public void UpdateCollectAmountDown(string id, int leftAmount)//丢道具时用到
     {
-        if (id == Info.Item.ID && AllPrevObjCmplt && !HasNextObjOngoing && Info.LoseItemAtSbmt)
+        if (id == Info.ItemToCollect.ID && AllPrevObjCmplt && !HasNextObjOngoing && Info.LoseItemAtSbmt)
             //前置目标都完成且没有后置目标在进行时，才允许更新；在提交任务时不需要提交相应道具，也不会更新减少值。
             CurrentAmount = leftAmount;
     }
@@ -194,7 +194,7 @@ public class MoveObjectiveData : ObjectiveData
 
     public void UpdateMoveState(CheckPointInformation point)
     {
-        if (point == Info.CheckPoint) UpdateAmountUp();
+        if (point == Info.AuxiliaryPos) UpdateAmountUp();
     }
 }
 
@@ -216,17 +216,17 @@ public class SubmitObjectiveData : ObjectiveData
     }
 }
 
-public class CustomObjectiveData : ObjectiveData
+public class TriggerObjectiveData : ObjectiveData
 {
-    public new CustomObjective Info
+    public new TriggerObjective Info
     {
         get
         {
-            return base.Info as CustomObjective;
+            return base.Info as TriggerObjective;
         }
     }
 
-    public CustomObjectiveData(CustomObjective objective) : base(objective) { }
+    public TriggerObjectiveData(TriggerObjective objective) : base(objective) { }
 
     public void UpdateTriggerState(string name, bool state)
     {
