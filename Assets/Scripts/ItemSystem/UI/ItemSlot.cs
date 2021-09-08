@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -141,8 +141,6 @@ public class ItemSlot : ItemSlotBase, IDragAble,
                 if (targetDark) Dark();
                 else Light();
             }
-            //else if (target.agentType == ItemAgentType.Backpack && agentType == ItemAgentType.Selling)
-            //    ShopManager.Instance.SellItem(ShopManager.Instance.GetMerchandiseAgentByItem(MItemInfo).merchandiseInfo);
         }
         FinishDrag();
     }
@@ -222,7 +220,7 @@ public class ItemSlot : ItemSlotBase, IDragAble,
     public void OnPointerEnter(PointerEventData eventData)//用于PC悬停
     {
 #if UNITY_STANDALONE
-        NewItemWindowManager.Instance.ShowItemInfo(this);
+        ItemWindowManager.Instance.ShowItemInfo(this);
         if (!DragableManager.Instance.IsDraging)
             Select();
 #endif
@@ -231,7 +229,7 @@ public class ItemSlot : ItemSlotBase, IDragAble,
     public void OnPointerExit(PointerEventData eventData)//用于安卓拖拽、PC悬停
     {
 #if UNITY_STANDALONE
-        if (!NewItemWindowManager.Instance.IsHeld) NewItemWindowManager.Instance.CloseWindow();
+        ItemWindowManager.Instance.CloseWindow();
         if (!DragableManager.Instance.IsDraging)
         {
             DeSelect();

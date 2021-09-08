@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -6,10 +7,14 @@ public static class ZetanEditorUtility
 {
     public static string GetDirectoryName(Object target)
     {
-        string path = AssetDatabase.GetAssetPath(target);
+        return GetDirectoryName(AssetDatabase.GetAssetPath(target));
+    }
+
+    public static string GetDirectoryName(string path)
+    {
         if (!string.IsNullOrEmpty(path) && File.Exists(path))
             return Path.GetDirectoryName(path);
-        return path;
+        else return string.Empty;
     }
 
     public static bool IsValidPath(string path)
@@ -25,6 +30,31 @@ public static class ZetanEditorUtility
     public static string GetFileName(string path)
     {
         return Path.GetFileName(path);
+    }
+
+    public static object GetValue(SerializedProperty property)
+    {
+        object value = default;
+        var onwerType = property.serializedObject.targetObject.GetType();
+        var field = onwerType.GetField(property.propertyPath);
+        if (field != null) value = field.GetValue(property.serializedObject.targetObject);
+        return value;
+    }
+
+    public static object GetValue(SerializedProperty property, out System.Reflection.FieldInfo fieldInfo)
+    {
+        object value = default;
+        var onwerType = property.serializedObject.targetObject.GetType();
+        fieldInfo = onwerType.GetField(property.propertyPath);
+        if (fieldInfo != null) value = fieldInfo.GetValue(property.serializedObject.targetObject);
+        return value;
+    }
+
+    public static void SetValue(SerializedProperty property, object value)
+    {
+        var onwerType = property.serializedObject.targetObject.GetType();
+        var fieldInfo = onwerType.GetField(property.propertyPath);
+        if (fieldInfo != null) fieldInfo.SetValue(property.serializedObject.targetObject, value);
     }
 
     public static string TrimContentByKey(string input, string key, int length)
@@ -51,5 +81,25 @@ public static class ZetanEditorUtility
         index = output.IndexOf(key);
         output = output.Insert(index, "<").Insert(index + 1 + key.Length, ">");
         return output;
+    }
+
+    public static List<T> LoadAssets<T>() where T : Object
+    {
+        string[] assetIds = AssetDatabase.FindAssets($"t:{typeof(T).Name}");
+        List<T> assets = new List<T>();
+        foreach (var assetId in assetIds)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(assetId);
+            try
+            {
+                T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+                assets.Add(asset);
+            }
+            catch
+            {
+                Debug.LogWarning($"找不到路径：{path}");
+            }
+        }
+        return assets;
     }
 }

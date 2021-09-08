@@ -16,26 +16,19 @@ MonoBehaviour:
   _Name: "\u5C0F\u80E1\u5B50"
   sex: 1
   defaultDialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
+  conditionDialogues: []
+  enable: 0
+  scene: 
+  position: {x: 0, y: 0, z: 0}
+  prefab: {fileID: 0}
   isWarehouseAgent: 0
-  warehouse:
-    warehouseSize:
-      min: 0
-      max: 50
+  warehouseCapcity: 30
   isVendor: 0
   shop: {fileID: 0}
   questsStored: []
   canDEV_RLAT: 0
   normalItemDialogue: {fileID: 0}
-  favoriteItemDialogue:
-    level_1: {fileID: 0}
-    level_2: {fileID: 0}
-    level_3: {fileID: 0}
-    level_4: {fileID: 0}
-  hateItemDialogue:
-    level_1: {fileID: 0}
-    level_2: {fileID: 0}
-    level_3: {fileID: 0}
-    level_4: {fileID: 0}
-  favoriteItems: []
-  hateItems: []
+  normalIntimacyValue: 5
+  giftDialogues: []
+  affectiveItems: []
   canMarry: 0

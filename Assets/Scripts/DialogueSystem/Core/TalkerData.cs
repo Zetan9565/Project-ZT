@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 [System.Serializable]
 public class TalkerData : CharacterData
@@ -7,7 +7,7 @@ public class TalkerData : CharacterData
     {
         get
         {
-            return (TalkerInformation)info;
+            return info as TalkerInformation;
         }
         set
         {
@@ -36,7 +36,7 @@ public class TalkerData : CharacterData
 
     public WarehouseData warehouse;
 
-    public ShopInformation shop;
+    public ShopData shop;
 
     public List<TalkObjectiveData> objectivesTalkToThis = new List<TalkObjectiveData>();
     public List<SubmitObjectiveData> objectivesSubmitToThis = new List<SubmitObjectiveData>();
@@ -49,6 +49,11 @@ public class TalkerData : CharacterData
 
     public TalkerData(TalkerInformation info) : base(info)
     {
+        if (Info.IsVendor)
+        {
+            shop = new ShopData(info.Shop);
+            ShopManager.Vendors.Add(this);
+        }
         relationshipInstance = new Relationship();
         InitQuest();
     }

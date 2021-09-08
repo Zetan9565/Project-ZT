@@ -245,7 +245,7 @@ MonoBehaviour:
   icon: {fileID: 3253754680822016698}
   amount: {fileID: 3253754681748403059}
   qualityEdge: {fileID: 3253754680372063916}
-  agentType: 0
+  mark: {fileID: 0}
   indexInGrid: 0
 --- !u!114 &8048359379828581248
 MonoBehaviour:
@@ -973,5 +973,5 @@ MonoBehaviour:
   nameText: {fileID: 4401104721317804737}
   priceText: {fileID: 4401104722535429760}
   amountText: {fileID: 4401104722756457990}
-  itemAgentSon: {fileID: 3253754681267570031}
+  itemIcon: {fileID: 3253754681267570031}
   merchandiseType: 0

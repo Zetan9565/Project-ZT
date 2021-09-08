@@ -132,7 +132,6 @@ public class QuestFlag : MonoBehaviour
         {
             if (triggerNames.Contains(args[0].ToString()))
                 UpdateUI();
-            MessageManager.Instance.New($"事件通知：触发器{args[0]}状态变成{args[1]}]");
         }
     }
 

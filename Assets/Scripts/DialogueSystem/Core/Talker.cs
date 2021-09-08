@@ -1,25 +1,23 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent, RequireComponent(typeof(MapIconHolder), typeof(Interactive))]
 public class Talker : Character
 {
-    public new TalkerInformation Info => (TalkerInformation)info;
+    public string TalkerID => Data ? Data.Info.ID : string.Empty;
 
-    public string TalkerID => info ? info.ID : string.Empty;
-
-    public string TalkerName => info ? info.name : string.Empty;
+    public string TalkerName => Data ? Data.Info.name : string.Empty;
 
     public Vector3 questFlagOffset;
     private QuestFlag flagAgent;
 
     public new TalkerData Data
     {
-        get => (TalkerData)data;
+        get => data as TalkerData;
         set
         {
             data = value;
-            base.Data = data;
         }
     }
 
@@ -27,15 +25,13 @@ public class Talker : Character
 
     [SerializeField]
     private MapIconHolder iconHolder;
-    public Interactive Interactive { get; private set; }
-
-    public new Transform transform { get; private set; }
+    private Interactive interactive;
 
     public bool IsInteractive
     {
         get
         {
-            return info && data && !DialogueManager.Instance.IsTalking;
+            return Data.Info && data && !DialogueManager.Instance.IsTalking;
         }
     }
 
@@ -43,62 +39,40 @@ public class Talker : Character
     {
         get
         {
-            foreach (var cd in Info.ConditionDialogues)
+            foreach (var cd in Data.Info.ConditionDialogues)
             {
                 if (MiscFuntion.CheckCondition(cd.Condition))
                     return cd.Dialogue;
             }
-            return Info.DefaultDialogue;
+            return Data.Info.DefaultDialogue;
         }
     }
 
-    public override bool Init()
+    public void Init(TalkerData data)
     {
-        if (!GameManager.Talkers.ContainsKey(TalkerID)) GameManager.Talkers.Add(TalkerID, this);
-        else if (!GameManager.Talkers[TalkerID] || !GameManager.Talkers[TalkerID].gameObject)
-        {
-            GameManager.Talkers.Remove(TalkerID);
-            GameManager.Talkers.Add(TalkerID, this);
-        }
-        else Destroy(gameObject);
-        if (!GameManager.TalkerDatas.TryGetValue(TalkerID, out TalkerData dataFound))
-        {
-            Data = new TalkerData(Info);
-            if (Info.IsVendor)
-            {
-                Data.shop = Instantiate(Info.Shop);
-                Data.shop.Init();
-            }
-            else if (Info.IsWarehouseAgent)
-            {
-                Data.warehouse = new WarehouseData(Info.WarehouseCapcity);
-                Data.warehouse.scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-                Data.warehouse.position = transform.position;
-            }
-            GameManager.TalkerDatas.Add(TalkerID, Data);
-        }
-        else Data = dataFound;
-        Data.currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-        Data.currentPosition = transform.position;
-        if (Info.IsWarehouseAgent)
-        {
-            Data.warehouse.scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            Data.warehouse.position = transform.position;
-        }
-        if (Info.IsVendor && !ShopManager.Vendors.Contains(Data)) ShopManager.Vendors.Add(Data);
+        Data = data;
+        Data.entity = this;
+        transform.position = Data.Info.Position;
         flagAgent = ObjectPool.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject, UIManager.Instance.QuestFlagParent).GetComponent<QuestFlag>();
         flagAgent.Init(this);
-        return true;
+        if (iconHolder)
+        {
+            iconHolder.textToDisplay = GetMapIconName();
+            iconHolder.iconEvents.RemoveAllListner();
+            iconHolder.iconEvents.onFingerClick.AddListener(ShowNameAtMousePosition);
+            iconHolder.iconEvents.onMouseEnter.AddListener(ShowNameAtMousePosition);
+            iconHolder.iconEvents.onMouseExit.AddListener(HideNameImmediately);
+        }
     }
 
     public void OnTalkBegin()
     {
-        Data.OnTalkBegin();
+        Data?.OnTalkBegin();
     }
 
     public void OnTalkFinished()
     {
-        Data.OnTalkFinished();
+        Data?.OnTalkFinished();
     }
 
     public Dialogue OnGetGift(ItemBase gift)
@@ -108,7 +82,17 @@ public class Talker : Character
 
     public bool DoInteract()
     {
-        return DialogueManager.Instance.Talk(this);
+        if (DialogueManager.Instance.Talk(this))
+        {
+            SetState(CharacterState.Busy, CharacterBusyState.Talking);
+            return true;
+        }
+        return false;
+    }
+    public void FinishInteraction()
+    {
+        SetState(CharacterState.Normal, CharacterNormalState.Idle);
+        interactive.FinishInteraction();
     }
 
     public void OnExit(Collider2D collision)
@@ -124,7 +108,7 @@ public class Talker : Character
 #if UNITY_ANDROID
         time = 2;
 #endif
-        TipsManager.Instance.ShowText(Input.mousePosition, GetMapIconName(), time);
+        TipsManager.Instance.ShowText(InputManager.mousePosition, GetMapIconName(), time);
     }
     private void HideNameImmediately()
     {
@@ -133,12 +117,12 @@ public class Talker : Character
     private string GetMapIconName()
     {
         System.Text.StringBuilder name = new System.Text.StringBuilder(TalkerName);
-        if (Info.IsVendor && Info.Shop || Info.IsWarehouseAgent && Info.WarehouseCapcity > 0)
+        if (Data.Info.IsVendor && Data.Info.Shop || Data.Info.IsWarehouseAgent && Data.Info.WarehouseCapcity > 0)
         {
             name.Append("<");
-            if (Info.IsVendor) name.Append(Info.Shop.ShopName);
-            if (Info.IsVendor && Info.IsWarehouseAgent) name.Append(",");
-            if (Info.IsWarehouseAgent) name.Append("仓库");
+            if (Data.Info.IsVendor) name.Append(Data.Info.Shop.ShopName);
+            if (Data.Info.IsVendor && Data.Info.IsWarehouseAgent) name.Append(",");
+            if (Data.Info.IsWarehouseAgent) name.Append("仓库");
             name.Append(">");
         }
         return name.ToString();
@@ -146,46 +130,22 @@ public class Talker : Character
     #endregion
 
     #region MonoBehaviour
-    private void Awake()
+    protected override void OnAwake()
     {
-        Interactive = GetComponent<Interactive>();
+        interactive = GetComponent<Interactive>();
         iconHolder = GetComponent<MapIconHolder>();
-        if (iconHolder)
-        {
-            iconHolder.textToDisplay = GetMapIconName();
-            iconHolder.iconEvents.RemoveAllListner();
-            iconHolder.iconEvents.onFingerClick.AddListener(ShowNameAtMousePosition);
-            iconHolder.iconEvents.onMouseEnter.AddListener(ShowNameAtMousePosition);
-            iconHolder.iconEvents.onMouseExit.AddListener(HideNameImmediately);
-        }
-        transform = base.transform;
     }
 
-    private void Update()
-    {
-        if (Data) Data.currentPosition = transform.position;
-    }
-
-    private void OnValidate()
-    {
-        iconHolder = GetComponent<MapIconHolder>();
-        if (iconHolder)
-        {
-            iconHolder.textToDisplay = GetMapIconName();
-            iconHolder.iconEvents.onFingerClick.AddListener(ShowNameAtMousePosition);
-            iconHolder.iconEvents.onMouseEnter.AddListener(ShowNameAtMousePosition);
-            iconHolder.iconEvents.onMouseExit.AddListener(HideNameImmediately);
-        }
-    }
-
-    private void OnDestroy()
+    protected override void OnDestroy_()
     {
         if (flagAgent) flagAgent.Recycle();
     }
 
-    private void OnDrawGizmos()
+    #if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
     {
         Gizmos.DrawWireCube(base.transform.position + questFlagOffset, Vector3.one);
     }
+    #endif
     #endregion
 }

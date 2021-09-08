@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class MapUI : MonoBehaviour
@@ -30,8 +30,8 @@ public class MapUI : MonoBehaviour
 
     private void Awake()
     {
-        cancelPath.onClick.AddListener(PlayerManager.Instance.PlayerController.ResetPath);
-        followPath.onClick.AddListener(PlayerManager.Instance.PlayerController.Trace);
+        cancelPath.onClick.AddListener(PlayerManager.Instance.ResetPath);
+        followPath.onClick.AddListener(PlayerManager.Instance.Trace);
         @switch.onClick.AddListener(MapManager.Instance.SwitchMapMode);
         locate.onClick.AddListener(MapManager.Instance.LocatePlayer);
     }

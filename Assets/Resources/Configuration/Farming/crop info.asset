@@ -25,25 +25,43 @@ MonoBehaviour:
   stages:
   - stage: 1
     lastingDays: 1
-    graph: {fileID: 0}
+    graph: {fileID: 6493176682603777421, guid: 9eb4318a95588c54ab79ca3639396e41, type: 3}
+    repeatTimes: 0
+    indexToReturn: 0
+    gatherInfo: {fileID: 0}
+  - stage: 2
+    lastingDays: 1
+    graph: {fileID: 7519021465560718109, guid: 9eb4318a95588c54ab79ca3639396e41, type: 3}
+    repeatTimes: 0
+    indexToReturn: 0
+    gatherInfo: {fileID: 0}
+  - stage: 3
+    lastingDays: 1
+    graph: {fileID: 8681658783954562144, guid: 9eb4318a95588c54ab79ca3639396e41, type: 3}
+    repeatTimes: 0
+    indexToReturn: 0
+    gatherInfo: {fileID: 0}
+  - stage: 4
+    lastingDays: 1
+    graph: {fileID: 5808869252666709706, guid: 9eb4318a95588c54ab79ca3639396e41, type: 3}
     repeatTimes: 0
     indexToReturn: 0
     gatherInfo: {fileID: 0}
   - stage: 5
     lastingDays: 1
-    graph: {fileID: 0}
-    repeatTimes: 1
-    indexToReturn: 0
-    gatherInfo: {fileID: 11400000, guid: f8d493d6b3173974d818047699d10d9b, type: 2}
+    graph: {fileID: 2559505510574410273, guid: 9eb4318a95588c54ab79ca3639396e41, type: 3}
+    repeatTimes: 3
+    indexToReturn: 2
+    gatherInfo: {fileID: 11400000, guid: b7d61bb25b481134faf5f994de7ab022, type: 2}
   - stage: 7
     lastingDays: 1
-    graph: {fileID: 0}
+    graph: {fileID: 8681658783954562144, guid: 9eb4318a95588c54ab79ca3639396e41, type: 3}
     repeatTimes: 0
     indexToReturn: 0
     gatherInfo: {fileID: 0}
   - stage: 8
     lastingDays: 1
-    graph: {fileID: 0}
+    graph: {fileID: 2105904688079780559, guid: 9eb4318a95588c54ab79ca3639396e41, type: 3}
     repeatTimes: 0
     indexToReturn: 0
     gatherInfo: {fileID: 0}

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -70,11 +70,10 @@ public class LootManager : WindowHandler<LootUI, LootManager>
             if (info.Amount == 1) OnTake(info, 1);
             else
             {
-                AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.New(delegate (long amount)
                 {
                     OnTake(info, (int)amount);
-                }, info.Amount);
+                }, info.Amount, "拾取数量", ZetanUtility.ScreenCenter, Vector2.zero);
             }
         else OnTake(info, info.Amount);
     }

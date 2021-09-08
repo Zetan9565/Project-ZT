@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "character info", menuName = "Zetan Studio/角色/角色信息")]
 public class CharacterInformation : ScriptableObject
@@ -17,6 +17,8 @@ public class CharacterInformation : ScriptableObject
 #endif
     protected CharacterSex sex;
     public CharacterSex Sex => sex;
+
+    public virtual bool IsValid => !string.IsNullOrEmpty(_ID) && !string.IsNullOrEmpty(_Name);
 
     public static string GetSexString(CharacterSex sex)
     {

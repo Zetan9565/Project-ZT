@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("Zetan Studio/管理器/玩家角色管理器")]
@@ -19,29 +19,32 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
     }
 
-    [SerializeField]
-    private PlayerController2D playerController;
-    public PlayerController2D PlayerController
-    {
-        get => playerController;
-        private set => playerController = value;
-    }
+    public PlayerController2D Controller { get; private set; }
 
-    public Transform PlayerTransform => playerController.CharacterController.transform;
+    public Transform PlayerTransform => Controller.Motion.transform;
 
     public Backpack Backpack { get { return PlayerInfo.backpack; } }
 
-    public Character character;
+    public Character Character { get; private set; }
+
+    public bool CheckIsNormalWithAlert()
+    {
+        if (Character.Data.mainState != CharacterState.Normal)
+        {
+            MessageManager.Instance.New("当前状态无法进行此操作");
+            return false;
+        }
+        return true;
+    }
 
     public void Init()
     {
-        playerController = FindObjectOfType<PlayerController2D>();
-        character = playerController.GetComponent<Character>();
+        Controller = FindObjectOfType<PlayerController2D>();
+        Character = Controller.Character;
         if (playerInfo)
         {
             playerInfo = Instantiate(playerInfo);
-            character.SetInfo(playerInfo);
-            playerController.CharacterController.character = character;
+            Character.Init(new CharacterData(playerInfo));
         }
     }
 
@@ -51,8 +54,18 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         Init();
     }
 
-    private void Update()
+    public void SetPlayerState(CharacterState state, dynamic subState)
     {
-        if (InputManager.IsTyping) playerController.controlAble = false;
+        Character.SetState(state, subState);
+    }
+
+    public void Trace()
+    {
+        Controller.Trace();
+    }
+
+    public void ResetPath()
+    {
+        Controller.ResetPath();
     }
 }

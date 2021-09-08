@@ -29,7 +29,7 @@ public class DialogueEditor : ConfigurationEditor<Dialogue>
             }
             else if (MiscFuntion.HandlingKeyWords(words.Content).Contains(keyWords))
             {
-                remark = $"第[{i}]句：{ZetanEditorUtility.TrimContentByKey(MiscFuntion.HandlingKeyWords(words.Content, false, objects), keyWords, 20)}";
+                remark = $"第[{i}]句：{ZetanEditorUtility.TrimContentByKey(MiscFuntion.HandlingKeyWords(words.Content, false, objects.ToArray()), keyWords, 20)}";
                 return true;
             }
             for (int j = 0; j < words.Options.Count; j++)

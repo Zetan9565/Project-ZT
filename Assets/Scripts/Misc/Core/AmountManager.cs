@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class AmountManager : SingletonMonoBehaviour<AmountManager>
@@ -28,7 +28,7 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
 
     private bool firstInput;
 
-    public void New(Action<long> confirmAction, long max, string title = "")
+    public void New(Action<long> confirmAction, long max, string title = "", Vector2? position = null, Vector2? offset = null)
     {
         long min = 0;
         if (max < min)
@@ -43,10 +43,11 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         UI.amount.text = amount.ToString();
         onConfirm = confirmAction;
         onCancel = null;
+        SetPosition(position, offset);
         ShowUI(title);
     }
 
-    public void New(Action<long> confirmAction, long min, long max, string title = "")
+    public void New(Action<long> confirmAction, long min, long max, string title = "", Vector2? position = null, Vector2? offset = null)
     {
         if (max < min)
         {
@@ -60,10 +61,11 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         UI.amount.text = amount.ToString();
         onConfirm = confirmAction;
         onCancel = null;
+        SetPosition(position, offset);
         ShowUI(title);
     }
 
-    public void New(Action<long> confirmAction, Action cancelAction, long max, string title = "")
+    public void New(Action<long> confirmAction, Action cancelAction, long max, string title = "", Vector2? position = null, Vector2? offset = null)
     {
         if (max < min)
         {
@@ -77,10 +79,11 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         UI.amount.text = amount.ToString();
         onConfirm = confirmAction;
         onCancel = cancelAction;
+        SetPosition(position, offset);
         ShowUI(title);
     }
 
-    public void New(Action<long> confirmAction, Action cancelAction, long max, long min, string title = "")
+    public void New(Action<long> confirmAction, Action cancelAction, long max, long min, string title = "", Vector2? position = null, Vector2? offset = null)
     {
         if (max < min)
         {
@@ -94,6 +97,7 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         UI.amount.text = amount.ToString();
         onConfirm = confirmAction;
         onCancel = cancelAction;
+        SetPosition(position, offset);
         ShowUI(title);
     }
 
@@ -113,7 +117,7 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
 
     public void ClickNumber(int num)
     {
-        if(firstInput)
+        if (firstInput)
         {
             UI.amount.text = num.ToString();
             firstInput = false;
@@ -197,16 +201,12 @@ public class AmountManager : SingletonMonoBehaviour<AmountManager>
         firstInput = false;
     }
 
-    public void SetPosition(Vector2 targetPos, Vector2 offset)
+    private void SetPosition(Vector2? position, Vector2? offset)
     {
-        UI.windowRect.position = targetPos + offset;
-        ZetanUtility.KeepInsideScreen(UI.windowRect);
-    }
-
-    public void SetPosition(Vector2 targetPos)
-    {
-        UI.window.GetComponent<RectTransform>().position = targetPos + defaultOffset;
-        ZetanUtility.KeepInsideScreen(UI.windowRect);
+        if (position != null)
+            if (offset != null)
+                UI.windowRect.position = position.Value + offset.Value;
+            else UI.windowRect.position = position.Value + defaultOffset;
     }
 
     public void FixAmount()

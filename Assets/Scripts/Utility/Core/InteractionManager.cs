@@ -7,7 +7,7 @@ public class InteractionManager : WindowHandler<InteractionUI, InteractionManage
 {
     public override bool IsUIOpen => true;
 
-    public bool ScrollAble => buttons.Count + buttons2.Count > 3;
+    public bool ScrollAble => buttons.Count + buttons2.Count > 1;
 
     private readonly HashSet<InteractiveObject> objects = new HashSet<InteractiveObject>();
     private readonly Dictionary<InteractiveObject, InteractionButton> buttons = new Dictionary<InteractiveObject, InteractionButton>();

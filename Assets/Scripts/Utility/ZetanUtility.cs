@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -20,7 +21,33 @@ namespace ZetanExtends
             if (string.IsNullOrEmpty(name)) name = $"Child ({source.transform.childCount})";
             GameObject child = new GameObject(name);
             child.transform.SetParent(source);
+            child.transform.localPosition = Vector3.zero;
             return child.transform;
+        }
+
+        public static Transform FindOrCreate(this Transform source, string n)
+        {
+            var child = source.Find(n);
+            return child != null ? child : source.CreateChild(n);
+        }
+
+        public static RectTransform GetRectTransform(this Transform source)
+        {
+            return source as RectTransform;
+        }
+
+        public static string GetPath(this Transform source)
+        {
+            StringBuilder sb = new StringBuilder();
+            Transform parent = source.parent;
+            while (parent)
+            {
+                sb.Append(parent.gameObject.name);
+                sb.Append("/");
+                parent = parent.parent;
+            }
+            sb.Append(source.gameObject.name);
+            return sb.ToString();
         }
     }
 
@@ -29,6 +56,12 @@ namespace ZetanExtends
         public static RectTransform GetRectTransform(this Component source)
         {
             return source.GetComponent<RectTransform>();
+        }
+
+        public static T GetOrAddComponent<T>(this Component source) where T : Component
+        {
+            var comp = source.GetComponent<T>();
+            return comp != null ? comp : source.gameObject.AddComponent<T>();
         }
     }
 
@@ -39,12 +72,18 @@ namespace ZetanExtends
             return source.GetComponent<RectTransform>();
         }
 
-        public static GameObject CreateChild(this GameObject source, string name = null)
+        public static GameObject CreateChild(this GameObject source, string name = null, params Type[] components)
         {
             if (string.IsNullOrEmpty(name)) name = $"Child ({source.transform.childCount})";
-            GameObject child = new GameObject(name);
+            GameObject child = new GameObject(name, components);
             child.transform.SetParent(source.transform);
+            child.transform.localPosition = Vector3.zero;
             return child;
+        }
+
+        public static void SetActiveSuper(this GameObject source, bool value)
+        {
+            if (source.activeSelf != value) source.SetActive(value);
         }
 
         public static GameObject Instantiate(this GameObject source)
@@ -67,12 +106,37 @@ namespace ZetanExtends
         {
             return UnityEngine.Object.Instantiate(source, position, rotation, parent);
         }
+
+        public static string GetPath(this GameObject source)
+        {
+            StringBuilder sb = new StringBuilder();
+            Transform parent = source.transform.parent;
+            while (parent)
+            {
+                sb.Append(parent.gameObject.name);
+                sb.Append("/");
+                parent = parent.parent;
+            }
+            sb.Append(source.name);
+            return sb.ToString();
+        }
     }
 }
 
 public sealed class ZetanUtility
 {
-    public static bool IsMouseInsideScreen => Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height;
+    public static bool IsMouseInsideScreen
+    {
+        get
+        {
+#if ENABLE_INPUT_SYSTEM
+            Vector2 mousePosition = UnityEngine.InputSystem.Pointer.current.position.ReadValue();
+            return mousePosition.x >= 0 && mousePosition.x <= Screen.width && mousePosition.y >= 0 && mousePosition.y <= Screen.height;
+#else
+            return Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width && Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height;
+#endif
+        }
+    }
 
     public static Scene ActiveScene => SceneManager.GetActiveScene();
 
@@ -223,9 +287,9 @@ public sealed class ZetanUtility
             sb.Append(target);
             sb.Append("\"");
         }
-        else if (type.GetInterfaces().Contains(typeof(IEnumerable)))
+        else if (typeof(IEnumerable).IsAssignableFrom(type))
         {
-            bool canIndex = type.IsArray || type.GetInterfaces().Contains(typeof(IList));
+            bool canIndex = type.IsArray || typeof(IList).IsAssignableFrom(type);
             var tEnum = (target as IEnumerable).GetEnumerator();
             sb.Append("{\n");
             int index = 0;
@@ -270,9 +334,9 @@ public sealed class ZetanUtility
                     {
                         sb.Append("    ");
                     }
-                    sb.Append("[");
+                    sb.Append("<");
                     sb.Append(property.Name);
-                    sb.Append("] = ");
+                    sb.Append("> = ");
                     sb.Append(SerializeObject(property.GetValue(target), includeProperty, depth - 1, indentation + 1));
                     sb.Append(",\n");
                 }
@@ -293,7 +357,12 @@ public sealed class ZetanUtility
         return SerializeObject(target, includeProperty, depth, 0);
     }
 
-    public static string GetEnumInspectorName(Enum enumValue)
+    public static string GetMemberName<T>(Expression<Func<T>> memberAccessor)
+    {
+        return ((MemberExpression)memberAccessor.Body).Member.Name;
+    }
+
+    public static string GetInspectorName(Enum enumValue)
     {
         if (enumValue != null)
         {
@@ -312,7 +381,17 @@ public sealed class ZetanUtility
     #region Vector相关
     public static Vector2 ScreenCenter => new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
 
-    public static Vector3 MousePositionToWorld => Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    public static Vector3 MousePositionToWorld
+    {
+        get
+        {
+#if ENABLE_INPUT_SYSTEM
+            return Camera.main.ScreenToWorldPoint(UnityEngine.InputSystem.Pointer.current.position.ReadValue());
+#else
+            return Camera.main.ScreenToWorldPoint(Input.mousePosition);
+#endif
+        }
+    }
 
     public static Vector3 PositionToGrid(Vector3 originalPos, float gridSize = 1.0f, float offset = 1.0f)
     {

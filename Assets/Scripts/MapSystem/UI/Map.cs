@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
-public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public void OnDrag(PointerEventData eventData)
     {
-        if (touchCount < 2 && ((Application.platform == RuntimePlatform.Android) || eventData.button == PointerEventData.InputButton.Right))
+        if (UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count < 2 && ((Application.platform == RuntimePlatform.Android) || eventData.button == PointerEventData.InputButton.Right))
             MapManager.Instance.DragWorldMap(-eventData.delta);
     }
 
@@ -19,7 +20,7 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             if (clickCount < 1) isClick = true;
-            if (clickTime <= 0.2f && Input.touchCount < 2) clickCount++;
+            if (clickTime <= 0.2f && UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count < 2) clickCount++;
             if (clickCount > 1)
             {
                 if (MapManager.Instance.IsViewingWorldMap) MapManager.Instance.CreateDefaultMarkAtMousePos(eventData.position);
@@ -48,17 +49,17 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
 
     private void Update()
     {
-        if (touchCount > 1 && Input.touchCount == 2)
+        if (UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count == 2)
         {
-            var first = Input.GetTouch(0);
-            var second = Input.GetTouch(1);
+            var first = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches[0];
+            var second = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches[1];
 
-            var firstPos = (Vector2)Camera.main.WorldToViewportPoint(first.position);
-            var secondPos = (Vector2)Camera.main.WorldToViewportPoint(second.position);
+            var firstPos = first.screenPosition;
+            var secondPos = second.screenPosition;
             var curDis = (firstPos - secondPos).magnitude;
 
-            var firstPrePos = (Vector2)Camera.main.WorldToViewportPoint(first.position - first.deltaPosition);
-            var secondPrePos = (Vector2)Camera.main.WorldToViewportPoint(second.position - second.deltaPosition);
+            var firstPrePos = first.screenPosition - first.delta;
+            var secondPrePos = second.screenPosition - second.delta;
             var preDis = (firstPrePos - secondPrePos).magnitude;
 
             var zoomValue = curDis - preDis;
@@ -67,7 +68,7 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
         }
         else if (canZoom)
         {
-            MapManager.Instance.Zoom(Input.mouseScrollDelta.y);
+            MapManager.Instance.Zoom(Mouse.current.scroll.ReadValue().y * 0.01f);
         }
     }
 
@@ -90,18 +91,4 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
         }
     }
 #endif
-    private int touchCount;
-    public void OnPointerDown(PointerEventData eventData)
-    {
-#if UNITY_ANDROID
-        if (touchCount < 2) touchCount++;
-#endif
-    }
-
-    public void OnPointerUp(PointerEventData eventData)
-    {
-#if UNITY_ANDROID
-        if (touchCount > 0) touchCount--;
-#endif
-    }
 }

@@ -1,7 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 
-#if UNITY_EDITOR
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property |
     AttributeTargets.Class | AttributeTargets.Struct, Inherited = true)]
 public class ConditionalHideAttribute : PropertyAttribute
@@ -29,4 +28,3 @@ public class ConditionalHideAttribute : PropertyAttribute
         this.enumCondition = enumCondition;
     }
 }
-#endif

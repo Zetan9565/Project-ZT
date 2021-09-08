@@ -91,12 +91,10 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void SaveWarehouse(SaveData data)
     {
-        foreach (KeyValuePair<string, TalkerData> kvp in GameManager.TalkerDatas)
+        foreach (var talker in DialogueManager.Instance.Talkers.Values)
         {
-            if (kvp.Value.Info.IsWarehouseAgent)
-            {
-                data.warehouseDatas.Add(new WarehouseSaveData(kvp.Value.TalkerID, kvp.Value.warehouse));
-            }
+            if (talker.Info.IsWarehouseAgent)
+                data.warehouseDatas.Add(new WarehouseSaveData(talker.TalkerID, talker.warehouse));
         }
         foreach (var kvp in FindObjectsOfType<Warehouse>())
         {
@@ -214,7 +212,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         foreach (WarehouseSaveData wd in data.warehouseDatas)
         {
             WarehouseData warehouse = null;
-            GameManager.TalkerDatas.TryGetValue(wd.handlerID, out TalkerData handler);
+            DialogueManager.Instance.Talkers.TryGetValue(wd.handlerID, out TalkerData handler);
             if (handler) warehouse = handler.warehouse;
             else
             {

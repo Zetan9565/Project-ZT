@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -209,7 +208,7 @@ public class MaterialListDrawer
                     headLabel = $"[{index}] {(item.objectReferenceValue as ItemBase).name}";
                 else if ((MakingType)makingType.enumValueIndex == MakingType.SameType)
                 {
-                    headLabel = $"[{index}] {ZetanUtility.GetEnumInspectorName((MaterialType)materialType.enumValueIndex)}";
+                    headLabel = $"[{index}] {ZetanUtility.GetInspectorName((MaterialType)materialType.enumValueIndex)}";
                 }
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), headLabel);
                 EditorGUI.BeginChangeCheck();
@@ -262,7 +261,7 @@ public class MaterialListDrawer
                                 if (eMakingType.enumValueIndex == (int)MakingType.SameType)
                                     if (itemNow.MaterialType == (MaterialType)eMaterialType.enumValueIndex)
                                     {
-                                        EditorUtility.DisplayDialog("错误", $"第 {i + 1} 个材料的类型 [{ZetanUtility.GetEnumInspectorName((MaterialType)eMaterialType.enumValueIndex)}] 已包括这个道具", "确定");
+                                        EditorUtility.DisplayDialog("错误", $"第 {i + 1} 个材料的类型 [{ZetanUtility.GetInspectorName((MaterialType)eMaterialType.enumValueIndex)}] 已包括这个道具", "确定");
                                         item.objectReferenceValue = itemBef;
                                     }
                             }
@@ -755,7 +754,7 @@ public class ItemSelectionDrawer<T> where T : ItemBase
         List<string> itemNames = new List<string>() { nameNull };
         foreach (var item in items)
         {
-            itemNames.Add($"{ZetanUtility.GetEnumInspectorName(item.ItemType)}/{item.name}");
+            itemNames.Add($"{ZetanUtility.GetInspectorName(item.ItemType)}/{item.name}");
         }
         this.property = property;
         this.label = label;
@@ -785,11 +784,10 @@ public class SceneSelectionDrawer
 {
     private readonly string[] sceneNames;
 
-    private readonly SerializedObject owner;
     private readonly SerializedProperty property;
     private readonly string label;
 
-    public SceneSelectionDrawer(SerializedObject owner, SerializedProperty property, string label = "场景", string nameNull = "未选择")
+    public SceneSelectionDrawer(SerializedProperty property, string label = "场景", string nameNull = "未选择")
     {
         List<string> sceneNames = new List<string>() { nameNull };
         foreach (var scene in EditorBuildSettings.scenes)
@@ -798,35 +796,26 @@ public class SceneSelectionDrawer
             if (find) sceneNames.Add(find.name);
         }
         this.sceneNames = sceneNames.ToArray();
-        this.owner = owner;
         this.property = property;
         this.label = label;
     }
 
     public void DoLayoutDraw()
     {
-        owner?.Update();
-        EditorGUI.BeginChangeCheck();
         int index = Array.FindIndex(sceneNames, x => x == property.stringValue);
         index = index < 0 ? 0 : index;
         index = EditorGUILayout.Popup(label, index, sceneNames);
         if (index < 1 || index > sceneNames.Length) property.stringValue = string.Empty;
         else property.stringValue = sceneNames[index];
-        if (EditorGUI.EndChangeCheck())
-            owner?.ApplyModifiedProperties();
     }
 
     public void DoDraw(Rect rect)
     {
-        owner?.Update();
-        EditorGUI.BeginChangeCheck();
         int index = Array.FindIndex(sceneNames, x => x == property.stringValue);
         index = index < 0 ? 0 : index;
         index = EditorGUI.Popup(rect, label, index, sceneNames);
         if (index < 1 || index > sceneNames.Length) property.stringValue = string.Empty;
         else property.stringValue = sceneNames[index];
-        if (EditorGUI.EndChangeCheck())
-            owner?.ApplyModifiedProperties();
     }
 
 }
@@ -908,6 +897,103 @@ public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
     public ScriptableObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, Func<T, string> groupPicker, string path, string label = "资源", string nameNull = "未选择")
     {
         objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
+        List<string> objectNames = new List<string>() { nameNull };
+        foreach (var obj in objects)
+        {
+            if (filter == null || filter != null && filter.Invoke(obj))
+            {
+
+                if (!string.IsNullOrEmpty(fieldAsName))
+                {
+                    var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                    if (field != null) objectNames.Add(GetGroupedName(obj, field.GetValue(obj).ToString()));
+                    else objectNames.Add(GetGroupedName(obj, obj.name));
+                }
+                else objectNames.Add(GetGroupedName(obj, obj.name));
+            }
+        }
+        this.property = property;
+        this.label = label;
+        this.objectNames = objectNames.ToArray();
+
+        string GetGroupedName(T obj, string name)
+        {
+            if (groupPicker == null) return name;
+            string group = groupPicker(obj);
+            if (string.IsNullOrEmpty(group)) return name;
+            else return $"{group}/{name}";
+        }
+    }
+
+    public ScriptableObjectSelectionDrawer(SerializedProperty property, string fieldAsName, T[] resources, string label = "资源", string nameNull = "未选择")
+    {
+        objects = resources;
+        List<string> objectNames = new List<string>() { nameNull };
+        foreach (var obj in objects)
+        {
+            if (!string.IsNullOrEmpty(fieldAsName))
+            {
+                var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                if (field != null) objectNames.Add(field.GetValue(obj).ToString());
+                else objectNames.Add(obj.name);
+            }
+            else objectNames.Add(obj.name);
+        }
+        this.property = property;
+        this.label = label;
+        this.objectNames = objectNames.ToArray();
+    }
+    public ScriptableObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, T[] resources, string label = "资源", string nameNull = "未选择")
+    {
+        objects = resources;
+        List<string> objectNames = new List<string>() { nameNull };
+        foreach (var obj in objects)
+        {
+            if (!string.IsNullOrEmpty(fieldAsName))
+            {
+                var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                if (field != null) objectNames.Add(GetGroupedName(obj, field.GetValue(obj).ToString()));
+                else objectNames.Add(GetGroupedName(obj, obj.name));
+            }
+            else objectNames.Add(GetGroupedName(obj, obj.name));
+        }
+        this.property = property;
+        this.label = label;
+        this.objectNames = objectNames.ToArray();
+
+        string GetGroupedName(T obj, string name)
+        {
+            if (groupPicker == null) return name;
+            string group = groupPicker(obj);
+            if (string.IsNullOrEmpty(group)) return name;
+            else return $"{group}/{name}";
+        }
+    }
+
+    public ScriptableObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, T[] resources, string label = "资源", string nameNull = "未选择")
+    {
+        objects = resources;
+        List<string> objectNames = new List<string>() { nameNull };
+        foreach (var obj in objects)
+        {
+            if (filter == null || filter != null && filter.Invoke(obj))
+            {
+                if (!string.IsNullOrEmpty(fieldAsName))
+                {
+                    var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                    if (field != null) objectNames.Add(field.GetValue(obj).ToString());
+                    else objectNames.Add(obj.name);
+                }
+                else objectNames.Add(obj.name);
+            }
+        }
+        this.property = property;
+        this.label = label;
+        this.objectNames = objectNames.ToArray();
+    }
+    public ScriptableObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, Func<T, string> groupPicker, T[] resources, string label = "资源", string nameNull = "未选择")
+    {
+        objects = resources;
         List<string> objectNames = new List<string>() { nameNull };
         foreach (var obj in objects)
         {

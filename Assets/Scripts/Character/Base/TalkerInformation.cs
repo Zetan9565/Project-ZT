@@ -13,13 +13,20 @@ public class TalkerInformation : CharacterInformation
     public List<ConditionDialogue> ConditionDialogues => conditionDialogues;
 
     [SerializeField]
+    private bool enable;
+    public bool Enable => enable;
+
+    [SerializeField]
     private string scene;
     public string Scene => scene;
 
     [SerializeField]
-    private Vector3 positions;
-    public Vector3 Positions => positions;
+    private Vector3 position;
+    public Vector3 Position => position;
 
+    [SerializeField]
+    private Talker prefab;
+    public Talker Prefab => prefab;
 
     [SerializeField]
     private bool isWarehouseAgent;
@@ -66,6 +73,15 @@ public class TalkerInformation : CharacterInformation
     [SerializeField]
     private bool canMarry;
     public bool CanMarry => canMarry;
+
+    public override bool IsValid
+    {
+        get
+        {
+            return base.IsValid && (!enable || enable && !string.IsNullOrEmpty(scene) && prefab && defaultDialogue && (!isVendor || isVendor && shop) && questsStored.TrueForAll(x => x != null)
+                && conditionDialogues.TrueForAll(x => x.IsValid) && (!canDEV_RLAT || canDEV_RLAT && normalItemDialogue && giftDialogues.TrueForAll(x => x.Dialogue) && affectiveItems.TrueForAll(x => x.Item)));
+        }
+    }
 }
 
 [System.Serializable]

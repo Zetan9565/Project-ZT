@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 
 [DisallowMultipleComponent]
@@ -22,8 +22,8 @@ public class SkillManager : SingletonMonoBehaviour<SkillManager>
     {
         get
         {
-            if (PlayerManager.Instance && PlayerManager.Instance.PlayerController)
-                return PlayerManager.Instance.PlayerController.Animator;
+            if (PlayerManager.Instance && PlayerManager.Instance.Controller)
+                return PlayerManager.Instance.Controller.Animator.GetAnimatorComponent();
             else return null;
         }
     }
@@ -93,7 +93,7 @@ public class SkillManager : SingletonMonoBehaviour<SkillManager>
     private void OnActionUpdate(float normalizedTime)
     {
         if (currentAction && normalizedTime > currentAction.InputListenBeginNrmlzTime && normalizedTime < currentAction.InputTimeOutNrmlzTime)
-            if (Input.GetButtonDown("Attack") || Input.GetButtonDownMobile("Attack"))
+            if (Input.GetButtonDown("Attack"))
                 TryActNext(PlayerAnimator.GetInteger(animaAttackIndexNameHash));
     }
     private void OnActionExit(SkillActionBehaviour behaviour)

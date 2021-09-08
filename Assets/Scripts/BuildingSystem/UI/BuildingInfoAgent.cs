@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -35,7 +35,7 @@ public class BuildingInfoAgent : MonoBehaviour,
         if(eventData.button == PointerEventData.InputButton.Right)
             TryBuild();
         else if(eventData.button == PointerEventData.InputButton.Left)
-            BuildingManager.Instance.ShowBuiltList(MBuildingInfo);
+            BuildingManager.Instance.ShowBuiltList(Info);
 #elif UNITY_ANDROID
         if (touchTime < 0.5f)
         {
@@ -101,7 +101,7 @@ public class BuildingInfoAgent : MonoBehaviour,
     public void OnPointerEnter(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
-        BuildingManager.Instance.ShowDescription(MBuildingInfo);
+        BuildingManager.Instance.ShowDescription(Info);
 #endif
     }
 

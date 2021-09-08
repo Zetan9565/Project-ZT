@@ -89,6 +89,15 @@ public static class MiscFuntion
         }
     }
 
+    public static string GetFirstWords(Dialogue dialogue)
+    {
+        if (dialogue&& dialogue.Words.Count > 0)
+        {
+            return HandlingKeyWords(dialogue.Words[0].ToString());
+        }
+        return string.Empty;
+    }
+
     public static bool CheckCondition(ConditionGroup group)
     {
         if (!group) return true;

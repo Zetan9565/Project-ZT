@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 public interface IWindowHandler
@@ -84,4 +84,17 @@ public interface IManageAble
     public bool OnSaveGame(SaveData data);
 
     public bool OnLoadGame(SaveData data);
+}
+
+public interface IDirectionMove
+{
+    public void Move(Vector2 vector2);
+}
+
+public interface IBehaviourListener
+{
+    void OnStateEnter(AnimatorStateInfo stateInfo, int layerIndex);
+    void OnStateUpdate(AnimatorStateInfo stateInfo, int layerIndex);
+    void OnStateExit(AnimatorStateInfo stateInfo, int layerIndex);
+
 }

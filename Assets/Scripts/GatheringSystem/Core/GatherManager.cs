@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,11 +22,11 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
     public void Init()
     {
         animaNameHash = Animator.StringToHash(animaName);
-        var gatherBehaviours = PlayerManager.Instance.PlayerController.Animator.GetBehaviours<GatherBehaviour>();
-        foreach (var gb in gatherBehaviours)
-        {
-            gb.enterCallback = GatherStart;
-        }
+        //var gatherBehaviours = PlayerManager.Instance.Controller.Animator.Animator.GetBehaviours<GatherBehaviour>();
+        //foreach (var gb in gatherBehaviours)
+        //{
+        //    gb.enterCallback = GatherStart;
+        //}
     }
 
     public void Cancel()
@@ -39,6 +39,8 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
 
     public bool Gather(Gathering gatherAgent)
     {
+        if (!PlayerManager.Instance.CheckIsNormalWithAlert())
+            return false;
         if (IsGathering)
         {
             MessageManager.Instance.New("请等待上一个采集完成");
@@ -62,7 +64,7 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
 
     private void GatherDone()
     {
-        PlayerManager.Instance.PlayerController.Animator.SetInteger(animaNameHash, -1);
+        PlayerManager.Instance.Controller.Animator.SetInteger(animaNameHash, -1);
         if (!Gathering) return;
         Gathering.FinishInteraction();
         Gathering.GatherSuccess();
@@ -75,7 +77,7 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
 
     private void GatherCancel()
     {
-        PlayerManager.Instance.PlayerController.Animator.SetInteger(animaNameHash, -1);
+        PlayerManager.Instance.Controller.Animator.SetInteger(animaNameHash, -1);
         if (Gathering) Gathering.FinishInteraction();
         if (IsGathering)
             NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.GatheringStateChange, false);

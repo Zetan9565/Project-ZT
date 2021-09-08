@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 5857539914028515396}
   - component: {fileID: 5857539914028515399}
   - component: {fileID: 5857539914028515398}
-  m_Layer: 13
+  - component: {fileID: 561129209075138679}
+  m_Layer: 12
   m_Name: CropTestPreview
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +75,8 @@ SpriteRenderer:
   m_SortingLayerID: 2050152057
   m_SortingLayer: 2
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 608fc6a057c396d43b24a636e27409cb, type: 3}
+  m_Sprite: {fileID: 2559505510574410273, guid: 9eb4318a95588c54ab79ca3639396e41,
+    type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -101,8 +103,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.4, y: 0.4}
+    pivot: {x: 0.5, y: 0.18}
+    oldSize: {x: 0.32, y: 0.64}
     newSize: {x: 0.4, y: 0.4}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -128,3 +130,14 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4096
   centerOffset: 1
+--- !u!210 &561129209075138679
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5857539914028515393}
+  m_Enabled: 1
+  m_SortingLayerID: 2050152057
+  m_SortingLayer: 2
+  m_SortingOrder: 0

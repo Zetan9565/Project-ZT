@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using ZetanExtends;
 
 public delegate void DialogueListner();
 [DisallowMultipleComponent]
@@ -12,6 +13,8 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 {
     public event DialogueListner OnBeginDialogueEvent;
     public event DialogueListner OnFinishDialogueEvent;
+
+    private Transform talkerRoot;
 
     public Talker CurrentTalker { get; private set; }
     public bool IsTalking { get; private set; }
@@ -35,6 +38,9 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     private readonly Stack<WordsOptionData> choiceOptionSaid = new Stack<WordsOptionData>();
 
     private readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
+
+    public readonly Dictionary<string, TalkerData> Talkers = new Dictionary<string, TalkerData>();
+    private readonly Dictionary<string, List<TalkerData>> talkersMap = new Dictionary<string, List<TalkerData>>();
 
     #region 选项相关
     private readonly List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
@@ -87,7 +93,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (!UI) return;
         CurrentTalker = talker;
         CurrentType = DialogueType.Normal;
-        ShowButtons(talker.Info.CanDEV_RLAT, talker.Info.IsVendor, talker.Info.IsWarehouseAgent, talker.QuestInstances.FindAll(q => !q.IsFinished && MiscFuntion.CheckCondition(q.Info.AcceptCondition)).Count > 0);
+        ShowButtons(talker.Data.Info.CanDEV_RLAT, talker.Data.Info.IsVendor, talker.Data.Info.IsWarehouseAgent, talker.QuestInstances.FindAll(q => !q.IsFinished && MiscFuntion.CheckCondition(q.Info.AcceptCondition)).Count > 0);
         HideQuestDescription();
         StartDialogue(talker.DefaultDialogue);
         talker.OnTalkBegin();
@@ -468,7 +474,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         string talkerName = words.TalkerName;
         if (currentDialogue)
-            talkerName = currentDialogue.origin.UseUnifiedNPC ? (currentDialogue.origin.UseCurrentTalkerInfo ? CurrentTalker.Info.name : currentDialogue.origin.UnifiedNPC.name) : talkerName;
+            talkerName = currentDialogue.origin.UseUnifiedNPC ? (currentDialogue.origin.UseCurrentTalkerInfo ? CurrentTalker.Data.Info.name : currentDialogue.origin.UnifiedNPC.name) : talkerName;
         if (words.TalkerType == TalkerType.Player && PlayerManager.Instance.PlayerInfo)
             talkerName = PlayerManager.Instance.PlayerInfo.name;
         UI.nameText.text = talkerName;
@@ -593,7 +599,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 if (!option.parent.parent.origin.UseUnifiedNPC)
                     talkerInfo = option.parent.origin.TalkerInfo;
                 else if (option.parent.parent.origin.UseUnifiedNPC && option.parent.parent.origin.UseCurrentTalkerInfo)
-                    talkerInfo = CurrentTalker.Info;
+                    talkerInfo = CurrentTalker.Data.Info;
                 else if (option.parent.parent.origin.UseUnifiedNPC && !option.parent.parent.origin.UseCurrentTalkerInfo)
                     talkerInfo = option.parent.parent.origin.UnifiedNPC;
                 wordsToSay.Push(new DialogueWordsData(new DialogueWords(talkerInfo, words), null));
@@ -614,10 +620,18 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             MessageManager.Instance.New("请先等待采集完成");
             return false;
         }
-        if (IsTalking || !talker) return false;
-        CurrentTalker = talker;
-        BeginNewDialogue();
-        return true;
+        if (PlayerManager.Instance.Character.GetMainState(out var state))
+        {
+            if (state == CharacterState.Normal)
+            {
+                if (IsTalking || !talker) return false;
+                CurrentTalker = talker;
+                BeginNewDialogue();
+                return true;
+            }
+            return false;
+        }
+        return false;
     }
     public void CancelTalk()
     {
@@ -632,15 +646,16 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (WarehouseManager.Instance.IsUIOpen) WarehouseManager.Instance.CloseWindow();
         WindowsManager.Instance.PauseAll(true, this);
         UIManager.Instance.EnableJoyStick(false);
-        PlayerManager.Instance.PlayerController.controlAble = false;
         NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.WindowStateChange, typeof(DialogueManager), true);
+        PlayerManager.Instance.Controller.ForceStop();
+        PlayerManager.Instance.Character.SetState(CharacterState.Busy, CharacterBusyState.Talking);
     }
     public override void CloseWindow()
     {
         base.CloseWindow();
         if (IsUIOpen) return;
         CurrentType = DialogueType.Normal;
-        if (CurrentTalker) CurrentTalker.Interactive.FinishInteraction();
+        if (CurrentTalker) CurrentTalker.FinishInteraction();
         CurrentTalker = null;
         currentQuest = null;
         currentTalkObj = null;
@@ -655,8 +670,8 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (ShopManager.Instance.IsUIOpen) ShopManager.Instance.CloseWindow();
         IsTalking = false;
         UIManager.Instance.EnableJoyStick(true);
-        PlayerManager.Instance.PlayerController.controlAble = true;
         NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.WindowStateChange, typeof(DialogueManager), false);
+        PlayerManager.Instance.Character.SetState(CharacterState.Normal, CharacterNormalState.Idle);
     }
 
     public void ShowQuestDescription(QuestData quest)
@@ -700,19 +715,17 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     public void OpenTalkerWarehouse()
     {
-        if (!CurrentTalker || !CurrentTalker.Info.IsWarehouseAgent) return;
+        if (!CurrentTalker || !CurrentTalker.Data.Info.IsWarehouseAgent) return;
         PauseDisplay(true);
         BackpackManager.Instance.PauseDisplay(false);
         WarehouseManager.Instance.Manage(CurrentTalker.Data.warehouse);
     }
     public void OpenTalkerShop()
     {
-        if (!CurrentTalker || !CurrentTalker.Info.IsVendor) return;
+        if (!CurrentTalker || !CurrentTalker.Data.Info.IsVendor) return;
         ShopManager.Instance.Init(CurrentTalker.Data.shop);
         ShopManager.Instance.OpenWindow();
         PauseDisplay(true);
-        BackpackManager.Instance.PauseDisplay(false);
-        BackpackManager.Instance.OpenWindow();
     }
     public void OpenGiftWindow()
     {
@@ -773,9 +786,28 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     #endregion
 
     #region 其它
+    public void Init()
+    {
+        if (!talkerRoot)
+            talkerRoot = new GameObject("Talkers").transform;
+        foreach (var ti in Resources.LoadAll<TalkerInformation>("Configuration").Where(x => x.IsValid && x.Enable))
+        {
+            TalkerData data = new TalkerData(ti);
+            if (ti.Scene == ZetanUtility.ActiveScene.name)
+            {
+                Talker talker = ti.Prefab.gameObject.Instantiate(talkerRoot).GetComponent<Talker>();
+                talker.Init(data);
+            }
+            Talkers.Add(ti.ID, data);
+            if (talkersMap.TryGetValue(ti.Scene, out var talkers))
+                talkers.Add(data);
+            else talkersMap.Add(ti.Scene, new List<TalkerData>() { data });
+        }
+    }
+
     public void SendTalkerGifts()
     {
-        if (!CurrentTalker || !CurrentTalker.Info.CanDEV_RLAT) return;
+        if (!CurrentTalker || !CurrentTalker.Data.Info.CanDEV_RLAT) return;
         OpenGiftWindow();
     }
 

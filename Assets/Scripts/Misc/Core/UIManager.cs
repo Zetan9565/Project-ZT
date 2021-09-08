@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager : SingletonMonoBehaviour<UIManager>
@@ -94,8 +94,8 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     {
         canvasGroup.alpha = 0;
         canvasGroup.blocksRaycasts = false;
-        JoyStick.enabled = false;
-        JoyStick.Stop();
+        //JoyStick.enabled = false;
+        //JoyStick.Stop();
     }
 
     public void Init()

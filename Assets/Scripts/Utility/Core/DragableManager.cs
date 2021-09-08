@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 
@@ -37,16 +37,15 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
     }
 #endif
 
-    // Update is called once per frame
     public void MoveIcon()
     {
         if (Current != null)
         {
-            if (Input.GetMouseButtonDown(1) || Input.touches.Length > 1)
+            if (InputManager.GetMouseButtonDown(1) || UnityEngine.InputSystem.EnhancedTouch.Touch.fingers.Count > 1)
             {
                 CancelDrag();
             }
-            icon.transform.position = Input.mousePosition;
+            icon.transform.position = InputManager.mousePosition;
         }
     }
 
@@ -73,7 +72,7 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
 
     public void CancelDrag()
     {
-        ResetIcon();
         onCancelDrag?.Invoke();
+        ResetIcon();
     }
 }

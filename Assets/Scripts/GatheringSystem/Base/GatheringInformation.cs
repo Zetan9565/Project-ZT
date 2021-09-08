@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "gathering info", menuName = "Zetan Studio/采集物信息")]
@@ -35,7 +35,7 @@ public class GatheringInformation : ScriptableObject
     }
 
     [SerializeField]
-    protected float gatherTime;
+    protected float gatherTime = 5.0f;
     public float GatherTime
     {
         get
@@ -73,6 +73,15 @@ public class GatheringInformation : ScriptableObject
             return lootPrefab;
         }
     }
+
+    public bool IsValid => !string.IsNullOrEmpty(_ID) && !string.IsNullOrEmpty(_name) && productItems.TrueForAll(x => x.IsValid) && lootPrefab;
+
+#if UNITY_EDITOR
+    public void SetBaseName(string name)
+    {
+        base.name = name;
+    }
+#endif
 }
 public enum GatherType
 {

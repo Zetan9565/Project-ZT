@@ -374,16 +374,16 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
 
     public decimal GetRealTimeUntil(float timeline)
     {
-        if (timeline == 0) timeline = 24;
+        if (timeline == 0f) timeline = 24f;
         if (timeline > this.timeline)
             return (decimal)(DayToSeconds * (timeline - this.timeline) * ScaleDayToReal);
         else
-            return (decimal)(DayToSeconds * (24 - this.timeline + timeline) * ScaleDayToReal);
+            return (decimal)(DayToSeconds * (24f - this.timeline + timeline) * ScaleDayToReal);
     }
 
     public void SkipToday()
     {
-        TimeStamp += GetRealTimeUntil(0f);
+        TimePase(GetRealTimeUntil(0f));
     }
 
     private void SetTime(decimal timeStamp)
@@ -393,8 +393,8 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     }
     private void ResetTime()
     {
-        timeStamp = 0;
-        timeline = 0;
+        timeStamp = 0m;
+        timeline = 0f;
         dayBefore = 0;
         UpdateUI();
     }

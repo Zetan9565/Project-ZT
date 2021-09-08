@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
-using UnityEngine.Events;
 
+[DisallowMultipleComponent]
 public sealed class Interactive : MonoBehaviour
 {
     /**
@@ -65,10 +65,11 @@ public sealed class Interactive : MonoBehaviour
     {
         if (component)
         {
-            interact += (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), component, component.GetType().GetMethod(interactMethod));
-            interactive += (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), component, component.GetType().GetMethod(interactiveMethod));
+            var type = component.GetType();
+            interact = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), component, type.GetMethod(interactMethod));
+            interactive = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), component, type.GetMethod(interactiveMethod));
             if (!string.IsNullOrEmpty(nameMethod))
-                getName += (Func<string>)Delegate.CreateDelegate(typeof(Func<string>), component, component.GetType().GetMethod(nameMethod));
+                getName = (Func<string>)Delegate.CreateDelegate(typeof(Func<string>), component, type.GetMethod(nameMethod));
         }
     }
 

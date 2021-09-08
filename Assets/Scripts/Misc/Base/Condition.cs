@@ -108,7 +108,9 @@ public class ConditionGroup
                         "\n3、未对非法输入进行处理，需规范填写\n4、例：(0 + 1) * ~2 表示满足条件0或1且不满足条件2\n5、为空时默认进行相互的“且”运算")]
     private string relational;
     public string Relational => relational;
-    
+
+    public bool IsValid => conditions.TrueForAll(x => x.IsValid);
+
     public static implicit operator bool(ConditionGroup self)
     {
         return self != null;

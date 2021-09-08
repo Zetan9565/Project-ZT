@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using UnityEngine;
@@ -85,7 +85,6 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
             }
             else
             {
-                AmountManager.Instance.SetPosition(ZetanUtility.ScreenCenter, Vector2.zero);
                 AmountManager.Instance.New(delegate (long amount)
                 {
                     ConfirmManager.Instance.New(string.Format("确定制作{0}次 [{1}] 吗？", (int)amount, currentItem.name), delegate
@@ -118,7 +117,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                                 PauseDisplay(false);
                             }, "制作中", true);
                     });
-                }, amountCanMake, "制作次数");
+                }, amountCanMake, "制作次数", ZetanUtility.ScreenCenter, Vector2.zero);
             }
         }
         else

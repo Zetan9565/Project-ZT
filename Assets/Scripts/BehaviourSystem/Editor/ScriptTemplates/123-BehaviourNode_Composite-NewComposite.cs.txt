@@ -1,0 +1,20 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using ZetanStudio.BehaviourTree;
+
+[NodeDescription("此处是结点悬浮描述")]
+public class #SCRIPTNAME# : Composite
+{
+    [DisplayName("参数显示名称")]
+    public SharedBoolean example;
+
+    //覆写此属性以用于判断结点有效性
+    public override bool IsValid => true;
+
+    //在此方法里编写结点逻辑
+    protected override NodeStates OnUpdate()
+    {
+        return NodeStates.Success;
+    }
+}

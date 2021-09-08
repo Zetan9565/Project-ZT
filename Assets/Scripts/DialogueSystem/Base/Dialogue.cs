@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -364,4 +364,6 @@ public class ConditionDialogue
     [SerializeField]
     private Dialogue dialogue;
     public Dialogue Dialogue => dialogue;
+
+    public bool IsValid => dialogue && condition.IsValid;
 }

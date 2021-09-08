@@ -1,61 +1,119 @@
-﻿using UnityEngine;
+using UnityEngine;
 
+[RequireComponent(typeof(Character))]
 public class CharacterController2D : MonoBehaviour
 {
-    [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("2D 刚体")]
+    [ReadOnly]
 #endif
-    private Rigidbody2D rigidbd;
+    public Vector2 input;
 
-#if UNITY_EDITOR
-    [DisplayName("移动速度")]
-#endif
-    public float moveSpeed = 5.0f;
+    public CharacterAnimator Animator => Character.Animator;
 
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("动画控制器")]
-#endif
-    private Animator animator;
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("Horizontal参数名")]
-#endif
-    private string animaHorizontal = "Horizontal";
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("Vertical参数名")]
-#endif
-    private string animaVertical = "Vertical";
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("Magnitude参数名")]
-#endif
-    private string animaMagnitude = "Move";
+    public CharacterMotion2D Motion => Character.Motion;
 
-    public Animator Animator
+    public Character Character { get; protected set; }
+
+    protected virtual void Awake()
     {
-        get
+        SetCharacter(GetComponent<Character>());
+    }
+
+    public virtual bool Roll(Vector2? input = null)
+    {
+        if (Animator.CurrentState.IsTag(CharacterAnimaTags.Roll) || Animator.CurrentState.IsTag(CharacterAnimaTags.Dash)) return false;
+        if (Character.GetMainState(out var state))
         {
-            return animator;
+            if (state == CharacterState.Normal || state == CharacterState.Attack)
+            {
+                if (input == null) input = this.input;
+                Character.SetState(CharacterState.Busy, CharacterBusyState.Roll);
+                Motion.Roll(input.Value, delegate
+                {
+                    if (Character.GetState(out var main, out var sub) && main == CharacterState.Busy && sub == CharacterBusyState.Roll)
+                        Character.SetState(CharacterState.Normal, CharacterNormalState.Idle);
+                });
+                Animator.PlayRollAnima(input.Value);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public virtual bool Dash(Vector2? input = null)
+    {
+        if (Animator.CurrentState.IsTag(CharacterAnimaTags.Roll) || Animator.CurrentState.IsTag(CharacterAnimaTags.Dash)) return false;
+        if (Character.GetMainState(out var state))
+        {
+            if (state == CharacterState.Normal)
+            {
+                if (input == null) input = this.input;
+                Character.SetState(CharacterState.Busy, CharacterBusyState.Dash);
+                Motion.Dash(input.Value, () => { Character.SetState(CharacterState.Normal, CharacterNormalState.Idle); });
+                Animator.PlayDashAnima(input.Value);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public virtual void Move(Vector2? input = null)
+    {
+        if (Character.GetMainState(out var state))
+        {
+            if (state == CharacterState.Normal)
+            {
+                if (input == null) input = this.input;
+                if (input.Value.sqrMagnitude != 0)
+                {
+                    Character.SetSubState(CharacterNormalState.Walk);
+                    Animator.PlayMoveAnima(input.Value);
+                }
+                else
+                {
+                    Character.SetSubState(CharacterNormalState.Idle);
+                }
+                Motion.Move(input.Value);
+            }
         }
     }
 
-    public void Move(Vector2 input)
+    protected virtual void Update()
     {
-        if (moveSpeed < 0) return;
-        rigidbd.velocity = new Vector2(input.x * moveSpeed, input.y * moveSpeed);
-        SetAnima(input);
+        if (Character.GetState(out var main, out var sub))
+        {
+            switch (main)
+            {
+                case CharacterState.Normal:
+                    Move();
+                    break;
+                case CharacterState.Abnormal:
+                    break;
+                case CharacterState.Gather:
+                    break;
+                case CharacterState.Attack:
+                    Motion.Move(Vector2.zero);
+                    break;
+                case CharacterState.Busy:
+                    if ((CharacterBusyState)sub == CharacterBusyState.Roll || (CharacterBusyState)sub == CharacterBusyState.Dash)
+                        Motion.Move(Vector2.zero);
+                    break;
+                default:
+                    break;
+            }
+        }
+        Animator.SetDesiredSpeed(input);
     }
 
-    public void SetAnima(Vector2 input)
+    public virtual void ForceStop()
     {
-        Animator.SetFloat(animaMagnitude, input.magnitude);
-        if (input != Vector2.zero)
-        {
-            Animator.SetFloat(animaHorizontal, input.x);
-            Animator.SetFloat(animaVertical, input.y);
-        }
+        Motion.ForceStop();
+        Animator.SetAnimaState((int)CharacterState.Normal, (int)CharacterNormalState.Idle);
+    }
+
+    public virtual void SetCharacter(Character character)
+    {
+        Character = character;
+        Character.SetController(this);
     }
 }

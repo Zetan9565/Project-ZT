@@ -155,45 +155,56 @@ public class CropInfoInspector : Editor
                     string.Empty, graph.objectReferenceValue, typeof(Sprite), false);
                 if (repeatTimes.intValue != 0)
                 {
-                    EditorGUI.PropertyField(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), gatherInfo, new GUIContent("对应采集物信息"));
-                    lineCount++;
+                    if (!gatherInfo.objectReferenceValue || gatherInfo.objectReferenceValue && !AssetDatabase.IsSubAsset(gatherInfo.objectReferenceValue))
+                    {
+                        EditorGUI.PropertyField(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), gatherInfo, new GUIContent("对应采集物信息"));
+                        lineCount++;
+                    }
+                    else if (AssetDatabase.IsSubAsset(gatherInfo.objectReferenceValue))
+                    {
+                        EditorGUI.LabelField(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight),
+                            $"对应采集物信息{((gatherInfo.objectReferenceValue as GatheringInformation).IsValid ? string.Empty : "(未补全)")}");
+                        lineCount++;
+                    }
                     if (gatherInfo.objectReferenceValue)
                     {
                         if (GUI.Button(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), "编辑"))
                             EditorUtility.OpenPropertyEditor(gatherInfo.objectReferenceValue);
+                        lineCount++;
+                        if (AssetDatabase.IsSubAsset(gatherInfo.objectReferenceValue))
+                        {
+                            if (GUI.Button(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), "删除"))
+                            {
+                                AssetDatabase.RemoveObjectFromAsset(gatherInfo.objectReferenceValue);
+                                gatherInfo.objectReferenceValue = null;
+                                AssetDatabase.SaveAssets();
+                            }
+                            lineCount++;
+                        }
                     }
                     else if (GUI.Button(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), "新建"))
                     {
-                        string folder = EditorUtility.OpenFolderPanel("选择保存文件夹", ZetanEditorUtility.GetDirectoryName(target), "");
-                        if (!string.IsNullOrEmpty(folder))
-                        {
-                            try
-                            {
-                                GatheringInformation infoInstance = CreateInstance<GatheringInformation>();
-                                AssetDatabase.CreateAsset(infoInstance, AssetDatabase.GenerateUniqueAssetPath($"{folder.Replace(Application.dataPath, "Assets")}/gathering info.asset"));
-                                AssetDatabase.Refresh();
+                        GatheringInformation infoInstance = CreateInstance<GatheringInformation>();
+                        infoInstance.SetBaseName("resource info");
+                        AssetDatabase.AddObjectToAsset(infoInstance, target);
+                        AssetDatabase.SaveAssets();
 
-                                gatherInfo.objectReferenceValue = infoInstance;
-                                SerializedObject gInfoObj = new SerializedObject(gatherInfo.objectReferenceValue);
-                                SerializedProperty _ID = gInfoObj.FindProperty("_ID");
-                                SerializedProperty _Name = gInfoObj.FindProperty("_name");
-                                _ID.stringValue = this._ID.stringValue + "S" + index;
-                                _Name.stringValue = _name.stringValue;
-                                gInfoObj.ApplyModifiedProperties();
+                        gatherInfo.objectReferenceValue = infoInstance;
+                        SerializedObject gInfoObj = new SerializedObject(gatherInfo.objectReferenceValue);
+                        SerializedProperty _ID = gInfoObj.FindProperty("_ID");
+                        SerializedProperty _Name = gInfoObj.FindProperty("_name");
+                        _ID.stringValue = this._ID.stringValue + "S" + index;
+                        _Name.stringValue = _name.stringValue;
+                        gInfoObj.ApplyModifiedProperties();
 
-                                EditorUtility.OpenPropertyEditor(infoInstance);
-                            }
-                            catch
-                            {
-                                EditorUtility.DisplayDialog("新建失败", "请选择Assets目录以下的文件夹。", "确定");
-                            }
-                        }
+                        EditorUtility.OpenPropertyEditor(infoInstance);
                     }
                     lineCount++;
                 }
                 if ((repeatTimes.intValue < 0 || repeatTimes.intValue > 1) && index > 0)
                 {
-                    EditorGUI.IntSlider(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight),
+                    lineCount = 4;
+                    EditorGUI.IntSlider(new Rect(rect.x + 8, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight),
                         indexToReturn, 0, index - 1, new GUIContent("收割后返回阶段"));
                 }
                 if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
@@ -210,6 +221,10 @@ public class CropInfoInspector : Editor
             if (cropStage.isExpanded)
             {
                 lineCount += 3;//空白
+                if ((repeatTimes.intValue < 0 || repeatTimes.intValue > 1) && index > 0)
+                {
+                    lineCount++;
+                }
             }
             return lineHeightSpace * lineCount + listHeight;
         };

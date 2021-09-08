@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System;
 using UnityEngine;
 
 [System.Serializable]
@@ -6,24 +6,17 @@ public class CharacterData
 {
     public CharacterInformation info;
 
-    public CharacterState currentState;
+    public CharacterState mainState;
+    public dynamic subState;
     public bool superArmor;
     public bool combat;
-    public bool IsDead => currentState == CharacterState.Dead;
+    public bool IsDead => mainState == CharacterState.Abnormal && subState == CharacterAbnormalState.Dead;
 
     public bool CanRoll
     {
         get
         {
-            switch (currentState)
-            {
-                case CharacterState.Idle:
-                case CharacterState.Walk:
-                case CharacterState.Run:
-                    return true;
-                default:
-                    return false;
-            }
+            return mainState == CharacterState.Normal;
         }
     }
 
@@ -39,25 +32,19 @@ public class CharacterData
     {
         get
         {
-            switch (currentState)
-            {
-                case CharacterState.Idle:
-                case CharacterState.Walk:
-                case CharacterState.Run:
-                case CharacterState.Swim:
-                    return true;
-                default:
-                    return false;
-            }
+            return mainState == CharacterState.Abnormal;
         }
     }
 
+    public Character entity;
     public string currentScene;
-    public Vector3 currentPosition;
+
+    public virtual Vector3 currentPosition => entity ? (entity.Body ? entity.Body.position : entity.Position) : Vector3.zero;
 
     public CharacterData(CharacterInformation info)
     {
         this.info = info;
+        currentScene = ZetanUtility.ActiveScene.name;
     }
 
     public static implicit operator bool(CharacterData self)
@@ -68,29 +55,90 @@ public class CharacterData
 
 public enum CharacterState
 {
-    Dying = -2,
-    Dead = -1,
+    [InspectorName("普通")]
+    Normal,
+    [InspectorName("异常")]
+    Abnormal,
+    [InspectorName("采集")]
+    Gather,
+    [InspectorName("攻击")]
+    Attack,
+    [InspectorName("忙碌")]
+    Busy
+}
+
+public enum CharacterNormalState
+{
+    [InspectorName("待机")]
     Idle,
+    [InspectorName("步行")]
     Walk,
+    [InspectorName("疾跑")]
     Run,
+    [InspectorName("游泳")]
     Swim,
-    Roll,
+}
+
+public enum CharacterAbnormalState
+{
+    [InspectorName("死亡")]
+    Dead,
+    [InspectorName("眩晕")]
+    Stun,
+    [InspectorName("倒地")]
+    Fall,
+    [InspectorName("浮空")]
+    Float,
+    [InspectorName("击退")]
+    Knockback,
+}
+
+public enum CharacterGatherState
+{
+    [InspectorName("手动")]
+    Gather_Hand,
+    [InspectorName("斧砍")]
+    Gather_Axe,
+    [InspectorName("铲挖")]
+    Gather_Chan,
+    [InspectorName("镐敲")]
+    Gather_Gao,
+    [InspectorName("捣碎")]
+    Gather_Dao,
+}
+
+public enum CharacterBusyState
+{
+    [InspectorName("受伤")]
+    GetHurt,
+    [InspectorName("闪现")]
     Dash,
-    Notice,
-    Unsheathe,//拔、收刀
-    Unsheathe_Move,//边走边拔、收刀
-    Attak,
-    Cast,
+    [InspectorName("翻滚")]
+    Roll,
+    [InspectorName("格挡")]
+    Parry,
+    [InspectorName("拔刀")]
+    Unsheathe,
+    [InspectorName("吃食")]
     Eat,
+    [InspectorName("坐着")]
     Sit,
-    Rely,
-    Stun = 61,
-    Fall = 62,
-    Float = 63,
-    Knockback = 64,
-    Gather_Hand = 51,
-    Gather_Axe = 52,
-    Gather_Chan = 53,
-    Gather_Gao = 55,
-    Gather_Dao = 56,
+    [InspectorName("垂钓")]
+    Fishing,
+    [InspectorName("谈话")]
+    Talking,
+    [InspectorName("操作UI")]
+    UI,
+}
+
+public enum CharacterAttackState
+{
+    [InspectorName("招式1")]
+    Action_1,
+    [InspectorName("招式2")]
+    Action_2,
+    [InspectorName("招式3")]
+    Action_3,
+    [InspectorName("招式4")]
+    Action_4,
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("Zetan Studio/管理器/农田管理器")]
@@ -44,6 +44,8 @@ public class FieldManager : WindowHandler<FieldUI, FieldManager>
 
     public bool Manage(Field field)
     {
+        if (!PlayerManager.Instance.CheckIsNormalWithAlert())
+            return false;
         if (!field || IsManaging) return false;
         CurrentField = field;
         IsManaging = true;

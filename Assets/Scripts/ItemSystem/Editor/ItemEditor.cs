@@ -16,7 +16,7 @@ public class ItemEditor : ConfigurationEditor<ItemBase>
         foreach (ItemType type in Enum.GetValues(typeof(ItemType)))
         {
             if (type != ItemType.Other)
-                menu.AddItem(new GUIContent($"增加新{ZetanUtility.GetEnumInspectorName(type)}"), false, CreateNewConfig, ItemBase.ItemTypeToClassType(type));
+                menu.AddItem(new GUIContent($"增加新{ZetanUtility.GetInspectorName(type)}"), false, CreateNewConfig, ItemBase.ItemTypeToClassType(type));
         }
     }
 

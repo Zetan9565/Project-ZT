@@ -73,7 +73,7 @@ public class Formulation : ScriptableObject
                 else
                 {
                     sb.Append("<");
-                    sb.Append(ZetanUtility.GetEnumInspectorName(material.MaterialType));
+                    sb.Append(ZetanUtility.GetInspectorName(material.MaterialType));
                     sb.Append("> × ");
                     sb.Append(material.Amount);
                 }

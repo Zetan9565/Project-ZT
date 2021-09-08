@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent, AddComponentMenu("Zetan Studio/管理器/建筑管理器")]
 public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpenCloseAbleWindow
@@ -35,6 +36,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     public bool IsPreviewing { get; private set; }
 
     private bool isDraging;
+    private Vector2 input;
     private float moveTime = 0.1f;
 
     public bool IsManaging { get; private set; }
@@ -113,6 +115,8 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
     #region 预览相关
     public void CreatPreview(BuildingInformation info)
     {
+        if (!PlayerManager.Instance.CheckIsNormalWithAlert())
+            return;
         if (info == null) return;
         HideDescription();
         HideBuiltList();
@@ -121,8 +125,8 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         WindowsManager.Instance.PauseAll(true);
         IsPreviewing = true;
         isDraging = true;
+        PlayerManager.Instance.SetPlayerState(CharacterState.Busy, CharacterBusyState.UI);
         ShowAndMovePreview();
-        PlayerManager.Instance.PlayerController.controlAble = false;
     }
     public void DoPlace()
     {
@@ -215,43 +219,47 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         ZetanUtility.SetActive(UI.buildButton, false);
         ZetanUtility.SetActive(UI.backButton, false);
         ZetanUtility.SetActive(UI.joyStick, false);
+        if (PlayerManager.Instance.Character.GetState(out var main, out var sub) && main == CharacterState.Busy && sub == CharacterBusyState.UI)
+            PlayerManager.Instance.SetPlayerState(CharacterState.Normal, CharacterNormalState.Idle);
         CameraMovement2D.Instance.Stop();
-        PlayerManager.Instance.PlayerController.controlAble = true;
     }
 
     public void ShowAndMovePreview()
     {
         if (!preview || !isDraging) return;
         preview.transform.position = ZetanUtility.PositionToGrid(GetMovePosition(), gridSize, preview.CenterOffset);
+#if UNITY_STANDALONE
         if (ZetanUtility.IsMouseInsideScreen)
         {
-            if (Input.GetMouseButtonDown(0))
+            if (InputManager.GetMouseButtonDown(0))
             {
                 DoPlace();
             }
-            if (Input.GetMouseButtonDown(1))
+            if (InputManager.GetMouseButtonDown(1))
             {
                 FinishPreview();
             }
         }
+#endif
     }
     private Vector2 GetMovePosition()
     {
-        if (ZetanUtility.IsMouseInsideScreen) return Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        if (ZetanUtility.IsMouseInsideScreen) return Camera.main.ScreenToWorldPoint(InputManager.mousePosition);
         else return preview.transform.position;
     }
 
     public void MovePreview()
     {
-        var horizontal = Input.GetAxisRaw("Horizontal");
-        var vertical = Input.GetAxisRaw("Vertical");
-        var move = new Vector2(horizontal, vertical).normalized;
-        if (move.sqrMagnitude > 0.25)
+        if (isDraging) return;
+        var horizontal = InputManager.GetAsix("Horizontal");
+        var vertical = InputManager.GetAsix("Vertical");
+        var input = new Vector2(horizontal, vertical).normalized;
+        if (input.sqrMagnitude > 0.25)
             moveTime += Time.deltaTime;
         if (moveTime >= 0.1f)
         {
             moveTime = 0;
-            preview.transform.position = ZetanUtility.PositionToGrid((Vector2)preview.transform.position + move, gridSize, preview.CenterOffset);
+            preview.transform.position = ZetanUtility.PositionToGrid((Vector2)preview.transform.position + input, gridSize, preview.CenterOffset);
             CameraMovement2D.Instance.MoveTo(preview.transform.position);
         }
     }
@@ -375,7 +383,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
             UI.infoNameText.text = CurrentBuilding.name;
             UI.infoDesText.text = CurrentBuilding.Info.Description;
             ZetanUtility.SetActive(UI.manageButton, CurrentBuilding.Info.Manageable);
-            UI.manageButton.onClick.AddListener(CurrentBuilding.OnManage);
+            UI.manageButton.onClick.AddListener(ManageCurrent);
             UI.manageBtnName.text = CurrentBuilding.Info.ManageBtnName;
             UI.destroyButton.onClick.AddListener(delegate { DestroyBuilding(CurrentBuilding.Data); });
             SetInfoShowState(true);
@@ -392,6 +400,13 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
             SetInfoShowState(true);
             UI.destroyButton.onClick.AddListener(delegate { DestroyBuilding(CurrentPreview.Data); });
         }
+    }
+
+    private void ManageCurrent()
+    {
+        if (!PlayerManager.Instance.CheckIsNormalWithAlert())
+            return;
+        CurrentBuilding.OnManage();
     }
 
     public void HideInfo()
@@ -450,11 +465,8 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
 
     public bool Manage(Building building)
     {
-        if (GatherManager.Instance.IsGathering)
-        {
-            MessageManager.Instance.New("请先等待采集完成");
+        if (!PlayerManager.Instance.CheckIsNormalWithAlert())
             return false;
-        }
         if (CurrentBuilding == building || !building) return false;
         CurrentBuilding = building;
         IsManaging = true;
@@ -469,11 +481,8 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
 
     public bool Manage(BuildingPreview preview)
     {
-        if (GatherManager.Instance.IsGathering)
-        {
-            MessageManager.Instance.New("请先等待采集完成");
+        if (!PlayerManager.Instance.CheckIsNormalWithAlert())
             return false;
-        }
         if (CurrentPreview == preview || !preview) return false;
         CurrentPreview = preview;
         IsManaging = true;

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public abstract class ConfigurationEditor<T> : EditorWindow where T : ScriptableObject
 {
-    protected T[] objects;
+    protected List<T> objects;
     protected List<SearchResult> results;
     protected Vector2 scrollPos;
     protected int pageEach = 10;
@@ -38,7 +38,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
         page = EditorGUILayout.IntSlider("当前页", page, 1, maxPage);
         if (pageBef != page) Refresh();
         if (!searching)
-            EditorGUILayout.LabelField($"{GetConfigurationName()}配置文件数量", objects.Length.ToString());
+            EditorGUILayout.LabelField($"{GetConfigurationName()}配置文件数量", objects.Count.ToString());
         else
             EditorGUILayout.LabelField($"找到的{GetConfigurationName()}配置文件数量", results.Count.ToString());
         objectsList.DoLayoutList();
@@ -51,7 +51,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
     private void Refresh()
     {
         results.Clear();
-        objects = Resources.LoadAll<T>(string.Empty);
+        objects = ZetanEditorUtility.LoadAssets<T>();
         foreach (var obj in objects)
         {
             if (!searching)
@@ -67,7 +67,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
         RefreshList();
     }
 
-    protected virtual void DrawElementOperator(T element, Rect rect, int index, ref int lineCount)
+    protected virtual void DrawElementOperator(T element, Rect rect)
     {
 
     }
@@ -87,6 +87,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
                 if (waitingRepaint) return;
                 int lineCount = 0;
                 EditorGUI.LabelField(new Rect(rect.x, rect.y + lineCount * lineHeightSpace, rect.width, lineHeight), GetResult(objectsList.list[index]).remark);
+                DrawElementOperator(GetResult(objectsList.list[index]).find, new Rect(rect.x, rect.y, rect.width - 80, lineHeight));
                 if (GUI.Button(new Rect(rect.x + rect.width - 80, rect.y + lineCount * lineHeightSpace, 40, lineHeight), "移动"))
                 {
                 selection:
@@ -117,7 +118,6 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
                 if (GUI.Button(new Rect(rect.x + rect.width - 40, rect.y + lineCount * lineHeightSpace, 40, lineHeight), "编辑"))
                     EditorUtility.OpenPropertyEditor(GetResult(objectsList.list[index]).find);
                 lineCount++;
-                DrawElementOperator(GetResult(objectsList.list[index]).find, rect, index, ref lineCount);
                 EditorGUI.LabelField(new Rect(rect.x, rect.y + lineCount * lineHeightSpace, rect.width / 2, lineHeight), "配置文件：");
                 GUI.enabled = false;
                 EditorGUI.ObjectField(new Rect(rect.x + rect.width - 280, rect.y + lineCount * lineHeightSpace, 280, lineHeight), GetResult(objectsList.list[index]).find, typeof(T), false);
@@ -129,7 +129,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
             objectsList.drawElementBackgroundCallback = (rect, index, isActive, isFocused) =>
             {
                 if (waitingRepaint) return;
-                EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, lineHeightSpace * 3), isActive ? new Color(0.5f, 0.5f, 0.5f, 0.5f) : (index % 2 != 0 ? Color.clear : new Color(1, 1, 1, 0.5f)));
+                EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, lineHeightSpace * 3), isActive ? new Color(0.5f, 0.5f, 0.5f, 0.5f) : (index % 2 != 0 ? Color.clear : new Color(1, 1, 1, 0.25f)));
             };
             objectsList.elementHeightCallback = (index) =>
             {

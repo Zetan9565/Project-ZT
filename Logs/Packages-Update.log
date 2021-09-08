@@ -224,3 +224,11 @@ Update Mode: updateDependencies
 
 The following packages were 已更新:
   com.unity.collab-proxy 从版本 1.5.7 到 1.7.1
+
+=== Mon Aug 30 14:29:30 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.2d.tilemap.extras 从版本 2.0.0 到 2.2.0

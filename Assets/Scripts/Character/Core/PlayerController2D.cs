@@ -1,21 +1,10 @@
-﻿using UnityEngine;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Character))]
-public class PlayerController2D : MonoBehaviour
+public class PlayerController2D : CharacterController2D
 {
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("角色控制器")]
-#endif
-    private CharacterMotion characterController;
-    public CharacterMotion CharacterController
-    {
-        get
-        {
-            return characterController;
-        }
-    }
-
     [SerializeField]
 #if UNITY_EDITOR
     [DisplayName("寻路代理")]
@@ -29,44 +18,68 @@ public class PlayerController2D : MonoBehaviour
         }
     }
 
-    public Animator Animator
+    protected override void Awake()
     {
-        get
+        base.Awake();
+        InputManager.Control.Player.Movement.performed += GetMovementInput;
+        InputManager.Control.Player.Movement.canceled += GetMovementInput;
+        InputManager.Control.Player.Dash.started += Dash;
+        InputManager.Control.Player.Roll.started += Roll;
+        InputManager.Control.Player.Action_1.started += Attack;
+    }
+
+    private bool canAttack;
+    private void Attack(InputAction.CallbackContext context)
+    {
+        if (Character.GetMainState(out var state))
         {
-            if (characterController) return characterController.Animator;
-            else return null;
+            if (state == CharacterState.Normal || state == CharacterState.Attack)
+            {
+                if (state == CharacterState.Normal) canAttack = true;
+                if (canAttack)
+                {
+                    Motion.ForceStop();
+                    if (inputCoroutine != null) StopCoroutine(inputCoroutine);
+                    inputCoroutine = StartCoroutine(WaitAttackInputDelay());
+                    if (timeoutCoroutine != null) StopCoroutine(timeoutCoroutine);
+                    timeoutCoroutine = StartCoroutine(WaitAttackInputTimeout());
+                    Animator.PlayAttackAnima();
+                }
+            }
         }
     }
 
-
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("更新方式")]
-#endif
-    private UpdateMode updateMode;
-
-    public bool controlAble = true;
-
-    private void Awake()
+    private Coroutine inputCoroutine;
+    private IEnumerator WaitAttackInputDelay()
     {
-        if (Unit) Unit.moveSpeed = characterController.moveSpeed;
+        canAttack = false;
+        yield return new WaitForSecondsRealtime(0.03f);
+        canAttack = true;
+    }
+
+    private Coroutine timeoutCoroutine;
+    private IEnumerator WaitAttackInputTimeout()
+    {
+        yield return new WaitForSecondsRealtime(0.3f);
+        Animator.ResetAttackAnima();
+    }
+
+    private void Roll(InputAction.CallbackContext context)
+    {
+        if (Roll()) canAttack = false;
+    }
+
+    private void Dash(InputAction.CallbackContext context)
+    {
+        Dash();
     }
 
     private bool isTrace;
 
-    void Update()
+    public void GetMovementInput(InputAction.CallbackContext context)
     {
-        if (updateMode == UpdateMode.Update) Control();
-        //以下只用于Debug
-        if (Input.GetKey(KeyCode.LeftControl) && Unit)
-        {
-            if (Input.GetMouseButtonDown(1) && Camera.main)
-            {
-                Unit.IsFollowingTarget = false;
-                Unit.ShowPath(true);
-                Unit.SetDestination(ZetanUtility.MousePositionToWorld);
-            }
-        }
+        if (context.performed) input = context.ReadValue<Vector2>();
+        else input = Vector2.zero;
     }
 
     public void Trace()
@@ -77,39 +90,5 @@ public class PlayerController2D : MonoBehaviour
     public void ResetPath()
     {
         if (Unit) Unit.ResetPath();
-    }
-
-    private void FixedUpdate()
-    {
-        if (updateMode == UpdateMode.FixedUpdate) Control();
-    }
-
-    private void Control()
-    {
-        if (!controlAble) return;
-        var horizontal = Input.GetAxisRaw("Horizontal");
-        var vertical = Input.GetAxisRaw("Vertical");
-        var input = new Vector2(horizontal, vertical);
-        characterController.Move(input.normalized);
-        if (Unit)
-        {
-            if (input.sqrMagnitude > 0 || Unit.IsStop)
-            {
-                Unit.IsFollowingPath = false;
-                Unit.IsFollowingTarget = false;
-                isTrace = false;
-            }
-            if (characterController)
-            {
-                if (input.sqrMagnitude == 0 && isTrace) characterController.Move(Unit.DesiredVelocity.normalized);
-                else if (Unit.IsFollowingPath || Unit.IsFollowingTarget) characterController.SetMoveAnima(Unit.DesiredVelocity.normalized);
-                Unit.moveSpeed = characterController.moveSpeed;
-            }
-        }
-    }
-
-    public void SetController(CharacterMotion characterController)
-    {
-        this.characterController = characterController;
     }
 }

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfe655ac97fcf6142844c144c66676dd, type: 3}
+  m_Name: BehaviourTreeSettings
+  m_EditorClassIdentifier: 
+  treeUxml: {fileID: 9197481963319205126, guid: 0361b1d6e5cb9464285cd5ce2b790808,
+    type: 3}
+  treeUss: {fileID: 7433441132597879392, guid: 4aa7045723842c548af9b7870490cd32, type: 3}
+  nodeUxml: {fileID: 9197481963319205126, guid: 907dffba4ddaf6045a94a786068ad0f1,
+    type: 3}
+  scriptTemplateAction: {fileID: 4900000, guid: 6f912646104a42f4fb6777ced41e142b,
+    type: 3}
+  scriptTemplateConditional: {fileID: 4900000, guid: 613baddc11e3e01499d398d8a07a8cdf,
+    type: 3}
+  scriptTemplateComposite: {fileID: 4900000, guid: 1b7bcf7154c5a3c4082747592806ca86,
+    type: 3}
+  scriptTemplateDecorator: {fileID: 4900000, guid: 8427836da4241de498120cce75e8ce7c,
+    type: 3}
+  newScriptFolder: Assets/Scripts/BehaviourSystem/Base/Nodes

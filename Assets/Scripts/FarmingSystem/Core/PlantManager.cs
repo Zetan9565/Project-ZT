@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
@@ -32,6 +32,8 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
 
     public void CreatPreview(CropInformation info)
     {
+        if (!PlayerManager.Instance.CheckIsNormalWithAlert())
+            return;
         if (info == null) return;
         HideDescription();
         HideBuiltList();
@@ -51,7 +53,7 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
     {
         Vector3 position;
         if (ZetanUtility.IsMouseInsideScreen)
-            position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            position = Camera.main.ScreenToWorldPoint(InputManager.mousePosition);
         else
             position = preview.transform.position;
 
@@ -75,17 +77,19 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
         {
             if (preview.SpriteRenderer) preview.SpriteRenderer.color = Color.white;
         }
+#if UNITY_STANDALONE
         if (ZetanUtility.IsMouseInsideScreen)
         {
-            if (Input.GetMouseButtonDown(0))
+            if (InputManager.GetMouseButtonDown(0))
             {
                 Plant();
             }
-            if (Input.GetMouseButtonDown(1))
+            if (InputManager.GetMouseButtonDown(1))
             {
                 FinishPreview();
             }
         }
+#endif
     }
 
     public void FinishPreview()

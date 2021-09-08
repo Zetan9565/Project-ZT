@@ -112,7 +112,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             if (o is TalkObjectiveData to)
                 if (!o.IsComplete)
                 {
-                    var talker = GameManager.TalkerDatas[to.Info.NPCToTalk.ID];
+                    var talker = DialogueManager.Instance.Talkers[to.Info.NPCToTalk.ID];
                     talker.objectivesTalkToThis.Add(to);
                     o.OnStateChangeEvent += talker.TryRemoveObjective;
                 }
@@ -121,7 +121,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
             if (o is SubmitObjectiveData so)
                 if (!o.IsComplete)
                 {
-                    var talker = GameManager.TalkerDatas[so.Info.NPCToSubmit.ID];
+                    var talker = DialogueManager.Instance.Talkers[so.Info.NPCToSubmit.ID];
                     talker.objectivesSubmitToThis.Add(so);
                     o.OnStateChangeEvent += talker.TryRemoveObjective;
                 }
@@ -136,7 +136,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         quest.InProgress = true;
         questsInProgress.Add(quest);
         if (quest.Info.NPCToSubmit)
-            GameManager.TalkerDatas[quest.Info.NPCToSubmit.ID].TransferQuestToThis(quest);
+            DialogueManager.Instance.Talkers[quest.Info.NPCToSubmit.ID].TransferQuestToThis(quest);
         if (!SaveManager.Instance.IsLoading) MessageManager.Instance.New($"接取了任务 [{quest.Info.Title}]");
         if (questsInProgress.Count > 0)
         {
@@ -248,7 +248,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 }
                 if (o is TalkObjectiveData to)
                 {
-                    var talker = GameManager.TalkerDatas[to.Info.NPCToTalk.ID];
+                    var talker = DialogueManager.Instance.Talkers[to.Info.NPCToTalk.ID];
                     talker.objectivesTalkToThis.RemoveAll(x => x == to);
                     o.OnStateChangeEvent -= talker.TryRemoveObjective;
                 }
@@ -259,7 +259,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 }
                 if (o is SubmitObjectiveData so)
                 {
-                    var talker = GameManager.TalkerDatas[so.Info.NPCToSubmit.ID];
+                    var talker = DialogueManager.Instance.Talkers[so.Info.NPCToSubmit.ID];
                     talker.objectivesSubmitToThis.RemoveAll(x => x == so);
                     o.OnStateChangeEvent -= talker.TryRemoveObjective;
                 }
@@ -351,7 +351,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     if (o is TalkObjectiveData to)
                     {
                         to.CurrentAmount = 0;
-                        GameManager.TalkerDatas[to.Info.NPCToTalk.ID].objectivesTalkToThis.RemoveAll(x => x == to);
+                        DialogueManager.Instance.Talkers[to.Info.NPCToTalk.ID].objectivesTalkToThis.RemoveAll(x => x == to);
                         DialogueManager.Instance.RemoveDialogueData(to.Info.Dialogue);
                     }
                     if (o is MoveObjectiveData mo)
@@ -363,7 +363,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                     if (o is SubmitObjectiveData so)
                     {
                         so.CurrentAmount = 0;
-                        GameManager.TalkerDatas[so.Info.NPCToSubmit.ID].objectivesSubmitToThis.RemoveAll(x => x == so);
+                        DialogueManager.Instance.Talkers[so.Info.NPCToSubmit.ID].objectivesSubmitToThis.RemoveAll(x => x == so);
                     }
                     if (o is TriggerObjectiveData cuo)
                     {
@@ -407,12 +407,12 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 
     public void TraceQuest(QuestData quest)
     {
-        if (!quest || !IsQuestValid(quest.Info) || !AStarManager.Instance || !PlayerManager.Instance.PlayerController.Unit) return;
-        if (quest.IsComplete && GameManager.Talkers[quest.currentQuestHolder.TalkerID])
+        if (!quest || !IsQuestValid(quest.Info) || !AStarManager.Instance || !PlayerManager.Instance.Controller.Unit) return;
+        if (quest.IsComplete && DialogueManager.Instance.Talkers.TryGetValue(quest.currentQuestHolder.TalkerID, out var talkerFound))
         {
-            PlayerManager.Instance.PlayerController.Unit.IsFollowingTarget = false;
-            PlayerManager.Instance.PlayerController.Unit.ShowPath(true);
-            PlayerManager.Instance.PlayerController.Unit.SetDestination(GameManager.Talkers[quest.currentQuestHolder.TalkerID].transform.position, false);
+            PlayerManager.Instance.Controller.Unit.IsFollowingTarget = false;
+            PlayerManager.Instance.Controller.Unit.ShowPath(true);
+            PlayerManager.Instance.Controller.Unit.SetDestination(talkerFound.currentPosition, false);
         }
         else if (quest.ObjectiveInstances.Count > 0)
             using (var objectiveEnum = quest.ObjectiveInstances.GetEnumerator())
@@ -441,7 +441,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 if (!currentObj.Info.CanNavigate) return;
                 if (currentObj is TalkObjectiveData to)
                 {
-                    if (GameManager.TalkerDatas.TryGetValue(to.Info.NPCToTalk.ID, out TalkerData talkerFound))
+                    if (DialogueManager.Instance.Talkers.TryGetValue(to.Info.NPCToTalk.ID, out talkerFound))
                     {
                         destination = talkerFound.currentPosition;
                         SetDestination();
@@ -449,7 +449,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
                 }
                 else if (currentObj is SubmitObjectiveData so)
                 {
-                    if (GameManager.TalkerDatas.TryGetValue(so.Info.NPCToSubmit.ID, out TalkerData talkerFound))
+                    if (DialogueManager.Instance.Talkers.TryGetValue(so.Info.NPCToSubmit.ID, out talkerFound))
                     {
                         destination = talkerFound.currentPosition;
                         SetDestination();
@@ -463,9 +463,9 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 
                 void SetDestination()
                 {
-                    PlayerManager.Instance.PlayerController.Unit.IsFollowingTarget = false;
-                    PlayerManager.Instance.PlayerController.Unit.ShowPath(true);
-                    PlayerManager.Instance.PlayerController.Unit.SetDestination(destination, false);
+                    PlayerManager.Instance.Controller.Unit.IsFollowingTarget = false;
+                    PlayerManager.Instance.Controller.Unit.ShowPath(true);
+                    PlayerManager.Instance.Controller.Unit.SetDestination(destination, false);
                 }
             }
     }
@@ -713,7 +713,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         //Debug.Log("Create icon for " + objective.DisplayName);
         if (objective is TalkObjectiveData to)
         {
-            if (GameManager.TalkerDatas.TryGetValue(to.Info.NPCToTalk.ID, out TalkerData talkerFound))
+            if (DialogueManager.Instance.Talkers.TryGetValue(to.Info.NPCToTalk.ID, out TalkerData talkerFound))
             {
                 if (talkerFound.currentScene == ZetanUtility.ActiveScene.name)
                     CreateIcon(talkerFound.currentPosition);
@@ -721,7 +721,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         }
         else if (objective is SubmitObjectiveData so)
         {
-            if (GameManager.TalkerDatas.TryGetValue(so.Info.NPCToSubmit.ID, out TalkerData talkerFound))
+            if (DialogueManager.Instance.Talkers.TryGetValue(so.Info.NPCToSubmit.ID, out TalkerData talkerFound))
             {
                 if (talkerFound.currentScene == ZetanUtility.ActiveScene.name)
                     CreateIcon(talkerFound.currentPosition);
@@ -840,7 +840,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     public static bool IsQuestValid(Quest quest)
     {
         if (string.IsNullOrEmpty(quest.ID) || string.IsNullOrEmpty(quest.Title)) return false;
-        if (quest.NPCToSubmit && !GameManager.TalkerDatas.ContainsKey(quest.NPCToSubmit.ID)) return false;
+        if (quest.NPCToSubmit && !DialogueManager.Instance.Talkers.ContainsKey(quest.NPCToSubmit.ID)) return false;
         foreach (var obj in quest.Objectives)
             if (!obj.IsValid) return false;
         return true;
@@ -910,7 +910,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
     }
     private QuestData HandlingQuestData(QuestSaveData questData)
     {
-        TalkerData questGiver = GameManager.TalkerDatas[questData.originalGiverID];
+        TalkerData questGiver = DialogueManager.Instance.Talkers[questData.originalGiverID];
         if (!questGiver) return null;
         QuestData quest = questGiver.questInstances.Find(x => x.Info.ID == questData.questID);
         if (!quest) return null;

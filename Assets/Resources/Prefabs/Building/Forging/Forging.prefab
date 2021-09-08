@@ -99,18 +99,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activated: 1
+  customName: 0
   _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
-  IDStarter: 
-  IDTail: 
-  isUnderBuilding: 0
-  buildingFlagOffset: {x: 0, y: 0, z: 0}
+  icon: {fileID: 0}
+  hidePanelOnInteract: 0
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
   buildingAgent: {fileID: 0}
-  leftBuildTime: 0
-  toolType: 2
-  makingTime: 10
 --- !u!58 &6884571979959223205
 CircleCollider2D:
   m_ObjectHideFlags: 0

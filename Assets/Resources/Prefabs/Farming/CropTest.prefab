@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 4025905083427130369}
   - component: {fileID: 4025905083427130383}
   - component: {fileID: 4025905083427130382}
-  m_Layer: 0
+  - component: {fileID: 3340562190056309975}
+  m_Layer: 3
   m_Name: CropTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +75,8 @@ SpriteRenderer:
   m_SortingLayerID: 2050152057
   m_SortingLayer: 2
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 608fc6a057c396d43b24a636e27409cb, type: 3}
+  m_Sprite: {fileID: 2559505510574410273, guid: 9eb4318a95588c54ab79ca3639396e41,
+    type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -101,8 +103,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.4, y: 0.4}
+    pivot: {x: 0.5, y: 0.18}
+    oldSize: {x: 0.32, y: 0.64}
     newSize: {x: 0.4, y: 0.4}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -123,12 +125,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5024511f82fbb40469298fe8321ea55f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activated: 1
+  customName: 0
+  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
+  icon: {fileID: 0}
+  hidePanelOnInteract: 0
   gatheringInfo: {fileID: 0}
   hideOnGathered: 0
-  collider: {fileID: 4025905083427130383}
   onGatherFinish:
     m_PersistentCalls:
       m_Calls: []
+  Data:
+    entity: {fileID: 0}
+    entityID: 
+    currentStageIndex: 0
+    currentStage:
+      stage: 0
+      lastingDays: 0
+      graph: {fileID: 0}
+      repeatTimes: 0
+      indexToReturn: 0
+      gatherInfo: {fileID: 0}
+    nextStage:
+      stage: 0
+      lastingDays: 0
+      graph: {fileID: 0}
+      repeatTimes: 0
+      indexToReturn: 0
+      gatherInfo: {fileID: 0}
+    harvestTimes: 0
+    growthTime: 0
+    growthDays: 0
+    stageTime: 0
+    stageDays: 0
+    growthRate: 0
+    dry: 0
+    pest: 0
+  UI: {fileID: 0}
   onHarvestFinish:
     m_PersistentCalls:
       m_Calls: []
+--- !u!210 &3340562190056309975
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4025905083427130381}
+  m_Enabled: 1
+  m_SortingLayerID: 2050152057
+  m_SortingLayer: 2
+  m_SortingOrder: 0

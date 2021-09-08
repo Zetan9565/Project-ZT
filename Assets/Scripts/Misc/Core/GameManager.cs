@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,9 +80,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
     public static Dictionary<string, List<Enemy>> Enemies { get; } = new Dictionary<string, List<Enemy>>();
     public static Dictionary<string, EnemyInformation> EnemyInfos { get; } = new Dictionary<string, EnemyInformation>();
 
-    public static Dictionary<string, Talker> Talkers { get; } = new Dictionary<string, Talker>();
     public static Dictionary<string, TalkerInformation> TalkerInfos { get; } = new Dictionary<string, TalkerInformation>();
-    public static Dictionary<string, TalkerData> TalkerDatas { get; } = new Dictionary<string, TalkerData>();
 
     public static Dictionary<string, ItemBase> Items { get; } = new Dictionary<string, ItemBase>();
 
@@ -109,17 +107,11 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         foreach (var t in talkers)
             TalkerInfos.Add(t.ID, t);
 
-        if (exceptions == null || !exceptions.Contains(typeof(Talker)))
-        {
-            Talkers.Clear();
-            TalkerDatas.Clear();
-            foreach (var talker in FindObjectsOfType<Talker>())
-                talker.Init();
-        }
         if (exceptions == null || !exceptions.Contains(typeof(TriggerHolder)))
             foreach (var tholder in FindObjectsOfType<TriggerHolder>())
                 tholder.Init();
         PlayerManager.Instance.Init();
+        DialogueManager.Instance.Init();
         if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIPrefab);
         UIManager.Instance.Init();
         FieldManager.Instance.Init();

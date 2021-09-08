@@ -1,0 +1,26 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using ZetanStudio.BehaviourTree;
+
+[NodeDescription("此处是结点悬浮描述")]
+public class #SCRIPTNAME# : Conditional
+{
+    [DisplayName("参数显示名称")]
+    public SharedBoolean example;
+
+    //覆写此属性以用于判断结点有效性
+    public override bool IsValid => true;
+
+    //在此方法里编写条件判断逻辑
+    protected override bool CheckCondition()
+    {
+        return example;
+    }
+
+    //在此方法里编写评估保持条件
+    protected override bool ShouldKeepRunning()
+    {
+        return true;
+    }
+}

@@ -342,8 +342,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
+  m_Type: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -447,5 +447,4 @@ MonoBehaviour:
   amount: {fileID: 5012386418583176612}
   qualityEdge: {fileID: 5012386419420911739}
   mark: {fileID: 2535677701644637278}
-  agentType: 0
   indexInGrid: 0

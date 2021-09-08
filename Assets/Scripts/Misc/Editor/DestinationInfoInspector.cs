@@ -29,7 +29,7 @@ public partial class DestinationInfoInspector : Editor
         _ID = serializedObject.FindProperty("_ID");
         scene = serializedObject.FindProperty("scene");
         positions = serializedObject.FindProperty("positions");
-        sceneSelector = new SceneSelectionDrawer(serializedObject, scene,"场景");
+        sceneSelector = new SceneSelectionDrawer(scene,"场景");
         if (target is CheckPointInformation)
             CheckPointEnable();
     }

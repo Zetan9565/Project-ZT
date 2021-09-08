@@ -10,6 +10,7 @@ public class NotifyCenter : SingletonMonoBehaviour<NotifyCenter>
         public const string TriggerChange = "TriggerChange";
         public const string WindowStateChange = "WindowStateChange";
         public const string GatheringStateChange = "GatheringStateChange";
+        public const string PlayerGetHurt = "PlayerGetHurt";
     }
 
     private readonly Dictionary<string, Notify> notifies = new Dictionary<string, Notify>();

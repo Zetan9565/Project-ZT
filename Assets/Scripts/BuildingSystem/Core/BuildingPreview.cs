@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -57,12 +57,12 @@ public class BuildingPreview : InteractiveObject
 
     private void Awake()
     {
-        if (!preview.TryGetComponent<TriggerEvents>(out var colliderEvent))
+        if (!preview.TryGetComponent<TriggerEvents>(out var colliderEvents))
         {
-            colliderEvent = preview.AddComponent<TriggerEvents>();
-            colliderEvent.OnEnter2D.AddListener(OnObstacleEnter);
-            colliderEvent.OnStay2D.AddListener(OnObstacleStay);
-            colliderEvent.OnExit2D.AddListener(OnObstacleExit);
+            colliderEvents = preview.AddComponent<TriggerEvents>();
+            colliderEvents.OnEnter2D.AddListener(OnObstacleEnter);
+            colliderEvents.OnStay2D.AddListener(OnObstacleStay);
+            colliderEvents.OnExit2D.AddListener(OnObstacleExit);
         }
         if (preview.layer != LayerMask.NameToLayer("BuildingPreview"))
             preview.layer = LayerMask.NameToLayer("BuildingPreview");
@@ -191,7 +191,7 @@ public class BuildingPreview : InteractiveObject
     public void OnCancelManage()
     {
         FinishInteraction();
-        if (Data) Data.PauseConstruct();
+        if (Data && !Data.Info.AutoBuild) Data.PauseConstruct();
     }
 
     public void OnDoneConstruct()

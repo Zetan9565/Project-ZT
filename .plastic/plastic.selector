@@ -1,0 +1,4 @@
+repository "Project-ZT@ssl://zetan_hwang@sh02-plasticscm.unity.cn:8787"
+  path "/"
+    smartbranch "/main/zetan9565" 
+     
