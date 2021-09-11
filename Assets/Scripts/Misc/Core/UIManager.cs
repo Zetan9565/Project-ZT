@@ -52,7 +52,6 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 #if UNITY_STANDALONE
         EnableJoyStick(false);
         ZetanUtility.SetActive(JoyStick.gameObject, false);
-        ZetanUtility.SetActive(JoyStick.KnobBackground.gameObject, false);
 #elif UNITY_ANDROID
         ZetanUtility.SetActive(JoyStick.gameObject, true);
 #endif

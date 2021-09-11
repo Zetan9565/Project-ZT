@@ -123,8 +123,18 @@ namespace ZetanStudio.BehaviourTree
             if (isRuntime) tree = this;
             else tree = Instantiate(this);
             tree.entry = entry.GetInstance() as Entry;
-            tree.nodes = new List<Node>();
-            Traverse(tree.entry, n => { tree.nodes.Add(n); });
+            if (!isRuntime)
+            {
+                tree.nodes = new List<Node>();
+                Traverse(tree.entry, n => { tree.nodes.Add(n); });
+            }
+            else
+            {
+                for (int i = 0; i < tree.nodes.Count; i++)
+                {
+                    tree.nodes[i] = tree.nodes[i].GetInstance();
+                }
+            }
             tree.IsInstance = true;
             return tree;
         }

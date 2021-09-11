@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
@@ -10,11 +10,10 @@ public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 #if UNITY_STANDALONE
             if (DragableManager.Instance.IsDraging)
             {
-                ItemAgent source = DragableManager.Instance.Current as ItemAgent;
+                ItemSlot source = DragableManager.Instance.Current as ItemSlot;
                 if (source)
                 {
                     BackpackManager.Instance.DiscardItem(source.MItemInfo);
-                    AmountManager.Instance.SetPosition(eventData.position);
                     source.FinishDrag();
                 }
             }

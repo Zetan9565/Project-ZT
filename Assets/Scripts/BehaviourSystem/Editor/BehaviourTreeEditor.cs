@@ -97,9 +97,10 @@ namespace ZetanStudio.BehaviourTree
             treeView.DrawTreeView(tree);
 
             serializedTree = new SerializedObject(tree);
-            var global = ZetanEditorUtility.LoadAssets<GlobalVariables>().Find(g => g);
+            var global = Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanEditorUtility.LoadAsset<GlobalVariables>();
             serializedGlobal = new SerializedObject(global);
             CheckShowShared();
+            CheckAssetDropdown();
 
             EditorApplication.delayCall += () =>
             {
@@ -109,6 +110,12 @@ namespace ZetanStudio.BehaviourTree
         private void CheckAssetDropdown()
         {
             var behaviourTrees = ZetanEditorUtility.LoadAssets<BehaviourTree>();
+            for (int i = toolbarMenu.menu.MenuItems().Count - 1; i > 0; i--)
+            {
+                toolbarMenu.menu.RemoveItemAt(i);
+            }
+            if (tree && tree.IsRuntime) toolbarMenu.menu.InsertAction(1, "保存到本地", (a) => { });
+            if (behaviourTrees.Count > 0) toolbarMenu.menu.AppendSeparator();
             behaviourTrees.ForEach(tree =>
             {
                 if (tree)
@@ -178,7 +185,6 @@ namespace ZetanStudio.BehaviourTree
 
             toolbarMenu = root.Q<ToolbarMenu>("assets");
             toolbarMenu.menu.AppendAction("新建", (a) => CreateNewTree("new behaviour tree"));
-            toolbarMenu.menu.AppendSeparator();
             CheckAssetDropdown();
 
             undo = root.Q<ToolbarButton>("undo");
@@ -194,7 +200,7 @@ namespace ZetanStudio.BehaviourTree
             global = root.Q<Button>("global");
             global.clicked += OnGlobalClick;
             showShared = true;
-            serializedGlobal = new SerializedObject(ZetanEditorUtility.LoadAsset<GlobalVariables>());
+            serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanEditorUtility.LoadAsset<GlobalVariables>());
             CheckShowShared();
 
             if (tree == null) OnSelectionChange();

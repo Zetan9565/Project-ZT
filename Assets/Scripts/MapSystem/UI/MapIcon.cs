@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -135,7 +135,7 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
 #endif
 #if UNITY_STANDALONE
         if (holder) holder.OnMouseExit?.Invoke();
-        if(!string.IsNullOrEmpty(textToDisplay)) TipsManager.Instance.HideText();
+        if(!string.IsNullOrEmpty(textToDisplay)) TipsManager.Instance.Hide();
 #endif
     }
 
