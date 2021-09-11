@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -32,31 +33,95 @@ public static class ZetanEditorUtility
         return Path.GetFileName(path);
     }
 
+    /// <summary>
+    /// 获取SerializedProperty关联字段的值，该字段必须是SerializedProperty.serializedObject.targetObject的顶级成员
+    /// </summary>
     public static object GetValue(SerializedProperty property)
     {
         object value = default;
-        var onwerType = property.serializedObject.targetObject.GetType();
-        var field = onwerType.GetField(property.propertyPath);
-        if (field != null) value = field.GetValue(property.serializedObject.targetObject);
+        if (property.serializedObject.targetObject)
+        {
+            var onwerType = property.serializedObject.targetObject.GetType();
+            var fieldInfo = onwerType.GetField(property.propertyPath, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            if (fieldInfo != null) value = fieldInfo.GetValue(property.serializedObject.targetObject);
+        }
         return value;
     }
 
-    public static object GetValue(SerializedProperty property, out System.Reflection.FieldInfo fieldInfo)
+    /// <summary>
+    /// 获取SerializedProperty关联字段的值，该字段必须是SerializedProperty.serializedObject.targetObject的顶级成员
+    /// </summary>
+    /// <param name="property">SerializedProperty</param>
+    /// <param name="fieldInfo">字段信息，找不到关联字段时是null</param>
+    /// <returns>获取到的字段值</returns>
+    public static object GetValue(SerializedProperty property, out FieldInfo fieldInfo)
     {
         object value = default;
-        var onwerType = property.serializedObject.targetObject.GetType();
-        fieldInfo = onwerType.GetField(property.propertyPath);
-        if (fieldInfo != null) value = fieldInfo.GetValue(property.serializedObject.targetObject);
+        fieldInfo = null;
+        if (property.serializedObject.targetObject)
+        {
+            var onwerType = property.serializedObject.targetObject.GetType();
+            fieldInfo = onwerType.GetField(property.propertyPath, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            if (fieldInfo != null) value = fieldInfo.GetValue(property.serializedObject.targetObject);
+        }
         return value;
     }
 
-    public static void SetValue(SerializedProperty property, object value)
+    public static bool GetFieldValue(string path, object target, out object value, out FieldInfo fieldInfo)
     {
-        var onwerType = property.serializedObject.targetObject.GetType();
-        var fieldInfo = onwerType.GetField(property.propertyPath);
-        if (fieldInfo != null) fieldInfo.SetValue(property.serializedObject.targetObject, value);
+        value = default;
+        fieldInfo = null;
+        string[] fields = path.Split('.');
+        object fv = target;
+        var fType = fv.GetType();
+        for (int i = 0; i < fields.Length; i++)
+        {
+            fieldInfo = fType.GetField(fields[i], BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            if (fieldInfo != null)
+            {
+                fv = fieldInfo.GetValue(fv);
+                if (fv != null) fType = fv.GetType();
+            }
+            else return false;
+        }
+        if (fieldInfo != null)
+        {
+            value = fv;
+            return true;
+        }
+        else return false;
     }
 
+    /// <summary>
+    /// 设置SerializedProperty关联字段的值，该字段必须是SerializedProperty.serializedObject.targetObject的顶级成员
+    /// </summary>
+    /// <returns>是否成功</returns>
+    public static bool SetValue(SerializedProperty property, object value)
+    {
+        var onwerType = property.serializedObject.targetObject.GetType();
+        var fieldInfo = onwerType.GetField(property.propertyPath, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        if (fieldInfo != null)
+        {
+            try
+            {
+                fieldInfo.SetValue(property.serializedObject.targetObject, value);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        else return false;
+    }
+
+    /// <summary>
+    /// 根据关键字截取给定内容中的一段
+    /// </summary>
+    /// <param name="input">内容</param>
+    /// <param name="key">关键字</param>
+    /// <param name="length">截取长度</param>
+    /// <returns>截取到的内容</returns>
     public static string TrimContentByKey(string input, string key, int length)
     {
         string output;
@@ -83,13 +148,18 @@ public static class ZetanEditorUtility
         return output;
     }
 
+    /// <summary>
+    /// 加载所有T类型的资源
+    /// </summary>
+    /// <typeparam name="T">UnityEngine.Object类型</typeparam>
+    /// <returns>找到的资源</returns>
     public static List<T> LoadAssets<T>() where T : Object
     {
-        string[] assetIds = AssetDatabase.FindAssets($"t:{typeof(T).Name}");
+        string[] guids = AssetDatabase.FindAssets($"t:{typeof(T).Name}");
         List<T> assets = new List<T>();
-        foreach (var assetId in assetIds)
+        foreach (var guid in guids)
         {
-            string path = AssetDatabase.GUIDToAssetPath(assetId);
+            string path = AssetDatabase.GUIDToAssetPath(guid);
             try
             {
                 T asset = AssetDatabase.LoadAssetAtPath<T>(path);
@@ -101,5 +171,31 @@ public static class ZetanEditorUtility
             }
         }
         return assets;
+    }
+
+    /// <summary>
+    /// 加载第一个T类型的资源
+    /// </summary>
+    /// <typeparam name="T">UnityEngine.Object类型</typeparam>
+    /// <returns>找到的资源</returns>
+    public static T LoadAsset<T>() where T : Object
+    {
+        string[] guids = AssetDatabase.FindAssets($"t:{typeof(T).Name}");
+        List<T> assets = new List<T>();
+        foreach (var guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            try
+            {
+                T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+                assets.Add(asset);
+            }
+            catch
+            {
+                Debug.LogWarning($"找不到路径：{path}");
+            }
+            if (assets.Count > 0) return assets[0];
+        }
+        return null;
     }
 }

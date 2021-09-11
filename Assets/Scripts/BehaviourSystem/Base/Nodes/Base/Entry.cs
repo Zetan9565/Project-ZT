@@ -9,8 +9,8 @@ namespace ZetanStudio.BehaviourTree
     [NodeDescription("开始结点：每棵行为树的根结点，应该有且只能有一个")]
     public sealed class Entry : Node
     {
-        [HideInInspector]
-        public Node start;
+        [SerializeField]
+        private Node start;
 
         public override bool IsValid => start;
 
@@ -24,7 +24,7 @@ namespace ZetanStudio.BehaviourTree
         {
             Entry entry = GetInstance<Entry>();
             entry.start = start.GetInstance();
-            entry.isInstance = true;
+            entry.IsInstance = true;
             return entry;
         }
 

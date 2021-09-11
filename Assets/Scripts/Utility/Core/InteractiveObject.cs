@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Events;
 
 public abstract class InteractiveObject : MonoBehaviour
@@ -16,7 +16,7 @@ public abstract class InteractiveObject : MonoBehaviour
 
     [SerializeField]
 #if UNITY_EDITOR
-    [ConditionalHide("customName", false)]
+    [HideIf("customName", true)]
 #endif
     protected string _name = "可交互对象";
     public virtual new string name { get => _name; protected set => _name = value; }

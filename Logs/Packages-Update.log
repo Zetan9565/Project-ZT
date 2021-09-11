@@ -232,3 +232,11 @@ Update Mode: updateDependencies
 
 The following packages were 已更新:
   com.unity.2d.tilemap.extras 从版本 2.0.0 到 2.2.0
+
+=== Sun Sep 12 00:01:18 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.collab-proxy 从版本 1.7.1 到 1.9.0

@@ -23039,6 +23039,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 782524853}
   m_CullTransparentMesh: 0
+--- !u!114 &785856015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddba8651ff3ae3c42921b76d74540306, type: 3}
+  m_Name: (2) Sequence(R)
+  m_EditorClassIdentifier: 
+  isRuntime: 1
+  guid: 6f9ef67dbf56cd445ae499eef4d212db
+  position: {x: 0, y: 299}
+  description: 
+  children:
+  - {fileID: 2007730462}
+  - {fileID: 1687321575}
 --- !u!1 &792512949
 GameObject:
   m_ObjectHideFlags: 0
@@ -23129,7 +23148,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a2e5007833377547b0004b04fa67360, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  globalVariables: {fileID: 0}
+  globalVariables: {fileID: 11400000, guid: 63d3b53dbfa6bf146bb09501fa22da69, type: 2}
+  presetVariables:
+  - id: 0
+  - id: 1
+  references:
+    version: 1
+    00000000:
+      type: {class: SharedGameObject, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedGameObject_2
+        isGlobal: 0
+        isShared: 1
+        value: {fileID: 793010720}
+    00000001:
+      type: {class: SharedTransform, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedTransform_3
+        isGlobal: 0
+        isShared: 1
+        value: {fileID: 793010721}
 --- !u!1 &795011988
 GameObject:
   m_ObjectHideFlags: 0
@@ -24355,13 +24393,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 857680152}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de3699ba1d38e394ca0f01d1dbb2fe67, type: 3}
+  m_Script: {fileID: 11500000, guid: 978a08112957d844ab7de17c01869723, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  behaviour: {fileID: 11400000, guid: 204552f2764e7cd4182342b455b0df97, type: 2}
+  behaviour: {fileID: 2004771891}
   startOnStart: 1
   restartOnComplete: 0
   resetOnRestart: 0
+  presetVariables: []
+  references:
+    version: 1
 --- !u!4 &857680154
 Transform:
   m_ObjectHideFlags: 0
@@ -24777,8 +24818,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 1143.353, y: 0}
-  m_SizeDelta: {x: 2286.706, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &863408216
 MonoBehaviour:
@@ -37744,7 +37785,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 300, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 600, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1321751988
@@ -40362,6 +40403,23 @@ MonoBehaviour:
   rollStopSpeed: 5
   rollSpeedDownMult: 5
   defaultDirection: {x: 1, y: 0}
+--- !u!114 &1397001657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc8a77ec6687a064cb1a4682f5739e49, type: 3}
+  m_Name: (0) Entry
+  m_EditorClassIdentifier: 
+  isRuntime: 1
+  guid: 
+  position: {x: 0, y: 0}
+  description: 
+  start: {fileID: 1962234085}
 --- !u!1 &1407338332
 GameObject:
   m_ObjectHideFlags: 0
@@ -48038,6 +48096,28 @@ MonoBehaviour:
   plantButton: {fileID: 1323376159}
   workerButton: {fileID: 856177358}
   destroyButton: {fileID: 1074359249}
+--- !u!114 &1687321575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
+  m_Name: (4) Log(R)
+  m_EditorClassIdentifier: 
+  isRuntime: 1
+  guid: 5ab05de9e5f355444aae4ba8ac751efe
+  position: {x: 150, y: 477}
+  description: 
+  logType: 0
+  message:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: Debug log
 --- !u!1 &1687551155
 GameObject:
   m_ObjectHideFlags: 0
@@ -49017,8 +49097,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 1143.353, y: 0}
-  m_SizeDelta: {x: 2286.706, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &1723881631
 GameObject:
@@ -55409,6 +55489,29 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1958568603}
   m_CullTransparentMesh: 0
+--- !u!114 &1962234085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ff1dfce8b479734c8bf533182248820, type: 3}
+  m_Name: (1) Repeater(R)
+  m_EditorClassIdentifier: 
+  isRuntime: 1
+  guid: 33ee657598d04554092ccb7a5aad19b7
+  position: {x: 0, y: 147}
+  description: 
+  child: {fileID: 785856015}
+  stopOnFailure: 0
+  count:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 0
 --- !u!1 &1966259077
 GameObject:
   m_ObjectHideFlags: 0
@@ -56457,6 +56560,91 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2002381489}
   m_CullTransparentMesh: 0
+--- !u!114 &2004771891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11ff0f6527981fa41a9e8e6e46d91bbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _name: 
+  description: 
+  entry: {fileID: 1397001657}
+  nodes:
+  - {fileID: 1397001657}
+  - {fileID: 1962234085}
+  - {fileID: 785856015}
+  - {fileID: 2007730462}
+  - {fileID: 1687321575}
+  variables:
+  - id: 0
+  - id: 1
+  - id: 2
+  isRuntime: 1
+  references:
+    version: 1
+    00000000:
+      type: {class: SharedBoolean, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedBoolean_1
+        isGlobal: 0
+        isShared: 1
+        value: 0
+    00000001:
+      type: {class: SharedString, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedString_2
+        isGlobal: 0
+        isShared: 1
+        value: 
+    00000002:
+      type: {class: SharedTransform, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedTransform_3
+        isGlobal: 0
+        isShared: 1
+        value: {fileID: 0}
+--- !u!114 &2007730462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cad2581818b4bc748b7dee3e227e8a06, type: 3}
+  m_Name: (3) Wait(R)
+  m_EditorClassIdentifier: 
+  isRuntime: 1
+  guid: b2eb7b21a275f184d9a088aeff315f54
+  position: {x: -150, y: 477}
+  description: 
+  randomWait:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 0
+  randomWaitMin:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+  randomWaitMax:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+  duration:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
 --- !u!1 &2008977434
 GameObject:
   m_ObjectHideFlags: 0

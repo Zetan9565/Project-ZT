@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
 public class CameraFollowing2D : SingletonMonoBehaviour<CameraFollowing2D>
@@ -15,7 +15,7 @@ public class CameraFollowing2D : SingletonMonoBehaviour<CameraFollowing2D>
     public bool smooth = true;
 
 #if UNITY_EDITOR
-    [ConditionalHide("smooth")]
+    [HideIf("smooth", false)]
 #endif
     public float smoothness = 0.25f;
 

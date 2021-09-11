@@ -26,32 +26,39 @@ namespace ZetanStudio.BehaviourTree
         public List<Node> Nodes => nodes;
 
         [SerializeReference]
-        public List<SharedVariable> variables;
+        private List<SharedVariable> variables;
+        public List<SharedVariable> Variables => variables;
 
         #region 运行时属性
         public bool IsPaused { get; private set; }
 
         public bool IsStarted => entry.IsStarted;
 
+        public bool IsDone => entry.IsDone;
+
         public bool IsInstance { get; private set; }
+
+        [SerializeField]
+        private bool isRuntime;//要暴露给Unity，要不然每运行一次就会被重置
+        public bool IsRuntime => isRuntime;
 
         public int ExecutionTimes { get; private set; }
 
         public NodeStates ExecutionState { get; private set; }
 
         public BehaviourExecutor Executor { get; private set; }
-        public Dictionary<string, SharedVariable> Variables { get; private set; }
+        public Dictionary<string, SharedVariable> KeyedVariables { get; private set; }
         #endregion
 
         #region 共享变量获取
         public SharedVariable GetVariable(string name)
         {
-            if (Variables.TryGetValue(name, out var variable)) return variable;
+            if (KeyedVariables.TryGetValue(name, out var variable)) return variable;
             else return null;
         }
         public SharedVariable<T> GetVariable<T>(string name)
         {
-            if (Variables.TryGetValue(name, out var variable)) return variable as SharedVariable<T>;
+            if (KeyedVariables.TryGetValue(name, out var variable)) return variable as SharedVariable<T>;
             else return null;
         }
         public List<SharedVariable> GetVariables(Type type)
@@ -84,7 +91,7 @@ namespace ZetanStudio.BehaviourTree
                 Debug.LogError("尝试对未实例化的局部变量赋值");
                 return false;
             }
-            if (Variables.TryGetValue(name, out var variable))
+            if (KeyedVariables.TryGetValue(name, out var variable))
             {
                 variable.SetValue(value);
                 return true;
@@ -98,7 +105,7 @@ namespace ZetanStudio.BehaviourTree
                 Debug.LogError("尝试对未实例化的局部变量赋值");
                 return false;
             }
-            if (Variables.TryGetValue(name, out var variable))
+            if (KeyedVariables.TryGetValue(name, out var variable))
             {
                 if (variable is SharedVariable<T> var)
                 {
@@ -112,7 +119,9 @@ namespace ZetanStudio.BehaviourTree
 
         public BehaviourTree GetInstance()
         {
-            BehaviourTree tree = Instantiate(this);
+            BehaviourTree tree;
+            if (isRuntime) tree = this;
+            else tree = Instantiate(this);
             tree.entry = entry.GetInstance() as Entry;
             tree.nodes = new List<Node>();
             Traverse(tree.entry, n => { tree.nodes.Add(n); });
@@ -122,16 +131,35 @@ namespace ZetanStudio.BehaviourTree
 
         public void Init(BehaviourExecutor executor)
         {
+            if (!IsInstance)
+            {
+                Debug.LogError("尝试初始化未实例化的行为树");
+                return;
+            }
             Executor = executor;
-            Variables = new Dictionary<string, SharedVariable>();
+            KeyedVariables = new Dictionary<string, SharedVariable>();
             foreach (var variable in variables)
             {
-                if (!Variables.ContainsKey(variable.name))
+                if (!KeyedVariables.ContainsKey(variable.name))
                 {
-                    Variables.Add(variable.name, variable);
+                    KeyedVariables.Add(variable.name, variable);
                 }
             }
             Traverse(entry, (n) => n.Init(this));
+        }
+
+        public void PresetVariables(List<SharedVariable> variables)
+        {
+            if (!IsInstance)
+            {
+                Debug.LogError("尝试预设未实例化的行为树");
+                return;
+            }
+            foreach (var variable in variables)
+            {
+                if (KeyedVariables.TryGetValue(variable.name, out var keyedVar) && keyedVar.GetType() == variable.GetType())
+                    keyedVar.SetValue(variable.GetValue());
+            }
         }
 
         public NodeStates Execute()
@@ -183,6 +211,63 @@ namespace ZetanStudio.BehaviourTree
         {
             Traverse(entry, n => n.Reset());
         }
+
+        #region 碰撞器事件
+        public void OnCollisionEnter(Collision collision)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnCollisionEnter(collision));
+        }
+        public void OnCollisionStay(Collision collision)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnCollisionStay(collision));
+        }
+        public void OnCollisionExit(Collision collision)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnCollisionExit(collision));
+        }
+
+        public void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnCollisionEnter2D(collision));
+        }
+        public void OnCollisionStay2D(Collision2D collision)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnCollisionStay2D(collision));
+        }
+        public void OnCollisionExit2D(Collision2D collision)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnCollisionExit2D(collision));
+        }
+        #endregion
+
+        #region 触发器事件
+        public void OnTriggerEnter(Collider other)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnTriggerEnter(other));
+        }
+        public void OnTriggerStay(Collider other)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnTriggerStay(other));
+        }
+        public void OnTriggerExit(Collider other)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnTriggerExit(other));
+        }
+
+        public void OnTriggerEnter2D(Collider2D collision)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnTriggerEnter2D(collision));
+        }
+        public void OnTriggerStay2D(Collider2D collision)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnTriggerStay2D(collision));
+        }
+        public void OnTriggerExit2D(Collider2D collision)
+        {
+            if (IsInstance) Traverse(entry, n => n.OnTriggerExit2D(collision));
+        }
+        #endregion
+
         #endregion
 
         public BehaviourTree()
@@ -206,8 +291,18 @@ namespace ZetanStudio.BehaviourTree
             if (node)
             {
                 onAccess?.Invoke(node);
-                node.GetChildren().ForEach((n) => Traverse(n, onAccess));
+                node.GetChildren().ForEach(n => Traverse(n, onAccess));
             }
+        }
+
+        public static BehaviourTree GetRuntimeTree()
+        {
+            BehaviourTree tree = CreateInstance<BehaviourTree>();
+            tree.entry = Node.GetRuntimeNode(typeof(Entry)) as Entry;
+            tree.entry.name = "(0) Entry(R)";
+            tree.nodes.Add(tree.entry);
+            tree.isRuntime = true;
+            return tree;
         }
 
 #if UNITY_EDITOR
@@ -219,7 +314,7 @@ namespace ZetanStudio.BehaviourTree
         {
             if (newNode is Entry entry) CreateEntry(entry);
             else nodes.Add(newNode);
-            if (!IsInstance)
+            if (!IsInstance && !IsRuntime)
             {
                 UnityEditor.AssetDatabase.AddObjectToAsset(newNode, this);
                 UnityEditor.AssetDatabase.SaveAssets();
@@ -233,7 +328,7 @@ namespace ZetanStudio.BehaviourTree
         public void DeleteNode(Node node)
         {
             nodes.Remove(node);
-            if (!IsInstance)
+            if (!IsInstance && !IsRuntime)
             {
                 UnityEditor.AssetDatabase.RemoveObjectFromAsset(node);
                 UnityEditor.AssetDatabase.SaveAssets();
@@ -246,7 +341,7 @@ namespace ZetanStudio.BehaviourTree
             {
                 if (this.entry.GetChildren().Count > 0)
                     entry.AddChild(this.entry.GetChildren()[0]);
-                if (!IsInstance)
+                if (!IsInstance && !IsRuntime)
                 {
                     UnityEditor.AssetDatabase.RemoveObjectFromAsset(entry);
                     UnityEditor.AssetDatabase.SaveAssets();

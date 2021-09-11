@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,8 +8,8 @@ namespace ZetanStudio.BehaviourTree
     /// </summary>
     public abstract class Decorator : Node
     {
-        [HideInInspector]
-        public Node child;
+        [SerializeField]
+        protected Node child;
 
         public override bool IsValid => child;
 

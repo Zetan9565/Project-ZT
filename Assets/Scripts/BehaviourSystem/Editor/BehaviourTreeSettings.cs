@@ -21,27 +21,24 @@ namespace ZetanStudio.BehaviourTree
         public TextAsset scriptTemplateComposite;
         [DisplayName("修饰结点脚本模版")]
         public TextAsset scriptTemplateDecorator;
+        [DisplayName("共享变量脚本模版")]
+        public TextAsset scriptTemplateVariable;
         [DisplayName("新结点脚本默认路径")]
-        public string newScriptFolder = "Assets/Scripts/BehaviourSystem/Base/Nodes";
+        public string newNodeScriptFolder = "Assets/Scripts/BehaviourSystem/Base/Nodes";
+        [DisplayName("新变量脚本默认路径")]
+        public string newVarScriptFolder = "Assets/Scripts/BehaviourSystem/Base/Variable";
 
-        private static BehaviourTreeSettings FindSettings()
+        private static BehaviourTreeSettings Find()
         {
-            var guids = AssetDatabase.FindAssets("t:BehaviourTreeSettings");
-            if (guids.Length > 1) Debug.LogWarning("找到多个行为树编辑器配置，将使用第一个");
-
-            switch (guids.Length)
-            {
-                case 0:
-                    return null;
-                default:
-                    var path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                    return AssetDatabase.LoadAssetAtPath<BehaviourTreeSettings>(path);
-            }
+            var settings = ZetanEditorUtility.LoadAssets<BehaviourTreeSettings>();
+            if (settings.Count > 1) Debug.LogWarning("找到多个行为树编辑器配置，将使用第一个");
+            if (settings.Count > 0) return settings[0];
+            return null;
         }
 
-        public static BehaviourTreeSettings GetOrCreateSettings()
+        public static BehaviourTreeSettings GetOrCreate()
         {
-            var settings = FindSettings();
+            var settings = Find();
             if (settings == null)
             {
                 settings = CreateInstance<BehaviourTreeSettings>();
@@ -52,7 +49,7 @@ namespace ZetanStudio.BehaviourTree
         }
     }
 
-    static class ZSBTSettingsUIElementsRegister
+    internal static class ZSBTSettingsUIElementsRegister
     {
         [SettingsProvider]
         public static SettingsProvider CreateZSBTSettingsProvider()
@@ -62,7 +59,7 @@ namespace ZetanStudio.BehaviourTree
                 label = "行为树编辑器",
                 activateHandler = (searchContext, rootElement) =>
                 {
-                    SerializedObject serializedObject = new SerializedObject(BehaviourTreeSettings.GetOrCreateSettings());
+                    SerializedObject serializedObject = new SerializedObject(BehaviourTreeSettings.GetOrCreate());
 
                     Label title = new Label() { text = "行为树编辑器设置" };
                     title.AddToClassList("title");

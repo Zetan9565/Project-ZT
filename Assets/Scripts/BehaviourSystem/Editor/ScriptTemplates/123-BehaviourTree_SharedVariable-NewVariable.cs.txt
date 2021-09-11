@@ -1,0 +1,13 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using ZetanStudio.BehaviourTree;
+
+[System.Serializable]
+public class #SCRIPTNAME# : SharedVariable<string>
+{
+    public static implicit operator #SCRIPTNAME#(string value)
+    {
+        return new #SCRIPTNAME#() { value = value };
+    }
+}

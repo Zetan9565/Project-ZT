@@ -8,8 +8,8 @@ namespace ZetanStudio.BehaviourTree
     /// </summary>
     public abstract class Composite : Node
     {
-        [HideInInspector]
-        public List<Node> children;
+        [SerializeField]
+        protected List<Node> children;
 
         public override bool IsValid => children.Count > 0;
 

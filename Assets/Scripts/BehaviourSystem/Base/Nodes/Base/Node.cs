@@ -19,17 +19,17 @@ namespace ZetanStudio.BehaviourTree
         public abstract bool IsValid { get; }
 
         #region 运行时属性
-        protected NodeStates state;
         /// <summary>
         /// 结点当前评估状态
         /// </summary>
-        public NodeStates State => state;
+        public NodeStates State { get; protected set; }
 
         protected bool isStarted;
         public bool IsStarted => isStarted;
 
-        protected bool isPaused;
-        public bool IsPaused => isPaused;
+        public bool IsPaused { get; protected set; }
+
+        public bool IsDone => State == NodeStates.Success || State == NodeStates.Failure;
 
         protected BehaviourTree owner;
         public BehaviourTree Owner => owner;
@@ -45,23 +45,42 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         public virtual Transform transform => Shortcut ? Shortcut.transform : null;
 
-        protected bool isInstance;
+        public bool IsInstance { get; protected set; }
+
+        [SerializeField]
+        private bool isRuntime;//要暴露给Unity，要不然每运行一次就会被重置
+        public bool IsRuntime => isRuntime;
         /// <summary>
         /// 是否是实例
         /// </summary>
-        public bool IsInstance => isInstance;
         #endregion
 
         #region 运行时方法
         public virtual Node GetInstance()
         {
+            if (isRuntime)
+            {
+                IsInstance = true;
+                return this;
+            }
             Node node = Instantiate(this);
-            node.isInstance = true;
+            node.IsInstance = true;
             return node;
+        }
+        protected virtual T GetInstance<T>() where T : Node
+        {
+            if (isRuntime)
+            {
+                IsInstance = true;
+                return this as T;
+            }
+            Node node = Instantiate(this);
+            node.IsInstance = true;
+            return node as T;
         }
         public void Init(BehaviourTree owner)
         {
-            if (!isInstance)
+            if (!IsInstance)
             {
                 Debug.LogError("尝试初始化未实例化的结点");
                 return;
@@ -142,14 +161,14 @@ namespace ZetanStudio.BehaviourTree
             }
             if (isStarted)
             {
-                if (!isPaused) state = OnUpdate();
-                if (state == NodeStates.Success || state == NodeStates.Failure)
+                if (!IsPaused) State = OnUpdate();
+                if (IsDone)
                 {
                     OnEnd();
                     isStarted = false;
                 }
             }
-            return state;
+            return State;
         }
         /// <summary>
         /// 暂停此结点
@@ -158,14 +177,14 @@ namespace ZetanStudio.BehaviourTree
         public void Pause(bool paused)
         {
             OnPaused(paused);
-            isPaused = paused;
+            IsPaused = paused;
         }
         /// <summary>
         /// 重置此结点
         /// </summary>
         public void Reset()
         {
-            state = NodeStates.Inactive;
+            State = NodeStates.Inactive;
             isStarted = false;
             OnReset();
         }
@@ -193,15 +212,40 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         protected virtual void OnReset() { }
 
-        protected virtual T GetInstance<T>() where T : Node
-        {
-            Node node = Instantiate(this);
-            node.isInstance = true;
-            return node as T;
-        }
+        #region 碰撞器事件
+        public virtual void OnCollisionEnter(Collision collision) { }
+        public virtual void OnCollisionStay(Collision collision) { }
+        public virtual void OnCollisionExit(Collision collision) { }
+
+        public virtual void OnCollisionEnter2D(Collision2D collision) { }
+        public virtual void OnCollisionStay2D(Collision2D collision) { }
+        public virtual void OnCollisionExit2D(Collision2D collision) { }
+        #endregion
+
+        #region 触发器事件
+        public virtual void OnTriggerEnter(Collider other) { }
+        public virtual void OnTriggerStay(Collider other) { }
+        public virtual void OnTriggerExit(Collider other) { }
+
+        public virtual void OnTriggerEnter2D(Collider2D collision) { }
+        public virtual void OnTriggerStay2D(Collider2D collision) { }
+        public virtual void OnTriggerExit2D(Collider2D collision) { }
+        #endregion
+
         #endregion
 
         public virtual List<Node> GetChildren() { return new List<Node>(); }
+
+        public static Node GetRuntimeNode(Type type)
+        {
+            if (type.IsSubclassOf(typeof(Node)))
+            {
+                Node node = CreateInstance(type) as Node;
+                node.isRuntime = true;
+                return node;
+            }
+            return null;
+        }
 
         public static implicit operator bool(Node self)
         {
@@ -272,26 +316,5 @@ namespace ZetanStudio.BehaviourTree
         Failure,
         [InspectorName("评估中")]
         Running
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class NodeDescriptionAttribute : System.Attribute
-    {
-        public string Description { get; private set; }
-
-        public NodeDescriptionAttribute(string description)
-        {
-            Description = description;
-        }
-    }
-
-    public abstract class Node<T> : Node where T : Node
-    {
-        public new virtual T GetInstance()
-        {
-            var node = Instantiate(this);
-            node.isInstance = true;
-            return node as T;
-        }
     }
 }

@@ -8,14 +8,14 @@ namespace ZetanStudio.BehaviourTree
     [NodeDescription("等待结点：等待一定时间后，才向上反馈评估成功，期间持续向上反馈评估正进行")]
     public class Wait : Action
     {
-        [DisplayName("等待时长(秒)")]
-        public SharedFloat duration = 1;
         [DisplayName("等待随机时长")]
         public SharedBoolean randomWait = false;
-        [DisplayName("最小随机时长")]
+        [DisplayName("最小随机时长"), HideIf("randomWait.value", false)]
         public SharedFloat randomWaitMin = 1;
-        [DisplayName("最大随机时长")]
+        [DisplayName("最大随机时长"), HideIf("randomWait.value", false)]
         public SharedFloat randomWaitMax = 1;
+        [DisplayName("等待时长(秒)"), HideIf("randomWait.value", true)]
+        public SharedFloat duration = 1;
 
         private float waitTime;
         private float startTime;

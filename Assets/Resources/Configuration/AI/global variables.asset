@@ -12,6 +12,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcfc5f518cab29a4f9796ca399c16563, type: 3}
   m_Name: global variables
   m_EditorClassIdentifier: 
-  variables: []
+  variables:
+  - id: 0
+  - id: 1
+  - id: 2
   references:
     version: 1
+    00000000:
+      type: {class: SharedFloat, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedFloat_1
+        isGlobal: 1
+        isShared: 0
+        value: 0
+    00000001:
+      type: {class: SharedGameObject, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedGameObject_2
+        isGlobal: 1
+        isShared: 0
+        value: {fileID: 0}
+    00000002:
+      type: {class: SharedTransform, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedTransform_3
+        isGlobal: 1
+        isShared: 0
+        value: {fileID: 0}

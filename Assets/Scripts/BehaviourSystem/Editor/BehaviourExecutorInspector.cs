@@ -1,0 +1,82 @@
+using UnityEditor;
+using UnityEditor.AnimatedValues;
+using UnityEngine;
+
+namespace ZetanStudio.BehaviourTree
+{
+    [CustomEditor(typeof(BehaviourExecutor), true)]
+    public class BehaviourExecutorInspector : Editor
+    {
+        SerializedProperty behaviour;
+
+        SerializedProperty startOnStart;
+        SerializedProperty restartOnComplete;
+        SerializedProperty resetOnRestart;
+        SerializedProperty presetVariables;
+
+        AnimBool showList;
+        AnimBool showPreset;
+        SharedVariableListDrawer variableList;
+        SharedVariablePresetListDrawer presetVariableList;
+        SerializedObject serializedTree;
+        SerializedProperty serializedVariables;
+
+        private void OnEnable()
+        {
+            behaviour = serializedObject.FindProperty("behaviour");
+            startOnStart = serializedObject.FindProperty("startOnStart");
+            restartOnComplete = serializedObject.FindProperty("restartOnComplete");
+            resetOnRestart = serializedObject.FindProperty("resetOnRestart");
+            presetVariables = serializedObject.FindProperty("presetVariables");
+            if (behaviour.objectReferenceValue) InitTree();
+        }
+
+        private void InitTree()
+        {
+            serializedTree = new SerializedObject(behaviour.objectReferenceValue);
+            serializedVariables = serializedTree.FindProperty("variables");
+            variableList = new SharedVariableListDrawer(serializedTree, serializedVariables, true);
+            presetVariableList = new SharedVariablePresetListDrawer(serializedObject, presetVariables,
+                                                                    serializedTree.targetObject as ISharedVariableHandler,
+                                                                    (target as BehaviourExecutor).GetVariableTypeAtIndex);
+            showList = new AnimBool(serializedVariables.isExpanded);
+            showList.valueChanged.AddListener(() => { Repaint(); if (serializedVariables != null) serializedVariables.isExpanded = showList.target; });
+            showPreset = new AnimBool(presetVariables.isExpanded);
+            showPreset.valueChanged.AddListener(() => { Repaint(); if (presetVariables != null) presetVariables.isExpanded = showPreset.target; });
+        }
+
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
+            EditorGUI.BeginChangeCheck();
+            EditorGUI.BeginDisabledGroup(target is RuntimeBehaviourExecutor);
+            bool hasTreeBef = behaviour.objectReferenceValue;
+            EditorGUILayout.PropertyField(behaviour, new GUIContent("行为树"));
+            EditorGUI.EndDisabledGroup();
+            if (behaviour.objectReferenceValue != hasTreeBef) InitTree();
+            if (behaviour.objectReferenceValue && GUILayout.Button("编辑")) BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor);
+            EditorGUILayout.PropertyField(startOnStart, new GUIContent("开始时启动"));
+            EditorGUILayout.PropertyField(restartOnComplete, new GUIContent("完成时重启"));
+            EditorGUILayout.PropertyField(resetOnRestart, new GUIContent("重启时重置"));
+            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+            if (behaviour.objectReferenceValue)
+            {
+                serializedTree.Update();
+                EditorGUILayout.PropertyField(serializedVariables, new GUIContent("行为树共享变量"), false);
+                showList.target = serializedVariables.isExpanded;
+                if (EditorGUILayout.BeginFadeGroup(showList.faded))
+                    variableList.DoLayoutList();
+                EditorGUILayout.EndFadeGroup();
+                if (!(target is RuntimeBehaviourExecutor) && !Application.isPlaying)
+                {
+                    EditorGUILayout.PropertyField(presetVariables, new GUIContent("变量预设列表"), false);
+                    showPreset.target = presetVariables.isExpanded;
+                    if (EditorGUILayout.BeginFadeGroup(showPreset.faded))
+                        presetVariableList.DoLayoutList();
+                    EditorGUILayout.EndFadeGroup();
+                }
+                serializedTree.ApplyModifiedProperties();
+            }
+        }
+    }
+}

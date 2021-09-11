@@ -3,7 +3,7 @@
     <uie:Toolbar>
         <uie:ToolbarMenu display-tooltip-when-elided="true" text="文件" name="assets" style="width: 48px;" />
         <uie:ToolbarButton text="撤销" display-tooltip-when-elided="true" name="undo" style="-unity-text-align: middle-center;" />
-        <uie:ToolbarButton text="重做" display-tooltip-when-elided="true" name="redo" style="-unity-text-align: middle-center;" />
+        <uie:ToolbarButton text="重做" display-tooltip-when-elided="true" name="redo" style="-unity-text-align: middle-center; white-space: nowrap;" />
     </uie:Toolbar>
     <ZetanStudio.BehaviourTree.SplitView fixed-pane-initial-dimension="300">
         <ZetanStudio.BehaviourTree.SplitView orientation="Vertical" fixed-pane-initial-dimension="250" name="left-container" style="min-width: auto;">

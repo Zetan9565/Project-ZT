@@ -1,6 +1,144 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8444150710570603868
+--- !u!114 &-8599469560084693122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ff1dfce8b479734c8bf533182248820, type: 3}
+  m_Name: (1) Repeater
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 785d38a00fe0ed344bf636903f3395f9
+  position: {x: 0, y: 142}
+  description: 
+  child: {fileID: -8390009652866561428}
+  stopOnFailure: 0
+  count:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 0
+--- !u!114 &-8390009652866561428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddba8651ff3ae3c42921b76d74540306, type: 3}
+  m_Name: (2) Sequence
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 0240171def361154292b3dd87c46b04c
+  position: {x: 0, y: 289}
+  description: 
+  children:
+  - {fileID: 3073737369977096355}
+  - {fileID: 4349196617172203227}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11ff0f6527981fa41a9e8e6e46d91bbe, type: 3}
+  m_Name: new behaviour tree
+  m_EditorClassIdentifier: 
+  _name: 
+  description: 
+  entry: {fileID: 6010367299264760620}
+  nodes:
+  - {fileID: 6010367299264760620}
+  - {fileID: 3073737369977096355}
+  - {fileID: 4349196617172203227}
+  - {fileID: -8599469560084693122}
+  - {fileID: -8390009652866561428}
+  - {fileID: 1266546897375501647}
+  variables:
+  - id: 0
+  - id: 1
+  - id: 2
+  - id: 3
+  isRuntime: 0
+  references:
+    version: 1
+    00000000:
+      type: {class: SharedVector3Array, ns: , asm: Assembly-CSharp}
+      data:
+        _name: sharedVector3Array_1
+        isGlobal: 0
+        isShared: 1
+        value: []
+    00000001:
+      type: {class: SharedGameObject, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedGameObject_2
+        isGlobal: 0
+        isShared: 1
+        value: {fileID: 0}
+    00000002:
+      type: {class: SharedString, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedString_3
+        isGlobal: 0
+        isShared: 1
+        value: 123456
+    00000003:
+      type: {class: SharedTransform, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedTransform_4
+        isGlobal: 0
+        isShared: 1
+        value: {fileID: 0}
+--- !u!114 &1266546897375501647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 929bd5e44c7d1d2408fe39814cbb73fb, type: 3}
+  m_Name: (5) WithinDistance
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 40d01842d0cfcf24cba10cce6abb2ed9
+  position: {x: -205, y: 201}
+  description: 
+  distance:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 0
+  usePoint: 0
+  point:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: {x: 0, y: 0, z: 0}
+  target:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: {fileID: 0}
+  useThis: 0
+  contrast:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: {fileID: 0}
+--- !u!114 &3073737369977096355
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10,16 +148,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cad2581818b4bc748b7dee3e227e8a06, type: 3}
-  m_Name: (4) Wait
+  m_Name: (3) Wait
   m_EditorClassIdentifier: 
-  guid: 029a8764b785ae144897df923f0c6145
-  position: {x: -125.5775, y: 444}
+  isRuntime: 0
+  guid: f447c4e0de0056a4fae3fe165efa2192
+  position: {x: -133, y: 451}
   description: 
-  duration:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 3
   randomWait:
     _name: 
     isGlobal: 0
@@ -35,7 +169,12 @@ MonoBehaviour:
     isGlobal: 0
     isShared: 0
     value: 1
---- !u!114 &-3748219054101061789
+  duration:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+--- !u!114 &4349196617172203227
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -45,90 +184,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
-  m_Name: (1) DebugLog
+  m_Name: (4) Log
   m_EditorClassIdentifier: 
-  guid: ee096ba207866244b9da33048af4dcfc
-  position: {x: 55.487514, y: 444}
+  isRuntime: 0
+  guid: 5139c85ea722159439a3f0876dd38ecb
+  position: {x: 139, y: 451}
   description: 
   logType: 0
   message:
-    _name: log
+    _name: sharedString_3
     isGlobal: 0
     isShared: 1
     value: Debug log
---- !u!114 &-2792767442087314184
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ddba8651ff3ae3c42921b76d74540306, type: 3}
-  m_Name: (4) Sequence
-  m_EditorClassIdentifier: 
-  guid: 1c9bc4ed5186899439f41117f463a3bf
-  position: {x: 114.99997, y: 254.99803}
-  description: 
-  children:
-  - {fileID: -8444150710570603868}
-  - {fileID: -3748219054101061789}
-  - {fileID: 7213850351422958022}
-  - {fileID: 4760085327767505959}
---- !u!114 &-370667420828893129
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ff1dfce8b479734c8bf533182248820, type: 3}
-  m_Name: (4) Repeater
-  m_EditorClassIdentifier: 
-  guid: 26194dbf5b9d8a546941fccbee77d848
-  position: {x: 115.00002, y: 136.75604}
-  description: 
-  child: {fileID: -2792767442087314184}
-  count: 0
-  stopOnFailure: 0
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11ff0f6527981fa41a9e8e6e46d91bbe, type: 3}
-  m_Name: new behaviour tree
-  m_EditorClassIdentifier: 
-  _name: 
-  description: 
-  entry: {fileID: 1447173461724774188}
-  nodes:
-  - {fileID: 1447173461724774188}
-  - {fileID: -3748219054101061789}
-  - {fileID: -8444150710570603868}
-  - {fileID: -370667420828893129}
-  - {fileID: 7213850351422958022}
-  - {fileID: 4760085327767505959}
-  - {fileID: -2792767442087314184}
-  variables:
-  - id: 0
-  references:
-    version: 1
-    00000000:
-      type: {class: SharedString, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _name: log
-        isGlobal: 0
-        isShared: 1
-        value: "\u6253\u5370\u6253\u5370"
---- !u!114 &1447173461724774188
+--- !u!114 &6010367299264760620
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -140,63 +208,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc8a77ec6687a064cb1a4682f5739e49, type: 3}
   m_Name: (0) Entry
   m_EditorClassIdentifier: 
-  guid: 1734d9ae5dbc807438bf77f0c763f18a
-  position: {x: 115.00002, y: 21.8647}
+  isRuntime: 0
+  guid: 7e08a642cff7a35499976a4011869aa1
+  position: {x: 0, y: 0}
   description: 
-  start: {fileID: -370667420828893129}
---- !u!114 &4760085327767505959
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
-  m_Name: (7) Log
-  m_EditorClassIdentifier: 
-  guid: 327f9e46fde42564a8c63c2a932618ea
-  position: {x: 417.99997, y: 443.99997}
-  description: 
-  logType: 0
-  message:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: Debug log
---- !u!114 &7213850351422958022
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cad2581818b4bc748b7dee3e227e8a06, type: 3}
-  m_Name: (6) Wait
-  m_EditorClassIdentifier: 
-  guid: c1798bd2f5bd0bf4b8685cce6b90ecfb
-  position: {x: 238.3275, y: 444}
-  description: "\u63CF\u8FF0\u63CF\u8FF0"
-  duration:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 2
-  randomWait:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
-  randomWaitMin:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
-  randomWaitMax:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 4
+  start: {fileID: -8599469560084693122}

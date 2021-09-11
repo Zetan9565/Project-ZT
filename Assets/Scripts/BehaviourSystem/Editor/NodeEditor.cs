@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;
@@ -20,7 +20,8 @@ namespace ZetanStudio.BehaviourTree
         private Action<NodeEditor> onUnselected;
         private Action<NodeEditor, Vector2> onSetPosition;
 
-        public NodeEditor(Node node, Action<NodeEditor> onSelected, Action<NodeEditor> onUnselected, Action<NodeEditor, Vector2> onSetPosition) : base("Assets/Scripts/BehaviourSystem/Editor/NodeEditor.uxml")
+        public NodeEditor(Node node, Action<NodeEditor> onSelected, Action<NodeEditor> onUnselected,
+                          Action<NodeEditor, Vector2> onSetPosition) : base(AssetDatabase.GetAssetPath(BehaviourTreeSettings.GetOrCreate().nodeUxml))
         {
             this.node = node;
             this.onSelected = onSelected;
@@ -28,10 +29,9 @@ namespace ZetanStudio.BehaviourTree
             this.onSetPosition = onSetPosition;
             viewDataKey = node.guid;
             Type type = node.GetType();
-            title = type.Name + (node.IsInstance ? "(clone)" : string.Empty);
-            var attrs = type.GetCustomAttributesData();
-            var attr = attrs.FirstOrDefault(x => x.AttributeType == typeof(NodeDescriptionAttribute));
-            if (attr != null) tooltip = attr.ConstructorArguments[0].Value as string;
+            title = type.Name + (node.IsInstance && !node.IsRuntime ? "(clone)" : (node.IsRuntime ? "(R)" : string.Empty));
+            var attr = type.GetCustomAttribute<NodeDescriptionAttribute>();
+            if (attr != null) tooltip = attr.description;
             else tooltip = string.Empty;
 
             style.left = node.position.x;

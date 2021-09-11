@@ -725,19 +725,14 @@ public class QuestInspector : Editor
         return editComplete;
     }
 
-    int GetNPCIndex(TalkerInformation npc)
-    {
-        return Array.IndexOf(npcs, npc);
-    }
-
-    public void AddAnimaListener(UnityEngine.Events.UnityAction callback)
+    private void AddAnimaListener(UnityEngine.Events.UnityAction callback)
     {
         foreach (var state in showState)
         {
             state.valueChanged.AddListener(callback);
         }
     }
-    public void RemoveAnimaListener(UnityEngine.Events.UnityAction callback)
+    private void RemoveAnimaListener(UnityEngine.Events.UnityAction callback)
     {
         foreach (var state in showState)
         {

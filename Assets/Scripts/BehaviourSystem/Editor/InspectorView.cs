@@ -10,35 +10,36 @@ namespace ZetanStudio.BehaviourTree
     {
         public new class UxmlFactory : UxmlFactory<InspectorView, UxmlTraits> { }
 
-        public BehaviourTree tree;
-        public GlobalVariables global;
+        private BehaviourTree tree;
+        private GlobalVariables global;
         public NodeEditor nodeEditor;
 
-        public string[] varType = { "普通", "共享", "全局" };
+        private readonly string[] varType = { "普通", "共享", "全局" };
 
         public InspectorView() { }
 
-        public void InspectNode(BehaviourTree tree, NodeEditor e)
+        public void InspectNode(BehaviourTree tree, NodeEditor node)
         {
             Clear();
             this.tree = tree;
-            if (!tree.IsInstance) global = ZetanEditorUtility.LoadAssets<GlobalVariables>().Find(g => g);
+            if (!tree.IsInstance) global = ZetanEditorUtility.LoadAsset<GlobalVariables>();
             else global = BehaviourManager.Instance.GlobalVariables;
-            nodeEditor = e;
-            if (tree && e != null && e.node)
+            nodeEditor = node;
+            if (tree && nodeEditor != null && nodeEditor.node)
             {
                 IMGUIContainer container = new IMGUIContainer(() =>
                 {
-                    if (tree && e != null && e.node)
+                    if (tree && nodeEditor != null && nodeEditor.node)
                     {
-                        using SerializedObject serializedObject = new SerializedObject(e.node);
+                        using SerializedObject serializedObject = new SerializedObject(nodeEditor.node);
                         serializedObject.Update();
                         EditorGUI.BeginChangeCheck();
-                        EditorGUILayout.LabelField("结点名称", e.node.name);
+                        EditorGUILayout.LabelField("结点名称", nodeEditor.node.name);
                         SerializedProperty property = serializedObject.GetIterator();
                         property.NextVisible(true);
                         while (property.NextVisible(false))
                         {
+                            if (property.name == "child" || property.name == "children" || property.name == "start" || property.name == "isRuntime") continue;
                             DrawProperty(property);
                         }
                         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
@@ -51,32 +52,39 @@ namespace ZetanStudio.BehaviourTree
         private void DrawProperty(SerializedProperty property)
         {
             var proValue = ZetanEditorUtility.GetValue(property, out var fieldInfo);
+            ShouldHide(fieldInfo.GetCustomAttribute<HideIfAttribute>(), out var shouldHide, out var readOnly);
+            if (shouldHide && !readOnly) return;
+            EditorGUI.BeginDisabledGroup(shouldHide && readOnly);
             var type = fieldInfo.FieldType;
             if (type.IsSubclassOf(typeof(SharedVariable)))
             {
-                var variable = proValue as SharedVariable;
+                SharedVariable variable = proValue as SharedVariable;
                 int typeIndex = variable.isGlobal ? 2 : (variable.isShared ? 1 : 0);
                 string displayName = property.displayName;
-                var attr = fieldInfo.CustomAttributes.FirstOrDefault(x => x.AttributeType == typeof(DisplayNameAttribute));
-                if (attr != null) displayName = attr.ConstructorArguments[0].Value.ToString();
+                DisplayNameAttribute nameAttr = fieldInfo.GetCustomAttribute<DisplayNameAttribute>();
+                if (nameAttr != null) displayName = nameAttr.Name;
                 SerializedProperty name = property.FindPropertyRelative("_name");
                 SerializedProperty value = property.FindPropertyRelative("value");
                 Rect rect = EditorGUILayout.GetControlRect();
-                Rect valueRect = new Rect(rect.x, rect.y, rect.width * 0.8f, EditorGUIUtility.singleLineHeight);
+                Rect valueRect = new Rect(rect.x, rect.y, rect.width * 0.84f, EditorGUI.GetPropertyHeight(property, true));
                 switch (typeIndex)
                 {
                     case 1:
-                        DrawVariableField(tree);
+                        valueRect = new Rect(rect.x, rect.y, rect.width * 0.84f, EditorGUIUtility.singleLineHeight);
+                        DrawSharedField(tree);
                         break;
                     case 2:
-                        DrawVariableField(global);
+                        valueRect = new Rect(rect.x, rect.y, rect.width * 0.84f, EditorGUIUtility.singleLineHeight);
+                        DrawSharedField(global);
                         break;
                     default:
-                        EditorGUI.PropertyField(valueRect, value, new GUIContent(displayName));
+                        valueRect = new Rect(rect.x, rect.y, rect.width * 0.84f, EditorGUI.GetPropertyHeight(value, true));
+                        EditorGUI.PropertyField(valueRect, value, new GUIContent(displayName), true);
+                        EditorGUILayout.Space(EditorGUI.GetPropertyHeight(value, true) - EditorGUIUtility.singleLineHeight);
                         break;
                 }
                 EditorGUI.BeginDisabledGroup(nodeEditor.node.IsInstance);
-                typeIndex = EditorGUI.Popup(new Rect(rect.x + rect.width * 0.8f + 2, rect.y, rect.width * 0.2f - 2, EditorGUIUtility.singleLineHeight), typeIndex, varType);
+                typeIndex = EditorGUI.Popup(new Rect(rect.x + rect.width * 0.84f + 2, rect.y, rect.width * 0.16f - 2, EditorGUIUtility.singleLineHeight), typeIndex, varType);
                 switch (typeIndex)
                 {
                     case 1:
@@ -94,19 +102,16 @@ namespace ZetanStudio.BehaviourTree
                 }
                 EditorGUI.EndDisabledGroup();
 
-                void DrawVariableField(ISharedVariableHandler variableHandler)
+                void DrawSharedField(ISharedVariableHandler variableHandler)
                 {
                     var variables = variableHandler.GetVariables(type);
                     string[] varNames = variables.Select(x => x.name).Prepend("未选择").ToArray();
                     int nameIndex = System.Array.IndexOf(varNames, variable.name);
                     if (nameIndex < 0) nameIndex = 0;
                     nameIndex = EditorGUI.Popup(valueRect, displayName, nameIndex, varNames);
-                    string nameStr = string.Empty;
+                    string nameStr = name.stringValue;
                     if (nameIndex > 0 && nameIndex <= variables.Count) nameStr = varNames[nameIndex];
-                    if (!nodeEditor.node.IsInstance)
-                    {
-                        name.stringValue = nameStr;
-                    }
+                    if (!nodeEditor.node.IsInstance) name.stringValue = nameStr;
                     else if (nameStr != name.stringValue)
                     {
                         var val = variableHandler.GetVariable(varNames[nameIndex]);
@@ -122,6 +127,20 @@ namespace ZetanStudio.BehaviourTree
                 }
             }
             else EditorGUILayout.PropertyField(property, true);
+            EditorGUI.EndDisabledGroup();
+        }
+
+        private void ShouldHide(HideIfAttribute hideAttr, out bool should, out bool readOnly)
+        {
+            should = false;
+            readOnly = false;
+            if (hideAttr != null)
+            {
+                readOnly = hideAttr.readOnly;
+                if (ZetanEditorUtility.GetFieldValue(hideAttr.path, nodeEditor.node, out var fv, out _))
+                    if (Equals(fv, hideAttr.value))
+                        should = true;
+            }
         }
     }
 }

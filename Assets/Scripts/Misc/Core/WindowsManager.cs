@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections.Generic;
@@ -134,9 +134,7 @@ public abstract class WindowHandler<UI_T, Mono_T> : SingletonMonoBehaviour<Mono_
     protected bool animated = true;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [ConditionalHide("animated", false)]
-#endif
+    [HideIf("animated", false)]
     protected float animationSpeed = 0.04f;
 
     public virtual bool IsUIOpen { get; protected set; }

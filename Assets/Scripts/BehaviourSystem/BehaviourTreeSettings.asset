@@ -25,4 +25,7 @@ MonoBehaviour:
     type: 3}
   scriptTemplateDecorator: {fileID: 4900000, guid: 8427836da4241de498120cce75e8ce7c,
     type: 3}
-  newScriptFolder: Assets/Scripts/BehaviourSystem/Base/Nodes
+  scriptTemplateVariable: {fileID: 4900000, guid: 28d7209af2618b84cbab289b484127ec,
+    type: 3}
+  newNodeScriptFolder: Assets/Scripts/BehaviourSystem/Base/Nodes
+  newVarScriptFolder: Assets/Scripts/BehaviourSystem/Base/Variable

@@ -13,6 +13,9 @@ namespace ZetanStudio.BehaviourTree
         private GlobalVariables globalVariables;
         public GlobalVariables GlobalVariables => globalVariables;
 
+        [SerializeReference]
+        private List<SharedVariable> presetVariables = new List<SharedVariable>();
+
         private void Awake()
         {
             foreach (var exe in FindObjectsOfType<BehaviourExecutor>())
@@ -22,6 +25,7 @@ namespace ZetanStudio.BehaviourTree
             }
             if (globalVariables) globalVariables = globalVariables.GetInstance();
             else globalVariables = ScriptableObject.CreateInstance<GlobalVariables>().GetInstance();
+            globalVariables.PresetVariables(presetVariables);
         }
 
         public void Remove(BehaviourExecutor behaviourExecutor)
@@ -56,5 +60,13 @@ namespace ZetanStudio.BehaviourTree
         {
             return globalVariables.SetVariable<T>(name, value);
         }
+
+#if UNITY_EDITOR
+        public Type GetPresetVariableTypeAtIndex(int index)
+        {
+            if (index < 0 || index > presetVariables.Count) return null;
+            else return presetVariables[index].GetType();
+        }
+#endif
     }
 }

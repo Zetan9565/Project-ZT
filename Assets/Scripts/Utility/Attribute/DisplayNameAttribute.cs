@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-[AttributeUsage(AttributeTargets.Field, Inherited = true)]
+[AttributeUsage(AttributeTargets.Field)]
 public class DisplayNameAttribute : PropertyAttribute
 {
     public string Name;

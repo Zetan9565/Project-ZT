@@ -18,6 +18,8 @@ namespace ZetanStudio.BehaviourTree
 
         public abstract object GetValue();
         public abstract void SetValue(object value);
+
+        public Action<object> onValueChanged;
     }
 
     [System.Serializable]
@@ -25,7 +27,17 @@ namespace ZetanStudio.BehaviourTree
     {
         [SerializeField]
         protected T value;
-        public T Value => value;
+        public T Value {
+            get
+            {
+                return value;
+            }
+            set
+            {
+                this.value = value;
+                onValueChanged?.Invoke(value);
+            }
+        }
 
         public override object GetValue()
         {
@@ -53,7 +65,9 @@ namespace ZetanStudio.BehaviourTree
 
     public interface ISharedVariableHandler
     {
-        public Dictionary<string, SharedVariable> Variables { get; }
+        public List<SharedVariable> Variables { get; }
+
+        public Dictionary<string, SharedVariable> KeyedVariables { get; }
 
         public SharedVariable GetVariable(string name);
 
