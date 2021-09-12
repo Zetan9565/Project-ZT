@@ -48,7 +48,7 @@ namespace ZetanStudio.BehaviourTree
         public bool IsInstance { get; protected set; }
 
         [SerializeField]
-        private bool isRuntime;//要暴露给Unity，要不然每运行一次就会被重置
+        protected bool isRuntime;//要暴露给Unity，要不然每运行一次就会被重置
         public bool IsRuntime => isRuntime;
         /// <summary>
         /// 是否是实例
@@ -276,6 +276,22 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         /// <param name="child"></param>
         public virtual void RemoveChild(Node child) { }
+
+        protected T ConvertToLocal<T>() where T : Node
+        {
+            Node node = Instantiate(this);
+            node.name = node.name.Replace("(R)(Clone)", "");
+            node.isRuntime = false;
+            return node as T;
+        }
+
+        public virtual Node ConvertToLocal()
+        {
+            Node node = Instantiate(this);
+            node.name = node.name.Replace("(R)(Clone)", "");
+            node.isRuntime = false;
+            return node;
+        }
 #endif
     }
 

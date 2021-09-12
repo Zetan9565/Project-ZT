@@ -114,7 +114,7 @@ namespace ZetanStudio.BehaviourTree
             {
                 toolbarMenu.menu.RemoveItemAt(i);
             }
-            if (tree && tree.IsRuntime) toolbarMenu.menu.InsertAction(1, "保存到本地", (a) => { });
+            if (!Application.isPlaying && tree && tree.IsRuntime) toolbarMenu.menu.InsertAction(1, "保存到本地", (a) => { SaveToLocal("new behaviour tree"); });
             if (behaviourTrees.Count > 0) toolbarMenu.menu.AppendSeparator();
             behaviourTrees.ForEach(tree =>
             {
@@ -125,6 +125,52 @@ namespace ZetanStudio.BehaviourTree
                     });
             });
         }
+
+        private void SaveToLocal(string assetName)
+        {
+            if (!tree || Application.isPlaying) return;
+            if (!tree.IsRuntime)
+            {
+                EditorUtility.DisplayDialog("保存失败", "无需保存，已经是本地行为树", "确定");
+                return;
+            }
+            if (EditorUtility.DisplayDialog("保存到本地", "保存到本地的行为树将失去对场景对象的引用，是否继续？", "继续", "取消"))
+            {
+                while (true)
+                {
+                    string path = EditorUtility.SaveFilePanel("保存行为树", string.Empty, assetName, "asset");
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        if (ZetanEditorUtility.IsValidPath(path))
+                        {
+                            try
+                            {
+                                BehaviourTree localTree = BehaviourTree.ConvertToLocal(tree);
+                                AssetDatabase.CreateAsset(localTree, AssetDatabase.GenerateUniqueAssetPath(ZetanEditorUtility.ConvertToAssetsPath(path)));
+                                for (int i = 0; i < localTree.Nodes.Count; i++)
+                                {
+                                    AssetDatabase.AddObjectToAsset(localTree.Nodes[i], localTree);
+                                }
+                                AssetDatabase.SaveAssets();
+                                EditorGUIUtility.PingObject(localTree);
+                                break;
+                            }
+                            catch
+                            {
+                                if (!EditorUtility.DisplayDialog("保存失败", "请选择Assets目录或以下的文件夹。", "确定", "取消"))
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            if (!EditorUtility.DisplayDialog("提示", "请选择Assets目录或以下的文件夹。", "确定", "取消"))
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
         private void CheckShowShared()
         {
             shared.SetEnabled(!showShared);

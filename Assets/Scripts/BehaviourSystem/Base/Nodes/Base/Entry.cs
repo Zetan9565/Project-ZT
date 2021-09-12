@@ -45,6 +45,13 @@ namespace ZetanStudio.BehaviourTree
         {
             if (child == start) start = null;
         }
+
+        public override Node ConvertToLocal()
+        {
+            Entry entry = ConvertToLocal<Entry>();
+            entry.start = start.ConvertToLocal();
+            return entry;
+        }
 #endif
     }
 }

@@ -39,6 +39,13 @@ namespace ZetanStudio.BehaviourTree
             children.Remove(child);
         }
 
+        public override Node ConvertToLocal()
+        {
+            Composite composite = ConvertToLocal<Composite>();
+            composite.children = children.ConvertAll(c => c.ConvertToLocal());
+            return composite;
+        }
+
         public void SortByPosition()
         {
             children.Sort((l, r) =>

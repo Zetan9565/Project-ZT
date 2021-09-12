@@ -1,10 +1,10 @@
 namespace ZetanStudio.BehaviourTree
 {
     /// <summary>
-    /// 随机选择器：当任意子结点评估成功时，向上反馈评估成功；若所有子结点都失败时，向上反馈评估失败；若任意子结点还在评估，则向上反馈评估正进行
+    /// 并行选择器：当任意子结点评估成功时，向上反馈评估成功；若所有子结点都失败时，向上反馈评估失败；若任意子结点还在评估，则向上反馈评估正进行
     /// </summary>
-    [NodeDescription("随机选择器：当任意子结点评估成功时，向上反馈评估成功；若所有子结点都失败时，向上反馈评估失败；若任意子结点还在评估，则向上反馈评估正进行")]
-    public class RandomSelector : Composite
+    [NodeDescription("并行选择器：当任意子结点评估成功时，向上反馈评估成功；若所有子结点都失败时，向上反馈评估失败；若任意子结点还在评估，则向上反馈评估正进行")]
+    public class ParallelSelector : Composite
     {
         protected override NodeStates OnUpdate()
         {

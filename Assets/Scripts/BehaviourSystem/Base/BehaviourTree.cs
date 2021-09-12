@@ -305,16 +305,6 @@ namespace ZetanStudio.BehaviourTree
             }
         }
 
-        public static BehaviourTree GetRuntimeTree()
-        {
-            BehaviourTree tree = CreateInstance<BehaviourTree>();
-            tree.entry = Node.GetRuntimeNode(typeof(Entry)) as Entry;
-            tree.entry.name = "(0) Entry(R)";
-            tree.nodes.Add(tree.entry);
-            tree.isRuntime = true;
-            return tree;
-        }
-
 #if UNITY_EDITOR
         /// <summary>
         /// 用于在编辑器中增加结点，不应在游戏逻辑中使用
@@ -359,6 +349,40 @@ namespace ZetanStudio.BehaviourTree
             }
             this.entry = entry;
             nodes.Add(entry);
+        }
+
+        /// <summary>
+        /// 用于在编辑器中获取运行时行为树，不应在游戏逻辑中使用
+        /// </summary>
+        /// <returns>运行时行为树</returns>
+        public static BehaviourTree GetRuntimeTree()
+        {
+            BehaviourTree tree = CreateInstance<BehaviourTree>();
+            tree.entry = Node.GetRuntimeNode(typeof(Entry)) as Entry;
+            tree.entry.name = "(0) Entry(R)";
+            tree.entry.guid = UnityEditor.GUID.Generate().ToString();
+            tree.nodes.Add(tree.entry);
+            tree.isRuntime = true;
+            return tree;
+        }
+        /// <summary>
+        /// 用于在编辑器将运行时行为树本地化时做准备，不应在游戏逻辑中使用
+        /// </summary>
+        /// <param name="runtimeTree">运行时行为树</param>
+        /// <returns>准备好本地化的行为树</returns>
+        public static BehaviourTree ConvertToLocal(BehaviourTree runtimeTree)
+        {
+            if (runtimeTree.IsInstance || !runtimeTree.isRuntime) return null;
+            BehaviourTree localTree = Instantiate(runtimeTree);
+            localTree.isRuntime = false;
+            Traverse(localTree.entry, n => localTree.nodes.Remove(n));
+            for (int i = 0; i < localTree.nodes.Count; i++)
+            {
+                localTree.nodes[i] = localTree.nodes[i].ConvertToLocal();
+            }
+            localTree.entry = localTree.entry.ConvertToLocal() as Entry;
+            Traverse(localTree.entry, n => localTree.nodes.Add(n));
+            return localTree;
         }
 #endif
     }
