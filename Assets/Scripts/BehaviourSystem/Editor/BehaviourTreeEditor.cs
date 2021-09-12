@@ -167,6 +167,7 @@ namespace ZetanStudio.BehaviourTree
                                 break;
                         }
                     }
+                    break;
                 }
             }
         }
