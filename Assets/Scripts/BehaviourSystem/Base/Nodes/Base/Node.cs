@@ -168,6 +168,7 @@ namespace ZetanStudio.BehaviourTree
                     isStarted = false;
                 }
             }
+            Owner.EvaluatedNodes.Enqueue(this);
             return State;
         }
         /// <summary>
@@ -176,7 +177,7 @@ namespace ZetanStudio.BehaviourTree
         /// <param name="paused"></param>
         public void Pause(bool paused)
         {
-            OnPaused(paused);
+            OnPause(paused);
             IsPaused = paused;
         }
         /// <summary>
@@ -206,12 +207,18 @@ namespace ZetanStudio.BehaviourTree
         /// 结点被暂停时
         /// </summary>
         /// <param name="paused"></param>
-        protected virtual void OnPaused(bool paused) { }
+        protected virtual void OnPause(bool paused) { }
         /// <summary>
         /// 结点被重置时
         /// </summary>
         protected virtual void OnReset() { }
 
+        public void OnAbort()
+        {
+            isStarted = false;
+            State = NodeStates.Failure;
+            GetChildren().ForEach(n => n.OnAbort());
+        }
         #region 碰撞器事件
         public virtual void OnCollisionEnter(Collision collision) { }
         public virtual void OnCollisionStay(Collision collision) { }
@@ -264,7 +271,7 @@ namespace ZetanStudio.BehaviourTree
         /// <summary>
         /// 用于在编辑器中备注结点功能，不应在游戏逻辑中使用
         /// </summary>
-        [TextArea] public string description;
+        [TextArea, DisplayName("描述")] public string description;
 
         /// <summary>
         /// 用于在编辑器中连接子结点，不应在游戏逻辑中使用

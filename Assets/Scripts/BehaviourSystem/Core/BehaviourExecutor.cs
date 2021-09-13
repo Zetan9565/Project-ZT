@@ -7,7 +7,7 @@ namespace ZetanStudio.BehaviourTree
     [DisallowMultipleComponent]
     public class BehaviourExecutor : MonoBehaviour
     {
-        [SerializeField]
+        [SerializeField, ObjectDropDown(typeof(BehaviourTree))]
         protected BehaviourTree behaviour;
         public BehaviourTree Behaviour => behaviour;
 
@@ -35,7 +35,7 @@ namespace ZetanStudio.BehaviourTree
 
         private void Update()
         {
-            if (behaviour && behaviour.IsStarted) behaviour.Execute();
+            if (behaviour) behaviour.Execute();
             if (restartOnComplete && behaviour.IsDone) behaviour.Restart(resetOnRestart);
         }
 

@@ -12,13 +12,13 @@ namespace ZetanStudio.BehaviourTree
 
         public override bool IsValid => tag != null && target != null;
 
-        protected override bool CheckCondition()
+        public override bool CheckCondition()
         {
             if (!compareThis) return target.GetGenericValue().CompareTag(tag);
             else return gameObject.CompareTag(tag);
         }
 
-        protected override bool ShouldKeepRunning()
+        public override bool ShouldKeepRunning()
         {
             if (!compareThis) return target.GetGenericValue() == null;
             else return string.IsNullOrEmpty(tag.GetGenericValue());

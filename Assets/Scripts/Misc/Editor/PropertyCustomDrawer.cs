@@ -142,18 +142,23 @@ public class ItemAmountListDrawer
                     owner.ApplyModifiedProperties();
             },
 
-            drawHeaderCallback = (rect) =>
+            onCanRemoveCallback = (list) =>
             {
-                int notCmpltCount = 0;
-                SerializedProperty item;
-                for (int i = 0; i < property.arraySize; i++)
-                {
-                    item = property.GetArrayElementAtIndex(i);
-                    if (!item.FindPropertyRelative("item").objectReferenceValue || item.FindPropertyRelative("amount").intValue < 1)
-                        notCmpltCount++;
-                }
-                EditorGUI.LabelField(rect, listTitle, "数量：" + property.arraySize + (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+                return list.IsSelected(list.index);
             },
+
+            drawHeaderCallback = (rect) =>
+                {
+                    int notCmpltCount = 0;
+                    SerializedProperty item;
+                    for (int i = 0; i < property.arraySize; i++)
+                    {
+                        item = property.GetArrayElementAtIndex(i);
+                        if (!item.FindPropertyRelative("item").objectReferenceValue || item.FindPropertyRelative("amount").intValue < 1)
+                            notCmpltCount++;
+                    }
+                    EditorGUI.LabelField(rect, listTitle, "数量：" + property.arraySize + (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
+                },
 
             drawNoneElementCallback = (rect) =>
             {
@@ -310,6 +315,11 @@ public class MaterialListDrawer
                     owner.ApplyModifiedProperties();
             },
 
+            onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
+            },
+
             drawHeaderCallback = (rect) =>
             {
                 int notCmpltCount = 0;
@@ -442,6 +452,11 @@ public class DropItemListDrawer
                 }
                 if (EditorGUI.EndChangeCheck())
                     owner.ApplyModifiedProperties();
+            },
+
+            onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
             },
 
             drawHeaderCallback = (rect) =>
@@ -617,6 +632,11 @@ public class ConditionGroupDrawer
                 }
                 if (EditorGUI.EndChangeCheck())
                     owner.ApplyModifiedProperties();
+            },
+
+            onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
             },
 
             drawHeaderCallback = (rect) =>
@@ -820,7 +840,7 @@ public class SceneSelectionDrawer
 
 }
 
-public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
+public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
 {
     private readonly T[] objects;
     private readonly string[] objectNames;
@@ -828,7 +848,7 @@ public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
     private readonly SerializedProperty property;
     private readonly string label;
 
-    public ScriptableObjectSelectionDrawer(SerializedProperty property, string fieldAsName, string path, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, string path, string label = "资源", string nameNull = "未选择")
     {
         objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
         List<string> objectNames = new List<string>() { nameNull };
@@ -846,7 +866,7 @@ public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
         this.label = label;
         this.objectNames = objectNames.ToArray();
     }
-    public ScriptableObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, string path, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, string path, string label = "资源", string nameNull = "未选择")
     {
         objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
         List<string> objectNames = new List<string>() { nameNull };
@@ -873,7 +893,7 @@ public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
         }
     }
 
-    public ScriptableObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, string path, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, string path, string label = "资源", string nameNull = "未选择")
     {
         objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
         List<string> objectNames = new List<string>() { nameNull };
@@ -894,7 +914,7 @@ public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
         this.label = label;
         this.objectNames = objectNames.ToArray();
     }
-    public ScriptableObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, Func<T, string> groupPicker, string path, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, Func<T, string> groupPicker, string path, string label = "资源", string nameNull = "未选择")
     {
         objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
         List<string> objectNames = new List<string>() { nameNull };
@@ -925,7 +945,7 @@ public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
         }
     }
 
-    public ScriptableObjectSelectionDrawer(SerializedProperty property, string fieldAsName, T[] resources, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, T[] resources, string label = "资源", string nameNull = "未选择")
     {
         objects = resources;
         List<string> objectNames = new List<string>() { nameNull };
@@ -943,7 +963,7 @@ public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
         this.label = label;
         this.objectNames = objectNames.ToArray();
     }
-    public ScriptableObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, T[] resources, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, T[] resources, string label = "资源", string nameNull = "未选择")
     {
         objects = resources;
         List<string> objectNames = new List<string>() { nameNull };
@@ -970,7 +990,7 @@ public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
         }
     }
 
-    public ScriptableObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, T[] resources, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, T[] resources, string label = "资源", string nameNull = "未选择")
     {
         objects = resources;
         List<string> objectNames = new List<string>() { nameNull };
@@ -991,7 +1011,7 @@ public class ScriptableObjectSelectionDrawer<T> where T : ScriptableObject
         this.label = label;
         this.objectNames = objectNames.ToArray();
     }
-    public ScriptableObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, Func<T, string> groupPicker, T[] resources, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, Func<T, string> groupPicker, T[] resources, string label = "资源", string nameNull = "未选择")
     {
         objects = resources;
         List<string> objectNames = new List<string>() { nameNull };

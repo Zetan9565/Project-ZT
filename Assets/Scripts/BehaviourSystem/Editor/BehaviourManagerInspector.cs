@@ -39,6 +39,9 @@ namespace ZetanStudio.BehaviourTree
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(globalVariables, new GUIContent("全局变量"));
+            if (!globalVariables.objectReferenceValue && ZetanEditorUtility.LoadAsset<GlobalVariables>() == null)
+                if (GUILayout.Button("新建"))
+                    ZetanEditorUtility.SaveFilePanel(CreateInstance<GlobalVariables>, "global variables");
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (globalVariables.objectReferenceValue)
             {

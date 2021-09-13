@@ -47,7 +47,7 @@ public class QuestInspector : Editor
     AnimBool[] showState;
 
     CharacterSelectionDrawer<TalkerInformation> npcSelector;
-    ScriptableObjectSelectionDrawer<QuestGroup> groupSelector;
+    ObjectSelectionDrawer<QuestGroup> groupSelector;
 
     private void OnEnable()
     {
@@ -76,7 +76,7 @@ public class QuestInspector : Editor
         _NPCToSubmit = serializedObject.FindProperty("_NPCToSubmit");
         cmpltObjctvInOrder = serializedObject.FindProperty("cmpltObjctvInOrder");
         objectives = serializedObject.FindProperty("objectives");
-        groupSelector = new ScriptableObjectSelectionDrawer<QuestGroup>(group, "_name", "Configuration", "归属组", "无");
+        groupSelector = new ObjectSelectionDrawer<QuestGroup>(group, "_name", "Configuration", "归属组", "无");
         npcSelector = new CharacterSelectionDrawer<TalkerInformation>(_NPCToSubmit, "在此NPC处提交", "接取处NPC");
         acceptConditionDrawer = new ConditionGroupDrawer(serializedObject, acceptCondition, lineHeight, lineHeightSpace, "接取条件列表");
         rewardDrawer = new ItemAmountListDrawer(serializedObject, rewardItems, lineHeight, lineHeightSpace, "奖励列表");
@@ -454,14 +454,14 @@ public class QuestInspector : Editor
                                     lineCount++;
                                     break;
                                 case (int)KillObjectiveType.Race:
-                                    new ScriptableObjectSelectionDrawer<EnemyRace>(race, "_name", "Configuration", "目标种族").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                                    new ObjectSelectionDrawer<EnemyRace>(race, "_name", "Configuration", "目标种族").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                                     lineCount++;
                                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                                         race, new GUIContent("目标种族"));
                                     lineCount++;
                                     break;
                                 case (int)KillObjectiveType.Group:
-                                    new ScriptableObjectSelectionDrawer<EnemyGroup>(group, "_name", "Configuration", "目标组合").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                                    new ObjectSelectionDrawer<EnemyGroup>(group, "_name", "Configuration", "目标组合").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                                     lineCount++;
                                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                                         group, new GUIContent("目标组合"));

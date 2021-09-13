@@ -48,6 +48,8 @@ namespace ZetanStudio.BehaviourTree
 
         public BehaviourExecutor Executor { get; private set; }
         public Dictionary<string, SharedVariable> KeyedVariables { get; private set; }
+
+        public Queue<Node> EvaluatedNodes { get; private set; }
         #endregion
 
         #region 共享变量获取
@@ -156,6 +158,8 @@ namespace ZetanStudio.BehaviourTree
                 }
             }
             Traverse(entry, (n) => n.Init(this));
+            EvaluatedNodes = new Queue<Node>();
+            executedConditional = new List<Conditional>();
         }
 
         public void PresetVariables(List<SharedVariable> variables)
@@ -184,23 +188,34 @@ namespace ZetanStudio.BehaviourTree
                 Debug.LogError($"尝试执行空的行为树：{(Executor ? $"{Executor.gameObject.name}." : string.Empty)}{name}");
                 return NodeStates.Inactive;
             }
-            if (!IsPaused && (entry.State == NodeStates.Inactive || entry.State == NodeStates.Running))
+            if (!IsPaused)
             {
-                ExecutionState = entry.Evaluate();
-                switch (ExecutionState)
+                bool abort = false;
+                for (int i = executedConditional.Count - 1; i >= 0; i--)
                 {
-                    case NodeStates.Inactive:
+                    Conditional conditional = executedConditional[i];
+                    Composite parent = conditional.parent;
+                    if ((parent.AbortType == AbortType.Self || parent.AbortType == AbortType.Both) && (parent.State == NodeStates.Running || parent.State == NodeStates.Success) && !conditional.CheckCondition()
+                        || (parent.AbortType == AbortType.LowerPriority || parent.AbortType == AbortType.Both) && parent.State == NodeStates.Failure && conditional.CheckCondition())
+                    {
+                        executedConditional.RemoveAt(i);
+                        conditional.parent.OnConditionalAbort(conditional.childIndex);
+                        EvaluatedNodes.Dequeue().OnAbort();
+                        abort = true;
                         break;
-                    case NodeStates.Success:
-                        ExecutionTimes++;
-                        break;
-                    case NodeStates.Failure:
-                        ExecutionTimes++;
-                        break;
-                    case NodeStates.Running:
-                        break;
-                    default:
-                        break;
+                    }
+                }
+                if (entry.State == NodeStates.Inactive || entry.State == NodeStates.Running || abort)
+                {
+                    EvaluatedNodes.Clear();
+                    ExecutionState = entry.Evaluate();
+                    switch (ExecutionState)
+                    {
+                        case NodeStates.Success:
+                        case NodeStates.Failure:
+                            ExecutionTimes++;
+                            break;
+                    }
                 }
             }
             return ExecutionState;
@@ -221,7 +236,12 @@ namespace ZetanStudio.BehaviourTree
         {
             Traverse(entry, n => n.Reset());
         }
-
+        private List<Conditional> executedConditional;
+        public void OnConditionalEnd(Conditional conditional)
+        {
+            if (conditional.parent && !executedConditional.Contains(conditional))
+                executedConditional.Add(conditional);
+        }
         #region 碰撞器事件
         public void OnCollisionEnter(Collision collision)
         {
@@ -288,11 +308,21 @@ namespace ZetanStudio.BehaviourTree
 
         public Node FindParent(Node child)
         {
-            return nodes.Find(x => x.GetChildren().Contains(child));
+            Node parent = null;
+            Traverse(entry, n =>
+            {
+                if (n.GetChildren().Contains(child))
+                {
+                    parent = n;
+                    return true;
+                }
+                return false;
+            });
+            return parent;
         }
 
         /// <summary>
-        /// 从指定结点开始遍历行为树
+        /// 从指定结点开始遍历一遍行为树
         /// </summary>
         /// <param name="node">指定的结点</param>
         /// <param name="onAccess">结点访问回调</param>
@@ -301,6 +331,20 @@ namespace ZetanStudio.BehaviourTree
             if (node)
             {
                 onAccess?.Invoke(node);
+                node.GetChildren().ForEach(n => Traverse(n, onAccess));
+            }
+        }
+
+        /// <summary>
+        /// 从指定结点开始遍历行为树
+        /// </summary>
+        /// <param name="node">指定的结点</param>
+        /// <param name="onAccess">带终止条件的结点访问回调</param>
+        public static void Traverse(Node node, Func<Node, bool> onAccess)
+        {
+            if (node)
+            {
+                if (onAccess != null && onAccess.Invoke(node)) return;
                 node.GetChildren().ForEach(n => Traverse(n, onAccess));
             }
         }

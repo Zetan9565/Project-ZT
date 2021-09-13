@@ -27,4 +27,7 @@ namespace ZetanStudio.BehaviourTree
             this.readOnly = readOnly;
         }
     }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class Tag : Attribute { }
 }

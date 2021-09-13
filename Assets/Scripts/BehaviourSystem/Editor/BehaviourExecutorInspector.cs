@@ -28,11 +28,12 @@ namespace ZetanStudio.BehaviourTree
             restartOnComplete = serializedObject.FindProperty("restartOnComplete");
             resetOnRestart = serializedObject.FindProperty("resetOnRestart");
             presetVariables = serializedObject.FindProperty("presetVariables");
-            if (behaviour.objectReferenceValue) InitTree();
+            InitTree();
         }
 
         private void InitTree()
         {
+            if (!behaviour.objectReferenceValue) return;
             serializedTree = new SerializedObject(behaviour.objectReferenceValue);
             serializedVariables = serializedTree.FindProperty("variables");
             variableList = new SharedVariableListDrawer(serializedTree, serializedVariables, true);
@@ -51,7 +52,8 @@ namespace ZetanStudio.BehaviourTree
             EditorGUI.BeginChangeCheck();
             EditorGUI.BeginDisabledGroup(target is RuntimeBehaviourExecutor);
             bool hasTreeBef = behaviour.objectReferenceValue;
-            EditorGUILayout.PropertyField(behaviour, new GUIContent("行为树"));
+            if (target is RuntimeBehaviourExecutor) EditorGUILayout.ObjectField(behaviour, new GUIContent("行为树"));
+            else EditorGUILayout.PropertyField(behaviour, new GUIContent("行为树"));
             EditorGUI.EndDisabledGroup();
             if (behaviour.objectReferenceValue != hasTreeBef) InitTree();
             if (behaviour.objectReferenceValue && GUILayout.Button("编辑")) BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor);

@@ -9,7 +9,7 @@ namespace ZetanStudio.BehaviourTree
         public List<BehaviourExecutor> Executors { get; } = new List<BehaviourExecutor>();
         public HashSet<BehaviourExecutor> executorsMap = new HashSet<BehaviourExecutor>();
 
-        [SerializeField]
+        [SerializeField, ObjectDropDown(typeof(GlobalVariables))]
         private GlobalVariables globalVariables;
         public GlobalVariables GlobalVariables => globalVariables;
 
@@ -20,8 +20,7 @@ namespace ZetanStudio.BehaviourTree
         {
             foreach (var exe in FindObjectsOfType<BehaviourExecutor>())
             {
-                Executors.Add(exe);
-                executorsMap.Add(exe);
+                Add(exe);
             }
             if (globalVariables) globalVariables = globalVariables.GetInstance();
             else globalVariables = ScriptableObject.CreateInstance<GlobalVariables>().GetInstance();
@@ -58,7 +57,7 @@ namespace ZetanStudio.BehaviourTree
 
         public bool SetGlobalVariable<T>(string name, T value)
         {
-            return globalVariables.SetVariable<T>(name, value);
+            return globalVariables.SetVariable(name, value);
         }
 
 #if UNITY_EDITOR

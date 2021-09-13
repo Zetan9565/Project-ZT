@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public static class ZetanEditorUtility
 {
@@ -197,5 +199,39 @@ public static class ZetanEditorUtility
             if (assets.Count > 0) return assets[0];
         }
         return null;
+    }
+
+    public static T SaveFilePanel<T>(Func<T> instantiate, string assetName, bool ping = false, bool select = false, string title = "选择保存文件夹", string extension = "asset") where T : Object
+    {
+        while (true)
+        {
+            string path = EditorUtility.SaveFilePanel(title, string.Empty, assetName, extension);
+            if (!string.IsNullOrEmpty(path))
+            {
+                if (IsValidPath(path))
+                {
+                    try
+                    {
+                        T obj = instantiate();
+                        AssetDatabase.CreateAsset(obj, ConvertToAssetsPath(path));
+                        AssetDatabase.SaveAssets();
+                        if (select) Selection.activeObject = obj;
+                        if (ping) EditorGUIUtility.PingObject(obj);
+                        return obj;
+                    }
+                    catch
+                    {
+                        if (!EditorUtility.DisplayDialog("保存失败", "请检查路径或者资源的有效性。", "确定", "取消"))
+                            return null;
+                    }
+                }
+                else
+                {
+                    if (!EditorUtility.DisplayDialog("提示", "请选择Assets目录或以下的文件夹。", "确定", "取消"))
+                        return null;
+                }
+            }
+            return null;
+        }
     }
 }

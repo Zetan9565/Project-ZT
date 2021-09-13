@@ -450,6 +450,10 @@ namespace ZetanStudio.BehaviourTree
                     list.serializedProperty.DeleteArrayElementAtIndex(list.index);
                 serializedObject.ApplyModifiedProperties();
             };
+            variableList.onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
+            };
             variableList.drawHeaderCallback = (rect) =>
             {
                 string typeMsg = EditorUtility.IsPersistent(serializedObject.targetObject) ? "(不可引用场景对象)" : "(可引用场景对象)";
@@ -603,6 +607,10 @@ namespace ZetanStudio.BehaviourTree
                 if (EditorUtility.DisplayDialog("删除变量", $"确定要删除预设 {_name.stringValue} 吗？", "确定", "取消"))
                     list.serializedProperty.DeleteArrayElementAtIndex(list.index);
                 serializedObject.ApplyModifiedProperties();
+            };
+            presetVariableList.onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
             };
             presetVariableList.drawHeaderCallback = (rect) =>
             {

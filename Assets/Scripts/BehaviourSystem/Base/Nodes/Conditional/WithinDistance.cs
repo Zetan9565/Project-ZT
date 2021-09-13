@@ -20,12 +20,12 @@ namespace ZetanStudio.BehaviourTree
 
         public override bool IsValid => true;
 
-        protected override bool ShouldKeepRunning()
+        public override bool ShouldKeepRunning()
         {
             return !usePoint && (target == null || target.Value == null) || !useThis && (contrast == null || contrast.Value == null);
         }
 
-        protected override bool CheckCondition()
+        public override bool CheckCondition()
         {
             if (usePoint) return Vector3.Distance(point, transform.position) <= distance;
             if (useThis) return Vector3.Distance(target.Value.position, transform.position) <= distance;

@@ -9,10 +9,15 @@ namespace ZetanStudio.BehaviourTree
         SerializedProperty _name;
         SerializedProperty description;
 
+        SerializedProperty variables;
+        SharedVariableListDrawer variableList;
+
         private void OnEnable()
         {
             _name = serializedObject.FindProperty("_name");
             description = serializedObject.FindProperty("description");
+            variables = serializedObject.FindProperty("variables");
+            variableList = new SharedVariableListDrawer(serializedObject, variables, true);
         }
 
         protected override void OnHeaderGUI()
@@ -35,6 +40,9 @@ namespace ZetanStudio.BehaviourTree
             EditorGUILayout.PropertyField(_name);
             EditorGUILayout.PropertyField(description);
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+            variableList.DoLayoutList();
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }

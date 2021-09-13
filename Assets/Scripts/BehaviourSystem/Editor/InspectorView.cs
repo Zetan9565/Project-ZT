@@ -54,15 +54,15 @@ namespace ZetanStudio.BehaviourTree
             var proValue = ZetanEditorUtility.GetValue(property, out var fieldInfo);
             ShouldHide(fieldInfo.GetCustomAttribute<HideIfAttribute>(), out var shouldHide, out var readOnly);
             if (shouldHide && !readOnly) return;
+            string displayName = property.displayName;
+            DisplayNameAttribute nameAttr = fieldInfo.GetCustomAttribute<DisplayNameAttribute>();
+            if (nameAttr != null) displayName = nameAttr.Name;
             EditorGUI.BeginDisabledGroup(shouldHide && readOnly);
             var type = fieldInfo.FieldType;
             if (type.IsSubclassOf(typeof(SharedVariable)))
             {
                 SharedVariable variable = proValue as SharedVariable;
                 int typeIndex = variable.isGlobal ? 2 : (variable.isShared ? 1 : 0);
-                string displayName = property.displayName;
-                DisplayNameAttribute nameAttr = fieldInfo.GetCustomAttribute<DisplayNameAttribute>();
-                if (nameAttr != null) displayName = nameAttr.Name;
                 SerializedProperty name = property.FindPropertyRelative("_name");
                 SerializedProperty value = property.FindPropertyRelative("value");
                 Rect rect = EditorGUILayout.GetControlRect();
@@ -79,7 +79,9 @@ namespace ZetanStudio.BehaviourTree
                         break;
                     default:
                         valueRect = new Rect(rect.x, rect.y, rect.width * 0.84f, EditorGUI.GetPropertyHeight(value, true));
-                        EditorGUI.PropertyField(valueRect, value, new GUIContent(displayName), true);
+                        if (type == typeof(SharedString) && fieldInfo.GetCustomAttribute<Tag>() != null)
+                            value.stringValue = EditorGUI.TagField(valueRect, displayName, string.IsNullOrEmpty(value.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : value.stringValue);
+                        else EditorGUI.PropertyField(valueRect, value, new GUIContent(displayName), true);
                         EditorGUILayout.Space(EditorGUI.GetPropertyHeight(value, true) - EditorGUIUtility.singleLineHeight);
                         break;
                 }
@@ -126,7 +128,9 @@ namespace ZetanStudio.BehaviourTree
                     }
                 }
             }
-            else EditorGUILayout.PropertyField(property, true);
+            else if (type == typeof(string) && fieldInfo.GetCustomAttribute<Tag>() != null)
+                property.stringValue = EditorGUILayout.TagField(displayName, string.IsNullOrEmpty(property.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : property.stringValue);
+            else EditorGUILayout.PropertyField(property, new GUIContent(displayName), true);
             EditorGUI.EndDisabledGroup();
         }
 

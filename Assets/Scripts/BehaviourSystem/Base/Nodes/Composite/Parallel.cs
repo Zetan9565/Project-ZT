@@ -9,9 +9,10 @@ namespace ZetanStudio.BehaviourTree
         protected override NodeStates OnUpdate()
         {
             bool hasChildRunning = false;
-            foreach (var child in children)
+            for (int i = currentIndex; i < children.Count; i++)
             {
-                if (child.IsValid)
+                Node child = children[i];
+                if (child.IsValid && child.State != NodeStates.Success)
                     switch (child.Evaluate())
                     {
                         case NodeStates.Failure:

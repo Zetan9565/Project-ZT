@@ -36,7 +36,7 @@ namespace ZetanStudio.BehaviourTree
             else waitTime = duration.Value;
         }
 
-        protected override void OnPaused(bool paused)
+        protected override void OnPause(bool paused)
         {
             if (paused) pauseTime = Time.time;
             else startTime += Time.time - pauseTime;

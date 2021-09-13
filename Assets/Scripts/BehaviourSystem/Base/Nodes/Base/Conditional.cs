@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace ZetanStudio.BehaviourTree
 {
     /// <summary>
@@ -5,15 +7,25 @@ namespace ZetanStudio.BehaviourTree
     /// </summary>
     public abstract class Conditional : Node
     {
-        protected abstract bool ShouldKeepRunning();
+        [HideInInspector]
+        public Composite parent;
+        [HideInInspector]
+        public int childIndex;
 
-        protected abstract bool CheckCondition();
+        public abstract bool ShouldKeepRunning();
+
+        public abstract bool CheckCondition();
 
         protected override NodeStates OnUpdate()
         {
             if (ShouldKeepRunning()) return NodeStates.Running;
             if (CheckCondition()) return NodeStates.Success;
             else return NodeStates.Failure;
+        }
+
+        protected override void OnEnd()
+        {
+            owner.OnConditionalEnd(this);
         }
     }
 }

@@ -11,7 +11,14 @@ namespace ZetanStudio.BehaviourTree
         [SerializeField]
         protected List<Node> children;
 
+        [SerializeField, DisplayName("中止类型")]
+        protected AbortType abortType;
+        public AbortType AbortType => abortType;
+
         public override bool IsValid => children.Count > 0;
+
+        protected int currentIndex;
+        protected Node currentChild;
 
         public Composite() { children = new List<Node>(); }
 
@@ -28,6 +35,41 @@ namespace ZetanStudio.BehaviourTree
             return children;
         }
 
+        protected override void OnStart()
+        {
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (children[i] is Conditional conditional)
+                {
+                    conditional.parent = this;
+                    conditional.childIndex = i;
+                }
+            }
+            currentIndex = 0;
+            if (children.Count > 0)
+            {
+                currentChild = children[currentIndex];
+                while (!currentChild.IsValid)
+                {
+                    currentChild = children[currentIndex++];
+                }
+            }
+        }
+
+        public virtual void OnConditionalAbort(int index)
+        {
+            if (index >= 0 && index < children.Count && children[index] is Conditional conditional)
+                if ((abortType == AbortType.Self || abortType == AbortType.Both) && (State == NodeStates.Running || State == NodeStates.Success) && !conditional.CheckCondition())
+                    OnAbort();
+                else if ((abortType == AbortType.LowerPriority || abortType == AbortType.Both) && State == NodeStates.Failure && conditional.CheckCondition())
+                {
+                    currentIndex = index;
+                    currentChild = children[index];
+                    isStarted = true;
+                }
+        }
+
+        #region EDITOR方法
 #if UNITY_EDITOR
         public override void AddChild(Node child)
         {
@@ -56,5 +98,18 @@ namespace ZetanStudio.BehaviourTree
             });
         }
 #endif
+        #endregion
+    }
+
+    public enum AbortType
+    {
+        [InspectorName("无")]
+        None,
+        [InspectorName("自我")]
+        Self,
+        [InspectorName("低优先级")]
+        LowerPriority,
+        [InspectorName("两种")]
+        Both
     }
 }
