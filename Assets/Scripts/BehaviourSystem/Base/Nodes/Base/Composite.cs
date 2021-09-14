@@ -37,14 +37,6 @@ namespace ZetanStudio.BehaviourTree
 
         protected override void OnStart()
         {
-            for (int i = 0; i < children.Count; i++)
-            {
-                if (children[i] is Conditional conditional)
-                {
-                    conditional.parent = this;
-                    conditional.childIndex = i;
-                }
-            }
             currentIndex = 0;
             if (children.Count > 0)
             {
@@ -58,15 +50,24 @@ namespace ZetanStudio.BehaviourTree
 
         public virtual void OnConditionalAbort(int index)
         {
-            if (index >= 0 && index < children.Count && children[index] is Conditional conditional)
-                if ((abortType == AbortType.Self || abortType == AbortType.Both) && (State == NodeStates.Running || State == NodeStates.Success) && !conditional.CheckCondition())
-                    OnAbort();
-                else if ((abortType == AbortType.LowerPriority || abortType == AbortType.Both) && State == NodeStates.Failure && conditional.CheckCondition())
+            if (abortType == AbortType.None) return;
+            if (abortType == AbortType.LowerPriority || abortType == AbortType.Both)
+            {
+                Composite parent= Owner.FindParent(this, out var childIndex) as Composite;
+                if (parent) parent.OnConditionalAbort(childIndex);
+                isStarted = true;
+            }
+            else if (abortType == AbortType.Self || abortType == AbortType.Both)
+            {
+                for (int i = index + 1; i < children.Count; i++)
                 {
-                    currentIndex = index;
-                    currentChild = children[index];
-                    isStarted = true;
+                    if (children[i] is Action action)
+                        action.Abort();
                 }
+                return;
+            }
+            currentIndex = index;
+            currentChild = children[index];
         }
 
         #region EDITOR方法
@@ -107,9 +108,9 @@ namespace ZetanStudio.BehaviourTree
         None,
         [InspectorName("自我")]
         Self,
-        [InspectorName("低优先级")]
+        [InspectorName("更低优先")]
         LowerPriority,
-        [InspectorName("两种")]
+        [InspectorName("以上两种")]
         Both
     }
 }

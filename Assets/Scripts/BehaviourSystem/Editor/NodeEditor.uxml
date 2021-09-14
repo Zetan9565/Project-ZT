@@ -13,7 +13,7 @@
                             <ui:VisualElement name="icon" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:Label display-tooltip-when-elided="true" name="description" style="-unity-font-style: normal; -unity-text-align: upper-left; padding-left: 4px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; color: rgba(128, 128, 128, 255);" />
+                    <ui:Label display-tooltip-when-elided="true" name="description" style="-unity-font-style: normal; -unity-text-align: upper-left; padding-left: 4px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; color: rgb(128, 128, 128);" />
                 </ui:VisualElement>
                 <ui:VisualElement name="divider" class="horizontal" />
                 <ui:VisualElement name="output" />
@@ -21,4 +21,5 @@
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement name="selection-border" picking-mode="Ignore" />
+    <ui:Label display-tooltip-when-elided="true" name="abort" style="-unity-text-align: middle-left; position: absolute; visibility: visible; display: flex; overflow: visible; padding-left: 8px; padding-right: 5px; padding-top: 6px; padding-bottom: 5px; font-size: 14px; -unity-font-style: normal;" />
 </ui:UXML>

@@ -57,8 +57,10 @@ namespace ZetanStudio.BehaviourTree
             EditorGUI.EndDisabledGroup();
             if (behaviour.objectReferenceValue != hasTreeBef) InitTree();
             if (behaviour.objectReferenceValue && GUILayout.Button("编辑")) BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor);
-            EditorGUILayout.PropertyField(startOnStart, new GUIContent("开始时启动"));
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(startOnStart, new GUIContent("开始时执行"));
             EditorGUILayout.PropertyField(restartOnComplete, new GUIContent("完成时重启"));
+            EditorGUILayout.EndHorizontal();
             EditorGUILayout.PropertyField(resetOnRestart, new GUIContent("重启时重置"));
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (behaviour.objectReferenceValue)

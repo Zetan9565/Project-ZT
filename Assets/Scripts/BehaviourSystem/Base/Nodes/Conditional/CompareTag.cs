@@ -5,9 +5,9 @@ namespace ZetanStudio.BehaviourTree
     {
         [DisplayName("与自身比较")]
         public SharedBoolean compareThis = true;
-        [DisplayName("比较标签")]
+        [DisplayName("比较标签"), Tag]
         public SharedString tag;
-        [DisplayName("比较对象")]
+        [DisplayName("比较对象"), HideIf("compareThis.value", true)]
         public SharedGameObject target;
 
         public override bool IsValid => tag != null && target != null;

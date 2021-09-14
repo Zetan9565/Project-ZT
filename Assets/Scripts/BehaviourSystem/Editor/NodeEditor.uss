@@ -127,7 +127,7 @@
 
 .entry #input {
     background-color: rgba(144, 144, 144, 0.59);
-    min-height: 20px;
+    min-height: 24px;
 }
 
 #node-state {

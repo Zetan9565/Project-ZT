@@ -95,11 +95,12 @@ public static class ZetanEditorUtility
     }
 
     /// <summary>
-    /// 设置SerializedProperty关联字段的值，该字段必须是SerializedProperty.serializedObject.targetObject的顶级成员
+    /// 设置property关联字段的值，该字段必须是property.serializedObject.targetObject的顶级成员或者有SerializeRenference标签
     /// </summary>
     /// <returns>是否成功</returns>
     public static bool SetValue(SerializedProperty property, object value)
     {
+        if (property.propertyType == SerializedPropertyType.ManagedReference) property.managedReferenceValue = value;
         var onwerType = property.serializedObject.targetObject.GetType();
         var fieldInfo = onwerType.GetField(property.propertyPath, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
         if (fieldInfo != null)
@@ -201,7 +202,15 @@ public static class ZetanEditorUtility
         return null;
     }
 
-    public static T SaveFilePanel<T>(Func<T> instantiate, string assetName, bool ping = false, bool select = false, string title = "选择保存文件夹", string extension = "asset") where T : Object
+    public static T SaveFilePanel<T>(Func<T> instantiate, string assetName, bool ping = false, bool select = false) where T : Object
+    {
+        return SaveFilePanel(instantiate, "选择保存位置", assetName, ping, select);
+    }
+    public static T SaveFilePanel<T>(Func<T> instantiate, string title, string assetName, bool ping = false, bool select = false) where T : Object
+    {
+        return SaveFilePanel(instantiate, title, assetName, "asset", ping, select);
+    }
+    public static T SaveFilePanel<T>(Func<T> instantiate, string title, string assetName, string extension, bool ping = false, bool select = false) where T : Object
     {
         while (true)
         {
@@ -214,7 +223,7 @@ public static class ZetanEditorUtility
                     {
                         T obj = instantiate();
                         AssetDatabase.CreateAsset(obj, ConvertToAssetsPath(path));
-                        AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
                         if (select) Selection.activeObject = obj;
                         if (ping) EditorGUIUtility.PingObject(obj);
                         return obj;

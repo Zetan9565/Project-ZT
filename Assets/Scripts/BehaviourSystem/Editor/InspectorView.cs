@@ -111,7 +111,7 @@ namespace ZetanStudio.BehaviourTree
                     int nameIndex = System.Array.IndexOf(varNames, variable.name);
                     if (nameIndex < 0) nameIndex = 0;
                     nameIndex = EditorGUI.Popup(valueRect, displayName, nameIndex, varNames);
-                    string nameStr = name.stringValue;
+                    string nameStr = string.Empty;
                     if (nameIndex > 0 && nameIndex <= variables.Count) nameStr = varNames[nameIndex];
                     if (!nodeEditor.node.IsInstance) name.stringValue = nameStr;
                     else if (nameStr != name.stringValue)

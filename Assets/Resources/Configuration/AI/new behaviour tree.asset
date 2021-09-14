@@ -42,6 +42,7 @@ MonoBehaviour:
   children:
   - {fileID: 3073737369977096355}
   - {fileID: 4349196617172203227}
+  abortType: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,32 +69,24 @@ MonoBehaviour:
   - id: 0
   - id: 1
   - id: 2
-  - id: 3
   isRuntime: 0
   references:
     version: 1
     00000000:
-      type: {class: SharedVector3Array, ns: , asm: Assembly-CSharp}
-      data:
-        _name: sharedVector3Array_1
-        isGlobal: 0
-        isShared: 1
-        value: []
-    00000001:
       type: {class: SharedGameObject, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedGameObject_2
         isGlobal: 0
         isShared: 1
         value: {fileID: 0}
-    00000002:
+    00000001:
       type: {class: SharedString, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedString_3
         isGlobal: 0
         isShared: 1
         value: 123456
-    00000003:
+    00000002:
       type: {class: SharedTransform, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedTransform_4

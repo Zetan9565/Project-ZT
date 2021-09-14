@@ -7,7 +7,7 @@ public class HideIfPropertyDrawer : PropertyDrawer
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         HideIfAttribute hideAttr = (HideIfAttribute)attribute;
-        bool hide = GetConditionalHideAttributeResult(hideAttr, property);
+        bool hide = ShouldHide(hideAttr, property);
         if (!hide || hide && hideAttr.readOnly)
         {
             EditorGUI.BeginDisabledGroup(hide && hideAttr.readOnly);
@@ -19,7 +19,7 @@ public class HideIfPropertyDrawer : PropertyDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         HideIfAttribute hideAttr = (HideIfAttribute)attribute;
-        bool hide = GetConditionalHideAttributeResult(hideAttr, property);
+        bool hide = ShouldHide(hideAttr, property);
 
         if (hideAttr.readOnly || !hide)
         {
@@ -31,7 +31,7 @@ public class HideIfPropertyDrawer : PropertyDrawer
         }
     }
 
-    private bool GetConditionalHideAttributeResult(HideIfAttribute hideAttr, SerializedProperty property)
+    private bool ShouldHide(HideIfAttribute hideAttr, SerializedProperty property)
     {
         if (ZetanEditorUtility.GetFieldValue(hideAttr.path, property.serializedObject.targetObject, out var value, out _))
         {

@@ -19,7 +19,7 @@ MonoBehaviour:
   children:
   - {fileID: 7735326463407916777}
   - {fileID: -3497104154283355184}
-  abortType: 2
+  abortType: 0
 --- !u!114 &-5206172762384140365
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34,7 +34,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: 
-  position: {x: 0, y: 7}
+  position: {x: 0.000022411346, y: 59.02697}
   description: 
   start: {fileID: 5222357198670177345}
 --- !u!114 &-3497104154283355184

@@ -7,9 +7,9 @@ namespace ZetanStudio.BehaviourTree
 {
     public sealed class BehaviourTreeSettings : ScriptableObject
     {
-        [DisplayName("树视图UXML")]
+        [DisplayName("编辑器UXML")]
         public VisualTreeAsset treeUxml;
-        [DisplayName("树视图USS")]
+        [DisplayName("编辑器USS")]
         public StyleSheet treeUss;
         [DisplayName("结点UXML")]
         public VisualTreeAsset nodeUxml;

@@ -160,6 +160,7 @@ namespace ZetanStudio.BehaviourTree
             Traverse(entry, (n) => n.Init(this));
             EvaluatedNodes = new Queue<Node>();
             executedConditional = new List<Conditional>();
+            conditionalsMap = new HashSet<Conditional>();
         }
 
         public void PresetVariables(List<SharedVariable> variables)
@@ -191,18 +192,28 @@ namespace ZetanStudio.BehaviourTree
             if (!IsPaused)
             {
                 bool abort = false;
-                for (int i = executedConditional.Count - 1; i >= 0; i--)
+                for (int i = 0; i < executedConditional.Count; i++)
                 {
                     Conditional conditional = executedConditional[i];
-                    Composite parent = conditional.parent;
-                    if ((parent.AbortType == AbortType.Self || parent.AbortType == AbortType.Both) && (parent.State == NodeStates.Running || parent.State == NodeStates.Success) && !conditional.CheckCondition()
-                        || (parent.AbortType == AbortType.LowerPriority || parent.AbortType == AbortType.Both) && parent.State == NodeStates.Failure && conditional.CheckCondition())
+                    Composite parent = FindParent(conditional, out var childIndex) as Composite;
+                    if (!parent)
                     {
                         executedConditional.RemoveAt(i);
-                        conditional.parent.OnConditionalAbort(conditional.childIndex);
-                        EvaluatedNodes.Dequeue().OnAbort();
-                        abort = true;
-                        break;
+                        conditionalsMap.Remove(conditional);
+                        i--;
+                    }
+                    if (parent)
+                    {
+                        bool self = (parent.AbortType == AbortType.Self || parent.AbortType == AbortType.Both) && (parent.State == NodeStates.Running || parent.State == NodeStates.Success) && !conditional.CheckCondition();
+                        bool lower = (parent.AbortType == AbortType.LowerPriority || parent.AbortType == AbortType.Both) && parent.State == NodeStates.Failure && conditional.CheckCondition();
+                        if (self || lower)
+                        {
+                            parent.OnConditionalAbort(childIndex);
+                            executedConditional.RemoveAt(i);
+                            conditionalsMap.Remove(conditional);
+                            abort = true;
+                            break;
+                        }
                     }
                 }
                 if (entry.State == NodeStates.Inactive || entry.State == NodeStates.Running || abort)
@@ -223,8 +234,21 @@ namespace ZetanStudio.BehaviourTree
 
         public void Restart(bool reset)
         {
+            if (!IsInstance)
+            {
+                Debug.LogError($"尝试重启未实例化的行为树：{(Executor ? $"{Executor.gameObject.name}." : string.Empty)}{name}");
+                return;
+            }
+            if (!entry)
+            {
+                Debug.LogError($"尝试重启空的行为树：{(Executor ? $"{Executor.gameObject.name}." : string.Empty)}{name}");
+                return;
+            }
             if (reset) Reset();
             else entry.Reset();
+            EvaluatedNodes = new Queue<Node>();
+            executedConditional = new List<Conditional>();
+            conditionalsMap = new HashSet<Conditional>();
             Execute();
         }
         public void Pause(bool paused)
@@ -237,10 +261,14 @@ namespace ZetanStudio.BehaviourTree
             Traverse(entry, n => n.Reset());
         }
         private List<Conditional> executedConditional;
+        private HashSet<Conditional> conditionalsMap;
         public void OnConditionalEnd(Conditional conditional)
         {
-            if (conditional.parent && !executedConditional.Contains(conditional))
+            if (!conditionalsMap.Contains(conditional))
+            {
                 executedConditional.Add(conditional);
+                conditionalsMap.Add(conditional);
+            }
         }
         #region 碰撞器事件
         public void OnCollisionEnter(Collision collision)
@@ -321,6 +349,28 @@ namespace ZetanStudio.BehaviourTree
             return parent;
         }
 
+        public Node FindParent(Node child, out int childIndex)
+        {
+            Node parent = null;
+            int index = -1;
+            Traverse(entry, n =>
+            {
+                var children = n.GetChildren();
+                for (int i = 0; i < children.Count; i++)
+                {
+                    if (children[i] == child)
+                    {
+                        parent = n;
+                        index = i;
+                        return true;
+                    }
+                }
+                return false;
+            });
+            childIndex = index;
+            return parent;
+        }
+
         /// <summary>
         /// 从指定结点开始遍历一遍行为树
         /// </summary>
@@ -339,7 +389,7 @@ namespace ZetanStudio.BehaviourTree
         /// 从指定结点开始遍历行为树
         /// </summary>
         /// <param name="node">指定的结点</param>
-        /// <param name="onAccess">带终止条件的结点访问回调</param>
+        /// <param name="onAccess">带终止条件的结点访问回调(返回值决定是否终止）</param>
         public static void Traverse(Node node, Func<Node, bool> onAccess)
         {
             if (node)

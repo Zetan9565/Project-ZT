@@ -27,12 +27,11 @@ namespace ZetanStudio.BehaviourTree
 
             this.AddManipulator(new ContentZoomer());
             this.AddManipulator(new ContentDragger());
-            //this.AddManipulator(new DoubleClickSelection());
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
 
             settings = BehaviourTreeSettings.GetOrCreate();
-            var styleSheet = settings.treeUss;// AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Scripts/BehaviourSystem/Editor/BehaviourTreeEditor.uss");
+            var styleSheet = settings.treeUss;
             styleSheets.Add(styleSheet);
 
             Undo = new UndoRedo();
@@ -208,12 +207,13 @@ namespace ZetanStudio.BehaviourTree
         }
         public void OnUpdate()
         {
-            if (Application.isPlaying)
-                nodes.ForEach(n =>
-                {
-                    NodeEditor editor = n as NodeEditor;
+            nodes.ForEach(n =>
+            {
+                NodeEditor editor = n as NodeEditor;
+                if (Application.isPlaying)
                     editor.UpdateStates();
-                });
+                editor.UpdateAbortType();
+            });
         }
         #endregion
 

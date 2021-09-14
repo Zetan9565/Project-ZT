@@ -16,9 +16,10 @@ namespace ZetanStudio.BehaviourTree
         public Port output;
         public Port input;
 
-        private Action<NodeEditor> onSelected;
-        private Action<NodeEditor> onUnselected;
-        private Action<NodeEditor, Vector2> onSetPosition;
+        private readonly Label abort;
+        private readonly Action<NodeEditor> onSelected;
+        private readonly Action<NodeEditor> onUnselected;
+        private readonly Action<NodeEditor, Vector2> onSetPosition;
 
         public NodeEditor(Node node, Action<NodeEditor> onSelected, Action<NodeEditor> onUnselected,
                           Action<NodeEditor, Vector2> onSetPosition) : base(AssetDatabase.GetAssetPath(BehaviourTreeSettings.GetOrCreate().nodeUxml))
@@ -41,10 +42,13 @@ namespace ZetanStudio.BehaviourTree
             des.bindingPath = "description";
             des.Bind(new SerializedObject(node));
 
+            abort = this.Q<Label>("abort");
+
             InitInput();
             InitOutput();
             InitClasses();
             UpdateStates();
+            UpdateAbortType();
         }
 
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt) { }
@@ -71,6 +75,7 @@ namespace ZetanStudio.BehaviourTree
                 outputContainer.Add(output);
             }
         }
+
         private void InitClasses()
         {
             if (node is Action) AddToClassList("action");
@@ -132,6 +137,31 @@ namespace ZetanStudio.BehaviourTree
                         break;
                     case NodeStates.Running:
                         AddToClassList("running");
+                        break;
+                }
+            }
+        }
+        public void UpdateAbortType()
+        {
+            if(node is Composite composite)
+            {
+                switch (composite.AbortType)
+                {
+                    case AbortType.Self:
+                        abort.text = "↓";
+                        abort.tooltip = "中止自我";
+                        break;
+                    case AbortType.LowerPriority:
+                        abort.text = "→";
+                        abort.tooltip = "中止更低优先";
+                        break;
+                    case AbortType.Both:
+                        abort.text = "↓→";
+                        abort.tooltip = "中止自我或更低优先";
+                        break;
+                    default:
+                        abort.text = string.Empty;
+                        abort.tooltip = string.Empty;
                         break;
                 }
             }

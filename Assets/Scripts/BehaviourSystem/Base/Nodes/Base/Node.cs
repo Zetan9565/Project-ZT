@@ -213,11 +213,14 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         protected virtual void OnReset() { }
 
-        public void OnAbort()
+        public void Abort()
         {
-            isStarted = false;
-            State = NodeStates.Failure;
-            GetChildren().ForEach(n => n.OnAbort());
+            if (State == NodeStates.Running)
+            {
+                isStarted = false;
+                State = NodeStates.Failure;
+                GetChildren().ForEach(n => n.Abort());
+            }
         }
         #region 碰撞器事件
         public virtual void OnCollisionEnter(Collision collision) { }
