@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace ZetanStudio.BehaviourTree
 {
+    [DefaultExecutionOrder(-1)]
     public class BehaviourManager : SingletonMonoBehaviour<BehaviourManager>
     {
         public List<BehaviourExecutor> Executors { get; } = new List<BehaviourExecutor>();
@@ -18,10 +19,6 @@ namespace ZetanStudio.BehaviourTree
 
         private void Awake()
         {
-            foreach (var exe in FindObjectsOfType<BehaviourExecutor>())
-            {
-                Add(exe);
-            }
             if (globalVariables) globalVariables = globalVariables.GetInstance();
             else globalVariables = ScriptableObject.CreateInstance<GlobalVariables>().GetInstance();
             globalVariables.PresetVariables(presetVariables);

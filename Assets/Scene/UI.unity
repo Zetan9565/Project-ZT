@@ -9125,7 +9125,7 @@ MonoBehaviour:
   description: 
   children:
   - {fileID: 1497758510}
-  - {fileID: 632203322}
+  - {fileID: 969354331}
   abortType: 0
 --- !u!1 &322733029
 GameObject:
@@ -19285,7 +19285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 1
   guid: 081bdeffd40ce4c4b81728f51bcfa0f7
-  position: {x: 248.00008, y: 357.00003}
+  position: {x: 276.00006, y: 504.00006}
   description: 
   logType: 0
   message:
@@ -24440,6 +24440,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   behaviour: {fileID: 1805233243}
+  frequency: 0
+  interval: 0.02
   startOnStart: 1
   restartOnComplete: 0
   resetOnRestart: 0
@@ -28141,6 +28143,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 967705119}
   m_CullTransparentMesh: 0
+--- !u!114 &969354331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffe5c8330626fe6429b8312895c656fa, type: 3}
+  m_Name: (10) UntilFailure(R)
+  m_EditorClassIdentifier: 
+  isRuntime: 1
+  guid: 605abe8977641a7459df18f8db71d42c
+  position: {x: 276.00006, y: 357.00003}
+  description: 
+  child: {fileID: 632203322}
 --- !u!114 &983997350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43109,7 +43128,7 @@ MonoBehaviour:
   children:
   - {fileID: 182427080}
   - {fileID: 1563672815}
-  abortType: 2
+  abortType: 0
 --- !u!1 &1507788712
 GameObject:
   m_ObjectHideFlags: 0
@@ -48558,7 +48577,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 1
   guid: 5c81d4a9c4a779b4c88678e362881373
-  position: {x: 22.999992, y: 639}
+  position: {x: 32.81517, y: 638.9999}
   description: 
   logType: 0
   message:
@@ -52007,7 +52026,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11ff0f6527981fa41a9e8e6e46d91bbe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _name: 
+  _name: "\u4E2D\u65AD\u6D4B\u8BD5"
   description: 
   entry: {fileID: 983997350}
   nodes:
@@ -52021,6 +52040,7 @@ MonoBehaviour:
   - {fileID: 312788326}
   - {fileID: 182427080}
   - {fileID: 1889094181}
+  - {fileID: 969354331}
   variables:
   - id: 0
   isRuntime: 1
@@ -54019,12 +54039,12 @@ MonoBehaviour:
     _name: 
     isGlobal: 0
     isShared: 0
-    value: Player
+    value: Untagged
   target:
     _name: 
     isGlobal: 0
     isShared: 0
-    value: {fileID: 0}
+    value: {fileID: 939414644}
 --- !u!1 &1891626378
 GameObject:
   m_ObjectHideFlags: 0
@@ -58920,7 +58940,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 1
   guid: 15e61210cedf94e4a9521b8f2541bd73
-  position: {x: -552.9002, y: 639.0001}
+  position: {x: -544.2756, y: 639}
   description: 
   distance:
     _name: 

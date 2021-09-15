@@ -157,7 +157,7 @@ namespace ZetanStudio.BehaviourTree
                     KeyedVariables.Add(variable.name, variable);
                 }
             }
-            Traverse(entry, (n) => n.Init(this));
+            Traverse(entry, n => n.Init(this));
             EvaluatedNodes = new Queue<Node>();
             executedConditional = new List<Conditional>();
             conditionalsMap = new HashSet<Conditional>();
@@ -219,12 +219,14 @@ namespace ZetanStudio.BehaviourTree
                 if (entry.State == NodeStates.Inactive || entry.State == NodeStates.Running || abort)
                 {
                     EvaluatedNodes.Clear();
+                    if (!entry.IsStarted) Traverse(entry, n => n.OnBehaviourStart());
                     ExecutionState = entry.Evaluate();
                     switch (ExecutionState)
                     {
                         case NodeStates.Success:
                         case NodeStates.Failure:
                             ExecutionTimes++;
+                            Traverse(entry, n => n.OnBehaviourEnd());
                             break;
                     }
                 }
@@ -249,6 +251,7 @@ namespace ZetanStudio.BehaviourTree
             EvaluatedNodes = new Queue<Node>();
             executedConditional = new List<Conditional>();
             conditionalsMap = new HashSet<Conditional>();
+            Traverse(entry, n => n.OnBehaviourRestart());
             Execute();
         }
         public void Pause(bool paused)
@@ -270,6 +273,8 @@ namespace ZetanStudio.BehaviourTree
                 conditionalsMap.Add(conditional);
             }
         }
+
+        #region Unity回调
         #region 碰撞器事件
         public void OnCollisionEnter(Collision collision)
         {
@@ -326,6 +331,15 @@ namespace ZetanStudio.BehaviourTree
         }
         #endregion
 
+        public void OnDrawGizmos()
+        {
+            if (IsInstance) Traverse(entry, n => n.OnDrawGizmos());
+        }
+        public void OnDrawGizmosSelected()
+        {
+            if (IsInstance) Traverse(entry, n => n.OnDrawGizmosSelected());
+        }
+        #endregion
         #endregion
 
         public BehaviourTree()
@@ -399,6 +413,7 @@ namespace ZetanStudio.BehaviourTree
             }
         }
 
+        #region EDITOR
 #if UNITY_EDITOR
         /// <summary>
         /// 用于在编辑器中增加结点，不应在游戏逻辑中使用
@@ -479,5 +494,6 @@ namespace ZetanStudio.BehaviourTree
             return localTree;
         }
 #endif
+        #endregion
     }
 }

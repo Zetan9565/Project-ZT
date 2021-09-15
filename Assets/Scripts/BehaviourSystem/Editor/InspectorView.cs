@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Reflection;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -44,6 +45,44 @@ namespace ZetanStudio.BehaviourTree
                         }
                         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
                     }
+                });
+                Add(container);
+            }
+        }
+
+        public void InspectTree(BehaviourTree tree)
+        {
+            Clear();
+            this.tree = tree;
+            if (tree)
+            {
+                IMGUIContainer container = new IMGUIContainer(() =>
+                {
+                    using SerializedObject serializedObject = new SerializedObject(tree);
+                    serializedObject.Update();
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_name"), new GUIContent("行为树名称"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("description"), new GUIContent("行为树描述"));
+                    if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+                });
+                Add(container);
+            }
+        }
+
+        public void InspectMultSelect(List<NodeEditor> nodes)
+        {
+            Clear();
+            if (nodes.Count() > 0)
+            {
+                IMGUIContainer container = new IMGUIContainer(() =>
+                {
+                    EditorGUILayout.LabelField("当前选中");
+                    EditorGUILayout.BeginVertical("Box");
+                    foreach (var node in nodes)
+                    {
+                        EditorGUILayout.LabelField($"[{node.node.name}]", $"({ node.node.GetType().Name})");
+                    }
+                    EditorGUILayout.EndVertical();
                 });
                 Add(container);
             }

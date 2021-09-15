@@ -8,6 +8,7 @@ namespace ZetanStudio.BehaviourTree
     {
         protected override NodeStates OnUpdate()
         {
+            if (!child) return NodeStates.Failure;
             return child.Evaluate() switch
             {
                 NodeStates.Failure => NodeStates.Success,

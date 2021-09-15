@@ -55,7 +55,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11ff0f6527981fa41a9e8e6e46d91bbe, type: 3}
   m_Name: new behaviour tree
   m_EditorClassIdentifier: 
-  _name: 
+  _name: "\u5FAA\u73AF\u7B49\u5F85"
   description: 
   entry: {fileID: 6010367299264760620}
   nodes:

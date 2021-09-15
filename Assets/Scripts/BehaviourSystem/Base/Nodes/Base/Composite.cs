@@ -50,14 +50,25 @@ namespace ZetanStudio.BehaviourTree
 
         public virtual void OnConditionalAbort(int index)
         {
-            if (abortType == AbortType.None) return;
+            if (abortType == AbortType.None)
+            {
+                if (children[index] is Composite)
+                {
+                    for (int i = index + 1; i < children.Count; i++)
+                    {
+                        children[i].Abort();
+                    }
+                    Composite parent = Owner.FindParent(this, out var childIndex) as Composite;
+                    if (parent) parent.OnConditionalAbort(childIndex);
+                }
+            }
             if (abortType == AbortType.LowerPriority || abortType == AbortType.Both)
             {
-                Composite parent= Owner.FindParent(this, out var childIndex) as Composite;
+                Composite parent = Owner.FindParent(this, out var childIndex) as Composite;
                 if (parent) parent.OnConditionalAbort(childIndex);
                 isStarted = true;
             }
-            else if (abortType == AbortType.Self || abortType == AbortType.Both)
+            if (abortType == AbortType.Self || abortType == AbortType.Both)
             {
                 for (int i = index + 1; i < children.Count; i++)
                 {

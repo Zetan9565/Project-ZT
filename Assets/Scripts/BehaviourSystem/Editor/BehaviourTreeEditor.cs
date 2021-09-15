@@ -101,10 +101,12 @@ namespace ZetanStudio.BehaviourTree
             EditorApplication.delayCall += () =>
             {
                 treeView.FrameAll();
+                inspectorView.InspectTree(tree);
             };
         }
         private void CheckAssetDropdown()
         {
+            if (toolbarMenu == null) return;
             var behaviourTrees = ZetanEditorUtility.LoadAssets<BehaviourTree>();
             for (int i = toolbarMenu.menu.MenuItems().Count - 1; i > 0; i--)
             {
@@ -115,14 +117,14 @@ namespace ZetanStudio.BehaviourTree
             behaviourTrees.ForEach(tree =>
             {
                 if (tree)
-                    toolbarMenu?.menu.AppendAction($"本地/{tree.name} ({ZetanEditorUtility.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
+                    toolbarMenu.menu.AppendAction($"本地/{tree.name} ({ZetanEditorUtility.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
                      {
                          Selection.activeObject = tree;
                      });
             });
             foreach (var exe in FindObjectsOfType<BehaviourExecutor>())
                 if (exe.Behaviour)
-                    toolbarMenu?.menu.AppendAction($"场景/{exe.gameObject.name} ({exe.gameObject.GetPath().Replace("/", "\u2215")})", (a) =>
+                    toolbarMenu.menu.AppendAction($"场景/{exe.gameObject.name} ({exe.gameObject.GetPath().Replace("/", "\u2215")})", (a) =>
                     {
                         Selection.activeObject = exe;
                     });
@@ -145,13 +147,19 @@ namespace ZetanStudio.BehaviourTree
         }
         private void OnNodeSelected(NodeEditor selected)
         {
-            inspectorView?.InspectNode(tree, selected);
+            var nodesSelected = treeView.nodes.ToList().FindAll(x => x.selected);
+            if (nodesSelected.Count > 1)
+            {
+                inspectorView.InspectMultSelect(nodesSelected.ConvertAll(x => x as NodeEditor));
+            }
+            else inspectorView?.InspectNode(tree, selected);
         }
         private void OnNodeUnselected(NodeEditor unseleted)
         {
-            if (inspectorView != null)
-                if (inspectorView.nodeEditor == unseleted)
-                    inspectorView.Clear();
+            if (inspectorView != null && inspectorView.nodeEditor == unseleted)
+                inspectorView.Clear();
+            if (!treeView.nodes.ToList().Exists(x => x.selected))
+                inspectorView?.InspectTree(tree);
         }
         private void OnPlayModeStateChanged(PlayModeStateChange state)
         {
@@ -215,10 +223,10 @@ namespace ZetanStudio.BehaviourTree
                 if (exe)
                 {
                     goTree = true;
-                    treeName.text = $"行为树视图\t当前：{exe.gameObject.GetPath()} ({exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)})";
+                    treeName.text = $"行为树视图\t当前路径：{exe.gameObject.GetPath()} <{exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)}>";
                 }
             }
-            if (tree && !goTree) treeName.text = $"行为树视图\t当前：{AssetDatabase.GetAssetPath(tree)}";
+            if (tree && !goTree) treeName.text = $"行为树视图\t当前路径：{AssetDatabase.GetAssetPath(tree)}";
         }
         private void OnSelectionChange()
         {
@@ -236,12 +244,12 @@ namespace ZetanStudio.BehaviourTree
                         {
                             tree = exe.Behaviour;
                             goTree = true;
-                            treeName.text = $"行为树视图\t当前：{exe.gameObject.GetPath()} ({exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)})";
+                            treeName.text = $"行为树视图\t当前路径：{exe.gameObject.GetPath()} <{exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)}>";
                         }
                     }
                 }
                 SelectTree(tree);
-                if (this.tree && !goTree) treeName.text = $"行为树视图\t当前：{AssetDatabase.GetAssetPath(this.tree)}";
+                if (this.tree && !goTree) treeName.text = $"行为树视图\t当前路径：{AssetDatabase.GetAssetPath(this.tree)}";
             };
         }
         private void OnInspectorUpdate()

@@ -24,7 +24,7 @@
       "url": "https://packages-v2.unity.cn"
     },
     "com.unity.2d.path": {
-      "version": "5.0.0",
+      "version": "5.0.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {},

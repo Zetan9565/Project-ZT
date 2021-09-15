@@ -11,19 +11,18 @@ namespace ZetanStudio.BehaviourTree
         protected BehaviourTree behaviour;
         public BehaviourTree Behaviour => behaviour;
 
+        public Frequency frequency = Frequency.PerFrame;
+        public float interval = 0.02f;
         public bool startOnStart = true;
         public bool restartOnComplete;
         public bool resetOnRestart;
 
         protected bool isRuntimeMode;
 
+        private float time;
+
         [SerializeReference]
         private List<SharedVariable> presetVariables = new List<SharedVariable>();
-
-        private void Start()
-        {
-            if (behaviour) Prepare(startOnStart);
-        }
 
         private void Prepare(bool execute)
         {
@@ -31,12 +30,6 @@ namespace ZetanStudio.BehaviourTree
             behaviour.Init(this);
             if (!isRuntimeMode) behaviour.PresetVariables(presetVariables);
             if (execute) behaviour.Execute();
-        }
-
-        private void Update()
-        {
-            if (behaviour) behaviour.Execute();
-            if (restartOnComplete && behaviour.IsDone) behaviour.Restart(resetOnRestart);
         }
 
         public virtual void SetBehaviour(BehaviourTree tree, bool executeImmediate)
@@ -48,6 +41,31 @@ namespace ZetanStudio.BehaviourTree
         public void Restart()
         {
             if (behaviour) behaviour.Restart(resetOnRestart);
+        }
+
+        #region Unity回调
+        private void Awake()
+        {
+            if (BehaviourManager.Instance) BehaviourManager.Instance.Add(this);
+        }
+        private void Start()
+        {
+            if (behaviour) Prepare(startOnStart);
+        }
+
+        private void Update()
+        {
+            if (frequency == Frequency.PerFrame && behaviour) behaviour.Execute();
+            if (frequency == Frequency.FixedTime)
+            {
+                time += Time.deltaTime;
+                if (time >= interval)
+                {
+                    time = 0;
+                    if (behaviour) behaviour.Execute();
+                }
+            }
+            if (restartOnComplete && behaviour.IsDone) behaviour.Restart(resetOnRestart);
         }
 
         #region 碰撞器事件
@@ -106,9 +124,27 @@ namespace ZetanStudio.BehaviourTree
         }
         #endregion
 
+        private void OnDrawGizmos()
+        {
+            if (behaviour) behaviour.OnDrawGizmos();
+        }
+        private void OnDrawGizmosSelected()
+        {
+            if (behaviour) behaviour.OnDrawGizmosSelected();
+        }
+
         private void OnDestroy()
         {
             if (BehaviourManager.Instance) BehaviourManager.Instance.Remove(this);
+        }
+        #endregion
+
+        public enum Frequency
+        {
+            [InspectorName("每帧")]
+            PerFrame,
+            [InspectorName("固定间隔")]
+            FixedTime,
         }
 
 #if UNITY_EDITOR

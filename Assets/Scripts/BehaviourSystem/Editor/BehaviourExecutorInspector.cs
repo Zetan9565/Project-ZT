@@ -9,6 +9,8 @@ namespace ZetanStudio.BehaviourTree
     {
         SerializedProperty behaviour;
 
+        SerializedProperty frequency;
+        SerializedProperty interval;
         SerializedProperty startOnStart;
         SerializedProperty restartOnComplete;
         SerializedProperty resetOnRestart;
@@ -24,6 +26,8 @@ namespace ZetanStudio.BehaviourTree
         private void OnEnable()
         {
             behaviour = serializedObject.FindProperty("behaviour");
+            frequency = serializedObject.FindProperty("frequency");
+            interval = serializedObject.FindProperty("interval");
             startOnStart = serializedObject.FindProperty("startOnStart");
             restartOnComplete = serializedObject.FindProperty("restartOnComplete");
             resetOnRestart = serializedObject.FindProperty("resetOnRestart");
@@ -56,7 +60,15 @@ namespace ZetanStudio.BehaviourTree
             else EditorGUILayout.PropertyField(behaviour, new GUIContent("行为树"));
             EditorGUI.EndDisabledGroup();
             if (behaviour.objectReferenceValue != hasTreeBef) InitTree();
-            if (behaviour.objectReferenceValue && GUILayout.Button("编辑")) BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor);
+            if (behaviour.objectReferenceValue)
+            {
+                if (GUILayout.Button("编辑")) BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor);
+                EditorGUILayout.PropertyField(serializedTree.FindProperty("_name"));
+                EditorGUILayout.PropertyField(serializedTree.FindProperty("description"));
+            }
+            EditorGUILayout.PropertyField(frequency, new GUIContent("执行频率"));
+            if (frequency.enumValueIndex == (int)BehaviourExecutor.Frequency.FixedTime)
+                EditorGUILayout.PropertyField(interval, new GUIContent("间隔"));
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(startOnStart, new GUIContent("开始时执行"));
             EditorGUILayout.PropertyField(restartOnComplete, new GUIContent("完成时重启"));

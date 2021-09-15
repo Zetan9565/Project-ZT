@@ -110,23 +110,23 @@
 }
 
 .action #input {
-    background-color: rgba(98, 111, 152, 0.59);
+    background-color: rgb(98, 111, 152);
 }
 
 .conditional #input {
-    background-color: rgba(60, 99, 81, 0.59);
+    background-color: rgb(60, 99, 81);
 }
 
 .composite #input {
-    background-color: rgba(161, 135, 89, 0.59);
+    background-color: rgb(161, 135, 89);
 }
 
 .decorator #input {
-    background-color: rgba(91, 149, 154, 0.59);
+    background-color: rgb(91, 149, 154);
 }
 
 .entry #input {
-    background-color: rgba(144, 144, 144, 0.59);
+    background-color: rgb(144, 144, 144);
     min-height: 24px;
 }
 
@@ -151,7 +151,7 @@
 }
 
 .failure #node-border {
-    background-color: rgb(183, 0, 0);
+    background-color: rgb(159, 0, 0);
 }
 
 .invalid #output {

@@ -6,7 +6,7 @@ using UnityEngine;
 namespace ZetanStudio.BehaviourTree
 {
     /// <summary>
-    /// 最基本的结点，所有后续扩展结点都继承于此
+    /// 结点基类，所有后续扩展结点都继承于此
     /// </summary>
     public abstract class Node : ScriptableObject
     {
@@ -97,7 +97,7 @@ namespace ZetanStudio.BehaviourTree
                 }
             }
             Shortcut = new NodeShortcut(owner.Executor);
-
+            OnAwake();
 #if false
             void TryLinkSharedVariable(object onwer, FieldInfo field)
             {
@@ -191,16 +191,20 @@ namespace ZetanStudio.BehaviourTree
         }
 
         /// <summary>
-        /// 评估进行时，核心方法
+        /// 初始化时调用一次
+        /// </summary>
+        protected virtual void OnAwake() { }
+        /// <summary>
+        /// 评估进行时回调，是结点的逻辑核心
         /// </summary>
         /// <returns></returns>
         protected abstract NodeStates OnUpdate();
         /// <summary>
-        /// 开始进行评估时
+        /// 评估开始回调，在第一次OnUpdate()之前调用
         /// </summary>
         protected virtual void OnStart() { }
         /// <summary>
-        /// 评估结束时
+        /// 评估结束回调
         /// </summary>
         protected virtual void OnEnd() { }
         /// <summary>
@@ -213,21 +217,28 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         protected virtual void OnReset() { }
 
+        public virtual void OnBehaviourStart() { }
+        public virtual void OnBehaviourRestart() { }
+        public virtual void OnBehaviourEnd() { }
+
         public void Abort()
         {
-            if (State == NodeStates.Running)
+            if (State != NodeStates.Inactive)
             {
                 isStarted = false;
                 State = NodeStates.Failure;
                 GetChildren().ForEach(n => n.Abort());
             }
         }
+
+        #region Unity回调
         #region 碰撞器事件
         public virtual void OnCollisionEnter(Collision collision) { }
         public virtual void OnCollisionStay(Collision collision) { }
         public virtual void OnCollisionExit(Collision collision) { }
 
         public virtual void OnCollisionEnter2D(Collision2D collision) { }
+
         public virtual void OnCollisionStay2D(Collision2D collision) { }
         public virtual void OnCollisionExit2D(Collision2D collision) { }
         #endregion
@@ -242,26 +253,19 @@ namespace ZetanStudio.BehaviourTree
         public virtual void OnTriggerExit2D(Collider2D collision) { }
         #endregion
 
+        public virtual void OnDrawGizmos() { }
+        public virtual void OnDrawGizmosSelected() { }
+        #endregion
         #endregion
 
         public virtual List<Node> GetChildren() { return new List<Node>(); }
-
-        public static Node GetRuntimeNode(Type type)
-        {
-            if (type.IsSubclassOf(typeof(Node)))
-            {
-                Node node = CreateInstance(type) as Node;
-                node.isRuntime = true;
-                return node;
-            }
-            return null;
-        }
 
         public static implicit operator bool(Node self)
         {
             return self != null;
         }
 
+        #region EDITOR
 #if UNITY_EDITOR
         /// <summary>
         /// 用于标识编辑器结点，不应在游戏逻辑中使用
@@ -287,6 +291,21 @@ namespace ZetanStudio.BehaviourTree
         /// <param name="child"></param>
         public virtual void RemoveChild(Node child) { }
 
+        /// <summary>
+        /// 用于在编辑器中获取运行时结点，不应在游戏逻辑中使用
+        /// </summary>
+        /// <returns>运行时结点</returns>
+        public static Node GetRuntimeNode(Type type)
+        {
+            if (type.IsSubclassOf(typeof(Node)))
+            {
+                Node node = CreateInstance(type) as Node;
+                node.isRuntime = true;
+                return node;
+            }
+            return null;
+        }
+
         protected T ConvertToLocal<T>() where T : Node
         {
             Node node = Instantiate(this);
@@ -295,6 +314,10 @@ namespace ZetanStudio.BehaviourTree
             return node as T;
         }
 
+        /// <summary>
+        /// 用于在编辑器中本地化行为树，不应在游戏逻辑中使用
+        /// </summary>
+        /// <returns></returns>
         public virtual Node ConvertToLocal()
         {
             Node node = Instantiate(this);
@@ -303,6 +326,7 @@ namespace ZetanStudio.BehaviourTree
             return node;
         }
 #endif
+        #endregion
     }
 
     public class NodeShortcut
