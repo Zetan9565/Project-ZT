@@ -35,11 +35,11 @@ namespace ZetanStudio.BehaviourTree
             if (attr != null) tooltip = attr.description;
             else tooltip = string.Empty;
 
-            style.left = node.position.x;
-            style.top = node.position.y;
+            style.left = node._position.x;
+            style.top = node._position.y;
 
             Label des = this.Q<Label>("description");
-            des.bindingPath = "description";
+            des.bindingPath = "_description";
             des.Bind(new SerializedObject(node));
 
             abort = this.Q<Label>("abort");
@@ -89,9 +89,9 @@ namespace ZetanStudio.BehaviourTree
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);
-            onSetPosition?.Invoke(this, node.position);
-            node.position.x = newPos.xMin;
-            node.position.y = newPos.yMin;
+            onSetPosition?.Invoke(this, node._position);
+            node._position.x = newPos.xMin;
+            node._position.y = newPos.yMin;
         }
         public override void OnSelected()
         {

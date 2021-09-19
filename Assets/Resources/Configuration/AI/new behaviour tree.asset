@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: 785d38a00fe0ed344bf636903f3395f9
-  position: {x: 0, y: 142}
-  description: 
-  child: {fileID: -8390009652866561428}
+  _position: {x: 236.26462, y: 325.38525}
+  _description: 
+  child: {fileID: -5673099492451267999}
   stopOnFailure: 0
   count:
     _name: 
@@ -37,12 +37,243 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: 0240171def361154292b3dd87c46b04c
-  position: {x: 0, y: 289}
-  description: 
+  _position: {x: 110.346954, y: 596.00006}
+  _description: "\u968F\u673A\u8D70\u52A8"
   children:
-  - {fileID: 3073737369977096355}
-  - {fileID: 4349196617172203227}
+  - {fileID: -850818315939059841}
+  - {fileID: 5613145345997147096}
+  abortType: 2
+--- !u!114 &-6739320512372274476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddba8651ff3ae3c42921b76d74540306, type: 3}
+  m_Name: (13) Sequence
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: ac3c5462fadba6642abe94d86b8348fe
+  _position: {x: -350.75504, y: 596.00006}
+  _description: 
+  children:
+  - {fileID: 5465056014895924026}
+  - {fileID: -3953251515193293871}
+  - {fileID: 7145209022686938395}
+  abortType: 3
+--- !u!114 &-6128441510128264828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ff1dfce8b479734c8bf533182248820, type: 3}
+  m_Name: (9) Repeater
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: ad849c0abb5c39c4aaa247d239076cc8
+  _position: {x: 385.99997, y: 596.00006}
+  _description: 
+  child: {fileID: -1056548748623071656}
+  stopOnFailure: 0
+  count:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 0
+--- !u!114 &-5673099492451267999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b12828a7cc58a647ae519d6440f98e5, type: 3}
+  m_Name: (9) Selector
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 2234df3428b8bb644b3ff987c0cf136b
+  _position: {x: 236.26462, y: 457.38525}
+  _description: 
+  children:
+  - {fileID: -6739320512372274476}
+  - {fileID: -8390009652866561428}
+  - {fileID: -6128441510128264828}
   abortType: 0
+--- !u!114 &-4884627513322541253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75d647946002fb04a937486c2e29327d, type: 3}
+  m_Name: (18) RandomPatrol
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: f42fd3aea9c51284791c54d7cdee4278
+  _position: {x: 335.4164, y: 935.99994}
+  _description: 
+  arriveDistance:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+  pickNextWaypointDist:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+  repathRate:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 0.5
+  useRange: 0
+  range:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 10
+  blindRange:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 0
+  boundMin:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: {x: -10, y: -10, z: 0}
+  boundMax:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: {x: 10, y: 10, z: 0}
+  interval:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+--- !u!114 &-3953251515193293871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b95c1691d382e74daa71c6d1bbd8fef, type: 3}
+  m_Name: (15) Seek
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 8214d53458ce9074dab37aeec7bcfa17
+  _position: {x: -350.75504, y: 757}
+  _description: 
+  arriveDistance:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+  pickNextWaypointDist:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+  repathRate:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 0.5
+  point:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: {x: 0, y: 0, z: 0}
+  target:
+    _name: sharedGameObject_2
+    isGlobal: 0
+    isShared: 1
+    value: {fileID: 0}
+  radius:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+--- !u!114 &-3740498926136104235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
+  m_Name: (16) Log
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 029e2ae6389dac24dbefd60f5261b5c0
+  _position: {x: -81.755005, y: 904.00006}
+  _description: 
+  logType: 0
+  message:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: "\u4F7F\u7528\u6280\u80FD2"
+--- !u!114 &-1056548748623071656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
+  m_Name: (10) Log
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: eefb2875798c6fa49a3893502509448c
+  _position: {x: 385.99997, y: 758}
+  _description: 
+  logType: 0
+  message:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: "\u975E\u6B63\u5E38\u72B6\u6001"
+--- !u!114 &-850818315939059841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3b8fd3d0eb4d7d45ad8481caeeb7608, type: 3}
+  m_Name: (8) CheckCharacterState
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 4ef9312f536aaa64a84784d292c8ca03
+  _position: {x: 35.346977, y: 755.00006}
+  _description: 
+  mainState: 0
+  checkSubState: 0
+  subState: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55,20 +286,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11ff0f6527981fa41a9e8e6e46d91bbe, type: 3}
   m_Name: new behaviour tree
   m_EditorClassIdentifier: 
-  _name: "\u5FAA\u73AF\u7B49\u5F85"
+  _name: "\u79FB\u52A8\u6D4B\u8BD5"
   description: 
   entry: {fileID: 6010367299264760620}
   nodes:
   - {fileID: 6010367299264760620}
-  - {fileID: 3073737369977096355}
-  - {fileID: 4349196617172203227}
   - {fileID: -8599469560084693122}
   - {fileID: -8390009652866561428}
-  - {fileID: 1266546897375501647}
+  - {fileID: -850818315939059841}
+  - {fileID: -5673099492451267999}
+  - {fileID: -6128441510128264828}
+  - {fileID: -1056548748623071656}
+  - {fileID: 7511397711317786164}
+  - {fileID: 5131726000886982299}
+  - {fileID: -6739320512372274476}
+  - {fileID: 5465056014895924026}
+  - {fileID: -3953251515193293871}
+  - {fileID: -3740498926136104235}
+  - {fileID: 7145209022686938395}
+  - {fileID: 8021095495707417499}
+  - {fileID: -4884627513322541253}
+  - {fileID: 5613145345997147096}
   variables:
   - id: 0
   - id: 1
   - id: 2
+  - id: 3
   isRuntime: 0
   references:
     version: 1
@@ -93,7 +336,40 @@ MonoBehaviour:
         isGlobal: 0
         isShared: 1
         value: {fileID: 0}
---- !u!114 &1266546897375501647
+    00000003:
+      type: {class: SharedVector3, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedVector3_4
+        isGlobal: 0
+        isShared: 1
+        value: {x: 0, y: 0, z: 0}
+--- !u!114 &5131726000886982299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 687defbcdf3fa4344aeefba2e8d98279, type: 3}
+  m_Name: (12) FindWithTag
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 80fddec9ace7e234fa6c5e92b127eaa9
+  _position: {x: -218.22963, y: 324.99994}
+  _description: 
+  tag:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: Player
+  register:
+    _name: sharedGameObject_2
+    isGlobal: 0
+    isShared: 1
+    value: {fileID: 0}
+--- !u!114 &5465056014895924026
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -103,17 +379,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 929bd5e44c7d1d2408fe39814cbb73fb, type: 3}
-  m_Name: (5) WithinDistance
+  m_Name: (14) WithinDistance
   m_EditorClassIdentifier: 
   isRuntime: 0
-  guid: 40d01842d0cfcf24cba10cce6abb2ed9
-  position: {x: -205, y: 201}
-  description: 
+  guid: 28464a0e5e070d54fb7597a1cb87187b
+  _position: {x: -500.75504, y: 758}
+  _description: 
   distance:
     _name: 
     isGlobal: 0
     isShared: 0
-    value: 0
+    value: 5
   usePoint: 0
   point:
     _name: 
@@ -121,17 +397,17 @@ MonoBehaviour:
     isShared: 0
     value: {x: 0, y: 0, z: 0}
   target:
-    _name: 
+    _name: sharedGameObject_2
     isGlobal: 0
-    isShared: 0
+    isShared: 1
     value: {fileID: 0}
-  useThis: 0
+  useThis: 1
   contrast:
     _name: 
     isGlobal: 0
     isShared: 0
     value: {fileID: 0}
---- !u!114 &3073737369977096355
+--- !u!114 &5613145345997147096
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -140,55 +416,43 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cad2581818b4bc748b7dee3e227e8a06, type: 3}
-  m_Name: (3) Wait
+  m_Script: {fileID: 11500000, guid: 7ea6923e20db6bd4299b55422b9a6472, type: 3}
+  m_Name: (16) Patrol
   m_EditorClassIdentifier: 
   isRuntime: 0
-  guid: f447c4e0de0056a4fae3fe165efa2192
-  position: {x: -133, y: 451}
-  description: 
-  randomWait:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 0
-  randomWaitMin:
+  guid: 524d265a9074ca34a92ee3775597785e
+  _position: {x: 184.99985, y: 757}
+  _description: 
+  arriveDistance:
     _name: 
     isGlobal: 0
     isShared: 0
     value: 1
-  randomWaitMax:
+  pickNextWaypointDist:
     _name: 
     isGlobal: 0
     isShared: 0
     value: 1
-  duration:
+  repathRate:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 0.5
+  random: 0
+  waypoints:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value:
+    - {x: 0, y: 0, z: 0}
+    - {x: 0, y: -5, z: 0}
+    - {x: 0, y: -10, z: 0}
+    - {x: 0, y: -5, z: 0}
+  interval:
     _name: 
     isGlobal: 0
     isShared: 0
     value: 1
---- !u!114 &4349196617172203227
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
-  m_Name: (4) Log
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 5139c85ea722159439a3f0876dd38ecb
-  position: {x: 139, y: 451}
-  description: 
-  logType: 0
-  message:
-    _name: sharedString_3
-    isGlobal: 0
-    isShared: 1
-    value: Debug log
 --- !u!114 &6010367299264760620
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -203,6 +467,68 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: 7e08a642cff7a35499976a4011869aa1
-  position: {x: 0, y: 0}
-  description: 
-  start: {fileID: -8599469560084693122}
+  _position: {x: -0.00015187263, y: 36.749504}
+  _description: 
+  start: {fileID: 7511397711317786164}
+--- !u!114 &7145209022686938395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ef06685521663d468450cda8b4aa9f8, type: 3}
+  m_Name: (16) RandomSelector
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 8463377966aea434ebddf402f2a3160e
+  _position: {x: -200.7551, y: 756}
+  _description: 
+  children:
+  - {fileID: 8021095495707417499}
+  - {fileID: -3740498926136104235}
+  abortType: 0
+--- !u!114 &7511397711317786164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddba8651ff3ae3c42921b76d74540306, type: 3}
+  m_Name: (11) Sequence
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: e927879006351ec4295530f65b01c475
+  _position: {x: 0.000030517578, y: 168.82915}
+  _description: 
+  children:
+  - {fileID: 5131726000886982299}
+  - {fileID: -8599469560084693122}
+  abortType: 0
+--- !u!114 &8021095495707417499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
+  m_Name: (17) Log
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 794a5ffea540f2041ac503ce01d63ee2
+  _position: {x: -317.7551, y: 904.00006}
+  _description: 
+  logType: 0
+  message:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: "\u4F7F\u7528\u6280\u80FD1"

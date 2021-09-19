@@ -115,9 +115,12 @@ public class Quest : ScriptableObject
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         foreach (var objective in objectives)
         {
-            sb.Append("-");
-            sb.Append(objective.DisplayName);
-            sb.Append("\n");
+            if (objective.Display)
+            {
+                sb.Append("-");
+                sb.Append(objective.DisplayName);
+                sb.Append("\n");
+            }
         }
         if (sb.Length > 1) sb.Remove(sb.Length - 1, 1);
         return sb.ToString();

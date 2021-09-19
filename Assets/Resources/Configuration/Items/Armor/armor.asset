@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: armor
   m_EditorClassIdentifier: 
   _ID: ARMR001
-  _Name: "\u94C1\u7247\u7532"
+  _name: "\u94C1\u7247\u7532"
   itemType: 5
   quality: 0
   weight: 0

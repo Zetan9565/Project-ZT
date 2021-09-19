@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: book
   m_EditorClassIdentifier: 
   _ID: BOOK001
-  _Name: "\u4ED3\u5E93\u8BBE\u8BA1\u56FE\u7EB8"
+  _name: "\u4ED3\u5E93\u8BBE\u8BA1\u56FE\u7EB8"
   itemType: 13
   quality: 4
   weight: 0

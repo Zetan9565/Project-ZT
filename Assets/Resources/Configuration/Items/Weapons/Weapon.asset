@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Weapon
   m_EditorClassIdentifier: 
   _ID: WEPN001
-  _Name: "\u7834\u65E7\u7684\u5251"
+  _name: "\u7834\u65E7\u7684\u5251"
   itemType: 4
   quality: 0
   weight: 1

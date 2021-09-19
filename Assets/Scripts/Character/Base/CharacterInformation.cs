@@ -8,8 +8,8 @@ public class CharacterInformation : ScriptableObject
     public string ID => _ID;
 
     [SerializeField]
-    protected string _Name;
-    public new string name => _Name;
+    protected string _name;
+    public new string name => _name;
 
     [SerializeField]
 #if UNITY_EDITOR
@@ -18,7 +18,7 @@ public class CharacterInformation : ScriptableObject
     protected CharacterSex sex;
     public CharacterSex Sex => sex;
 
-    public virtual bool IsValid => !string.IsNullOrEmpty(_ID) && !string.IsNullOrEmpty(_Name);
+    public virtual bool IsValid => !string.IsNullOrEmpty(_ID) && !string.IsNullOrEmpty(_name);
 
     public static string GetSexString(CharacterSex sex)
     {

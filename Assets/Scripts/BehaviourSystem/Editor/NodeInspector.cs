@@ -10,7 +10,7 @@ namespace ZetanStudio.BehaviourTree
 
         private void OnEnable()
         {
-            description = serializedObject.FindProperty("description");
+            description = serializedObject.FindProperty("_description");
         }
 
         public override void OnInspectorGUI()

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
@@ -10,16 +9,14 @@ public class QuestGroupInspector : Editor
     QuestGroup group;
 
     SerializedProperty _ID;
-    SerializedProperty _Name;
-    SerializedProperty questsInGoup;
+    SerializedProperty _name;
 
     private void OnEnable()
     {
         group = target as QuestGroup;
 
         _ID = serializedObject.FindProperty("_ID");
-        _Name = serializedObject.FindProperty("_name");
-        questsInGoup = serializedObject.FindProperty("questsInGoup");
+        _name = serializedObject.FindProperty("_name");
     }
 
     public override void OnInspectorGUI()
@@ -37,7 +34,7 @@ public class QuestGroupInspector : Editor
                 EditorGUI.FocusTextInControl(null);
             }
         }
-        EditorGUILayout.PropertyField(_Name, new GUIContent("组名"));
+        EditorGUILayout.PropertyField(_name, new GUIContent("组名"));
         ShowGroupQuests();
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();

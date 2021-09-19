@@ -89,7 +89,7 @@ public class QuestFlag : MonoBehaviour
     private void CheckDistance()
     {
         Vector3 viewportPoint = Camera.main.WorldToViewportPoint(questHolder.transform.position + questHolder.questFlagOffset);
-        float sqrDistance = Vector3.SqrMagnitude(Camera.main.transform.position - questHolder.transform.position);
+        float sqrDistance = Vector3.SqrMagnitude(Camera.main.transform.position - questHolder.Position);
         if (viewportPoint.z <= 0 || viewportPoint.x > 1 || viewportPoint.x < 0 || viewportPoint.y > 1 || viewportPoint.y < 0 || sqrDistance > 900f)
         {
             if (icon.enabled) icon.enabled = false;
@@ -115,12 +115,13 @@ public class QuestFlag : MonoBehaviour
         {
             if (icon.enabled) icon.enabled = false;
         }
+        transform.position = new Vector3(viewportPoint.x * Screen.width, viewportPoint.y * Screen.height, 0);
     }
 
     public void Recycle()
     {
         if (NotifyCenter.Instance) NotifyCenter.Instance.RemoveListener(this);
-        if(MapManager.Instance) MapManager.Instance.RemoveMapIcon(mapIcon);
+        if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(mapIcon);
         questHolder = null;
         mapIcon = null;
         ObjectPool.Put(gameObject);
@@ -151,6 +152,7 @@ public class QuestFlag : MonoBehaviour
             CheckDistance();
             if (questHolder.isActiveAndEnabled && conditionShow) mapIcon.Show();
             else mapIcon.Hide();
+            MapManager.Instance.UpdateMapIconPosition(mapIcon, questHolder.transform.position);
         }
     }
 

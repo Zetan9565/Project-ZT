@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: currency 1
   m_EditorClassIdentifier: 
   _ID: CURR002
-  _Name: "\u7ECF\u9A8C"
+  _name: "\u7ECF\u9A8C"
   itemType: 16
   quality: 0
   weight: 0

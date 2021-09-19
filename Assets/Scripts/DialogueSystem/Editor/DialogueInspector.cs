@@ -24,7 +24,7 @@ public class DialogueInspector : Editor
 
     TalkerInformation[] npcs;
     string[] npcNames;
-    CharacterSelectionDrawer<TalkerInformation> npcSelector;
+    ObjectSelectionDrawer<TalkerInformation> npcSelector;
 
     private void OnEnable()
     {
@@ -42,7 +42,7 @@ public class DialogueInspector : Editor
         useCurrentTalkerInfo = serializedObject.FindProperty("useCurrentTalkerInfo");
         unifiedNPC = serializedObject.FindProperty("unifiedNPC");
         dialogWords = serializedObject.FindProperty("words");
-        npcSelector = new CharacterSelectionDrawer<TalkerInformation>(unifiedNPC, string.Empty);
+        npcSelector = new ObjectSelectionDrawer<TalkerInformation>(unifiedNPC, "_name", "Configuration", string.Empty);
         HandlingWordsList();
     }
 

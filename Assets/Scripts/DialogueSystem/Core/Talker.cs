@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[DisallowMultipleComponent, RequireComponent(typeof(MapIconHolder), typeof(Interactive))]
+[DisallowMultipleComponent, RequireComponent(typeof(Interactive))]
 public class Talker : Character
 {
     public string TalkerID => Data ? Data.Info.ID : string.Empty;
@@ -133,7 +132,7 @@ public class Talker : Character
     protected override void OnAwake()
     {
         interactive = GetComponent<Interactive>();
-        iconHolder = GetComponent<MapIconHolder>();
+        iconHolder = GetComponentInChildren<MapIconHolder>();
     }
 
     protected override void OnDestroy_()

@@ -21,7 +21,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
 
     public PlayerController2D Controller { get; private set; }
 
-    public Transform PlayerTransform => Controller.Motion.transform;
+    public Transform PlayerTransform => Controller.transform;
 
     public Backpack Backpack { get { return PlayerInfo.backpack; } }
 

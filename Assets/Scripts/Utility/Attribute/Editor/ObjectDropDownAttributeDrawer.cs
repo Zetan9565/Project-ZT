@@ -10,20 +10,19 @@ public class ObjectDropDownAttributeDrawer : PropertyDrawer
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         ObjectDropDownAttribute attribute = this.attribute as ObjectDropDownAttribute;
-        Handling(attribute.type, attribute.fieldAsName, attribute.path, attribute.nameNull, out var objects, out var objectNames);
-        int index = Array.FindIndex(objects, x => x == property.objectReferenceValue) + 1;
+        Handling(attribute.type, attribute.fieldAsName, attribute.resPath, attribute.nameNull, out var objects, out var objectNames);
+        int index = Array.IndexOf(objects, property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
         index = EditorGUI.Popup(new Rect(position.x, position.y, position.width - 21, position.height), label.text, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
-        property.objectReferenceValue = EditorGUI.ObjectField(new Rect(position.x + position.width - 21, position.y, 20, position.height),
-                                                              property.objectReferenceValue, attribute.type, false);
+        EditorGUI.PropertyField(new Rect(position.x + position.width - 20, position.y, 20, position.height), property, new GUIContent(string.Empty));
     }
 
-    private void Handling(Type type, string fieldAsName, string path, string nameNull,
+    private void Handling(Type type, string fieldAsName, string resPath, string nameNull,
                           out UnityEngine.Object[] objects, out string[] objectNamesArray)
     {
-        objects = Resources.LoadAll(string.IsNullOrEmpty(path) ? string.Empty : path, type);
+        objects = Resources.LoadAll(string.IsNullOrEmpty(resPath) ? string.Empty : resPath, type);
         List<string> objectNames = new List<string>() { nameNull };
         foreach (var obj in objects)
         {

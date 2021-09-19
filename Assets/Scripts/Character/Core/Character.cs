@@ -12,18 +12,16 @@ public class Character : MonoBehaviour
 
     public Transform Body { get; private set; }
 
+    public Vector3 Position => transform.position;
+
     public CharacterAnimator Animator { get; private set; }
-    public CharacterMotion2D Motion { get; protected set; }
 
     public CharacterController2D Controller { get; private set; }
-
-    public Vector3 Position => transform.position;
 
     private void Awake()
     {
         Body = transform.FindOrCreate("Body");
-        Animator = Body.GetComponent<CharacterAnimator>();
-        Motion = Body.GetComponent<CharacterMotion2D>();
+        Animator = Body.GetOrAddComponent<CharacterAnimator>();
         OnAwake();
     }
 

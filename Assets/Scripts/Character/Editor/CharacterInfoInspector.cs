@@ -1,16 +1,14 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
-using UnityEditorInternal;
 using System;
 using System.Linq;
-using System.Collections.Generic;
 
 [CustomEditor(typeof(CharacterInformation), true)]
 public partial class CharacterInfoInspector : Editor
 {
     CharacterInformation character;
     SerializedProperty _ID;
-    SerializedProperty _Name;
+    SerializedProperty _name;
     SerializedProperty sex;
 
     PlayerInformation player;
@@ -31,7 +29,7 @@ public partial class CharacterInfoInspector : Editor
         player = target as PlayerInformation;
         characters = Resources.LoadAll<CharacterInformation>("Configuration");
         _ID = serializedObject.FindProperty("_ID");
-        _Name = serializedObject.FindProperty("_Name");
+        _name = serializedObject.FindProperty("_name");
         sex = serializedObject.FindProperty("sex");
 
         lineHeight = EditorGUIUtility.singleLineHeight;
@@ -81,7 +79,7 @@ public partial class CharacterInfoInspector : Editor
                     EditorGUI.FocusTextInControl(null);
                 }
             }
-            EditorGUILayout.PropertyField(_Name, new GUIContent("名称"));
+            EditorGUILayout.PropertyField(_name, new GUIContent("名称"));
             if (!enemy) EditorGUILayout.PropertyField(sex, new GUIContent("性别"));
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();

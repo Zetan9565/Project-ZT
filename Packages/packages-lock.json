@@ -89,7 +89,7 @@
       "url": "https://packages-v2.unity.cn"
     },
     "com.unity.analytics": {
-      "version": "3.5.3",
+      "version": "3.6.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {

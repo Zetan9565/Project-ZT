@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: item box
   m_EditorClassIdentifier: 
   _ID: IBOX001
-  _Name: "\u56FE\u7EB8\u7BB1\u5B50"
+  _name: "\u56FE\u7EB8\u7BB1\u5B50"
   itemType: 7
   quality: 1
   weight: 10

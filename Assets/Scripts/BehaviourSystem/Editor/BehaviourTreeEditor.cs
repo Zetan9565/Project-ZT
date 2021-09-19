@@ -14,7 +14,8 @@ namespace ZetanStudio.BehaviourTree
         private BehaviourTree tree;
         private InspectorView inspectorView;
         private IMGUIContainer variables;
-        private ToolbarMenu toolbarMenu;
+        private ToolbarMenu assetsMenu;
+        private ToolbarMenu exeMenu;
         private ToolbarButton undo;
         private ToolbarButton redo;
         //private ToolbarSearchField searchField;
@@ -106,30 +107,47 @@ namespace ZetanStudio.BehaviourTree
         }
         private void CheckAssetDropdown()
         {
-            if (toolbarMenu == null) return;
+            if (assetsMenu == null) return;
             var behaviourTrees = ZetanEditorUtility.LoadAssets<BehaviourTree>();
-            for (int i = toolbarMenu.menu.MenuItems().Count - 1; i > 0; i--)
+            for (int i = assetsMenu.menu.MenuItems().Count - 1; i > 0; i--)
             {
-                toolbarMenu.menu.RemoveItemAt(i);
+                assetsMenu.menu.RemoveItemAt(i);
             }
-            if (!Application.isPlaying && tree && tree.IsRuntime) toolbarMenu.menu.InsertAction(1, "保存到本地", (a) => { SaveToLocal("new behaviour tree"); });
-            if (behaviourTrees.Count > 0) toolbarMenu.menu.AppendSeparator();
+            if (!Application.isPlaying && tree && tree.IsRuntime) assetsMenu.menu.InsertAction(1, "保存到本地", (a) => { SaveToLocal("new behaviour tree"); });
+            if (behaviourTrees.Count > 0) assetsMenu.menu.AppendSeparator();
             behaviourTrees.ForEach(tree =>
             {
                 if (tree)
-                    toolbarMenu.menu.AppendAction($"本地/{tree.name} ({ZetanEditorUtility.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
+                    assetsMenu.menu.AppendAction($"本地/{tree.name} ({ZetanEditorUtility.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
                      {
                          Selection.activeObject = tree;
                      });
             });
             foreach (var exe in FindObjectsOfType<BehaviourExecutor>())
                 if (exe.Behaviour)
-                    toolbarMenu.menu.AppendAction($"场景/{exe.gameObject.name} ({exe.gameObject.GetPath().Replace("/", "\u2215")})", (a) =>
+                    assetsMenu.menu.AppendAction($"场景/{exe.gameObject.name} ({exe.gameObject.GetPath().Replace("/", "\u2215")})", (a) =>
                     {
                         Selection.activeObject = exe;
                     });
         }
-
+        private void CheckExeDropdown()
+        {
+            if (exeMenu != null)
+                if (Selection.activeGameObject)
+                {
+                    for (int i = exeMenu.menu.MenuItems().Count - 1; i >= 0; i--)
+                    {
+                        exeMenu.menu.RemoveItemAt(i);
+                    }
+                    BehaviourExecutor[] executors = Selection.activeGameObject.GetComponents<BehaviourExecutor>();
+                    foreach (var exe in executors)
+                    {
+                        if (exe.Behaviour)
+                            exeMenu.menu.AppendAction(string.IsNullOrEmpty(exe.Behaviour.Name) ? "未命名" : exe.Behaviour.Name, (a) => SelectTree(exe.Behaviour));
+                    }
+                    exeMenu.visible = exeMenu.menu.MenuItems().Count > 0;
+                }
+        }
         private void CheckShowShared()
         {
             shared.SetEnabled(!showShared);
@@ -194,9 +212,11 @@ namespace ZetanStudio.BehaviourTree
             inspectorView = root.Q<InspectorView>();
             variables = root.Q<IMGUIContainer>("variables");
 
-            toolbarMenu = root.Q<ToolbarMenu>("assets");
-            toolbarMenu.menu.AppendAction("新建", (a) => CreateNewTree("new behaviour tree"));
+            assetsMenu = root.Q<ToolbarMenu>("assets");
+            assetsMenu.menu.AppendAction("新建", (a) => CreateNewTree("new behaviour tree"));
             CheckAssetDropdown();
+            exeMenu = root.Q<ToolbarMenu>("exe-select");
+            CheckExeDropdown();
 
             undo = root.Q<ToolbarButton>("undo");
             undo.clicked += OnUndoClick;
@@ -233,7 +253,7 @@ namespace ZetanStudio.BehaviourTree
             EditorApplication.delayCall += () =>
             {
                 bool goTree = false;
-                treeName.text = "行为树视图";
+                if (treeName != null) treeName.text = "行为树视图";
                 BehaviourTree tree = Selection.activeObject as BehaviourTree;
                 if (!tree)
                 {
@@ -244,12 +264,12 @@ namespace ZetanStudio.BehaviourTree
                         {
                             tree = exe.Behaviour;
                             goTree = true;
-                            treeName.text = $"行为树视图\t当前路径：{exe.gameObject.GetPath()} <{exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)}>";
+                            if (treeName != null) treeName.text = $"行为树视图\t当前路径：{exe.gameObject.GetPath()} <{exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)}>";
                         }
                     }
                 }
                 SelectTree(tree);
-                if (this.tree && !goTree) treeName.text = $"行为树视图\t当前路径：{AssetDatabase.GetAssetPath(this.tree)}";
+                if (this.tree && !goTree && treeName != null) treeName.text = $"行为树视图\t当前路径：{AssetDatabase.GetAssetPath(this.tree)}";
             };
         }
         private void OnInspectorUpdate()
@@ -269,6 +289,7 @@ namespace ZetanStudio.BehaviourTree
         {
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            OnSelectionChange();
         }
         private void OnDisable()
         {
@@ -349,7 +370,7 @@ namespace ZetanStudio.BehaviourTree
                 {
                     AssetDatabase.AddObjectToAsset(localTree.Nodes[i], localTree);
                 }
-                AssetDatabase.Refresh();
+                AssetDatabase.SaveAssets();
             }
         }
         #endregion

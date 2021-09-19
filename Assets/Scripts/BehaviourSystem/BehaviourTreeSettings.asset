@@ -27,5 +27,5 @@ MonoBehaviour:
     type: 3}
   scriptTemplateVariable: {fileID: 4900000, guid: 28d7209af2618b84cbab289b484127ec,
     type: 3}
-  newNodeScriptFolder: Assets/Scripts/BehaviourSystem/Base/Nodes
+  newNodeScriptFolder: Assets/Scripts/BehaviourSystem/Base/Node
   newVarScriptFolder: Assets/Scripts/BehaviourSystem/Base/Variable

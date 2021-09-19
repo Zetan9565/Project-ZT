@@ -24,7 +24,7 @@ namespace ZetanStudio.BehaviourTree
         [DisplayName("共享变量脚本模版")]
         public TextAsset scriptTemplateVariable;
         [DisplayName("新结点脚本默认路径")]
-        public string newNodeScriptFolder = "Assets/Scripts/BehaviourSystem/Base/Nodes";
+        public string newNodeScriptFolder = "Assets/Scripts/BehaviourSystem/Base/Node";
         [DisplayName("新变量脚本默认路径")]
         public string newVarScriptFolder = "Assets/Scripts/BehaviourSystem/Base/Variable";
 

@@ -92,25 +92,29 @@ namespace ZetanStudio.BehaviourTree
                 var types = TypeCache.GetTypesDerivedFrom<Action>();
                 foreach (var type in types)
                 {
-                    evt.menu.AppendAction($"行为结点(Action)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
+                    if (!type.IsAbstract && !type.IsGenericType)
+                        evt.menu.AppendAction($"行为结点(Action)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
                 }
 
                 types = TypeCache.GetTypesDerivedFrom<Conditional>();
                 foreach (var type in types)
                 {
-                    evt.menu.AppendAction($"条件结点(Conditional)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
+                    if (!type.IsAbstract && !type.IsGenericType)
+                        evt.menu.AppendAction($"条件结点(Conditional)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
                 }
 
                 types = TypeCache.GetTypesDerivedFrom<Composite>();
                 foreach (var type in types)
                 {
-                    evt.menu.AppendAction($"复合结点(Composite)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
+                    if (!type.IsAbstract && !type.IsGenericType)
+                        evt.menu.AppendAction($"复合结点(Composite)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
                 }
 
                 types = TypeCache.GetTypesDerivedFrom<Decorator>();
                 foreach (var type in types)
                 {
-                    evt.menu.AppendAction($"修饰结点(Decorator)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
+                    if (!type.IsAbstract && !type.IsGenericType)
+                        evt.menu.AppendAction($"修饰结点(Decorator)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
                 }
 
                 evt.menu.AppendSeparator();
@@ -253,7 +257,7 @@ namespace ZetanStudio.BehaviourTree
         private void CreateNewNode(Node newNode, string name, Vector2 position)
         {
             newNode.name = name;
-            newNode.position = position;
+            newNode._position = position;
             newNode.guid = GUID.Generate().ToString();
             if (tree.IsInstance)
             {
@@ -276,7 +280,7 @@ namespace ZetanStudio.BehaviourTree
         }
         private void CopyNode(NodeEditor editor)
         {
-            CreateNewNode(UnityEngine.Object.Instantiate(editor.node), $"({tree.Nodes.Count}) {editor.node.GetType().Name}{(tree.IsRuntime ? "(R)" : string.Empty)}", editor.node.position + new Vector2(30, 30));
+            CreateNewNode(UnityEngine.Object.Instantiate(editor.node), $"({tree.Nodes.Count}) {editor.node.GetType().Name}{(tree.IsRuntime ? "(R)" : string.Empty)}", editor.node._position + new Vector2(30, 30));
         }
         #endregion
 
@@ -317,8 +321,8 @@ namespace ZetanStudio.BehaviourTree
             public System.Action undoRedoPerformed;
             public System.Action onRecordsChanged;
 
-            private Stack<Record> undoRecords = new Stack<Record>();
-            private Stack<Record> redoRecords = new Stack<Record>();
+            private readonly Stack<Record> undoRecords = new Stack<Record>();
+            private readonly Stack<Record> redoRecords = new Stack<Record>();
 
             public bool CanUndo => undoRecords.Count > 0;
             public bool CanRedo => redoRecords.Count > 0;
@@ -416,18 +420,13 @@ namespace ZetanStudio.BehaviourTree
 
                 public Record Perform()
                 {
-                    switch (type)
+                    return type switch
                     {
-                        case RecordType.NodePosition:
-                            return UndoNodePosition();
-                        case RecordType.MultNodePosition:
-                            return UndoMultNodePosition();
-                        case RecordType.TreeChange:
-                            return UndoTreeChange();
-                        case RecordType.Empty:
-                        default:
-                            return null;
-                    }
+                        RecordType.NodePosition => UndoNodePosition(),
+                        RecordType.MultNodePosition => UndoMultNodePosition(),
+                        RecordType.TreeChange => UndoTreeChange(),
+                        _ => null,
+                    };
 
                     Record UndoTreeChange()
                     {
@@ -465,8 +464,8 @@ namespace ZetanStudio.BehaviourTree
                     }
                     Record UndoNodePosition()
                     {
-                        Vector2 current = node.position;
-                        node.position = position;
+                        Vector2 current = node._position;
+                        node._position = position;
                         return new Record(RecordType.NodePosition) { node = node, position = current };
                     }
 
@@ -475,8 +474,8 @@ namespace ZetanStudio.BehaviourTree
                         Dictionary<Node, Vector2> currents = new Dictionary<Node, Vector2>();
                         foreach (var kvp in positions)
                         {
-                            currents.Add(kvp.Key, kvp.Key.position);
-                            kvp.Key.position = kvp.Value;
+                            currents.Add(kvp.Key, kvp.Key._position);
+                            kvp.Key._position = kvp.Value;
                         }
                         return new Record(RecordType.MultNodePosition) { positions = currents };
                     }

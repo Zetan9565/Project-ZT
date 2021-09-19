@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: beard
   m_EditorClassIdentifier: Assembly-CSharp::NPCInfomation
   _ID: NPC002
-  _Name: "\u6069\u683C\u65AF"
+  _name: "\u6069\u683C\u65AF"
   sex: 1
   defaultDialogue: {fileID: 11400000, guid: 982521bacf361f14289d5658a605bca4, type: 2}
   conditionDialogues:

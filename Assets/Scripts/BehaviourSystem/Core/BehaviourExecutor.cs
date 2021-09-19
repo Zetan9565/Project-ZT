@@ -4,10 +4,9 @@ using UnityEngine;
 
 namespace ZetanStudio.BehaviourTree
 {
-    [DisallowMultipleComponent]
     public class BehaviourExecutor : MonoBehaviour
     {
-        [SerializeField, ObjectDropDown(typeof(BehaviourTree))]
+        [SerializeField]
         protected BehaviourTree behaviour;
         public BehaviourTree Behaviour => behaviour;
 
@@ -148,7 +147,7 @@ namespace ZetanStudio.BehaviourTree
         }
 
 #if UNITY_EDITOR
-        public Type GetVariableTypeAtIndex(int index)
+        public Type GetPresetVariableTypeAtIndex(int index)
         {
             if (index < 0 || index > presetVariables.Count) return null;
             return presetVariables[index].GetType();

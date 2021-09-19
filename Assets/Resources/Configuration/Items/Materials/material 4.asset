@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: material 4
   m_EditorClassIdentifier: 
   _ID: MATR005
-  _Name: "\u8304\u5B50"
+  _name: "\u8304\u5B50"
   itemType: 8
   quality: 1
   weight: 0.5

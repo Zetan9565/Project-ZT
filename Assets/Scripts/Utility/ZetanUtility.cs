@@ -71,6 +71,11 @@ namespace ZetanExtends
         {
             return source.GetComponent<RectTransform>();
         }
+        public static T GetOrAddComponent<T>(this GameObject source) where T : Component
+        {
+            var comp = source.GetComponent<T>();
+            return comp != null ? comp : source.AddComponent<T>();
+        }
 
         public static GameObject CreateChild(this GameObject source, string name = null, params Type[] components)
         {
@@ -376,6 +381,16 @@ public sealed class ZetanUtility
             }
         }
         return enumValue.ToString();
+    }
+
+    public static string[] GetEnumNames(Type type)
+    {
+        List<string> names = new List<string>();
+        foreach (Enum value in Enum.GetValues(type))
+        {
+            names.Add(GetInspectorName(value));
+        }
+        return names.ToArray();
     }
 
     #region Vector相关

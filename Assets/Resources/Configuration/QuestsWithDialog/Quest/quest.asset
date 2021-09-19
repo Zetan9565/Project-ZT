@@ -85,7 +85,7 @@ MonoBehaviour:
         orderIndex: 3
         killType: 2
         enemy: {fileID: 0}
-        race: {fileID: 0}
+        race: {fileID: 11400000, guid: 150e8a581f32093459fd9b32c975e6f7, type: 2}
         group: {fileID: 11400000, guid: e3f0673e98f57e246b4162cc7596550b, type: 2}
     00000003:
       type: {class: CollectObjective, ns: , asm: Assembly-CSharp}

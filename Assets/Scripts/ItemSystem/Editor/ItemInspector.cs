@@ -16,7 +16,7 @@ public partial class ItemInspector : Editor
     float lineHeightSpace;
 
     SerializedProperty _ID;
-    SerializedProperty _Name;
+    SerializedProperty _name;
     SerializedProperty itemType;
     SerializedProperty quality;
     SerializedProperty weight;
@@ -52,7 +52,7 @@ public partial class ItemInspector : Editor
 
         item = target as ItemBase;
         _ID = serializedObject.FindProperty("_ID");
-        _Name = serializedObject.FindProperty("_Name");
+        _name = serializedObject.FindProperty("_name");
         itemType = serializedObject.FindProperty("itemType");
         quality = serializedObject.FindProperty("quality");
         weight = serializedObject.FindProperty("weight");
@@ -113,7 +113,7 @@ public partial class ItemInspector : Editor
                 EditorGUI.FocusTextInControl(null);
             }
         }
-        EditorGUILayout.PropertyField(_Name, new GUIContent("名称"));
+        EditorGUILayout.PropertyField(_name, new GUIContent("名称"));
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("道具类型");
         GUI.enabled = false;

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: bag
   m_EditorClassIdentifier: 
   _ID: IBAG001
-  _Name: "\u80CC\u5305\u6269\u5C55\u888B"
+  _name: "\u80CC\u5305\u6269\u5C55\u888B"
   itemType: 14
   quality: 3
   weight: 1

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: c9840ac1dd0a7014ab089865ae67776e
-  position: {x: -235, y: 475}
+  _position: {x: -235, y: 475}
   description: 
   children:
   - {fileID: 7735326463407916777}
@@ -34,7 +34,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: 
-  position: {x: 0.000022411346, y: 59.02697}
+  _position: {x: 0.000022411346, y: 59.02697}
   description: 
   start: {fileID: 5222357198670177345}
 --- !u!114 &-3497104154283355184
@@ -51,7 +51,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: 86f74059db0e4734e9da8885766b742f
-  position: {x: -69, y: 622}
+  _position: {x: -69, y: 622}
   description: 
   randomWait:
     _name: 
@@ -122,7 +122,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: 4ead47104bd67064a8634ebed707ae82
-  position: {x: -235, y: 334}
+  _position: {x: -235, y: 334}
   description: 
   child: {fileID: -8248035722993667674}
 --- !u!114 &5222357198670177345
@@ -139,7 +139,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: 5907f986a75ff18438fa7db70e82e1d4
-  position: {x: -0.000019073486, y: 189.13002}
+  _position: {x: -0.000019073486, y: 189.13002}
   description: 
   children:
   - {fileID: 322414272137955155}
@@ -159,7 +159,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: 081bdeffd40ce4c4b81728f51bcfa0f7
-  position: {x: 259.01294, y: 345}
+  _position: {x: 259.01294, y: 345}
   description: 
   logType: 0
   message:
@@ -181,7 +181,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRuntime: 0
   guid: 7ae0cea9eb261ca42bc8135085a3950d
-  position: {x: -399, y: 622}
+  _position: {x: -399, y: 622}
   description: 
   tag:
     _name: 

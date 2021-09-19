@@ -154,6 +154,10 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
                     Refresh();
                 }
             };
+            objectsList.onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
+            };
             objectsList.drawHeaderCallback = (rect) =>
             {
                 if (waitingRepaint) return;

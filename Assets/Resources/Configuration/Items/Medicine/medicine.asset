@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: medicine
   m_EditorClassIdentifier: 
   _ID: MADC001
-  _Name: "\u6B62\u8840\u6563"
+  _name: "\u6B62\u8840\u6563"
   itemType: 1
   quality: 1
   weight: 0.03

@@ -16,6 +16,8 @@ namespace ZetanStudio.BehaviourTree
         [HideInInspector]
         public bool isShared;
 
+        public bool IsValid => !(isGlobal || isShared) || (isGlobal || isShared) && !string.IsNullOrEmpty(_name);
+
         public abstract object GetValue();
         public abstract void SetValue(object value);
 
@@ -27,6 +29,9 @@ namespace ZetanStudio.BehaviourTree
     {
         [SerializeField]
         protected T value;
+        /// <summary>
+        /// 赋值要使用此字段，如果直接把泛型值赋值给此对象，此对象会被覆盖，泛型值赋值只是为了方便声明变量的初始值
+        /// </summary>
         public T Value {
             get
             {

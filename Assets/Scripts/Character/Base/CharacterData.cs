@@ -39,7 +39,7 @@ public class CharacterData
     public Character entity;
     public string currentScene;
 
-    public virtual Vector3 currentPosition => entity ? (entity.Body ? entity.Body.position : entity.Position) : Vector3.zero;
+    public virtual Vector3 currentPosition => entity ? entity.Position : Vector3.zero;
 
     public CharacterData(CharacterInformation info)
     {

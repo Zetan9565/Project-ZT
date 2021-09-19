@@ -48,8 +48,6 @@ namespace ZetanStudio.BehaviourTree
 
         public BehaviourExecutor Executor { get; private set; }
         public Dictionary<string, SharedVariable> KeyedVariables { get; private set; }
-
-        public Queue<Node> EvaluatedNodes { get; private set; }
         #endregion
 
         #region 共享变量获取
@@ -145,7 +143,7 @@ namespace ZetanStudio.BehaviourTree
         {
             if (!IsInstance)
             {
-                Debug.LogError("尝试初始化未实例化的行为树");
+                Debug.LogError("尝试初始化未实例化的行为树: " + executor.gameObject.name);
                 return;
             }
             Executor = executor;
@@ -158,7 +156,6 @@ namespace ZetanStudio.BehaviourTree
                 }
             }
             Traverse(entry, n => n.Init(this));
-            EvaluatedNodes = new Queue<Node>();
             executedConditional = new List<Conditional>();
             conditionalsMap = new HashSet<Conditional>();
         }
@@ -167,7 +164,7 @@ namespace ZetanStudio.BehaviourTree
         {
             if (!IsInstance)
             {
-                Debug.LogError("尝试预设未实例化的行为树");
+                Debug.LogError($"尝试预设未实例化的行为树：{(Executor ? $"{Executor.gameObject.name}." : string.Empty)}{name}");
                 return;
             }
             foreach (var variable in variables)
@@ -218,7 +215,6 @@ namespace ZetanStudio.BehaviourTree
                 }
                 if (entry.State == NodeStates.Inactive || entry.State == NodeStates.Running || abort)
                 {
-                    EvaluatedNodes.Clear();
                     if (!entry.IsStarted) Traverse(entry, n => n.OnBehaviourStart());
                     ExecutionState = entry.Evaluate();
                     switch (ExecutionState)
@@ -246,9 +242,8 @@ namespace ZetanStudio.BehaviourTree
                 Debug.LogError($"尝试重启空的行为树：{(Executor ? $"{Executor.gameObject.name}." : string.Empty)}{name}");
                 return;
             }
-            if (reset) Reset();
-            else entry.Reset();
-            EvaluatedNodes = new Queue<Node>();
+            if (reset) Reset_();
+            else entry.Reset_();
             executedConditional = new List<Conditional>();
             conditionalsMap = new HashSet<Conditional>();
             Traverse(entry, n => n.OnBehaviourRestart());
@@ -259,9 +254,9 @@ namespace ZetanStudio.BehaviourTree
             Traverse(entry, n => n.Pause(paused));
             IsPaused = paused;
         }
-        public void Reset()
+        public void Reset_()
         {
-            Traverse(entry, n => n.Reset());
+            Traverse(entry, n => n.Reset_());
         }
         private List<Conditional> executedConditional;
         private HashSet<Conditional> conditionalsMap;
@@ -333,21 +328,16 @@ namespace ZetanStudio.BehaviourTree
 
         public void OnDrawGizmos()
         {
-            if (IsInstance) Traverse(entry, n => n.OnDrawGizmos());
+            Traverse(entry, n => n.OnDrawGizmos());
         }
         public void OnDrawGizmosSelected()
         {
-            if (IsInstance) Traverse(entry, n => n.OnDrawGizmosSelected());
+            Traverse(entry, n => n.OnDrawGizmosSelected());
         }
         #endregion
         #endregion
 
-        public BehaviourTree()
-        {
-            nodes = new List<Node>();
-            variables = new List<SharedVariable>();
-        }
-
+        #region 结点搜索相关
         public Node FindParent(Node child)
         {
             Node parent = null;
@@ -362,7 +352,6 @@ namespace ZetanStudio.BehaviourTree
             });
             return parent;
         }
-
         public Node FindParent(Node child, out int childIndex)
         {
             Node parent = null;
@@ -383,6 +372,35 @@ namespace ZetanStudio.BehaviourTree
             });
             childIndex = index;
             return parent;
+        }
+
+        public Node FindNode(string name)
+        {
+            return nodes.Find(x => x.name == name);
+        }
+        public Node FindNode(Type type)
+        {
+            return nodes.Find(x => x.GetType() == type);
+        }
+        public T FindNode<T>() where T : Node
+        {
+            return nodes.Find(x => x.GetType() == typeof(T)) as T;
+        }
+
+        public List<Node> FindNodes(Type type)
+        {
+            return nodes.FindAll(x => x.GetType() == type);
+        }
+        public List<T> FindNodes<T>() where T : Node
+        {
+            return nodes.FindAll(x => x.GetType() == typeof(T)).ConvertAll(x => x as T);
+        }
+        #endregion
+
+        public BehaviourTree()
+        {
+            nodes = new List<Node>();
+            variables = new List<SharedVariable>();
         }
 
         /// <summary>
@@ -484,7 +502,7 @@ namespace ZetanStudio.BehaviourTree
             if (runtimeTree.IsInstance || !runtimeTree.isRuntime) return null;
             BehaviourTree localTree = Instantiate(runtimeTree);
             localTree.isRuntime = false;
-            Traverse(localTree.entry, n => localTree.nodes.Remove(n));
+            Traverse(localTree.entry, n => { localTree.nodes.Remove(n); });
             for (int i = 0; i < localTree.nodes.Count; i++)
             {
                 localTree.nodes[i] = localTree.nodes[i].ConvertToLocal();

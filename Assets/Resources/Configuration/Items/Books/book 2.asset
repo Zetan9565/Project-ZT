@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: book 2
   m_EditorClassIdentifier: 
   _ID: BOOK003
-  _Name: "\u5C0F\u578B\u519C\u7530\u5F00\u57A6\u6307\u5357"
+  _name: "\u5C0F\u578B\u519C\u7530\u5F00\u57A6\u6307\u5357"
   itemType: 13
   quality: 4
   weight: 0

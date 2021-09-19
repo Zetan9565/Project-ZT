@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditorInternal;
@@ -507,7 +508,7 @@ public class ConditionGroupDrawer
 
     private readonly float lineHeightSpace;
 
-    private readonly Dictionary<int, CharacterSelectionDrawer<TalkerInformation>> npcSelectors;
+    private readonly Dictionary<int, ObjectSelectionDrawer<TalkerInformation>> npcSelectors;
 
     public ReorderableList List { get; }
 
@@ -517,7 +518,8 @@ public class ConditionGroupDrawer
         this.property = property;
         this.lineHeightSpace = lineHeightSpace;
         SerializedProperty conditions = property.FindPropertyRelative("conditions");
-        npcSelectors = new Dictionary<int, CharacterSelectionDrawer<TalkerInformation>>();
+        npcSelectors = new Dictionary<int, ObjectSelectionDrawer<TalkerInformation>>();
+        var talkers = Resources.LoadAll<TalkerInformation>("").Where(x => x.Enable).ToArray();
         List = new ReorderableList(property.serializedObject, conditions, true, true, true, true)
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
@@ -574,7 +576,7 @@ public class ConditionGroupDrawer
                             compareType = condition.FindPropertyRelative("compareType");
                             if (!npcSelectors.TryGetValue(index, out var selector))
                             {
-                                selector = new CharacterSelectionDrawer<TalkerInformation>(npc, "条件对象");
+                                selector = new ObjectSelectionDrawer<TalkerInformation>(npc, "_name", talkers, "条件对象");
                                 npcSelectors.Add(index, selector);
                             }
                             selector.DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
@@ -716,90 +718,6 @@ public class ConditionGroupDrawer
     }
 }
 
-public class CharacterSelectionDrawer<T> where T : CharacterInformation
-{
-    private readonly T[] characters;
-    private readonly string[] characterNames;
-
-    private readonly SerializedProperty property;
-    private readonly string label;
-
-    public CharacterSelectionDrawer(SerializedProperty property, string label = "角色选择", string nameNull = "未选择")
-    {
-        characters = Resources.LoadAll<T>("Configuration");
-        List<string> characterNames = new List<string>() { nameNull };
-        foreach (var character in characters)
-        {
-            if (character is EnemyInformation e && e.Race)
-            {
-                characterNames.Add($"{e.Race.name}/{e.name}");
-            }
-            else characterNames.Add(character.name);
-        }
-        this.property = property;
-        this.label = label;
-        this.characterNames = characterNames.ToArray();
-    }
-
-    public void DoLayoutDraw()
-    {
-        int index = Array.FindIndex(characters, x => x == property.objectReferenceValue) + 1;
-        index = index < 0 ? 0 : index;
-        index = EditorGUILayout.Popup(label, index, characterNames);
-        if (index < 1 || index > characters.Length) property.objectReferenceValue = null;
-        else property.objectReferenceValue = characters[index - 1];
-    }
-
-    public void DoDraw(Rect rect)
-    {
-        int index = Array.FindIndex(characters, x => x == property.objectReferenceValue) + 1;
-        index = index < 0 ? 0 : index;
-        index = EditorGUI.Popup(rect, label, index, characterNames);
-        if (index < 1 || index > characters.Length) property.objectReferenceValue = null;
-        else property.objectReferenceValue = characters[index - 1];
-    }
-}
-
-public class ItemSelectionDrawer<T> where T : ItemBase
-{
-    private readonly T[] items;
-    private readonly string[] itemNames;
-
-    private readonly SerializedProperty property;
-    private readonly string label;
-
-    public ItemSelectionDrawer(SerializedProperty property, string label = "道具", string nameNull = "未选择")
-    {
-        items = Resources.LoadAll<T>("Configuration");
-        List<string> itemNames = new List<string>() { nameNull };
-        foreach (var item in items)
-        {
-            itemNames.Add($"{ZetanUtility.GetInspectorName(item.ItemType)}/{item.name}");
-        }
-        this.property = property;
-        this.label = label;
-        this.itemNames = itemNames.ToArray();
-    }
-
-    public void DoLayoutDraw()
-    {
-        int index = Array.FindIndex(items, x => x == property.objectReferenceValue) + 1;
-        index = index < 0 ? 0 : index;
-        index = EditorGUILayout.Popup(label, index, itemNames);
-        if (index < 1 || index > items.Length) property.objectReferenceValue = null;
-        else property.objectReferenceValue = items[index - 1];
-    }
-
-    public void DoDraw(Rect rect)
-    {
-        int index = Array.FindIndex(items, x => x == property.objectReferenceValue) + 1;
-        index = index < 0 ? 0 : index;
-        index = EditorGUI.Popup(rect, label, index, itemNames);
-        if (index < 1 || index > items.Length) property.objectReferenceValue = null;
-        else property.objectReferenceValue = items[index - 1];
-    }
-}
-
 public class SceneSelectionDrawer
 {
     private readonly string[] sceneNames;
@@ -848,7 +766,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
     private readonly SerializedProperty property;
     private readonly string label;
 
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, string path, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, string path, string label = "", string nameNull = "未选择")
     {
         objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
         List<string> objectNames = new List<string>() { nameNull };
@@ -866,7 +784,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         this.label = label;
         this.objectNames = objectNames.ToArray();
     }
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, string path, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, string path, string label = "", string nameNull = "未选择")
     {
         objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
         List<string> objectNames = new List<string>() { nameNull };
@@ -893,7 +811,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         }
     }
 
-    public ObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, string path, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, string path, string label = "", string nameNull = "未选择")
     {
         objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
         List<string> objectNames = new List<string>() { nameNull };
@@ -914,7 +832,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         this.label = label;
         this.objectNames = objectNames.ToArray();
     }
-    public ObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, Func<T, string> groupPicker, string path, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, Func<T, string> groupPicker, string path, string label = "", string nameNull = "未选择")
     {
         objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
         List<string> objectNames = new List<string>() { nameNull };
@@ -945,7 +863,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         }
     }
 
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, T[] resources, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, T[] resources, string label = "", string nameNull = "未选择")
     {
         objects = resources;
         List<string> objectNames = new List<string>() { nameNull };
@@ -963,7 +881,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         this.label = label;
         this.objectNames = objectNames.ToArray();
     }
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, T[] resources, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, T[] resources, string label = "", string nameNull = "未选择")
     {
         objects = resources;
         List<string> objectNames = new List<string>() { nameNull };
@@ -990,7 +908,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         }
     }
 
-    public ObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, T[] resources, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, T[] resources, string label = "", string nameNull = "未选择")
     {
         objects = resources;
         List<string> objectNames = new List<string>() { nameNull };
@@ -1011,7 +929,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         this.label = label;
         this.objectNames = objectNames.ToArray();
     }
-    public ObjectSelectionDrawer(SerializedProperty property, Func<T, bool> filter, string fieldAsName, Func<T, string> groupPicker, T[] resources, string label = "资源", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, Func<T, string> groupPicker, T[] resources, string label = "", string nameNull = "未选择")
     {
         objects = resources;
         List<string> objectNames = new List<string>() { nameNull };
@@ -1044,19 +962,22 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
 
     public void DoLayoutDraw()
     {
-        int index = Array.FindIndex(objects, x => x == property.objectReferenceValue) + 1;
+        int index = Array.IndexOf(objects, property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
-        index = EditorGUILayout.Popup(label, index, objectNames);
+        Rect rect = EditorGUILayout.GetControlRect();
+        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 21, rect.height), string.IsNullOrEmpty(label) ? property.displayName : label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
+        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 20, rect.y, 20, rect.height), property, new GUIContent(string.Empty));
     }
 
     public void DoDraw(Rect rect)
     {
         int index = Array.FindIndex(objects, x => x == property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
-        index = EditorGUI.Popup(rect, label, index, objectNames);
+        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 21, rect.height), string.IsNullOrEmpty(label) ? property.displayName : label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
+        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 20, rect.y, 20, rect.height), property, new GUIContent(string.Empty));
     }
 }

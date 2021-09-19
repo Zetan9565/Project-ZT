@@ -7,7 +7,7 @@ using ZetanStudio.BehaviourTree;
 public class #SCRIPTNAME# : Conditional
 {
     [DisplayName("参数显示名称")]
-    public SharedBoolean example;
+    public SharedBool example;
 
     //覆写此属性以用于判断结点有效性
     public override bool IsValid => true;

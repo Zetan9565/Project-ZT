@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -11,8 +10,8 @@ public abstract class ItemBase : ScriptableObject
     public virtual string ID => _ID;
 
     [SerializeField]
-    protected string _Name;
-    public new virtual string name => _Name;
+    protected string _name;
+    public new virtual string name => _name;
 
     [SerializeField]
     protected ItemType itemType = ItemType.Other;

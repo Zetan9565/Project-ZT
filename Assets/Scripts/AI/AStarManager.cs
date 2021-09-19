@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
 
@@ -23,8 +23,9 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
     [SerializeField]
     private Color gridColor = new Color(Color.white.r, Color.white.g, Color.white.b, 0.15f);
 
-    [SerializeField]
-    private bool expendGraphs = true;
+#if UNITY_EDITOR
+    public bool expendGraphs = true;
+#endif
     #endregion
 
     #region 初始化相关变量
@@ -139,7 +140,7 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
     public List<Vector3> SimplifyPath(Vector2Int unitSize, List<GraphNode> path)
     {
         List<Vector3> waypoints = new List<Vector3>();
-        if (path.Count < 1) return waypoints;
+        if (path == null || path.Count < 1) return waypoints;
         PathToWaypoints();
         StraightenPath();
         return waypoints;
@@ -155,7 +156,7 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
                         - new Vector2(path[i].position.x, ThreeD ? path[i].position.z : path[i].position.y);
                     if (newDir != oldDir)//方向不一样时才使用前面的点
                         waypoints.Add((Vector3)path[i - 1].position);
-                    else if (i == path.Count - 1) waypoints.Add((Vector3)path[i].position);//即使方向一样，也强制把终点点也加进去
+                    else if (i == path.Count - 1) waypoints.Add((Vector3)path[i].position);//即使方向一样，也强制把终点也加进去
                     oldDir = newDir;
                 }
             }

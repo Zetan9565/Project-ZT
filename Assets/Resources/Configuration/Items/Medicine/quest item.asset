@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: quest item
   m_EditorClassIdentifier: 
   _ID: QSTI001
-  _Name: "\u7F6E\u4F4D\u89E6\u53D1\u5668"
+  _name: "\u7F6E\u4F4D\u89E6\u53D1\u5668"
   itemType: 10
   quality: 0
   weight: 0

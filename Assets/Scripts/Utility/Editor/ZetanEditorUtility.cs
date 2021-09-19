@@ -223,7 +223,7 @@ public static class ZetanEditorUtility
                     {
                         T obj = instantiate();
                         AssetDatabase.CreateAsset(obj, ConvertToAssetsPath(path));
-                        AssetDatabase.Refresh();
+                        AssetDatabase.SaveAssets();
                         if (select) Selection.activeObject = obj;
                         if (ping) EditorGUIUtility.PingObject(obj);
                         return obj;
@@ -242,5 +242,32 @@ public static class ZetanEditorUtility
             }
             return null;
         }
+    }
+
+    public static void MinMaxSlider(string label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
+    {
+        MinMaxSlider(EditorGUILayout.GetControlRect(), label, ref minValue, ref maxValue, minLimit, maxLimit);
+    }
+    public static void MinMaxSlider(GUIContent label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
+    {
+        MinMaxSlider(EditorGUILayout.GetControlRect(), label, ref minValue, ref maxValue, minLimit, maxLimit);
+    }
+    public static void MinMaxSlider(Rect rect, string label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
+    {
+        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width * 0.4f, rect.height), label);
+        minValue = EditorGUI.FloatField(new Rect(rect.x + rect.width * 0.4f, rect.y, 30, rect.height), minValue);
+        if (minValue < minLimit) minValue = minLimit;
+        maxValue = EditorGUI.FloatField(new Rect(rect.x + rect.width - 30, rect.y, 30, rect.height), maxValue);
+        if (maxValue > maxLimit) maxValue = maxLimit;
+        EditorGUI.MinMaxSlider(new Rect(rect.x + rect.width * 0.4f + 33, rect.y, rect.width * 0.6f - 66, rect.height), ref minValue, ref maxValue, minLimit, maxLimit);
+    }
+    public static void MinMaxSlider(Rect rect, GUIContent label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
+    {
+        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width * 0.4f, rect.height), label);
+        minValue = EditorGUI.FloatField(new Rect(rect.x + rect.width * 0.4f, rect.y, 30, rect.height), minValue);
+        if (minValue < minLimit) minValue = minLimit;
+        maxValue = EditorGUI.FloatField(new Rect(rect.x + rect.width - 30, rect.y, 30, rect.height), maxValue);
+        if (maxValue > maxLimit) maxValue = maxLimit;
+        EditorGUI.MinMaxSlider(new Rect(rect.x + rect.width * 0.4f + 33, rect.y, rect.width * 0.6f - 66, rect.height), ref minValue, ref maxValue, minLimit, maxLimit);
     }
 }

@@ -112,7 +112,7 @@ public partial class CharacterInfoInspector
                         EditorGUI.FocusTextInControl(null);
                     }
                 }
-                EditorGUILayout.PropertyField(_Name, new GUIContent("名称"));
+                EditorGUILayout.PropertyField(_name, new GUIContent("名称"));
                 EditorGUILayout.PropertyField(sex, new GUIContent("性别"));
                 if (enable.boolValue)
                 {
@@ -125,6 +125,7 @@ public partial class CharacterInfoInspector
                 #endregion
                 break;
             case 1:
+                #region case 1
                 serializedObject.Update();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(defalutDialogue, new GUIContent("默认对话"));
@@ -156,6 +157,7 @@ public partial class CharacterInfoInspector
                     conditionDialogList.DoLayoutList();
                     serializedObject.ApplyModifiedProperties();
                 }
+                #endregion
                 break;
             case 2:
                 #region case 2
@@ -334,6 +336,11 @@ public partial class CharacterInfoInspector
                     serializedObject.ApplyModifiedProperties();
             },
 
+            onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
+            },
+
             drawHeaderCallback = (rect) =>
             {
                 int notCmpltCount = talker.ConditionDialogues.FindAll(x => !x.Dialogue ||
@@ -351,125 +358,139 @@ public partial class CharacterInfoInspector
 
     void HandlingGiftDialogueList()
     {
-        giftDialoguesList = new ReorderableList(serializedObject, giftDialogues, true, true, true, true);
-        giftDialoguesList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+        giftDialoguesList = new ReorderableList(serializedObject, giftDialogues, true, true, true, true)
         {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            SerializedProperty giftDialogue = giftDialogues.GetArrayElementAtIndex(index);
-            SerializedProperty dialogue = giftDialogue.FindPropertyRelative("dialogue");
-            SerializedProperty lowerBound = giftDialogue.FindPropertyRelative("lowerBound");
-            SerializedProperty upperBound = giftDialogue.FindPropertyRelative("upperBound");
-            EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2, lineHeight),
-                giftDialogue, new GUIContent($"对话[{lowerBound.intValue}~{upperBound.intValue}]"));
-            EditorGUI.PropertyField(new Rect(rect.x + 8 + rect.width / 2, rect.y, rect.width / 2 - 8, lineHeight),
-                dialogue, new GUIContent(string.Empty));
-            int lineCount = 1;
-            if (dialogue.objectReferenceValue)
+            drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                Dialogue dialog = dialogue.objectReferenceValue as Dialogue;
-                if (dialog.Words[0])
-                {
-                    GUI.enabled = false;
-                    EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), $"[{dialog.Words[0].TalkerName}]说：{dialog.Words[0].Content}");
-                    GUI.enabled = true;
-                    lineCount++;
-                }
-            }
-            if (giftDialogue.isExpanded)
-            {
-                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                    lowerBound, new GUIContent("增加值高于此值时"));
-                lineCount++;
-                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                    upperBound, new GUIContent("增加值低于此值时"));
-            }
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
-
-        giftDialoguesList.elementHeightCallback = (index) =>
-        {
-            SerializedProperty giftDialogue = giftDialogues.GetArrayElementAtIndex(index);
-            SerializedProperty dialogue = giftDialogue.FindPropertyRelative("dialogue");
-            int lineCount = 2;
-            if (giftDialogue.isExpanded)
-            {
-                lineCount++;
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                SerializedProperty giftDialogue = giftDialogues.GetArrayElementAtIndex(index);
+                SerializedProperty dialogue = giftDialogue.FindPropertyRelative("dialogue");
+                SerializedProperty lowerBound = giftDialogue.FindPropertyRelative("lowerBound");
+                SerializedProperty upperBound = giftDialogue.FindPropertyRelative("upperBound");
+                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2, lineHeight),
+                    giftDialogue, new GUIContent($"对话[{lowerBound.intValue}~{upperBound.intValue}]"));
+                EditorGUI.PropertyField(new Rect(rect.x + 8 + rect.width / 2, rect.y, rect.width / 2 - 8, lineHeight),
+                    dialogue, new GUIContent(string.Empty));
+                int lineCount = 1;
                 if (dialogue.objectReferenceValue)
+                {
+                    Dialogue dialog = dialogue.objectReferenceValue as Dialogue;
+                    if (dialog.Words[0])
+                    {
+                        GUI.enabled = false;
+                        EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), $"[{dialog.Words[0].TalkerName}]说：{dialog.Words[0].Content}");
+                        GUI.enabled = true;
+                        lineCount++;
+                    }
+                }
+                if (giftDialogue.isExpanded)
+                {
+                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                        lowerBound, new GUIContent("增加值高于此值时"));
                     lineCount++;
+                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                        upperBound, new GUIContent("增加值低于此值时"));
+                }
+                if (EditorGUI.EndChangeCheck())
+                    serializedObject.ApplyModifiedProperties();
+            },
+
+            elementHeightCallback = (index) =>
+            {
+                SerializedProperty giftDialogue = giftDialogues.GetArrayElementAtIndex(index);
+                SerializedProperty dialogue = giftDialogue.FindPropertyRelative("dialogue");
+                int lineCount = 2;
+                if (giftDialogue.isExpanded)
+                {
+                    lineCount++;
+                    if (dialogue.objectReferenceValue)
+                        lineCount++;
+                }
+                return lineHeightSpace * lineCount;
+            },
+
+            onRemoveCallback = (list) =>
+            {
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                if (EditorUtility.DisplayDialog("删除", "确定删除这个对话吗？", "确定", "取消"))
+                    giftDialogues.DeleteArrayElementAtIndex(list.index);
+                if (EditorGUI.EndChangeCheck())
+                    serializedObject.ApplyModifiedProperties();
+            },
+
+            onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
+            },
+
+            drawHeaderCallback = (rect) =>
+            {
+                int notCmpltCount = talker.AffectiveItems.FindAll(x => !x.Item).Count;
+                EditorGUI.LabelField(rect, "送礼对话列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
+            },
+
+            drawNoneElementCallback = (rect) =>
+            {
+                EditorGUI.LabelField(rect, "空列表");
             }
-            return lineHeightSpace * lineCount;
-        };
-
-        giftDialoguesList.onRemoveCallback = (list) =>
-        {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            if (EditorUtility.DisplayDialog("删除", "确定删除这个对话吗？", "确定", "取消"))
-                giftDialogues.DeleteArrayElementAtIndex(list.index);
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
-
-        giftDialoguesList.drawHeaderCallback = (rect) =>
-        {
-            int notCmpltCount = talker.AffectiveItems.FindAll(x => !x.Item).Count;
-            EditorGUI.LabelField(rect, "送礼对话列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
-        };
-
-        giftDialoguesList.drawNoneElementCallback = (rect) =>
-        {
-            EditorGUI.LabelField(rect, "空列表");
         };
     }
 
     void HandlingAffectiveItemsList()
     {
-        affectiveItemsList = new ReorderableList(serializedObject, affectiveItems, true, true, true, true);
-        affectiveItemsList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+        affectiveItemsList = new ReorderableList(serializedObject, affectiveItems, true, true, true, true)
         {
-            serializedObject.Update();
-            if (talker.AffectiveItems[index].Item != null)
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.AffectiveItems[index].Item.name);
-            else
-                EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
-            EditorGUI.BeginChangeCheck();
-            SerializedProperty favoriteItem = affectiveItems.GetArrayElementAtIndex(index);
-            SerializedProperty item = favoriteItem.FindPropertyRelative("item");
-            SerializedProperty intimacyValue = favoriteItem.FindPropertyRelative("intimacyValue");
-            EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
-                item, new GUIContent(string.Empty));
-            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight),
-                intimacyValue, new GUIContent("亲密值"));
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
+            drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+            {
+                serializedObject.Update();
+                if (talker.AffectiveItems[index].Item != null)
+                    EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.AffectiveItems[index].Item.name);
+                else
+                    EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
+                EditorGUI.BeginChangeCheck();
+                SerializedProperty favoriteItem = affectiveItems.GetArrayElementAtIndex(index);
+                SerializedProperty item = favoriteItem.FindPropertyRelative("item");
+                SerializedProperty intimacyValue = favoriteItem.FindPropertyRelative("intimacyValue");
+                EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
+                    item, new GUIContent(string.Empty));
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight),
+                    intimacyValue, new GUIContent("亲密值"));
+                if (EditorGUI.EndChangeCheck())
+                    serializedObject.ApplyModifiedProperties();
+            },
 
-        affectiveItemsList.elementHeightCallback = (index) =>
-        {
-            return 2 * lineHeightSpace;
-        };
+            elementHeightCallback = (index) =>
+            {
+                return 2 * lineHeightSpace;
+            },
 
-        affectiveItemsList.onRemoveCallback = (list) =>
-        {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
-            if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
-                affectiveItems.DeleteArrayElementAtIndex(list.index);
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
-        };
+            onRemoveCallback = (list) =>
+            {
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
+                    affectiveItems.DeleteArrayElementAtIndex(list.index);
+                if (EditorGUI.EndChangeCheck())
+                    serializedObject.ApplyModifiedProperties();
+            },
 
-        affectiveItemsList.drawHeaderCallback = (rect) =>
-        {
-            int notCmpltCount = talker.AffectiveItems.FindAll(x => !x.Item).Count;
-            EditorGUI.LabelField(rect, "亲密值道具列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
-        };
+            onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
+            },
 
-        affectiveItemsList.drawNoneElementCallback = (rect) =>
-        {
-            EditorGUI.LabelField(rect, "空列表");
+            drawHeaderCallback = (rect) =>
+            {
+                int notCmpltCount = talker.AffectiveItems.FindAll(x => !x.Item).Count;
+                EditorGUI.LabelField(rect, "亲密值道具列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
+            },
+
+            drawNoneElementCallback = (rect) =>
+            {
+                EditorGUI.LabelField(rect, "空列表");
+            }
         };
     }
 
@@ -502,7 +523,7 @@ public partial class CharacterInfoInspector
                             SerializedProperty _ID = newQuest.FindProperty("_ID");
                             SerializedProperty title = newQuest.FindProperty("title");
                             _ID.stringValue = Quest.GetAutoID();
-                            title.stringValue = $"{_Name.stringValue}的委托";
+                            title.stringValue = $"{_name.stringValue}的委托";
                             newQuest.ApplyModifiedProperties();
 
                             EditorUtility.OpenPropertyEditor(questInstance);
@@ -554,6 +575,11 @@ public partial class CharacterInfoInspector
                     talker.QuestsStored.RemoveAt(list.index);
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
+            },
+
+            onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
             },
 
             drawHeaderCallback = (rect) =>

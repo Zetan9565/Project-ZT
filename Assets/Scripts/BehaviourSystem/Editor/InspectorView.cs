@@ -58,12 +58,15 @@ namespace ZetanStudio.BehaviourTree
             {
                 IMGUIContainer container = new IMGUIContainer(() =>
                 {
-                    using SerializedObject serializedObject = new SerializedObject(tree);
-                    serializedObject.Update();
-                    EditorGUI.BeginChangeCheck();
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("_name"), new GUIContent("行为树名称"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("description"), new GUIContent("行为树描述"));
-                    if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+                    if (tree)
+                    {
+                        using SerializedObject serializedObject = new SerializedObject(tree);
+                        serializedObject.Update();
+                        EditorGUI.BeginChangeCheck();
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("_name"), new GUIContent("行为树名称"));
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("description"), new GUIContent("行为树描述"));
+                        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+                    }
                 });
                 Add(container);
             }
@@ -91,12 +94,12 @@ namespace ZetanStudio.BehaviourTree
         private void DrawProperty(SerializedProperty property)
         {
             var proValue = ZetanEditorUtility.GetValue(property, out var fieldInfo);
-            ShouldHide(fieldInfo.GetCustomAttribute<HideIfAttribute>(), out var shouldHide, out var readOnly);
+            ShouldHide(fieldInfo, out var shouldHide, out var readOnly);
             if (shouldHide && !readOnly) return;
             string displayName = property.displayName;
             DisplayNameAttribute nameAttr = fieldInfo.GetCustomAttribute<DisplayNameAttribute>();
             if (nameAttr != null) displayName = nameAttr.Name;
-            EditorGUI.BeginDisabledGroup(shouldHide && readOnly);
+            EditorGUI.BeginDisabledGroup(readOnly);
             var type = fieldInfo.FieldType;
             if (type.IsSubclassOf(typeof(SharedVariable)))
             {
@@ -119,8 +122,8 @@ namespace ZetanStudio.BehaviourTree
                     default:
                         valueRect = new Rect(rect.x, rect.y, rect.width * 0.84f, EditorGUI.GetPropertyHeight(value, true));
                         if (type == typeof(SharedString) && fieldInfo.GetCustomAttribute<Tag>() != null)
-                            value.stringValue = EditorGUI.TagField(valueRect, displayName, string.IsNullOrEmpty(value.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : value.stringValue);
-                        else EditorGUI.PropertyField(valueRect, value, new GUIContent(displayName), true);
+                            value.stringValue = EditorGUI.TagField(valueRect, new GUIContent(displayName, property.tooltip), string.IsNullOrEmpty(value.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : value.stringValue);
+                        else EditorGUI.PropertyField(valueRect, value, new GUIContent(displayName, property.tooltip), true);
                         EditorGUILayout.Space(EditorGUI.GetPropertyHeight(value, true) - EditorGUIUtility.singleLineHeight);
                         break;
                 }
@@ -147,9 +150,14 @@ namespace ZetanStudio.BehaviourTree
                 {
                     var variables = variableHandler.GetVariables(type);
                     string[] varNames = variables.Select(x => x.name).Prepend("未选择").ToArray();
+                    GUIContent[] contents = new GUIContent[varNames.Length];
+                    for (int i = 0; i < varNames.Length; i++)
+                    {
+                        contents[i] = new GUIContent(varNames[i]);
+                    }
                     int nameIndex = System.Array.IndexOf(varNames, variable.name);
                     if (nameIndex < 0) nameIndex = 0;
-                    nameIndex = EditorGUI.Popup(valueRect, displayName, nameIndex, varNames);
+                    nameIndex = EditorGUI.Popup(valueRect, new GUIContent(displayName, property.tooltip), nameIndex, contents);
                     string nameStr = string.Empty;
                     if (nameIndex > 0 && nameIndex <= variables.Count) nameStr = varNames[nameIndex];
                     if (!nodeEditor.node.IsInstance) name.stringValue = nameStr;
@@ -168,13 +176,15 @@ namespace ZetanStudio.BehaviourTree
                 }
             }
             else if (type == typeof(string) && fieldInfo.GetCustomAttribute<Tag>() != null)
-                property.stringValue = EditorGUILayout.TagField(displayName, string.IsNullOrEmpty(property.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : property.stringValue);
-            else EditorGUILayout.PropertyField(property, new GUIContent(displayName), true);
+                property.stringValue = EditorGUILayout.TagField(new GUIContent(displayName, property.tooltip), string.IsNullOrEmpty(property.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : property.stringValue);
+            else EditorGUILayout.PropertyField(property, new GUIContent(displayName, property.tooltip), true);
             EditorGUI.EndDisabledGroup();
         }
 
-        private void ShouldHide(HideIfAttribute hideAttr, out bool should, out bool readOnly)
+        private void ShouldHide(FieldInfo fieldInfo, out bool should, out bool readOnly)
         {
+            HideIfAttribute hideAttr = fieldInfo.GetCustomAttribute<HideIfAttribute>();
+            ReadOnlyAttribute roAttr = fieldInfo.GetCustomAttribute<ReadOnlyAttribute>();
             should = false;
             readOnly = false;
             if (hideAttr != null)
@@ -183,6 +193,10 @@ namespace ZetanStudio.BehaviourTree
                 if (ZetanEditorUtility.GetFieldValue(hideAttr.path, nodeEditor.node, out var fv, out _))
                     if (Equals(fv, hideAttr.value))
                         should = true;
+            }
+            else if (roAttr != null)
+            {
+                readOnly = !roAttr.onlyRuntime || roAttr.onlyRuntime && Application.isPlaying;
             }
         }
     }

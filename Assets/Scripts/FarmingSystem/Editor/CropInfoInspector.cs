@@ -192,9 +192,9 @@ public class CropInfoInspector : Editor
                         gatherInfo.objectReferenceValue = infoInstance;
                         SerializedObject gInfoObj = new SerializedObject(gatherInfo.objectReferenceValue);
                         SerializedProperty _ID = gInfoObj.FindProperty("_ID");
-                        SerializedProperty _Name = gInfoObj.FindProperty("_name");
+                        SerializedProperty _name = gInfoObj.FindProperty("_name");
                         _ID.stringValue = this._ID.stringValue + "S" + index;
-                        _Name.stringValue = _name.stringValue;
+                        _name.stringValue = this._name.stringValue;
                         gInfoObj.ApplyModifiedProperties();
 
                         EditorUtility.OpenPropertyEditor(infoInstance);

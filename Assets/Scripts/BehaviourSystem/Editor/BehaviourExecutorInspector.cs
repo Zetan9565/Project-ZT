@@ -18,6 +18,7 @@ namespace ZetanStudio.BehaviourTree
 
         AnimBool showList;
         AnimBool showPreset;
+        ObjectSelectionDrawer<BehaviourTree> treeDrawer;
         SharedVariableListDrawer variableList;
         SharedVariablePresetListDrawer presetVariableList;
         SerializedObject serializedTree;
@@ -32,6 +33,7 @@ namespace ZetanStudio.BehaviourTree
             restartOnComplete = serializedObject.FindProperty("restartOnComplete");
             resetOnRestart = serializedObject.FindProperty("resetOnRestart");
             presetVariables = serializedObject.FindProperty("presetVariables");
+            treeDrawer = new ObjectSelectionDrawer<BehaviourTree>(behaviour, string.Empty, string.Empty, "行为树");
             InitTree();
         }
 
@@ -43,7 +45,7 @@ namespace ZetanStudio.BehaviourTree
             variableList = new SharedVariableListDrawer(serializedTree, serializedVariables, true);
             presetVariableList = new SharedVariablePresetListDrawer(serializedObject, presetVariables,
                                                                     serializedTree.targetObject as ISharedVariableHandler,
-                                                                    (target as BehaviourExecutor).GetVariableTypeAtIndex);
+                                                                    (target as BehaviourExecutor).GetPresetVariableTypeAtIndex);
             showList = new AnimBool(serializedVariables.isExpanded);
             showList.valueChanged.AddListener(() => { Repaint(); if (serializedVariables != null) serializedVariables.isExpanded = showList.target; });
             showPreset = new AnimBool(presetVariables.isExpanded);
@@ -52,19 +54,35 @@ namespace ZetanStudio.BehaviourTree
 
         public override void OnInspectorGUI()
         {
+            if (target is RuntimeBehaviourExecutor exe)
+            {
+                if (PrefabUtility.IsPartOfAnyPrefab(exe))
+                {
+                    EditorGUILayout.HelpBox("不能在预制件使用RuntimeBehaviourExecutor", MessageType.Error);
+                    return;
+                }
+                else EditorGUILayout.HelpBox("只在本场景生效，若要制作预制件，请使用BehaviourExecutor", MessageType.Info);
+            }
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUI.BeginDisabledGroup(target is RuntimeBehaviourExecutor);
-            bool hasTreeBef = behaviour.objectReferenceValue;
-            if (target is RuntimeBehaviourExecutor) EditorGUILayout.ObjectField(behaviour, new GUIContent("行为树"));
-            else EditorGUILayout.PropertyField(behaviour, new GUIContent("行为树"));
-            EditorGUI.EndDisabledGroup();
+            var hasTreeBef = behaviour.objectReferenceValue;
+            if (!(target is RuntimeBehaviourExecutor))
+            {
+                bool shouldDisable = Application.isPlaying && !PrefabUtility.IsPartOfAnyPrefab(target);
+                EditorGUI.BeginDisabledGroup(shouldDisable);
+                if (shouldDisable) EditorGUILayout.PropertyField(behaviour, new GUIContent("行为树"));
+                else treeDrawer.DoLayoutDraw();
+                EditorGUI.EndDisabledGroup();
+            }
             if (behaviour.objectReferenceValue != hasTreeBef) InitTree();
             if (behaviour.objectReferenceValue)
             {
                 if (GUILayout.Button("编辑")) BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor);
+                serializedTree.Update();
+                EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(serializedTree.FindProperty("_name"));
                 EditorGUILayout.PropertyField(serializedTree.FindProperty("description"));
+                if (EditorGUI.EndChangeCheck()) serializedTree.ApplyModifiedProperties();
             }
             EditorGUILayout.PropertyField(frequency, new GUIContent("执行频率"));
             if (frequency.enumValueIndex == (int)BehaviourExecutor.Frequency.FixedTime)

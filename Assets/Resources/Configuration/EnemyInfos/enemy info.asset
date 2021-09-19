@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: enemy info
   m_EditorClassIdentifier: 
   _ID: ENMY001
-  _Name: "\u9AB7\u9AC5"
+  _name: "\u9AB7\u9AC5"
   sex: 0
   race: {fileID: 11400000, guid: 150e8a581f32093459fd9b32c975e6f7, type: 2}
   dropItems: {fileID: 11400000, guid: 806b50f8feb444e44b0cb56ee1adaa28, type: 2}

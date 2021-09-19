@@ -41,20 +41,22 @@ public class QuestInspector : Editor
     Quest[] allQuests;
 
     TalkerInformation[] npcs;
+    ItemBase[] items;
 
     TalkerInformation holder;
 
     AnimBool[] showState;
 
-    CharacterSelectionDrawer<TalkerInformation> npcSelector;
+    ObjectSelectionDrawer<TalkerInformation> npcSelector;
     ObjectSelectionDrawer<QuestGroup> groupSelector;
 
     private void OnEnable()
     {
         allQuests = Resources.LoadAll<Quest>("Configuration");
         quest = target as Quest;
-        npcs = Resources.LoadAll<TalkerInformation>("Configuration");
-        holder = Resources.LoadAll<TalkerInformation>("Configuration").FirstOrDefault(x => x.QuestsStored.Contains(quest));
+        npcs = Resources.LoadAll<TalkerInformation>("Configuration").Where(x => x.Enable).ToArray();
+        holder = npcs.FirstOrDefault(x => x.QuestsStored.Contains(quest));
+        items = Resources.LoadAll<ItemBase>("Configuration");
 
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 2;
@@ -77,7 +79,7 @@ public class QuestInspector : Editor
         cmpltObjctvInOrder = serializedObject.FindProperty("cmpltObjctvInOrder");
         objectives = serializedObject.FindProperty("objectives");
         groupSelector = new ObjectSelectionDrawer<QuestGroup>(group, "_name", "Configuration", "归属组", "无");
-        npcSelector = new CharacterSelectionDrawer<TalkerInformation>(_NPCToSubmit, "在此NPC处提交", "接取处NPC");
+        npcSelector = new ObjectSelectionDrawer<TalkerInformation>(_NPCToSubmit, "_name", npcs, "在此NPC处提交", "接取处NPC");
         acceptConditionDrawer = new ConditionGroupDrawer(serializedObject, acceptCondition, lineHeight, lineHeightSpace, "接取条件列表");
         rewardDrawer = new ItemAmountListDrawer(serializedObject, rewardItems, lineHeight, lineHeightSpace, "奖励列表");
         HandlingObjectiveList();
@@ -136,9 +138,7 @@ public class QuestInspector : Editor
                     EditorGUILayout.EndHorizontal();
                 }
                 groupSelector.DoLayoutDraw();
-                EditorGUILayout.PropertyField(group, new GUIContent("引用资源"));
                 npcSelector.DoLayoutDraw();
-                EditorGUILayout.PropertyField(_NPCToSubmit, new GUIContent("引用资源"));
                 if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();//这一步一定要在DoLayoutList()之前做！否则无法修改DoList之前的数据
                 if (holder)
                 {
@@ -280,23 +280,11 @@ public class QuestInspector : Editor
         {
             if (GUILayout.Button("新建"))
             {
-                string folder = EditorUtility.OpenFolderPanel("选择保存文件夹", ZetanEditorUtility.GetDirectoryName(target), "");
-                if (!string.IsNullOrEmpty(folder))
+                Dialogue dialogInstance = ZetanEditorUtility.SaveFilePanel(CreateInstance<Dialogue>, "dialogue", true);
+                if (dialogInstance)
                 {
-                    try
-                    {
-                        Dialogue dialogInstance = CreateInstance<Dialogue>();
-                        AssetDatabase.CreateAsset(dialogInstance, AssetDatabase.GenerateUniqueAssetPath($"{folder.Replace(Application.dataPath, "Assets")}/dialogue.asset"));
-                        AssetDatabase.Refresh();
-
-                        dialogue.objectReferenceValue = dialogInstance;
-
-                        EditorUtility.OpenPropertyEditor(dialogInstance);
-                    }
-                    catch
-                    {
-                        EditorUtility.DisplayDialog("新建失败", "请选择Assets目录以下的文件夹。", "确定");
-                    }
+                    dialogue.objectReferenceValue = dialogInstance;
+                    EditorUtility.OpenPropertyEditor(dialogInstance);
                 }
             }
         }
@@ -425,9 +413,9 @@ public class QuestInspector : Editor
                             SerializedProperty itemToCollect = objective.FindPropertyRelative("itemToCollect");
                             SerializedProperty checkBagAtStart = objective.FindPropertyRelative("checkBagAtStart");
                             SerializedProperty loseItemAtSbmt = objective.FindPropertyRelative("loseItemAtSbmt");
-                            new ItemSelectionDrawer<ItemBase>(itemToCollect, "目标道具").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
-                            lineCount++;
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), itemToCollect, new GUIContent("引用资源"));
+                            new ObjectSelectionDrawer<ItemBase>(itemToCollect, "_name",
+                                                                i => ZetanUtility.GetInspectorName(i.ItemType), items,
+                                                                "目标道具").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                             lineCount++;
                             EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
                                 checkBagAtStart, new GUIContent("开始进行时检查数量"));
@@ -447,24 +435,15 @@ public class QuestInspector : Editor
                             switch (killType.enumValueIndex)
                             {
                                 case (int)KillObjectiveType.Specific:
-                                    new CharacterSelectionDrawer<EnemyInformation>(enemy, "目标敌人").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
-                                    lineCount++;
-                                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                                        enemy, new GUIContent("目标敌人"));
+                                    new ObjectSelectionDrawer<EnemyInformation>(enemy, "_name", e => e.Race ? e.Race.name : string.Empty, "Configuration", "目标敌人").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                                     lineCount++;
                                     break;
                                 case (int)KillObjectiveType.Race:
                                     new ObjectSelectionDrawer<EnemyRace>(race, "_name", "Configuration", "目标种族").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                                     lineCount++;
-                                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                                        race, new GUIContent("目标种族"));
-                                    lineCount++;
                                     break;
                                 case (int)KillObjectiveType.Group:
                                     new ObjectSelectionDrawer<EnemyGroup>(group, "_name", "Configuration", "目标组合").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
-                                    lineCount++;
-                                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                                        group, new GUIContent("目标组合"));
                                     lineCount++;
                                     break;
                                 default: break;
@@ -475,9 +454,7 @@ public class QuestInspector : Editor
                             #region 交谈类目标
                             SerializedProperty _NPCToTalk = objective.FindPropertyRelative("_NPCToTalk");
                             SerializedProperty dialogue = objective.FindPropertyRelative("dialogue");
-                            new CharacterSelectionDrawer<TalkerInformation>(_NPCToTalk, "与此NPC交谈").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
-                            lineCount++;
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), _NPCToTalk, new GUIContent("引用资源"));
+                            new ObjectSelectionDrawer<TalkerInformation>(_NPCToTalk, "_name", npcs, "与此NPC交谈").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                             lineCount++;
                             EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), dialogue, new GUIContent("交谈时的对话"));
                             lineCount++;
@@ -504,9 +481,8 @@ public class QuestInspector : Editor
                         case 3:
                             #region 检查点目标
                             SerializedProperty itemToUseHere = objective.FindPropertyRelative("itemToUseHere");
-                            new ItemSelectionDrawer<ItemBase>(itemToUseHere, "需在此处使用的道具").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
-                            lineCount++;
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), itemToUseHere, new GUIContent("引用资源"));
+                            new ObjectSelectionDrawer<ItemBase>(itemToUseHere, "_name", i => ZetanUtility.GetInspectorName(i.ItemType), items,
+                                                                "需在此处使用的道具").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                             lineCount++;
                             #endregion
                             break;
@@ -516,17 +492,12 @@ public class QuestInspector : Editor
                             SerializedProperty itemToSubmit = objective.FindPropertyRelative("itemToSubmit");
                             SerializedProperty wordsWhenSubmit = objective.FindPropertyRelative("wordsWhenSubmit");
                             SerializedProperty talkerType = objective.FindPropertyRelative("talkerType");
-                            new CharacterSelectionDrawer<TalkerInformation>(_NPCToSubmit, "与此NPC交谈").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                            new ObjectSelectionDrawer<TalkerInformation>(_NPCToSubmit, "_name", npcs, "与此NPC交谈").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                             lineCount++;
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), _NPCToSubmit, new GUIContent("引用资源"));
+                            new ObjectSelectionDrawer<ItemBase>(itemToSubmit, "_name", i => ZetanUtility.GetInspectorName(i.ItemType), items,
+                                                                "需提交的道具").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                             lineCount++;
-                            new ItemSelectionDrawer<ItemBase>(itemToSubmit, "需提交的道具").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
-                            lineCount++;
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                                itemToSubmit, new GUIContent("引用资源"));
-                            lineCount++;
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
-                                new GUIContent("提交时的说的话"), new GUIStyle() { fontStyle = FontStyle.Bold });
+                            EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight), new GUIContent("提交时的说的话"));
                             talkerType.enumValueIndex = EditorGUI.Popup(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
                                 talkerType.enumValueIndex, new string[] { "NPC说", "玩家说" });
                             lineCount++;
@@ -612,6 +583,10 @@ public class QuestInspector : Editor
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
             },
+            onCanRemoveCallback = (list) =>
+            {
+                return list.IsSelected(list.index);
+            },
             elementHeightCallback = (index) =>
             {
                 SerializedProperty objective = objectives.GetArrayElementAtIndex(index);
@@ -639,7 +614,7 @@ public class QuestInspector : Editor
                     switch (type)
                     {
                         case 0:
-                            lineCount += 3;//目标道具、接取时检查、提交时失去
+                            lineCount += 2;//目标道具、接取时检查、提交时失去
                             break;
                         case 1:
                             lineCount += 1;//目标类型
@@ -648,13 +623,13 @@ public class QuestInspector : Editor
                                 case (int)KillObjectiveType.Specific:
                                 case (int)KillObjectiveType.Race:
                                 case (int)KillObjectiveType.Group:
-                                    lineCount += 2;
+                                    lineCount++;
                                     break;
                                 default: break;
                             }
                             break;
                         case 2:
-                            lineCount += 2;//目标NPC
+                            lineCount++;//目标NPC
                             lineCount++; //交谈时对话
                             SerializedProperty dialogue = objective.FindPropertyRelative("dialogue");
                             if (dialogue.objectReferenceValue is Dialogue dialog)
@@ -666,10 +641,10 @@ public class QuestInspector : Editor
                             }
                             break;
                         case 3:
-                            lineCount += 2;//道具
+                            lineCount++;//道具
                             break;
                         case 4:
-                            lineCount += 6;//NPC、目标道具、提交对话、对话人
+                            lineCount += 4;//NPC、目标道具、提交对话、对话人
                             break;
                         case 5:
                             lineCount += 2;//触发器、状态、检查
@@ -692,17 +667,17 @@ public class QuestInspector : Editor
 
         int GetObjectiveType(string managedReferenceFullTypename)
         {
-            if (managedReferenceFullTypename.Contains("CollectObjective"))
+            if (managedReferenceFullTypename.Contains(typeof(CollectObjective).Name))
                 return 0;
-            if (managedReferenceFullTypename.Contains("KillObjective"))
+            if (managedReferenceFullTypename.Contains(typeof(KillObjective).Name))
                 return 1;
-            if (managedReferenceFullTypename.Contains("TalkObjective"))
+            if (managedReferenceFullTypename.Contains(typeof(TalkObjective).Name))
                 return 2;
-            if (managedReferenceFullTypename.Contains("MoveObjective"))
+            if (managedReferenceFullTypename.Contains(typeof(MoveObjective).Name))
                 return 3;
-            if (managedReferenceFullTypename.Contains("SubmitObjective"))
+            if (managedReferenceFullTypename.Contains(typeof(SubmitObjective).Name))
                 return 4;
-            if (managedReferenceFullTypename.Contains("TriggerObjective"))
+            if (managedReferenceFullTypename.Contains(typeof(TriggerObjective).Name))
                 return 5;
             return -1;
         }

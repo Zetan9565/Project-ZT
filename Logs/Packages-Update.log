@@ -240,3 +240,11 @@ Update Mode: updateDependencies
 
 The following packages were 已更新:
   com.unity.collab-proxy 从版本 1.7.1 到 1.9.0
+
+=== Thu Sep 16 21:23:30 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.analytics 从版本 3.5.3 到 3.6.11

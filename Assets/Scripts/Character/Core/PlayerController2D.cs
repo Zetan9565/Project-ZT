@@ -38,7 +38,7 @@ public class PlayerController2D : CharacterController2D
                 if (state == CharacterState.Normal) canAttack = true;
                 if (canAttack)
                 {
-                    Motion.ForceStop();
+                    ForceStop();
                     if (inputCoroutine != null) StopCoroutine(inputCoroutine);
                     inputCoroutine = StartCoroutine(WaitAttackInputDelay());
                     if (timeoutCoroutine != null) StopCoroutine(timeoutCoroutine);

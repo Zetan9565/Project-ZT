@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: gem item
   m_EditorClassIdentifier: 
   _ID: GEMS001
-  _Name: "\u666E\u901A\u7684\u5B9D\u77F3"
+  _name: "\u666E\u901A\u7684\u5B9D\u77F3"
   itemType: 12
   quality: 0
   weight: 0

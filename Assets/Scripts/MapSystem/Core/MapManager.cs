@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
@@ -290,6 +290,12 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
         icon.transform.position = screenPos;
         if (icon.iconRange) icon.iconRange.transform.position = rangePos;
+    }
+
+    public void UpdateMapIconPosition(MapIcon icon, Vector3 worldPosition)
+    {
+        if (IconsWithoutHolder.TryGetValue(icon, out var mapIconWithoutHolder))
+            mapIconWithoutHolder.worldPosition = worldPosition;
     }
 
     private void InitPlayerIcon()

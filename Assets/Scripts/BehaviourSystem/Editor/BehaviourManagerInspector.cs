@@ -10,6 +10,7 @@ namespace ZetanStudio.BehaviourTree
         SerializedProperty globalVariables;
         SerializedProperty presetVariables;
 
+        ObjectSelectionDrawer<GlobalVariables> globalDrawer;
         SharedVariableListDrawer variableList;
         SharedVariablePresetListDrawer presetVariableList;
         SerializedObject serializedGlobal;
@@ -22,6 +23,12 @@ namespace ZetanStudio.BehaviourTree
         {
             globalVariables = serializedObject.FindProperty("globalVariables");
             presetVariables = serializedObject.FindProperty("presetVariables");
+            globalDrawer = new ObjectSelectionDrawer<GlobalVariables>(globalVariables, string.Empty, string.Empty, "全局变量");
+            InitGlobal();
+        }
+
+        private void InitGlobal()
+        {
             serializedGlobal = new SerializedObject(globalVariables.objectReferenceValue);
             serializedVariables = serializedGlobal.FindProperty("variables");
             variableList = new SharedVariableListDrawer(serializedGlobal, serializedVariables, false);
@@ -38,10 +45,16 @@ namespace ZetanStudio.BehaviourTree
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(globalVariables, new GUIContent("全局变量"));
+            bool shouldDisable = Application.isPlaying && !PrefabUtility.IsPartOfAnyPrefab(target);
+            EditorGUI.BeginDisabledGroup(shouldDisable);
+            var globalBef = globalVariables.objectReferenceValue;
+            if (shouldDisable) EditorGUILayout.PropertyField(globalVariables, new GUIContent("全局变量"));
+            else globalDrawer.DoLayoutDraw();
             if (!globalVariables.objectReferenceValue && ZetanEditorUtility.LoadAsset<GlobalVariables>() == null)
                 if (GUILayout.Button("新建"))
-                    ZetanEditorUtility.SaveFilePanel(CreateInstance<GlobalVariables>, "global variables");
+                    globalVariables.objectReferenceValue = ZetanEditorUtility.SaveFilePanel(CreateInstance<GlobalVariables>, "global variables");
+            EditorGUI.EndDisabledGroup();
+            if (globalVariables.objectReferenceValue != globalBef) InitGlobal();
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (globalVariables.objectReferenceValue)
             {

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: currency
   m_EditorClassIdentifier: 
   _ID: CURR001
-  _Name: "\u91D1\u5E01"
+  _name: "\u91D1\u5E01"
   itemType: 16
   quality: 0
   weight: 0

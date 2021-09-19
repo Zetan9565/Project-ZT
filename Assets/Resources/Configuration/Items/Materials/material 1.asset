@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: material 1
   m_EditorClassIdentifier: 
   _ID: MATR002
-  _Name: "\u94C1\u539F\u77F3"
+  _name: "\u94C1\u539F\u77F3"
   itemType: 8
   quality: 0
   weight: 0.1

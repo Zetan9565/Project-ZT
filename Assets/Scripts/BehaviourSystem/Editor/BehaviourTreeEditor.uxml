@@ -4,9 +4,11 @@
         <uie:ToolbarMenu display-tooltip-when-elided="true" text="文件" name="assets" style="width: 48px;" />
         <uie:ToolbarButton text="撤销" display-tooltip-when-elided="true" name="undo" style="-unity-text-align: middle-center;" />
         <uie:ToolbarButton text="重做" display-tooltip-when-elided="true" name="redo" style="-unity-text-align: middle-center; white-space: nowrap;" />
+        <uie:ToolbarSpacer style="width: 1100px;" />
+        <uie:ToolbarMenu display-tooltip-when-elided="true" name="exe-select" text="选择行为树" style="flex-direction: row;" />
     </uie:Toolbar>
     <ZetanStudio.BehaviourTree.SplitView fixed-pane-initial-dimension="300">
-        <ZetanStudio.BehaviourTree.SplitView orientation="Vertical" fixed-pane-initial-dimension="250" name="left-container" style="min-width: auto;">
+        <ZetanStudio.BehaviourTree.SplitView orientation="Vertical" fixed-pane-initial-dimension="360" name="left-container" style="min-width: auto;">
             <ui:ScrollView vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" name="inspector-container" style="flex-grow: 0;">
                 <ui:Label text="检查器" display-tooltip-when-elided="true" style="background-color: rgba(0, 0, 0, 0.5); height: 16px; font-size: 14px;" />
                 <ZetanStudio.BehaviourTree.InspectorView style="flex-grow: 1; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;" />

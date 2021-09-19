@@ -10,7 +10,7 @@ namespace ZetanStudio.BehaviourTree
         public List<BehaviourExecutor> Executors { get; } = new List<BehaviourExecutor>();
         public HashSet<BehaviourExecutor> executorsMap = new HashSet<BehaviourExecutor>();
 
-        [SerializeField, ObjectDropDown(typeof(GlobalVariables))]
+        [SerializeField]
         private GlobalVariables globalVariables;
         public GlobalVariables GlobalVariables => globalVariables;
 

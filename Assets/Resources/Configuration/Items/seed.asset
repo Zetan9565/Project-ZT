@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: seed
   m_EditorClassIdentifier: 
   _ID: SEED001
-  _Name: "\u79CD\u5B50"
+  _name: "\u79CD\u5B50"
   itemType: 15
   quality: 0
   weight: 0
