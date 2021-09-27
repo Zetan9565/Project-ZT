@@ -59,10 +59,10 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         long maxAmount = goods.Info.EmptyAble ? goods.LeftAmount : (goods.Info.SellPrice > 0 ? BackpackManager.Instance.Money / goods.Info.SellPrice : 999);
         if (goods.LeftAmount == 1 && goods.Info.EmptyAble)
         {
-            ConfirmManager.Instance.New(string.Format("确定购买1个 [{0}] 吗？", goods.Item.name), delegate
+            ConfirmManager.Instance.New(string.Format("确定购买1个 [{0}] 吗？", goods.Item.Name), delegate
             {
                 if (OnSell(goods))
-                    MessageManager.Instance.New(string.Format("购买了1个 [{0}]", goods.Item.name));
+                    MessageManager.Instance.New(string.Format("购买了1个 [{0}]", goods.Item.Name));
             });
         }
         else if (goods.IsEmpty)
@@ -73,10 +73,10 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         {
             AmountManager.Instance.New(delegate (long amount)
             {
-                ConfirmManager.Instance.New(string.Format("确定购买{0}个 [{1}] 吗？", (int)amount, goods.Item.name), delegate
+                ConfirmManager.Instance.New(string.Format("确定购买{0}个 [{1}] 吗？", (int)amount, goods.Item.Name), delegate
                 {
                     if (OnSell(goods, (int)amount))
-                        MessageManager.Instance.New(string.Format("购买了{0}个 [{1}]", (int)amount, goods.Item.name));
+                        MessageManager.Instance.New(string.Format("购买了{0}个 [{1}]", (int)amount, goods.Item.Name));
                 });
             }, maxAmount, "购买数量", ZetanUtility.ScreenCenter, Vector2.zero);
         }
@@ -115,10 +115,10 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         int maxAmount = data.Info.EmptyAble ? (data.LeftAmount > backpackAmount ? backpackAmount : data.LeftAmount) : backpackAmount;
         if (data.LeftAmount == 1 && data.Info.EmptyAble)
         {
-            ConfirmManager.Instance.New(string.Format("确定出售1个 [{0}] 吗？", data.Item.name), delegate
+            ConfirmManager.Instance.New(string.Format("确定出售1个 [{0}] 吗？", data.Item.Name), delegate
             {
                 if (OnPurchase(data, 1))
-                    MessageManager.Instance.New(string.Format("出售了1个 [{1}]", 1, data.Item.name));
+                    MessageManager.Instance.New(string.Format("出售了1个 [{1}]", 1, data.Item.Name));
             });
         }
         else if (data.IsEmpty)
@@ -132,10 +132,10 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         {
             AmountManager.Instance.New(delegate (long amount)
             {
-                ConfirmManager.Instance.New(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, data.Item.name), delegate
+                ConfirmManager.Instance.New(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, data.Item.Name), delegate
                 {
                     if (OnPurchase(data, (int)amount))
-                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, data.Item.name));
+                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, data.Item.Name));
                 });
             }, maxAmount, "出售数量", ZetanUtility.ScreenCenter, Vector2.zero);
         }
@@ -197,20 +197,20 @@ public class ShopManager : WindowHandler<ShopUI, ShopManager>
         }
         if (info.Amount == 1)
         {
-            ConfirmManager.Instance.New(string.Format("确定出售1个 [{0}] 吗？", info.item.name), delegate
+            ConfirmManager.Instance.New(string.Format("确定出售1个 [{0}] 吗？", info.item.Name), delegate
             {
                 if (OnPurchase(info))
-                    MessageManager.Instance.New(string.Format("出售了1个 [{0}]", info.item.name));
+                    MessageManager.Instance.New(string.Format("出售了1个 [{0}]", info.item.Name));
             });
         }
         else
         {
             AmountManager.Instance.New(delegate (long amount)
             {
-                ConfirmManager.Instance.New(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, info.item.name), delegate
+                ConfirmManager.Instance.New(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, info.item.Name), delegate
                 {
                     if (OnPurchase(info, (int)amount))
-                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, info.item.name));
+                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, info.item.Name));
                 });
             }, BackpackManager.Instance.GetItemAmount(info.item), "出售数量", ZetanUtility.ScreenCenter, Vector2.zero);
         }

@@ -22,4 +22,6 @@
     </ui:VisualElement>
     <ui:VisualElement name="selection-border" picking-mode="Ignore" />
     <ui:Label display-tooltip-when-elided="true" name="abort" style="-unity-text-align: middle-left; position: absolute; visibility: visible; display: flex; overflow: visible; padding-left: 8px; padding-right: 5px; padding-top: 6px; padding-bottom: 5px; font-size: 14px; -unity-font-style: normal;" />
+    <ui:Label display-tooltip-when-elided="true" name="repeat" style="-unity-text-align: middle-left; position: absolute; visibility: visible; display: flex; overflow: visible; padding-left: 8px; padding-right: 5px; padding-top: 10px; padding-bottom: 5px; font-size: 10px; -unity-font-style: normal;" />
+    <ui:Label display-tooltip-when-elided="true" name="invalid" style="-unity-text-align: middle-left; position: absolute; visibility: visible; display: flex; overflow: visible; padding-left: 8px; padding-right: 5px; padding-top: 7px; padding-bottom: 5px; font-size: 14px; -unity-font-style: bold; flex-shrink: 0; flex-grow: 0; left: auto; right: 3px; color: rgba(219, 34, 34, 255);" />
 </ui:UXML>

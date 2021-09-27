@@ -15,10 +15,5 @@ namespace ZetanStudio.BehaviourTree
             if (CheckCondition()) return NodeStates.Success;
             else return NodeStates.Failure;
         }
-
-        protected override void OnEnd()
-        {
-            owner.OnConditionalEnd(this);
-        }
     }
 }

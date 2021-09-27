@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(GatheringInformation))]
+[CustomEditor(typeof(ResourceInformation))]
 public class GatheringInfoInspector : Editor
 {
-    GatheringInformation info;
+    ResourceInformation info;
 
     SerializedProperty _ID;
     SerializedProperty _name;
@@ -19,14 +19,14 @@ public class GatheringInfoInspector : Editor
     float lineHeight;
     float lineHeightSpace;
 
-    GatheringInformation[] gathering;
+    ResourceInformation[] gathering;
 
     private void OnEnable()
     {
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 2;
 
-        info = target as GatheringInformation;
+        info = target as ResourceInformation;
 
         _ID = serializedObject.FindProperty("_ID");
         _name = serializedObject.FindProperty("_name");
@@ -37,7 +37,7 @@ public class GatheringInfoInspector : Editor
         productItems = serializedObject.FindProperty("productItems");
         dropList = new DropItemListDrawer(serializedObject, productItems, lineHeight, lineHeightSpace);
 
-        gathering = Resources.LoadAll<GatheringInformation>("Configuration");
+        gathering = Resources.LoadAll<ResourceInformation>("Configuration");
     }
 
     public override void OnInspectorGUI()
@@ -104,7 +104,7 @@ public class GatheringInfoInspector : Editor
 
     bool ExistsID()
     {
-        GatheringInformation find = Array.Find(gathering, x => x.ID == _ID.stringValue);
+        ResourceInformation find = Array.Find(gathering, x => x.ID == _ID.stringValue);
         if (!find) return false;//若没有找到，则ID可用
         //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
         return find != info || (find == info && Array.FindAll(gathering, x => x.ID == _ID.stringValue).Length > 1);

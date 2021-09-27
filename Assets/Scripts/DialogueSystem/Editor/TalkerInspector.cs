@@ -8,21 +8,24 @@ public class TalkerInspector : Editor
 {
     Talker talker;
 
+    SerializedProperty data;
     SerializedProperty questFlagOffset;
 
     private void OnEnable()
     {
         talker = target as Talker;
+        data = serializedObject.FindProperty("data");
         questFlagOffset = serializedObject.FindProperty("questFlagOffset");
     }
 
     public override void OnInspectorGUI()
     {
-        if (talker.Data)
+        if (talker.GetGenericData())
         {
             EditorGUILayout.BeginVertical("Box");
             EditorGUILayout.LabelField("NPC识别码：" + talker.TalkerID);
             EditorGUILayout.LabelField("NPC名字：" + talker.TalkerName);
+            EditorGUILayout.PropertyField(data);
             EditorGUILayout.EndVertical();
         }
         serializedObject.Update();

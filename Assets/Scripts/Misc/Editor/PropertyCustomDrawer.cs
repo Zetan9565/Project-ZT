@@ -114,7 +114,7 @@ public class ItemAmountListDrawer
                 SerializedProperty item = itemInfo.FindPropertyRelative("item");
                 SerializedProperty amount = itemInfo.FindPropertyRelative("amount");
                 if (item.objectReferenceValue != null)
-                    EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), $"[{index}] {(item.objectReferenceValue as ItemBase).name}");
+                    EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), $"[{index}] {(item.objectReferenceValue as ItemBase).Name}");
                 else
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), $"[{index}] (空)");
                 EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
@@ -211,7 +211,7 @@ public class MaterialListDrawer
 
                 string headLabel = $"[{index}] (空)";
                 if (item.objectReferenceValue && (MakingType)makingType.enumValueIndex == MakingType.SingleItem)
-                    headLabel = $"[{index}] {(item.objectReferenceValue as ItemBase).name}";
+                    headLabel = $"[{index}] {(item.objectReferenceValue as ItemBase).Name}";
                 else if ((MakingType)makingType.enumValueIndex == MakingType.SameType)
                 {
                     headLabel = $"[{index}] {ZetanUtility.GetInspectorName((MaterialType)materialType.enumValueIndex)}";
@@ -380,7 +380,7 @@ public class DropItemListDrawer
                 EditorGUI.BeginChangeCheck();
                 SerializedProperty item = itemInfo.FindPropertyRelative("item");
                 if (item.objectReferenceValue != null)
-                    EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent($"[{index}] {(item.objectReferenceValue as ItemBase).name}"));
+                    EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent($"[{index}] {(item.objectReferenceValue as ItemBase).Name}"));
                 else
                     EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent($"[{index}] (空)"));
                 SerializedProperty minAmount = itemInfo.FindPropertyRelative("minAmount");
@@ -554,7 +554,7 @@ public class ConditionGroupDrawer
                             if (relatedItem.objectReferenceValue)
                             {
                                 ItemBase item = relatedItem.objectReferenceValue as ItemBase;
-                                EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "道具名称", item.name);
+                                EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "道具名称", item.Name);
                             }
                             break;
                         case ConditionType.Level:
@@ -738,24 +738,25 @@ public class SceneSelectionDrawer
         this.label = label;
     }
 
-    public void DoLayoutDraw()
+    public int DoLayoutDraw()
     {
         int index = Array.FindIndex(sceneNames, x => x == property.stringValue);
         index = index < 0 ? 0 : index;
         index = EditorGUILayout.Popup(label, index, sceneNames);
         if (index < 1 || index > sceneNames.Length) property.stringValue = string.Empty;
         else property.stringValue = sceneNames[index];
+        return index;
     }
 
-    public void DoDraw(Rect rect)
+    public int DoDraw(Rect rect)
     {
         int index = Array.FindIndex(sceneNames, x => x == property.stringValue);
         index = index < 0 ? 0 : index;
         index = EditorGUI.Popup(rect, label, index, sceneNames);
         if (index < 1 || index > sceneNames.Length) property.stringValue = string.Empty;
         else property.stringValue = sceneNames[index];
+        return index;
     }
-
 }
 
 public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
@@ -960,24 +961,26 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         }
     }
 
-    public void DoLayoutDraw()
+    public int DoLayoutDraw()
     {
         int index = Array.IndexOf(objects, property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
         Rect rect = EditorGUILayout.GetControlRect();
-        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 21, rect.height), string.IsNullOrEmpty(label) ? property.displayName : label, index, objectNames);
+        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 21, rect.height), label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
         EditorGUI.PropertyField(new Rect(rect.x + rect.width - 20, rect.y, 20, rect.height), property, new GUIContent(string.Empty));
+        return index;
     }
 
-    public void DoDraw(Rect rect)
+    public int DoDraw(Rect rect)
     {
         int index = Array.FindIndex(objects, x => x == property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
-        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 21, rect.height), string.IsNullOrEmpty(label) ? property.displayName : label, index, objectNames);
+        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 21, rect.height), label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
         EditorGUI.PropertyField(new Rect(rect.x + rect.width - 20, rect.y, 20, rect.height), property, new GUIContent(string.Empty));
+        return index;
     }
 }

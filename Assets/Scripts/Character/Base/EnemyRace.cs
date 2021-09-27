@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "enemy race", menuName = "Zetan Studio/敌人/敌人种族", order = 1)]
 public class EnemyRace : ScriptableObject
@@ -21,7 +21,7 @@ public class EnemyRace : ScriptableObject
     [DisplayName("种群名")]
 #endif
     private string _name;
-    public new string name
+    public string Name
     {
         get
         {

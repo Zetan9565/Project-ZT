@@ -38,16 +38,27 @@ public static class ZetanEditorUtility
     /// <summary>
     /// 获取SerializedProperty关联字段的值，该字段必须是SerializedProperty.serializedObject.targetObject的顶级成员
     /// </summary>
-    public static object GetValue(SerializedProperty property)
+    public static bool TryGetValue(SerializedProperty property, out object value)
     {
-        object value = default;
+        value = default;
         if (property.serializedObject.targetObject)
         {
             var onwerType = property.serializedObject.targetObject.GetType();
             var fieldInfo = onwerType.GetField(property.propertyPath, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            if (fieldInfo != null) value = fieldInfo.GetValue(property.serializedObject.targetObject);
+            if (fieldInfo != null)
+            {
+                try
+                {
+                    value = fieldInfo.GetValue(property.serializedObject.targetObject);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
         }
-        return value;
+        return false;
     }
 
     /// <summary>
@@ -56,39 +67,59 @@ public static class ZetanEditorUtility
     /// <param name="property">SerializedProperty</param>
     /// <param name="fieldInfo">字段信息，找不到关联字段时是null</param>
     /// <returns>获取到的字段值</returns>
-    public static object GetValue(SerializedProperty property, out FieldInfo fieldInfo)
+    public static bool TryGetValue(SerializedProperty property, out object value, out FieldInfo fieldInfo)
     {
-        object value = default;
+        value = default;
         fieldInfo = null;
         if (property.serializedObject.targetObject)
         {
             var onwerType = property.serializedObject.targetObject.GetType();
             fieldInfo = onwerType.GetField(property.propertyPath, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            if (fieldInfo != null) value = fieldInfo.GetValue(property.serializedObject.targetObject);
-        }
-        return value;
-    }
-
-    public static bool GetFieldValue(string path, object target, out object value, out FieldInfo fieldInfo)
-    {
-        value = default;
-        fieldInfo = null;
-        string[] fields = path.Split('.');
-        object fv = target;
-        var fType = fv.GetType();
-        for (int i = 0; i < fields.Length; i++)
-        {
-            fieldInfo = fType.GetField(fields[i], BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             if (fieldInfo != null)
             {
-                fv = fieldInfo.GetValue(fv);
-                if (fv != null) fType = fv.GetType();
+                try
+                {
+                    value = fieldInfo.GetValue(property.serializedObject.targetObject);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
             }
-            else return false;
         }
-        if (fieldInfo != null)
+        return false;
+    }
+
+    public static bool TryGetMemberValue(string path, object target, out object value, out MemberInfo memberInfo)
+    {
+        value = default;
+        memberInfo = null;
+        string[] fields = path.Split('.');
+        object mv = target;
+        var mType = mv.GetType();
+        for (int i = 0; i < fields.Length; i++)
         {
-            value = fv;
+            memberInfo = mType?.GetField(fields[i], BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            if (memberInfo is FieldInfo field)
+            {
+                mv = field.GetValue(mv);
+                mType = mv?.GetType();
+            }
+            else
+            {
+                memberInfo = mType?.GetProperty(fields[i], BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (memberInfo is PropertyInfo property)
+                {
+                    mv = property.GetValue(mv);
+                    mType = mv?.GetType();
+                }
+                else return false;
+            }
+        }
+        if (memberInfo != null)
+        {
+            value = mv;
             return true;
         }
         else return false;
@@ -98,7 +129,7 @@ public static class ZetanEditorUtility
     /// 设置property关联字段的值，该字段必须是property.serializedObject.targetObject的顶级成员或者有SerializeRenference标签
     /// </summary>
     /// <returns>是否成功</returns>
-    public static bool SetValue(SerializedProperty property, object value)
+    public static bool TrySetValue(SerializedProperty property, object value)
     {
         if (property.propertyType == SerializedPropertyType.ManagedReference) property.managedReferenceValue = value;
         var onwerType = property.serializedObject.targetObject.GetType();
@@ -254,20 +285,20 @@ public static class ZetanEditorUtility
     }
     public static void MinMaxSlider(Rect rect, string label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
     {
-        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width * 0.4f, rect.height), label);
-        minValue = EditorGUI.FloatField(new Rect(rect.x + rect.width * 0.4f, rect.y, 30, rect.height), minValue);
+        EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), label);
+        minValue = EditorGUI.FloatField(new Rect(rect.x + EditorGUIUtility.labelWidth + 2, rect.y, 40, rect.height), minValue);
         if (minValue < minLimit) minValue = minLimit;
-        maxValue = EditorGUI.FloatField(new Rect(rect.x + rect.width - 30, rect.y, 30, rect.height), maxValue);
+        maxValue = EditorGUI.FloatField(new Rect(rect.x + rect.width - 40, rect.y, 40, rect.height), maxValue);
         if (maxValue > maxLimit) maxValue = maxLimit;
-        EditorGUI.MinMaxSlider(new Rect(rect.x + rect.width * 0.4f + 33, rect.y, rect.width * 0.6f - 66, rect.height), ref minValue, ref maxValue, minLimit, maxLimit);
+        EditorGUI.MinMaxSlider(new Rect(rect.x + EditorGUIUtility.labelWidth + 45, rect.y, rect.width - EditorGUIUtility.labelWidth - 88, rect.height), ref minValue, ref maxValue, minLimit, maxLimit);
     }
     public static void MinMaxSlider(Rect rect, GUIContent label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
     {
-        EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width * 0.4f, rect.height), label);
-        minValue = EditorGUI.FloatField(new Rect(rect.x + rect.width * 0.4f, rect.y, 30, rect.height), minValue);
+        EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), label);
+        minValue = EditorGUI.FloatField(new Rect(rect.x + EditorGUIUtility.labelWidth + 2, rect.y, 40, rect.height), minValue);
         if (minValue < minLimit) minValue = minLimit;
-        maxValue = EditorGUI.FloatField(new Rect(rect.x + rect.width - 30, rect.y, 30, rect.height), maxValue);
+        maxValue = EditorGUI.FloatField(new Rect(rect.x + rect.width - 40, rect.y, 40, rect.height), maxValue);
         if (maxValue > maxLimit) maxValue = maxLimit;
-        EditorGUI.MinMaxSlider(new Rect(rect.x + rect.width * 0.4f + 33, rect.y, rect.width * 0.6f - 66, rect.height), ref minValue, ref maxValue, minLimit, maxLimit);
+        EditorGUI.MinMaxSlider(new Rect(rect.x + EditorGUIUtility.labelWidth + 45, rect.y, rect.width - EditorGUIUtility.labelWidth - 88, rect.height), ref minValue, ref maxValue, minLimit, maxLimit);
     }
 }

@@ -337,7 +337,7 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         var find = GetItemInfo(item);
         if (!find)
         {
-            MessageManager.Instance.New($"{GameManager.BackpackName}中没有 [{item.name}]");
+            MessageManager.Instance.New($"{GameManager.BackpackName}中没有 [{item.Name}]");
             return false;
         }
         if (simulGetItems != null)
@@ -348,12 +348,12 @@ public class BackpackManager : WindowHandler<BackpackUI, BackpackManager>, IOpen
         }
         if (GetItemAmount(item) < amount)
         {
-            MessageManager.Instance.New($"{GameManager.BackpackName}中没有这么多的 [{item.name}]");
+            MessageManager.Instance.New($"{GameManager.BackpackName}中没有这么多的 [{item.Name}]");
             return false;
         }
         if (QuestManager.Instance.HasQuestRequiredItem(item, GetItemAmount(item) - amount))
         {
-            MessageManager.Instance.New($"[{item.name}] 为任务所需");
+            MessageManager.Instance.New($"[{item.Name}] 为任务所需");
             return false;
         }
         return true;

@@ -32,7 +32,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5729784439181124921}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &4653218093553118060
 SpriteRenderer:
@@ -139,15 +139,16 @@ GameObject:
   m_Component:
   - component: {fileID: 5729784439181124921}
   - component: {fileID: 5729784439181124917}
-  - component: {fileID: 5729784439181124919}
-  - component: {fileID: 5729784439181124916}
-  - component: {fileID: 2903017820317666825}
   - component: {fileID: -4027490250092188733}
   - component: {fileID: 3621944093514496759}
   - component: {fileID: 345350267368019675}
+  - component: {fileID: 4999703559838116204}
+  - component: {fileID: 3351392294259685136}
   - component: {fileID: 221708541}
   - component: {fileID: 8014375055092662053}
-  - component: {fileID: 1870279777}
+  - component: {fileID: 2429067774158318337}
+  - component: {fileID: 840760797740629695}
+  - component: {fileID: 7903210529052645866}
   m_Layer: 7
   m_Name: TalkerTest2
   m_TagString: NPC
@@ -166,6 +167,7 @@ Transform:
   m_LocalPosition: {x: 2.5, y: 3.51, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 4831245250180362095}
   - {fileID: 4653218093553118059}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -190,87 +192,6 @@ MonoBehaviour:
     version: 1
     00000000:
       type: {class: , ns: , asm: }
---- !u!114 &5729784439181124919
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5729784439181124927}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76f521c22894b2d4d8f75ddcb24c38b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  activated: 1
-  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
-  icon: {fileID: 21300000, guid: 56b94c01694ae5648824eb62a97f268a, type: 3}
-  hidePanelOnInteract: 1
-  component: {fileID: 5729784439181124917}
-  interactMethod: DoInteract
-  interactiveMethod: get_IsInteractive
-  nameMethod: get_TalkerName
-  OnEnter2D:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStay2D:
-    m_PersistentCalls:
-      m_Calls: []
-  OnExit2D:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5729784439181124917}
-        m_TargetAssemblyTypeName: Talker, Assembly-CSharp
-        m_MethodName: OnExit
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
---- !u!58 &5729784439181124916
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5729784439181124927}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 1
---- !u!114 &2903017820317666825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5729784439181124927}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a2b68872fd65d7479103775dcff63ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  input: {x: 0, y: 0}
-  mRigidbody: {fileID: 0}
-  raycastLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  distanceOffset: 0.5
-  moveSpeed: 2
-  dashForce: 5
-  defaultDirection: {x: 1, y: 0}
-  funcSpeed: 0
-  seeker: {fileID: 0}
-  pickNextDistance: 0
 --- !u!114 &-4027490250092188733
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -348,9 +269,45 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.35
---- !u!114 &221708541
+--- !u!114 &4999703559838116204
 MonoBehaviour:
   m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5729784439181124927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09a761c2507c7b843b1f24c470b75b2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actionInputInterval: 0.2
+  moveInput: {x: 0, y: 0}
+  validMoveInput: {x: 0, y: 0}
+  rollInput: 0
+  dashInput: 0
+--- !u!114 &3351392294259685136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5729784439181124927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6caf5f4f39336f47a533ee7b520c894, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stoppingDistance: 1
+  pickNextWaypointDist: 1
+  autoRepath: 0
+  repathRate: 0.5
+  showSeeker: 0
+  gizmosPath: 0
+  gizmosDetail: 0
+--- !u!114 &221708541
+MonoBehaviour:
+  m_ObjectHideFlags: 2
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -398,7 +355,28 @@ MonoBehaviour:
   bezierTangentLength: 0.4
   offset: 0.2
   factor: 0.1
---- !u!114 &1870279777
+--- !u!50 &2429067774158318337
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5729784439181124927}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!114 &840760797740629695
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -407,10 +385,121 @@ MonoBehaviour:
   m_GameObject: {fileID: 5729784439181124927}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6caf5f4f39336f47a533ee7b520c894, type: 3}
+  m_Script: {fileID: 11500000, guid: 090c06bc000f89744a455332950c47b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stoppingDistance: 1
-  pickNextWaypointDist: 1
-  autoRepath: 1
-  repathRate: 0.5
+  _rigidbody: {fileID: 2429067774158318337}
+  raycastLayer:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &7903210529052645866
+MonoBehaviour:
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5729784439181124927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0047d9f1181fdb41a0d39cb65ce0c2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &8689191005776426144
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4831245250180362095}
+  - component: {fileID: 5858621325374315602}
+  - component: {fileID: 8820521665684640757}
+  m_Layer: 7
+  m_Name: Interactive
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4831245250180362095
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8689191005776426144}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5729784439181124921}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5858621325374315602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8689191005776426144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76f521c22894b2d4d8f75ddcb24c38b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activated: 1
+  _3D: 0
+  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
+  icon: {fileID: 21300000, guid: 56b94c01694ae5648824eb62a97f268a, type: 3}
+  hidePanelOnInteract: 1
+  component: {fileID: 5729784439181124917}
+  interactMethod: DoInteract
+  interactiveMethod: get_IsInteractive
+  nameMethod: get_TalkerName
+  OnEnter:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStay:
+    m_PersistentCalls:
+      m_Calls: []
+  OnExit:
+    m_PersistentCalls:
+      m_Calls: []
+  OnEnter2D:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStay2D:
+    m_PersistentCalls:
+      m_Calls: []
+  OnExit2D:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5729784439181124917}
+        m_TargetAssemblyTypeName: Talker, Assembly-CSharp
+        m_MethodName: OnExit
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!58 &8820521665684640757
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8689191005776426144}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 1

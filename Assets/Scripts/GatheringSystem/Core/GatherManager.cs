@@ -12,9 +12,9 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
 
     [SerializeField]
     private float lootInvaildDistance = 2.0f;
-    private Gathering doneAgent;
+    private Resource doneAgent;
 
-    public Gathering Gathering { get; private set; }
+    public Resource Gathering { get; private set; }
 
     public bool GatherAble { get; private set; }
     public bool IsGathering { get; private set; }
@@ -37,7 +37,7 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
         if (IsGathering) ProgressBar.Instance.Cancel();
     }
 
-    public bool Gather(Gathering gatherAgent)
+    public bool Gather(Resource gatherAgent)
     {
         if (!PlayerManager.Instance.CheckIsNormalWithAlert())
             return false;
@@ -59,12 +59,12 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
         if (!IsGathering)
             NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.GatheringStateChange, true);
         IsGathering = true;
-        ProgressBar.Instance.New(Gathering.GatheringInfo.GatherTime, GatherDone, GatherCancel, "采集中");
+        ProgressBar.Instance.New(Gathering.ResourceInfo.GatherTime, GatherDone, GatherCancel, "采集中");
     }
 
     private void GatherDone()
     {
-        PlayerManager.Instance.Controller.Animator.SetInteger(animaNameHash, -1);
+        //PlayerManager.Instance.Controller.Animator.SetInteger(animaNameHash, -1);
         if (!Gathering) return;
         Gathering.FinishInteraction();
         Gathering.GatherSuccess();
@@ -77,7 +77,7 @@ public class GatherManager : SingletonMonoBehaviour<GatherManager>
 
     private void GatherCancel()
     {
-        PlayerManager.Instance.Controller.Animator.SetInteger(animaNameHash, -1);
+        //PlayerManager.Instance.Controller.Animator.SetInteger(animaNameHash, -1);
         if (Gathering) Gathering.FinishInteraction();
         if (IsGathering)
             NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.GatheringStateChange, false);

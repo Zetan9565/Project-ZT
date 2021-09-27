@@ -20,7 +20,7 @@ public class MakingAgent : MonoBehaviour
     {
         if (!item) return;
         this.MItem = item;
-        nameText.text = item.name;
+        nameText.text = item.Name;
     }
 
     public void Clear(bool recycle = false)

@@ -17,6 +17,8 @@ namespace ZetanStudio.BehaviourTree
         public Port input;
 
         private readonly Label abort;
+        private readonly Label repeat;
+        private readonly Label invalid;
         private readonly Action<NodeEditor> onSelected;
         private readonly Action<NodeEditor> onUnselected;
         private readonly Action<NodeEditor, Vector2> onSetPosition;
@@ -43,11 +45,14 @@ namespace ZetanStudio.BehaviourTree
             des.Bind(new SerializedObject(node));
 
             abort = this.Q<Label>("abort");
+            repeat = this.Q<Label>("repeat");
+            invalid = this.Q<Label>("invalid");
 
             InitInput();
             InitOutput();
             InitClasses();
             UpdateStates();
+            UpdateInvalid();
             UpdateAbortType();
         }
 
@@ -83,7 +88,6 @@ namespace ZetanStudio.BehaviourTree
             else if (node is Composite) AddToClassList("composite");
             else if (node is Decorator) AddToClassList("decorator");
             else if (node is Entry) AddToClassList("entry");
-            UpdateValid();
         }
 
         public override void SetPosition(Rect newPos)
@@ -110,10 +114,10 @@ namespace ZetanStudio.BehaviourTree
                 composite.SortByPosition();
         }
 
-        public void UpdateValid()
+        public void UpdateValid(BehaviourTree tree)
         {
             RemoveFromClassList("invalid");
-            if (!node.IsValid) AddToClassList("invalid");
+            if ((tree.FindParent(node) || node is Entry) && !node.IsValid) AddToClassList("invalid");
         }
         public void UpdateStates()
         {
@@ -140,10 +144,47 @@ namespace ZetanStudio.BehaviourTree
                         break;
                 }
             }
+
+            UpdateRecheck();
+        }
+        public void UpdateInvalid()
+        {
+            if (!node.IsValid)
+            {
+                invalid.text = "!";
+                invalid.tooltip = "有未补全信息";
+            }
+            else
+            {
+                invalid.text = string.Empty;
+                invalid.tooltip = string.Empty;
+            }
+        }
+        private void UpdateRecheck()
+        {
+            if (node.IsInstance && node is Conditional)
+            {
+                Composite parent = node.Owner.FindParent(node) as Composite;
+                if (parent && parent.AbortType != AbortType.None)
+                {
+                    repeat.text = "Recheck";
+                    repeat.tooltip = "后台检查中";
+                }
+                else
+                {
+                    repeat.text = string.Empty;
+                    repeat.tooltip = string.Empty;
+                }
+            }
+            else
+            {
+                repeat.text = string.Empty;
+                repeat.tooltip = string.Empty;
+            }
         }
         public void UpdateAbortType()
         {
-            if(node is Composite composite)
+            if (node is Composite composite)
             {
                 switch (composite.AbortType)
                 {

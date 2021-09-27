@@ -30,4 +30,15 @@ namespace ZetanStudio.BehaviourTree
 
     [AttributeUsage(AttributeTargets.Field)]
     public class Tag : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class VariableName : Attribute
+    {
+        public readonly Type type;
+
+        public VariableName(Type type)
+        {
+            this.type = type;
+        }
+    }
 }

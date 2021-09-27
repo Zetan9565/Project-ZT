@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,7 +37,7 @@ public class AStarUnit : MonoBehaviour
     [SerializeField]
     private new Rigidbody2D rigidbody2D;
     [SerializeField]
-    private CharacterController controller;
+    private UnityEngine.CharacterController controller;
     public new Transform transform { get; private set; }
 
     public float moveSpeed = 10f;

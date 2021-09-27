@@ -13,26 +13,28 @@ public class ObjectDropDownAttributeDrawer : PropertyDrawer
         Handling(attribute.type, attribute.fieldAsName, attribute.resPath, attribute.nameNull, out var objects, out var objectNames);
         int index = Array.IndexOf(objects, property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
-        index = EditorGUI.Popup(new Rect(position.x, position.y, position.width - 21, position.height), label.text, index, objectNames);
+        label = EditorGUI.BeginProperty(position, label, property);
+        index = EditorGUI.Popup(new Rect(position.x, position.y, position.width - 21, position.height), label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
         EditorGUI.PropertyField(new Rect(position.x + position.width - 20, position.y, 20, position.height), property, new GUIContent(string.Empty));
+        EditorGUI.EndProperty();
     }
 
     private void Handling(Type type, string fieldAsName, string resPath, string nameNull,
-                          out UnityEngine.Object[] objects, out string[] objectNamesArray)
+                          out UnityEngine.Object[] objects, out GUIContent[] objectNamesArray)
     {
         objects = Resources.LoadAll(string.IsNullOrEmpty(resPath) ? string.Empty : resPath, type);
-        List<string> objectNames = new List<string>() { nameNull };
+        List<GUIContent> objectNames = new List<GUIContent>() { new GUIContent(nameNull) };
         foreach (var obj in objects)
         {
             if (!string.IsNullOrEmpty(fieldAsName))
             {
                 var field = obj.GetType().GetField(fieldAsName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (field != null) objectNames.Add(field.GetValue(obj).ToString());
-                else objectNames.Add(obj.name);
+                if (field != null) objectNames.Add(new GUIContent(field.GetValue(obj).ToString()));
+                else objectNames.Add(new GUIContent(obj.name));
             }
-            else objectNames.Add(obj.name);
+            else objectNames.Add(new GUIContent(obj.name));
         }
         objectNamesArray = objectNames.ToArray();
     }

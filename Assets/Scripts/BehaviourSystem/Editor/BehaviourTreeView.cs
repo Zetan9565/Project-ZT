@@ -178,7 +178,8 @@ namespace ZetanStudio.BehaviourTree
                         NodeEditor parent = edge.output.node as NodeEditor;
                         NodeEditor child = edge.input.node as NodeEditor;
                         parent.node.RemoveChild(child.node);
-                        parent.UpdateValid();
+                        UpdateValid(parent);
+                        UpdateValid(child);
                         EditorUtility.SetDirty(parent.node);
                     }
                 });
@@ -191,7 +192,8 @@ namespace ZetanStudio.BehaviourTree
                     NodeEditor parent = edge.output.node as NodeEditor;
                     NodeEditor child = edge.input.node as NodeEditor;
                     parent.node.AddChild(child.node);
-                    parent.UpdateValid();
+                    UpdateValid(parent);
+                    UpdateValid(child);
                     EditorUtility.SetDirty(parent.node);
                 });
             }
@@ -204,6 +206,13 @@ namespace ZetanStudio.BehaviourTree
 
             return graphViewChange;
         }
+
+        private void UpdateValid(NodeEditor editor)
+        {
+            if (!(editor.node is Action) && !(editor.node is Conditional))
+                editor.UpdateValid(tree);
+        }
+
         private void OnNodePositionChanged(NodeEditor editor, Vector2 oldPos)
         {
             if (selection.Where(x => x is NodeEditor).Count() > 0) Undo.RecordMultNodePosition(editor.node, oldPos);
@@ -216,6 +225,7 @@ namespace ZetanStudio.BehaviourTree
                 NodeEditor editor = n as NodeEditor;
                 if (Application.isPlaying)
                     editor.UpdateStates();
+                editor.UpdateInvalid();
                 editor.UpdateAbortType();
             });
         }
@@ -244,6 +254,7 @@ namespace ZetanStudio.BehaviourTree
 
             tree.Nodes.ForEach(n => CreateNode(n));
             tree.Nodes.ForEach(n => CreateEdges(n));
+            tree.Nodes.ForEach(n => { if (n is Composite composite) composite.SortByPosition(); });
         }
         private void CreateTreeNode(Type type, Vector2 position)
         {
@@ -254,7 +265,7 @@ namespace ZetanStudio.BehaviourTree
         #endregion
 
         #region 图形结点相关
-        private void CreateNewNode(Node newNode, string name, Vector2 position)
+        private void CreateNewNode(Node newNode, string name, Vector2 position, bool record = true)
         {
             newNode.name = name;
             newNode._position = position;
@@ -264,7 +275,7 @@ namespace ZetanStudio.BehaviourTree
                 if (!tree.IsRuntime) newNode = newNode.GetInstance();
                 newNode.Init(tree);
             }
-            Undo.RecordTreeChange(tree);
+            if (record) Undo.RecordTreeChange(tree);
             tree.AddNode(newNode);
             CreateNode(newNode);
         }
@@ -280,7 +291,13 @@ namespace ZetanStudio.BehaviourTree
         }
         private void CopyNode(NodeEditor editor)
         {
-            CreateNewNode(UnityEngine.Object.Instantiate(editor.node), $"({tree.Nodes.Count}) {editor.node.GetType().Name}{(tree.IsRuntime ? "(R)" : string.Empty)}", editor.node._position + new Vector2(30, 30));
+            Node node = editor.node.Copy();
+            Undo.RecordTreeChange(tree);
+            BehaviourTree.Traverse(node, n =>
+            {
+                CreateNewNode(n, $"({tree.Nodes.Count}) {n.GetType().Name}{(tree.IsRuntime ? "(R)" : string.Empty)}", n._position + new Vector2(30, 30), false);
+            });
+            DrawTreeView(tree);
         }
         #endregion
 
@@ -292,6 +309,8 @@ namespace ZetanStudio.BehaviourTree
                 NodeEditor parent = GetNodeByGuid(node.guid) as NodeEditor;
                 NodeEditor child = GetNodeByGuid(c.guid) as NodeEditor;
                 Edge edge = parent.output.ConnectTo(child.input);
+                UpdateValid(parent);
+                UpdateValid(child);
                 AddElement(edge);
             });
         }

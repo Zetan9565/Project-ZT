@@ -37,22 +37,29 @@ namespace ZetanStudio.BehaviourTree
             executorsMap.Add(behaviourExecutor);
         }
 
-        public SharedVariable GetGlobalVariable(string name)
+        public SharedVariable GetVariable(string name)
         {
             return globalVariables.GetVariable(name);
         }
-
-        public SharedVariable<T> GetGlobalVariable<T>(string name)
+        public bool TryGetVariable<T>(string name, out SharedVariable<T> variable)
         {
-            return globalVariables.GetVariable<T>(name);
+            return globalVariables.TryGetVariable<T>(name, out variable);
         }
 
-        public List<SharedVariable<T>> GetGlobalVariables<T>()
+        public List<SharedVariable> GetVariables(Type type)
+        {
+            return globalVariables.GetVariables(type);
+        }
+        public List<SharedVariable<T>> GetVariables<T>()
         {
             return globalVariables.GetVariables<T>();
         }
 
-        public bool SetGlobalVariable<T>(string name, T value)
+        public bool SetVariable(string name, object value)
+        {
+            return globalVariables.SetVariable(name, value);
+        }
+        public bool SetVariable<T>(string name, T value)
         {
             return globalVariables.SetVariable(name, value);
         }
@@ -62,6 +69,12 @@ namespace ZetanStudio.BehaviourTree
         {
             if (index < 0 || index > presetVariables.Count) return null;
             else return presetVariables[index].GetType();
+        }
+
+        private void OnValidate()
+        {
+            if (FindObjectsOfType<BehaviourManager>().Length > 1)
+                Debug.LogError("存在多个激活的BehaviourManager，请删除或失活其它");
         }
 #endif
     }

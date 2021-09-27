@@ -11,6 +11,7 @@ namespace ZetanStudio.BehaviourTree
             switch (currentChild.Evaluate())
             {
                 case NodeStates.Success:
+                    InactivateFrom(currentChildIndex);
                     return NodeStates.Success;
                 case NodeStates.Failure:
                     currentChildIndex++;
@@ -23,10 +24,12 @@ namespace ZetanStudio.BehaviourTree
                         {
                             currentChild = children[currentChildIndex++];
                         }
+                        InactivateFrom(currentChildIndex);
                         return NodeStates.Running;
                     }
                 case NodeStates.Inactive:
                 case NodeStates.Running:
+                    InactivateFrom(currentChildIndex);
                     return NodeStates.Running;
             }
             return NodeStates.Failure;

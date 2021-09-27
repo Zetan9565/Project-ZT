@@ -231,7 +231,6 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         if (!UI || !UI.gameObject) return;
         if (!MapCamera.orthographic) MapCamera.orthographic = true;
-        if (!MapCamera.CompareTag("MapCamera")) MapCamera.tag = "MapCamera";
         if (MapCamera.cullingMask != mapRenderMask) MapCamera.cullingMask = mapRenderMask;
         foreach (var iconKvp in iconsWithHolder)
         {
@@ -611,7 +610,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         {
             float radius = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) * 0.5f * this.radius;
             //ZetanUtility.DrawGizmosCircle(ZetanUtility.CenterBetween(corners[0], corners[2]), radius, radius / 1000, Color.white, false);
-            ZetanUtility.DrawGizmosCircle(ZetanUtility.CenterBetween(corners[0], corners[2]), radius, Vector3.forward);
+            ZetanUtility.DrawGizmosCircle(ZetanUtility.CenterBetween(corners[0], corners[2]), radius);
         }
         else
         {
@@ -633,6 +632,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
             name = "MapTexture"
         };
         MapCamera.targetTexture = targetTexture;
+        if (!MapCamera.CompareTag("MapCamera")) MapCamera.tag = "MapCamera";
         UI.mapImage.texture = targetTexture;
         miniModeInfo.currentSizeOfCam = miniModeInfo.defaultSizeOfCam;
         worldModeInfo.currentSizeOfCam = worldModeInfo.defaultSizeOfCam;

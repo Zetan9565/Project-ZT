@@ -1,14 +1,14 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Gathering : InteractiveObject
+public class Resource : InteractiveObject
 {
     [SerializeField]
-    protected GatheringInformation gatheringInfo;
-    public GatheringInformation GatheringInfo => gatheringInfo;
+    protected ResourceInformation resourceInfo;
+    public ResourceInformation ResourceInfo => resourceInfo;
 
-    public override string name { get => gatheringInfo.name; protected set => _name = value; }
+    protected override string CustomName { get => resourceInfo.Name; }
 
     [SerializeField]
     protected bool hideOnGathered;
@@ -17,7 +17,7 @@ public class Gathering : InteractiveObject
     {
         get
         {
-            return gatheringInfo && gatheringInfo.ProductItems.Count > 0 && GatherManager.Instance.Gathering != this;
+            return resourceInfo && resourceInfo.ProductItems.Count > 0 && GatherManager.Instance.Gathering != this;
         }
     }
 
@@ -28,16 +28,21 @@ public class Gathering : InteractiveObject
     [HideInInspector]
     public UnityEngine.Events.UnityEvent onGatherFinish = new UnityEngine.Events.UnityEvent();
 
+    private void Awake()
+    {
+        customName = true;
+    }
+
     public virtual void GatherSuccess()
     {
         onGatherFinish?.Invoke();
         if (hideOnGathered) GetComponent<Renderer>().enabled = false;
-        if (GatheringInfo.ProductItems.Count > 0)
+        if (ResourceInfo.ProductItems.Count > 0)
         {
-            List<ItemInfoBase> lootItems = DropItemInfo.Drop(GatheringInfo.ProductItems);
+            List<ItemInfoBase> lootItems = DropItemInfo.Drop(ResourceInfo.ProductItems);
             if (lootItems.Count > 0)
             {
-                LootAgent la = ObjectPool.Get(GatheringInfo.LootPrefab).GetComponent<LootAgent>();
+                LootAgent la = ObjectPool.Get(ResourceInfo.LootPrefab).GetComponent<LootAgent>();
                 la.Init(lootItems, transform.position);
             }
         }
@@ -47,15 +52,15 @@ public class Gathering : InteractiveObject
 
     protected virtual IEnumerator UpdateTime()
     {
-        if (GatheringInfo.RefreshTime < 0) yield break;
+        if (ResourceInfo.RefreshTime < 0) yield break;
 
-        LeftRefreshTime = GatheringInfo.RefreshTime;
-        while (!IsInteractive && GatheringInfo)
+        LeftRefreshTime = ResourceInfo.RefreshTime;
+        while (!IsInteractive && ResourceInfo)
         {
             LeftRefreshTime -= Time.deltaTime;
             if (LeftRefreshTime <= 0)
             {
-                LeftRefreshTime = GatheringInfo.RefreshTime;
+                LeftRefreshTime = ResourceInfo.RefreshTime;
                 Refresh();
                 yield break;
             }

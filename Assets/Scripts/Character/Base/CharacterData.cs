@@ -4,19 +4,28 @@ using UnityEngine;
 [System.Serializable]
 public class CharacterData
 {
-    public CharacterInformation info;
+    protected CharacterInformation info;
 
-    public CharacterState mainState;
+    public virtual CharacterInformation GetInfo()
+    {
+        return info;
+    }
+    public virtual T GetInfo<T>() where T : CharacterInformation
+    {
+        return info as T;
+    }
+
+    public CharacterStates mainState;
     public dynamic subState;
     public bool superArmor;
     public bool combat;
-    public bool IsDead => mainState == CharacterState.Abnormal && subState == CharacterAbnormalState.Dead;
+    public bool IsDead => mainState == CharacterStates.Abnormal && subState == CharacterAbnormalStates.Dead;
 
     public bool CanRoll
     {
         get
         {
-            return mainState == CharacterState.Normal;
+            return mainState == CharacterStates.Normal;
         }
     }
 
@@ -32,7 +41,7 @@ public class CharacterData
     {
         get
         {
-            return mainState == CharacterState.Abnormal;
+            return mainState == CharacterStates.Abnormal;
         }
     }
 
@@ -53,7 +62,7 @@ public class CharacterData
     }
 }
 
-public enum CharacterState
+public enum CharacterStates
 {
     [InspectorName("普通")]
     Normal,
@@ -67,7 +76,7 @@ public enum CharacterState
     Busy
 }
 
-public enum CharacterNormalState
+public enum CharacterNormalStates
 {
     [InspectorName("待机")]
     Idle,
@@ -79,7 +88,7 @@ public enum CharacterNormalState
     Swim,
 }
 
-public enum CharacterAbnormalState
+public enum CharacterAbnormalStates
 {
     [InspectorName("死亡")]
     Dead,
@@ -93,7 +102,7 @@ public enum CharacterAbnormalState
     Knockback,
 }
 
-public enum CharacterGatherState
+public enum CharacterGatherStates
 {
     [InspectorName("手动")]
     Gather_Hand,
@@ -107,7 +116,7 @@ public enum CharacterGatherState
     Gather_Dao,
 }
 
-public enum CharacterBusyState
+public enum CharacterBusyStates
 {
     [InspectorName("受伤")]
     GetHurt,
@@ -131,7 +140,7 @@ public enum CharacterBusyState
     UI,
 }
 
-public enum CharacterAttackState
+public enum CharacterAttackStates
 {
     [InspectorName("招式1")]
     Action_1,

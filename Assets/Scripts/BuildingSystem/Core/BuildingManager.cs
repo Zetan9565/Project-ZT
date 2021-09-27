@@ -58,7 +58,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
             return false;
         }
         buildingsLearned.Add(buildingInfo);
-        ConfirmManager.Instance.New(string.Format("学会了 [{0}] 的建造方法!", buildingInfo.name));
+        ConfirmManager.Instance.New(string.Format("学会了 [{0}] 的建造方法!", buildingInfo.Name));
         return true;
     }
     public bool HadLearned(BuildingInformation buildingInfo)
@@ -125,7 +125,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         WindowsManager.Instance.PauseAll(true);
         IsPreviewing = true;
         isDraging = true;
-        PlayerManager.Instance.SetPlayerState(CharacterState.Busy, CharacterBusyState.UI);
+        PlayerManager.Instance.SetPlayerState(CharacterStates.Busy, CharacterBusyStates.UI);
         ShowAndMovePreview();
     }
     public void DoPlace()
@@ -219,8 +219,8 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         ZetanUtility.SetActive(UI.buildButton, false);
         ZetanUtility.SetActive(UI.backButton, false);
         ZetanUtility.SetActive(UI.joyStick, false);
-        if (PlayerManager.Instance.Character.GetState(out var main, out var sub) && main == CharacterState.Busy && sub == CharacterBusyState.UI)
-            PlayerManager.Instance.SetPlayerState(CharacterState.Normal, CharacterNormalState.Idle);
+        if (PlayerManager.Instance.Player.GetState(out var main, out var sub) && main == CharacterStates.Busy && sub == CharacterBusyStates.UI)
+            PlayerManager.Instance.SetPlayerState(CharacterStates.Normal, CharacterNormalStates.Idle);
         CameraMovement2D.Instance.Stop();
     }
 
@@ -274,7 +274,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         if (buildingData.scene != UnityEngine.SceneManagement.SceneManager.GetActiveScene().name) return;
         if (!buildingGroups.TryGetValue(buildingData.Info, out var parent))
         {
-            parent = new GameObject(buildingData.Info.name).transform;
+            parent = new GameObject(buildingData.Info.Name).transform;
             parent.SetParent(BuildingRoot);
             buildingGroups.Add(buildingData.Info, parent);
         }
@@ -320,7 +320,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
             string endLine = i == lineCount - 1 ? string.Empty : "\n";
             materials += materialsInfo[i] + endLine;
         }
-        UI.nameText.text = buildingInfo.name;
+        UI.nameText.text = buildingInfo.Name;
         UI.desciptionText.text = string.Format("<b>描述</b>\n{0}\n<b>耗时: </b>{1}\n<b>建造材料：{2}</b>\n{3}",
             buildingInfo.Description,
             buildingInfo.BuildTime > 0 ? buildingInfo.BuildTime.ToString("F2") + 's' : "立即",
@@ -380,7 +380,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         if (CurrentBuilding)
         {
             if (!CurrentBuilding.Info || isInfoPausing) return;
-            UI.infoNameText.text = CurrentBuilding.name;
+            UI.infoNameText.text = CurrentBuilding.Name;
             UI.infoDesText.text = CurrentBuilding.Info.Description;
             ZetanUtility.SetActive(UI.manageButton, CurrentBuilding.Info.Manageable);
             UI.manageButton.onClick.AddListener(ManageCurrent);
@@ -392,7 +392,7 @@ public class BuildingManager : WindowHandler<BuildingUI, BuildingManager>, IOpen
         else if (CurrentPreview)
         {
             if (!CurrentPreview.Data || isInfoPausing) return;
-            UI.infoNameText.text = CurrentPreview.Data.Info.name;
+            UI.infoNameText.text = CurrentPreview.Data.Info.Name;
             UI.infoDesText.text = CurrentPreview.Data.Info.Description;
             ZetanUtility.SetActive(UI.manageButton, !CurrentPreview.Data.Info.AutoBuild);
             UI.manageButton.onClick.AddListener(SwitchMorePanel);

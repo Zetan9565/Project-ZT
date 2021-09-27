@@ -76,7 +76,7 @@ namespace ZetanStudio.BehaviourTree
 
         public SharedVariable GetVariable(string name);
 
-        public SharedVariable<T> GetVariable<T>(string name);
+        public bool TryGetVariable<T>(string name, out SharedVariable<T> variable);
 
         public List<SharedVariable> GetVariables(Type type);
 

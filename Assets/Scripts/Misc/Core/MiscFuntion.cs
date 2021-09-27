@@ -46,7 +46,7 @@ public static class MiscFuntion
                 }
                 if (talkers == null) talkers = Resources.LoadAll<TalkerInformation>("Configuration");
                 var talker = Array.Find(talkers, x => x.ID == keyWords);
-                if (talker) keyWords = talker.name;
+                if (talker) keyWords = talker.Name;
                 return color ? ZetanUtility.ColorText(keyWords, Color.green) : keyWords;
             }
             else if (keyWords.StartsWith("[ITEM]"))
@@ -64,7 +64,7 @@ public static class MiscFuntion
                 }
                 if (items == null) items = Resources.LoadAll<ItemBase>("Configuration");
                 var item = Array.Find(items, x => x.ID == keyWords);
-                if (item) keyWords = item.name;
+                if (item) keyWords = item.Name;
                 return color ? ZetanUtility.ColorText(keyWords, Color.yellow) : keyWords;
             }
             else if (keyWords.StartsWith("[ENMY]"))
@@ -82,7 +82,7 @@ public static class MiscFuntion
                 }
                 if (enemies == null) enemies = Resources.LoadAll<EnemyInformation>("Configuration");
                 var enemy = Array.Find(enemies, x => x.ID == keyWords);
-                if (enemy) keyWords = enemy.name;
+                if (enemy) keyWords = enemy.Name;
                 return color ? ZetanUtility.ColorText(keyWords, Color.red) : keyWords;
             }
             return keyWords;

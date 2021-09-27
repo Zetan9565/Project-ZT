@@ -29,6 +29,7 @@ namespace ZetanStudio.BehaviourTree
 
         private void InitGlobal()
         {
+            if (!globalVariables.objectReferenceValue) return;
             serializedGlobal = new SerializedObject(globalVariables.objectReferenceValue);
             serializedVariables = serializedGlobal.FindProperty("variables");
             variableList = new SharedVariableListDrawer(serializedGlobal, serializedVariables, false);
@@ -43,6 +44,11 @@ namespace ZetanStudio.BehaviourTree
 
         public override void OnInspectorGUI()
         {
+            if (FindObjectsOfType<BehaviourManager>().Length > 1)
+            {
+                EditorGUILayout.HelpBox("存在多个激活的BehaviourManager，请删除或失活其它", MessageType.Error);
+                return;
+            }
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
             bool shouldDisable = Application.isPlaying && !PrefabUtility.IsPartOfAnyPrefab(target);

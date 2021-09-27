@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,11 +10,11 @@ public class Building : InteractiveObject
     public BuildingData Data { get; private set; }
     public string EntityID => Data ? Data.entityID : string.Empty;
 
-    public override string name
+    protected override string CustomName
     {
         get
         {
-            return Info ? Info.name : "未设置";
+            return Info ? Info.Name : "未设置";
         }
     }
 
@@ -42,6 +42,11 @@ public class Building : InteractiveObject
     [ReadOnly]
 #endif
     public BuildingAgent buildingAgent;
+
+    private void Awake()
+    {
+        customName = true;
+    }
 
     public void Build(BuildingData data)
     {

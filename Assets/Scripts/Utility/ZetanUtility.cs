@@ -30,25 +30,6 @@ namespace ZetanExtends
             var child = source.Find(n);
             return child != null ? child : source.CreateChild(n);
         }
-
-        public static RectTransform GetRectTransform(this Transform source)
-        {
-            return source as RectTransform;
-        }
-
-        public static string GetPath(this Transform source)
-        {
-            StringBuilder sb = new StringBuilder();
-            Transform parent = source.parent;
-            while (parent)
-            {
-                sb.Append(parent.gameObject.name);
-                sb.Append("/");
-                parent = parent.parent;
-            }
-            sb.Append(source.gameObject.name);
-            return sb.ToString();
-        }
     }
 
     public static class ComponentExtend
@@ -63,6 +44,33 @@ namespace ZetanExtends
             var comp = source.GetComponent<T>();
             return comp != null ? comp : source.gameObject.AddComponent<T>();
         }
+
+        public static Component GetComponentInFamily(this Component source, Type type)
+        {
+            Component component = source.GetComponentInParent(type);
+            if (Equals(component, null)) component = source.GetComponentInChildren(type);
+            return component;
+        }
+        public static T GetComponentInFamily<T>(this Component source)
+        {
+            T component = source.GetComponentInParent<T>();
+            if (Equals(component, null)) component = source.GetComponentInChildren<T>();
+            return component;
+        }
+
+        public static string GetPath(this Component source)
+        {
+            StringBuilder sb = new StringBuilder();
+            Transform parent = source.transform.parent;
+            while (parent)
+            {
+                sb.Append(parent.gameObject.name);
+                sb.Append("/");
+                parent = parent.parent;
+            }
+            sb.Append(source.gameObject.name);
+            return sb.ToString();
+        }
     }
 
     public static class GameObjectExtend
@@ -75,6 +83,18 @@ namespace ZetanExtends
         {
             var comp = source.GetComponent<T>();
             return comp != null ? comp : source.AddComponent<T>();
+        }
+        public static Component GetComponentInFamily(this GameObject source, Type type)
+        {
+            Component component = source.GetComponentInParent(type);
+            if (Equals(component, null)) component = source.GetComponentInChildren(type);
+            return component;
+        }
+        public static T GetComponentInFamily<T>(this GameObject source)
+        {
+            T component = source.GetComponentInParent<T>();
+            if (Equals(component, null)) component = source.GetComponentInChildren<T>();
+            return component;
         }
 
         public static GameObject CreateChild(this GameObject source, string name = null, params Type[] components)
@@ -194,34 +214,17 @@ public sealed class ZetanUtility
         return new Rect(x, y, size.x, size.y);
     }
 
-    public static void DrawGizmosCircle(Vector3 center, float radius, Vector3 rotateAxis)
-    {
-        float delta = radius * 0.001f;
-        if (delta < 0.0001f) delta = 0.0001f;
-        Vector3 firstPoint = Vector3.zero;
-        Vector3 fromPoint = Vector3.zero;
-        Vector3 yAxis = rotateAxis.normalized;
-        Vector3 xAxis = Vector3.ProjectOnPlane(Vector3.right, yAxis).normalized;
-        Vector3 zAxis = Vector3.Cross(xAxis, yAxis).normalized;
-        for (float perimeter = 0; perimeter < 2 * Mathf.PI; perimeter += delta)
-        {
-            Vector3 toPoint = new Vector3(radius * Mathf.Cos(perimeter), 0, radius * Mathf.Sin(perimeter));
-            toPoint = center + toPoint.x * xAxis + toPoint.y * yAxis + toPoint.z * zAxis;
-            if (perimeter == 0) firstPoint = toPoint;
-            else Gizmos.DrawLine(fromPoint, toPoint);
-            fromPoint = toPoint;
-        }
-        Gizmos.DrawLine(firstPoint, fromPoint);
-    }
-    public static void DrawGizmosCircle(Vector3 center, float radius, Vector3 rotateAxis, Color color)
+    public static void DrawGizmosCircle(Vector3 center, float radius, Vector3? normal = null, Color? color = null)
     {
         float delta = radius * 0.001f;
         if (delta < 0.0001f) delta = 0.0001f;
         Color colorBef = Gizmos.color;
-        Gizmos.color = color;
+        if (color != null) Gizmos.color = color.Value;
         Vector3 firstPoint = Vector3.zero;
         Vector3 fromPoint = Vector3.zero;
-        Vector3 yAxis = rotateAxis.normalized;
+        Vector3 yAxis;
+        if (normal != null) yAxis = normal.Value.normalized;
+        else yAxis = Vector3.forward.normalized;
         Vector3 xAxis = Vector3.ProjectOnPlane(Vector3.right, yAxis).normalized;
         Vector3 zAxis = Vector3.Cross(xAxis, yAxis).normalized;
         for (float perimeter = 0; perimeter < 2 * Mathf.PI; perimeter += delta)
@@ -234,6 +237,19 @@ public sealed class ZetanUtility
         }
         Gizmos.DrawLine(firstPoint, fromPoint);
         Gizmos.color = colorBef;
+    }
+    public static void DrawGizmosSector(Vector3 origin, Vector3 direction, float radius, float angle, Vector3? normal = null)
+    {
+#if UNITY_EDITOR
+        Vector3 axis;
+        if (normal != null) axis = normal.Value.normalized;
+        else axis = Vector3.forward.normalized;
+        Vector3 end = (Quaternion.AngleAxis(angle / 2, axis) * direction).normalized;
+        Gizmos.DrawLine(origin, origin + end * radius);
+        Vector3 from = (Quaternion.AngleAxis(-angle / 2, axis) * direction).normalized;
+        Gizmos.DrawLine(origin, origin + from * radius);
+        UnityEditor.Handles.DrawWireArc(origin, axis, from, angle, radius);
+#endif
     }
 
     public static FileStream OpenFile(string path, FileMode fileMode, FileAccess fileAccess = FileAccess.ReadWrite)
@@ -457,6 +473,12 @@ public sealed class ZetanUtility
     public static Vector3 SizeBetween(Vector3 point1, Vector3 point2)
     {
         return new Vector3(Mathf.Abs(point1.x - point2.x), Mathf.Abs(point1.y - point2.y), Mathf.Abs(point1.z - point2.z));
+    }
+
+    public static Vector2 GetVectorFromAngle(float angle)
+    {
+        float angleRad = angle * Mathf.Deg2Rad;
+        return new Vector2(Mathf.Cos(angleRad), Mathf.Sin(angleRad));
     }
     #endregion
 

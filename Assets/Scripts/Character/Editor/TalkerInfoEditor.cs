@@ -43,9 +43,9 @@ public class TalkerInfoEditor : ConfigurationEditor<TalkerInformation>
             remark = ZetanEditorUtility.TrimContentByKey(element.ID, keyWords, 16);
             return true;
         }
-        else if (element.name.Contains(keyWords))
+        else if (element.Name.Contains(keyWords))
         {
-            remark = ZetanEditorUtility.TrimContentByKey(element.name, keyWords, 16);
+            remark = ZetanEditorUtility.TrimContentByKey(element.Name, keyWords, 16);
             return true;
         }
         else if ((keyWords.ToLower() == "{enable}" || keyWords == "{启用}") && element.Enable)
@@ -68,6 +68,6 @@ public class TalkerInfoEditor : ConfigurationEditor<TalkerInformation>
 
     protected override string GetElementName(TalkerInformation element)
     {
-        return element.name;
+        return element.Name;
     }
 }

@@ -6,6 +6,7 @@ using UnityEngine;
 public class InteractiveInspector : Editor
 {
     SerializedProperty activated;
+    SerializedProperty _3D;
     SerializedProperty _name;
     SerializedProperty icon;
     SerializedProperty hidePanelOnInteract;
@@ -13,9 +14,9 @@ public class InteractiveInspector : Editor
     SerializedProperty interactMethod;
     SerializedProperty interactiveMethod;
     SerializedProperty nameMethod;
-    //SerializedProperty OnEnter;
-    //SerializedProperty OnStay;
-    //SerializedProperty OnExit;
+    SerializedProperty OnEnter;
+    SerializedProperty OnStay;
+    SerializedProperty OnExit;
     SerializedProperty OnEnter2D;
     SerializedProperty OnStay2D;
     SerializedProperty OnExit2D;
@@ -23,6 +24,7 @@ public class InteractiveInspector : Editor
     private void OnEnable()
     {
         activated = serializedObject.FindProperty("activated");
+        _3D = serializedObject.FindProperty("_3D");
         _name = serializedObject.FindProperty("_name");
         icon = serializedObject.FindProperty("icon");
         hidePanelOnInteract = serializedObject.FindProperty("hidePanelOnInteract");
@@ -30,9 +32,9 @@ public class InteractiveInspector : Editor
         interactMethod = serializedObject.FindProperty("interactMethod");
         interactiveMethod = serializedObject.FindProperty("interactiveMethod");
         nameMethod = serializedObject.FindProperty("nameMethod");
-        //OnEnter = serializedObject.FindProperty("OnEnter");
-        //OnExit = serializedObject.FindProperty("OnExit");
-        //OnStay = serializedObject.FindProperty("OnStay");
+        OnEnter = serializedObject.FindProperty("OnEnter");
+        OnExit = serializedObject.FindProperty("OnExit");
+        OnStay = serializedObject.FindProperty("OnStay");
         OnEnter2D = serializedObject.FindProperty("OnEnter2D");
         OnExit2D = serializedObject.FindProperty("OnExit2D");
         OnStay2D = serializedObject.FindProperty("OnStay2D");
@@ -42,7 +44,11 @@ public class InteractiveInspector : Editor
     {
         serializedObject.Update();
         EditorGUI.BeginChangeCheck();
+        EditorGUILayout.BeginHorizontal();
         EditorGUILayout.PropertyField(activated, new GUIContent("启用"));
+        if(activated.boolValue)
+            EditorGUILayout.PropertyField(_3D, new GUIContent("3D"));
+        EditorGUILayout.EndHorizontal();
         if (activated.boolValue)
         {
             if (string.IsNullOrEmpty(nameMethod.stringValue))
@@ -67,7 +73,7 @@ public class InteractiveInspector : Editor
                     {
                         var name = methods[i].Name;
                         meNames[i + 1] = name;
-                        meNames_Com[i + 1] = $"{name}() [{type.Name}]";
+                        meNames_Com[i + 1] = $"{name}()";
                         if (name == interactMethod.stringValue)
                             index = i + 1;
                         if (name == interactiveMethod.stringValue)
@@ -89,7 +95,7 @@ public class InteractiveInspector : Editor
                     {
                         var name = methods[i].Name;
                         meNames[i + 1] = name;
-                        meNames_Com[i + 1] = $"{name}() [{type.Name}]";
+                        meNames_Com[i + 1] = $"{name}()";
                         if (name == nameMethod.stringValue)
                             index = i + 1;
                     }
@@ -97,12 +103,18 @@ public class InteractiveInspector : Editor
                     nameMethod.stringValue = index == 0 ? string.Empty : meNames[index];
                 }
             }
-            //EditorGUILayout.PropertyField(OnEnter, new GUIContent("进入可交互范围内时"));
-            //EditorGUILayout.PropertyField(OnStay, new GUIContent("停留可交互范围内时"));
-            //EditorGUILayout.PropertyField(OnExit, new GUIContent("离开可交互范围内时"));
-            EditorGUILayout.PropertyField(OnEnter2D, new GUIContent("进入可交互范围内时"));
-            EditorGUILayout.PropertyField(OnStay2D, new GUIContent("停留可交互范围内时"));
-            EditorGUILayout.PropertyField(OnExit2D, new GUIContent("离开可交互范围内时"));
+            if (_3D.boolValue)
+            {
+                EditorGUILayout.PropertyField(OnEnter, new GUIContent("进入可交互范围内时"));
+                EditorGUILayout.PropertyField(OnStay, new GUIContent("停留可交互范围内时"));
+                EditorGUILayout.PropertyField(OnExit, new GUIContent("离开可交互范围内时"));
+            }
+            else
+            {
+                EditorGUILayout.PropertyField(OnEnter2D, new GUIContent("进入可交互范围内时"));
+                EditorGUILayout.PropertyField(OnStay2D, new GUIContent("停留可交互范围内时"));
+                EditorGUILayout.PropertyField(OnExit2D, new GUIContent("离开可交互范围内时"));
+            }
         }
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();

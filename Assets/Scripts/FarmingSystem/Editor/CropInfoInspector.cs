@@ -163,7 +163,7 @@ public class CropInfoInspector : Editor
                     else if (AssetDatabase.IsSubAsset(gatherInfo.objectReferenceValue))
                     {
                         EditorGUI.LabelField(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight),
-                            $"对应采集物信息{((gatherInfo.objectReferenceValue as GatheringInformation).IsValid ? string.Empty : "(未补全)")}");
+                            $"对应采集物信息{((gatherInfo.objectReferenceValue as ResourceInformation).IsValid ? string.Empty : "(未补全)")}");
                         lineCount++;
                     }
                     if (gatherInfo.objectReferenceValue)
@@ -184,7 +184,7 @@ public class CropInfoInspector : Editor
                     }
                     else if (GUI.Button(new Rect(rect.x - 4 + lineHeight * 4.5f, rect.y + lineHeightSpace * lineCount, rect.width - lineHeight * 4f, lineHeight), "新建"))
                     {
-                        GatheringInformation infoInstance = CreateInstance<GatheringInformation>();
+                        ResourceInformation infoInstance = CreateInstance<ResourceInformation>();
                         infoInstance.SetBaseName("resource info");
                         AssetDatabase.AddObjectToAsset(infoInstance, target);
                         AssetDatabase.SaveAssets();

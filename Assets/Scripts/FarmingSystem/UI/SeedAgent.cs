@@ -16,7 +16,7 @@ public class SeedAgent : MonoBehaviour,
     public void Init(SeedItem seed, ScrollRect parentRect = null)
     {
         Seed = seed;
-        nameText.text = Seed.name;
+        nameText.text = Seed.Name;
     }
 
     public void Clear(bool recycle = false)

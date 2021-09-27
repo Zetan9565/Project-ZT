@@ -1,96 +1,131 @@
 using UnityEngine;
 using ZetanExtends;
 
-public class Character : MonoBehaviour
+[RequireComponent(typeof(CharacterSMRunner))]
+public abstract class Character<T> : Character where T : CharacterData
 {
-    [SerializeReference]
-#if UNITY_EDITOR
-    [ReadOnly]
-#endif
-    protected CharacterData data;
-    public CharacterData Data { get => data; protected set => data = value; }
+    [SerializeReference, ReadOnly]
+    protected T data;
 
-    public Transform Body { get; private set; }
+    public override CharacterData GetData()
+    {
+        return data;
+    }
+    public override void SetData(CharacterData value)
+    {
+        data = (T)value;
+    }
 
+    public virtual T GetGenericData()
+    {
+        return data;
+    }
+    protected void SetGenericData(T value)
+    {
+        data = value;
+    }
+
+    public virtual void Init(T data)
+    {
+        SetGenericData(data);
+        GetData().entity = this;
+        StateMachine.Init(this);
+    }
+}
+
+public abstract class Character : MonoBehaviour
+{
     public Vector3 Position => transform.position;
 
-    public CharacterAnimator Animator { get; private set; }
+    public CharacterAnimator Animator { get; protected set; }
 
-    public CharacterController2D Controller { get; private set; }
+    public CharacterController2D Controller { get; protected set; }
 
-    private void Awake()
+    public CharacterSMRunner StateMachine { get; protected set; }
+
+    protected void Awake()
     {
-        Body = transform.FindOrCreate("Body");
-        Animator = Body.GetOrAddComponent<CharacterAnimator>();
+        StateMachine = GetComponent<CharacterSMRunner>();
+        Animator = this.GetComponentInFamily<CharacterAnimator>();
+        if (!Animator) Animator = gameObject.AddComponent<CharacterAnimator>();
         OnAwake();
     }
 
-    private void OnDestroy()
+    protected void OnDestroy()
     {
         OnDestroy_();
+#if UNITY_EDITOR
+        if (GetComponent<CharacterSMRunner>() is CharacterSMRunner machine)
+            machine.hideFlags = HideFlags.None;
+#endif
     }
 
-    public bool IsInit { get; protected set; }
-
-    public void Init(CharacterData data)
+    protected void OnValidate()
     {
-        Data = data;
-        Data.entity = this;
+        if (GetComponent<CharacterSMRunner>() is CharacterSMRunner machine)
+            machine.hideFlags = HideFlags.HideInInspector;
     }
 
-    public void SetState(CharacterState mainState, dynamic subState)
+    public abstract CharacterData GetData();
+    public T GetData<T>() where T : CharacterData
     {
-        Data.mainState = mainState;
-        Data.subState = subState;
+        return GetData() as T;
     }
-    public void SetMainState(CharacterState state)
+    public abstract void SetData(CharacterData value);
+
+    public void SetState(CharacterStates mainState, dynamic subState)
     {
-        Data.mainState = state;
-        Data.subState = default;
+        GetData().mainState = mainState;
+        GetData().subState = subState;
+    }
+    public void SetMainState(CharacterStates state)
+    {
+        GetData().mainState = state;
+        GetData().subState = default;
     }
     public void SetSubState(dynamic state)
     {
-        Data.subState = state;
+        GetData().subState = state;
     }
 
-    public bool GetState(out CharacterState mainState, out dynamic subState)
+    public bool GetState(out CharacterStates mainState, out dynamic subState)
     {
-        if (!Data)
+        if (!GetData())
         {
-            mainState = CharacterState.Abnormal;
-            subState = CharacterAbnormalState.Dead;
+            mainState = CharacterStates.Abnormal;
+            subState = CharacterAbnormalStates.Dead;
             return false;
         }
         else
         {
-            mainState = Data.mainState;
-            subState = Data.subState;
+            mainState = GetData().mainState;
+            subState = GetData().subState;
             return true;
         }
     }
-    public bool GetMainState(out CharacterState mainState)
+    public bool GetMainState(out CharacterStates mainState)
     {
-        if (!Data)
+        if (!GetData())
         {
-            mainState = CharacterState.Abnormal;
+            mainState = CharacterStates.Abnormal;
             return false;
         }
         else
         {
-            mainState = Data.mainState;
+            mainState = GetData().mainState;
             return true;
         }
     }
     public bool GetSubState(out dynamic subState)
     {
-        if (!Data)
+        if (!GetData())
         {
             subState = default;
             return false;
         }
         else
         {
-            subState = Data.subState;
+            subState = GetData().subState;
             return true;
         }
     }
@@ -109,4 +144,5 @@ public class Character : MonoBehaviour
     {
 
     }
+
 }

@@ -1,26 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanExtends;
 
-[DisallowMultipleComponent, RequireComponent(typeof(Interactive))]
-public class Talker : Character
+[DisallowMultipleComponent]
+public class Talker : Character<TalkerData>
 {
-    public string TalkerID => Data ? Data.Info.ID : string.Empty;
+    public string TalkerID => GetGenericData() ? GetGenericData().Info.ID : string.Empty;
 
-    public string TalkerName => Data ? Data.Info.name : string.Empty;
+    public string TalkerName => GetGenericData() ? GetGenericData().Info.Name : string.Empty;
 
     public Vector3 questFlagOffset;
     private QuestFlag flagAgent;
 
-    public new TalkerData Data
-    {
-        get => data as TalkerData;
-        set
-        {
-            data = value;
-        }
-    }
-
-    public List<QuestData> QuestInstances => Data ? Data.questInstances : null;
+    public List<QuestData> QuestInstances => GetGenericData() ? GetGenericData().questInstances : null;
 
     [SerializeField]
     private MapIconHolder iconHolder;
@@ -30,7 +22,7 @@ public class Talker : Character
     {
         get
         {
-            return Data.Info && data && !DialogueManager.Instance.IsTalking;
+            return GetGenericData().Info && data && !DialogueManager.Instance.IsTalking;
         }
     }
 
@@ -38,20 +30,19 @@ public class Talker : Character
     {
         get
         {
-            foreach (var cd in Data.Info.ConditionDialogues)
+            foreach (var cd in GetGenericData().Info.ConditionDialogues)
             {
                 if (MiscFuntion.CheckCondition(cd.Condition))
                     return cd.Dialogue;
             }
-            return Data.Info.DefaultDialogue;
+            return GetGenericData().Info.DefaultDialogue;
         }
     }
 
-    public void Init(TalkerData data)
+    public override void Init(TalkerData data)
     {
-        Data = data;
-        Data.entity = this;
-        transform.position = Data.Info.Position;
+        base.Init(data);
+        transform.position = GetGenericData().GetInfo<NPCInformation>().Position;
         flagAgent = ObjectPool.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject, UIManager.Instance.QuestFlagParent).GetComponent<QuestFlag>();
         flagAgent.Init(this);
         if (iconHolder)
@@ -66,31 +57,31 @@ public class Talker : Character
 
     public void OnTalkBegin()
     {
-        Data?.OnTalkBegin();
+        GetGenericData()?.OnTalkBegin();
     }
 
     public void OnTalkFinished()
     {
-        Data?.OnTalkFinished();
+        GetGenericData()?.OnTalkFinished();
     }
 
     public Dialogue OnGetGift(ItemBase gift)
     {
-        return Data?.OnGetGift(gift);
+        return GetGenericData()?.OnGetGift(gift);
     }
 
     public bool DoInteract()
     {
         if (DialogueManager.Instance.Talk(this))
         {
-            SetState(CharacterState.Busy, CharacterBusyState.Talking);
+            SetState(CharacterStates.Busy, CharacterBusyStates.Talking);
             return true;
         }
         return false;
     }
     public void FinishInteraction()
     {
-        SetState(CharacterState.Normal, CharacterNormalState.Idle);
+        SetState(CharacterStates.Normal, CharacterNormalStates.Idle);
         interactive.FinishInteraction();
     }
 
@@ -116,12 +107,12 @@ public class Talker : Character
     private string GetMapIconName()
     {
         System.Text.StringBuilder name = new System.Text.StringBuilder(TalkerName);
-        if (Data.Info.IsVendor && Data.Info.Shop || Data.Info.IsWarehouseAgent && Data.Info.WarehouseCapcity > 0)
+        if (GetGenericData().Info.IsVendor && GetGenericData().Info.Shop || GetGenericData().Info.IsWarehouseAgent && GetGenericData().Info.WarehouseCapcity > 0)
         {
             name.Append("<");
-            if (Data.Info.IsVendor) name.Append(Data.Info.Shop.ShopName);
-            if (Data.Info.IsVendor && Data.Info.IsWarehouseAgent) name.Append(",");
-            if (Data.Info.IsWarehouseAgent) name.Append("仓库");
+            if (GetGenericData().Info.IsVendor) name.Append(GetGenericData().Info.Shop.ShopName);
+            if (GetGenericData().Info.IsVendor && GetGenericData().Info.IsWarehouseAgent) name.Append(",");
+            if (GetGenericData().Info.IsWarehouseAgent) name.Append("仓库");
             name.Append(">");
         }
         return name.ToString();
@@ -131,7 +122,18 @@ public class Talker : Character
     #region MonoBehaviour
     protected override void OnAwake()
     {
-        interactive = GetComponent<Interactive>();
+        interactive = GetComponentInChildren<Interactive>();
+        if (!interactive)
+        {
+            interactive = transform.FindOrCreate("Interactive").GetOrAddComponent<Interactive>();
+            interactive.interactFunc = () => DoInteract();
+            interactive.interactiveFunc = () => IsInteractive;
+            interactive.getNameFunc = () => TalkerName;
+            interactive.OnExit2D.AddListener(OnExit);
+            var collider = interactive.GetOrAddComponent<CircleCollider2D>();
+            collider.isTrigger = true;
+            collider.radius = 1.0f;
+        }
         iconHolder = GetComponentInChildren<MapIconHolder>();
     }
 
@@ -140,11 +142,11 @@ public class Talker : Character
         if (flagAgent) flagAgent.Recycle();
     }
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        Gizmos.DrawWireCube(base.transform.position + questFlagOffset, Vector3.one);
+        Gizmos.DrawWireCube(base.transform.position + questFlagOffset, new Vector3(1, 1, 0));
     }
-    #endif
+#endif
     #endregion
 }

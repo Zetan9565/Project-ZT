@@ -347,7 +347,9 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
 
 #if UNITY_EDITOR
     [UnityEditor.MenuItem("Zetan Studio/添加寻路管理器")]
+#pragma warning disable IDE0051 // 删除未使用的私有成员
     private static void MakeAStar()
+#pragma warning restore IDE0051 // 删除未使用的私有成员
     {
         if (Instance)
         {

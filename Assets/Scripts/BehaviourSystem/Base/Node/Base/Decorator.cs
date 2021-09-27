@@ -16,7 +16,7 @@ namespace ZetanStudio.BehaviourTree
         public override Node GetInstance()
         {
             Decorator decorator = GetInstance<Decorator>();
-            if (decorator.child) decorator.child = child.GetInstance();
+            if (child) decorator.child = child.GetInstance();
             return decorator;
         }
 
@@ -42,6 +42,13 @@ namespace ZetanStudio.BehaviourTree
         {
             Decorator decorator = ConvertToLocal<Decorator>();
             decorator.child = child.ConvertToLocal();
+            return decorator;
+        }
+
+        public override Node Copy()
+        {
+            Decorator decorator = Instantiate(this);
+            if (child) decorator.child = child.Copy();
             return decorator;
         }
 #endif

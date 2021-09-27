@@ -27,6 +27,8 @@ namespace ZetanStudio.BehaviourTree
         public string newNodeScriptFolder = "Assets/Scripts/BehaviourSystem/Base/Node";
         [DisplayName("新变量脚本默认路径")]
         public string newVarScriptFolder = "Assets/Scripts/BehaviourSystem/Base/Variable";
+        [DisplayName("选取树时同步更改编辑器")]
+        public bool changeOnSelected;
 
         private static BehaviourTreeSettings Find()
         {

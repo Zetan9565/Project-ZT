@@ -213,7 +213,7 @@ public class PlantManager : WindowHandler<PlantUI, PlantManager>
         }
 
         UI.descriptionWindow.alpha = 1;
-        UI.nameText.text = seed.Crop.name;
+        UI.nameText.text = seed.Crop.Name;
         UI.amount.text = BackpackManager.Instance.GetItemAmount(seed).ToString();
         StringBuilder str = new StringBuilder("占用田地空间：");
         str.Append(seed.Crop.Size);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,7 @@ public class BuildingData
     {
         get
         {
-            return Info ? Info.name + (Vector2)position : "未设置";
+            return Info ? Info.Name + (Vector2)position : "未设置";
         }
     }
 

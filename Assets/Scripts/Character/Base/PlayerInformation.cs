@@ -1,8 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "player info", menuName = "Zetan Studio/角色/玩家信息")]
 public class PlayerInformation : CharacterInformation
 {
+    [EnumMemberNames("未知", "男", "女")]
+    protected CharacterSex sex;
+    public CharacterSex Sex => sex;
+
     public Backpack backpack;
 
     #region 装备相关
@@ -90,94 +94,6 @@ public class PlayerInformation : CharacterInformation
             return secondaryWeapon != null && secondaryWeapon.item;
         }
     }
-    #endregion
-
-    #region 能力相关
-    [SerializeField]
-    private RoleAttributeGroup attribute;
-    public RoleAttributeGroup Attribute => attribute;
-
-    [SerializeField]
-    private ScopeInt _HP = new ScopeInt(150) { Current = 150 };
-    public ScopeInt HP
-    {
-        get
-        {
-            return _HP;
-        }
-    }
-
-    [SerializeField]
-    private ScopeInt _MP = new ScopeInt(50) { Current = 50 };
-    public ScopeInt MP
-    {
-        get
-        {
-            return _MP;
-        }
-    }
-
-    [SerializeField]
-    private int _ATK;
-    public int ATK
-    {
-        get
-        {
-            return _ATK;
-        }
-
-        private set
-        {
-            _ATK = value;
-        }
-    }
-
-    [SerializeField]
-    private int _DEF;
-    public int DEF
-    {
-        get
-        {
-            return _DEF;
-        }
-
-        private set
-        {
-            _DEF = value;
-        }
-    }
-
-    [SerializeField]
-    private int hit;
-    public int Hit
-    {
-        get
-        {
-            return hit;
-        }
-
-        private set
-        {
-            hit = value;
-        }
-    }
-
-    [SerializeField]
-    private int dodge;
-    public int Dodge
-    {
-        get
-        {
-            return dodge;
-        }
-
-        private set
-        {
-            dodge = value;
-        }
-    }
 
     #endregion
-
-    public int level;
 }

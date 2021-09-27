@@ -19,13 +19,14 @@ namespace ZetanStudio.BehaviourTree
 
         protected int currentChildIndex;
         protected Node currentChild;
+        protected bool abort;
 
         public Composite() { children = new List<Node>(); }
 
         public override Node GetInstance()
         {
             Composite composite = GetInstance<Composite>();
-            composite.children = children.ConvertAll(c => c.GetInstance());
+            if (children != null) composite.children = children.ConvertAll(c => c.GetInstance());
             return composite;
         }
 
@@ -37,6 +38,7 @@ namespace ZetanStudio.BehaviourTree
 
         protected override void OnStart()
         {
+            abort = false;
             currentChildIndex = 0;
             if (children.Count > 0)
             {
@@ -46,11 +48,12 @@ namespace ZetanStudio.BehaviourTree
                     currentChild = children[currentChildIndex++];
                 }
             }
+            Owner.OnCompositeEvaluate(this);
         }
 
-        public virtual void OnConditionalAbort(int index)
+        protected virtual void OnConditionalAbort(int index, bool lowerAbort)
         {
-            if (abortType == AbortType.None)
+            if (lowerAbort && abortType == AbortType.None)
             {
                 if (children[index] is Composite)
                 {
@@ -59,25 +62,61 @@ namespace ZetanStudio.BehaviourTree
                         children[i].Abort();
                     }
                     Composite parent = Owner.FindParent(this, out var childIndex) as Composite;
-                    if (parent) parent.OnConditionalAbort(childIndex);
+                    if (parent) parent.OnConditionalAbort(childIndex, lowerAbort);
+                    AcceptAbort();
                 }
             }
-            if (abortType == AbortType.LowerPriority || abortType == AbortType.Both)
+            else if (lowerAbort && (abortType == AbortType.LowerPriority || abortType == AbortType.Both))
             {
                 Composite parent = Owner.FindParent(this, out var childIndex) as Composite;
-                if (parent) parent.OnConditionalAbort(childIndex);
+                if (parent) parent.OnConditionalAbort(childIndex, lowerAbort);
+                AcceptAbort();
             }
-            if (abortType == AbortType.Self || abortType == AbortType.Both)
+            else if (!lowerAbort && (abortType == AbortType.Self || abortType == AbortType.Both))
             {
                 for (int i = index + 1; i < children.Count; i++)
                 {
                     if (children[i] is Action action)
                         action.Abort();
+                    else children[i].Inactivate();
+                }
+                AcceptAbort();
+            }
+
+            void AcceptAbort()
+            {
+                abort = true;
+                isStarted = true;
+                currentChildIndex = index;
+                currentChild = children[index];
+            }
+        }
+
+        public bool CheckConditionalAbort()
+        {
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (children[i] is Conditional conditional && conditional.IsDone)
+                {
+                    bool lowerAbort = conditional.CheckCondition();
+                    if (State == NodeStates.Failure && (abortType == AbortType.LowerPriority || abortType == AbortType.Both) && lowerAbort
+                        || (State == NodeStates.Success || State == NodeStates.Running) && (abortType == AbortType.Self || abortType == AbortType.Both) && !lowerAbort)
+                    {
+                        OnConditionalAbort(i, lowerAbort);
+                        return true;
+                    }
                 }
             }
-            isStarted = true;
-            currentChildIndex = index;
-            currentChild = children[index];
+            return false;
+        }
+
+        protected void InactivateFrom(int childIndex)
+        {
+            if (abort) return;
+            for (int j = childIndex + 1; j < children.Count; j++)
+            {
+                children[j].Inactivate();
+            }
         }
 
         #region EDITOR方法
@@ -85,17 +124,26 @@ namespace ZetanStudio.BehaviourTree
         public override void AddChild(Node child)
         {
             children.Add(child);
+            SortByPosition();
         }
 
         public override void RemoveChild(Node child)
         {
             children.Remove(child);
+            SortByPosition();
         }
 
         public override Node ConvertToLocal()
         {
             Composite composite = ConvertToLocal<Composite>();
             composite.children = children.ConvertAll(c => c.ConvertToLocal());
+            return composite;
+        }
+
+        public override Node Copy()
+        {
+            Composite composite = Instantiate(this);
+            if (children != null) composite.children = children.ConvertAll(c => c.Copy());
             return composite;
         }
 

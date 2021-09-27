@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "gathering info", menuName = "Zetan Studio/采集物信息")]
-public class GatheringInformation : ScriptableObject
+[CreateAssetMenu(fileName = "resource info", menuName = "Zetan Studio/采集物信息")]
+public class ResourceInformation : ScriptableObject
 {
     [SerializeField]
     protected string _ID;
@@ -16,7 +16,7 @@ public class GatheringInformation : ScriptableObject
 
     [SerializeField]
     protected string _name;
-    public new string name
+    public string Name
     {
         get
         {

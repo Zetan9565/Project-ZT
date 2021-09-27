@@ -1,59 +1,67 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Pathfinding;
+using UnityEngine;
+using ZetanExtends;
 
-[RequireComponent(typeof(CharacterController2D), typeof(Seeker))]
+[RequireComponent(typeof(Seeker))]
 public class PathAgent : MonoBehaviour
 {
     [DisplayName("停止距离")]
     public float stoppingDistance = 1;
     [DisplayName("选点距离")]
     public float pickNextWaypointDist = 1;
-    [DisplayName("自动寻路")]
+    [DisplayName("自动重寻")]
     public bool autoRepath = true;
     [DisplayName("寻路间隔")]
     public float repathRate = 0.5f;
 
-    public Vector3 destination { get; private set; }
-    public Vector3 pathEndPosition { get; set; }
-    public Path path { get; private set; }
-    public float remainingDistance => (destination - transform.position).magnitude;
-    public bool hasPath => path != null && path.vectorPath.Count > 0;
-    public Vector3 desiredDirection
+#if UNITY_EDITOR
+    [SerializeField, DisplayName("显示Seeker")]
+    private bool showSeeker;
+    [SerializeField, DisplayName("路径Gizmos")]
+    private bool gizmosPath;
+    [SerializeField, DisplayName("细节Gizmos")]
+    private bool gizmosDetail;
+#endif
+
+    public Vector3 Destination { get; private set; }
+    public Vector3 PathEndPosition { get; set; }
+    public Path Path { get; private set; }
+    public float RemainingDistance => (Destination - transform.position).magnitude;
+    public bool HasPath => Path != null && Path.vectorPath.Count > 0;
+    public Vector3 DesiredDirection
     {
         get
         {
-            if (isStopped) return Vector3.zero;
+            if (IsStopped) return Vector3.zero;
             else return (waypoint - transform.position).normalized;
         }
     }
 
     private bool _isStopped;
-    public bool isStopped
+    public bool IsStopped
     {
         get => _isStopped;
         set
         {
-            if (!value) controller.Move(Vector2.zero);
+            if (!value) controller.SetMoveInput(Vector2.zero);
             _isStopped = value;
         }
     }
-    public bool hasArrive { get; private set; }
+    public bool HasArrive { get; private set; }
 
     private Seeker seeker;
     private int waypointIndex;
     private Vector3 waypoint;
-    private CharacterController2D controller;
+    private CharacterControlInput controller;
     private float timer;
 
     private void Awake()
     {
-        controller = GetComponent<CharacterController2D>();
+        controller = this.GetOrAddComponent<CharacterControlInput>();
         seeker = GetComponent<Seeker>();
         waypointIndex = 0;
-        destination = transform.position;
-        waypoint = pathEndPosition = destination;
+        Destination = transform.position;
+        waypoint = PathEndPosition = Destination;
         CheckArrive();
     }
 
@@ -61,17 +69,39 @@ public class PathAgent : MonoBehaviour
     {
         CheckArrive();
         CalNextWaypoint();
-        if (!isStopped)
+        if (!IsStopped)
         {
-            if (hasPath && !hasArrive) controller.Move(desiredDirection);
-            else controller.Move(Vector2.zero);
+            if (HasPath && !HasArrive) controller.SetMoveInput(DesiredDirection);
+            else controller.SetMoveInput(Vector2.zero);
         }
-        timer += Time.deltaTime;
-        if (timer >= repathRate)
+        if (autoRepath)
         {
-            timer = 0;
-            if (autoRepath) SetDestination(destination);
+            timer += Time.deltaTime;
+            if (timer >= repathRate)
+            {
+                timer = 0;
+                SetDestination(Destination);
+            }
         }
+    }
+
+    private void OnValidate()
+    {
+        if (GetComponent<Seeker>() is Seeker seeker)
+        {
+            if (!showSeeker) seeker.hideFlags = HideFlags.HideInInspector;
+            else seeker.hideFlags = HideFlags.None;
+            seeker.drawGizmos = gizmosPath;
+            seeker.detailedGizmos = gizmosDetail;
+        }
+    }
+
+    private void OnDestroy()
+    {
+#if UNITY_EDITOR
+        if (GetComponent<Seeker>() is Seeker seeker)
+            seeker.hideFlags = HideFlags.None;
+#endif
     }
 
     public void SetDestination(Vector3 destination)
@@ -79,39 +109,39 @@ public class PathAgent : MonoBehaviour
         if (seeker)
         {
             AStarManager.Instance.RequestPath(new PathRequest(transform.position, destination, seeker, Vector2Int.one, OnPathComplete));
-            this.destination = destination;
-            hasArrive = false;
+            this.Destination = destination;
+            HasArrive = false;
         }
     }
     private void OnPathComplete(Path path)
     {
         if (!path.error)
         {
-            this.path = path;
+            this.Path = path;
             waypointIndex = 0;
             waypoint = path.vectorPath[waypointIndex];
-            pathEndPosition = path.vectorPath[path.vectorPath.Count - 1];
+            PathEndPosition = path.vectorPath[path.vectorPath.Count - 1];
         }
     }
     private void CalNextWaypoint()
     {
-        if (!hasPath) return;
-        bool isLast = waypointIndex >= path.vectorPath.Count - 1;
+        if (!HasPath) return;
+        bool isLast = waypointIndex >= Path.vectorPath.Count - 1;
         if (isLast && (waypoint - transform.position).sqrMagnitude <= stoppingDistance * stoppingDistance)
         {
-            waypoint = destination;
+            waypoint = Destination;
             return;
         }
         if (!isLast && (waypoint - transform.position).sqrMagnitude <= pickNextWaypointDist * pickNextWaypointDist)
         {
             waypointIndex++;
-            if (waypointIndex >= path.vectorPath.Count) waypoint = destination;
-            else waypoint = path.vectorPath[waypointIndex];
+            if (waypointIndex >= Path.vectorPath.Count) waypoint = Destination;
+            else waypoint = Path.vectorPath[waypointIndex];
         }
     }
-    public void CheckArrive()
+    private void CheckArrive()
     {
-        if (!hasArrive && remainingDistance <= stoppingDistance) hasArrive = true;
-        else if (hasArrive && remainingDistance > stoppingDistance) hasArrive = false;
+        if (!HasArrive && (Destination - transform.position).sqrMagnitude <= stoppingDistance * stoppingDistance) HasArrive = true;
+        else if (HasArrive && (Destination - transform.position).sqrMagnitude > stoppingDistance * stoppingDistance) HasArrive = false;
     }
 }

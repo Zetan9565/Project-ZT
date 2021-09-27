@@ -13,14 +13,15 @@ MonoBehaviour:
   m_Name: dialogue
   m_EditorClassIdentifier: 
   _ID: DIALG000015
-  useUnifiedNPC: 1
+  storyDialogue: 0
+  useUnifiedNPC: 0
   useCurrentTalkerInfo: 1
   unifiedNPC: {fileID: 11400000, guid: 1481175f66907084b9478d884409a341, type: 2}
   words:
-  - talkerType: 2
+  - talkerType: 0
     talkerInfo: {fileID: 11400000, guid: 1481175f66907084b9478d884409a341, type: 2}
     content: "\u6211\u4E0D\u9700\u8981\u8FD9\u4E2A\uFF0C\u4F46\u8FD8\u662F\u8C22\u8C22\u4E86\u3002"
     indexOfCorrectOption: 0
-    wordsWhenChusWB: 
-   options: []
+    wrongChoiceWords: 
+    options: []
     events: []

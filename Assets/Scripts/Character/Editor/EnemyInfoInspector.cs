@@ -1,5 +1,4 @@
-﻿using UnityEditor;
-using UnityEditorInternal;
+using UnityEditor;
 using UnityEngine;
 
 public partial class CharacterInfoInspector
@@ -18,7 +17,7 @@ public partial class CharacterInfoInspector
 
     void EnemyHeader()
     {
-        if (string.IsNullOrEmpty(enemy.name) || string.IsNullOrEmpty(enemy.ID) || enemy.DropItems && enemy.DropItems.Products.Exists(x => !x.Item))
+        if (string.IsNullOrEmpty(enemy.Name) || string.IsNullOrEmpty(enemy.ID) || enemy.DropItems && enemy.DropItems.Products.Exists(x => !x.Item))
             EditorGUILayout.HelpBox("该敌人信息未补全。", MessageType.Warning);
         else EditorGUILayout.HelpBox("该敌人信息已完整。", MessageType.Info);
     }
@@ -29,17 +28,15 @@ public partial class CharacterInfoInspector
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(race, new GUIContent("种族"));
         if (race.objectReferenceValue)
-            EditorGUILayout.LabelField("种族名称", (race.objectReferenceValue as EnemyRace).name);
-        if (EditorGUI.EndChangeCheck())
-            serializedObject.ApplyModifiedProperties();
+            EditorGUILayout.LabelField("种族名称", (race.objectReferenceValue as EnemyRace).Name);
+        EditorGUILayout.PropertyField(SMParams, new GUIContent("状态机参数"));
         EditorGUILayout.PropertyField(dropItems, new GUIContent("掉落道具"));
         if (dropItems.objectReferenceValue)
         {
-            serializedObject.Update();
-            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(lootPrefab, new GUIContent("掉落道具预制件"));
-            if (EditorGUI.EndChangeCheck())
-                serializedObject.ApplyModifiedProperties();
         }
+        attrDrawer.DoLayoutDraw();
+        if (EditorGUI.EndChangeCheck())
+            serializedObject.ApplyModifiedProperties();
     }
 }

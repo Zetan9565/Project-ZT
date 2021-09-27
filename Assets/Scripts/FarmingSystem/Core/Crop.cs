@@ -1,9 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [AddComponentMenu("Zetan Studio/农牧/农作物")]
-public class Crop : Gathering
+public class Crop : Resource
 {
     public string EntityID => Data ? Data.entityID : string.Empty;
 
@@ -76,7 +76,7 @@ public class Crop : Gathering
             Parent.Crops.Remove(this);
             Parent = null;
         }
-        gatheringInfo = null;
+        resourceInfo = null;
         UI = null;
     }
 
@@ -84,8 +84,8 @@ public class Crop : Gathering
     {
         if (!stage) return;
         if (stage.HarvestAble)
-            gatheringInfo = Data.currentStage.GatherInfo;
-        else gatheringInfo = null;
+            resourceInfo = Data.currentStage.GatherInfo;
+        else resourceInfo = null;
     }
 
     public void Recycle()

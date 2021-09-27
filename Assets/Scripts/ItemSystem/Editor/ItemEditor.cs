@@ -52,12 +52,12 @@ public class ItemEditor : ConfigurationEditor<ItemBase>
         if (!element) return false;
         if (element.ID.Contains(keyWords))
         {
-            remark = $"识别码：{ZetanEditorUtility.TrimContentByKey(element.name, keyWords, 16)}";
+            remark = $"识别码：{ZetanEditorUtility.TrimContentByKey(element.Name, keyWords, 16)}";
             return true;
         }
-        else if (element.name.Contains(keyWords))
+        else if (element.Name.Contains(keyWords))
         {
-            remark = $"名称：{ZetanEditorUtility.TrimContentByKey(element.name, keyWords, 16)}";
+            remark = $"名称：{ZetanEditorUtility.TrimContentByKey(element.Name, keyWords, 16)}";
             return true;
         }
         else if (element.Description.Contains(keyWords))
@@ -75,6 +75,6 @@ public class ItemEditor : ConfigurationEditor<ItemBase>
 
     protected override string GetElementName(ItemBase element)
     {
-        return element.name;
+        return element.Name;
     }
 }

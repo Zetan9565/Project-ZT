@@ -37,10 +37,15 @@ namespace ZetanStudio.BehaviourTree
             else return null;
         }
 
-        public SharedVariable<T> GetVariable<T>(string name)
+        public bool TryGetVariable<T>(string name, out SharedVariable<T> variable)
         {
-            if (KeyedVariables.TryGetValue(name, out var variable)) return variable as SharedVariable<T>;
-            else return null;
+            variable = null;
+            if (KeyedVariables.TryGetValue(name, out var find))
+            {
+                variable = find as SharedVariable<T>;
+                return true;
+            }
+            else return false;
         }
 
         public List<SharedVariable> GetVariables(Type type)

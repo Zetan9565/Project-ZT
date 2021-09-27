@@ -188,10 +188,10 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case ItemKeyType.Name:
-                    if (CompareString(item.name, strKeys[0]))
+                    if (CompareString(item.Name, strKeys[0]))
                     {
                         take = true;
-                        remark = $"名称：{item.name}";
+                        remark = $"名称：{item.Name}";
                     }
                     break;
                 case ItemKeyType.Desc:
@@ -210,21 +210,21 @@ public class ConfigurationFinding : EditorWindow
                     if (item.ItemType == (ItemType)intKeys[0])
                     {
                         take = true;
-                        remark = $"[名称：{item.name}]是此类型";
+                        remark = $"[名称：{item.Name}]是此类型";
                     }
                     break;
                 case ItemKeyType.AsMater:
                     if (item.MaterialType == (MaterialType)intKeys[0])
                     {
                         take = true;
-                        remark = $"[名称：{item.name}]是此材料类型";
+                        remark = $"[名称：{item.Name}]是此材料类型";
                     }
                     break;
                 case ItemKeyType.Formu:
                     if (item.Formulation == objKeys[0])
                     {
                         take = true;
-                        remark = $"[名称：{item.name}]使用该配方";
+                        remark = $"[名称：{item.Name}]使用该配方";
                     }
                     break;
                 case ItemKeyType.Mater:
@@ -514,7 +514,7 @@ public class ConfigurationFinding : EditorWindow
                             if (dialog.UnifiedNPC == objKeys[0])
                             {
                                 take = true;
-                                remark = $"统一对话人是[{dialog.UnifiedNPC.name}]";
+                                remark = $"统一对话人是[{dialog.UnifiedNPC.Name}]";
                             }
                         }
                         else
@@ -536,7 +536,7 @@ public class ConfigurationFinding : EditorWindow
                             if (dialog.UnifiedNPC == objKeys[0])
                             {
                                 take = true;
-                                remark = $"统一对话人是[{dialog.UnifiedNPC.name}]";
+                                remark = $"统一对话人是[{dialog.UnifiedNPC.Name}]";
                             }
                         }
                     }
@@ -593,7 +593,7 @@ public class ConfigurationFinding : EditorWindow
                             take = true;
                             remark = $"第[{index + 1}]句话";
                             index = dialog.Words[index].Options.FindIndex(x => x.TalkerType == TalkerType.NPC);
-                            remark += $"第[{index + 1}]个选项是[{(objKeys[0] as TalkerInformation).name}]说";
+                            remark += $"第[{index + 1}]个选项是[{(objKeys[0] as TalkerInformation).Name}]说";
                         }
                     }
                     break;
@@ -794,10 +794,10 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case BuildingKeyType.Name:
-                    if (CompareString(building.name, strKeys[0]))
+                    if (CompareString(building.Name, strKeys[0]))
                     {
                         take = true;
-                        remark = $"名称：{building.name}";
+                        remark = $"名称：{building.Name}";
                     }
                     break;
                 case BuildingKeyType.Desc:

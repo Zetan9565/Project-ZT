@@ -8,6 +8,8 @@ public class CharacterAnimator : MonoBehaviour
 
     public AnimatorStateInfo CurrentState => GetCurrentAnimatorStateInfo();
 
+    public AnimatorStateInfo PreviousState { get; private set; }
+
     private Animator animator;
 
     public Animator GetAnimatorComponent()
@@ -24,6 +26,11 @@ public class CharacterAnimator : MonoBehaviour
         }
     }
 
+    private void LateUpdate()
+    {
+        PreviousState = CurrentState;
+    }
+
     private void OnStateEnter(AnimatorStateInfo stateInfo, int layerIndex)
     {
 
@@ -34,7 +41,6 @@ public class CharacterAnimator : MonoBehaviour
     }
     private void OnStateExit(AnimatorStateInfo stateInfo, int layerIndex)
     {
-
     }
 
     public void SetAnimaState(int state, int substate)
@@ -109,7 +115,8 @@ public class CharacterAnimator : MonoBehaviour
 
     public AnimatorStateInfo GetCurrentAnimatorStateInfo(int layerIndex = 0)
     {
-        return animator.GetCurrentAnimatorStateInfo(layerIndex);
+        if (animator.runtimeAnimatorController) return animator.GetCurrentAnimatorStateInfo(layerIndex);
+        else return default;
     }
     public void PlayAttackAnima()
     {
@@ -121,6 +128,11 @@ public class CharacterAnimator : MonoBehaviour
     public void ResetAttackAnima()
     {
         ResetTrigger(CharacterAnimaParams.Attack);
+    }
+
+    private bool StateEquals(AnimatorStateInfo left, AnimatorStateInfo right)
+    {
+        return left.fullPathHash == right.fullPathHash;
     }
 
     #region Animator部分方法覆写

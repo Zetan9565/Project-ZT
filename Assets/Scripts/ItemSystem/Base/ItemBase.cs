@@ -11,7 +11,7 @@ public abstract class ItemBase : ScriptableObject
 
     [SerializeField]
     protected string _name;
-    public new virtual string name => _name;
+    public virtual string Name => _name;
 
     [SerializeField]
     protected ItemType itemType = ItemType.Other;

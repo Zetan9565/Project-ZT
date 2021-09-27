@@ -26,6 +26,7 @@ namespace ZetanStudio.BehaviourTree
             switch (currentChild.Evaluate())
             {
                 case NodeStates.Success:
+                    InactivateFrom(currentChildIndex);
                     return NodeStates.Success;
                 case NodeStates.Failure:
                     if (childrenExecutionOrder.Count <= 0) //能够到达这一步，说明前面没有一个成功的，所以评估失败
@@ -34,10 +35,12 @@ namespace ZetanStudio.BehaviourTree
                     {
                         currentChildIndex = childrenExecutionOrder.Pop();
                         currentChild = children[currentChildIndex];
+                        InactivateFrom(currentChildIndex);
                         return NodeStates.Running;
                     }
                 case NodeStates.Inactive:
                 case NodeStates.Running:
+                    InactivateFrom(currentChildIndex);
                     return NodeStates.Running;
             }
             return NodeStates.Failure;
@@ -53,14 +56,6 @@ namespace ZetanStudio.BehaviourTree
                 childIndexList[j] = childIndexList[i - 1];
                 childIndexList[i - 1] = index;
             }
-        }
-
-        public override void OnConditionalAbort(int index)
-        {
-            base.OnConditionalAbort(index);
-            CalculateOrder();
-            currentChildIndex = childrenExecutionOrder.Pop();
-            currentChild = children[currentChildIndex];
         }
     }
 }

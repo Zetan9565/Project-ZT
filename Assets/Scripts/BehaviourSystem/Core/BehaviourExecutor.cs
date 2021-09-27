@@ -42,6 +42,40 @@ namespace ZetanStudio.BehaviourTree
             if (behaviour) behaviour.Restart(resetOnRestart);
         }
 
+        public SharedVariable GetVariable(string name)
+        {
+            if (!behaviour) return null;
+            return behaviour.GetVariable(name);
+        }
+        public bool TryGetVariable<T>(string name, out SharedVariable<T> variable)
+        {
+            variable = null;
+            if (!behaviour) return false;
+            return behaviour.TryGetVariable<T>(name, out variable);
+        }
+
+        public List<SharedVariable> GetVariables(Type type)
+        {
+            if (!behaviour) return null;
+            return behaviour.GetVariables(type);
+        }
+        public List<SharedVariable<T>> GetVariables<T>()
+        {
+            if (!behaviour) return null;
+            return behaviour.GetVariables<T>();
+        }
+
+        public bool SetVariable(string name, object value)
+        {
+            if (!behaviour) return false;
+            return behaviour.SetVariable(name, value);
+        }
+        public bool SetVariable<T>(string name, T value)
+        {
+            if (!behaviour) return false;
+            return behaviour.SetVariable(name, value);
+        }
+
         #region Unity回调
         private void Awake()
         {

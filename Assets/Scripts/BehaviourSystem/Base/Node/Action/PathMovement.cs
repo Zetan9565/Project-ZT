@@ -9,8 +9,6 @@ public abstract class PathMovement : Action
     public SharedFloat arriveDistance = 1;
     [DisplayName("选点距离")]
     public SharedFloat pickNextWaypointDist = 1;
-    [DisplayName("寻路频率")]
-    public SharedFloat repathRate = 0.5f;
 
     protected PathAgent pathAgent;
     protected bool pathFailed;
@@ -29,11 +27,6 @@ public abstract class PathMovement : Action
         pathAgent.stoppingDistance = arriveDistance;
         pathAgent.pickNextWaypointDist = pickNextWaypointDist;
     }
-    protected override void OnStart()
-    {
-        pathAgent.autoRepath = true;
-        pathAgent.repathRate = repathRate.Value;
-    }
     protected override void OnEnd()
     {
         Stop();
@@ -47,7 +40,7 @@ public abstract class PathMovement : Action
     {
         if (pathAgent)
         {
-            pathAgent.isStopped = false;
+            pathAgent.IsStopped = false;
             pathAgent.SetDestination(destination);
             pathFailed = false;
         }
@@ -55,11 +48,11 @@ public abstract class PathMovement : Action
     }
     public void Stop()
     {
-        pathAgent.isStopped = true;
+        pathAgent.IsStopped = true;
     }
     protected bool HasArrive()
     {
         if (!pathAgent) return true;
-        else return pathAgent.hasArrive;
+        else return pathAgent.HasArrive;
     }
 }

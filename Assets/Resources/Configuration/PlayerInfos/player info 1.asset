@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: player info 1
   m_EditorClassIdentifier: 
   _ID: PLAY001
-  _Name: "\u674E\u9A81"
-  sex: 1
+  _name: "\u73A9\u5BB6"
+  _SMParams: {fileID: 11400000, guid: 5f652b0575cf04147adc6a24c7fed291, type: 2}
+  attribute:
+    attributes: []
+  level: 0
   backpack:
     size:
       min: 0
@@ -26,102 +29,35 @@ MonoBehaviour:
     item: {fileID: 0}
     amount: 1
     indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
   secondaryWeapon:
     item: {fileID: 0}
     amount: 1
     indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
   armor:
     item: {fileID: 0}
     amount: 1
     indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
   helmet:
     item: {fileID: 0}
     amount: 1
     indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
   boots:
     item: {fileID: 0}
     amount: 1
     indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
   gloves:
     item: {fileID: 0}
     amount: 1
     indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
   clothes:
     item: {fileID: 0}
     amount: 1
     indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
   ring1:
     item: {fileID: 0}
     amount: 1
     indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
   ring2:
     item: {fileID: 0}
     amount: 1
     indexInGrid: 0
-    durability:
-      min: 0
-      max: 1
-    gemSlotAmount: 0
-    gemstone1: {fileID: 0}
-    gemstone2: {fileID: 0}
-  attribute:
-    attributes: []
-  _HP:
-    min: 0
-    max: 150
-  _MP:
-    min: 0
-    max: 50
-  _ATK: 0
-  _DEF: 0
-  hit: 0
-  dodge: 0
-  level: 0

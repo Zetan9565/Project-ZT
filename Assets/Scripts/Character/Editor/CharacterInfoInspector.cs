@@ -1,7 +1,7 @@
-using UnityEngine;
-using UnityEditor;
 using System;
 using System.Linq;
+using UnityEditor;
+using UnityEngine;
 
 [CustomEditor(typeof(CharacterInformation), true)]
 public partial class CharacterInfoInspector : Editor
@@ -9,10 +9,10 @@ public partial class CharacterInfoInspector : Editor
     CharacterInformation character;
     SerializedProperty _ID;
     SerializedProperty _name;
-    SerializedProperty sex;
 
     PlayerInformation player;
     SerializedProperty backpack;
+    SerializedProperty SMParams;
     SerializedProperty attribute;
     RoleAttributeGroupDrawer attrDrawer;
 
@@ -25,12 +25,14 @@ public partial class CharacterInfoInspector : Editor
     {
         character = target as CharacterInformation;
         enemy = target as EnemyInformation;
-        talker = target as TalkerInformation;
+        NPC = target as NPCInformation;
         player = target as PlayerInformation;
         characters = Resources.LoadAll<CharacterInformation>("Configuration");
         _ID = serializedObject.FindProperty("_ID");
         _name = serializedObject.FindProperty("_name");
-        sex = serializedObject.FindProperty("sex");
+        SMParams = serializedObject.FindProperty("_SMParams");
+        attribute = serializedObject.FindProperty("attribute");
+        attrDrawer = new RoleAttributeGroupDrawer(serializedObject, attribute, lineHeight, lineHeightSpace);
 
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 2;
@@ -39,15 +41,13 @@ public partial class CharacterInfoInspector : Editor
         {
             EnemyInfoEnable();
         }
-        else if (talker)
+        else if (NPC)
         {
-            TalkerInfoEnable();
+            NPCInfoEnable();
         }
         else if (player)
         {
             backpack = serializedObject.FindProperty("backpack");
-            attribute = serializedObject.FindProperty("attribute");
-            attrDrawer = new RoleAttributeGroupDrawer(serializedObject, attribute, lineHeight, lineHeightSpace);
         }
     }
 
@@ -57,14 +57,14 @@ public partial class CharacterInfoInspector : Editor
         {
             EnemyHeader();
         }
-        else if (talker)
+        else if (NPC)
         {
-            TalkerInfoHeader();
+            NPCInfoHeader();
         }
-        else if (string.IsNullOrEmpty(character.name) || string.IsNullOrEmpty(character.ID))
+        else if (string.IsNullOrEmpty(character.Name) || string.IsNullOrEmpty(character.ID))
             EditorGUILayout.HelpBox("该角色信息未补全。", MessageType.Warning);
         else EditorGUILayout.HelpBox("该角色信息已完整。", MessageType.Info);
-        if (!talker)
+        if (!NPC)
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
@@ -80,7 +80,6 @@ public partial class CharacterInfoInspector : Editor
                 }
             }
             EditorGUILayout.PropertyField(_name, new GUIContent("名称"));
-            if (!enemy) EditorGUILayout.PropertyField(sex, new GUIContent("性别"));
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
             if (enemy)
@@ -91,19 +90,22 @@ public partial class CharacterInfoInspector : Editor
             {
                 serializedObject.Update();
                 EditorGUI.BeginChangeCheck();
+                EditorGUILayout.PropertyField(SMParams, new GUIContent("状态机参数"));
                 EditorGUILayout.LabelField("背包信息");
                 SerializedProperty size = backpack.FindPropertyRelative("size");
                 SerializedProperty weight = backpack.FindPropertyRelative("weight");
                 size.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认容量(格)", size.FindPropertyRelative("max").intValue, 30, 200);
                 weight.FindPropertyRelative("max").floatValue = EditorGUILayout.Slider("默认负重(WL)", weight.FindPropertyRelative("max").floatValue, 100, 1000);
-                attrDrawer.DoLayoutDraw();
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
+                serializedObject.Update();
+                attrDrawer.DoLayoutDraw();
+                serializedObject.ApplyModifiedProperties();
             }
         }
         else
         {
-            DrawTalkerInfo();
+            DrawNPCInfo();
         }
     }
 
@@ -112,37 +114,36 @@ public partial class CharacterInfoInspector : Editor
         string newID = string.Empty;
         if (enemy)
         {
-            EnemyInformation[] enemies = Resources.LoadAll<EnemyInformation>("Configuration");
+            var enemies = characters.Where(x => x is EnemyInformation);
             for (int i = 1; i < 1000; i++)
             {
                 newID = "ENMY" + i.ToString().PadLeft(3, '0');
-                if (!Array.Exists(enemies, x => x.ID == newID))
+                if (!enemies.Any(x => x.ID == newID))
                     break;
             }
         }
-        else if (talker)
+        else if (NPC)
         {
-            TalkerInformation[] talkers = Resources.LoadAll<TalkerInformation>("Configuration");
+            var npcs = characters.Where(x => x is NPCInformation);
             for (int i = 1; i < 1000; i++)
             {
                 newID = "NPC" + i.ToString().PadLeft(3, '0');
-                if (!Array.Exists(talkers, x => x.ID == newID))
+                if (!npcs.Any(x => x.ID == newID))
                     break;
             }
         }
         else if (player)
         {
-            PlayerInformation[] players = Resources.LoadAll<PlayerInformation>("Configuration");
+            var players = characters.Where(x => x is PlayerInformation);
             for (int i = 1; i < 1000; i++)
             {
                 newID = "PLAY" + i.ToString().PadLeft(3, '0');
-                if (!Array.Exists(players, x => x.ID == newID))
+                if (!players.Any(x => x.ID == newID))
                     break;
             }
         }
         else
         {
-            CharacterInformation[] characters = Resources.LoadAll<CharacterInformation>("Configuration").Where(x => !(x is EnemyInformation) && !(x is TalkerInformation)).ToArray();
             for (int i = 1; i < 1000; i++)
             {
                 newID = "CHAR" + i.ToString().PadLeft(3, '0');

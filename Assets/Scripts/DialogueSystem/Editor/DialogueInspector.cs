@@ -29,7 +29,7 @@ public class DialogueInspector : Editor
     private void OnEnable()
     {
         npcs = Resources.LoadAll<TalkerInformation>("Configuration");
-        npcNames = npcs.Select(x => x.name).ToArray();//Linq分离出NPC名字
+        npcNames = npcs.Select(x => x.Name).ToArray();//Linq分离出NPC名字
 
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 2;
@@ -42,7 +42,7 @@ public class DialogueInspector : Editor
         useCurrentTalkerInfo = serializedObject.FindProperty("useCurrentTalkerInfo");
         unifiedNPC = serializedObject.FindProperty("unifiedNPC");
         dialogWords = serializedObject.FindProperty("words");
-        npcSelector = new ObjectSelectionDrawer<TalkerInformation>(unifiedNPC, "_name", "Configuration", string.Empty);
+        npcSelector = new ObjectSelectionDrawer<TalkerInformation>(unifiedNPC, "_name", "Configuration", "指定的NPC");
         HandlingWordsList();
     }
 
@@ -67,7 +67,8 @@ public class DialogueInspector : Editor
                 EditorGUI.FocusTextInControl(null);
             }
         }
-        EditorGUILayout.PropertyField(storyDialogue, new GUIContent("剧情用对话"));
+        if (!useCurrentTalkerInfo.boolValue)
+            EditorGUILayout.PropertyField(storyDialogue, new GUIContent("剧情用对话"));
         if (storyDialogue.boolValue)
         {
             EditorGUILayout.HelpBox("在进行该对话时将不会显示返回、结束等按钮，且在完成对话时会自动关闭对话窗口。", MessageType.Info);
@@ -84,10 +85,7 @@ public class DialogueInspector : Editor
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.BeginHorizontal();
             npcSelector.DoLayoutDraw();
-            EditorGUILayout.PropertyField(unifiedNPC, new GUIContent(string.Empty));
-            EditorGUILayout.EndVertical();
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         }
         serializedObject.Update();
@@ -118,7 +116,7 @@ public class DialogueInspector : Editor
             {
                 if (!useUnifiedNPC.boolValue)
                     talkerName = dialogue.Words[index] == null ? "(空)" : !dialogue.Words[index].TalkerInfo ? "(空谈话人)" : (dialogue.Words[index].TalkerName + "说");
-                else talkerName = !dialogue.UnifiedNPC ? "(空)" : (useCurrentTalkerInfo.boolValue ? "NPC说" : dialogue.UnifiedNPC.name + "说");
+                else talkerName = !dialogue.UnifiedNPC ? "(空)" : (useCurrentTalkerInfo.boolValue ? "NPC说" : dialogue.UnifiedNPC.Name + "说");
             }
             else talkerName = "玩家说";
             EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2, lineHeight), words, new GUIContent(talkerName));
@@ -170,15 +168,6 @@ public class DialogueInspector : Editor
                 words.serializedObject.Update();
                 EditorGUI.BeginChangeCheck();
                 int lineCount = 1;
-                if (talkerType.enumValueIndex == (int)TalkerType.NPC && !useUnifiedNPC.boolValue)
-                {
-                    EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight), "引用资源");
-                    GUI.enabled = false;
-                    EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight),
-                        talkerInfo, new GUIContent(string.Empty));
-                    GUI.enabled = true;
-                    lineCount++;
-                }
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount - lineHeight, rect.width, lineHeight * 4),
                     content, new GUIContent(string.Empty));
                 lineCount += 2;
@@ -188,13 +177,13 @@ public class DialogueInspector : Editor
                     GUI.FocusControl(null);
                     GenericMenu menu = new GenericMenu();
                     for (int i = 0; i < npcs.Length; i++)
-                        menu.AddItem(new GUIContent($"人名/{CharacterInformation.GetSexString(npcs[i].Sex)}/{npcs[i].name}"), false, OnSelectNpc, i);
+                        menu.AddItem(new GUIContent($"人名/{NPCInformation.GetSexString(npcs[i].Sex)}/{npcs[i].Name}"), false, OnSelectNpc, i);
                     var items = Resources.LoadAll<ItemBase>("Configuration");
                     for (int i = 0; i < items.Length; i++)
-                        menu.AddItem(new GUIContent($"道具/{ItemBase.GetItemTypeString(items[i].ItemType)}/{items[i].name}"), false, OnSelectItem, i);
+                        menu.AddItem(new GUIContent($"道具/{ItemBase.GetItemTypeString(items[i].ItemType)}/{items[i].Name}"), false, OnSelectItem, i);
                     var enemies = Resources.LoadAll<EnemyInformation>("Configuration");
                     for (int i = 0; i < enemies.Length; i++)
-                        menu.AddItem(new GUIContent(string.Format("敌人/{0}{1}", enemies[i].Race ? enemies[i].Race.name + "/" : string.Empty, enemies[i].name)),
+                        menu.AddItem(new GUIContent(string.Format("敌人/{0}{1}", enemies[i].Race ? enemies[i].Race.Name + "/" : string.Empty, enemies[i].Name)),
                             false, OnSelectEnemy, i);
 
                     menu.DropDown(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight));
@@ -398,7 +387,7 @@ public class DialogueInspector : Editor
                                         }
                                         string b_talkerName;
                                         if (b_talkerType.enumValueIndex == (int)TalkerType.NPC)
-                                            b_talkerName = (this.dialogue.UseUnifiedNPC ? this.dialogue.UnifiedNPC.name : this.dialogue.Words[index].TalkerName) + "说";
+                                            b_talkerName = (this.dialogue.UseUnifiedNPC ? this.dialogue.UnifiedNPC.Name : this.dialogue.Words[index].TalkerName) + "说";
                                         else b_talkerName = "玩家说";
                                         EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight), b_talkerName);
                                         b_talkerType.enumValueIndex = EditorGUI.IntPopup(new Rect(_rect.x + _rect.width / 2, _rect.y + lineHeightSpace * _lineCount, _rect.width / 2, lineHeight),
@@ -586,18 +575,7 @@ public class DialogueInspector : Editor
                                     break;
                                 case WordsEventType.GetAmity:
                                 case WordsEventType.LoseAmity:
-                                    oIndex = GetNPCIndex(toWhom.objectReferenceValue as TalkerInformation);
-                                    indexes.Clear();
-                                    names.Clear();
-                                    for (int i = 0; i < npcNames.Length; i++)
-                                    {
-                                        indexes.Add(i);
-                                        names.Add(npcNames[i]);
-                                    }
-                                    EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace, 28, lineHeight), "对谁");
-                                    oIndex = EditorGUI.IntPopup(new Rect(_rect.x + 28, _rect.y + lineHeightSpace, _rect.width / 2 - 28, lineHeight), oIndex, names.ToArray(), indexes.ToArray());
-                                    if (oIndex >= 0 && oIndex < npcs.Length) toWhom.objectReferenceValue = npcs[oIndex];
-                                    else toWhom.objectReferenceValue = null;
+                                    new ObjectSelectionDrawer<TalkerInformation>(toWhom, "_name", npcs).DoDraw(new Rect(_rect.x, _rect.y + lineHeightSpace, _rect.width / 2, lineHeight));
                                     EditorGUI.LabelField(new Rect(_rect.x + 2 + _rect.width / 2, _rect.y + lineHeightSpace, 40, lineHeight), "好感值");
                                     EditorGUI.PropertyField(new Rect(_rect.x + 42 + _rect.width / 2, _rect.y + lineHeightSpace, _rect.width / 2 - 42, lineHeight),
                                         favorabilityValue, new GUIContent(string.Empty));
@@ -667,7 +645,6 @@ public class DialogueInspector : Editor
                 SerializedProperty options = words.FindPropertyRelative("options");
                 SerializedProperty events = words.FindPropertyRelative("events");
                 SerializedProperty indexOfCorrectOption = words.FindPropertyRelative("indexOfCorrectOption");
-                if (dialogue.Words[index].TalkerType == TalkerType.NPC && !useUnifiedNPC.boolValue) lineCount += 1;//NPC选择
                 lineCount += 5;//对话、按钮、选项
                 if (options.isExpanded)
                 {

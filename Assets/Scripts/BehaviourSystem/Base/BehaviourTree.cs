@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace ZetanStudio.BehaviourTree
@@ -56,10 +57,15 @@ namespace ZetanStudio.BehaviourTree
             if (KeyedVariables.TryGetValue(name, out var variable)) return variable;
             else return null;
         }
-        public SharedVariable<T> GetVariable<T>(string name)
+        public bool TryGetVariable<T>(string name, out SharedVariable<T> variable)
         {
-            if (KeyedVariables.TryGetValue(name, out var variable)) return variable as SharedVariable<T>;
-            else return null;
+            variable = null;
+            if (KeyedVariables.TryGetValue(name, out var find))
+            {
+                variable = find as SharedVariable<T>;
+                return true;
+            }
+            else return false;
         }
         public List<SharedVariable> GetVariables(Type type)
         {
@@ -116,6 +122,31 @@ namespace ZetanStudio.BehaviourTree
             }
             else return false;
         }
+        public bool ReplaceVariable<T>(string name, SharedVariable<T> variable)
+        {
+            if (!IsInstance)
+            {
+                Debug.LogError("尝试替换未实例化的局部变量");
+                return false;
+            }
+            if (KeyedVariables.ContainsKey(name))
+            {
+                Traverse(entry, n =>
+                {
+                    Type type = n.GetType();
+                    foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+                    {
+                        if(field.FieldType.Equals(typeof(SharedVariable<T>)))
+                        {
+                            if (name == (field.GetValue(n) as SharedVariable<T>).name)
+                                field.SetValue(n, variable);
+                        }
+                    }
+                });
+                return true;
+            }
+            else return false;
+        }
 
         public BehaviourTree GetInstance()
         {
@@ -155,9 +186,9 @@ namespace ZetanStudio.BehaviourTree
                     KeyedVariables.Add(variable.name, variable);
                 }
             }
-            Traverse(entry, n => n.Init(this));
-            executedConditional = new List<Conditional>();
-            conditionalsMap = new HashSet<Conditional>();
+            Nodes.ForEach(n => n.Init(this));
+            executedComposites = new List<Composite>();
+            compositesMap = new HashSet<Composite>();
         }
 
         public void PresetVariables(List<SharedVariable> variables)
@@ -189,28 +220,15 @@ namespace ZetanStudio.BehaviourTree
             if (!IsPaused)
             {
                 bool abort = false;
-                for (int i = 0; i < executedConditional.Count; i++)
+                for (int i = 0; i < executedComposites.Count; i++)
                 {
-                    Conditional conditional = executedConditional[i];
-                    Composite parent = FindParent(conditional, out var childIndex) as Composite;
-                    if (!parent)
+                    Composite composite = executedComposites[i];
+                    if(composite.CheckConditionalAbort())
                     {
-                        executedConditional.RemoveAt(i);
-                        conditionalsMap.Remove(conditional);
-                        i--;
-                    }
-                    if (parent)
-                    {
-                        bool self = (parent.AbortType == AbortType.Self || parent.AbortType == AbortType.Both) && (parent.State == NodeStates.Running || parent.State == NodeStates.Success) && !conditional.CheckCondition();
-                        bool lower = (parent.AbortType == AbortType.LowerPriority || parent.AbortType == AbortType.Both) && parent.State == NodeStates.Failure && conditional.CheckCondition();
-                        if (self || lower)
-                        {
-                            parent.OnConditionalAbort(childIndex);
-                            executedConditional.RemoveAt(i);
-                            conditionalsMap.Remove(conditional);
-                            abort = true;
-                            break;
-                        }
+                        executedComposites.RemoveAt(i);
+                        compositesMap.Remove(composite);
+                        abort = true;
+                        break;
                     }
                 }
                 if (entry.State == NodeStates.Inactive || entry.State == NodeStates.Running || abort)
@@ -230,7 +248,7 @@ namespace ZetanStudio.BehaviourTree
             return ExecutionState;
         }
 
-        public void Restart(bool reset)
+        public void Restart(bool reset = false)
         {
             if (!IsInstance)
             {
@@ -244,8 +262,8 @@ namespace ZetanStudio.BehaviourTree
             }
             if (reset) Reset_();
             else entry.Reset_();
-            executedConditional = new List<Conditional>();
-            conditionalsMap = new HashSet<Conditional>();
+            executedComposites = new List<Composite>();
+            compositesMap = new HashSet<Composite>();
             Traverse(entry, n => n.OnBehaviourRestart());
             Execute();
         }
@@ -258,14 +276,14 @@ namespace ZetanStudio.BehaviourTree
         {
             Traverse(entry, n => n.Reset_());
         }
-        private List<Conditional> executedConditional;
-        private HashSet<Conditional> conditionalsMap;
-        public void OnConditionalEnd(Conditional conditional)
+        private List<Composite> executedComposites;
+        private HashSet<Composite> compositesMap;
+        public void OnCompositeEvaluate(Composite composite)
         {
-            if (!conditionalsMap.Contains(conditional))
+            if (!compositesMap.Contains(composite))
             {
-                executedConditional.Add(conditional);
-                conditionalsMap.Add(conditional);
+                executedComposites.Add(composite);
+                compositesMap.Add(composite);
             }
         }
 

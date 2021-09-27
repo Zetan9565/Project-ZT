@@ -39,22 +39,22 @@ public class SetCharacterStateBehaviourInspector : Editor
 
         void DrawSubState(int enumValueIndex, SerializedProperty subState)
         {
-            switch ((CharacterState)enumValueIndex)
+            switch ((CharacterStates)enumValueIndex)
             {
-                case CharacterState.Normal:
-                    DrawField(typeof(CharacterNormalState));
+                case CharacterStates.Normal:
+                    DrawField(typeof(CharacterNormalStates));
                     break;
-                case CharacterState.Abnormal:
-                    DrawField(typeof(CharacterAbnormalState));
+                case CharacterStates.Abnormal:
+                    DrawField(typeof(CharacterAbnormalStates));
                     break;
-                case CharacterState.Gather:
-                    DrawField(typeof(CharacterGatherState));
+                case CharacterStates.Gather:
+                    DrawField(typeof(CharacterGatherStates));
                     break;
-                case CharacterState.Attack:
-                    DrawField(typeof(CharacterAttackState));
+                case CharacterStates.Attack:
+                    DrawField(typeof(CharacterAttackStates));
                     break;
-                case CharacterState.Busy:
-                    DrawField(typeof(CharacterBusyState));
+                case CharacterStates.Busy:
+                    DrawField(typeof(CharacterBusyStates));
                     break;
                 default:
                     break;

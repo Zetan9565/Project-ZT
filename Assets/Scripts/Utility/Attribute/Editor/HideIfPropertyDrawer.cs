@@ -10,9 +10,11 @@ public class HideIfPropertyDrawer : PropertyDrawer
         bool hide = ShouldHide(hideAttr, property);
         if (!hide || hide && hideAttr.readOnly)
         {
+            label = EditorGUI.BeginProperty(position, label, property);
             EditorGUI.BeginDisabledGroup(hide && hideAttr.readOnly);
             EditorGUI.PropertyField(position, property, label, true);
             EditorGUI.EndDisabledGroup();
+            EditorGUI.EndProperty();
         }
     }
 
@@ -33,14 +35,14 @@ public class HideIfPropertyDrawer : PropertyDrawer
 
     private bool ShouldHide(HideIfAttribute hideAttr, SerializedProperty property)
     {
-        if (ZetanEditorUtility.GetFieldValue(hideAttr.path, property.serializedObject.targetObject, out var value, out _))
+        if (ZetanEditorUtility.TryGetMemberValue(hideAttr.path, property.serializedObject.targetObject, out var value, out _))
         {
             if (Equals(value, hideAttr.value)) return true;
             else return false;
         }
         else
         {
-            Debug.LogWarning("找不到字段路径：" + hideAttr.path);
+            Debug.LogWarning("找不到路径：" + hideAttr.path);
             return false;
         }
     }

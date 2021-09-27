@@ -19,17 +19,17 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
     }
 
-    public PlayerController2D Controller { get; private set; }
+    public PlayerControlInput Controller { get; private set; }
 
     public Transform PlayerTransform => Controller.transform;
 
     public Backpack Backpack { get { return PlayerInfo.backpack; } }
 
-    public Character Character { get; private set; }
+    public Player Player { get; private set; }
 
     public bool CheckIsNormalWithAlert()
     {
-        if (Character.Data.mainState != CharacterState.Normal)
+        if (Player.GetData().mainState != CharacterStates.Normal)
         {
             MessageManager.Instance.New("当前状态无法进行此操作");
             return false;
@@ -39,12 +39,12 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
 
     public void Init()
     {
-        Controller = FindObjectOfType<PlayerController2D>();
-        Character = Controller.Character;
+        Controller = FindObjectOfType<PlayerControlInput>();
+        Player = Controller.GetComponent<Player>();
         if (playerInfo)
         {
             playerInfo = Instantiate(playerInfo);
-            Character.Init(new CharacterData(playerInfo));
+            Player.Init(new PlayerData(playerInfo));
         }
     }
 
@@ -54,18 +54,18 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         Init();
     }
 
-    public void SetPlayerState(CharacterState state, dynamic subState)
+    public void SetPlayerState(CharacterStates state, dynamic subState)
     {
-        Character.SetState(state, subState);
+        Player.SetState(state, subState);
     }
 
     public void Trace()
     {
-        Controller.Trace();
+        //Controller.Trace();
     }
 
     public void ResetPath()
     {
-        Controller.ResetPath();
+        //Controller.ResetPath();
     }
 }

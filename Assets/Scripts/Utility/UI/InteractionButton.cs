@@ -28,7 +28,7 @@ public class InteractionButton : MonoBehaviour
     public void Init(InteractiveObject interactive)
     {
         interactiveObj = interactive;
-        buttonText.text = interactive.name;
+        buttonText.text = interactive.Name;
         buttonIcon.overrideSprite = interactive.Icon;
         SetSelected(false);
     }
@@ -36,7 +36,7 @@ public class InteractionButton : MonoBehaviour
     public void Init(Interactive interactive)
     {
         interactiveCom = interactive;
-        buttonText.text = interactive.name;
+        buttonText.text = interactive.Name;
         buttonIcon.overrideSprite = interactive.Icon;
         SetSelected(false);
     }

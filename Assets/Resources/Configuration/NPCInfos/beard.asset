@@ -14,7 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCInfomation
   _ID: NPC002
   _name: "\u6069\u683C\u65AF"
+  _SMParams: {fileID: 0}
+  attribute:
+    attributes: []
+  level: 0
   sex: 1
+  enable: 1
+  scene: UI
+  position: {x: 2.5, y: 3.51, z: 0}
+  prefab: {fileID: 5729784439181124927, guid: c129bba4cb2b9c549bda4aef1c16b7ab, type: 3}
   defaultDialogue: {fileID: 11400000, guid: 982521bacf361f14289d5658a605bca4, type: 2}
   conditionDialogues:
   - condition:
@@ -28,10 +36,6 @@ MonoBehaviour:
         triggerName: 
       relational: 
     dialogue: {fileID: 11400000, guid: ee87b06aec0879548b1c88221a4c5e8e, type: 2}
-  enable: 1
-  scene: UI
-  position: {x: 2.5, y: 3.51, z: 0}
-  prefab: {fileID: 5729784439181124917, guid: c129bba4cb2b9c549bda4aef1c16b7ab, type: 3}
   isWarehouseAgent: 1
   warehouseCapcity: 30
   isVendor: 0

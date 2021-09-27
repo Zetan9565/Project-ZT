@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Field : Building
@@ -11,6 +11,7 @@ public class Field : Building
 
     private void Awake()
     {
+        customName = true;
         Range = GetComponent<Renderer>();
     }
 

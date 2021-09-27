@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "field information", menuName = "Zetan Studio/种植/田地信息")]
 public class FieldInformation : ScriptableObject
@@ -9,7 +9,7 @@ public class FieldInformation : ScriptableObject
 
     [SerializeField]
     private string _name;
-    public new string name => _name;
+    public string Name => _name;
 
     [SerializeField]
     private int humidity = 50;

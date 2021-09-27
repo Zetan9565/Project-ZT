@@ -10,10 +10,10 @@ public class #SCRIPTNAME# : Conditional
     public SharedBool example;
 
     //覆写此属性以用于判断结点有效性
-    public override bool IsValid => true;
+    public override bool IsValid => example != null && example.IsValid;
 
     //在此方法里编写条件判断逻辑
-    protected override bool CheckCondition()
+    public override bool CheckCondition()
     {
         return example;
     }
@@ -21,6 +21,6 @@ public class #SCRIPTNAME# : Conditional
     //在此方法里编写评估保持条件
     protected override bool ShouldKeepRunning()
     {
-        return true;
+        return false;
     }
 }

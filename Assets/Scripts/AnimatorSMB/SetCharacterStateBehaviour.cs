@@ -6,7 +6,7 @@ public class SetCharacterStateBehaviour : StateMachineBehaviour
     [SerializeField, Range(0, 1)]
     private float normalizedTime;
     [SerializeField]
-    private CharacterState state = CharacterState.Normal;
+    private CharacterStates state = CharacterStates.Normal;
     [SerializeField]
     private int subState = 0;
 
@@ -14,7 +14,7 @@ public class SetCharacterStateBehaviour : StateMachineBehaviour
     [SerializeField, Range(0, 1)]
     private float exitNormalizedTime = 0.9f;
     [SerializeField]
-    private CharacterState exitState = CharacterState.Normal;
+    private CharacterStates exitState = CharacterStates.Normal;
     [SerializeField]
     private int exitSubState = 0;
 
@@ -48,24 +48,24 @@ public class SetCharacterStateBehaviour : StateMachineBehaviour
         if (!isExit) SetState(exitState, exitSubState);
     }
 
-    private void SetState(CharacterState main, int sub)
+    private void SetState(CharacterStates main, int sub)
     {
         switch (main)
         {
-            case CharacterState.Normal:
-                character.SetState(main, (CharacterNormalState)sub);
+            case CharacterStates.Normal:
+                character.SetState(main, (CharacterNormalStates)sub);
                 break;
-            case CharacterState.Abnormal:
-                character.SetState(main, (CharacterAbnormalState)sub);
+            case CharacterStates.Abnormal:
+                character.SetState(main, (CharacterAbnormalStates)sub);
                 break;
-            case CharacterState.Gather:
-                character.SetState(main, (CharacterGatherState)sub);
+            case CharacterStates.Gather:
+                character.SetState(main, (CharacterGatherStates)sub);
                 break;
-            case CharacterState.Attack:
-                character.SetState(main, (CharacterAttackState)sub);
+            case CharacterStates.Attack:
+                character.SetState(main, (CharacterAttackStates)sub);
                 break;
-            case CharacterState.Busy:
-                character.SetState(main, (CharacterBusyState)sub);
+            case CharacterStates.Busy:
+                character.SetState(main, (CharacterBusyStates)sub);
                 break;
             default:
                 break;

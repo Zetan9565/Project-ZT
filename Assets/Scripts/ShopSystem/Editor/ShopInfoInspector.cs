@@ -74,7 +74,7 @@ public class ShopInfoInspector : Editor
             SerializedProperty minRefreshAmount = commodity.FindPropertyRelative("minRefreshAmount");
             SerializedProperty maxRefreshAmount = commodity.FindPropertyRelative("maxRefreshAmount");
             string label = "(空)";
-            if (shop.Commodities[index].Item) label = shop.Commodities[index].Item.name;
+            if (shop.Commodities[index].Item) label = shop.Commodities[index].Item.Name;
             EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2 - 8, lineHeight), commodity, new GUIContent(label));
             EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, lineHeight),
                 item, new GUIContent(string.Empty));
@@ -175,7 +175,7 @@ public class ShopInfoInspector : Editor
             SerializedProperty minRefreshAmount = acquisition.FindPropertyRelative("minRefreshAmount");
             SerializedProperty maxRefreshAmount = acquisition.FindPropertyRelative("maxRefreshAmount");
             string label = "(空)";
-            if (shop.Acquisitions[index].Item) label = shop.Acquisitions[index].Item.name;
+            if (shop.Acquisitions[index].Item) label = shop.Acquisitions[index].Item.Name;
             EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width / 2 - 8, lineHeight), acquisition, new GUIContent(label));
             EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, lineHeight),
                 item, new GUIContent(string.Empty));

@@ -21,7 +21,7 @@ public class ItemInfoBase
     {
         get
         {
-            if (item) return item.name;
+            if (item) return item.Name;
             else return "(无效道具)";
         }
     }
@@ -131,7 +131,7 @@ public class DropItemInfo
     {
         get
         {
-            if (Item) return Item.name;
+            if (Item) return Item.Name;
             else return string.Empty;
         }
     }
@@ -241,7 +241,7 @@ public class MaterialInfo
     {
         get
         {
-            if (Item) return Item.name;
+            if (Item) return Item.Name;
             else return string.Empty;
         }
     }

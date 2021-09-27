@@ -17,6 +17,9 @@ namespace ZetanStudio.BehaviourTree
         //-ptableObject则可以避免这一点。当然，结点之间的关联可以用某种键值定义，每次需要访问
         //子结点都传入树对象并根据这种键值从中找对应的结点，如此复杂，何必多此一举。
 
+        /// <summary>
+        /// 结点是否有效
+        /// </summary>
         public abstract bool IsValid { get; }
 
         #region 运行时属性
@@ -94,7 +97,7 @@ namespace ZetanStudio.BehaviourTree
                 {
                     SharedVariable variable = field.GetValue(this) as SharedVariable;
                     if (variable.isShared) field.SetValue(this, this.owner.GetVariable(variable.name));
-                    else if (variable.isGlobal) field.SetValue(this, BehaviourManager.Instance.GetGlobalVariable(variable.name));
+                    else if (variable.isGlobal) field.SetValue(this, BehaviourManager.Instance.GetVariable(variable.name));
                 }
             }
             Shortcut = new NodeShortcut(owner.Executor);
@@ -223,10 +226,19 @@ namespace ZetanStudio.BehaviourTree
 
         public void Abort()
         {
+            if (State != NodeStates.Inactive)
+            {
+                isStarted = false;
+                State = NodeStates.Failure;
+                GetChildren().ForEach(n => n.Abort());
+                OnEnd();
+            }
+        }
+        public void Inactivate()
+        {
             isStarted = false;
             State = NodeStates.Inactive;
-            GetChildren().ForEach(n => n.Abort());
-            OnEnd();
+            GetChildren().ForEach(n => n.Inactivate());
         }
         #endregion
 
@@ -400,6 +412,15 @@ namespace ZetanStudio.BehaviourTree
             node.name = node.name.Replace("(R)(Clone)", "");
             node.isRuntime = false;
             return node;
+        }
+
+        /// <summary>
+        /// 用于在编辑器中复制结点，不应在游戏逻辑中使用
+        /// </summary>
+        /// <returns>克隆的结点</returns>
+        public virtual Node Copy()
+        {
+            return Instantiate(this);
         }
 #endif
         #endregion

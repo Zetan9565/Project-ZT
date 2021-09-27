@@ -8,26 +8,26 @@ public class MoveToPoint : Action
     [DisplayName("停止距离")]
     public SharedFloat stopDistance = 1.0f;
 
-    private CharacterController2D controller;
+    private CharacterControlInput controller;
 
     public override bool IsValid => point != null && point.IsValid;
 
     protected override void OnAwake()
     {
-        controller = GetComponentInParent<CharacterController2D>();
+        controller = GetComponentInParent<CharacterControlInput>();
     }
 
     protected override NodeStates OnUpdate()
     {
         if (!controller) return NodeStates.Failure;
-        controller.Move(GetDirection());
+        controller.SetMoveInput(GetDirection());
         if (!Arrive()) return NodeStates.Running;
         else return NodeStates.Success;
     }
 
     protected override void OnEnd()
     {
-        controller.Move(Vector2.zero);
+        controller.SetMoveInput(Vector2.zero);
     }
 
     private bool Arrive()

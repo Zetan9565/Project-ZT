@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8248035722993667674
+--- !u!114 &-9104212791377172996
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,18 +9,44 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ddba8651ff3ae3c42921b76d74540306, type: 3}
-  m_Name: (5) Sequence
+  m_Script: {fileID: 11500000, guid: da6a273dc3cc9e54686bfe8e79bee0c4, type: 3}
+  m_Name: (1) MoveToPoint
   m_EditorClassIdentifier: 
   isRuntime: 0
-  guid: c9840ac1dd0a7014ab089865ae67776e
-  _position: {x: -235, y: 475}
-  description: 
+  guid: 4313b3c1e1594624a8bad6a1e2da7cd3
+  _position: {x: -180, y: 288}
+  _description: 
+  point:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: {x: 0, y: 0, z: 0}
+  stopDistance:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+--- !u!114 &-8448230157291039244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ccadf94414932b4684438af50c21bbf, type: 3}
+  m_Name: (2) Parallel
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 422ac1cf4eebcbd4fb12e3aba943393b
+  _position: {x: -75, y: 152}
+  _description: 
   children:
-  - {fileID: 7735326463407916777}
-  - {fileID: -3497104154283355184}
+  - {fileID: -9104212791377172996}
+  - {fileID: -5555195295319423902}
   abortType: 0
---- !u!114 &-5206172762384140365
+--- !u!114 &-7192465467389885076
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -29,15 +55,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc8a77ec6687a064cb1a4682f5739e49, type: 3}
-  m_Name: (0) Entry
+  m_Script: {fileID: 11500000, guid: da6a273dc3cc9e54686bfe8e79bee0c4, type: 3}
+  m_Name: (5) MoveToPoint
   m_EditorClassIdentifier: 
   isRuntime: 0
-  guid: 
-  _position: {x: 0.000022411346, y: 59.02697}
-  description: 
-  start: {fileID: 5222357198670177345}
---- !u!114 &-3497104154283355184
+  guid: 768d0c442b025504fb93bd3035f3d330
+  _position: {x: -150, y: 318}
+  _description: 
+  point:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: {x: 0, y: 0, z: 0}
+  stopDistance:
+    _name: 
+    isGlobal: 0
+    isShared: 0
+    value: 1
+--- !u!114 &-6018192572495175186
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -46,33 +81,49 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cad2581818b4bc748b7dee3e227e8a06, type: 3}
-  m_Name: (7) Wait
+  m_Script: {fileID: 11500000, guid: 0ccadf94414932b4684438af50c21bbf, type: 3}
+  m_Name: (4) Parallel
   m_EditorClassIdentifier: 
   isRuntime: 0
-  guid: 86f74059db0e4734e9da8885766b742f
-  _position: {x: -69, y: 622}
-  description: 
-  randomWait:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 0
-  randomWaitMin:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
-  randomWaitMax:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
-  duration:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
+  guid: 7238636e6c62c1b47a776eb877174bc5
+  _position: {x: -45, y: 182}
+  _description: 
+  children:
+  - {fileID: -7192465467389885076}
+  - {fileID: -224557394208396486}
+  abortType: 0
+--- !u!114 &-5555195295319423902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9993540cb76b58b44aa14b4038d90241, type: 3}
+  m_Name: (3) Roll
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: ebab8152b5e488b40b409e8409c9f5a8
+  _position: {x: 21.7, y: 288.00006}
+  _description: 
+--- !u!114 &-224557394208396486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9993540cb76b58b44aa14b4038d90241, type: 3}
+  m_Name: (6) Roll
+  m_EditorClassIdentifier: 
+  isRuntime: 0
+  guid: 4d50743c05d49624aa55b9306061acb6
+  _position: {x: 51.7, y: 318.00006}
+  _description: 
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -87,28 +138,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _name: 
   description: 
-  entry: {fileID: -5206172762384140365}
+  entry: {fileID: 4412341204687091695}
   nodes:
-  - {fileID: -5206172762384140365}
-  - {fileID: 5222357198670177345}
-  - {fileID: 322414272137955155}
-  - {fileID: -8248035722993667674}
-  - {fileID: 7735326463407916777}
-  - {fileID: -3497104154283355184}
-  - {fileID: 7458370299593916702}
-  variables:
-  - id: 0
+  - {fileID: 4412341204687091695}
+  - {fileID: -9104212791377172996}
+  - {fileID: -8448230157291039244}
+  - {fileID: -5555195295319423902}
+  - {fileID: -6018192572495175186}
+  - {fileID: -7192465467389885076}
+  - {fileID: -224557394208396486}
+  variables: []
   isRuntime: 0
   references:
     version: 1
-    00000000:
-      type: {class: SharedGameObject, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _name: sharedGameObject_1
-        isGlobal: 0
-        isShared: 1
-        value: {fileID: 0}
---- !u!114 &322414272137955155
+--- !u!114 &4412341204687091695
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -117,79 +160,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e686550d5e89e7448869d39254309c4, type: 3}
-  m_Name: (4) UntilSuccess
+  m_Script: {fileID: 11500000, guid: fc8a77ec6687a064cb1a4682f5739e49, type: 3}
+  m_Name: (0) Entry
   m_EditorClassIdentifier: 
   isRuntime: 0
-  guid: 4ead47104bd67064a8634ebed707ae82
-  _position: {x: -235, y: 334}
-  description: 
-  child: {fileID: -8248035722993667674}
---- !u!114 &5222357198670177345
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ddba8651ff3ae3c42921b76d74540306, type: 3}
-  m_Name: (8) Sequence
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 5907f986a75ff18438fa7db70e82e1d4
-  _position: {x: -0.000019073486, y: 189.13002}
-  description: 
-  children:
-  - {fileID: 322414272137955155}
-  - {fileID: 7458370299593916702}
-  abortType: 0
---- !u!114 &7458370299593916702
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
-  m_Name: (8) Log
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 081bdeffd40ce4c4b81728f51bcfa0f7
-  _position: {x: 259.01294, y: 345}
-  description: 
-  logType: 0
-  message:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: Find
---- !u!114 &7735326463407916777
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 687defbcdf3fa4344aeefba2e8d98279, type: 3}
-  m_Name: (6) FindWithTag
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 7ae0cea9eb261ca42bc8135085a3950d
-  _position: {x: -399, y: 622}
-  description: 
-  tag:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: Player
-  register:
-    _name: sharedGameObject_1
-    isGlobal: 0
-    isShared: 1
-    value: {fileID: 0}
+  guid: 73d322c3d0997fc4698ee584213b4f04
+  _position: {x: 0, y: 0}
+  _description: 
+  start: {fileID: -8448230157291039244}

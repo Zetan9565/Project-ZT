@@ -240,7 +240,7 @@ public partial class ItemInspector : Editor
                         EditorGUILayout.PropertyField(building, new GUIContent("可学设施"), true);
                         if (building.objectReferenceValue)
                         {
-                            EditorGUILayout.LabelField("设施名称", (building.objectReferenceValue as BuildingInformation).name);
+                            EditorGUILayout.LabelField("设施名称", (building.objectReferenceValue as BuildingInformation).Name);
                         }
                         break;
                     case BookType.Making:
@@ -252,7 +252,7 @@ public partial class ItemInspector : Editor
                             {
                                 EditorGUILayout.HelpBox("不可制作的道具！", MessageType.Error);
                             }
-                            else EditorGUILayout.LabelField("道具名称", (item.objectReferenceValue as ItemBase).name);
+                            else EditorGUILayout.LabelField("道具名称", (item.objectReferenceValue as ItemBase).Name);
                         }
                         break;
                     default: break;
@@ -324,7 +324,7 @@ public partial class ItemInspector : Editor
     {
         bool editComplete = true;
 
-        editComplete &= !(string.IsNullOrEmpty(item.ID) || string.IsNullOrEmpty(item.name) ||
+        editComplete &= !(string.IsNullOrEmpty(item.ID) || string.IsNullOrEmpty(item.Name) ||
             string.IsNullOrEmpty(item.Description) || item.Icon == null ||
             ExistsID() || string.IsNullOrEmpty(Regex.Replace(item.ID, @"[^0-9]+", "")) || !Regex.IsMatch(item.ID, @"(\d+)$") ||
             (item.IsBook && (item as BookItem).BookType == BookType.Building && !(item as BookItem).BuildingToLearn) ||

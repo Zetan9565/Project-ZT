@@ -19,7 +19,7 @@ MonoBehaviour:
   unifiedNPC: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
   words:
   - talkerType: 2
-    talkerInfo: {fileID: 0}
+    talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
     content: "\u4F60\u597D\u50CF\u6709\u79CD\u5B50\u554A\uFF0C\u4E0D\u8BD5\u7740\u79CD\u4E00\u4E0B\u5417\uFF1F"
     indexOfCorrectOption: 0
     wrongChoiceWords: 

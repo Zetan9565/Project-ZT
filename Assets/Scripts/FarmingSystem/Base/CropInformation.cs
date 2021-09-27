@@ -11,7 +11,7 @@ public class CropInformation : ScriptableObject
 
     [SerializeField]
     private string _name;
-    public new string name => _name;
+    public string Name => _name;
 
     [SerializeField]
     private CropType cropType;
@@ -185,8 +185,8 @@ public class CropStage
     public int IndexToReturn => indexToReturn;
 
     [SerializeField]
-    private GatheringInformation gatherInfo;
-    public GatheringInformation GatherInfo => gatherInfo;
+    private ResourceInformation gatherInfo;
+    public ResourceInformation GatherInfo => gatherInfo;
 
 
     public CropStage(int lastingDays, CropStageType stage)

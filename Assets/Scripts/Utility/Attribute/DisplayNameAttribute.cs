@@ -4,13 +4,13 @@ using System;
 [AttributeUsage(AttributeTargets.Field)]
 public class DisplayNameAttribute : PropertyAttribute
 {
-    public string Name;
+    public readonly string name;
 
-    public bool ReadOnly;
+    public readonly bool readOnly;
 
     public DisplayNameAttribute(string name, bool readOnly = false)
     {
-        Name = name;
-        ReadOnly = readOnly;
+        this.name = name;
+        this.readOnly = readOnly;
     }
 }

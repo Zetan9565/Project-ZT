@@ -265,36 +265,65 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     #endregion
 
     #region 计数相关
+    private bool daysNeedUpdate;
+    private int days;
     public int Days
     {
         get
         {
-            int days = Mathf.CeilToInt((float)(timeStamp * multiples / DayToSeconds));
-            return days < 1 ? 1 : days;
+            if (daysNeedUpdate)
+            {
+                daysNeedUpdate = false;
+                days = Mathf.CeilToInt((float)(timeStamp * multiples / DayToSeconds));
+                days = days < 1 ? 1 : days;
+            }
+            return days;
         }
     }//从1开始计
+
+    private bool weeksNeedUpdate;
+    private int weeks;
     public int Weeks
     {
         get
         {
-            int weeks = Mathf.CeilToInt((float)(timeStamp * multiples / WeekToSeconds));
-            return weeks < 1 ? 1 : weeks;
+            if (weeksNeedUpdate)
+            {
+                weeksNeedUpdate = false;
+                weeks = Mathf.CeilToInt((float)(timeStamp * multiples / WeekToSeconds));
+                weeks = weeks < 1 ? 1 : weeks;
+            }
+            return weeks;
         }
     }//从1开始计
-    public int Months//从1开始计
+
+    private bool monthsNeedUpdate;
+    private int months;
+    public int Months
     {
         get
         {
-            int months = Mathf.CeilToInt((float)(timeStamp * multiples / MonthToSeconds));
-            return months < 1 ? 1 : months;
+            if (monthsNeedUpdate)
+            {
+                months = Mathf.CeilToInt((float)(timeStamp * multiples / MonthToSeconds));
+                months = months < 1 ? 1 : months;
+            }
+            return months;
         }
-    }
+    }//从1开始计
+
+    private bool yearsNeedUpdate;
+    public int years;
     public int Years
     {
         get
         {
-            int years = Mathf.CeilToInt((float)(timeStamp * multiples / YearToSeconds));
-            return years < 1 ? 1 : years;
+            if (yearsNeedUpdate)
+            {
+                years = Mathf.CeilToInt((float)(timeStamp * multiples / YearToSeconds));
+                years = years < 1 ? 1 : years;
+            }
+            return years;
         }
     }//从1开始计
     #endregion
@@ -341,9 +370,10 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     {
         OnTimePassed?.Invoke(realSecond);
         timeStamp += realSecond;
-        timeline = (float)(timeStamp * multiples / HourToSeconds % 24);
+        timeline =  Mathf.Repeat((float)timeStamp * multiples / HourToSeconds, 24);
         CheckDayChange();
         UpdateTime();
+        SetDirty();
     }
     private void CheckDayChange()
     {
@@ -398,11 +428,19 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         dayBefore = 0;
         UpdateUI();
     }
+    private void SetDirty()
+    {
+        daysNeedUpdate = true;
+        weeksNeedUpdate = true;
+        monthsNeedUpdate = true;
+        yearsNeedUpdate = true;
+    }
     #endregion
 
     #region MonoBehaviour
     private void Awake()
     {
+        SetDirty();
         UpdateUI();
         Timeline = timeline;
         Date.month = CurrentMonth;

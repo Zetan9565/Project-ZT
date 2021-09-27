@@ -19,7 +19,7 @@ public class GemstoneAgent : MonoBehaviour
         if (gem) return;
         gemstone = gem;
         icon.overrideSprite = gemstone.Icon;
-        nameText.text = gemstone.name;
+        nameText.text = gemstone.Name;
         effectText.text = gemstone.Powerup.ToString();
     }
 

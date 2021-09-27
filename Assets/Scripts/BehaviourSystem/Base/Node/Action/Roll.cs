@@ -5,16 +5,16 @@ public class Roll : Action
 {
     public override bool IsValid => true;
 
-    private CharacterController2D controller;
+    private CharacterControlInput controller;
 
     protected override void OnAwake()
     {
-        controller = gameObject.GetComponentInParent<CharacterController2D>();
+        controller = gameObject.GetComponentInParent<CharacterControlInput>();
     }
 
     protected override NodeStates OnUpdate()
     {
-        controller.Roll();
+        controller.SetRollInput(true);
         return NodeStates.Success;
     }
 }

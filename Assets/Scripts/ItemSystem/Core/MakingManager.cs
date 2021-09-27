@@ -63,7 +63,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         {
             if (amountCanMake > 0 && amountCanMake < 2)
             {
-                ConfirmManager.Instance.New(string.Format("确定制作1次 [{0}] 吗？", currentItem.name), delegate
+                ConfirmManager.Instance.New(string.Format("确定制作1次 [{0}] 吗？", currentItem.Name), delegate
                 {
                     IsMaking = true;
                     PauseDisplay(true);
@@ -74,7 +74,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                         int amoutBef = BackpackManager.Instance.GetItemAmount(currentItem.ID);
                         if (MakeItem(currentItem))
                             MessageManager.Instance.New(string.Format("制作了 {0} 个 [{1}]", BackpackManager.Instance.GetItemAmount(currentItem.ID) - amoutBef,
-                                ZetanUtility.ColorText(currentItem.name, GameManager.QualityToColor(currentItem.Quality))));
+                                ZetanUtility.ColorText(currentItem.Name, GameManager.QualityToColor(currentItem.Quality))));
                     },
                     delegate
                     {
@@ -87,7 +87,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
             {
                 AmountManager.Instance.New(delegate (long amount)
                 {
-                    ConfirmManager.Instance.New(string.Format("确定制作{0}次 [{1}] 吗？", (int)amount, currentItem.name), delegate
+                    ConfirmManager.Instance.New(string.Format("确定制作{0}次 [{1}] 吗？", (int)amount, currentItem.Name), delegate
                     {
                         int num = (int)amount;
                         IsMaking = true;
@@ -103,7 +103,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
                                 int amoutBef = BackpackManager.Instance.GetItemAmount(currentItem.ID);
                                 if (MakeItem(currentItem))
                                     MessageManager.Instance.New(string.Format("制作了 {0} 个 [{1}]", BackpackManager.Instance.GetItemAmount(currentItem.ID) - amoutBef,
-                                        ZetanUtility.ColorText(currentItem.name, GameManager.QualityToColor(currentItem.Quality))));
+                                        ZetanUtility.ColorText(currentItem.Name, GameManager.QualityToColor(currentItem.Quality))));
                                 else
                                 {
                                     IsMaking = false;
@@ -231,12 +231,12 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         }
         if (HadLearned(item))
         {
-            ConfirmManager.Instance.New("已经学会制作 [" + item.name + "]，无需再学习。");
+            ConfirmManager.Instance.New("已经学会制作 [" + item.Name + "]，无需再学习。");
             return false;
         }
         learnedItems.Add(item);
         //MessageManager.Instance.NewMessage(string.Format("学会了 [{0}] 的制作方法!", item.name));
-        ConfirmManager.Instance.New(string.Format("学会了 [{0}] 的制作方法!", item.name));
+        ConfirmManager.Instance.New(string.Format("学会了 [{0}] 的制作方法!", item.Name));
         UpdateUI();
         return true;
     }
@@ -451,7 +451,7 @@ public class MakingManager : WindowHandler<MakingUI, MakingManager>
         UI.description.text = materials.ToString();
         int makeAmount = BackpackManager.Instance.GetAmountCanMake(currentItem.Formulation.Materials);
         UI.icon.SetItem(new ItemInfo(currentItem, makeAmount));
-        UI.nameText.text = item.name;
+        UI.nameText.text = item.Name;
         UI.makeButton.interactable = makeAmount > 0;
         UI.descriptionWindow.alpha = 1;
         UI.descriptionWindow.blocksRaycasts = true;

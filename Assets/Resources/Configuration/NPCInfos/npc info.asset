@@ -14,13 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ID: NPC003
   _name: "\u5C0F\u80E1\u5B50"
+  attribute:
+    attributes: []
+  level: 0
   sex: 1
-  defaultDialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
-  conditionDialogues: []
   enable: 0
   scene: 
   position: {x: 0, y: 0, z: 0}
   prefab: {fileID: 0}
+  defaultDialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
+  conditionDialogues: []
   isWarehouseAgent: 0
   warehouseCapcity: 30
   isVendor: 0

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class CropAgent : MonoBehaviour
@@ -28,7 +28,7 @@ public class CropAgent : MonoBehaviour
     {
         if (!MCrop) return;
         totalDays.text = MCrop.Data.growthDays.ToString();
-        nameText.text = MCrop.Data.Info.name;
+        nameText.text = MCrop.Data.Info.Name;
         ZetanUtility.SetActive(dryIcon.gameObject, MCrop.Dry);
         ZetanUtility.SetActive(pestIcon.gameObject, MCrop.Pest);
         ZetanUtility.SetActive(matureIcon.gameObject, MCrop.Data.HarvestAble);

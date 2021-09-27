@@ -407,67 +407,67 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
 
     public void TraceQuest(QuestData quest)
     {
-        if (!quest || !IsQuestValid(quest.Info) || !AStarManager.Instance || !PlayerManager.Instance.Controller.Unit) return;
-        if (quest.IsComplete && DialogueManager.Instance.Talkers.TryGetValue(quest.currentQuestHolder.TalkerID, out var talkerFound))
-        {
-            PlayerManager.Instance.Controller.Unit.IsFollowingTarget = false;
-            PlayerManager.Instance.Controller.Unit.ShowPath(true);
-            PlayerManager.Instance.Controller.Unit.SetDestination(talkerFound.currentPosition, false);
-        }
-        else if (quest.ObjectiveInstances.Count > 0)
-            using (var objectiveEnum = quest.ObjectiveInstances.GetEnumerator())
-            {
-                Vector3 destination = default;
-                ObjectiveData currentObj = null;
-                List<ObjectiveData> parallelObj = new List<ObjectiveData>();
-                while (objectiveEnum.MoveNext())
-                {
-                    currentObj = objectiveEnum.Current;
-                    if (!currentObj.IsComplete)
-                    {
-                        if (currentObj.Parallel && currentObj.AllPrevObjCmplt)
-                        {
-                            if (!(currentObj is CollectObjectiveData))
-                                parallelObj.Add(currentObj);
-                        }
-                        else break;
-                    }
-                }
-                if (parallelObj.Count > 0)
-                {
-                    int index = Random.Range(0, parallelObj.Count);//如果目标可以同时进行，则随机选一个
-                    currentObj = parallelObj[index];
-                }
-                if (!currentObj.Info.CanNavigate) return;
-                if (currentObj is TalkObjectiveData to)
-                {
-                    if (DialogueManager.Instance.Talkers.TryGetValue(to.Info.NPCToTalk.ID, out talkerFound))
-                    {
-                        destination = talkerFound.currentPosition;
-                        SetDestination();
-                    }
-                }
-                else if (currentObj is SubmitObjectiveData so)
-                {
-                    if (DialogueManager.Instance.Talkers.TryGetValue(so.Info.NPCToSubmit.ID, out talkerFound))
-                    {
-                        destination = talkerFound.currentPosition;
-                        SetDestination();
-                    }
-                }
-                else if (!(currentObj is TriggerObjectiveData) && currentObj.Info.AuxiliaryPos && currentObj.Info.AuxiliaryPos.Positions.Length > 0)
-                {
-                    destination = currentObj.Info.AuxiliaryPos.Positions[Random.Range(0, currentObj.Info.AuxiliaryPos.Positions.Length)];
-                    SetDestination();
-                }
+        //if (!quest || !IsQuestValid(quest.Info) || !AStarManager.Instance || !PlayerManager.Instance.Controller.Unit) return;
+        //if (quest.IsComplete && DialogueManager.Instance.Talkers.TryGetValue(quest.currentQuestHolder.TalkerID, out var talkerFound))
+        //{
+        //    PlayerManager.Instance.Controller.Unit.IsFollowingTarget = false;
+        //    PlayerManager.Instance.Controller.Unit.ShowPath(true);
+        //    PlayerManager.Instance.Controller.Unit.SetDestination(talkerFound.currentPosition, false);
+        //}
+        //else if (quest.ObjectiveInstances.Count > 0)
+        //    using (var objectiveEnum = quest.ObjectiveInstances.GetEnumerator())
+        //    {
+        //        Vector3 destination = default;
+        //        ObjectiveData currentObj = null;
+        //        List<ObjectiveData> parallelObj = new List<ObjectiveData>();
+        //        while (objectiveEnum.MoveNext())
+        //        {
+        //            currentObj = objectiveEnum.Current;
+        //            if (!currentObj.IsComplete)
+        //            {
+        //                if (currentObj.Parallel && currentObj.AllPrevObjCmplt)
+        //                {
+        //                    if (!(currentObj is CollectObjectiveData))
+        //                        parallelObj.Add(currentObj);
+        //                }
+        //                else break;
+        //            }
+        //        }
+        //        if (parallelObj.Count > 0)
+        //        {
+        //            int index = Random.Range(0, parallelObj.Count);//如果目标可以同时进行，则随机选一个
+        //            currentObj = parallelObj[index];
+        //        }
+        //        if (!currentObj.Info.CanNavigate) return;
+        //        if (currentObj is TalkObjectiveData to)
+        //        {
+        //            if (DialogueManager.Instance.Talkers.TryGetValue(to.Info.NPCToTalk.ID, out talkerFound))
+        //            {
+        //                destination = talkerFound.currentPosition;
+        //                SetDestination();
+        //            }
+        //        }
+        //        else if (currentObj is SubmitObjectiveData so)
+        //        {
+        //            if (DialogueManager.Instance.Talkers.TryGetValue(so.Info.NPCToSubmit.ID, out talkerFound))
+        //            {
+        //                destination = talkerFound.currentPosition;
+        //                SetDestination();
+        //            }
+        //        }
+        //        else if (!(currentObj is TriggerObjectiveData) && currentObj.Info.AuxiliaryPos && currentObj.Info.AuxiliaryPos.Positions.Length > 0)
+        //        {
+        //            destination = currentObj.Info.AuxiliaryPos.Positions[Random.Range(0, currentObj.Info.AuxiliaryPos.Positions.Length)];
+        //            SetDestination();
+        //        }
 
-                void SetDestination()
-                {
-                    PlayerManager.Instance.Controller.Unit.IsFollowingTarget = false;
-                    PlayerManager.Instance.Controller.Unit.ShowPath(true);
-                    PlayerManager.Instance.Controller.Unit.SetDestination(destination, false);
-                }
-            }
+        //        void SetDestination()
+        //        {
+        //            PlayerManager.Instance.Controller.Unit.IsFollowingTarget = false;
+        //            PlayerManager.Instance.Controller.Unit.ShowPath(true);
+        //            PlayerManager.Instance.Controller.Unit.SetDestination(destination, false);
+        //        }
+        //    }
     }
     /// <summary>
     /// 追踪当前展示任务进行中的目标

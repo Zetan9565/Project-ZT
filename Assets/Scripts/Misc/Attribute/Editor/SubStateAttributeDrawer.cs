@@ -12,34 +12,34 @@ public class SubStateAttributeDrawer : PropertyDrawer
         if (main != null)
         {
             List<GUIContent> names = new List<GUIContent>();
-            switch ((CharacterState)main.enumValueIndex)
+            switch ((CharacterStates)main.enumValueIndex)
             {
-                case CharacterState.Normal:
-                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterNormalState)))
+                case CharacterStates.Normal:
+                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterNormalStates)))
                     {
                         names.Add(new GUIContent(name));
                     }
                     break;
-                case CharacterState.Abnormal:
-                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterAbnormalState)))
+                case CharacterStates.Abnormal:
+                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterAbnormalStates)))
                     {
                         names.Add(new GUIContent(name));
                     }
                     break;
-                case CharacterState.Gather:
-                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterGatherState)))
+                case CharacterStates.Gather:
+                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterGatherStates)))
                     {
                         names.Add(new GUIContent(name));
                     }
                     break;
-                case CharacterState.Attack:
-                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterAttackState)))
+                case CharacterStates.Attack:
+                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterAttackStates)))
                     {
                         names.Add(new GUIContent(name));
                     }
                     break;
-                case CharacterState.Busy:
-                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterBusyState)))
+                case CharacterStates.Busy:
+                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterBusyStates)))
                     {
                         names.Add(new GUIContent(name));
                     }

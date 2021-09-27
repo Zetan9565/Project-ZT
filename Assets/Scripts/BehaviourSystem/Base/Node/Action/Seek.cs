@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using ZetanStudio.BehaviourTree;
 
@@ -11,16 +10,21 @@ public class Seek : PathMovement
     public SharedGameObject target;
     [DisplayName("半径")]
     public SharedFloat radius = 1;
+    [DisplayName("寻路频率")]
+    public SharedFloat repathRate = 0.5f;
 
     private float pathTime;
+    private bool repath;
 
-    public override bool IsValid => base.IsValid && point != null && point.IsValid;
+    public override bool IsValid => base.IsValid && (point != null && point.IsValid || target != null && target.IsValid) && radius != null && radius.IsValid && repathRate != null && repathRate.IsValid;
 
     protected override void OnStart()
     {
         base.OnStart();
         SetDestination(GetTarget());
         pathTime = Time.time;
+        repath = pathAgent.autoRepath;
+        pathAgent.autoRepath = false;
     }
     protected override NodeStates OnUpdate()
     {
@@ -33,9 +37,13 @@ public class Seek : PathMovement
         }
         return NodeStates.Running;
     }
+    protected override void OnEnd()
+    {
+        pathAgent.autoRepath = repath;
+    }
     public override void OnDrawGizmosSelected()
     {
-        if (transform) ZetanUtility.DrawGizmosCircle(transform.position, radius, Vector3.forward);
+        if (transform) ZetanUtility.DrawGizmosCircle(transform.position, radius);
     }
 
     private Vector3 GetTarget()

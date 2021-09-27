@@ -7,10 +7,6 @@ using UnityEngine;
 public partial class CharacterInfoInspector
 {
     TalkerInformation talker;
-    SerializedProperty enable;
-    SerializedProperty scene;
-    SerializedProperty position;
-    SerializedProperty prefab;
     SerializedProperty defalutDialogue;
     SerializedProperty conditionDialogues;
     SerializedProperty canDEV_RLAT;
@@ -28,8 +24,6 @@ public partial class CharacterInfoInspector
 
     int barIndex;
 
-    SceneSelectionDrawer sceneSelector;
-
     ReorderableList conditionDialogList;
     ReorderableList giftDialoguesList;
     ReorderableList affectiveItemsList;
@@ -46,11 +40,6 @@ public partial class CharacterInfoInspector
             allTalkers = Resources.LoadAll<TalkerInformation>("Configuration").ToList();
             allTalkers.Remove(talker);
         }
-
-        enable = serializedObject.FindProperty("enable");
-        scene = serializedObject.FindProperty("scene");
-        position = serializedObject.FindProperty("position");
-        prefab = serializedObject.FindProperty("prefab");
         defalutDialogue = serializedObject.FindProperty("defaultDialogue");
         conditionDialogues = serializedObject.FindProperty("conditionDialogues");
         canDEV_RLAT = serializedObject.FindProperty("canDEV_RLAT");
@@ -64,7 +53,6 @@ public partial class CharacterInfoInspector
         warehouseCapcity = serializedObject.FindProperty("warehouseCapcity");
         shop = serializedObject.FindProperty("shop");
         questsStored = serializedObject.FindProperty("questsStored");
-        sceneSelector = new SceneSelectionDrawer(scene);
         conditionDrawers = new Dictionary<ConditionDialogue, ConditionGroupDrawer>();
         HandlingConditionDialogueList();
         HandlingGiftDialogueList();
@@ -119,6 +107,7 @@ public partial class CharacterInfoInspector
                     sceneSelector.DoLayoutDraw();
                     EditorGUILayout.PropertyField(position, new GUIContent("位置"));
                     EditorGUILayout.PropertyField(prefab, new GUIContent("预制件"));
+                    EditorGUILayout.PropertyField(SMParams, new GUIContent("状态机参数"));
                 }
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
@@ -182,13 +171,13 @@ public partial class CharacterInfoInspector
                             {
                                 EditorGUILayout.LabelField("商品列表", new GUIStyle { fontStyle = FontStyle.Bold });
                                 for (int i = 0; i < talker.Shop.Commodities.Count; i++)
-                                    EditorGUILayout.LabelField("商品 " + (i + 1), talker.Shop.Commodities[i].Item.name);
+                                    EditorGUILayout.LabelField("商品 " + (i + 1), talker.Shop.Commodities[i].Item.Name);
                             }
                             if (talker.Shop.Acquisitions.Count > 0)
                             {
                                 EditorGUILayout.LabelField("收购品列表", new GUIStyle { fontStyle = FontStyle.Bold });
                                 for (int i = 0; i < talker.Shop.Acquisitions.Count; i++)
-                                    EditorGUILayout.LabelField("收购品 " + (i + 1), talker.Shop.Acquisitions[i].Item.name);
+                                    EditorGUILayout.LabelField("收购品 " + (i + 1), talker.Shop.Acquisitions[i].Item.Name);
                             }
                             EditorGUILayout.EndVertical();
                         }
@@ -446,7 +435,7 @@ public partial class CharacterInfoInspector
             {
                 serializedObject.Update();
                 if (talker.AffectiveItems[index].Item != null)
-                    EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.AffectiveItems[index].Item.name);
+                    EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.AffectiveItems[index].Item.Name);
                 else
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
                 EditorGUI.BeginChangeCheck();
@@ -515,7 +504,7 @@ public partial class CharacterInfoInspector
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
                     if (GUI.Button(new Rect(rect.x + rect.width * 0.8f, rect.y, rect.width * 0.2f, lineHeight), "新建"))
                     {
-                        Quest questInstance= ZetanEditorUtility.SaveFilePanel(CreateInstance<Quest>, "quest", true);
+                        Quest questInstance = ZetanEditorUtility.SaveFilePanel(CreateInstance<Quest>, "quest", true);
                         if (questInstance)
                         {
                             quest.objectReferenceValue = questInstance;
@@ -543,7 +532,7 @@ public partial class CharacterInfoInspector
                     var conflictTalker = allTalkers.Find(x => x.QuestsStored.Count > 0 && x.QuestsStored.Contains(quest.objectReferenceValue as Quest));
                     if (conflictTalker && conflictTalker != talker)
                     {
-                        EditorUtility.DisplayDialog("错误", "[" + conflictTalker.name + "]已使用该任务，无法添加。", "确定");
+                        EditorUtility.DisplayDialog("错误", "[" + conflictTalker.Name + "]已使用该任务，无法添加。", "确定");
                         quest.objectReferenceValue = qBef;
                     }
                 }

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "npc info", menuName = "Zetan Studio/角色/NPC信息")]
-public class TalkerInformation : CharacterInformation
+[CreateAssetMenu(fileName = "talker info", menuName = "Zetan Studio/角色/谈话人信息")]
+public class TalkerInformation : NPCInformation
 {
     [SerializeField]
     private Dialogue defaultDialogue;
@@ -11,22 +11,6 @@ public class TalkerInformation : CharacterInformation
     [SerializeField, NonReorderable]
     private List<ConditionDialogue> conditionDialogues = new List<ConditionDialogue>();
     public List<ConditionDialogue> ConditionDialogues => conditionDialogues;
-
-    [SerializeField]
-    private bool enable;
-    public bool Enable => enable;
-
-    [SerializeField]
-    private string scene;
-    public string Scene => scene;
-
-    [SerializeField]
-    private Vector3 position;
-    public Vector3 Position => position;
-
-    [SerializeField]
-    private Talker prefab;
-    public Talker Prefab => prefab;
 
     [SerializeField]
     private bool isWarehouseAgent;

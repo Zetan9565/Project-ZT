@@ -10,7 +10,7 @@ public class EnemyGroup : ScriptableObject
 
     [SerializeField]
     private string _name;
-    public new string name => _name;
+    public string Name => _name;
 
     [SerializeField]
     private List<EnemyInformation> enemies = new List<EnemyInformation>();

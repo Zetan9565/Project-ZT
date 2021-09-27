@@ -3,17 +3,8 @@ using System.Collections.Generic;
 [System.Serializable]
 public class TalkerData : CharacterData
 {
-    public TalkerInformation Info
-    {
-        get
-        {
-            return info as TalkerInformation;
-        }
-        set
-        {
-            info = value;
-        }
-    }
+    public TalkerInformation Info => GetInfo<TalkerInformation>();
+
     public string TalkerID
     {
         get
@@ -27,7 +18,7 @@ public class TalkerData : CharacterData
     {
         get
         {
-            if (Info) return Info.name;
+            if (Info) return Info.Name;
             return string.Empty;
         }
     }

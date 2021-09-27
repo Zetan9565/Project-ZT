@@ -5,11 +5,11 @@ using System.Linq;
 [DisallowMultipleComponent]
 public class BuildingPreview : InteractiveObject
 {
-    public override string name
+    protected override string CustomName
     {
         get
         {
-            return Data ? Data.Info.name : gameObject.name;
+            return Data ? Data.Info.Name : gameObject.name;
         }
     }
 
@@ -57,6 +57,8 @@ public class BuildingPreview : InteractiveObject
 
     private void Awake()
     {
+        customName = true;
+
         if (!preview.TryGetComponent<TriggerEvents>(out var colliderEvents))
         {
             colliderEvents = preview.AddComponent<TriggerEvents>();

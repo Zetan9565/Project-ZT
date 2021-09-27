@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -11,7 +11,7 @@ public class BuildingInformation : ScriptableObject
 
     [SerializeField]
     private string _name;
-    public new string name => _name;
+    public string Name => _name;
 
     [SerializeField]
     private string description;

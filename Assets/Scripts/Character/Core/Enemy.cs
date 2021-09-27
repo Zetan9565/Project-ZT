@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 
 
@@ -7,7 +7,7 @@ public class Enemy : MonoBehaviour
 {
     public string EnemyID => info ? info.ID : string.Empty;
 
-    public string EnemyName => info ? info.name : string.Empty;
+    public string EnemyName => info ? info.Name : string.Empty;
 
     [SerializeField]
     private EnemyInformation info;

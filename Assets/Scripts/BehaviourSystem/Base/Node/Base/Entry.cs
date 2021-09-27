@@ -23,7 +23,7 @@ namespace ZetanStudio.BehaviourTree
         public override Node GetInstance()
         {
             Entry entry = GetInstance<Entry>();
-            entry.start = start.GetInstance();
+            if (start) entry.start = start.GetInstance();
             entry.IsInstance = true;
             return entry;
         }
@@ -49,7 +49,14 @@ namespace ZetanStudio.BehaviourTree
         public override Node ConvertToLocal()
         {
             Entry entry = ConvertToLocal<Entry>();
-            entry.start = start.ConvertToLocal();
+            if (start) entry.start = start.ConvertToLocal();
+            return entry;
+        }
+
+        public override Node Copy()
+        {
+            Entry entry = Instantiate(this);
+            if (start) entry.start = start.Copy();
             return entry;
         }
 #endif

@@ -1,7 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "character info", menuName = "Zetan Studio/角色/角色信息")]
-public class CharacterInformation : ScriptableObject
+public abstract class CharacterInformation : ScriptableObject
 {
     [SerializeField]
     protected string _ID;
@@ -9,30 +8,19 @@ public class CharacterInformation : ScriptableObject
 
     [SerializeField]
     protected string _name;
-    public new string name => _name;
+    public string Name => _name;
 
     [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("未知", "男", "女")]
-#endif
-    protected CharacterSex sex;
-    public CharacterSex Sex => sex;
+    protected CharacterSMParams _SMParams;
+    public CharacterSMParams SMParams => _SMParams;
+
+    [SerializeField]
+    protected RoleAttributeGroup attribute;
+    public RoleAttributeGroup Attribute => attribute;
+
+    public int level;
 
     public virtual bool IsValid => !string.IsNullOrEmpty(_ID) && !string.IsNullOrEmpty(_name);
-
-    public static string GetSexString(CharacterSex sex)
-    {
-        switch (sex)
-        {
-            case CharacterSex.Male:
-                return "男性";
-            case CharacterSex.Female:
-                return "女性";
-            case CharacterSex.Unknown:
-            default:
-                return "未知";
-        }
-    }
 }
 public enum CharacterSex
 {

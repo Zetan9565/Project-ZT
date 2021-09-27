@@ -10,7 +10,7 @@ public class #SCRIPTNAME# : Action
     public SharedBool example;
 
     //覆写此属性以用于判断结点有效性
-    public override bool IsValid => true;
+    public override bool IsValid => example != null && example.IsValid;
 
     //在此方法里编写结点逻辑
     protected override NodeStates OnUpdate()

@@ -435,7 +435,7 @@ public class QuestInspector : Editor
                             switch (killType.enumValueIndex)
                             {
                                 case (int)KillObjectiveType.Specific:
-                                    new ObjectSelectionDrawer<EnemyInformation>(enemy, "_name", e => e.Race ? e.Race.name : string.Empty, "Configuration", "目标敌人").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                                    new ObjectSelectionDrawer<EnemyInformation>(enemy, "_name", e => e.Race ? e.Race.Name : string.Empty, "Configuration", "目标敌人").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                                     lineCount++;
                                     break;
                                 case (int)KillObjectiveType.Race:

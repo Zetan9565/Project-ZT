@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
@@ -45,7 +45,7 @@ public class QuestGroupAgent : MonoBehaviour
     public void UpdateStatus()
     {
         if (questGroup)
-            nameText.text = questGroup.name + (IsExpanded ? "<" : ">");
+            nameText.text = questGroup.Name + (IsExpanded ? "<" : ">");
     }
 
     public void Recycle()

@@ -20,6 +20,8 @@ namespace ZetanStudio.BehaviourTree
         private ToolbarButton redo;
         //private ToolbarSearchField searchField;
         private Label treeName;
+        private GameObject latestGo;
+        private BehaviourTreeSettings settings;
         #endregion
 
         #region 变量相关
@@ -46,15 +48,22 @@ namespace ZetanStudio.BehaviourTree
             wnd.titleContent = new GUIContent("行为树编辑器");
             Selection.activeGameObject = executor.gameObject;
             EditorGUIUtility.PingObject(executor);
-            wnd.OnSelectionChange();
+            wnd.ChangeTreeBySelection();
+        }
+        public static void CreateWindow(BehaviourTree tree)
+        {
+            BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>();
+            wnd.titleContent = new GUIContent("行为树编辑器");
+            Selection.activeObject = tree;
+            wnd.ChangeTreeBySelection();
         }
 
         [OnOpenAsset]
         public static bool OnOpenAsset(int instanceID, int line)
         {
-            if (EditorUtility.InstanceIDToObject(instanceID) is BehaviourTree)
+            if (EditorUtility.InstanceIDToObject(instanceID) is BehaviourTree tree)
             {
-                CreateWindow();
+                CreateWindow(tree);
                 return true;
             }
             return false;
@@ -65,22 +74,22 @@ namespace ZetanStudio.BehaviourTree
         private void OnGlobalClick()
         {
             showShared = false;
-            CheckShowShared();
+            UpdateVariables();
         }
         private void OnSharedClick()
         {
             showShared = true;
-            CheckShowShared();
+            UpdateVariables();
         }
         private void OnUndoClick()
         {
             treeView?.UndoOperation();
-            CheckUndoRedo();
+            UpdateUndoRedo();
         }
         private void OnRedoClick()
         {
             treeView?.RedoOperation();
-            CheckUndoRedo();
+            UpdateUndoRedo();
         }
         #endregion
 
@@ -96,8 +105,10 @@ namespace ZetanStudio.BehaviourTree
             serializedTree = new SerializedObject(tree);
             var global = Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanEditorUtility.LoadAsset<GlobalVariables>();
             serializedGlobal = new SerializedObject(global);
-            CheckShowShared();
-            CheckAssetDropdown();
+            UpdateVariables();
+            UpdateAssetDropdown();
+            UpdateTreeDropdown();
+            UpdateTreeName();
 
             EditorApplication.delayCall += () =>
             {
@@ -105,9 +116,10 @@ namespace ZetanStudio.BehaviourTree
                 inspectorView.InspectTree(tree);
             };
         }
-        private void CheckAssetDropdown()
+        private void UpdateAssetDropdown()
         {
             if (assetsMenu == null) return;
+            settings = settings ? settings : BehaviourTreeSettings.GetOrCreate();
             var behaviourTrees = ZetanEditorUtility.LoadAssets<BehaviourTree>();
             for (int i = assetsMenu.menu.MenuItems().Count - 1; i > 0; i--)
             {
@@ -119,49 +131,83 @@ namespace ZetanStudio.BehaviourTree
             {
                 if (tree)
                     assetsMenu.menu.AppendAction($"本地/{tree.name} ({ZetanEditorUtility.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
-                     {
-                         Selection.activeObject = tree;
-                     });
+                    {
+                        EditorApplication.delayCall += () =>
+                        {
+                            latestGo = null;
+                            SelectTree(tree);
+                        };
+                    });
             });
-            foreach (var exe in FindObjectsOfType<BehaviourExecutor>())
+            foreach (var exe in FindObjectsOfType<BehaviourExecutor>(true))
                 if (exe.Behaviour)
                     assetsMenu.menu.AppendAction($"场景/{exe.gameObject.name} ({exe.gameObject.GetPath().Replace("/", "\u2215")})", (a) =>
                     {
-                        Selection.activeObject = exe;
+                        EditorApplication.delayCall += () =>
+                        {
+                            latestGo = exe.gameObject;
+                            SelectTree(exe.Behaviour);
+                        };
                     });
         }
-        private void CheckExeDropdown()
+        private void UpdateTreeDropdown()
         {
             if (exeMenu != null)
-                if (Selection.activeGameObject)
+                if (latestGo)
                 {
                     for (int i = exeMenu.menu.MenuItems().Count - 1; i >= 0; i--)
                     {
                         exeMenu.menu.RemoveItemAt(i);
                     }
-                    BehaviourExecutor[] executors = Selection.activeGameObject.GetComponents<BehaviourExecutor>();
-                    foreach (var exe in executors)
+                    BehaviourExecutor[] executors = latestGo.GetComponents<BehaviourExecutor>();
+                    for (int i = 0; i < executors.Length; i++)
                     {
+                        var exe = executors[i];
                         if (exe.Behaviour)
-                            exeMenu.menu.AppendAction(string.IsNullOrEmpty(exe.Behaviour.Name) ? "未命名" : exe.Behaviour.Name, (a) => SelectTree(exe.Behaviour));
+                            exeMenu.menu.AppendAction($"[{i}] {(string.IsNullOrEmpty(exe.Behaviour.Name) ? "(未命名)" : exe.Behaviour.Name)}", (a) => SelectTree(exe.Behaviour));
                     }
                     exeMenu.visible = exeMenu.menu.MenuItems().Count > 0;
+                    if (tree && exeMenu.visible) exeMenu.text = string.IsNullOrEmpty(tree.Name) ? "(未命名)" : tree.Name;
+                }
+                else
+                {
+                    exeMenu.visible = false;
                 }
         }
-        private void CheckShowShared()
+        private void UpdateVariables()
         {
             shared.SetEnabled(!showShared);
             global.SetEnabled(showShared);
             InitVariables();
             variables.onGUIHandler = DrawVariables;
         }
-        private void CheckUndoRedo()
+        private void UpdateUndoRedo()
         {
             if (treeView != null)
             {
                 undo.SetEnabled(treeView.CanUndo());
                 redo.SetEnabled(treeView.CanRedo());
             }
+        }
+        private void UpdateTreeName()
+        {
+            if (tree)
+            {
+                if (latestGo)
+                {
+                    BehaviourExecutor[] exes = latestGo.GetComponents<BehaviourExecutor>();
+                    foreach (var exe in exes)
+                    {
+                        if (exe.Behaviour == tree)
+                        {
+                            treeName.text = $"行为树视图\t当前：{(string.IsNullOrEmpty(tree.Name) ? "(未命名)" : tree.Name)} ({exe.gameObject.GetPath()} <{exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)}>)";
+                            break;
+                        }
+                    }
+                }
+                else treeName.text = $"行为树视图\t当前：{(string.IsNullOrEmpty(tree.Name) ? "(未命名)" : tree.Name)} ({AssetDatabase.GetAssetPath(tree)})";
+            }
+            else treeName.text = "行为树视图";
         }
         private void OnNodeSelected(NodeEditor selected)
         {
@@ -189,12 +235,37 @@ namespace ZetanStudio.BehaviourTree
                     break;
             }
         }
+        private void OnPauseStateChanged(PauseState state)
+        {
+            ChangeTreeBySelection();
+        }
+        private void ChangeTreeBySelection()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                BehaviourTree tree = Selection.activeObject as BehaviourTree;
+                if (!tree)
+                {
+                    if (Selection.activeGameObject)
+                    {
+                        BehaviourExecutor exe = Selection.activeGameObject.GetComponent<BehaviourExecutor>();
+                        if (exe)
+                        {
+                            tree = exe.Behaviour;
+                            latestGo = exe.gameObject;
+                        }
+                    }
+                }
+                else latestGo = null;
+                SelectTree(tree);
+            };
+        }
         #endregion
 
         #region Unity回调
         public void CreateGUI()
         {
-            var settings = BehaviourTreeSettings.GetOrCreate();
+            settings = settings ? settings : BehaviourTreeSettings.GetOrCreate();
 
             VisualElement root = rootVisualElement;
 
@@ -207,22 +278,20 @@ namespace ZetanStudio.BehaviourTree
             treeView = root.Q<BehaviourTreeView>();
             treeView.nodeSelectedCallback = OnNodeSelected;
             treeView.nodeUnselectedCallback = OnNodeUnselected;
-            treeView.undoChangedCallback = CheckUndoRedo;
+            treeView.undoChangedCallback = UpdateUndoRedo;
 
             inspectorView = root.Q<InspectorView>();
             variables = root.Q<IMGUIContainer>("variables");
 
             assetsMenu = root.Q<ToolbarMenu>("assets");
             assetsMenu.menu.AppendAction("新建", (a) => CreateNewTree("new behaviour tree"));
-            CheckAssetDropdown();
             exeMenu = root.Q<ToolbarMenu>("exe-select");
-            CheckExeDropdown();
 
             undo = root.Q<ToolbarButton>("undo");
             undo.clicked += OnUndoClick;
             redo = root.Q<ToolbarButton>("redo");
             redo.clicked += OnRedoClick;
-            CheckUndoRedo();
+            UpdateUndoRedo();
 
             treeName = root.Q<Label>("tree-name");
 
@@ -232,65 +301,39 @@ namespace ZetanStudio.BehaviourTree
             global.clicked += OnGlobalClick;
             showShared = true;
             serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanEditorUtility.LoadAsset<GlobalVariables>());
-            CheckShowShared();
+            UpdateVariables();
 
-            if (tree == null) OnSelectionChange();
+            if (tree == null) ChangeTreeBySelection();
             else SelectTree(tree);
-            bool goTree = false;
-            if (Selection.activeGameObject)
-            {
-                BehaviourExecutor exe = Selection.activeGameObject.GetComponent<BehaviourExecutor>();
-                if (exe)
-                {
-                    goTree = true;
-                    treeName.text = $"行为树视图\t当前路径：{exe.gameObject.GetPath()} <{exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)}>";
-                }
-            }
-            if (tree && !goTree) treeName.text = $"行为树视图\t当前路径：{AssetDatabase.GetAssetPath(tree)}";
         }
         private void OnSelectionChange()
         {
-            EditorApplication.delayCall += () =>
-            {
-                bool goTree = false;
-                if (treeName != null) treeName.text = "行为树视图";
-                BehaviourTree tree = Selection.activeObject as BehaviourTree;
-                if (!tree)
-                {
-                    if (Selection.activeGameObject)
-                    {
-                        BehaviourExecutor exe = Selection.activeGameObject.GetComponent<BehaviourExecutor>();
-                        if (exe)
-                        {
-                            tree = exe.Behaviour;
-                            goTree = true;
-                            if (treeName != null) treeName.text = $"行为树视图\t当前路径：{exe.gameObject.GetPath()} <{exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)}>";
-                        }
-                    }
-                }
-                SelectTree(tree);
-                if (this.tree && !goTree && treeName != null) treeName.text = $"行为树视图\t当前路径：{AssetDatabase.GetAssetPath(this.tree)}";
-            };
+            settings = settings ? settings : BehaviourTreeSettings.GetOrCreate();
+            if (settings.changeOnSelected) ChangeTreeBySelection();
         }
         private void OnInspectorUpdate()
         {
             treeView?.OnUpdate();
             if (!treeView?.tree) treeView?.DrawTreeView(tree);
+            UpdateTreeDropdown();
         }
         private void OnProjectChange()
         {
-            CheckAssetDropdown();
+            UpdateAssetDropdown();
         }
         private void OnHierarchyChange()
         {
-            CheckAssetDropdown();
+            UpdateAssetDropdown();
         }
         private void OnEnable()
         {
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-            OnSelectionChange();
+            EditorApplication.pauseStateChanged += OnPauseStateChanged;
+            ChangeTreeBySelection();
         }
+
+
         private void OnDisable()
         {
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
@@ -341,8 +384,12 @@ namespace ZetanStudio.BehaviourTree
             BehaviourTree tree = ZetanEditorUtility.SaveFilePanel(CreateInstance<BehaviourTree>, assetName, true, true);
             if (tree)
             {
-                serializedGlobal = new SerializedObject(tree);
-                CheckShowShared();
+                serializedTree = new SerializedObject(tree);
+                UpdateVariables();
+                Selection.activeObject = tree;
+                EditorGUIUtility.PingObject(tree);
+                settings = settings ? settings : BehaviourTreeSettings.GetOrCreate();
+                if (!settings.changeOnSelected) ChangeTreeBySelection();
             }
         }
         private void CreateGlobalVariables(string assetName)
@@ -352,7 +399,7 @@ namespace ZetanStudio.BehaviourTree
             if (global)
             {
                 serializedGlobal = new SerializedObject(global);
-                CheckShowShared();
+                UpdateVariables();
             }
         }
         private void SaveToLocal(string assetName)

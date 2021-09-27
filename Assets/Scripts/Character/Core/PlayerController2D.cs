@@ -33,9 +33,9 @@ public class PlayerController2D : CharacterController2D
     {
         if (Character.GetMainState(out var state))
         {
-            if (state == CharacterState.Normal || state == CharacterState.Attack)
+            if (state == CharacterStates.Normal || state == CharacterStates.Attack)
             {
-                if (state == CharacterState.Normal) canAttack = true;
+                if (state == CharacterStates.Normal) canAttack = true;
                 if (canAttack)
                 {
                     ForceStop();

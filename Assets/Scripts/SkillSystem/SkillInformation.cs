@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,7 +17,7 @@ public class SkillInformation : ScriptableObject
 
     [SerializeField]
     private string _name;
-    public new string name
+    public string Name
     {
         get
         {

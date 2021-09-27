@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Events;
 
 public abstract class InteractiveObject : MonoBehaviour
 {
@@ -10,31 +9,32 @@ public abstract class InteractiveObject : MonoBehaviour
     * **/
 
     public bool activated = true;
+    public virtual bool _3D => false;
 
     [SerializeField]
     protected bool customName;
 
-    [SerializeField]
-#if UNITY_EDITOR
-    [HideIf("customName", true)]
-#endif
-    protected string _name = "可交互对象";
-    public virtual new string name { get => _name; protected set => _name = value; }
+    protected virtual string CustomName { get => _name; }
 
-    [SerializeField]
-#if UNITY_EDITOR
-    [SpriteSelector]
-#endif
+    [SerializeField, HideIf("customName", true)]
+    protected string _name = "可交互对象";
+    public string Name { get => customName ? CustomName : _name; }
+
+    [SerializeField, SpriteSelector]
     private Sprite icon;
     public Sprite Icon => icon;
 
     public bool hidePanelOnInteract;
 
     /// <summary>
-    /// 可否触发交互
+    /// 可否交互
     /// </summary>
     public virtual bool IsInteractive { get; protected set; } = true;
 
+    /// <summary>
+    /// 进行交互
+    /// </summary>
+    /// <returns>交互是否成功</returns>
     public virtual bool DoInteract()
     {
         if (hidePanelOnInteract)
@@ -42,6 +42,9 @@ public abstract class InteractiveObject : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 结束交互，每次DoInteract()后必须手动调用一次
+    /// </summary>
     public virtual void FinishInteraction()
     {
         if (hidePanelOnInteract)
@@ -49,20 +52,20 @@ public abstract class InteractiveObject : MonoBehaviour
     }
 
     #region 额外触发器事件
-    //protected virtual void OnExit(Collider other)
-    //{
+    protected virtual void OnExit(Collider other)
+    {
 
-    //}
+    }
 
-    //protected virtual void OnStay(Collider other)
-    //{
+    protected virtual void OnStay(Collider other)
+    {
 
-    //}
+    }
 
-    //protected virtual void OnEnter(Collider other)
-    //{
+    protected virtual void OnEnter(Collider other)
+    {
 
-    //}
+    }
 
     protected virtual void OnExit(Collider2D collision)
     {
@@ -82,35 +85,35 @@ public abstract class InteractiveObject : MonoBehaviour
 
     #region MonoBehaviour
     #region 3D Trigger
-    //protected void OnTriggerEnter(Collider other)
-    //{
-    //    if (!activated) return;
-    //    if (Interactive && other.CompareTag("Player"))
-    //        InteractionManager.Instance.Insert(this);
-    //    OnEnter(other);
-    //}
+    protected void OnTriggerEnter(Collider other)
+    {
+        if (!activated || !_3D) return;
+        if (IsInteractive && other.CompareTag("Player"))
+            InteractionManager.Instance.Insert(this);
+        OnEnter(other);
+    }
 
-    //protected void OnTriggerStay(Collider other)
-    //{
-    //    if (!activated) return;
-    //    if (Interactive && other.CompareTag("Player"))
-    //        InteractionManager.Instance.Insert(this);
-    //    OnStay(other);
-    //}
+    protected void OnTriggerStay(Collider other)
+    {
+        if (!activated || !_3D) return;
+        if (IsInteractive && other.CompareTag("Player"))
+            InteractionManager.Instance.Insert(this);
+        OnStay(other);
+    }
 
-    //protected void OnTriggerExit(Collider other)
-    //{
-    //    if (!activated) return;
-    //    if (Interactive && other.CompareTag("Player"))
-    //        InteractionManager.Instance.Remove(this);
-    //    OnExit(other);
-    //}
+    protected void OnTriggerExit(Collider other)
+    {
+        if (!activated || !_3D) return;
+        if (IsInteractive && other.CompareTag("Player"))
+            InteractionManager.Instance.Remove(this);
+        OnExit(other);
+    }
     #endregion
 
     #region 2D Trigger
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!activated) return;
+        if (!activated || _3D) return;
         if (IsInteractive && collision.CompareTag("Player"))
             InteractionManager.Instance.Insert(this);
         OnEnter(collision);
@@ -118,7 +121,7 @@ public abstract class InteractiveObject : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (!activated) return;
+        if (!activated || _3D) return;
         if (IsInteractive && collision.CompareTag("Player"))
             InteractionManager.Instance.Insert(this);
         OnStay(collision);
@@ -126,7 +129,7 @@ public abstract class InteractiveObject : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (!activated) return;
+        if (!activated || _3D) return;
         if (IsInteractive && collision.CompareTag("Player"))
             InteractionManager.Instance.Remove(this);
         OnExit(collision);

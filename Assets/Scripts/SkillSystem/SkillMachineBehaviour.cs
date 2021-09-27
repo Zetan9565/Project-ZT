@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 
 public class SkillMachineBehaviour : StateMachineBehaviour
@@ -11,17 +11,17 @@ public class SkillMachineBehaviour : StateMachineBehaviour
 
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        enterCallback?.Invoke(skillInfo.name);
+        enterCallback?.Invoke(skillInfo.Name);
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        updateCallback?.Invoke(skillInfo.name);
+        updateCallback?.Invoke(skillInfo.Name);
     }
 
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        enterCallback?.Invoke(skillInfo.name);
+        enterCallback?.Invoke(skillInfo.Name);
     }
 
     public override void OnStateMachineEnter(Animator animator, int stateMachinePathHash)

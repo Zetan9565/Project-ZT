@@ -27,7 +27,7 @@ public class QuestFlag : MonoBehaviour
         if (MapManager.Instance)
         {
             if (mapIcon) MapManager.Instance.RemoveMapIcon(mapIcon, true);
-            mapIcon = MapManager.Instance.CreateMapIcon(notAccepted, Vector2.one * 48, questHolder.Data.currentPosition, false, MapIconType.Quest, false);
+            mapIcon = MapManager.Instance.CreateMapIcon(notAccepted, Vector2.one * 48, questHolder.GetGenericData().currentPosition, false, MapIconType.Quest, false);
             mapIcon.iconImage.raycastTarget = false;
             mapIcon.Hide();
         }
@@ -49,8 +49,8 @@ public class QuestFlag : MonoBehaviour
     public void UpdateUI()
     {
         //Debug.Log(questHolder.TalkerName);
-        bool hasObjective = questHolder.Data.objectivesTalkToThis.FindAll(x => x.AllPrevObjCmplt && !x.IsComplete).Count > 0
-            || questHolder.Data.objectivesSubmitToThis.FindAll(x => x.AllPrevObjCmplt && !x.IsComplete).Count > 0;
+        bool hasObjective = questHolder.GetGenericData().objectivesTalkToThis.FindAll(x => x.AllPrevObjCmplt && !x.IsComplete).Count > 0
+            || questHolder.GetGenericData().objectivesSubmitToThis.FindAll(x => x.AllPrevObjCmplt && !x.IsComplete).Count > 0;
         if (questHolder.QuestInstances.Count < 1 && !hasObjective)
         {
             if (icon.enabled) icon.enabled = false;
