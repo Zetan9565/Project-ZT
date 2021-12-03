@@ -100,15 +100,16 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     private MapModeInfo worldModeInfo = new MapModeInfo();
 
     private readonly Dictionary<MapIconHolder, MapIcon> iconsWithHolder = new Dictionary<MapIconHolder, MapIcon>();
-    public Dictionary<MapIcon, MapIconWithoutHolder> IconsWithoutHolder { get; private set; } = new Dictionary<MapIcon, MapIconWithoutHolder>();
+    public List<MapIcon> NormalIcons { get; private set; } = new List<MapIcon>();
 
     #region 地图图标相关
     public void CreateMapIcon(MapIconHolder holder)
     {
         if (!UI || !UI.gameObject || !holder.icon) return;
         MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(holder.iconType)).GetComponent<MapIcon>();
-        InitIcon();
+        icon.Init(holder);
         iconsWithHolder.TryGetValue(holder, out MapIcon iconFound);
+        //Icons.Add(icon);
         if (iconFound != null)
         {
             holder.iconInstance = icon;
@@ -116,62 +117,24 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
         else iconsWithHolder.Add(holder, icon);
         return;
-
-        void InitIcon()
-        {
-            icon.iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            icon.iconImage.overrideSprite = holder.icon;
-            icon.iconImage.rectTransform.sizeDelta = holder.iconSize;
-            icon.iconType = holder.iconType;
-            icon.RemoveAble = holder.removeAble;
-            holder.iconInstance = icon;
-            icon.holder = holder;
-            if (holder.showRange) icon.iconRange = ObjectPool.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
-        }
     }
     public MapIcon CreateMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap,
         MapIconType iconType, bool removeAble, string textToDisplay = "")
     {
         if (!UI || !UI.gameObject || !iconSprite) return null;
         MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(iconType)).GetComponent<MapIcon>();
-        InitIcon();
-        IconsWithoutHolder.Add(icon, new MapIconWithoutHolder(worldPosition, icon, keepOnMap, removeAble, textToDisplay));
+        icon.Init(iconSprite, size, worldPosition, keepOnMap, iconType, removeAble, textToDisplay);
+        NormalIcons.Add(icon);
         return icon;
-
-        void InitIcon()
-        {
-            icon.iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            icon.iconImage.overrideSprite = iconSprite;
-            icon.iconImage.rectTransform.sizeDelta = size;
-            icon.iconType = iconType;
-            icon.RemoveAble = removeAble;
-            icon.TextToDisplay = textToDisplay;
-        }
     }
     public MapIcon CreateMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap, float rangeSize,
         MapIconType iconType, bool removeAble, string textToDisplay = "")
     {
         if (!UI || !UI.gameObject || !iconSprite) return null;
         MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(iconType)).GetComponent<MapIcon>();
-        InitIcon();
-        IconsWithoutHolder.Add(icon, new MapIconWithoutHolder(worldPosition, icon, keepOnMap, removeAble, textToDisplay));
+        icon.Init(iconSprite, size, worldPosition, keepOnMap, rangeSize, iconType, removeAble, textToDisplay);
+        NormalIcons.Add(icon);
         return icon;
-
-        void InitIcon()
-        {
-            icon.iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            icon.iconImage.overrideSprite = iconSprite;
-            icon.iconImage.rectTransform.sizeDelta = size;
-            icon.iconType = iconType;
-            if (rangeSize > 0)
-            {
-                icon.iconRange = ObjectPool.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
-                ZetanUtility.SetActive(icon.iconRange.gameObject, true);
-                icon.iconRange.rectTransform.sizeDelta = new Vector2(rangeSize, rangeSize);
-            }
-            icon.RemoveAble = removeAble;
-            icon.TextToDisplay = textToDisplay;
-        }
     }
 
     public MapIcon CreateDefaultMark(Vector3 worldPosition, bool keepOnMap, bool removeAble, string textToDisplay = "")
@@ -198,19 +161,9 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         if (icon.holder) RemoveMapIcon(icon.holder, force);
         else
         {
-            IconsWithoutHolder.Remove(icon);
+            NormalIcons.Remove(icon);
             icon.Recycle();
         }
-    }
-    public void RemoveMapIcon(Vector3 worldPosition, bool force = false)
-    {
-        foreach (var iconWoH in IconsWithoutHolder.Values.ToList())
-            if (iconWoH.worldPosition == worldPosition && (iconWoH.removeAble || force))
-            {
-                IconsWithoutHolder.Remove(iconWoH.mapIcon);
-                if (iconWoH.mapIcon) iconWoH.mapIcon.Recycle();
-                iconWoH.mapIcon = null;
-            }
     }
     public void DestroyMapIcon(MapIcon icon)
     {
@@ -221,7 +174,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
         else
         {
-            if (!icon.holder) IconsWithoutHolder.Remove(icon);
+            if (!icon.holder) NormalIcons.Remove(icon);
             else iconsWithHolder.Remove(icon.holder);
         }
         Destroy(icon);
@@ -235,22 +188,20 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         foreach (var iconKvp in iconsWithHolder)
         {
             MapIconHolder holder = iconKvp.Key;
-            float sqrDistance = Vector3.SqrMagnitude(holder.transform.position - player.position);
+            float distance = Vector3.Magnitude(holder.transform.position - player.position);
             if (iconKvp.Key.isActiveAndEnabled && !iconKvp.Value.ForceHided && (isViewingWorldMap && holder.drawOnWorldMap || !isViewingWorldMap && (!holder.AutoHide
-               || holder.AutoHide && holder.DistanceSqr >= sqrDistance)))
+               || holder.AutoHide && holder.maxValidDistance >= distance)))
             {
-                if (holder.showRange && !iconKvp.Value.iconRange)
-                    iconKvp.Value.iconRange = ObjectPool.Get(UI.rangePrefab.gameObject, UI.rangesParent).GetComponent<MapIconRange>();
                 holder.ShowIcon(CameraZoom);
                 DrawMapIcon(holder.transform.position + new Vector3(holder.offset.x, use2D ? holder.offset.y : 0, use2D ? 0 : holder.offset.y), iconKvp.Value, holder.keepOnMap);
-                if (!IsViewingWorldMap && sqrDistance > holder.DistanceSqr * 0.81f && sqrDistance < holder.DistanceSqr)
-                    iconKvp.Value.ImageCanvas.alpha = (holder.DistanceSqr - sqrDistance) / (holder.DistanceSqr * 0.19f);
+                if (!IsViewingWorldMap && distance > holder.maxValidDistance * 0.9f && distance < holder.maxValidDistance)
+                    iconKvp.Value.ImageCanvas.alpha = (holder.maxValidDistance - distance) / (holder.maxValidDistance * 0.1f);
                 else iconKvp.Value.ImageCanvas.alpha = 1;
             }
             else holder.HideIcon();
         }
-        foreach (var icon in IconsWithoutHolder.Values)
-            DrawMapIcon(icon.worldPosition, icon.mapIcon, icon.keepOnMap);
+        foreach (var icon in NormalIcons)
+            DrawMapIcon(icon.Position, icon, icon.KeepOnMap);
     }
     private void DrawMapIcon(Vector3 worldPosition, MapIcon icon, bool keepOnMap)
     {
@@ -291,16 +242,9 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         if (icon.iconRange) icon.iconRange.transform.position = rangePos;
     }
 
-    public void UpdateMapIconPosition(MapIcon icon, Vector3 worldPosition)
-    {
-        if (IconsWithoutHolder.TryGetValue(icon, out var mapIconWithoutHolder))
-            mapIconWithoutHolder.worldPosition = worldPosition;
-    }
-
     private void InitPlayerIcon()
     {
-        if (playerIconInstance) return;
-        playerIconInstance = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(MapIconType.Main)).GetComponent<MapIcon>();
+        if (!playerIconInstance) playerIconInstance = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(MapIconType.Main)).GetComponent<MapIcon>();
         playerIconInstance.iconImage.overrideSprite = playerIcon;
         playerIconInstance.iconImage.rectTransform.sizeDelta = playerIconSize;
         playerIconInstance.iconType = MapIconType.Main;
@@ -626,6 +570,12 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     public void Init()
     {
         InitPlayerIcon();
+        //foreach (var icon in iconsWithHolder)
+        //    icon.Value.Recycle();
+        //iconsWithHolder.Clear();
+        //foreach (var iconWoH in NormalIcons)
+        //    iconWoH.Recycle();
+        //NormalIcons.Clear();
         if (targetTexture) targetTexture.Release();
         targetTexture = new RenderTexture(textureSize.x, textureSize.y, 24, textureFormat)
         {
@@ -641,10 +591,9 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 
     private void ClearMarks()
     {
-        MapIconWithoutHolder[] iconWoHs = new MapIconWithoutHolder[IconsWithoutHolder.Count];
-        IconsWithoutHolder.Values.CopyTo(iconWoHs, 0);
-        foreach (var iconWoH in iconWoHs)
-            if (iconWoH.mapIcon.iconType == MapIconType.Mark) RemoveMapIcon(iconWoH.mapIcon, true);
+        var marks = NormalIcons.FindAll(x => x.iconType == MapIconType.Mark);
+        foreach (var iconWoH in marks)
+            RemoveMapIcon(iconWoH, true);
     }
 
     private RectTransform SelectParent(MapIconType iconType)
@@ -668,33 +617,15 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 
     public void SaveData(SaveData data)
     {
-        foreach (var iconWoH in IconsWithoutHolder.Values)
-            if (iconWoH.mapIcon.iconType == MapIconType.Mark) data.markDatas.Add(new MapMarkSaveData(iconWoH));
+        ClearMarks();
+        foreach (var iconWoH in NormalIcons)
+            if (iconWoH.iconType == MapIconType.Mark) data.markDatas.Add(new MapMarkSaveData(iconWoH));
     }
 
     public void LoadData(SaveData data)
     {
-        ClearMarks();
         foreach (var md in data.markDatas)
             CreateDefaultMark(new Vector3(md.worldPosX, md.worldPosY, md.worldPosZ), md.keepOnMap, md.removeAble, md.textToDisplay);
-    }
-
-    public class MapIconWithoutHolder
-    {
-        public Vector3 worldPosition;
-        public MapIcon mapIcon;
-        public bool keepOnMap;
-        public bool removeAble;
-        public string textToDisplay;
-
-        public MapIconWithoutHolder(Vector3 worldPosition, MapIcon mapIcon, bool keepOnMap, bool removeAble, string textToDisplay)
-        {
-            this.worldPosition = worldPosition;
-            this.mapIcon = mapIcon;
-            this.keepOnMap = keepOnMap;
-            this.removeAble = removeAble;
-            this.textToDisplay = textToDisplay;
-        }
     }
 
     [Serializable]

@@ -14,6 +14,7 @@ namespace ZetanStudio.BehaviourTree
         SerializedProperty startOnStart;
         SerializedProperty restartOnComplete;
         SerializedProperty resetOnRestart;
+        SerializedProperty gizmos;
         SerializedProperty presetVariables;
 
         AnimBool showList;
@@ -32,6 +33,7 @@ namespace ZetanStudio.BehaviourTree
             startOnStart = serializedObject.FindProperty("startOnStart");
             restartOnComplete = serializedObject.FindProperty("restartOnComplete");
             resetOnRestart = serializedObject.FindProperty("resetOnRestart");
+            gizmos = serializedObject.FindProperty("gizmos");
             presetVariables = serializedObject.FindProperty("presetVariables");
             treeDrawer = new ObjectSelectionDrawer<BehaviourTree>(behaviour, string.Empty, string.Empty, "行为树");
             InitTree();
@@ -66,7 +68,7 @@ namespace ZetanStudio.BehaviourTree
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
             var hasTreeBef = behaviour.objectReferenceValue;
-            if (!(target is RuntimeBehaviourExecutor))
+            if (target is not RuntimeBehaviourExecutor)
             {
                 bool shouldDisable = Application.isPlaying && !PrefabUtility.IsPartOfAnyPrefab(target);
                 EditorGUI.BeginDisabledGroup(shouldDisable);
@@ -91,7 +93,10 @@ namespace ZetanStudio.BehaviourTree
             EditorGUILayout.PropertyField(startOnStart, new GUIContent("开始时执行"));
             EditorGUILayout.PropertyField(restartOnComplete, new GUIContent("完成时重启"));
             EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(resetOnRestart, new GUIContent("重启时重置"));
+            EditorGUILayout.PropertyField(gizmos, new GUIContent("显示Gizmos"));
+            EditorGUILayout.EndHorizontal();
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (behaviour.objectReferenceValue)
             {
@@ -101,7 +106,7 @@ namespace ZetanStudio.BehaviourTree
                 if (EditorGUILayout.BeginFadeGroup(showList.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
-                if (!(target is RuntimeBehaviourExecutor) && !Application.isPlaying)
+                if (target is not RuntimeBehaviourExecutor && !Application.isPlaying)
                 {
                     EditorGUILayout.PropertyField(presetVariables, new GUIContent("变量预设列表"), false);
                     showPreset.target = presetVariables.isExpanded;

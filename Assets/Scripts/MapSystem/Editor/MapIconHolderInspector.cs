@@ -90,10 +90,6 @@ public class MapIconHolderInspector : Editor
             EditorGUILayout.PropertyField(onMouseEnter, new GUIContent("鼠标滑入事件"));
             EditorGUILayout.PropertyField(onMouseExit, new GUIContent("鼠标滑出事件"));
         }
-        if (EditorGUI.EndChangeCheck())
-        {
-            serializedObject.ApplyModifiedProperties();
-            if (Application.isPlaying) holder.SetIconValidDistance(maxValidDistance.floatValue);
-        }
+        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
     }
 }

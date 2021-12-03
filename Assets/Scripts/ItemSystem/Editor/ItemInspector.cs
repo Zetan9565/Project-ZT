@@ -145,7 +145,7 @@ public partial class ItemInspector : Editor
         EditorGUILayout.LabelField("附加信息", new GUIStyle() { fontStyle = FontStyle.Bold });
         HandlingItemType();
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
-        if (!(item is BoxItem) && !(item is BookItem) && !(item is CurrencyItem))
+        if (item is not BoxItem && item is not BookItem && item is not CurrencyItem)
         {
             EditorGUILayout.Space();
             serializedObject.Update();

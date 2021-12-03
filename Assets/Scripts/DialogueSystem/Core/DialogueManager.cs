@@ -38,7 +38,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     private readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
 
     public readonly Dictionary<string, TalkerData> Talkers = new Dictionary<string, TalkerData>();
-    private readonly Dictionary<string, List<TalkerData>> talkersMap = new Dictionary<string, List<TalkerData>>();
+    private readonly Dictionary<string, List<TalkerData>> scenedTalkers = new Dictionary<string, List<TalkerData>>();
 
     #region 选项相关
     private readonly List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
@@ -788,6 +788,8 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         if (!talkerRoot)
             talkerRoot = new GameObject("Talkers").transform;
+        Talkers.Clear();
+        scenedTalkers.Clear();
         foreach (var ti in Resources.LoadAll<TalkerInformation>("Configuration").Where(x => x.IsValid && x.Enable))
         {
             TalkerData data = new TalkerData(ti);
@@ -797,9 +799,9 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 talker.Init(data);
             }
             Talkers.Add(ti.ID, data);
-            if (talkersMap.TryGetValue(ti.Scene, out var talkers))
+            if (scenedTalkers.TryGetValue(ti.Scene, out var talkers))
                 talkers.Add(data);
-            else talkersMap.Add(ti.Scene, new List<TalkerData>() { data });
+            else scenedTalkers.Add(ti.Scene, new List<TalkerData>() { data });
         }
     }
 

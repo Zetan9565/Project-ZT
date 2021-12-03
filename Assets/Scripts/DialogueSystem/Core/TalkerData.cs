@@ -45,6 +45,11 @@ public class TalkerData : CharacterData
             shop = new ShopData(info.Shop);
             ShopManager.Vendors.Add(this);
         }
+        if(Info.IsWarehouseAgent)
+        {
+            warehouse = new WarehouseData(Info.WarehouseCapcity);
+            warehouse.scene = ZetanUtility.ActiveScene.name;
+        }
         relationshipInstance = new Relationship();
         InitQuest();
     }

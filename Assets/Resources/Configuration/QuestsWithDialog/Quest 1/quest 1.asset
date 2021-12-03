@@ -45,11 +45,12 @@ MonoBehaviour:
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 1
   objectives:
-  - id: 0
-  - id: 1
+  - rid: 0
+  - rid: 1
   references:
-    version: 1
-    00000000:
+    version: 2
+    RefIds:
+    - rid: 0
       type: {class: KillObjective, ns: , asm: Assembly-CSharp}
       data:
         displayName: "\u51FB\u6740\u6751\u5317\u7684\u602A\u7269"
@@ -64,7 +65,7 @@ MonoBehaviour:
         enemy: {fileID: 0}
         race: {fileID: 0}
         group: {fileID: 11400000, guid: e3f0673e98f57e246b4162cc7596550b, type: 2}
-    00000001:
+    - rid: 1
       type: {class: TalkObjective, ns: , asm: Assembly-CSharp}
       data:
         displayName: "\u5B89\u6170\u739B\u4E3D\u4E9A"

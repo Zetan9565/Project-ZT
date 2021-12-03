@@ -15,6 +15,7 @@ namespace ZetanStudio.BehaviourTree
         public bool startOnStart = true;
         public bool restartOnComplete;
         public bool resetOnRestart;
+        public bool gizmos = true;
 
         protected bool isRuntimeMode;
 
@@ -159,11 +160,11 @@ namespace ZetanStudio.BehaviourTree
 
         private void OnDrawGizmos()
         {
-            if (behaviour) behaviour.OnDrawGizmos();
+            if (gizmos && behaviour) behaviour.OnDrawGizmos();
         }
         private void OnDrawGizmosSelected()
         {
-            if (behaviour) behaviour.OnDrawGizmosSelected();
+            if (gizmos && behaviour) behaviour.OnDrawGizmosSelected();
         }
 
         private void OnDestroy()

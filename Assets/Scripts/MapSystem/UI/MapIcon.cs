@@ -13,7 +13,6 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
     [HideInInspector]
     public Image iconImage;
 
-    [HideInInspector]
     public MapIconRange iconRange;
 
     public CanvasGroup ImageCanvas { get; private set; }
@@ -31,11 +30,6 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
         {
             return holder ? holder.removeAble : removeAble;
         }
-
-        set
-        {
-            removeAble = value;
-        }
     }
 
     private string textToDisplay;
@@ -45,21 +39,67 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
         {
             return holder ? holder.textToDisplay : textToDisplay;
         }
-
-        set
-        {
-            textToDisplay = value;
-        }
     }
 
-    //[HideInInspector]
+    [HideInInspector]
     public MapIconHolder holder;
+
+    private Vector3 position;
+    public Vector3 Position => holder ? holder.transform.position : position;
+
+    private bool keepOnMap;
+    public bool KeepOnMap => holder ? holder.keepOnMap : keepOnMap;
+
+    public void Init(MapIconHolder holder)
+    {
+        iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        iconImage.overrideSprite = holder.icon;
+        iconImage.rectTransform.sizeDelta = holder.iconSize;
+        iconType = holder.iconType;
+        holder.iconInstance = this;
+        this.holder = holder;
+        if (holder.showRange) ZetanUtility.SetActive(iconRange, true);
+        else ZetanUtility.SetActive(iconRange, false);
+    }
+
+    public void Init(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap,
+MapIconType iconType, bool removeAble, string textToDisplay = "")
+    {
+        iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        iconImage.overrideSprite = iconSprite;
+        iconImage.rectTransform.sizeDelta = size;
+        this.iconType = iconType;
+        ZetanUtility.SetActive(iconRange.gameObject, false);
+        position = worldPosition;
+        this.keepOnMap = keepOnMap;
+        this.removeAble = removeAble;
+        this.textToDisplay = textToDisplay;
+    }
+
+    public void Init(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap, float rangeSize,
+    MapIconType iconType, bool removeAble, string textToDisplay = "")
+    {
+        iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        iconImage.overrideSprite = iconSprite;
+        iconImage.rectTransform.sizeDelta = size;
+        this.iconType = iconType;
+        if (rangeSize > 0)
+        {
+            ZetanUtility.SetActive(iconRange.gameObject, true);
+            iconRange.rectTransform.sizeDelta = new Vector2(rangeSize, rangeSize);
+        }
+        else ZetanUtility.SetActive(iconRange.gameObject, false);
+        position = worldPosition;
+        this.keepOnMap = keepOnMap;
+        this.removeAble = removeAble;
+        this.textToDisplay = textToDisplay;
+    }
 
     public void Show(bool showRange = false)
     {
         if (ForceHided) return;
         ZetanUtility.SetActive(iconImage.gameObject, true);
-        if (iconRange) ZetanUtility.SetActive(iconRange.gameObject, showRange);
+        ZetanUtility.SetActive(iconRange.gameObject, showRange);
     }
     public void Hide()
     {
@@ -75,11 +115,9 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
             holder = null;
         }
         iconImage.raycastTarget = true;
-        RemoveAble = true;
+        removeAble = true;
         if (!string.IsNullOrEmpty(TextToDisplay) && TipsManager.Instance) TipsManager.Instance.Hide();
-        TextToDisplay = string.Empty;
-        if (iconRange) ObjectPool.Put(iconRange.gameObject);
-        iconRange = null;
+        textToDisplay = string.Empty;
         ObjectPool.Put(gameObject);
     }
 
@@ -147,9 +185,15 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
         transform = base.transform;
     }
 
+    public void UpdatePosition(Vector3 worldPosition)
+    {
+        position = worldPosition;
+    }
+
 #if UNITY_ANDROID
     readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
     Coroutine pressCoroutine;
+    internal object worldPosition;
 
     IEnumerator Press()
     {

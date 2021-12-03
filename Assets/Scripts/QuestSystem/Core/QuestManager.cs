@@ -819,7 +819,7 @@ public class QuestManager : WindowHandler<QuestUI, QuestManager>, IOpenCloseAble
         ObjectiveData nextObjective = objective.nextObjective;
         while (nextObjective != null)
         {
-            if (!(nextObjective is CollectObjectiveData) && nextObjective.Info.InOrder && nextObjective.nextObjective != null && nextObjective.nextObjective.Info.InOrder && nextObjective.Info.OrderIndex < nextObjective.nextObjective.Info.OrderIndex)
+            if (nextObjective is not CollectObjectiveData && nextObjective.Info.InOrder && nextObjective.nextObjective != null && nextObjective.nextObjective.Info.InOrder && nextObjective.Info.OrderIndex < nextObjective.nextObjective.Info.OrderIndex)
             {
                 //若相邻后置目标不是收集类目标，该后置目标按顺序执行，其相邻后置也按顺序执行，且两者不可同时执行，则说明无法继续更新后置的收集类目标
                 return;

@@ -16,7 +16,7 @@ MonoBehaviour:
   guid: 785d38a00fe0ed344bf636903f3395f9
   _position: {x: 236.26462, y: 325.38525}
   _description: 
-  child: {fileID: -5673099492451267999}
+  child: {fileID: 0}
   stopOnFailure: 0
   count:
     _name: 
@@ -257,7 +257,6 @@ MonoBehaviour:
   entry: {fileID: 6010367299264760620}
   nodes:
   - {fileID: 6010367299264760620}
-  - {fileID: -8599469560084693122}
   - {fileID: -8390009652866561428}
   - {fileID: -850818315939059841}
   - {fileID: -5673099492451267999}
@@ -271,36 +270,38 @@ MonoBehaviour:
   - {fileID: 8021095495707417499}
   - {fileID: -8279204925400381292}
   - {fileID: -6226792001529788340}
+  - {fileID: -8599469560084693122}
   variables:
-  - id: 0
-  - id: 1
-  - id: 2
-  - id: 3
+  - rid: 0
+  - rid: 1
+  - rid: 2
+  - rid: 3
   isRuntime: 0
   references:
-    version: 1
-    00000000:
+    version: 2
+    RefIds:
+    - rid: 0
       type: {class: SharedGameObject, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedGameObject_2
         isGlobal: 0
         isShared: 1
         value: {fileID: 0}
-    00000001:
+    - rid: 1
       type: {class: SharedString, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedString_3
         isGlobal: 0
         isShared: 1
         value: 123456
-    00000002:
+    - rid: 2
       type: {class: SharedTransform, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedTransform_4
         isGlobal: 0
         isShared: 1
         value: {fileID: 0}
-    00000003:
+    - rid: 3
       type: {class: SharedVector3, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedVector3_4
@@ -370,7 +371,7 @@ MonoBehaviour:
     isGlobal: 0
     isShared: 0
     value: 0
-  sightLayer:
+  obstacleLayer:
     serializedVersion: 2
     m_Bits: 0
   eyesOffset:
@@ -433,7 +434,6 @@ MonoBehaviour:
   _description: 
   children:
   - {fileID: 5131726000886982299}
-  - {fileID: -8599469560084693122}
   abortType: 0
 --- !u!114 &8021095495707417499
 MonoBehaviour:

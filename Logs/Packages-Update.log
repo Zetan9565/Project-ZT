@@ -276,3 +276,35 @@ The following packages were updated:
 The following packages were removed:
   com.unity.multiplayer-hlapi@1.0.8
   com.unity.render-pipelines.lightweight@10.5.1
+
+=== Mon Nov 15 12:19:44 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.2d.animation 从版本 7.0.0 到 7.0.1
+  com.unity.2d.psdimporter 从版本 6.0.0 到 6.0.1
+  com.unity.purchasing 从版本 4.0.3 到 4.1.0
+  com.unity.render-pipelines.core 从版本 12.1.0 到 12.1.1
+  com.unity.render-pipelines.universal 从版本 12.1.0 到 12.1.1
+
+=== Mon Nov 22 15:56:33 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.cinemachine 从版本 2.8.0 到 2.8.2
+  com.unity.collab-proxy 从版本 1.13.5 到 1.15.1
+  com.unity.purchasing 从版本 4.1.0 到 4.1.1
+
+=== Fri Dec  3 17:18:43 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.inputsystem 从版本 1.1.1 到 1.2.0
+  com.unity.render-pipelines.core 从版本 12.1.1 到 12.1.2
+  com.unity.render-pipelines.universal 从版本 12.1.1 到 12.1.2

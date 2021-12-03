@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 [Serializable]
 public class SaveData
 {
+    public string version;
     public string sceneName;
 
     public DateTime saveDate;
@@ -33,8 +34,9 @@ public class SaveData
 
     public TriggerSaveData triggerData = new TriggerSaveData();
 
-    public SaveData()
+    public SaveData(string version)
     {
+        this.version = version;
         sceneName = SceneManager.GetActiveScene().name;
         saveDate = DateTime.Now;
         var playerPos = PlayerManager.Instance.PlayerTransform.position;
@@ -288,14 +290,14 @@ public class MapMarkSaveData
     public bool removeAble;
     public string textToDisplay;
 
-    public MapMarkSaveData(MapManager.MapIconWithoutHolder iconWoH)
+    public MapMarkSaveData(MapIcon iconWoH)
     {
-        worldPosX = iconWoH.worldPosition.x;
-        worldPosY = iconWoH.worldPosition.y;
-        worldPosZ = iconWoH.worldPosition.z;
-        keepOnMap = iconWoH.keepOnMap;
-        removeAble = iconWoH.removeAble;
-        textToDisplay = iconWoH.textToDisplay;
+        worldPosX = iconWoH.Position.x;
+        worldPosY = iconWoH.Position.y;
+        worldPosZ = iconWoH.Position.z;
+        keepOnMap = iconWoH.KeepOnMap;
+        removeAble = iconWoH.RemoveAble;
+        textToDisplay = iconWoH.TextToDisplay;
     }
 }
 #endregion

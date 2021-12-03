@@ -10,8 +10,6 @@ public class MapUI : MonoBehaviour
 
     public MapIcon iconPrefab;
     public RectTransform iconsParent;
-    public MapIconRange rangePrefab;
-    public RectTransform rangesParent;
     public RectTransform mainParent;
 
     public RectTransform marksParent;

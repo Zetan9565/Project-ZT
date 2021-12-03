@@ -127,12 +127,12 @@ namespace ZetanStudio.BehaviourTree
             {
                 if (editor.output != null && editor.output.connected)
                     evt.menu.AppendAction("选择子结点", (a) => SelectNodeChildren(editor));
-                if (!(editor.node is Entry))
+                if (editor.node is not Entry)
                 {
                     evt.menu.AppendAction("删除", (a) => RightClickDeletion());
                     evt.menu.AppendAction("复制", (a) => CopyNode(editor));
                 }
-                if (!(editor.node is Entry))
+                if (!editor.node.GetType().IsSealed)
                 {
                     evt.menu.AppendSeparator();
                     evt.menu.AppendAction("编辑脚本", (a) => AssetDatabase.OpenAsset(MonoScript.FromScriptableObject(editor.node)));
@@ -209,7 +209,7 @@ namespace ZetanStudio.BehaviourTree
 
         private void UpdateValid(NodeEditor editor)
         {
-            if (!(editor.node is Action) && !(editor.node is Conditional))
+            if (editor.node is not Action && editor.node is not Conditional)
                 editor.UpdateValid(tree);
         }
 
@@ -459,7 +459,7 @@ namespace ZetanStudio.BehaviourTree
                         var toAdd = new List<Node>(nodes.Except(tree.Nodes));
                         foreach (var delete in toDelete)
                         {
-                            if (!(delete is Entry))
+                            if (delete is not Entry)
                                 tree.DeleteNode(delete);
                         }
                         foreach (var add in toAdd)

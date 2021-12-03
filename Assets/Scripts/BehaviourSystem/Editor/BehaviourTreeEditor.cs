@@ -286,6 +286,7 @@ namespace ZetanStudio.BehaviourTree
             assetsMenu = root.Q<ToolbarMenu>("assets");
             assetsMenu.menu.AppendAction("新建", (a) => CreateNewTree("new behaviour tree"));
             exeMenu = root.Q<ToolbarMenu>("exe-select");
+            UpdateAssetDropdown();
 
             undo = root.Q<ToolbarButton>("undo");
             undo.clicked += OnUndoClick;

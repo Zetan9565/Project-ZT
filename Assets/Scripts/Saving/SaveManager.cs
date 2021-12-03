@@ -23,9 +23,6 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 #endif
     private string encryptKey = "zetangamedatezetangamdatezetanga";
 
-    [SerializeReference]
-    private List<Objective> objective = new List<Objective>() { new MoveObjective(), new KillObjective() };
-
     public bool IsLoading { get; private set; }
 
     #region 存档相关
@@ -37,7 +34,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
             {
                 BinaryFormatter bf = new BinaryFormatter();
 
-                SaveData data = new SaveData();
+                SaveData data = new SaveData(Application.version);
 
                 SaveTime(data);
                 SaveBag(data);
@@ -56,11 +53,11 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
                 fs.Close();
 
                 MessageManager.Instance.New("保存成功！");
+                //Debug.Log("存档版本号：" + data.version);
                 return true;
             }
             catch (Exception ex)
             {
-                //throw ex;
                 Debug.LogWarning(ex.Message);
                 if (fs != null) fs.Close();
                 MessageManager.Instance.New("保存失败！");
@@ -208,7 +205,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void LoadWarehouse(SaveData data)
     {
-        Warehouse[] warehouseAgents = FindObjectsOfType<Warehouse>();
+        Warehouse[] warehouses = FindObjectsOfType<Warehouse>();
         foreach (WarehouseSaveData wd in data.warehouseDatas)
         {
             WarehouseData warehouse = null;
@@ -216,7 +213,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
             if (handler) warehouse = handler.warehouse;
             else
             {
-                Warehouse wagent = Array.Find(warehouseAgents, x => x.EntityID == wd.handlerID);
+                Warehouse wagent = Array.Find(warehouses, x => x.EntityID == wd.handlerID);
                 if (wagent) warehouse = wagent.WData;
             }
             if (warehouse != null)

@@ -16,10 +16,7 @@ public class MapIconHolder : MonoBehaviour
     public bool keepOnMap = true;
 
     [SerializeField, Tooltip("小于零时表示显示状态不受距离影响。")]
-    private float maxValidDistance = -1;
-
-    [HideInInspector]
-    public float DistanceSqr { get; private set; }
+    public float maxValidDistance = -1;
 
     public bool forceHided;
 
@@ -48,12 +45,6 @@ public class MapIconHolder : MonoBehaviour
 
     public UnityEvent OnMouseEnter => iconEvents.onMouseEnter;
     public UnityEvent OnMouseExit => iconEvents.onMouseExit;
-
-    public void SetIconValidDistance(float distance)
-    {
-        maxValidDistance = distance;
-        DistanceSqr = maxValidDistance * maxValidDistance;
-    }
 
     public void CreateIcon()
     {
@@ -116,7 +107,6 @@ public class MapIconHolder : MonoBehaviour
 
     private void Awake()
     {
-        DistanceSqr = maxValidDistance * maxValidDistance;
         StartCoroutine(UpdateIcon());
     }
 

@@ -11,9 +11,9 @@ public class RandomPatrol : PathMovement
     public SharedFloat range = 10f;
     [DisplayName("盲区半径"), @HideIf("useRange", false), Tooltip("不会在此范围内取点")]
     public SharedFloat blindRange = 0f;
-    [DisplayName("边界最小值"), @HideIf("useRange", true)]
+    [DisplayName("边界右上角"), @HideIf("useRange", true)]
     public SharedVector3 boundMin;
-    [DisplayName("边界最大值"), @HideIf("useRange", true)]
+    [DisplayName("边界左下角"), @HideIf("useRange", true)]
     public SharedVector3 boundMax;
     [DisplayName("巡逻间隔")]
     public SharedFloat interval = 1f;

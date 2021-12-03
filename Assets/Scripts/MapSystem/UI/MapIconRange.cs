@@ -4,8 +4,6 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Image))]
 public class MapIconRange : MonoBehaviour
 {
-    public new Transform transform { get; private set; }
-
     private Image range;
 
     public Color Color
@@ -21,6 +19,5 @@ public class MapIconRange : MonoBehaviour
         range = GetComponent<Image>();
         range.raycastTarget = false;
         rectTransform = range.rectTransform;
-        transform = base.transform;
     }
 }

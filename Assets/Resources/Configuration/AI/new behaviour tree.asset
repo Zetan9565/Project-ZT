@@ -217,43 +217,44 @@ MonoBehaviour:
   - {fileID: -8538923950621602905}
   - {fileID: 4457901579468244061}
   variables:
-  - id: 0
-  - id: 1
-  - id: 2
-  - id: 3
-  - id: 4
+  - rid: 5373739391182176262
+  - rid: 5373739391182176263
+  - rid: 5373739391182176264
+  - rid: 5373739391182176265
+  - rid: 5373739391182176266
   isRuntime: 0
   references:
-    version: 1
-    00000000:
+    version: 2
+    RefIds:
+    - rid: 5373739391182176262
       type: {class: SharedGameObject, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedGameObject_2
         isGlobal: 0
         isShared: 1
         value: {fileID: 0}
-    00000001:
+    - rid: 5373739391182176263
       type: {class: SharedString, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedString_3
         isGlobal: 0
         isShared: 1
         value: 123456
-    00000002:
+    - rid: 5373739391182176264
       type: {class: SharedTransform, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedTransform_4
         isGlobal: 0
         isShared: 1
         value: {fileID: 0}
-    00000003:
+    - rid: 5373739391182176265
       type: {class: SharedVector3, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedVector3_4
         isGlobal: 0
         isShared: 1
         value: {x: 0, y: 0, z: 0}
-    00000004:
+    - rid: 5373739391182176266
       type: {class: SharedBool, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedBool_5
@@ -384,10 +385,10 @@ MonoBehaviour:
     isGlobal: 0
     isShared: 0
     value:
-    - {x: 0, y: 0, z: 0}
-    - {x: 0, y: -5, z: 0}
-    - {x: 0, y: -10, z: 0}
-    - {x: 0, y: -5, z: 0}
+    - {x: 0.5, y: 0.5, z: 0}
+    - {x: 0.5, y: -5.5, z: 0}
+    - {x: 0.5, y: -10.5, z: 0}
+    - {x: 0.5, y: -5.5, z: 0}
   interval:
     _name: 
     isGlobal: 0

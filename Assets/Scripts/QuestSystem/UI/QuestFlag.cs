@@ -121,7 +121,7 @@ public class QuestFlag : MonoBehaviour
     public void Recycle()
     {
         if (NotifyCenter.Instance) NotifyCenter.Instance.RemoveListener(this);
-        if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(mapIcon);
+        if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(mapIcon, true);
         questHolder = null;
         mapIcon = null;
         ObjectPool.Put(gameObject);
@@ -150,9 +150,12 @@ public class QuestFlag : MonoBehaviour
         if (questHolder)
         {
             CheckDistance();
-            if (questHolder.isActiveAndEnabled && conditionShow) mapIcon.Show();
+            if (questHolder.isActiveAndEnabled && conditionShow)
+            {
+                mapIcon.UpdatePosition(questHolder.transform.position);
+                mapIcon.Show();
+            }
             else mapIcon.Hide();
-            MapManager.Instance.UpdateMapIconPosition(mapIcon, questHolder.transform.position);
         }
     }
 
