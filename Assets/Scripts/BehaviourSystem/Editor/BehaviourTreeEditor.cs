@@ -12,13 +12,15 @@ namespace ZetanStudio.BehaviourTree
         #region 视图相关
         private BehaviourTreeView treeView;
         private BehaviourTree tree;
+        private Label inspectorLabel;
         private InspectorView inspectorView;
+        private Button inspector;
+        private Button searcher;
         private IMGUIContainer variables;
         private ToolbarMenu assetsMenu;
         private ToolbarMenu exeMenu;
         private ToolbarButton undo;
         private ToolbarButton redo;
-        //private ToolbarSearchField searchField;
         private Label treeName;
         private GameObject latestGo;
         private BehaviourTreeSettings settings;
@@ -27,6 +29,7 @@ namespace ZetanStudio.BehaviourTree
         #region 变量相关
         private Button shared;
         private Button global;
+        private bool showInspector;
         private bool showShared;
         private SerializedObject serializedTree;
         private SerializedObject serializedGlobal;
@@ -48,7 +51,7 @@ namespace ZetanStudio.BehaviourTree
             wnd.titleContent = new GUIContent("行为树编辑器");
             Selection.activeGameObject = executor.gameObject;
             EditorGUIUtility.PingObject(executor);
-            wnd.ChangeTreeBySelection();
+            wnd.ChangeTreeBySelection(executor);
         }
         public static void CreateWindow(BehaviourTree tree)
         {
@@ -71,6 +74,16 @@ namespace ZetanStudio.BehaviourTree
         #endregion
 
         #region 按钮点击
+        private void OnInspectorClick()
+        {
+            showInspector = true;
+            SwitchInspector();
+        }
+        private void OnSeacherClick()
+        {
+            showInspector = false;
+            SwitchInspector();
+        }
         private void OnGlobalClick()
         {
             showShared = false;
@@ -109,6 +122,7 @@ namespace ZetanStudio.BehaviourTree
             UpdateAssetDropdown();
             UpdateTreeDropdown();
             UpdateTreeName();
+            SwitchInspector();
 
             EditorApplication.delayCall += () =>
             {
@@ -211,6 +225,7 @@ namespace ZetanStudio.BehaviourTree
         }
         private void OnNodeSelected(NodeEditor selected)
         {
+            if (!showInspector) return;
             var nodesSelected = treeView.nodes.ToList().FindAll(x => x.selected);
             if (nodesSelected.Count > 1)
             {
@@ -220,6 +235,7 @@ namespace ZetanStudio.BehaviourTree
         }
         private void OnNodeUnselected(NodeEditor unseleted)
         {
+            if (!showInspector) return;
             if (inspectorView != null && inspectorView.nodeEditor == unseleted)
                 inspectorView.Clear();
             if (!treeView.nodes.ToList().Exists(x => x.selected))
@@ -260,6 +276,36 @@ namespace ZetanStudio.BehaviourTree
                 SelectTree(tree);
             };
         }
+        private void ChangeTreeBySelection(BehaviourExecutor exe)
+        {
+            EditorApplication.delayCall += () =>
+            {
+                if (exe)
+                {
+                    tree = exe.Behaviour;
+                    latestGo = exe.gameObject;
+                }
+                else latestGo = null;
+                SelectTree(tree);
+            };
+        }
+        private void SwitchInspector()
+        {
+            inspectorLabel.text = showInspector ? "检查器" : "结点类型列表";
+            inspector.SetEnabled(!showInspector);
+            searcher.SetEnabled(showInspector && tree);
+            if (showInspector)
+            {
+                var nodesSelected = treeView.nodes.ToList().FindAll(x => x.selected);
+                if (nodesSelected.Count > 1)
+                {
+                    inspectorView.InspectMultSelect(nodesSelected.ConvertAll(x => x as NodeEditor));
+                }
+                else if (nodesSelected.Count > 0) inspectorView?.InspectNode(tree, nodesSelected[0] as NodeEditor);
+                else inspectorView?.InspectTree(tree);
+            }
+            else inspectorView.InspectNodes(treeView.InsertNode);
+        }
         #endregion
 
         #region Unity回调
@@ -280,7 +326,14 @@ namespace ZetanStudio.BehaviourTree
             treeView.nodeUnselectedCallback = OnNodeUnselected;
             treeView.undoChangedCallback = UpdateUndoRedo;
 
+            inspectorLabel = root.Q<Label>("inspector-label");
+            inspector = root.Q<Button>("view-inspector");
+            inspector.clicked += OnInspectorClick;
+            searcher = root.Q<Button>("search-node");
+            searcher.clicked += OnSeacherClick;
+            showInspector = true;
             inspectorView = root.Q<InspectorView>();
+            SwitchInspector();
             variables = root.Q<IMGUIContainer>("variables");
 
             assetsMenu = root.Q<ToolbarMenu>("assets");

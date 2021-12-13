@@ -258,9 +258,8 @@ public class QuestInspector : Editor
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
 
-                EditorGUILayout.PropertyField(objectives, new GUIContent("任务目标\t\t"
-                    + (objectives.isExpanded ? string.Empty : (objectives.arraySize > 0 ? "数量：" + objectives.arraySize : "无"))), false);
-                showState[0].target = objectives.isExpanded;
+                showState[0].target = EditorGUILayout.Foldout(objectives.isExpanded, "任务目标\t\t"
+                    + (objectives.isExpanded ? string.Empty : (objectives.arraySize > 0 ? "数量：" + objectives.arraySize : "无")), true);
                 if (EditorGUILayout.BeginFadeGroup(showState[0].faded))
                 {
                     serializedObject.Update();

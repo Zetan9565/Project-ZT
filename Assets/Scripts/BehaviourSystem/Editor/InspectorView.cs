@@ -14,7 +14,8 @@ namespace ZetanStudio.BehaviourTree
         private BehaviourTree tree;
         private GlobalVariables global;
         public NodeEditor nodeEditor;
-        SerializedObject serializedObject;
+        private SerializedObject serializedObject;
+        private string searchKey;
 
         private readonly string[] varType = { "普通", "共享", "全局" };
 
@@ -95,6 +96,94 @@ namespace ZetanStudio.BehaviourTree
             }
         }
 
+        public void InspectNodes(System.Action<System.Type> insertCallback)
+        {
+            Clear();
+            Dictionary<string, System.Action> action = new Dictionary<string, System.Action>();
+            Dictionary<string, System.Action> conditional = new Dictionary<string, System.Action>();
+            Dictionary<string, System.Action> composite = new Dictionary<string, System.Action>();
+            Dictionary<string, System.Action> decorator = new Dictionary<string, System.Action>();
+            var types = TypeCache.GetTypesDerivedFrom<Action>().OrderBy(x => x.Name);
+            foreach (var type in types)
+            {
+                if (!type.IsAbstract && !type.IsGenericType)
+                    action.Add(type.Name, () => insertCallback(type));
+            }
+
+            types = TypeCache.GetTypesDerivedFrom<Conditional>().OrderBy(x => x.Name);
+            foreach (var type in types)
+            {
+                if (!type.IsAbstract && !type.IsGenericType)
+                    conditional.Add(type.Name, () => insertCallback(type));
+            }
+
+            types = TypeCache.GetTypesDerivedFrom<Composite>().OrderBy(x => x.Name);
+            foreach (var type in types)
+            {
+                if (!type.IsAbstract && !type.IsGenericType)
+                    composite.Add(type.Name, () => insertCallback(type));
+            }
+
+            types = TypeCache.GetTypesDerivedFrom<Decorator>().OrderBy(x => x.Name);
+            foreach (var type in types)
+            {
+                if (!type.IsAbstract && !type.IsGenericType)
+                    decorator.Add(type.Name, () => insertCallback(type));
+            }
+
+            searchKey = string.Empty;
+            IMGUIContainer container = new IMGUIContainer(() =>
+            {
+                searchKey = EditorGUILayout.TextField(searchKey);
+                bool empty = string.IsNullOrEmpty(searchKey);
+                EditorGUILayout.BeginVertical("Box");
+                EditorGUILayout.LabelField("行为结点");
+                foreach (var node in action)
+                {
+                    if (Contains(node.Key, searchKey))
+                        if (GUILayout.Button(node.Key))
+                            node.Value?.Invoke();
+                }
+                EditorGUILayout.EndVertical();
+
+                EditorGUILayout.BeginVertical("Box");
+                EditorGUILayout.LabelField("条件结点");
+                foreach (var node in conditional)
+                {
+                    if (Contains(node.Key, searchKey))
+                        if (GUILayout.Button(node.Key))
+                            node.Value?.Invoke();
+                }
+                EditorGUILayout.EndVertical();
+
+                EditorGUILayout.BeginVertical("Box");
+                EditorGUILayout.LabelField("复合结点");
+                foreach (var node in composite)
+                {
+                    if (Contains(node.Key, searchKey))
+                        if (GUILayout.Button(node.Key))
+                            node.Value?.Invoke();
+                }
+                EditorGUILayout.EndVertical();
+
+                EditorGUILayout.BeginVertical("Box");
+                EditorGUILayout.LabelField("修饰结点");
+                foreach (var node in decorator)
+                {
+                    if (Contains(node.Key, searchKey))
+                        if (GUILayout.Button(node.Key))
+                            node.Value?.Invoke();
+                }
+                EditorGUILayout.EndVertical();
+
+                bool Contains(string content, string key)
+                {
+                    return empty || content.ToLower().Contains(key.ToLower());
+                }
+            });
+            Add(container);
+        }
+
         private void DrawProperty(SerializedProperty property)
         {
             if (!ZetanEditorUtility.TryGetValue(property, out var proValue, out var fieldInfo)) return;
@@ -146,7 +235,7 @@ namespace ZetanStudio.BehaviourTree
                     default:
                         valueRect = new Rect(rect.x, rect.y, rect.width - 34, EditorGUI.GetPropertyHeight(value, true));
                         if (type == typeof(SharedString) && fieldInfo.GetCustomAttribute<Tag>() != null)
-                            value.stringValue = EditorGUI.TagField(valueRect, new GUIContent(displayName, tooltip), 
+                            value.stringValue = EditorGUI.TagField(valueRect, new GUIContent(displayName, tooltip),
                                 string.IsNullOrEmpty(value.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : value.stringValue);
                         else EditorGUI.PropertyField(valueRect, value, new GUIContent(displayName, tooltip), true);
                         EditorGUILayout.Space(EditorGUI.GetPropertyHeight(value, true) - EditorGUIUtility.singleLineHeight);
@@ -185,7 +274,7 @@ namespace ZetanStudio.BehaviourTree
             else if (type == typeof(string))
             {
                 if (fieldInfo.GetCustomAttribute<Tag>() != null)
-                    property.stringValue = EditorGUILayout.TagField(new GUIContent(displayName, tooltip), 
+                    property.stringValue = EditorGUILayout.TagField(new GUIContent(displayName, tooltip),
                         string.IsNullOrEmpty(property.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : property.stringValue);
                 else
                 {

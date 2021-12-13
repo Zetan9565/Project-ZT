@@ -101,15 +101,14 @@ namespace ZetanStudio.BehaviourTree
             if (behaviour.objectReferenceValue)
             {
                 serializedTree.Update();
-                EditorGUILayout.PropertyField(serializedVariables, new GUIContent("行为树共享变量"), false);
-                showList.target = serializedVariables.isExpanded;
+                showList.target = EditorGUILayout.Foldout(serializedVariables.isExpanded, "行为树共享变量", true);
                 if (EditorGUILayout.BeginFadeGroup(showList.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
                 if (target is not RuntimeBehaviourExecutor && !Application.isPlaying)
                 {
-                    EditorGUILayout.PropertyField(presetVariables, new GUIContent("变量预设列表"), false);
-                    showPreset.target = presetVariables.isExpanded;
+                    
+                    showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, "变量预设列表", true);
                     if (EditorGUILayout.BeginFadeGroup(showPreset.faded))
                         presetVariableList.DoLayoutList();
                     EditorGUILayout.EndFadeGroup();

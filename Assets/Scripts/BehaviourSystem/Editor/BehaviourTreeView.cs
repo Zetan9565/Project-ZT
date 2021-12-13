@@ -89,28 +89,28 @@ namespace ZetanStudio.BehaviourTree
             if (evt.target == this)
             {
                 Vector2 nodePosition = this.ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
-                var types = TypeCache.GetTypesDerivedFrom<Action>();
+                var types = TypeCache.GetTypesDerivedFrom<Action>().OrderBy(x=>x.Name);
                 foreach (var type in types)
                 {
                     if (!type.IsAbstract && !type.IsGenericType)
                         evt.menu.AppendAction($"行为结点(Action)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
                 }
 
-                types = TypeCache.GetTypesDerivedFrom<Conditional>();
+                types = TypeCache.GetTypesDerivedFrom<Conditional>().OrderBy(x => x.Name);
                 foreach (var type in types)
                 {
                     if (!type.IsAbstract && !type.IsGenericType)
                         evt.menu.AppendAction($"条件结点(Conditional)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
                 }
 
-                types = TypeCache.GetTypesDerivedFrom<Composite>();
+                types = TypeCache.GetTypesDerivedFrom<Composite>().OrderBy(x => x.Name);
                 foreach (var type in types)
                 {
                     if (!type.IsAbstract && !type.IsGenericType)
                         evt.menu.AppendAction($"复合结点(Composite)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
                 }
 
-                types = TypeCache.GetTypesDerivedFrom<Decorator>();
+                types = TypeCache.GetTypesDerivedFrom<Decorator>().OrderBy(x => x.Name);
                 foreach (var type in types)
                 {
                     if (!type.IsAbstract && !type.IsGenericType)
@@ -144,6 +144,15 @@ namespace ZetanStudio.BehaviourTree
                 {
                     evt.menu.AppendAction("删除", (a) => RightClickDeletion());
                 }
+            }
+        }
+        public void InsertNode(Type type)
+        {
+            var newNode = CreateTreeNode(type, this.ChangeCoordinatesTo(contentViewContainer, viewport.localBound.center - new Vector2(20, 80)));
+            if (newNode != null)
+            {
+                ClearSelection();
+                AddToSelection(newNode);
             }
         }
         #endregion
@@ -256,16 +265,17 @@ namespace ZetanStudio.BehaviourTree
             tree.Nodes.ForEach(n => CreateEdges(n));
             tree.Nodes.ForEach(n => { if (n is Composite composite) composite.SortByPosition(); });
         }
-        private void CreateTreeNode(Type type, Vector2 position)
+        private NodeEditor CreateTreeNode(Type type, Vector2 position)
         {
             if (type.IsSubclassOf(typeof(Node)))
-                if (tree.IsRuntime) CreateNewNode(Node.GetRuntimeNode(type), $"({tree.Nodes.Count}) {type.Name}(R)", position);
-                else CreateNewNode(ScriptableObject.CreateInstance(type) as Node, $"({tree.Nodes.Count}) {type.Name}", position);
+                if (tree.IsRuntime) return CreateNewNode(Node.GetRuntimeNode(type), $"({tree.Nodes.Count}) {type.Name}(R)", position);
+                else return CreateNewNode(ScriptableObject.CreateInstance(type) as Node, $"({tree.Nodes.Count}) {type.Name}", position);
+            else return null;
         }
         #endregion
 
         #region 图形结点相关
-        private void CreateNewNode(Node newNode, string name, Vector2 position, bool record = true)
+        private NodeEditor CreateNewNode(Node newNode, string name, Vector2 position, bool record = true)
         {
             newNode.name = name;
             newNode._position = position;
@@ -277,12 +287,13 @@ namespace ZetanStudio.BehaviourTree
             }
             if (record) Undo.RecordTreeChange(tree);
             tree.AddNode(newNode);
-            CreateNode(newNode);
+            return CreateNode(newNode);
         }
-        private void CreateNode(Node node)
+        private NodeEditor CreateNode(Node node)
         {
             NodeEditor editor = new NodeEditor(node, nodeSelectedCallback, nodeUnselectedCallback, OnNodePositionChanged);
             AddElement(editor);
+            return editor;
         }
         private void RightClickDeletion()
         {

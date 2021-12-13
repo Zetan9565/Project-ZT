@@ -65,15 +65,14 @@ namespace ZetanStudio.BehaviourTree
             if (globalVariables.objectReferenceValue)
             {
                 serializedObject.Update();
-                EditorGUILayout.PropertyField(serializedVariables, new GUIContent("全局变量列表"), false);
-                showGlobal.target = serializedVariables.isExpanded;
+
+                showGlobal.target = EditorGUILayout.Foldout(serializedVariables.isExpanded, "全局变量列表", true); ;
                 if (EditorGUILayout.BeginFadeGroup(showGlobal.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
                 if (!Application.isPlaying)
                 {
-                    EditorGUILayout.PropertyField(presetVariables, new GUIContent("变量预设列表"), false);
-                    showPreset.target = presetVariables.isExpanded;
+                    showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, "变量预设列表", false);
                     if (EditorGUILayout.BeginFadeGroup(showPreset.faded))
                         presetVariableList.DoLayoutList();
                     EditorGUILayout.EndFadeGroup();
