@@ -6,7 +6,7 @@ namespace Pathfinding {
 	using Pathfinding.Serialization;
 
 	public interface INavmesh {
-		void GetNodes (System.Action<GraphNode> del);
+		void GetNodes(System.Action<GraphNode> del);
 	}
 
 	/// <summary>
@@ -233,7 +233,7 @@ namespace Pathfinding {
 
 			forcedBoundsSize = sourceMesh.bounds.size * scale;
 			Vector3[] vectorVertices = sourceMesh.vertices;
-			var intVertices = ListPool<Int3>.Claim (vectorVertices.Length);
+			var intVertices = ListPool<Int3>.Claim(vectorVertices.Length);
 			var matrix = Matrix4x4.TRS(-sourceMesh.bounds.min * scale, Quaternion.identity, Vector3.one * scale);
 			// Convert the vertices to integer coordinates and also position them in graph space
 			// so that the minimum of the bounding box of the mesh is at the origin
@@ -248,7 +248,7 @@ namespace Pathfinding {
 			Int3[] compressedVertices = null;
 			int[] compressedTriangles = null;
 			Polygon.CompressMesh(intVertices, new List<int>(sourceMesh.triangles), out compressedVertices, out compressedTriangles);
-			ListPool<Int3>.Release (ref intVertices);
+			ListPool<Int3>.Release(ref intVertices);
 
 			yield return new Progress(0.2f, "Building Nodes");
 

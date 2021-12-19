@@ -199,7 +199,7 @@ namespace Pathfinding {
 			case Exactness.NodeConnection:
 				Vector3 relevantPoint;
 				if (start) {
-					relevantPoint = adjustStartPoint != null? adjustStartPoint () : path.originalStartPoint;
+					relevantPoint = adjustStartPoint != null? adjustStartPoint() : path.originalStartPoint;
 				} else {
 					relevantPoint = path.originalEndPoint;
 				}
@@ -232,6 +232,7 @@ namespace Pathfinding {
 					// will change during iteration
 					for (int i = connectionBuffer.Count - 1; i >= 0; i--) {
 						var neighbour = connectionBuffer[i];
+						if (!path.CanTraverse(neighbour)) continue;
 
 						// Find the closest point on the connection between the nodes
 						// and check if the distance to that point is lower than the previous best

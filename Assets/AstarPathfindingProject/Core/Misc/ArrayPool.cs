@@ -167,7 +167,7 @@ namespace Pathfinding.Util {
 		/// are rarely being reused will lead to an effective memory leak.
 		/// </summary>
 		public static T[] ToArrayFromPool<T>(this List<T> list) {
-			var arr = ArrayPool<T>.ClaimWithExactLength (list.Count);
+			var arr = ArrayPool<T>.ClaimWithExactLength(list.Count);
 
 			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = list[i];

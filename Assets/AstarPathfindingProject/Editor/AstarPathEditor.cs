@@ -37,16 +37,16 @@ namespace Pathfinding {
 		static bool customAreaColorsOpen;
 		static bool editTags;
 
-		static FadeArea settingsArea;
-		static FadeArea colorSettingsArea;
-		static FadeArea editorSettingsArea;
-		static FadeArea aboutArea;
-		static FadeArea optimizationSettingsArea;
-		static FadeArea serializationSettingsArea;
-		static FadeArea tagsArea;
-		static FadeArea graphsArea;
-		static FadeArea addGraphsArea;
-		static FadeArea alwaysVisibleArea;
+		FadeArea settingsArea;
+		FadeArea colorSettingsArea;
+		FadeArea editorSettingsArea;
+		FadeArea aboutArea;
+		FadeArea optimizationSettingsArea;
+		FadeArea serializationSettingsArea;
+		FadeArea tagsArea;
+		FadeArea graphsArea;
+		FadeArea addGraphsArea;
+		FadeArea alwaysVisibleArea;
 
 		#endregion
 
@@ -126,6 +126,8 @@ namespace Pathfinding {
 			CheckGraphEditors();
 
 			SaveGraphsAndUndo();
+
+			script = null;
 		}
 
 		/// <summary>Reads settings frome EditorPrefs</summary>
@@ -235,6 +237,16 @@ namespace Pathfinding {
 					"Skin loading is done in the AstarPathEditor.cs --> LoadStyles method", MessageType.Error);
 				return;
 			}
+
+#if UNITY_2020_1_OR_NEWER
+			if (UnityEditor.EditorSettings.enterPlayModeOptionsEnabled && (UnityEditor.EditorSettings.enterPlayModeOptions & EnterPlayModeOptions.DisableSceneReload) != 0) {
+				EditorGUILayout.HelpBox("The enter play mode option 'Scene Reload' must be enabled. This package does not support it being disabled. Disabling domain reload is supported however.", MessageType.Error);
+				if (GUILayout.Button("Enable the Scene Reload option")) {
+					UnityEditor.EditorSettings.enterPlayModeOptions &= ~EnterPlayModeOptions.DisableSceneReload;
+				}
+				EditorGUILayout.Separator();
+			}
+#endif
 
 #if ASTAR_ATAVISM
 			EditorGUILayout.HelpBox("This is a special version of the A* Pathfinding Project for Atavism. This version only supports scanning recast graphs and exporting them, but no pathfinding during runtime.", MessageType.Info);
@@ -1341,7 +1353,7 @@ namespace Pathfinding {
 				// Deserialize editor settings
 				for (int i = 0; i < graphEditors.Length; i++) {
 					var data = (graphEditors[i].target as IGraphInternals).SerializedEditorSettings;
-					if (data != null) Pathfinding.Serialization.TinyJsonDeserializer.Deserialize(data, graphEditors[i].GetType(), graphEditors[i]);
+					if (data != null) Pathfinding.Serialization.TinyJsonDeserializer.Deserialize(data, graphEditors[i].GetType(), graphEditors[i], script.gameObject);
 				}
 			} catch (System.Exception e) {
 				Debug.LogError("Failed to deserialize graphs");

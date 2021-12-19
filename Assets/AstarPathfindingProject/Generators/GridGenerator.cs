@@ -105,7 +105,9 @@ namespace Pathfinding {
 		}
 
 		void RemoveGridGraphFromStatic () {
-			GridNode.SetGridGraph(AstarPath.active.data.GetGraphIndex(this), null);
+			var graphIndex = active.data.GetGraphIndex(this);
+
+			GridNode.ClearGridGraph(graphIndex, this);
 		}
 
 		/// <summary>
@@ -147,6 +149,8 @@ namespace Pathfinding {
 		/// <summary>
 		/// Determines the layout of the grid graph inspector in the Unity Editor.
 		/// This field is only used in the editor, it has no effect on the rest of the game whatsoever.
+		///
+		/// If you want to change the grid shape like in the inspector you can use the <see cref="SetGridShape"/> method.
 		/// </summary>
 		[JsonMember]
 		public InspectorGridMode inspectorGridMode = InspectorGridMode.Grid;
@@ -192,6 +196,8 @@ namespace Pathfinding {
 		/// A top down view of an isometric graph. Note that the graph is entirely 2D, there is no perspective in this image.
 		/// [Open online documentation to see images]
 		///
+		/// For commonly used values see <see cref="StandardIsometricAngle"/> and <see cref="StandardDimetricAngle"/>.
+		///
 		/// Usually the angle that you want to use is either 30 degrees (alternatively 90-30 = 60 degrees) or atan(1/sqrt(2)) which is approximately 35.264 degrees (alternatively 90 - 35.264 = 54.736 degrees).
 		/// You might also want to rotate the graph plus or minus 45 degrees around the Y axis to get the oritientation required for your game.
 		///
@@ -203,6 +209,12 @@ namespace Pathfinding {
 		/// </summary>
 		[JsonMember]
 		public float isometricAngle;
+
+		/// <summary>Commonly used value for <see cref="isometricAngle"/></summary>
+		public static readonly float StandardIsometricAngle = 90-Mathf.Atan(1/Mathf.Sqrt(2))*Mathf.Rad2Deg;
+
+		/// <summary>Commonly used value for <see cref="isometricAngle"/></summary>
+		public static readonly float StandardDimetricAngle = Mathf.Acos(1/2f)*Mathf.Rad2Deg;
 
 		/// <summary>
 		/// If true, all edge costs will be set to the same value.
@@ -430,6 +442,24 @@ namespace Pathfinding {
 		/// </summary>
 		public GraphTransform transform { get; private set; }
 
+		/// <summary>
+		/// Get or set if the graph should be in 2D mode.
+		///
+		/// Note: This is just a convenience property, this property will actually read/modify the <see cref="rotation"/> of the graph. A rotation aligned with the 2D plane is what determines if the graph is 2D or not.
+		///
+		/// See: You can also set if the graph should use 2D physics using `this.collision.use2D` (\reflink{GraphCollision.use2D}).
+		/// </summary>
+		public bool is2D {
+			get {
+				return Quaternion.Euler(this.rotation) * Vector3.up == -Vector3.forward;
+			}
+			set {
+				if (value != is2D) {
+					this.rotation = value ? new Vector3(this.rotation.y - 90, 270, 90) : new Vector3(0, this.rotation.x + 90, 0);
+				}
+			}
+		}
+
 
 		public GridGraph () {
 			unclampedSize = new Vector2(10, 10);
@@ -591,6 +621,42 @@ namespace Pathfinding {
 			return true;
 		}
 
+		/// <summary>
+		/// Changes the grid shape.
+		/// This is equivalent to changing the 'shape' dropdown in the grid graph inspector.
+		///
+		/// Calling this method will set <see cref="isometricAngle"/>, <see cref="aspectRatio"/>, <see cref="uniformEdgeCosts"/> and <see cref="neighbours"/>
+		/// to appropriate values for that shape.
+		///
+		/// Note: Setting the shape to <see cref="InspectorGridMode.Advanced"/> does not do anything except set the <see cref="inspectorGridMode"/> field.
+		///
+		/// See: <see cref="inspectorHexagonSizeMode"/>
+		/// </summary>
+		public void SetGridShape (InspectorGridMode shape) {
+			switch (shape) {
+			case InspectorGridMode.Grid:
+				isometricAngle = 0;
+				aspectRatio = 1;
+				uniformEdgeCosts = false;
+				if (neighbours == NumNeighbours.Six) neighbours = NumNeighbours.Eight;
+				break;
+			case InspectorGridMode.Hexagonal:
+				isometricAngle = StandardIsometricAngle;
+				aspectRatio = 1;
+				uniformEdgeCosts = true;
+				neighbours = NumNeighbours.Six;
+				break;
+			case InspectorGridMode.IsometricGrid:
+				uniformEdgeCosts = false;
+				if (neighbours == NumNeighbours.Six) neighbours = NumNeighbours.Eight;
+				isometricAngle = StandardIsometricAngle;
+				break;
+			case InspectorGridMode.Advanced:
+			default:
+				break;
+			}
+			inspectorGridMode = shape;
+		}
 		/// <summary>
 		/// Updates <see cref="unclampedSize"/> from <see cref="width"/>, <see cref="depth"/> and <see cref="nodeSize"/> values.
 		/// Also \link UpdateTransform generates a new matrix \endlink.
@@ -1256,7 +1322,7 @@ namespace Pathfinding {
 			}
 
 			// Return the list to the pool
-			Pathfinding.Util.ListPool<GraphNode>.Release (ref nodesInRect);
+			Pathfinding.Util.ListPool<GraphNode>.Release(ref nodesInRect);
 		}
 
 		/// <summary>
@@ -1511,7 +1577,7 @@ namespace Pathfinding {
 			// for large graphs. However just checking if any mesh needs to be updated is relatively fast. So we just store
 			// a hash together with the mesh and rebuild the mesh when necessary.
 			const int chunkWidth = 32;
-			GridNodeBase[] allNodes = ArrayPool<GridNodeBase>.Claim (chunkWidth*chunkWidth*LayerCount);
+			GridNodeBase[] allNodes = ArrayPool<GridNodeBase>.Claim(chunkWidth*chunkWidth*LayerCount);
 			for (int cx = width/chunkWidth; cx >= 0; cx--) {
 				for (int cz = depth/chunkWidth; cz >= 0; cz--) {
 					Profiler.BeginSample("Hash");
@@ -1542,7 +1608,7 @@ namespace Pathfinding {
 					}
 				}
 			}
-			ArrayPool<GridNodeBase>.Release (ref allNodes);
+			ArrayPool<GridNodeBase>.Release(ref allNodes);
 
 			if (active.showUnwalkableNodes) DrawUnwalkableNodes(nodeSize * 0.3f);
 		}
@@ -1567,8 +1633,8 @@ namespace Pathfinding {
 			var verticesPerNode = 3*trianglesPerNode;
 
 			// Get arrays that have room for all vertices/colors (the array might be larger)
-			var vertices = ArrayPool<Vector3>.Claim (walkable*verticesPerNode);
-			var colors = ArrayPool<Color>.Claim (walkable*verticesPerNode);
+			var vertices = ArrayPool<Vector3>.Claim(walkable*verticesPerNode);
+			var colors = ArrayPool<Color>.Claim(walkable*verticesPerNode);
 			int baseIndex = 0;
 
 			for (int i = 0; i < nodeCount; i++) {
@@ -1656,16 +1722,18 @@ namespace Pathfinding {
 
 			if (showMeshSurface) helper.DrawTriangles(vertices, colors, baseIndex*trianglesPerNode/verticesPerNode);
 
-			ArrayPool<Vector3>.Release (ref vertices);
-			ArrayPool<Color>.Release (ref colors);
+			ArrayPool<Vector3>.Release(ref vertices);
+			ArrayPool<Color>.Release(ref colors);
 		}
 
 		/// <summary>
-		/// A rect with all nodes that the bounds could touch.
+		/// A rect that contains all nodes that the bounds could touch.
 		/// This correctly handles rotated graphs and other transformations.
 		/// The returned rect is guaranteed to not extend outside the graph bounds.
+		///
+		/// Note: The rect may contain nodes that are not contained in the bounding box.
 		/// </summary>
-		protected IntRect GetRectFromBounds (Bounds bounds) {
+		public IntRect GetRectFromBounds (Bounds bounds) {
 			// Take the bounds and transform it using the matrix
 			// Then convert that to a rectangle which contains
 			// all nodes that might be inside the bounds
@@ -1738,11 +1806,11 @@ namespace Pathfinding {
 			var rect = GetRectFromBounds(bounds);
 
 			if (nodes == null || !rect.IsValid() || nodes.Length != width*depth) {
-				return ListPool<GraphNode>.Claim ();
+				return ListPool<GraphNode>.Claim();
 			}
 
 			// Get a buffer we can use
-			var inArea = ListPool<GraphNode>.Claim (rect.Width*rect.Height);
+			var inArea = ListPool<GraphNode>.Claim(rect.Width*rect.Height);
 
 			// Loop through all nodes in the rectangle
 			for (int x = rect.xmin; x <= rect.xmax; x++) {
@@ -1762,7 +1830,11 @@ namespace Pathfinding {
 			return inArea;
 		}
 
-		/// <summary>Get all nodes in a rectangle.</summary>
+		/// <summary>
+		/// Get all nodes in a rectangle.
+		///
+		/// See: <see cref="GetRectFromBounds"/>
+		/// </summary>
 		/// <param name="rect">Region in which to return nodes. It will be clamped to the grid.</param>
 		public virtual List<GraphNode> GetNodesInRegion (IntRect rect) {
 			// Clamp the rect to the grid
@@ -1771,10 +1843,10 @@ namespace Pathfinding {
 
 			rect = IntRect.Intersection(rect, gridRect);
 
-			if (nodes == null || !rect.IsValid() || nodes.Length != width*depth) return ListPool<GraphNode>.Claim (0);
+			if (nodes == null || !rect.IsValid() || nodes.Length != width*depth) return ListPool<GraphNode>.Claim(0);
 
 			// Get a buffer we can use
-			var inArea = ListPool<GraphNode>.Claim (rect.Width*rect.Height);
+			var inArea = ListPool<GraphNode>.Claim(rect.Width*rect.Height);
 
 
 			for (int z = rect.ymin; z <= rect.ymax; z++) {
@@ -1793,6 +1865,8 @@ namespace Pathfinding {
 		///
 		/// Note: This method is much faster than GetNodesInRegion(IntRect) which returns a list because this method can make use of the highly optimized
 		///  System.Array.Copy method.
+		///
+		/// See: <see cref="GetRectFromBounds"/>
 		/// </summary>
 		/// <param name="rect">Region in which to return nodes. It will be clamped to the grid.</param>
 		/// <param name="buffer">Buffer in which the nodes will be stored. Should be at least as large as the number of nodes that can exist in that region.</param>

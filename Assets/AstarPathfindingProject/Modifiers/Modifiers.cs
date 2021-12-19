@@ -9,8 +9,8 @@ namespace Pathfinding {
 	public interface IPathModifier {
 		int Order { get; }
 
-		void Apply (Path path);
-		void PreProcess (Path path);
+		void Apply(Path path);
+		void PreProcess(Path path);
 	}
 
 	/// <summary>
@@ -46,7 +46,7 @@ namespace Pathfinding {
 		}
 
 		/// <summary>Main Post-Processing function</summary>
-		public abstract void Apply (Path path);
+		public abstract void Apply(Path path);
 	}
 
 	/// <summary>
@@ -84,6 +84,6 @@ namespace Pathfinding {
 		}
 
 		/// <summary>Called for each path that the Seeker calculates after the calculation has finished</summary>
-		public abstract void Apply (Path path);
+		public abstract void Apply(Path path);
 	}
 }

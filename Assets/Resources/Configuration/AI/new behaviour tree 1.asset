@@ -16,7 +16,7 @@ MonoBehaviour:
   guid: 785d38a00fe0ed344bf636903f3395f9
   _position: {x: 236.26462, y: 325.38525}
   _description: 
-  child: {fileID: 0}
+  child: {fileID: -5673099492451267999}
   stopOnFailure: 0
   count:
     _name: 
@@ -434,6 +434,7 @@ MonoBehaviour:
   _description: 
   children:
   - {fileID: 5131726000886982299}
+  - {fileID: -8599469560084693122}
   abortType: 0
 --- !u!114 &8021095495707417499
 MonoBehaviour:

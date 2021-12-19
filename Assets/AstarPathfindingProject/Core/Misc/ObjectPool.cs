@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Pathfinding.Util {
 	public interface IAstarPooledObject {
-		void OnEnterPool ();
+		void OnEnterPool();
 	}
 
 	/// <summary>
@@ -29,12 +29,12 @@ namespace Pathfinding.Util {
 	/// </summary>
 	public static class ObjectPool<T> where T : class, IAstarPooledObject, new(){
 		public static T Claim () {
-			return ObjectPoolSimple<T>.Claim ();
+			return ObjectPoolSimple<T>.Claim();
 		}
 
 		public static void Release (ref T obj) {
 			obj.OnEnterPool();
-			ObjectPoolSimple<T>.Release (ref obj);
+			ObjectPoolSimple<T>.Release(ref obj);
 		}
 	}
 

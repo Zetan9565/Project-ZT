@@ -119,7 +119,7 @@ namespace Pathfinding {
 			dirty.CopyTo(newDirty, 0);
 
 			for (int i = children.Length; i < newChildren.Length; i++) {
-				newChildren[i] = ListPool<GraphNode>.Claim (MaxChildrenPerNode);
+				newChildren[i] = ListPool<GraphNode>.Claim(MaxChildrenPerNode);
 				newConnections[i] = new List<int>();
 				if (i > 0) freeNodeIndices.Push(i);
 			}
@@ -317,8 +317,8 @@ namespace Pathfinding {
 			hasher.AddHash(gizmoVersion);
 
 			if (!gizmos.Draw(hasher)) {
-				var builder = ObjectPool<RetainedGizmos.Builder>.Claim ();
-				var centers = ArrayPool<UnityEngine.Vector3>.Claim (areas.Length);
+				var builder = ObjectPool<RetainedGizmos.Builder>.Claim();
+				var centers = ArrayPool<UnityEngine.Vector3>.Claim(areas.Length);
 				for (int i = 0; i < areas.Length; i++) {
 					Int3 center = Int3.zero;
 					var childs = children[i];

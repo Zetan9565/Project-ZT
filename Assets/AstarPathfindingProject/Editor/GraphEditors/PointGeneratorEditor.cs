@@ -12,7 +12,7 @@ namespace Pathfinding {
 		public override void OnInspectorGUI (NavGraph target) {
 			var graph = target as PointGraph;
 
-			graph.root = ObjectField(new GUIContent("Root", "All childs of this object will be used as nodes, if it is not set, a tag search will be used instead (see below)"), graph.root, typeof(Transform), true) as Transform;
+			graph.root = ObjectField(new GUIContent("Root", "All childs of this object will be used as nodes, if it is not set, a tag search will be used instead (see below)"), graph.root, typeof(Transform), true, false) as Transform;
 
 			graph.recursive = EditorGUILayout.Toggle(new GUIContent("Recursive", "Should childs of the childs in the root GameObject be searched"), graph.recursive);
 			graph.searchTag = EditorGUILayout.TagField(new GUIContent("Tag", "If root is not set, all objects with this tag will be used as nodes"), graph.searchTag);

@@ -16578,9 +16578,6 @@ MonoBehaviour:
   iconPrefab: {fileID: 4022907399929590145, guid: eec892b8d02ecd04d9b88b2dbfc312db,
     type: 3}
   iconsParent: {fileID: 1252703870}
-  rangePrefab: {fileID: 7714578875117671888, guid: e733cb1c175e5b7478edb3cf0923f2fe,
-    type: 3}
-  rangesParent: {fileID: 25672088}
   mainParent: {fileID: 662640414}
   marksParent: {fileID: 1860147326}
   objectivesParent: {fileID: 333481065}
@@ -25219,6 +25216,7 @@ MonoBehaviour:
   startOnStart: 1
   restartOnComplete: 0
   resetOnRestart: 0
+  gizmos: 1
   presetVariables: []
   references:
     version: 2
@@ -37816,6 +37814,35 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1255039264}
   m_CullTransparentMesh: 0
+--- !u!1 &1255735859 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5729784439181124927, guid: c129bba4cb2b9c549bda4aef1c16b7ab,
+    type: 3}
+  m_PrefabInstance: {fileID: 606906890}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1255735872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1255735859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de3699ba1d38e394ca0f01d1dbb2fe67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  behaviour: {fileID: 11400000, guid: 453bd6f7074a180488c0d9df60535609, type: 2}
+  frequency: 0
+  interval: 0.02
+  startOnStart: 1
+  restartOnComplete: 0
+  resetOnRestart: 0
+  gizmos: 1
+  presetVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &1259886483
 GameObject:
   m_ObjectHideFlags: 0

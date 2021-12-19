@@ -86,7 +86,7 @@ namespace Pathfinding {
 			}
 
 			// Pool the temporary list
-			ListPool<GraphNode>.Release (ref reachable);
+			ListPool<GraphNode>.Release(ref reachable);
 
 			return result;
 		}
@@ -114,8 +114,8 @@ namespace Pathfinding {
 		/// <param name="filter">Optional filter for which nodes to search. You can combine this with tagMask = -1 to make the filter determine everything.
 		///      Only walkable nodes are searched regardless of the filter. If the filter function returns false the node will be treated as unwalkable.</param>
 		public static List<GraphNode> GetReachableNodes (GraphNode seed, int tagMask = -1, System.Func<GraphNode, bool> filter = null) {
-			Stack<GraphNode> dfsStack = StackPool<GraphNode>.Claim ();
-			List<GraphNode> reachable = ListPool<GraphNode>.Claim ();
+			Stack<GraphNode> dfsStack = StackPool<GraphNode>.Claim();
+			List<GraphNode> reachable = ListPool<GraphNode>.Claim();
 
 			/// <summary>TODO: Pool</summary>
 			var map = new HashSet<GraphNode>();
@@ -146,7 +146,7 @@ namespace Pathfinding {
 				dfsStack.Pop().GetConnections(callback);
 			}
 
-			StackPool<GraphNode>.Release (dfsStack);
+			StackPool<GraphNode>.Release(dfsStack);
 			return reachable;
 		}
 
@@ -200,7 +200,7 @@ namespace Pathfinding {
 			que.Clear();
 			map.Clear();
 
-			List<GraphNode> result = ListPool<GraphNode>.Claim ();
+			List<GraphNode> result = ListPool<GraphNode>.Claim();
 
 			int currentDist = -1;
 			System.Action<GraphNode> callback;
@@ -260,7 +260,7 @@ namespace Pathfinding {
 		/// See: Pathfinding.Util.ListPool
 		/// </summary>
 		public static List<Vector3> GetSpiralPoints (int count, float clearance) {
-			List<Vector3> pts = ListPool<Vector3>.Claim (count);
+			List<Vector3> pts = ListPool<Vector3>.Claim(count);
 
 			// The radius of the smaller circle used for generating the involute of a circle
 			// Calculated from the separation distance between the turns
@@ -448,7 +448,7 @@ namespace Pathfinding {
 			if (nodes == null) throw new System.ArgumentNullException("nodes");
 			if (nodes.Count == 0) throw new System.ArgumentException("no nodes passed");
 
-			List<Vector3> pts = ListPool<Vector3>.Claim (count);
+			List<Vector3> pts = ListPool<Vector3>.Claim(count);
 
 			// Square
 			clearanceRadius *= clearanceRadius;
@@ -459,7 +459,7 @@ namespace Pathfinding {
 #endif
 				) {
 				// Accumulated area of all nodes
-				List<float> accs = ListPool<float>.Claim (nodes.Count);
+				List<float> accs = ListPool<float>.Claim(nodes.Count);
 
 				// Total area of all nodes so far
 				float tot = 0;
@@ -522,7 +522,7 @@ namespace Pathfinding {
 					}
 				}
 
-				ListPool<float>.Release (ref accs);
+				ListPool<float>.Release(ref accs);
 			} else {
 				// Fast path, assumes all nodes have the same area (usually zero)
 				for (int i = 0; i < count; i++) {

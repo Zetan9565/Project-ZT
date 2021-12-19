@@ -120,7 +120,7 @@ namespace Pathfinding {
 		/// Does not update the <see cref="transform"/> field.
 		/// See: <see cref="RelocateNodes(GraphTransform)"/>
 		/// </summary>
-		public abstract GraphTransform CalculateTransform ();
+		public abstract GraphTransform CalculateTransform();
 
 		/// <summary>
 		/// Called when tiles have been completely recalculated.
@@ -249,7 +249,7 @@ namespace Pathfinding {
 
 			if (tiles != null) {
 				for (int i = 0; i < tiles.Length; i++) {
-					Pathfinding.Util.ObjectPool<BBTree>.Release (ref tiles[i].bbTree);
+					Pathfinding.Util.ObjectPool<BBTree>.Release(ref tiles[i].bbTree);
 				}
 			}
 		}
@@ -310,7 +310,7 @@ namespace Pathfinding {
 					   vertsInGraphSpace = new Int3[0],
 					   tris = new int[0],
 					   nodes = new TriangleMeshNode[0],
-					   bbTree = ObjectPool<BBTree>.Claim (),
+					   bbTree = ObjectPool<BBTree>.Claim(),
 					   graph = this,
 			};
 		}
@@ -561,9 +561,9 @@ namespace Pathfinding {
 		/// Version: Since 3.7.6 the implementation is thread safe
 		/// </summary>
 		protected static void CreateNodeConnections (TriangleMeshNode[] nodes) {
-			List<Connection> connections = ListPool<Connection>.Claim ();
+			List<Connection> connections = ListPool<Connection>.Claim();
 
-			var nodeRefs = ObjectPoolSimple<Dictionary<Int2, int> >.Claim ();
+			var nodeRefs = ObjectPoolSimple<Dictionary<Int2, int> >.Claim();
 
 			nodeRefs.Clear();
 
@@ -620,8 +620,8 @@ namespace Pathfinding {
 			}
 
 			nodeRefs.Clear();
-			ObjectPoolSimple<Dictionary<Int2, int> >.Release (ref nodeRefs);
-			ListPool<Connection>.Release (ref connections);
+			ObjectPoolSimple<Dictionary<Int2, int> >.Release(ref nodeRefs);
+			ListPool<Connection>.Release(ref connections);
 		}
 
 		/// <summary>
@@ -683,7 +683,7 @@ namespace Pathfinding {
 
 			// Find all nodes of the second tile which are adjacent to the border between the tiles.
 			// This is used to speed up the matching process (the impact can be very significant for large tiles, but is insignificant for small ones).
-			TriangleMeshNode[] closeToEdge = ArrayPool<TriangleMeshNode>.Claim (nodes2.Length);
+			TriangleMeshNode[] closeToEdge = ArrayPool<TriangleMeshNode>.Claim(nodes2.Length);
 			int numCloseToEdge = 0;
 			for (int j = 0; j < nodes2.Length; j++) {
 				TriangleMeshNode nodeB = nodes2[j];
@@ -751,7 +751,7 @@ namespace Pathfinding {
 				}
 			}
 
-			ArrayPool<TriangleMeshNode>.Release (ref closeToEdge);
+			ArrayPool<TriangleMeshNode>.Release(ref closeToEdge);
 		}
 
 		/// <summary>
@@ -786,7 +786,7 @@ namespace Pathfinding {
 
 				// Remove the connections array explicitly for performance.
 				// Otherwise the Destroy method will try to remove the connections in both directions one by one which is slow.
-				ArrayPool<Connection>.Release (ref node.connections, true);
+				ArrayPool<Connection>.Release(ref node.connections, true);
 				node.Destroy();
 			}
 		}
@@ -839,7 +839,7 @@ namespace Pathfinding {
 			for (int i = 0; i < nodes.Length; i++) {
 				if (nodes[i] != null) batchNodesToDestroy.Add(nodes[i]);
 			}
-			ObjectPool<BBTree>.Release (ref tile.bbTree);
+			ObjectPool<BBTree>.Release(ref tile.bbTree);
 			// TODO: Pool tile object and various arrays in it?
 			tiles[x + z*tileXCount] = null;
 		}
@@ -866,7 +866,7 @@ namespace Pathfinding {
 			for (int i = 0, j = 0; i < tris.Length; i += 3, j++) {
 				recycling[verts[tris[i+0]].GetHashCode() + verts[tris[i+1]].GetHashCode() + verts[tris[i+2]].GetHashCode()] = j;
 			}
-			var connectionsToKeep = ListPool<Connection>.Claim ();
+			var connectionsToKeep = ListPool<Connection>.Claim();
 
 			for (int i = 0; i < nodes.Length; i++) {
 				var node = nodes[i];
@@ -888,7 +888,7 @@ namespace Pathfinding {
 								connectionsToKeep.Add(node.connections[j]);
 							}
 						}
-						ArrayPool<Connection>.Release (ref node.connections, true);
+						ArrayPool<Connection>.Release(ref node.connections, true);
 						if (connectionsToKeep.Count > 0) {
 							node.connections = connectionsToKeep.ToArrayFromPool();
 							node.SetConnectivityDirty();
@@ -899,7 +899,7 @@ namespace Pathfinding {
 			}
 
 			recycling.Clear();
-			ListPool<Connection>.Release (ref connectionsToKeep);
+			ListPool<Connection>.Release(ref connectionsToKeep);
 		}
 
 		/// <summary>
@@ -939,7 +939,7 @@ namespace Pathfinding {
 				w = w,
 				d = d,
 				tris = tris,
-				bbTree = ObjectPool<BBTree>.Claim (),
+				bbTree = ObjectPool<BBTree>.Claim(),
 				graph = this,
 			};
 
@@ -1115,8 +1115,8 @@ namespace Pathfinding {
 			for (int i = startTile; i < endTile; i++) if (tiles[i] != null) numNodes += tiles[i].nodes.Length;
 
 			// Vertex array might be a bit larger than necessary, but that's ok
-			var vertices = ArrayPool<Vector3>.Claim (numNodes*3);
-			var colors = ArrayPool<Color>.Claim (numNodes*3);
+			var vertices = ArrayPool<Vector3>.Claim(numNodes*3);
+			var colors = ArrayPool<Color>.Claim(numNodes*3);
 			int offset = 0;
 			for (int i = startTile; i < endTile; i++) {
 				var tile = tiles[i];
@@ -1141,8 +1141,8 @@ namespace Pathfinding {
 			if (showMeshOutline) helper.DrawWireTriangles(vertices, colors, numNodes);
 
 			// Return lists to the pool
-			ArrayPool<Vector3>.Release (ref vertices);
-			ArrayPool<Color>.Release (ref colors);
+			ArrayPool<Vector3>.Release(ref vertices);
+			ArrayPool<Color>.Release(ref colors);
 		}
 
 		/// <summary>Creates an outline of the navmesh for use in OnDrawGizmos in the editor</summary>
@@ -1286,7 +1286,7 @@ namespace Pathfinding {
 						z = tz,
 						w = reader.ReadInt32(),
 						d = reader.ReadInt32(),
-						bbTree = ObjectPool<BBTree>.Claim (),
+						bbTree = ObjectPool<BBTree>.Claim(),
 						graph = this,
 					};
 

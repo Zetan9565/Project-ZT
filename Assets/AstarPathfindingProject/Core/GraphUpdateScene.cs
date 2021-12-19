@@ -247,7 +247,7 @@ namespace Pathfinding {
 					}
 
 					var mat = transform.localToWorldMatrix * Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90, 0, 0), Vector3.one);
-					var shape = new GraphUpdateShape(points, convex, mat, minBoundsHeight);
+					var shape = new GraphUpdateShape(pts, convex, mat, minBoundsHeight);
 					guo = new GraphUpdateObject(GetBounds());
 					guo.shape = shape;
 				} else {

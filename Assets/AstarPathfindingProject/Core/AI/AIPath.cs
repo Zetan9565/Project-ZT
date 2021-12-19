@@ -181,7 +181,7 @@ namespace Pathfinding {
 		public bool reachedDestination {
 			get {
 				if (!reachedEndOfPath) return false;
-				if (remainingDistance + movementPlane.ToPlane(destination - interpolator.endPoint).magnitude > endReachedDistance) return false;
+				if (!interpolator.valid || remainingDistance + movementPlane.ToPlane(destination - interpolator.endPoint).magnitude > endReachedDistance) return false;
 
 				// Don't do height checks in 2D mode
 				if (orientation != OrientationMode.YAxisForward) {
@@ -257,6 +257,7 @@ namespace Pathfinding {
 			if (path != null) path.Release(this);
 			path = null;
 			interpolator.SetPath(null);
+			reachedEndOfPath = false;
 		}
 
 		/// <summary>
@@ -290,6 +291,7 @@ namespace Pathfinding {
 			// More info in p.errorLog (debug string)
 			if (p.error) {
 				p.Release(this);
+				SetPath(null);
 				return;
 			}
 
@@ -331,6 +333,8 @@ namespace Pathfinding {
 
 		protected override void ClearPath () {
 			CancelCurrentPathRequest();
+			if (path != null) path.Release(this);
+			path = null;
 			interpolator.SetPath(null);
 			reachedEndOfPath = false;
 		}
@@ -368,11 +372,12 @@ namespace Pathfinding {
 			var forwards = movementPlane.ToPlane(simulatedRotation * (orientation == OrientationMode.YAxisForward ? Vector3.up : Vector3.forward));
 
 			// Check if we have a valid path to follow and some other script has not stopped the character
-			if (interpolator.valid && !isStopped) {
+			bool stopped = isStopped || (reachedDestination && whenCloseToDestination == CloseToDestinationMode.Stop);
+			if (interpolator.valid && !stopped) {
 				// How fast to move depending on the distance to the destination.
 				// Move slower as the character gets closer to the destination.
 				// This is always a value between 0 and 1.
-				slowdown = distanceToEnd < slowdownDistance? Mathf.Sqrt (distanceToEnd / slowdownDistance) : 1;
+				slowdown = distanceToEnd < slowdownDistance? Mathf.Sqrt(distanceToEnd / slowdownDistance) : 1;
 
 				if (reachedEndOfPath && whenCloseToDestination == CloseToDestinationMode.Stop) {
 					// Slow down as quickly as possible
@@ -478,10 +483,9 @@ namespace Pathfinding {
 #endif
 
 		protected override int OnUpgradeSerializedData (int version, bool unityThread) {
-			base.OnUpgradeSerializedData(version, unityThread);
 			// Approximately convert from a damping value to a degrees per second value.
 			if (version < 1) rotationSpeed *= 90;
-			return 2;
+			return base.OnUpgradeSerializedData(version, unityThread);
 		}
 	}
 }

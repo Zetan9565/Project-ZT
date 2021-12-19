@@ -155,7 +155,7 @@ namespace Pathfinding.Util {
 		/// Note: For better memory usage, consider pooling the list using Pathfinding.Util.ListPool after you are done with it
 		/// </summary>
 		public List<U> QueryRect<U>(IntRect r) where U : class, T {
-			List<U> result = Pathfinding.Util.ListPool<U>.Claim ();
+			List<U> result = Pathfinding.Util.ListPool<U>.Claim();
 
 			// Loop through tiles and check which objects are inside them
 			for (int z = r.ymin; z <= r.ymax; z++) {

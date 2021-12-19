@@ -217,7 +217,7 @@ namespace Pathfinding {
 
 			string[] currentLayerNames;
 			if (!layerNames.TryGetValue(selected.value, out currentLayerNames)) {
-				var layers = Pathfinding.Util.ListPool<string>.Claim ();
+				var layers = Pathfinding.Util.ListPool<string>.Claim();
 
 				int emptyLayers = 0;
 				for (int i = 0; i < 32; i++) {
@@ -235,7 +235,7 @@ namespace Pathfinding {
 				}
 
 				currentLayerNames = layerNames[selected.value] = layers.ToArray();
-				Pathfinding.Util.ListPool<string>.Release (ref layers);
+				Pathfinding.Util.ListPool<string>.Release(ref layers);
 			}
 
 			selected.value = EditorGUILayout.MaskField(label, selected.value, currentLayerNames);

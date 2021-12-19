@@ -5,18 +5,18 @@ namespace Pathfinding {
 	/// <summary>Interface for something that holds a triangle based navmesh</summary>
 	public interface INavmeshHolder : ITransformedGraph, INavmesh {
 		/// <summary>Position of vertex number i in the world</summary>
-		Int3 GetVertex (int i);
+		Int3 GetVertex(int i);
 
 		/// <summary>
 		/// Position of vertex number i in coordinates local to the graph.
 		/// The up direction is always the +Y axis for these coordinates.
 		/// </summary>
-		Int3 GetVertexInGraphSpace (int i);
+		Int3 GetVertexInGraphSpace(int i);
 
-		int GetVertexArrayIndex (int index);
+		int GetVertexArrayIndex(int index);
 
 		/// <summary>Transforms coordinates from graph space to world space</summary>
-		void GetTileCoordinates (int tileIndex, out int x, out int z);
+		void GetTileCoordinates(int tileIndex, out int x, out int z);
 	}
 
 	/// <summary>Node represented by a triangle</summary>

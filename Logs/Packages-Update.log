@@ -308,3 +308,11 @@ The following packages were 已更新:
   com.unity.inputsystem 从版本 1.1.1 到 1.2.0
   com.unity.render-pipelines.core 从版本 12.1.1 到 12.1.2
   com.unity.render-pipelines.universal 从版本 12.1.1 到 12.1.2
+
+=== Sun Dec 19 16:03:30 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.postprocessing 从版本 3.1.1 到 3.2.0

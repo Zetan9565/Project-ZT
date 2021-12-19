@@ -26,7 +26,7 @@ using Thread = System.Threading.Thread;
 [HelpURL("http://arongranberg.com/astar/docs/class_astar_path.php")]
 public class AstarPath : VersionedMonoBehaviour {
 	/// <summary>The version number for the A* %Pathfinding Project</summary>
-	public static readonly System.Version Version = new System.Version(4, 2, 15);
+	public static readonly System.Version Version = new System.Version(4, 2, 17);
 
 	/// <summary>Information about where the package was downloaded</summary>
 	public enum AstarDistribution { WebsiteDownload, AssetStore, PackageManager };
@@ -827,7 +827,7 @@ public class AstarPath : VersionedMonoBehaviour {
 	/// </summary>
 	private void LogPathResults (Path path) {
 		if (logPathResults != PathLog.None && (path.error || logPathResults != PathLog.OnlyErrors)) {
-			string debug = path.DebugString(logPathResults);
+			string debug = (path as IPathInternals).DebugString(logPathResults);
 
 			if (logPathResults == PathLog.InGame) {
 				inGameDebugPath = debug;
@@ -1088,6 +1088,10 @@ public class AstarPath : VersionedMonoBehaviour {
 	/// See: graph-updates (view in online documentation for working links)
 	/// </summary>
 	public void UpdateGraphs (GraphUpdateObject ob) {
+		if (ob.internalStage != GraphUpdateObject.STAGE_CREATED) {
+			throw new System.Exception("You are trying to update graphs using the same graph update object twice. Please create a new GraphUpdateObject instead.");
+		}
+		ob.internalStage = GraphUpdateObject.STAGE_PENDING;
 		graphUpdates.AddToQueue(ob);
 
 		// If we should limit graph updates, start a coroutine which waits until we should update graphs
@@ -1699,6 +1703,7 @@ public class AstarPath : VersionedMonoBehaviour {
 
 		data.LockGraphStructure();
 
+		Physics2D.SyncTransforms();
 		var watch = System.Diagnostics.Stopwatch.StartNew();
 
 		// Destroy previous nodes
@@ -1973,9 +1978,10 @@ public class AstarPath : VersionedMonoBehaviour {
 	static readonly NNConstraint NNConstraintNone = NNConstraint.None;
 
 	/// <summary>
-	/// Returns the nearest node to a position using the specified NNConstraint.
-	/// Searches through all graphs for their nearest nodes to the specified position and picks the closest one.\n
-	/// Using the NNConstraint.None constraint.
+	/// Returns the nearest node to a position.
+	/// This method will search through all graphs and query them for the closest node to this position, and then it will return the closest one of those.
+	///
+	/// Equivalent to GetNearest(position, NNConstraint.None).
 	///
 	/// <code>
 	/// // Find the closest node to this GameObject's position

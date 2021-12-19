@@ -7,7 +7,7 @@ namespace Pathfinding {
 		public override void OnInspectorGUI (NavGraph target) {
 			var graph = target as NavMeshGraph;
 
-			graph.sourceMesh = ObjectField("Source Mesh", graph.sourceMesh, typeof(Mesh), false) as Mesh;
+			graph.sourceMesh = ObjectField("Source Mesh", graph.sourceMesh, typeof(Mesh), false, true) as Mesh;
 
 			graph.offset = EditorGUILayout.Vector3Field("Offset", graph.offset);
 

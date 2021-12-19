@@ -4,14 +4,10 @@ using UnityEngine;
 namespace Pathfinding {
 	[CustomEditor(typeof(AILerp), true)]
 	[CanEditMultipleObjects]
-	public class AILerpEditor : EditorBase {
+	public class AILerpEditor : BaseAIEditor {
 		protected override void Inspector () {
 			Section("Pathfinding");
-			if (PropertyField("canSearch")) {
-				EditorGUI.indentLevel++;
-				FloatField("repathRate", min: 0f);
-				EditorGUI.indentLevel--;
-			}
+			AutoRepathInspector();
 
 			Section("Movement");
 			FloatField("speed", min: 0f);
@@ -28,6 +24,8 @@ namespace Pathfinding {
 				FloatField("switchPathInterpolationSpeed", min: 0f);
 				EditorGUI.indentLevel--;
 			}
+
+			DebugInspector();
 		}
 	}
 }

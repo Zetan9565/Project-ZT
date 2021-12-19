@@ -6,6 +6,43 @@ namespace Pathfinding {
 	[CanEditMultipleObjects]
 	public class BaseAIEditor : EditorBase {
 		float lastSeenCustomGravity = float.NegativeInfinity;
+		bool debug = false;
+
+		protected void AutoRepathInspector () {
+			var mode = FindProperty("autoRepath.mode");
+
+			PropertyField(mode, "Recalculate paths automatically");
+			if (!mode.hasMultipleDifferentValues) {
+				var modeValue = (AutoRepathPolicy.Mode)mode.enumValueIndex;
+				EditorGUI.indentLevel++;
+				if (modeValue == AutoRepathPolicy.Mode.EveryNSeconds) {
+					FloatField("autoRepath.interval", min: 0f);
+				} else if (modeValue == AutoRepathPolicy.Mode.Dynamic) {
+					var maxInterval = FindProperty("autoRepath.maximumInterval");
+					FloatField(maxInterval, min: 0f);
+					Slider("autoRepath.sensitivity", 1.0f, 20.0f);
+					if (PropertyField("autoRepath.visualizeSensitivity")) {
+						EditorGUILayout.HelpBox("When the game is running the sensitivity will be visualized as a magenta circle. The path will be recalculated immediately if the destination is outside the circle and more quickly if it is close to the edge.", MessageType.None);
+					}
+					EditorGUILayout.HelpBox("The path will be recalculated at least every " + maxInterval.floatValue.ToString("0.0") + " seconds, but more often if the destination changes a lot", MessageType.None);
+				}
+				EditorGUI.indentLevel--;
+			}
+		}
+
+		protected void DebugInspector () {
+			debug = EditorGUILayout.Foldout(debug, "Debug info");
+			if (debug) {
+				var ai = target as IAstarAI;
+				EditorGUI.BeginDisabledGroup(true);
+				EditorGUILayout.Toggle("Reached Destination", ai.reachedDestination);
+				EditorGUILayout.Toggle("Reached End Of Path", ai.reachedEndOfPath);
+				EditorGUILayout.Toggle("Path Pending", ai.pathPending);
+				EditorGUILayout.Vector3Field("Destination", ai.destination);
+				EditorGUILayout.LabelField("Remaining distance", ai.remainingDistance.ToString("0.00"));
+				EditorGUI.EndDisabledGroup();
+			}
+		}
 
 		protected override void Inspector () {
 			var isAIPath = typeof(AIPath).IsAssignableFrom(target.GetType());
@@ -15,11 +52,7 @@ namespace Pathfinding {
 			FloatField("height", min: 0.01f);
 
 			Section("Pathfinding");
-			if (PropertyField("canSearch")) {
-				EditorGUI.indentLevel++;
-				FloatField("repathRate", min: 0f);
-				EditorGUI.indentLevel--;
-			}
+			AutoRepathInspector();
 
 			Section("Movement");
 
@@ -77,9 +110,9 @@ namespace Pathfinding {
 			}
 
 			var mono = target as MonoBehaviour;
-			var rigid = mono.GetComponent<Rigidbody>();
-			var rigid2D = mono.GetComponent<Rigidbody2D>();
-			var controller = mono.GetComponent<CharacterController>();
+			mono.TryGetComponent<Rigidbody>(out Rigidbody rigid);
+			mono.TryGetComponent<Rigidbody2D>(out Rigidbody2D rigid2D);
+			mono.TryGetComponent<CharacterController>(out CharacterController controller);
 			var canUseGravity = (controller != null && controller.enabled) || ((rigid == null || rigid.isKinematic) && (rigid2D == null || rigid2D.isKinematic));
 
 			var gravity = FindProperty("gravity");
@@ -119,6 +152,7 @@ namespace Pathfinding {
 				EditorGUI.EndDisabledGroup();
 			}
 
+			DebugInspector();
 			if ((rigid != null || rigid2D != null) && (controller != null && controller.enabled)) {
 				EditorGUILayout.HelpBox("You are using both a Rigidbody and a Character Controller. Those components are not really designed for that. Please use only one of them.", MessageType.Warning);
 			}

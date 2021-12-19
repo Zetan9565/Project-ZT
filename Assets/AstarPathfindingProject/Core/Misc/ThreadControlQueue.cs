@@ -210,9 +210,17 @@ namespace Pathfinding {
 				}
 				head.next = null;
 				head = newHead;
+
 				return p;
 			} finally {
-				Monitor.Exit(lockObj);
+				// Normally this only exits via a QueueTerminationException and will always be entered in that case.
+				// However the thread may also be aborted using a ThreadAbortException which can happen at any time.
+				// In particular if the Unity Editor recompiles scripts and is configured to exit play mode on recompilation
+				// then it will apparently abort all threads before the AstarPath.OnDestroy method is called (which would have
+				// cleaned up the threads gracefully). So we need to check if we actually hold the lock before releaseing it.
+				if (Monitor.IsEntered(lockObj)) {
+					Monitor.Exit(lockObj);
+				}
 			}
 		}
 

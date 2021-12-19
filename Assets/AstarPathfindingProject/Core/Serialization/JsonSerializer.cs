@@ -175,6 +175,13 @@ namespace Pathfinding.Serialization {
 		/// <summary>Settings for serialization</summary>
 		private SerializeSettings settings;
 
+		/// <summary>
+		/// Root GameObject used for deserialization.
+		/// This should be the GameObject which holds the AstarPath component.
+		/// Important when deserializing when the component is on a prefab.
+		/// </summary>
+		private GameObject contextRoot;
+
 		/// <summary>Graphs that are being serialized or deserialized</summary>
 		private NavGraph[] graphs;
 
@@ -220,13 +227,12 @@ namespace Pathfinding.Serialization {
 		/// <summary>Cached version object for 4.1.0</summary>
 		public static readonly System.Version V4_1_0 = new System.Version(4, 1, 0);
 
-		public AstarSerializer (AstarData data) {
-			this.data = data;
-			settings = SerializeSettings.Settings;
+		public AstarSerializer (AstarData data, GameObject contextRoot) : this(data, SerializeSettings.Settings, contextRoot) {
 		}
 
-		public AstarSerializer (AstarData data, SerializeSettings settings) {
+		public AstarSerializer (AstarData data, SerializeSettings settings, GameObject contextRoot) {
 			this.data = data;
+			this.contextRoot = contextRoot;
 			this.settings = settings;
 		}
 
@@ -521,11 +527,6 @@ namespace Pathfinding.Serialization {
 					"\nThis is usually fine as the stored data is usually backwards and forwards compatible." +
 					"\nHowever node data (not settings) can get corrupted between versions (even though I try my best to keep compatibility), so it is recommended " +
 					"to recalculate any caches (those for faster startup) and resave any files. Even if it seems to load fine, it might cause subtle bugs.\n");
-			} else if (FullyDefinedVersion(meta.version) < FullyDefinedVersion(AstarPath.Version)) {
-				Debug.LogWarning("Upgrading serialized pathfinding data from version " + meta.version + " to " + AstarPath.Version +
-					"\nThis is usually fine, it just means you have upgraded to a new version." +
-					"\nHowever node data (not settings) can get corrupted between versions (even though I try my best to keep compatibility), so it is recommended " +
-					"to recalculate any caches (those for faster startup) and resave any files. Even if it seems to load fine, it might cause subtle bugs.\n");
 			}
 			return true;
 		}
@@ -562,7 +563,7 @@ namespace Pathfinding.Serialization {
 
 			if (ContainsEntry(jsonName)) {
 				// Read the graph settings
-				TinyJsonDeserializer.Deserialize(GetString(GetEntry(jsonName)), graphType, graph);
+				TinyJsonDeserializer.Deserialize(GetString(GetEntry(jsonName)), graphType, graph, contextRoot);
 			} else if (ContainsEntry(binName)) {
 				var reader = GetBinaryReader(GetEntry(binName));
 				var ctx = new GraphSerializationContext(reader, null, graph.graphIndex, meta);
@@ -813,6 +814,7 @@ namespace Pathfinding.Serialization {
 			meta.typeNames = new List<string>();
 			count = reader.ReadInt32();
 			for (int i = 0; i < count; i++) meta.typeNames.Add(reader.ReadString());
+			reader.Close();
 
 			return meta;
 		}

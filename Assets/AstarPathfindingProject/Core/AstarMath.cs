@@ -9,7 +9,7 @@ namespace Pathfinding {
 	/// Contains various spline functions.
 	/// \ingroup utils
 	/// </summary>
-	static class AstarSplines {
+	public static class AstarSplines {
 		public static Vector3 CatmullRom (Vector3 previous, Vector3 start, Vector3 end, Vector3 next, float elapsedTime) {
 			// References used:
 			// p.266 GemsV1
@@ -276,17 +276,18 @@ namespace Pathfinding {
 			Vector3 u = e1 - s1;
 			Vector3 v = e2 - s2;
 			Vector3 w = s1 - s2;
-			float a = Vector3.Dot(u, u);           // always >= 0
-			float b = Vector3.Dot(u, v);
-			float c = Vector3.Dot(v, v);           // always >= 0
-			float d = Vector3.Dot(u, w);
-			float e = Vector3.Dot(v, w);
-			float D = a*c - b*b;           // always >= 0
-			float sc, sN, sD = D;          // sc = sN / sD, default sD = D >= 0
-			float tc, tN, tD = D;          // tc = tN / tD, default tD = D >= 0
+			double a = Vector3.Dot(u, u);           // always >= 0
+			double b = Vector3.Dot(u, v);
+			double c = Vector3.Dot(v, v);           // always >= 0
+			double d = Vector3.Dot(u, w);
+			double e = Vector3.Dot(v, w);
+			double D = a*c - b*b;           // always >= 0
+			double sc, sN, sD = D;          // sc = sN / sD, default sD = D >= 0
+			double tc, tN, tD = D;          // tc = tN / tD, default tD = D >= 0
 
 			// compute the line parameters of the two closest points
-			if (D < 0.000001f) { // the lines are almost parallel
+			// D is approximately |v|^2|u|^2*(1-cos alpha), where alpha is the angle between the lines
+			if (D < 0.00001) { // the lines are almost parallel
 				sN = 0.0f;         // force using point P0 on segment S1
 				sD = 1.0f;         // to prevent possible division by 0.0 later
 				tN = e;
@@ -294,8 +295,8 @@ namespace Pathfinding {
 			} else {               // get the closest points on the infinite lines
 				sN = (b*e - c*d);
 				tN = (a*e - b*d);
-				if (sN < 0.0f) {        // sc < 0 => the s=0 edge is visible
-					sN = 0.0f;
+				if (sN < 0.0) {        // sc < 0 => the s=0 edge is visible
+					sN = 0.0;
 					tN = e;
 					tD = c;
 				} else if (sN > sD) { // sc > 1  => the s=1 edge is visible
@@ -305,8 +306,8 @@ namespace Pathfinding {
 				}
 			}
 
-			if (tN < 0.0f) {            // tc < 0 => the t=0 edge is visible
-				tN = 0.0f;
+			if (tN < 0.0) {            // tc < 0 => the t=0 edge is visible
+				tN = 0.0;
 				// recompute sc for this edge
 				if (-d < 0.0f)
 					sN = 0.0f;
@@ -328,12 +329,13 @@ namespace Pathfinding {
 					sD = a;
 				}
 			}
+
 			// finally do the division to get sc and tc
-			sc = (Math.Abs(sN) < 0.000001f ? 0.0f : sN / sD);
-			tc = (Math.Abs(tN) < 0.000001f ? 0.0f : tN / tD);
+			sc = (Math.Abs(sN) < 0.00001f ? 0.0 : sN / sD);
+			tc = (Math.Abs(tN) < 0.00001f ? 0.0 : tN / tD);
 
 			// get the difference of the two closest points
-			Vector3 dP = w + (sc * u) - (tc * v);  // =  S1(sc) - S2(tc)
+			Vector3 dP = w + ((float)sc * u) - ((float)tc * v);  // =  S1(sc) - S2(tc)
 
 			return dP.sqrMagnitude;   // return the closest distance
 		}
@@ -1169,7 +1171,7 @@ namespace Pathfinding {
 		public static Vector3[] ConvexHullXZ (Vector3[] points) {
 			if (points.Length == 0) return new Vector3[0];
 
-			var hull = Pathfinding.Util.ListPool<Vector3>.Claim ();
+			var hull = Pathfinding.Util.ListPool<Vector3>.Claim();
 
 			int pointOnHull = 0;
 			for (int i = 1; i < points.Length; i++) if (points[i].x < points[pointOnHull].x) pointOnHull = i;
@@ -1194,7 +1196,7 @@ namespace Pathfinding {
 			var result = hull.ToArray();
 
 			// Return to pool
-			Pathfinding.Util.ListPool<Vector3>.Release (hull);
+			Pathfinding.Util.ListPool<Vector3>.Release(hull);
 			return result;
 		}
 
@@ -1424,7 +1426,7 @@ namespace Pathfinding {
 			firstVerts.Clear();
 
 			// Use cached array to reduce memory allocations
-			int[] compressedPointers = ArrayPool<int>.Claim (vertices.Count);
+			int[] compressedPointers = ArrayPool<int>.Claim(vertices.Count);
 
 			// Map positions to the first index they were encountered at
 			int count = 0;
@@ -1458,7 +1460,7 @@ namespace Pathfinding {
 			for (int i = 0; i < count; i++)
 				outVertices[i] = vertices[i];
 
-			ArrayPool<int>.Release (ref compressedPointers);
+			ArrayPool<int>.Release(ref compressedPointers);
 		}
 
 		/// <summary>
@@ -1475,8 +1477,8 @@ namespace Pathfinding {
 			// we need to start these at the beginning of the chain.
 			// Then iterate over all the loops of the outline.
 			// Since they are loops, we can start at any point.
-			var obstacleVertices = ListPool<int>.Claim ();
-			var outlineKeys = ListPool<int>.Claim ();
+			var obstacleVertices = ListPool<int>.Claim();
+			var outlineKeys = ListPool<int>.Claim();
 
 			outlineKeys.AddRange(outline.Keys);
 			for (int k = 0; k <= 1; k++) {
@@ -1512,8 +1514,8 @@ namespace Pathfinding {
 				}
 			}
 
-			ListPool<int>.Release (ref outlineKeys);
-			ListPool<int>.Release (ref obstacleVertices);
+			ListPool<int>.Release(ref outlineKeys);
+			ListPool<int>.Release(ref obstacleVertices);
 		}
 
 		/// <summary>Divides each segment in the list into subSegments segments and fills the result list with the new points</summary>

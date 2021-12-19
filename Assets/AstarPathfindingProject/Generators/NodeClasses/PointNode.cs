@@ -45,6 +45,15 @@ namespace Pathfinding {
 		public PointNode (AstarPath astar) : base(astar) {
 		}
 
+		/// <summary>
+		/// Closest point on the surface of this node to the point p.
+		///
+		/// For a point node this is always the node's <see cref="position"/> sicne it has no surface.
+		/// </summary>
+		public override Vector3 ClosestPointOnNode (Vector3 p) {
+			return (Vector3)this.position;
+		}
+
 		public override void GetConnections (System.Action<GraphNode> action) {
 			if (connections == null) return;
 			for (int i = 0; i < connections.Length; i++) action(connections[i].node);

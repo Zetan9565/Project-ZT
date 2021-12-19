@@ -17,23 +17,20 @@ namespace Pathfinding {
 	///   This only works to some degree however since an update has an inherent overhead.
 	/// - Reduce the grid size.
 	/// - Turn on multithreading (A* Inspector -> Settings)
-	/// - Disable the <see cref="floodFill"/> field. However note the restrictions on when this can be done.
 	/// - Disable Height Testing or Collision Testing in the grid graph. This can give a performance boost
 	///   since fewer calls to the physics engine need to be done.
 	/// - Avoid using any erosion in the grid graph settings. This is relatively slow.
+	///
+	/// This script has a built-in constant called <see cref="MaxMillisPerFrame"/> and it tries to not use any more
+	/// cpu time than that per frame.
 	///
 	/// Make sure you have 'Show Graphs' disabled in the A* inspector since gizmos in the scene view can take some
 	/// time to update when the graph moves and thus make it seem like this script is slower than it actually is.
 	///
 	/// See: Take a look at the example scene called "Procedural" for an example of how to use this script
 	///
-	/// Note: This class does not support the erosion setting on grid graphs. You can instead try to
-	///  increase the 'diameter' setting under the Grid Graph Settings -> Collision Testing header to achieve a similar effect.
-	///  However even if it did support erosion you would most likely not want to use it with this script
-	///  since erosion would increase the number of nodes that had to be updated when the graph moved by a large amount.
-	///
-	/// Version: Since 3.6.8 this class can handle graph rotation other options such as isometric angle and aspect ratio.
-	/// Version: After 3.6.8 this class can also handle layered grid graphs.
+	/// Note: Using erosion on grid graphs can significantly lower the performance when updating graphs.
+	/// Each erosion iteration requires expanding the region that is updated by 1 node.
 	/// </summary>
 	[HelpURL("http://arongranberg.com/astar/docs/class_pathfinding_1_1_procedural_grid_mover.php")]
 	public class ProceduralGridMover : VersionedMonoBehaviour {
@@ -48,21 +45,41 @@ namespace Pathfinding {
 		/// <summary>Graph will be moved to follow this target</summary>
 		public Transform target;
 
-		/// <summary>Grid graph to update</summary>
-		GridGraph graph;
-
 		/// <summary>Temporary buffer</summary>
 		GridNodeBase[] buffer;
 
 		/// <summary>True while the graph is being updated by this script</summary>
 		public bool updatingGraph { get; private set; }
 
+		/// <summary>
+		/// Grid graph to update.
+		/// This will be set at Start based on <see cref="graphIndex"/>.
+		/// During runtime you may set this to any graph or to null to disable updates.
+		/// </summary>
+		public GridGraph graph;
+
+		/// <summary>
+		/// Index for the graph to update.
+		/// This will be used at Start to set <see cref="graph"/>.
+		///
+		/// This is an index into the AstarPath.active.data.graphs array.
+		/// </summary>
+		[HideInInspector]
+		public int graphIndex;
+
 		void Start () {
 			if (AstarPath.active == null) throw new System.Exception("There is no AstarPath object in the scene");
 
-			graph = AstarPath.active.data.FindGraphWhichInheritsFrom(typeof(GridGraph)) as GridGraph;
+			// If one creates this component via a script then they may have already set the graph field.
+			// In that case don't replace it.
+			if (graph == null) {
+				if (graphIndex < 0) throw new System.Exception("Graph index should not be negative");
+				if (graphIndex >= AstarPath.active.data.graphs.Length) throw new System.Exception("The ProceduralGridMover was configured to use graph index " + graphIndex + ", but only " + AstarPath.active.data.graphs.Length + " graphs exist");
 
-			if (graph == null) throw new System.Exception("The AstarPath object has no GridGraph or LayeredGridGraph");
+				graph = AstarPath.active.data.graphs[graphIndex] as GridGraph;
+				if (graph == null) throw new System.Exception("The ProceduralGridMover was configured to use graph index " + graphIndex + " but that graph either does not exist or is not a GridGraph or LayerGridGraph");
+			}
+
 			UpdateGraph();
 		}
 
@@ -126,7 +143,7 @@ namespace Pathfinding {
 			// to avoid too large FPS drops
 			IEnumerator ie = UpdateGraphCoroutine();
 			AstarPath.active.AddWorkItem(new AstarWorkItem(
-					(context, force) => {
+				(context, force) => {
 				// If force is true we need to calculate all steps at once
 				if (force) while (ie.MoveNext()) {}
 

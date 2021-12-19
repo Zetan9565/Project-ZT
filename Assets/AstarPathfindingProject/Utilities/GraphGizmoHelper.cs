@@ -31,14 +31,14 @@ namespace Pathfinding.Util {
 			}
 			this.gizmos = gizmos;
 			this.hasher = hasher;
-			builder = ObjectPool<RetainedGizmos.Builder>.Claim ();
+			builder = ObjectPool<RetainedGizmos.Builder>.Claim();
 		}
 
 		public void OnEnterPool () {
 			// Will cause pretty much all calls to throw null ref exceptions until Init is called
 			var bld = builder;
 
-			ObjectPool<RetainedGizmos.Builder>.Release (ref bld);
+			ObjectPool<RetainedGizmos.Builder>.Release(ref bld);
 			builder = null;
 			debugData = null;
 		}
@@ -137,11 +137,11 @@ namespace Pathfinding.Util {
 		}
 
 		public void DrawTriangles (Vector3[] vertices, Color[] colors, int numTriangles) {
-			var triangles = ListPool<int>.Claim (numTriangles);
+			var triangles = ListPool<int>.Claim(numTriangles);
 
 			for (int i = 0; i < numTriangles*3; i++) triangles.Add(i);
 			builder.DrawMesh(gizmos, vertices, triangles, colors);
-			ListPool<int>.Release (ref triangles);
+			ListPool<int>.Release(ref triangles);
 		}
 
 		public void DrawWireTriangles (Vector3[] vertices, Color[] colors, int numTriangles) {
@@ -158,7 +158,7 @@ namespace Pathfinding.Util {
 			var tmp = this;
 
 			Submit();
-			ObjectPool<GraphGizmoHelper>.Release (ref tmp);
+			ObjectPool<GraphGizmoHelper>.Release(ref tmp);
 		}
 	}
 }

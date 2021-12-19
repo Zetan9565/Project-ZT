@@ -104,7 +104,7 @@ namespace Pathfinding {
 		/// Deprecated: Avoid using. This will force a full recalculation of the connected components. In most cases the HierarchicalGraph class takes care of things automatically behind the scenes now. In pretty much all cases you should be able to remove the call to this function.
 		/// </summary>
 		[System.Obsolete("Avoid using. This will force a full recalculation of the connected components. In most cases the HierarchicalGraph class takes care of things automatically behind the scenes now. In pretty much all cases you should be able to remove the call to this function.")]
-		void QueueFloodFill ();
+		void QueueFloodFill();
 
 		/// <summary>
 		/// If a WorkItem needs to have a valid area information during execution, call this method to ensure there are no pending flood fills.
@@ -124,7 +124,7 @@ namespace Pathfinding {
 		/// }));
 		/// </code>
 		/// </summary>
-		void EnsureValidFloodFill ();
+		void EnsureValidFloodFill();
 
 		/// <summary>
 		/// Trigger a graph modification event.
@@ -132,7 +132,7 @@ namespace Pathfinding {
 		/// Some scripts listen for this event. For example off-mesh links listen to it and will recalculate which nodes they are connected to when it it sent.
 		/// If a graph is dirtied multiple times, or even if multiple graphs are dirtied, the event will only be sent once.
 		/// </summary>
-		void SetGraphDirty (NavGraph graph);
+		void SetGraphDirty(NavGraph graph);
 	}
 
 	class WorkItemProcessor : IWorkItemContext {
@@ -265,6 +265,7 @@ namespace Pathfinding {
 			if (workItemsInProgressRightNow) throw new System.Exception("Processing work items recursively. Please do not wait for other work items to be completed inside work items. " +
 				"If you think this is not caused by any of your scripts, this might be a bug.");
 
+			UnityEngine.Physics2D.SyncTransforms();
 			workItemsInProgressRightNow = true;
 			astar.data.LockGraphStructure(true);
 			while (workItems.Count > 0) {

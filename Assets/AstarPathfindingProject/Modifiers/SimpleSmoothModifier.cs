@@ -112,7 +112,7 @@ namespace Pathfinding {
 			}
 
 			if (path != p.vectorPath) {
-				ListPool<Vector3>.Release (ref p.vectorPath);
+				ListPool<Vector3>.Release(ref p.vectorPath);
 				p.vectorPath = path;
 			}
 		}
@@ -135,7 +135,7 @@ namespace Pathfinding {
 				}
 			}
 
-			List<Vector3> subdivided = ListPool<Vector3>.Claim (pointCounter);
+			List<Vector3> subdivided = ListPool<Vector3>.Claim(pointCounter);
 
 			// Set first velocity
 			Vector3 preEndVel = (path[1]-path[0]).normalized;
@@ -194,8 +194,8 @@ namespace Pathfinding {
 
 			int maxLength = (path.Count-2)*(int)Mathf.Pow(2, iterations)+2;
 
-			List<Vector3> subdivided = ListPool<Vector3>.Claim (maxLength);
-			List<Vector3> subdivided2 = ListPool<Vector3>.Claim (maxLength);
+			List<Vector3> subdivided = ListPool<Vector3>.Claim(maxLength);
+			List<Vector3> subdivided2 = ListPool<Vector3>.Claim(maxLength);
 
 			for (int i = 0; i < maxLength; i++) { subdivided.Add(Vector3.zero); subdivided2.Add(Vector3.zero); }
 
@@ -249,7 +249,7 @@ namespace Pathfinding {
 				subdivided[(path.Count-2)*(int)Mathf.Pow(2, iteration+1)+2-1] = subdivided2[currentPathLength-1];
 			}
 
-			ListPool<Vector3>.Release (ref subdivided2);
+			ListPool<Vector3>.Release(ref subdivided2);
 
 			return subdivided;
 		}
@@ -270,7 +270,7 @@ namespace Pathfinding {
 
 				int estimatedNumberOfSegments = Mathf.FloorToInt(pathLength / maxSegmentLength);
 				// Get a list with an initial capacity high enough so that we can add all points
-				subdivided = ListPool<Vector3>.Claim (estimatedNumberOfSegments+2);
+				subdivided = ListPool<Vector3>.Claim(estimatedNumberOfSegments+2);
 
 				float distanceAlong = 0;
 
@@ -300,7 +300,7 @@ namespace Pathfinding {
 				}
 
 				int steps = 1 << subdivisions;
-				subdivided = ListPool<Vector3>.Claim ((path.Count-1)*steps + 1);
+				subdivided = ListPool<Vector3>.Claim((path.Count-1)*steps + 1);
 				Polygon.Subdivide(path, subdivided, steps);
 			}
 
@@ -327,7 +327,7 @@ namespace Pathfinding {
 			if (subdivisions < 0) subdivisions = 0;
 
 			int subMult = 1 << subdivisions;
-			List<Vector3> subdivided = ListPool<Vector3>.Claim ();
+			List<Vector3> subdivided = ListPool<Vector3>.Claim();
 
 			for (int i = 0; i < path.Count-1; i++) {
 				Vector3 tangent1;

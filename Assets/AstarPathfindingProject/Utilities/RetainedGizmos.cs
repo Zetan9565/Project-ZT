@@ -152,11 +152,11 @@ namespace Pathfinding.Util {
 					UnityEngine.Assertions.Assert.IsTrue(lineEndPointCount % 2 == 0);
 
 					// Use pooled lists to avoid excessive allocations
-					var vertices = ListPool<Vector3>.Claim (lineEndPointCount*2);
-					var colors = ListPool<Color32>.Claim (lineEndPointCount*2);
-					var normals = ListPool<Vector3>.Claim (lineEndPointCount*2);
-					var uv = ListPool<Vector2>.Claim (lineEndPointCount*2);
-					var tris = ListPool<int>.Claim (lineEndPointCount*3);
+					var vertices = ListPool<Vector3>.Claim(lineEndPointCount*2);
+					var colors = ListPool<Color32>.Claim(lineEndPointCount*2);
+					var normals = ListPool<Vector3>.Claim(lineEndPointCount*2);
+					var uv = ListPool<Vector2>.Claim(lineEndPointCount*2);
+					var tris = ListPool<int>.Claim(lineEndPointCount*3);
 					// Loop through each endpoint of the lines
 					// and add 2 vertices for each
 					for (int j = startIndex; j < endIndex; j++) {
@@ -212,11 +212,11 @@ namespace Pathfinding.Util {
 					mesh.UploadMeshData(false);
 
 					// Release the lists back to the pool
-					ListPool<Vector3>.Release (ref vertices);
-					ListPool<Color32>.Release (ref colors);
-					ListPool<Vector3>.Release (ref normals);
-					ListPool<Vector2>.Release (ref uv);
-					ListPool<int>.Release (ref tris);
+					ListPool<Vector3>.Release(ref vertices);
+					ListPool<Color32>.Release(ref colors);
+					ListPool<Vector3>.Release(ref normals);
+					ListPool<Vector2>.Release(ref uv);
+					ListPool<int>.Release(ref tris);
 
 					gizmos.meshes.Add(new MeshWithHash { hash = hash, mesh = mesh, lines = true });
 					gizmos.existingHashes.Add(hash);
@@ -250,7 +250,7 @@ namespace Pathfinding.Util {
 		}
 
 		public GraphGizmoHelper GetGizmoHelper (AstarPath active, Hasher hasher) {
-			var helper = ObjectPool<GraphGizmoHelper>.Claim ();
+			var helper = ObjectPool<GraphGizmoHelper>.Claim();
 
 			helper.Init(active, hasher, this);
 			return helper;

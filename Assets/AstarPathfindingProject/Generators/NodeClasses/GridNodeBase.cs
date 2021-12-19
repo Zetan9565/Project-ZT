@@ -158,7 +158,7 @@ namespace Pathfinding {
 		///
 		/// See: GetConnections
 		/// </summary>
-		public abstract GridNodeBase GetNeighbourAlongDirection (int direction);
+		public abstract GridNodeBase GetNeighbourAlongDirection(int direction);
 
 		public override bool ContainsConnection (GraphNode node) {
 #if !ASTAR_GRID_NO_CUSTOM_CONNECTIONS

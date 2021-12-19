@@ -14,13 +14,13 @@ namespace Pathfinding {
 	/// </summary>
 	public interface IGraphInternals {
 		string SerializedEditorSettings { get; set; }
-		void OnDestroy ();
-		void DestroyAllNodes ();
-		IEnumerable<Progress> ScanInternal ();
-		void SerializeExtraInfo (GraphSerializationContext ctx);
-		void DeserializeExtraInfo (GraphSerializationContext ctx);
-		void PostDeserialization (GraphSerializationContext ctx);
-		void DeserializeSettingsCompatibility (GraphSerializationContext ctx);
+		void OnDestroy();
+		void DestroyAllNodes();
+		IEnumerable<Progress> ScanInternal();
+		void SerializeExtraInfo(GraphSerializationContext ctx);
+		void DeserializeExtraInfo(GraphSerializationContext ctx);
+		void PostDeserialization(GraphSerializationContext ctx);
+		void DeserializeSettingsCompatibility(GraphSerializationContext ctx);
 	}
 
 	/// <summary>Base class for all graphs</summary>
@@ -121,12 +121,13 @@ namespace Pathfinding {
 		/// var gg = AstarPath.active.data.gridGraph;
 		///
 		/// List<GraphNode> nodes = new List<GraphNode>();
+		///
 		/// gg.GetNodes((System.Action<GraphNode>)nodes.Add);
 		/// </code>
 		///
 		/// See: <see cref="Pathfinding.AstarData.GetNodes"/>
 		/// </summary>
-		public abstract void GetNodes (System.Action<GraphNode> action);
+		public abstract void GetNodes(System.Action<GraphNode> action);
 
 		/// <summary>
 		/// A matrix for translating/rotating/scaling the graph.
@@ -302,7 +303,7 @@ namespace Pathfinding {
 		/// Progress objects can be yielded to show progress info in the editor and to split up processing
 		/// over several frames when using async scanning.
 		/// </summary>
-		protected abstract IEnumerable<Progress> ScanInternal ();
+		protected abstract IEnumerable<Progress> ScanInternal();
 
 		/// <summary>
 		/// Serializes graph type specific node data.
@@ -419,6 +420,9 @@ namespace Pathfinding {
 		/// If <see cref="type"/> is set to Sphere, this does not affect anything.
 		///
 		/// [Open online documentation to see images]
+		///
+		/// Warning: In contrast to Unity's capsule collider and character controller this height does not include the end spheres of the capsule, but only the cylinder part.
+		/// This is mostly for historical reasons.
 		/// </summary>
 		public float height = 2F;
 
@@ -495,6 +499,15 @@ namespace Pathfinding {
 		/// </summary>
 		private Vector3 upheight;
 
+		/// <summary>Used for 2D collision queries</summary>
+		private ContactFilter2D contactFilter;
+
+		/// <summary>
+		/// Just so that the Physics2D.OverlapPoint method has some buffer to store things in.
+		/// We never actually read from this array, so we don't even care if this is thread safe.
+		/// </summary>
+		private static Collider2D[] dummyArray = new Collider2D[1];
+
 		/// <summary>
 		/// <see cref="diameter"/> * scale * 0.5.
 		/// Where scale usually is \link Pathfinding.GridGraph.nodeSize nodeSize \endlink
@@ -523,10 +536,11 @@ namespace Pathfinding {
 			upheight = up*height;
 			finalRadius = diameter*scale*0.5F;
 			finalRaycastRadius = thickRaycastDiameter*scale*0.5F;
+			contactFilter = new ContactFilter2D { layerMask = mask, useDepth = false, useLayerMask = true, useNormalAngle = false, useTriggers = false };
 		}
 
 		/// <summary>
-		/// Returns if the position is obstructed.
+		/// Returns true if the position is not obstructed.
 		/// If <see cref="collisionCheck"/> is false, this will always return true.\n
 		/// </summary>
 		public bool Check (Vector3 position) {
@@ -538,9 +552,9 @@ namespace Pathfinding {
 				switch (type) {
 				case ColliderType.Capsule:
 				case ColliderType.Sphere:
-					return Physics2D.OverlapCircle(position, finalRadius, mask) == null;
+					return Physics2D.OverlapCircle(position, finalRadius, contactFilter, dummyArray) == 0;
 				default:
-					return Physics2D.OverlapPoint(position, mask) == null;
+					return Physics2D.OverlapPoint(position, contactFilter, dummyArray) == 0;
 				}
 			}
 

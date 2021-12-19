@@ -77,7 +77,7 @@ namespace Pathfinding {
 		}
 
 		void CalculateConvexHull () {
-			_convexPoints = points != null? Polygon.ConvexHullXZ (points) : null;
+			_convexPoints = points != null? Polygon.ConvexHullXZ(points) : null;
 		}
 
 		/// <summary>World space bounding box of this shape</summary>

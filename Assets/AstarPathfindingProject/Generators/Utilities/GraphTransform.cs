@@ -11,15 +11,15 @@ namespace Pathfinding.Util {
 	/// See: <see cref="Pathfinding.Util.GraphTransform"/>
 	/// </summary>
 	public interface IMovementPlane {
-		Vector2 ToPlane (Vector3 p);
-		Vector2 ToPlane (Vector3 p, out float elevation);
-		Vector3 ToWorld (Vector2 p, float elevation = 0);
+		Vector2 ToPlane(Vector3 p);
+		Vector2 ToPlane(Vector3 p, out float elevation);
+		Vector3 ToWorld(Vector2 p, float elevation = 0);
 	}
 
 	/// <summary>Generic 3D coordinate transformation</summary>
 	public interface ITransform {
-		Vector3 Transform (Vector3 position);
-		Vector3 InverseTransform (Vector3 position);
+		Vector3 Transform(Vector3 position);
+		Vector3 InverseTransform(Vector3 position);
 	}
 
 	/// <summary>
@@ -126,7 +126,7 @@ namespace Pathfinding.Util {
 		public Bounds Transform (Bounds bounds) {
 			if (onlyTranslational) return new Bounds(bounds.center + translation, bounds.size);
 
-			var corners = ArrayPool<Vector3>.Claim (8);
+			var corners = ArrayPool<Vector3>.Claim(8);
 			var extents = bounds.extents;
 			corners[0] = Transform(bounds.center + new Vector3(extents.x, extents.y, extents.z));
 			corners[1] = Transform(bounds.center + new Vector3(extents.x, extents.y, -extents.z));
@@ -143,14 +143,14 @@ namespace Pathfinding.Util {
 				min = Vector3.Min(min, corners[i]);
 				max = Vector3.Max(max, corners[i]);
 			}
-			ArrayPool<Vector3>.Release (ref corners);
+			ArrayPool<Vector3>.Release(ref corners);
 			return new Bounds((min+max)*0.5f, max - min);
 		}
 
 		public Bounds InverseTransform (Bounds bounds) {
 			if (onlyTranslational) return new Bounds(bounds.center - translation, bounds.size);
 
-			var corners = ArrayPool<Vector3>.Claim (8);
+			var corners = ArrayPool<Vector3>.Claim(8);
 			var extents = bounds.extents;
 			corners[0] = InverseTransform(bounds.center + new Vector3(extents.x, extents.y, extents.z));
 			corners[1] = InverseTransform(bounds.center + new Vector3(extents.x, extents.y, -extents.z));
@@ -167,7 +167,7 @@ namespace Pathfinding.Util {
 				min = Vector3.Min(min, corners[i]);
 				max = Vector3.Max(max, corners[i]);
 			}
-			ArrayPool<Vector3>.Release (ref corners);
+			ArrayPool<Vector3>.Release(ref corners);
 			return new Bounds((min+max)*0.5f, max - min);
 		}
 

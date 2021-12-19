@@ -168,6 +168,7 @@ namespace Pathfinding.Serialization {
 	/// </summary>
 	public class TinyJsonDeserializer {
 		System.IO.TextReader reader;
+		GameObject contextRoot;
 
 		static readonly System.Globalization.NumberFormatInfo numberFormat = System.Globalization.NumberFormatInfo.InvariantInfo;
 
@@ -175,9 +176,10 @@ namespace Pathfinding.Serialization {
 		/// Deserializes an object of the specified type.
 		/// Will load all fields into the populate object if it is set (only works for classes).
 		/// </summary>
-		public static System.Object Deserialize (string text, Type type, System.Object populate = null) {
+		public static System.Object Deserialize (string text, Type type, System.Object populate = null, GameObject contextRoot = null) {
 			return new TinyJsonDeserializer() {
-					   reader = new System.IO.StringReader(text)
+					   reader = new System.IO.StringReader(text),
+					   contextRoot = contextRoot,
 			}.Deserialize(type, populate);
 		}
 
@@ -326,7 +328,24 @@ namespace Pathfinding.Serialization {
 				if (EatField() != "GUID") throw new Exception("Expected 'GUID' field");
 				string guid = EatField();
 
-				foreach (var helper in UnityEngine.Object.FindObjectsOfType<UnityReferenceHelper>()) {
+				if (contextRoot != null) {
+					foreach (var helper in contextRoot.GetComponentsInChildren<UnityReferenceHelper>(true)) {
+						if (helper.GetGUID() == guid) {
+							if (Type.Equals(type, typeof(GameObject))) {
+								return helper.gameObject;
+							} else {
+								return helper.GetComponent(type);
+							}
+						}
+					}
+				}
+
+#if UNITY_2020_1_OR_NEWER
+				foreach (var helper in UnityEngine.Object.FindObjectsOfType<UnityReferenceHelper>(true))
+#else
+				foreach (var helper in UnityEngine.Object.FindObjectsOfType<UnityReferenceHelper>())
+#endif
+				{
 					if (helper.GetGUID() == guid) {
 						if (Type.Equals(type, typeof(GameObject))) {
 							return helper.gameObject;

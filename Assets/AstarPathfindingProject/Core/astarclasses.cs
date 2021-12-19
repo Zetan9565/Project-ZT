@@ -423,21 +423,39 @@ namespace Pathfinding {
 		/// -# Call Apply on the GUO for every node which should be updated with the GUO.
 		/// -# Update connectivity info if appropriate (GridGraphs updates connectivity, but most other graphs don't since then the connectivity cannot be recovered later).
 		/// </summary>
-		void UpdateArea (GraphUpdateObject o);
+		void UpdateArea(GraphUpdateObject o);
 
 		/// <summary>
 		/// May be called on the Unity thread before starting the update.
 		/// See: CanUpdateAsync
 		/// </summary>
-		void UpdateAreaInit (GraphUpdateObject o);
+		void UpdateAreaInit(GraphUpdateObject o);
 
 		/// <summary>
 		/// May be called on the Unity thread after executing the update.
 		/// See: CanUpdateAsync
 		/// </summary>
-		void UpdateAreaPost (GraphUpdateObject o);
+		void UpdateAreaPost(GraphUpdateObject o);
 
-		GraphUpdateThreading CanUpdateAsync (GraphUpdateObject o);
+		GraphUpdateThreading CanUpdateAsync(GraphUpdateObject o);
+	}
+
+	/// <summary>Info about if a graph update has been applied or not</summary>
+	public enum GraphUpdateStage {
+		/// <summary>
+		/// The graph update object has been created, but not used for anything yet.
+		/// This is the default value.
+		/// </summary>
+		Created,
+		/// <summary>The graph update has been sent to the pathfinding system and is scheduled to be applied to the graphs</summary>
+		Pending,
+		/// <summary>The graph update has been applied to all graphs</summary>
+		Applied,
+		/// <summary>
+		/// The graph update has been aborted and will not be applied.
+		/// This can happen if the AstarPath component is destroyed while a graph update is queued to be applied.
+		/// </summary>
+		Aborted,
 	}
 
 	/// <summary>
@@ -473,7 +491,9 @@ namespace Pathfinding {
 		/// with settings from "Collision Testing" and "Height Testing".
 		///
 		/// When updating a PointGraph, setting this to true will make it re-evaluate all connections in the graph which passes through the <see cref="bounds"/>.
+		///
 		/// This has no effect when updating GridGraphs if <see cref="modifyWalkability"/> is turned on.
+		/// You should not combine <see cref="updatePhysics"/> and <see cref="modifyWalkability"/>.
 		///
 		/// On RecastGraphs, having this enabled will trigger a complete recalculation of all tiles intersecting the bounds.
 		/// This is quite slow (but powerful). If you only want to update e.g penalty on existing nodes, leave it disabled.
@@ -535,7 +555,11 @@ namespace Pathfinding {
 		/// </summary>
 		public int addPenalty;
 
-		/// <summary>If true, all nodes' walkable variable will be set to <see cref="setWalkability"/></summary>
+		/// <summary>
+		/// If true, all nodes' walkable variable will be set to <see cref="setWalkability"/>.
+		/// It is not recommended to combine this with <see cref="updatePhysics"/> since then you will just overwrite
+		/// what <see cref="updatePhysics"/> calculated.
+		/// </summary>
 		public bool modifyWalkability;
 
 		/// <summary>If <see cref="modifyWalkability"/> is true, the nodes' walkable variable will be set to this value</summary>
@@ -572,13 +596,43 @@ namespace Pathfinding {
 		public GraphUpdateShape shape;
 
 		/// <summary>
+		/// Info about if a graph update has been applied or not.
+		/// Either an enum (see STAGE_CREATED and associated constants)
+		/// or a non-negative count of the number of graphs that are waiting to apply this graph update.
+		/// </summary>
+		internal int internalStage = STAGE_CREATED;
+
+		internal const int STAGE_CREATED = -1;
+		internal const int STAGE_PENDING = -2;
+		internal const int STAGE_ABORTED = -3;
+		internal const int STAGE_APPLIED = 0;
+
+		/// <summary>Info about if a graph update has been applied or not</summary>
+		public GraphUpdateStage stage {
+			get {
+				switch (internalStage) {
+				case STAGE_CREATED:
+					return GraphUpdateStage.Created;
+				case STAGE_APPLIED:
+					return GraphUpdateStage.Applied;
+				case STAGE_ABORTED:
+					return GraphUpdateStage.Aborted;
+				// Positive numbers means it is currently being applied, so it is also pending.
+				default:
+				case STAGE_PENDING:
+					return GraphUpdateStage.Pending;
+				}
+			}
+		}
+
+		/// <summary>
 		/// Should be called on every node which is updated with this GUO before it is updated.
 		/// See: <see cref="trackChangedNodes"/>
 		/// </summary>
 		/// <param name="node">The node to save fields for. If null, nothing will be done</param>
 		public virtual void WillUpdateNode (GraphNode node) {
 			if (trackChangedNodes && node != null) {
-				if (changedNodes == null) { changedNodes = ListPool<GraphNode>.Claim (); backupData = ListPool<uint>.Claim (); backupPositionData = ListPool<Int3>.Claim (); }
+				if (changedNodes == null) { changedNodes = ListPool<GraphNode>.Claim(); backupData = ListPool<uint>.Claim(); backupPositionData = ListPool<Int3>.Claim(); }
 				changedNodes.Add(node);
 				backupPositionData.Add(node.position);
 				backupData.Add(node.Penalty);
@@ -627,9 +681,9 @@ namespace Pathfinding {
 					changedNodes[i].SetConnectivityDirty();
 				}
 
-				ListPool<GraphNode>.Release (ref changedNodes);
-				ListPool<uint>.Release (ref backupData);
-				ListPool<Int3>.Release (ref backupPositionData);
+				ListPool<GraphNode>.Release(ref changedNodes);
+				ListPool<uint>.Release(ref backupData);
+				ListPool<Int3>.Release(ref backupPositionData);
 			} else {
 				throw new System.InvalidOperationException("Changed nodes have not been tracked, cannot revert from backup. Please set trackChangedNodes to true before applying the update.");
 			}
@@ -665,14 +719,17 @@ namespace Pathfinding {
 
 	/// <summary>Graph which supports the Linecast method</summary>
 	public interface IRaycastableGraph {
-		bool Linecast (Vector3 start, Vector3 end);
-		bool Linecast (Vector3 start, Vector3 end, GraphNode hint);
-		bool Linecast (Vector3 start, Vector3 end, GraphNode hint, out GraphHitInfo hit);
-		bool Linecast (Vector3 start, Vector3 end, GraphNode hint, out GraphHitInfo hit, List<GraphNode> trace);
+		bool Linecast(Vector3 start, Vector3 end);
+		bool Linecast(Vector3 start, Vector3 end, GraphNode hint);
+		bool Linecast(Vector3 start, Vector3 end, GraphNode hint, out GraphHitInfo hit);
+		bool Linecast(Vector3 start, Vector3 end, GraphNode hint, out GraphHitInfo hit, List<GraphNode> trace);
+		bool Linecast(Vector3 start, Vector3 end, out GraphHitInfo hit, List<GraphNode> trace, System.Func<GraphNode, bool> filter);
 	}
 
 	/// <summary>
 	/// Integer Rectangle.
+	/// Uses an inclusive coordinate range.
+	///
 	/// Works almost like UnityEngine.Rect but with integer coordinates
 	/// </summary>
 	[System.Serializable]
@@ -699,6 +756,12 @@ namespace Pathfinding {
 		public int Height {
 			get {
 				return ymax-ymin+1;
+			}
+		}
+
+		public int Area {
+			get {
+				return Width * Height;
 			}
 		}
 
@@ -898,14 +961,14 @@ namespace Pathfinding {
 	 * Example function:
 	 * \snippet MiscSnippets.cs OnPathDelegate
 	 */
-	public delegate void OnPathDelegate (Path p);
+	public delegate void OnPathDelegate(Path p);
 
-	public delegate void OnGraphDelegate (NavGraph graph);
+	public delegate void OnGraphDelegate(NavGraph graph);
 
-	public delegate void OnScanDelegate (AstarPath script);
+	public delegate void OnScanDelegate(AstarPath script);
 
 	/// <summary>Deprecated:</summary>
-	public delegate void OnScanStatus (Progress progress);
+	public delegate void OnScanStatus(Progress progress);
 
 	#endregion
 

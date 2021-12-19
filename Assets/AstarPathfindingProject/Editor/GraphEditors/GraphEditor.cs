@@ -26,11 +26,11 @@ namespace Pathfinding {
 		public virtual void OnEnable () {
 		}
 
-		public static Object ObjectField (string label, Object obj, System.Type objType, bool allowSceneObjects) {
-			return ObjectField(new GUIContent(label), obj, objType, allowSceneObjects);
+		public static Object ObjectField (string label, Object obj, System.Type objType, bool allowSceneObjects, bool assetsMustBeInResourcesFolder) {
+			return ObjectField(new GUIContent(label), obj, objType, allowSceneObjects, assetsMustBeInResourcesFolder);
 		}
 
-		public static Object ObjectField (GUIContent label, Object obj, System.Type objType, bool allowSceneObjects) {
+		public static Object ObjectField (GUIContent label, Object obj, System.Type objType, bool allowSceneObjects, bool assetsMustBeInResourcesFolder) {
 			obj = EditorGUILayout.ObjectField(label, obj, objType, allowSceneObjects);
 
 			if (obj != null) {
@@ -47,32 +47,34 @@ namespace Pathfinding {
 						}
 					}
 				} else if (EditorUtility.IsPersistent(obj)) {
-					string path = AssetDatabase.GetAssetPath(obj).Replace("\\", "/");
-					var rg = new System.Text.RegularExpressions.Regex(@"Resources/.*$");
+					if (assetsMustBeInResourcesFolder) {
+						string path = AssetDatabase.GetAssetPath(obj).Replace("\\", "/");
+						var rg = new System.Text.RegularExpressions.Regex(@"Resources/.*$");
 
-					if (!rg.IsMatch(path)) {
-						if (FixLabel("Object must be in the 'Resources' folder")) {
-							if (!System.IO.Directory.Exists(Application.dataPath+"/Resources")) {
-								System.IO.Directory.CreateDirectory(Application.dataPath+"/Resources");
-								AssetDatabase.Refresh();
-							}
+						if (!rg.IsMatch(path)) {
+							if (FixLabel("Object must be in the 'Resources' folder")) {
+								if (!System.IO.Directory.Exists(Application.dataPath+"/Resources")) {
+									System.IO.Directory.CreateDirectory(Application.dataPath+"/Resources");
+									AssetDatabase.Refresh();
+								}
 
-							string ext = System.IO.Path.GetExtension(path);
-							string error = AssetDatabase.MoveAsset(path, "Assets/Resources/"+obj.name+ext);
+								string ext = System.IO.Path.GetExtension(path);
+								string error = AssetDatabase.MoveAsset(path, "Assets/Resources/"+obj.name+ext);
 
-							if (error == "") {
-								path = AssetDatabase.GetAssetPath(obj);
-							} else {
-								Debug.LogError("Couldn't move asset - "+error);
+								if (error == "") {
+									path = AssetDatabase.GetAssetPath(obj);
+								} else {
+									Debug.LogError("Couldn't move asset - "+error);
+								}
 							}
 						}
-					}
 
-					if (!AssetDatabase.IsMainAsset(obj) && obj.name != AssetDatabase.LoadMainAssetAtPath(path).name) {
-						if (FixLabel("Due to technical reasons, the main asset must\nhave the same name as the referenced asset")) {
-							string error = AssetDatabase.RenameAsset(path, obj.name);
-							if (error != "") {
-								Debug.LogError("Couldn't rename asset - "+error);
+						if (!AssetDatabase.IsMainAsset(obj) && obj.name != AssetDatabase.LoadMainAssetAtPath(path).name) {
+							if (FixLabel("Due to technical reasons, the main asset must\nhave the same name as the referenced asset")) {
+								string error = AssetDatabase.RenameAsset(path, obj.name);
+								if (error != "") {
+									Debug.LogError("Couldn't rename asset - "+error);
+								}
 							}
 						}
 					}

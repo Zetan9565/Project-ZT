@@ -46,52 +46,6 @@ MonoBehaviour:
   - {fileID: -9104212791377172996}
   - {fileID: -5555195295319423902}
   abortType: 0
---- !u!114 &-7192465467389885076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da6a273dc3cc9e54686bfe8e79bee0c4, type: 3}
-  m_Name: (5) MoveToPoint
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 768d0c442b025504fb93bd3035f3d330
-  _position: {x: -150, y: 318}
-  _description: 
-  point:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: {x: 0, y: 0, z: 0}
-  stopDistance:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
---- !u!114 &-6018192572495175186
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ccadf94414932b4684438af50c21bbf, type: 3}
-  m_Name: (4) Parallel
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 7238636e6c62c1b47a776eb877174bc5
-  _position: {x: -45, y: 182}
-  _description: 
-  children:
-  - {fileID: -7192465467389885076}
-  - {fileID: -224557394208396486}
-  abortType: 0
 --- !u!114 &-5555195295319423902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -107,22 +61,6 @@ MonoBehaviour:
   isRuntime: 0
   guid: ebab8152b5e488b40b409e8409c9f5a8
   _position: {x: 21.7, y: 288.00006}
-  _description: 
---- !u!114 &-224557394208396486
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9993540cb76b58b44aa14b4038d90241, type: 3}
-  m_Name: (6) Roll
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 4d50743c05d49624aa55b9306061acb6
-  _position: {x: 51.7, y: 318.00006}
   _description: 
 --- !u!114 &11400000
 MonoBehaviour:
@@ -144,13 +82,11 @@ MonoBehaviour:
   - {fileID: -9104212791377172996}
   - {fileID: -8448230157291039244}
   - {fileID: -5555195295319423902}
-  - {fileID: -6018192572495175186}
-  - {fileID: -7192465467389885076}
-  - {fileID: -224557394208396486}
   variables: []
   isRuntime: 0
   references:
-    version: 1
+    version: 2
+    RefIds: []
 --- !u!114 &4412341204687091695
 MonoBehaviour:
   m_ObjectHideFlags: 0

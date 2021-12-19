@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Pathfinding.WindowsStore;
+using Pathfinding.Serialization;
 #if UNITY_WINRT && !UNITY_EDITOR
 //using MarkerMetro.Unity.WinLegacy.IO;
 //using MarkerMetro.Unity.WinLegacy.Reflection;
@@ -108,10 +109,10 @@ namespace Pathfinding {
 					data = upgradeData;
 					upgradeData = null;
 				}
-				return dataString != null? System.Convert.FromBase64String (dataString) : null;
+				return dataString != null? System.Convert.FromBase64String(dataString) : null;
 			}
 			set {
-				dataString = value != null? System.Convert.ToBase64String (value) : null;
+				dataString = value != null? System.Convert.ToBase64String(value) : null;
 			}
 		}
 
@@ -265,7 +266,7 @@ namespace Pathfinding {
 		/// See: DeserializeGraphs(byte[])
 		/// </summary>
 		public byte[] SerializeGraphs () {
-			return SerializeGraphs(Pathfinding.Serialization.SerializeSettings.Settings);
+			return SerializeGraphs(SerializeSettings.Settings);
 		}
 
 		/// <summary>
@@ -273,7 +274,7 @@ namespace Pathfinding {
 		/// See: DeserializeGraphs(byte[])
 		/// See: Pathfinding.Serialization.SerializeSettings
 		/// </summary>
-		public byte[] SerializeGraphs (Pathfinding.Serialization.SerializeSettings settings) {
+		public byte[] SerializeGraphs (SerializeSettings settings) {
 			uint checksum;
 
 			return SerializeGraphs(settings, out checksum);
@@ -284,9 +285,9 @@ namespace Pathfinding {
 		/// Serializes all graphs to a byte array
 		/// A similar function exists in the AstarPathEditor.cs script to save additional info
 		/// </summary>
-		public byte[] SerializeGraphs (Pathfinding.Serialization.SerializeSettings settings, out uint checksum) {
+		public byte[] SerializeGraphs (SerializeSettings settings, out uint checksum) {
 			var graphLock = AssertSafe();
-			var sr = new Pathfinding.Serialization.AstarSerializer(this, settings);
+			var sr = new AstarSerializer(this, settings, active.gameObject);
 
 			sr.OpenSerialize();
 			sr.SerializeGraphs(graphs);
@@ -316,7 +317,7 @@ namespace Pathfinding {
 					graphs[i].active = null;
 				}
 			}
-			graphs = null;
+			graphs = new NavGraph[0];
 			UpdateShortcuts();
 		}
 
@@ -346,7 +347,7 @@ namespace Pathfinding {
 
 			try {
 				if (bytes != null) {
-					var sr = new Pathfinding.Serialization.AstarSerializer(this);
+					var sr = new AstarSerializer(this, active.gameObject);
 
 					if (sr.OpenDeserialize(bytes)) {
 						DeserializeGraphsPartAdditive(sr);
@@ -368,7 +369,7 @@ namespace Pathfinding {
 		}
 
 		/// <summary>Helper function for deserializing graphs</summary>
-		void DeserializeGraphsPartAdditive (Pathfinding.Serialization.AstarSerializer sr) {
+		void DeserializeGraphsPartAdditive (AstarSerializer sr) {
 			if (graphs == null) graphs = new NavGraph[0];
 
 			var gr = new List<NavGraph>(graphs);

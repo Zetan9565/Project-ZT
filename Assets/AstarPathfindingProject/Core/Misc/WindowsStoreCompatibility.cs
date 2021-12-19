@@ -42,8 +42,8 @@ namespace Pathfinding.WindowsStore {
 	}
 
 #if NETFX_CORE
-	public delegate void ParameterizedThreadStart (System.Object ob);
-	public delegate void ThreadStart ();
+	public delegate void ParameterizedThreadStart(System.Object ob);
+	public delegate void ThreadStart();
 
 	public class Thread {
 		//

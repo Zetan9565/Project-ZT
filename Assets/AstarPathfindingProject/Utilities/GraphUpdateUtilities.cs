@@ -21,9 +21,6 @@ namespace Pathfinding {
 		/// This is slower than a normal graph update.
 		/// All queued graph updates and thread safe callbacks will be flushed during this function.
 		///
-		/// Note: This might return true for small areas even if there is no possible path if AstarPath.minAreaSize is greater than zero (0).
-		/// So when using this, it is recommended to set AstarPath.minAreaSize to 0 (A* Inspector -> Settings -> Pathfinding)
-		///
 		/// Returns: True if the given nodes are still reachable from each other after the guo has been applied. False otherwise.
 		///
 		/// <code>
@@ -47,13 +44,13 @@ namespace Pathfinding {
 		/// <param name="node2">Node which should have a valid path to node1. All nodes should be walkable or false will be returned.</param>
 		/// <param name="alwaysRevert">If true, reverts the graphs to the old state even if no blocking occurred</param>
 		public static bool UpdateGraphsNoBlock (GraphUpdateObject guo, GraphNode node1, GraphNode node2, bool alwaysRevert = false) {
-			List<GraphNode> buffer = ListPool<GraphNode>.Claim ();
+			List<GraphNode> buffer = ListPool<GraphNode>.Claim();
 
 			buffer.Add(node1);
 			buffer.Add(node2);
 
 			bool worked = UpdateGraphsNoBlock(guo, buffer, alwaysRevert);
-			ListPool<GraphNode>.Release (ref buffer);
+			ListPool<GraphNode>.Release(ref buffer);
 			return worked;
 		}
 
@@ -64,25 +61,27 @@ namespace Pathfinding {
 		/// This is slower than a normal graph update.
 		/// All queued graph updates will be flushed during this function.
 		///
-		/// Note: This might return true for small areas even if there is no possible path if AstarPath.minAreaSize is greater than zero (0).
-		/// So when using this, it is recommended to set AstarPath.minAreaSize to 0. (A* Inspector -> Settings -> Pathfinding)
-		///
 		/// Returns: True if the given nodes are still reachable from each other after the guo has been applied. False otherwise.
 		/// </summary>
 		/// <param name="guo">The GraphUpdateObject to update the graphs with</param>
 		/// <param name="nodes">Nodes which should have valid paths between them. All nodes should be walkable or false will be returned.</param>
 		/// <param name="alwaysRevert">If true, reverts the graphs to the old state even if no blocking occurred</param>
 		public static bool UpdateGraphsNoBlock (GraphUpdateObject guo, List<GraphNode> nodes, bool alwaysRevert = false) {
-			// Make sure all nodes are walkable
-			for (int i = 0; i < nodes.Count; i++) if (!nodes[i].Walkable) return false;
-
-			// Track changed nodes to enable reversion of the guo
-			guo.trackChangedNodes = true;
 			bool worked;
 
 			// Pause pathfinding while modifying the graphs
 			var graphLock = AstarPath.active.PausePathfinding();
+
 			try {
+				// Make sure any pending graph updates have been done before we start
+				AstarPath.active.FlushGraphUpdates();
+
+				// Make sure all nodes are walkable
+				for (int i = 0; i < nodes.Count; i++) if (!nodes[i].Walkable) return false;
+
+				// Track changed nodes to enable reversion of the guo
+				guo.trackChangedNodes = true;
+
 				AstarPath.active.UpdateGraphs(guo);
 
 				// Update the graphs immediately

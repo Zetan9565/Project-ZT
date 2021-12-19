@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Pathfinding {
 	/// <summary>Exposes internal methods from <see cref="Pathfinding.VersionedMonoBehaviour"/></summary>
 	public interface IVersionedMonoBehaviourInternal {
-		void UpgradeFromUnityThread ();
+		void UpgradeFromUnityThread();
 	}
 
 	/// <summary>Base class for all components in the package</summary>
