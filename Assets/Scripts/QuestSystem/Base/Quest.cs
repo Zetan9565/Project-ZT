@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 [CreateAssetMenu(fileName = "quest", menuName = "Zetan Studio/任务/任务", order = 1)]
 public class Quest : ScriptableObject
 {

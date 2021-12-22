@@ -2,8 +2,6 @@
     <Style src="project://database/Assets/Scripts/BehaviourSystem/Editor/BehaviourTreeEditor.uss?fileID=7433441132597879392&amp;guid=4aa7045723842c548af9b7870490cd32&amp;type=3#BehaviourTreeEditor" />
     <uie:Toolbar>
         <uie:ToolbarMenu display-tooltip-when-elided="true" text="文件" name="assets" style="width: 48px; -unity-font: resource(&apos;Font/Default&apos;); padding-right: 2px;" />
-        <uie:ToolbarButton text="撤销" display-tooltip-when-elided="true" name="undo" style="-unity-text-align: middle-center; -unity-font: resource(&apos;Font/Default&apos;); margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 4px; padding-right: 4px;" />
-        <uie:ToolbarButton text="重做" display-tooltip-when-elided="true" name="redo" style="-unity-text-align: middle-center; white-space: nowrap; -unity-font: resource(&apos;Font/Default&apos;); margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 4px; padding-right: 4px;" />
         <uie:ToolbarMenu display-tooltip-when-elided="true" name="exe-select" text="选择行为树" style="flex-direction: row; -unity-font: resource(&apos;Font/Default&apos;); justify-content: flex-start; position: relative; right: auto;" />
     </uie:Toolbar>
     <ZetanStudio.BehaviourTree.SplitView fixed-pane-initial-dimension="300">

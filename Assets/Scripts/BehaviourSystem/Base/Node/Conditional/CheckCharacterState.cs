@@ -7,7 +7,7 @@ public class CheckCharacterState : Conditional
     public CharacterStates mainState;
     [DisplayName("检查子状态")]
     public bool checkSubState;
-    [DisplayName("子状态"), HideIf("checkSubState", false), SubState("mainState")]
+    [DisplayName("子状态"), HideIf_BT("checkSubState", false), SubState("mainState")]
     public int subState;
 
     private Character character;

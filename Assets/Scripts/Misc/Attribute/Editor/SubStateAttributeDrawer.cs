@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -9,10 +10,39 @@ public class SubStateAttributeDrawer : PropertyDrawer
     {
         SubStateAttribute attr = attribute as SubStateAttribute;
         SerializedProperty main = property.serializedObject.FindProperty(attr.mainField);
-        if (main != null)
+        string[] paths = property.propertyPath.Split('.');
+        object value = property.serializedObject.targetObject;
+        for (int i = 0; i < paths.Length - 1; i++)
+        {
+            if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
+            {
+                if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
+                {
+                    if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
+                    {
+                        if (GetValue(paths[i], value) is IList list)
+                        {
+                            value = list[index];
+                            i += 2;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                value = GetValue(paths[i], value);
+            }
+
+            static object GetValue(string path, object target)
+            {
+                return target.GetType().GetField(path, ZetanUtility.CommonBindingFlags).GetValue(target);
+            }
+        }
+        value = value.GetType().GetField(attr.mainField, ZetanUtility.CommonBindingFlags).GetValue(value);
+        if (value != null)
         {
             List<GUIContent> names = new List<GUIContent>();
-            switch ((CharacterStates)main.enumValueIndex)
+            switch ((CharacterStates)value)
             {
                 case CharacterStates.Normal:
                     foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterNormalStates)))
@@ -50,5 +80,6 @@ public class SubStateAttributeDrawer : PropertyDrawer
             }
             property.intValue = EditorGUI.Popup(position, label, property.intValue, names.ToArray());
         }
+        else EditorGUI.PropertyField(position, property, label);
     }
 }

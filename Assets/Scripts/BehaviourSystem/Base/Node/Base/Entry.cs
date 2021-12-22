@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ namespace ZetanStudio.BehaviourTree
     [NodeDescription("开始结点：每棵行为树的根结点，应该有且只能有一个")]
     public sealed class Entry : Node
     {
-        [SerializeField]
+        [SerializeReference]
         private Node start;
 
         public override bool IsValid => start;
@@ -46,18 +47,17 @@ namespace ZetanStudio.BehaviourTree
             if (child == start) start = null;
         }
 
-        public override Node ConvertToLocal()
+        public override Node Copy()
         {
-            Entry entry = ConvertToLocal<Entry>();
-            if (start) entry.start = start.ConvertToLocal();
+            Entry entry = MemberwiseClone() as Entry;
+            if (start) entry.start = start.Copy();
             return entry;
         }
 
-        public override Node Copy()
+        public void ConvertToRuntime()
         {
-            Entry entry = Instantiate(this);
-            if (start) entry.start = start.Copy();
-            return entry;
+            name += "(R)";
+            isRuntime = true;
         }
 #endif
     }

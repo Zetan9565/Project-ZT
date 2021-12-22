@@ -1,19 +1,18 @@
 using UnityEngine;
 using ZetanStudio.BehaviourTree;
-using HideIf = ZetanStudio.BehaviourTree.HideIfAttribute;
 
 [NodeDescription("随机巡逻：在给定的范围内随机巡逻")]
 public class RandomPatrol : PathMovement
 {
     [DisplayName("范围而不是边界")]
     public bool useRange = true;
-    [DisplayName("范围半径"), @HideIf("useRange", false)]
+    [DisplayName("范围半径"), HideIf_BT("useRange", false)]
     public SharedFloat range = 10f;
-    [DisplayName("盲区半径"), @HideIf("useRange", false), Tooltip("不会在此范围内取点")]
+    [DisplayName("盲区半径"), HideIf_BT("useRange", false), Tooltip("不会在此范围内取点")]
     public SharedFloat blindRange = 0f;
-    [DisplayName("边界右上角"), @HideIf("useRange", true)]
+    [DisplayName("边界右上角"), HideIf_BT("useRange", true)]
     public SharedVector3 boundMin;
-    [DisplayName("边界左下角"), @HideIf("useRange", true)]
+    [DisplayName("边界左下角"), HideIf_BT("useRange", true)]
     public SharedVector3 boundMax;
     [DisplayName("巡逻间隔")]
     public SharedFloat interval = 1f;

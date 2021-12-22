@@ -8,7 +8,7 @@ namespace ZetanStudio.BehaviourTree
     /// </summary>
     public abstract class Composite : Node
     {
-        [SerializeField]
+        [SerializeReference]
         protected List<Node> children;
 
         [SerializeField, DisplayName("中止类型")]
@@ -133,16 +133,9 @@ namespace ZetanStudio.BehaviourTree
             SortByPosition();
         }
 
-        public override Node ConvertToLocal()
-        {
-            Composite composite = ConvertToLocal<Composite>();
-            composite.children = children.ConvertAll(c => c.ConvertToLocal());
-            return composite;
-        }
-
         public override Node Copy()
         {
-            Composite composite = Instantiate(this);
+            Composite composite = MemberwiseClone() as Composite;
             if (children != null) composite.children = children.ConvertAll(c => c.Copy());
             return composite;
         }

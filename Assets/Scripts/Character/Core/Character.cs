@@ -1,7 +1,6 @@
 using UnityEngine;
 using ZetanExtends;
 
-[RequireComponent(typeof(CharacterSMRunner))]
 public abstract class Character<T> : Character where T : CharacterData
 {
     [SerializeReference, ReadOnly]
@@ -29,10 +28,11 @@ public abstract class Character<T> : Character where T : CharacterData
     {
         SetGenericData(data);
         GetData().entity = this;
-        StateMachine.Init(this);
+        StateMachine?.Init(this);
     }
 }
 
+[RequireComponent(typeof(CharacterSMRunner))]
 public abstract class Character : MonoBehaviour
 {
     public Vector3 Position => transform.position;
@@ -60,7 +60,7 @@ public abstract class Character : MonoBehaviour
 #endif
     }
 
-    protected void OnValidate()
+    protected virtual void OnValidate()
     {
         if (GetComponent<CharacterSMRunner>() is CharacterSMRunner machine)
             machine.hideFlags = HideFlags.HideInInspector;

@@ -6,16 +6,13 @@ using UnityEngine;
 
 namespace ZetanStudio.BehaviourTree
 {
+    [Serializable]
     /// <summary>
     /// 结点基类，所有后续扩展结点都继承于此
     /// </summary>
-    public abstract class Node : ScriptableObject
+    public abstract class Node
     {
-        //为什么使用ScriptableObject：树本身是ScriptableObject生成的asset文件，而Unity保存
-        //asset的方式类似于json，所以有时候看着是同样的asset，其实已经是某次反序列化的结果，
-        //不是最初的那个了，这会造成Node之间的相互引用丢失，比如父结点失去子结点。都使用Scri-
-        //-ptableObject则可以避免这一点。当然，结点之间的关联可以用某种键值定义，每次需要访问
-        //子结点都传入树对象并根据这种键值从中找对应的结点，如此复杂，何必多此一举。
+        public string name;
 
         /// <summary>
         /// 结点是否有效
@@ -49,14 +46,15 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         public virtual Transform transform => Shortcut ? Shortcut.transform : null;
 
+        /// <summary>
+        /// 是否是实例
+        /// </summary>
         public bool IsInstance { get; protected set; }
 
         [SerializeField]
         protected bool isRuntime;//要暴露给Unity，要不然每运行一次就会被重置
         public bool IsRuntime => isRuntime;
-        /// <summary>
-        /// 是否是实例
-        /// </summary>
+
         #endregion
 
         #region 运行时方法
@@ -67,7 +65,7 @@ namespace ZetanStudio.BehaviourTree
                 IsInstance = true;
                 return this;
             }
-            Node node = Instantiate(this);
+            Node node = MemberwiseClone() as Node;
             node.IsInstance = true;
             return node;
         }
@@ -78,7 +76,7 @@ namespace ZetanStudio.BehaviourTree
                 IsInstance = true;
                 return this as T;
             }
-            Node node = Instantiate(this);
+            Node node = MemberwiseClone() as Node;
             node.IsInstance = true;
             return node as T;
         }
@@ -184,9 +182,9 @@ namespace ZetanStudio.BehaviourTree
             IsPaused = paused;
         }
         /// <summary>
-        /// 重置此结点，区别于ScriptableObject.Reset()
+        /// 重置此结点
         /// </summary>
-        public void Reset_()
+        public void Reset()
         {
             State = NodeStates.Inactive;
             isStarted = false;
@@ -356,15 +354,15 @@ namespace ZetanStudio.BehaviourTree
         #region EDITOR
 #if UNITY_EDITOR
         /// <summary>
-        /// 用于标识编辑器结点，不应在游戏逻辑中使用
+        /// 用于在编辑器中标识结点，不应在游戏逻辑中使用
         /// </summary>
         [HideInInspector] public string guid;
         /// <summary>
-        /// 用于设置编辑器结点位置，不应在游戏逻辑中使用
+        /// 用于在编辑器中设置结点位置，不应在游戏逻辑中使用
         /// </summary>
         [HideInInspector] public Vector2 _position;
         /// <summary>
-        /// 用于在编辑器中备注结点功能，不应在游戏逻辑中使用
+        /// 用于在编辑器中备注结点，不应在游戏逻辑中使用
         /// </summary>
         [TextArea, DisplayName("描述")] public string _description;
 
@@ -387,31 +385,21 @@ namespace ZetanStudio.BehaviourTree
         {
             if (type.IsSubclassOf(typeof(Node)))
             {
-                Node node = CreateInstance(type) as Node;
+                Node node = Activator.CreateInstance(type) as Node;
                 node.isRuntime = true;
                 return node;
             }
             return null;
         }
 
-        protected T ConvertToLocal<T>() where T : Node
-        {
-            Node node = UnityEditor.EditorUtility.IsPersistent(this) ? this : Instantiate(this);
-            node.name = node.name.Replace("(R)(Clone)", "");
-            node.isRuntime = false;
-            return node as T;
-        }
-
         /// <summary>
         /// 用于在编辑器中本地化行为树，不应在游戏逻辑中使用
         /// </summary>
         /// <returns></returns>
-        public virtual Node ConvertToLocal()
+        public void ConvertToLocal()
         {
-            Node node = UnityEditor.EditorUtility.IsPersistent(this) ? this : Instantiate(this);
-            node.name = node.name.Replace("(R)(Clone)", "");
-            node.isRuntime = false;
-            return node;
+            name = name.Replace("(R)", "");
+            isRuntime = false;
         }
 
         /// <summary>
@@ -420,7 +408,7 @@ namespace ZetanStudio.BehaviourTree
         /// <returns>克隆的结点</returns>
         public virtual Node Copy()
         {
-            return Instantiate(this);
+            return MemberwiseClone() as Node;
         }
 #endif
         #endregion

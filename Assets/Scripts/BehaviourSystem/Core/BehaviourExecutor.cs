@@ -52,7 +52,7 @@ namespace ZetanStudio.BehaviourTree
         {
             variable = null;
             if (!behaviour) return false;
-            return behaviour.TryGetVariable<T>(name, out variable);
+            return behaviour.TryGetVariable(name, out variable);
         }
 
         public List<SharedVariable> GetVariables(Type type)

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ZetanStudio.BehaviourTree
 {
-    [System.Serializable]
+    [Serializable]
     public abstract class SharedVariable
     {
         [SerializeField]
@@ -24,7 +24,7 @@ namespace ZetanStudio.BehaviourTree
         public Action<object> onValueChanged;
     }
 
-    [System.Serializable]
+    [Serializable]
     public abstract class SharedVariable<T> : SharedVariable
     {
         [SerializeField]

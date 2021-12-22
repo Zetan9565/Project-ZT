@@ -7,7 +7,7 @@ namespace ZetanStudio.BehaviourTree
         public SharedFloat successProbability = 0.5f;
         [DisplayName("自定义种子")]
         public SharedBool useSeed;
-        [DisplayName("随机种子"), HideIf("useSeed.value", false)]
+        [DisplayName("随机种子"), HideIf_BT("useSeed.value", false)]
         public SharedInt seed;
 
         private System.Random random;

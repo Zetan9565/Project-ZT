@@ -14,13 +14,13 @@ namespace ZetanStudio.BehaviourTree
     }
 
     [AttributeUsage(AttributeTargets.Field)]
-    public class HideIfAttribute : Attribute
+    public class HideIf_BTAttribute : Attribute
     {
         public readonly string path;
         public readonly object value;
         public readonly bool readOnly;
 
-        public HideIfAttribute(string path, object value, bool readOnly = false)
+        public HideIf_BTAttribute(string path, object value, bool readOnly = false)
         {
             this.path = path;
             this.value = value;
@@ -29,14 +29,14 @@ namespace ZetanStudio.BehaviourTree
     }
 
     [AttributeUsage(AttributeTargets.Field)]
-    public class Tag : Attribute { }
+    public class Tag_BTAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.Field)]
-    public class VariableName : Attribute
+    public class NameOfVariableAttribute : Attribute
     {
         public readonly Type type;
 
-        public VariableName(Type type)
+        public NameOfVariableAttribute(Type type)
         {
             this.type = type;
         }

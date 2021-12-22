@@ -78,7 +78,7 @@ public class QuestInspector : Editor
         _NPCToSubmit = serializedObject.FindProperty("_NPCToSubmit");
         cmpltObjctvInOrder = serializedObject.FindProperty("cmpltObjctvInOrder");
         objectives = serializedObject.FindProperty("objectives");
-        groupSelector = new ObjectSelectionDrawer<QuestGroup>(group, "_name", "Configuration", "归属组", "无");
+        groupSelector = new ObjectSelectionDrawer<QuestGroup>(group, "_name", "Assets/Resources/Configuration", "归属组", "无");
         npcSelector = new ObjectSelectionDrawer<TalkerInformation>(_NPCToSubmit, "_name", npcs, "在此NPC处提交", "接取处NPC");
         acceptConditionDrawer = new ConditionGroupDrawer(serializedObject, acceptCondition, lineHeight, lineHeightSpace, "接取条件列表");
         rewardDrawer = new ItemAmountListDrawer(serializedObject, rewardItems, lineHeight, lineHeightSpace, "奖励列表");
@@ -434,15 +434,15 @@ public class QuestInspector : Editor
                             switch (killType.enumValueIndex)
                             {
                                 case (int)KillObjectiveType.Specific:
-                                    new ObjectSelectionDrawer<EnemyInformation>(enemy, "_name", e => e.Race ? e.Race.Name : string.Empty, "Configuration", "目标敌人").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                                    new ObjectSelectionDrawer<EnemyInformation>(enemy, "_name", e => e.Race ? e.Race.Name : string.Empty, "Assets/Resources/Configuration", "目标敌人").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                                     lineCount++;
                                     break;
                                 case (int)KillObjectiveType.Race:
-                                    new ObjectSelectionDrawer<EnemyRace>(race, "_name", "Configuration", "目标种族").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                                    new ObjectSelectionDrawer<EnemyRace>(race, "_name", "Assets/Resources/Configuration", "目标种族").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                                     lineCount++;
                                     break;
                                 case (int)KillObjectiveType.Group:
-                                    new ObjectSelectionDrawer<EnemyGroup>(group, "_name", "Configuration", "目标组合").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                                    new ObjectSelectionDrawer<EnemyGroup>(group, "_name", "Assets/Resources/Configuration", "目标组合").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                                     lineCount++;
                                     break;
                                 default: break;

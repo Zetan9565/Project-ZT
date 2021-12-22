@@ -35,14 +35,22 @@ public class HideIfPropertyDrawer : PropertyDrawer
 
     private bool ShouldHide(HideIfAttribute hideAttr, SerializedProperty property)
     {
-        if (ZetanEditorUtility.TryGetMemberValue(hideAttr.path, property.serializedObject.targetObject, out var value, out _))
+        if (ZetanEditorUtility.TryGetValue(property, out var target))
         {
-            if (Equals(value, hideAttr.value)) return true;
-            else return false;
+            if (ZetanEditorUtility.TryGetMemberValue(hideAttr.path, target, out var value, out _))
+            {
+                if (Equals(value, hideAttr.value)) return true;
+                else return false;
+            }
+            else
+            {
+                Debug.LogWarning("找不到路径：" + hideAttr.path);
+                return false;
+            }
         }
         else
         {
-            Debug.LogWarning("找不到路径：" + hideAttr.path);
+            Debug.LogWarning("无法访问：" + property.propertyPath);
             return false;
         }
     }

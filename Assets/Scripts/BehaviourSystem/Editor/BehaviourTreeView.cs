@@ -14,11 +14,9 @@ namespace ZetanStudio.BehaviourTree
 
         public Action<NodeEditor> nodeSelectedCallback;
         public Action<NodeEditor> nodeUnselectedCallback;
-        public System.Action undoChangedCallback;
         public BehaviourTree tree;
 
         private BehaviourTree treeBef;
-        private readonly UndoRedo Undo;
         private readonly BehaviourTreeSettings settings;
 
         public BehaviourTreeView()
@@ -34,31 +32,8 @@ namespace ZetanStudio.BehaviourTree
             var styleSheet = settings.treeUss;
             styleSheets.Add(styleSheet);
 
-            Undo = new UndoRedo();
             Undo.undoRedoPerformed += OnUndoRedo;
-            Undo.onRecordsChanged += OnUndoChanged;
-            UnityEditor.Undo.undoRedoPerformed += OnUndoRedo;
         }
-
-        #region 撤销重做相关
-        public void UndoOperation()
-        {
-            Undo.PerformUndo();
-        }
-        public void RedoOperation()
-        {
-            Undo.PerformRedo();
-        }
-
-        public bool CanUndo()
-        {
-            return Undo.CanUndo;
-        }
-        public bool CanRedo()
-        {
-            return Undo.CanRedo;
-        }
-        #endregion
 
         #region 操作相关
         private void SelectNodeChildren(NodeEditor editor)
@@ -89,7 +64,7 @@ namespace ZetanStudio.BehaviourTree
             if (evt.target == this)
             {
                 Vector2 nodePosition = this.ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
-                var types = TypeCache.GetTypesDerivedFrom<Action>().OrderBy(x=>x.Name);
+                var types = TypeCache.GetTypesDerivedFrom<Action>().OrderBy(x => x.Name);
                 foreach (var type in types)
                 {
                     if (!type.IsAbstract && !type.IsGenericType)
@@ -125,17 +100,26 @@ namespace ZetanStudio.BehaviourTree
             }
             else if (evt.target is NodeEditor editor)
             {
-                if (editor.output != null && editor.output.connected)
+                if (editor.output != null && editor.output.connected && selection.Count < 2)
                     evt.menu.AppendAction("选择子结点", (a) => SelectNodeChildren(editor));
                 if (editor.node is not Entry)
                 {
                     evt.menu.AppendAction("删除", (a) => RightClickDeletion());
                     evt.menu.AppendAction("复制", (a) => CopyNode(editor));
                 }
-                if (!editor.node.GetType().IsSealed)
+                if (!editor.node.GetType().IsSealed && selection.Count < 2)
                 {
                     evt.menu.AppendSeparator();
-                    evt.menu.AppendAction("编辑脚本", (a) => AssetDatabase.OpenAsset(MonoScript.FromScriptableObject(editor.node)));
+                    var scripts = AssetDatabase.FindAssets($"t:monoscript {editor.node.GetType().Name}");
+                    evt.menu.AppendAction("编辑脚本", (a) =>
+                    {
+                        foreach (var s in scripts)
+                        {
+                            string path = AssetDatabase.GUIDToAssetPath(s);
+                            if (path.Contains($"/{editor.node.GetType().Name}.cs"))
+                                AssetDatabase.OpenAsset(AssetDatabase.LoadAssetAtPath<MonoScript>(path));
+                        }
+                    });
                 }
             }
             else if (evt.target is Edge edge)
@@ -158,10 +142,6 @@ namespace ZetanStudio.BehaviourTree
         #endregion
 
         #region 事件回调
-        private void OnUndoChanged()
-        {
-            undoChangedCallback?.Invoke();
-        }
         private void OnUndoRedo()
         {
             DrawTreeView(tree);
@@ -169,42 +149,48 @@ namespace ZetanStudio.BehaviourTree
         }
         private GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
         {
-            if (graphViewChange.elementsToRemove != null || graphViewChange.edgesToCreate != null)
-                Undo.RecordTreeChange(tree);
+            //if (graphViewChange.elementsToRemove != null && graphViewChange.elementsToRemove.Exists(elem => elem is NodeEditor))
+            //    Undo.RegisterCompleteObjectUndo(tree, "行为树变化");
             if (graphViewChange.elementsToRemove != null)
             {
+                HashSet<NodeEditor> removedNodes = new HashSet<NodeEditor>();
                 //为了保证撤销重做的顺利进行，先遍历结点，再遍历连线
                 graphViewChange.elementsToRemove.ForEach(elem =>
                 {
                     if (elem is NodeEditor editor)
                     {
                         tree.DeleteNode(editor.node);
-                        EditorUtility.SetDirty(tree);
+                        removedNodes.Add(editor);
                     }
-
+                });
+                graphViewChange.elementsToRemove.ForEach(elem =>
+                {
                     if (elem is Edge edge)
                     {
                         NodeEditor parent = edge.output.node as NodeEditor;
                         NodeEditor child = edge.input.node as NodeEditor;
+                        if (!removedNodes.Contains(parent) && !removedNodes.Contains(child))
+                            Undo.RegisterCompleteObjectUndo(tree, "断开子结点");
                         parent.node.RemoveChild(child.node);
                         UpdateValid(parent);
                         UpdateValid(child);
-                        EditorUtility.SetDirty(parent.node);
                     }
                 });
+                EditorUtility.SetDirty(tree);
             }
 
             if (graphViewChange.edgesToCreate != null)
             {
                 graphViewChange.edgesToCreate.ForEach(edge =>
                 {
+                    Undo.RegisterCompleteObjectUndo(tree, "链接子结点");
                     NodeEditor parent = edge.output.node as NodeEditor;
                     NodeEditor child = edge.input.node as NodeEditor;
                     parent.node.AddChild(child.node);
                     UpdateValid(parent);
                     UpdateValid(child);
-                    EditorUtility.SetDirty(parent.node);
                 });
+                EditorUtility.SetDirty(tree);
             }
 
             nodes.ForEach((n) =>
@@ -224,8 +210,7 @@ namespace ZetanStudio.BehaviourTree
 
         private void OnNodePositionChanged(NodeEditor editor, Vector2 oldPos)
         {
-            if (selection.Where(x => x is NodeEditor).Count() > 0) Undo.RecordMultNodePosition(editor.node, oldPos);
-            else Undo.RecordNodePosition(editor.node, oldPos);
+            Undo.RegisterCompleteObjectUndo(tree, "移动结点");
         }
         public void OnUpdate()
         {
@@ -234,7 +219,8 @@ namespace ZetanStudio.BehaviourTree
                 NodeEditor editor = n as NodeEditor;
                 if (Application.isPlaying)
                     editor.UpdateStates();
-                editor.UpdateInvalid();
+                editor.UpdateDesc();
+                editor.UpdateInvalid(tree);
                 editor.UpdateAbortType();
             });
         }
@@ -245,7 +231,7 @@ namespace ZetanStudio.BehaviourTree
         {
             if (newTree)
             {
-                if (treeBef != newTree) Undo.Clear();
+                if (treeBef != newTree) Undo.ClearUndo(treeBef);
                 tree = newTree;
             }
             if (tree != null) treeBef = tree;
@@ -255,12 +241,8 @@ namespace ZetanStudio.BehaviourTree
             graphViewChanged += OnGraphViewChanged;
 
             if (!tree) return;
-            if (EditorUtility.IsPersistent(tree) && tree.Entry == null)
-            {
-                CreateTreeNode(typeof(Entry), Vector2.zero);
-                AssetDatabase.SaveAssets();
-            }
-
+            if (string.IsNullOrEmpty(tree.Entry.guid))
+                tree.Entry.guid = UnityEditor.GUID.Generate().ToString();
             tree.Nodes.ForEach(n => CreateNode(n));
             tree.Nodes.ForEach(n => CreateEdges(n));
             tree.Nodes.ForEach(n => { if (n is Composite composite) composite.SortByPosition(); });
@@ -269,7 +251,7 @@ namespace ZetanStudio.BehaviourTree
         {
             if (type.IsSubclassOf(typeof(Node)))
                 if (tree.IsRuntime) return CreateNewNode(Node.GetRuntimeNode(type), $"({tree.Nodes.Count}) {type.Name}(R)", position);
-                else return CreateNewNode(ScriptableObject.CreateInstance(type) as Node, $"({tree.Nodes.Count}) {type.Name}", position);
+                else return CreateNewNode(Activator.CreateInstance(type) as Node, $"({tree.Nodes.Count}) {type.Name}", position);
             else return null;
         }
         #endregion
@@ -285,13 +267,14 @@ namespace ZetanStudio.BehaviourTree
                 if (!tree.IsRuntime) newNode = newNode.GetInstance();
                 newNode.Init(tree);
             }
-            if (record) Undo.RecordTreeChange(tree);
+            if (record) Undo.RegisterCompleteObjectUndo(tree, "新增结点");
             tree.AddNode(newNode);
             return CreateNode(newNode);
         }
         private NodeEditor CreateNode(Node node)
         {
             NodeEditor editor = new NodeEditor(node, nodeSelectedCallback, nodeUnselectedCallback, OnNodePositionChanged);
+            UpdateValid(editor);
             AddElement(editor);
             return editor;
         }
@@ -303,10 +286,10 @@ namespace ZetanStudio.BehaviourTree
         private void CopyNode(NodeEditor editor)
         {
             Node node = editor.node.Copy();
-            Undo.RecordTreeChange(tree);
+            Undo.RegisterCompleteObjectUndo(tree, "复制结点");
             BehaviourTree.Traverse(node, n =>
             {
-                CreateNewNode(n, $"({tree.Nodes.Count}) {n.GetType().Name}{(tree.IsRuntime ? "(R)" : string.Empty)}", n._position + new Vector2(30, 30), false);
+                CreateNewNode(n, $"({tree.Nodes.Count}) {n.GetType().Name}{(tree.IsRuntime ? "(R)" : string.Empty)}", n._position + new Vector2(30, 30));
             });
             DrawTreeView(tree);
         }
@@ -344,193 +327,6 @@ namespace ZetanStudio.BehaviourTree
 
             string templatePath = AssetDatabase.GetAssetPath(template.templateFile);
             ProjectWindowUtil.CreateScriptAssetFromTemplateFile(templatePath, template.fileName);
-        }
-
-        private class UndoRedo
-        {
-            public System.Action undoRedoPerformed;
-            public System.Action onRecordsChanged;
-
-            private readonly Stack<Record> undoRecords = new Stack<Record>();
-            private readonly Stack<Record> redoRecords = new Stack<Record>();
-
-            public bool CanUndo => undoRecords.Count > 0;
-            public bool CanRedo => redoRecords.Count > 0;
-
-            public void RecordNodePosition(Node node, Vector2 position)
-            {
-                Stack<Record> temp = new Stack<Record>();
-                //检查是否记录过该结点
-                while (undoRecords.Count > 0 && undoRecords.Peek().type == RecordType.NodePosition)
-                {
-                    temp.Push(undoRecords.Pop());
-                    if (temp.Peek().node == node) //已经记录过该结点了，则不再记录
-                    {
-                        while (temp.Count > 0)
-                        {
-                            undoRecords.Push(temp.Pop());
-                        }
-                        return;
-                    }
-                }
-                while (temp.Count > 0)
-                {
-                    undoRecords.Push(temp.Pop());
-                }
-                undoRecords.Push(new Record(RecordType.NodePosition) { node = node, position = position });
-                onRecordsChanged?.Invoke();
-            }
-
-            public void RecordMultNodePosition(Node node, Vector2 position)
-            {
-                //栈顶是多选移动记录，则直接修改此记录
-                if (undoRecords.Count > 0 && undoRecords.Peek().type == RecordType.MultNodePosition)
-                {
-                    if (undoRecords.Peek().positions.ContainsKey(node)) return; //已经记录过该结点了，则不再记录
-                    else undoRecords.Peek().positions.Add(node, position);
-                }
-                //否则新建记录
-                else undoRecords.Push(new Record(RecordType.MultNodePosition) { positions = new Dictionary<Node, Vector2> { { node, position } } });
-                onRecordsChanged?.Invoke();
-            }
-
-            public void RecordTreeChange(BehaviourTree tree)
-            {
-                Dictionary<Node, List<Node>> nodeChildren = new Dictionary<Node, List<Node>>();
-                foreach (var node in tree.Nodes)
-                {
-                    nodeChildren.Add(node, new List<Node>(node.GetChildren()));
-                }
-                undoRecords.Push(new Record(RecordType.TreeChange) { tree = tree, nodes = new List<Node>(tree.Nodes), nodeChildren = nodeChildren });
-                onRecordsChanged?.Invoke();
-            }
-
-            public void PerformUndo()
-            {
-                if (CanUndo)
-                {
-                    redoRecords.Push(undoRecords.Pop().Perform());
-                    undoRedoPerformed?.Invoke();
-                    onRecordsChanged?.Invoke();
-                }
-            }
-
-            public void PerformRedo()
-            {
-                if (CanRedo)
-                {
-                    undoRecords.Push(redoRecords.Pop().Perform());
-                    undoRedoPerformed?.Invoke();
-                    onRecordsChanged?.Invoke();
-                }
-            }
-
-            public void Clear()
-            {
-                undoRecords.Clear();
-                redoRecords.Clear();
-                onRecordsChanged?.Invoke();
-            }
-
-            private class Record
-            {
-                public RecordType type;
-                public BehaviourTree tree;
-                public Node node;
-                public List<Node> nodes = new List<Node>();
-                public Vector2 position;
-                public Dictionary<Node, Vector2> positions = new Dictionary<Node, Vector2>();
-                public Dictionary<Node, NodeData> nodeDatas = new Dictionary<Node, NodeData>();
-                public Dictionary<Node, List<Node>> nodeChildren = new Dictionary<Node, List<Node>>();
-
-                public Record(RecordType type)
-                {
-                    this.type = type;
-                }
-
-                public Record Perform()
-                {
-                    return type switch
-                    {
-                        RecordType.NodePosition => UndoNodePosition(),
-                        RecordType.MultNodePosition => UndoMultNodePosition(),
-                        RecordType.TreeChange => UndoTreeChange(),
-                        _ => null,
-                    };
-
-                    Record UndoTreeChange()
-                    {
-                        Dictionary<Node, List<Node>> nodeChildren = new Dictionary<Node, List<Node>>();
-                        foreach (var node in tree.Nodes)
-                        {
-                            nodeChildren.Add(node, new List<Node>(node.GetChildren()));
-                        }
-                        Record record = new Record(RecordType.TreeChange) { tree = tree, nodes = new List<Node>(tree.Nodes), nodeChildren = nodeChildren };
-                        var toDelete = new List<Node>(tree.Nodes.Except(nodes));
-                        var toAdd = new List<Node>(nodes.Except(tree.Nodes));
-                        foreach (var delete in toDelete)
-                        {
-                            if (delete is not Entry)
-                                tree.DeleteNode(delete);
-                        }
-                        foreach (var add in toAdd)
-                        {
-                            tree.AddNode(add);
-                        }
-                        foreach (var kvp in this.nodeChildren)
-                        {
-                            toDelete = new List<Node>(kvp.Key.GetChildren().Except(kvp.Value));
-                            toAdd = new List<Node>(kvp.Value.Except(kvp.Key.GetChildren()));
-                            foreach (var delete in toDelete)
-                            {
-                                kvp.Key.RemoveChild(delete);
-                            }
-                            foreach (var add in toAdd)
-                            {
-                                kvp.Key.AddChild(add);
-                            }
-                        }
-                        return record;
-                    }
-                    Record UndoNodePosition()
-                    {
-                        Vector2 current = node._position;
-                        node._position = position;
-                        return new Record(RecordType.NodePosition) { node = node, position = current };
-                    }
-
-                    Record UndoMultNodePosition()
-                    {
-                        Dictionary<Node, Vector2> currents = new Dictionary<Node, Vector2>();
-                        foreach (var kvp in positions)
-                        {
-                            currents.Add(kvp.Key, kvp.Key._position);
-                            kvp.Key._position = kvp.Value;
-                        }
-                        return new Record(RecordType.MultNodePosition) { positions = currents };
-                    }
-                }
-
-                public class NodeData
-                {
-                    public Node parent;
-                    public List<Node> children;
-
-                    public NodeData(Node parent, List<Node> children)
-                    {
-                        this.parent = parent;
-                        this.children = children;
-                    }
-                }
-            }
-
-            private enum RecordType
-            {
-                Empty,
-                NodePosition,
-                MultNodePosition,
-                TreeChange,
-            }
         }
     }
 }

@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -36,33 +38,15 @@ public static class ZetanEditorUtility
     }
 
     /// <summary>
-    /// 获取SerializedProperty关联字段的值，该字段必须是SerializedProperty.serializedObject.targetObject的顶级成员
+    /// 获取SerializedProperty关联字段的值
     /// </summary>
     public static bool TryGetValue(SerializedProperty property, out object value)
     {
-        value = default;
-        if (property.serializedObject.targetObject)
-        {
-            var onwerType = property.serializedObject.targetObject.GetType();
-            var fieldInfo = onwerType.GetField(property.propertyPath, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            if (fieldInfo != null)
-            {
-                try
-                {
-                    value = fieldInfo.GetValue(property.serializedObject.targetObject);
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-        }
-        return false;
+        return TryGetValue(property, out value, out _);
     }
 
     /// <summary>
-    /// 获取SerializedProperty关联字段的值，该字段必须是SerializedProperty.serializedObject.targetObject的顶级成员
+    /// 获取SerializedProperty关联字段的值
     /// </summary>
     /// <param name="property">SerializedProperty</param>
     /// <param name="fieldInfo">字段信息，找不到关联字段时是null</param>
@@ -73,19 +57,37 @@ public static class ZetanEditorUtility
         fieldInfo = null;
         if (property.serializedObject.targetObject)
         {
-            var onwerType = property.serializedObject.targetObject.GetType();
-            fieldInfo = onwerType.GetField(property.propertyPath, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            if (fieldInfo != null)
+            try
             {
-                try
+                string[] paths = property.propertyPath.Split('.');
+                value = property.serializedObject.targetObject;
+                for (int i = 0; i < paths.Length; i++)
                 {
-                    value = fieldInfo.GetValue(property.serializedObject.targetObject);
-                    return true;
+                    if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
+                    {
+                        if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
+                        {
+                            if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
+                            {
+                                fieldInfo = value.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
+                                value = (fieldInfo.GetValue(value) as IList)[index];
+                                i += 2;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        fieldInfo = value.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
+                        value = fieldInfo.GetValue(value);
+                    }
                 }
-                catch
-                {
-                    return false;
-                }
+                return fieldInfo != null;
+            }
+            catch
+            {
+                value = default;
+                fieldInfo = null;
+                return false;
             }
         }
         return false;
@@ -100,7 +102,7 @@ public static class ZetanEditorUtility
         var mType = mv.GetType();
         for (int i = 0; i < fields.Length; i++)
         {
-            memberInfo = mType?.GetField(fields[i], BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            memberInfo = mType?.GetField(fields[i], ZetanUtility.CommonBindingFlags);
             if (memberInfo is FieldInfo field)
             {
                 mv = field.GetValue(mv);
@@ -108,7 +110,7 @@ public static class ZetanEditorUtility
             }
             else
             {
-                memberInfo = mType?.GetProperty(fields[i], BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                memberInfo = mType?.GetProperty(fields[i], ZetanUtility.CommonBindingFlags);
                 if (memberInfo is PropertyInfo property)
                 {
                     mv = property.GetValue(mv);
@@ -133,7 +135,7 @@ public static class ZetanEditorUtility
     {
         if (property.propertyType == SerializedPropertyType.ManagedReference) property.managedReferenceValue = value;
         var onwerType = property.serializedObject.targetObject.GetType();
-        var fieldInfo = onwerType.GetField(property.propertyPath, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        var fieldInfo = onwerType.GetField(property.propertyPath, ZetanUtility.CommonBindingFlags);
         if (fieldInfo != null)
         {
             try
@@ -186,10 +188,11 @@ public static class ZetanEditorUtility
     /// 加载所有T类型的资源
     /// </summary>
     /// <typeparam name="T">UnityEngine.Object类型</typeparam>
+    /// <param name="folder">以Assets开头的指定加载文件夹路径</param>
     /// <returns>找到的资源</returns>
-    public static List<T> LoadAssets<T>() where T : Object
+    public static List<T> LoadAssets<T>(string folder = "") where T : Object
     {
-        string[] guids = AssetDatabase.FindAssets($"t:{typeof(T).Name}");
+        string[] guids = AssetDatabase.FindAssets($"t:{typeof(T).Name}", string.IsNullOrEmpty(folder) ? null : new string[] { folder });
         List<T> assets = new List<T>();
         foreach (var guid in guids)
         {

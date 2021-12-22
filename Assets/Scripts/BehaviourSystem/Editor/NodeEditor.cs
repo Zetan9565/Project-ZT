@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -16,6 +15,7 @@ namespace ZetanStudio.BehaviourTree
         public Port output;
         public Port input;
 
+        private readonly Label des;
         private readonly Label abort;
         private readonly Label repeat;
         private readonly Label invalid;
@@ -40,9 +40,7 @@ namespace ZetanStudio.BehaviourTree
             style.left = node._position.x;
             style.top = node._position.y;
 
-            Label des = this.Q<Label>("description");
-            des.bindingPath = "_description";
-            des.Bind(new SerializedObject(node));
+            des = this.Q<Label>("description");
 
             abort = this.Q<Label>("abort");
             repeat = this.Q<Label>("repeat");
@@ -52,7 +50,6 @@ namespace ZetanStudio.BehaviourTree
             InitOutput();
             InitClasses();
             UpdateStates();
-            UpdateInvalid();
             UpdateAbortType();
         }
 
@@ -147,9 +144,13 @@ namespace ZetanStudio.BehaviourTree
 
             UpdateRecheck();
         }
-        public void UpdateInvalid()
+        public void UpdateDesc()
         {
-            if (!node.IsValid)
+            if (des != null) des.text = node._description;
+        }
+        public void UpdateInvalid(BehaviourTree tree)
+        {
+            if (tree.Reachable(node) && !node.IsValid)
             {
                 invalid.text = "!";
                 invalid.tooltip = "有未补全信息";

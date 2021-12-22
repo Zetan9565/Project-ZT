@@ -9,15 +9,15 @@ namespace ZetanStudio.BehaviourTree
         public SharedFloat distance;
         [DisplayName("使用点")]
         public bool usePoint;
-        [DisplayName("目标点"), HideIf("usePoint", false)]
+        [DisplayName("目标点"), HideIf_BT("usePoint", false)]
         public SharedVector3 point;
-        [DisplayName("目标对象"), HideIf("usePoint", true)]
+        [DisplayName("目标对象"), HideIf_BT("usePoint", true)]
         public SharedGameObject target;
         [DisplayName("检查视线")]
         public SharedBool lineOfSight;
-        [HideIf("lineOfSight.value", false)]
+        [HideIf_BT("lineOfSight.value", false)]
         public LayerMask obstacleLayer;
-        [DisplayName("眼睛位置偏移"), HideIf("lineOfSight.value", false)]
+        [DisplayName("眼睛位置偏移"), HideIf_BT("lineOfSight.value", false)]
         public SharedVector3 eyesOffset;
 
         public override bool IsValid => distance != null && (usePoint && point != null && point.IsValid || !usePoint && target != null && target.IsValid)

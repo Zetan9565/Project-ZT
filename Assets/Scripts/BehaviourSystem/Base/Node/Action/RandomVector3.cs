@@ -7,13 +7,13 @@ namespace ZetanStudio.BehaviourTree
     {
         [DisplayName("范围而不是边界")]
         public bool useRange = true;
-        [DisplayName("范围半径"), HideIf("useRange", false)]
+        [DisplayName("范围半径"), HideIf_BT("useRange", false)]
         public SharedFloat range = 10f;
-        [DisplayName("盲区半径"), HideIf("useRange", false), Tooltip("不会在此范围内取点")]
+        [DisplayName("盲区半径"), HideIf_BT("useRange", false), Tooltip("不会在此范围内取点")]
         public SharedFloat blindRange = 0f;
-        [DisplayName("边界最小值"), HideIf("useRange", true)]
+        [DisplayName("边界最小值"), HideIf_BT("useRange", true)]
         public SharedVector3 boundMin;
-        [DisplayName("边界最大值"), HideIf("useRange", true)]
+        [DisplayName("边界最大值"), HideIf_BT("useRange", true)]
         public SharedVector3 boundMax;
         [DisplayName("结果寄存器")]
         public SharedVector3 register;

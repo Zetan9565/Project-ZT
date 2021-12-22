@@ -42,7 +42,7 @@ public class DialogueInspector : Editor
         useCurrentTalkerInfo = serializedObject.FindProperty("useCurrentTalkerInfo");
         unifiedNPC = serializedObject.FindProperty("unifiedNPC");
         dialogWords = serializedObject.FindProperty("words");
-        npcSelector = new ObjectSelectionDrawer<TalkerInformation>(unifiedNPC, "_name", "Configuration", "指定的NPC");
+        npcSelector = new ObjectSelectionDrawer<TalkerInformation>(unifiedNPC, "_name", "Assets/Resources/Configuration", "指定的NPC");
         HandlingWordsList();
     }
 

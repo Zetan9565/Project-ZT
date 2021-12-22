@@ -12236,29 +12236,6 @@ Transform:
   m_Father: {fileID: 1525718081}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &394956342
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11ff0f6527981fa41a9e8e6e46d91bbe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _name: 
-  description: 
-  entry: {fileID: 1234748533}
-  nodes:
-  - {fileID: 1234748533}
-  - {fileID: 976927418}
-  variables: []
-  isRuntime: 1
-  references:
-    version: 2
-    RefIds: []
 --- !u!1 &395057875
 GameObject:
   m_ObjectHideFlags: 0
@@ -19127,11 +19104,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3351392294259685136, guid: c129bba4cb2b9c549bda4aef1c16b7ab,
-        type: 3}
-      propertyPath: showSeeker
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5729784439181124921, guid: c129bba4cb2b9c549bda4aef1c16b7ab,
         type: 3}
       propertyPath: m_RootOrder
@@ -25188,7 +25160,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 857680154}
-  - component: {fileID: 857680153}
   - component: {fileID: 857680156}
   - component: {fileID: 857680155}
   m_Layer: 0
@@ -25198,29 +25169,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &857680153
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 857680152}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 978a08112957d844ab7de17c01869723, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  behaviour: {fileID: 394956342}
-  frequency: 0
-  interval: 0.02
-  startOnStart: 1
-  restartOnComplete: 0
-  resetOnRestart: 0
-  gizmos: 1
-  presetVariables: []
-  references:
-    version: 2
-    RefIds: []
 --- !u!4 &857680154
 Transform:
   m_ObjectHideFlags: 0
@@ -29097,28 +29045,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 967705119}
   m_CullTransparentMesh: 0
---- !u!114 &976927418
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
-  m_Name: (1) Log(R)
-  m_EditorClassIdentifier: 
-  isRuntime: 1
-  guid: b80a2867a7cadac4ba795811d0f30ce7
-  _position: {x: 0, y: 146}
-  _description: 
-  logType: 0
-  message:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: Debug log
 --- !u!1 &986388891
 GameObject:
   m_ObjectHideFlags: 0
@@ -37396,23 +37322,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1227832554}
   m_CullTransparentMesh: 0
---- !u!114 &1234748533
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc8a77ec6687a064cb1a4682f5739e49, type: 3}
-  m_Name: (0) Entry(R)
-  m_EditorClassIdentifier: 
-  isRuntime: 1
-  guid: 29595335b10494448a29c55880b3d064
-  _position: {x: 0, y: 0}
-  _description: 
-  start: {fileID: 976927418}
 --- !u!114 &1236047472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37814,35 +37723,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1255039264}
   m_CullTransparentMesh: 0
---- !u!1 &1255735859 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5729784439181124927, guid: c129bba4cb2b9c549bda4aef1c16b7ab,
-    type: 3}
-  m_PrefabInstance: {fileID: 606906890}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1255735872
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1255735859}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de3699ba1d38e394ca0f01d1dbb2fe67, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  behaviour: {fileID: 11400000, guid: 453bd6f7074a180488c0d9df60535609, type: 2}
-  frequency: 0
-  interval: 0.02
-  startOnStart: 1
-  restartOnComplete: 0
-  resetOnRestart: 0
-  gizmos: 1
-  presetVariables: []
-  references:
-    version: 2
-    RefIds: []
 --- !u!1 &1259886483
 GameObject:
   m_ObjectHideFlags: 0

@@ -795,7 +795,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
             TalkerData data = new TalkerData(ti);
             if (ti.Scene == ZetanUtility.ActiveScene.name)
             {
-                Talker talker = ti.Prefab.gameObject.Instantiate(talkerRoot).GetComponent<Talker>();
+                Talker talker = ti.Prefab.Instantiate(talkerRoot).GetComponent<Talker>();
                 talker.Init(data);
             }
             Talkers.Add(ti.ID, data);

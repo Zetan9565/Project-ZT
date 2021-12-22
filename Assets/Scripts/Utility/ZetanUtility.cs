@@ -409,6 +409,7 @@ public sealed class ZetanUtility
         return names.ToArray();
     }
 
+    public static BindingFlags CommonBindingFlags => BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
     #region Vector相关
     public static Vector2 ScreenCenter => new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
 
@@ -686,6 +687,7 @@ public enum UpdateMode
     FixedUpdate
 }
 
+#region 范围数
 [Serializable]
 public class ScopeInt
 {
@@ -1434,6 +1436,7 @@ public class ScopeFloat
         return hashCode;
     }
 }
+#endregion
 
 public class Heap<T> where T : class, IHeapItem<T>
 {

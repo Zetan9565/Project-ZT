@@ -94,23 +94,17 @@ namespace ZetanStudio.BehaviourTree
             showShared = true;
             UpdateVariables();
         }
-        private void OnUndoClick()
-        {
-            treeView?.UndoOperation();
-            UpdateUndoRedo();
-        }
-        private void OnRedoClick()
-        {
-            treeView?.RedoOperation();
-            UpdateUndoRedo();
-        }
         #endregion
 
         #region 状态变化相关
         private void SelectTree(BehaviourTree selected)
         {
 
-            if (treeView == null || !selected) return;
+            if (treeView == null || !selected)
+            {
+                UpdateTreeName();
+                return;
+            }
             tree = selected;
 
             treeView.DrawTreeView(tree);
@@ -178,7 +172,8 @@ namespace ZetanStudio.BehaviourTree
                     {
                         var exe = executors[i];
                         if (exe.Behaviour)
-                            exeMenu.menu.AppendAction($"[{i}] {(string.IsNullOrEmpty(exe.Behaviour.Name) ? "(未命名)" : exe.Behaviour.Name)}", (a) => SelectTree(exe.Behaviour));
+                            exeMenu.menu.AppendAction($"[{i + 1}] {(string.IsNullOrEmpty(exe.Behaviour.Name) ? "(未命名)" : exe.Behaviour.Name)}{(tree == exe.Behaviour ? "\t(当前)" : string.Empty)}",
+                                (a) => SelectTree(exe.Behaviour));
                     }
                     exeMenu.visible = exeMenu.menu.MenuItems().Count > 0;
                     if (tree && exeMenu.visible) exeMenu.text = string.IsNullOrEmpty(tree.Name) ? "(未命名)" : tree.Name;
@@ -194,14 +189,6 @@ namespace ZetanStudio.BehaviourTree
             global.SetEnabled(showShared);
             InitVariables();
             variables.onGUIHandler = DrawVariables;
-        }
-        private void UpdateUndoRedo()
-        {
-            if (treeView != null)
-            {
-                undo.SetEnabled(treeView.CanUndo());
-                redo.SetEnabled(treeView.CanRedo());
-            }
         }
         private void UpdateTreeName()
         {
@@ -247,7 +234,7 @@ namespace ZetanStudio.BehaviourTree
             {
                 case PlayModeStateChange.EnteredEditMode:
                 case PlayModeStateChange.EnteredPlayMode:
-                    OnSelectionChange();
+                    ChangeTreeBySelection();
                     break;
             }
         }
@@ -324,7 +311,6 @@ namespace ZetanStudio.BehaviourTree
             treeView = root.Q<BehaviourTreeView>();
             treeView.nodeSelectedCallback = OnNodeSelected;
             treeView.nodeUnselectedCallback = OnNodeUnselected;
-            treeView.undoChangedCallback = UpdateUndoRedo;
 
             inspectorLabel = root.Q<Label>("inspector-label");
             inspector = root.Q<Button>("view-inspector");
@@ -340,12 +326,6 @@ namespace ZetanStudio.BehaviourTree
             assetsMenu.menu.AppendAction("新建", (a) => CreateNewTree("new behaviour tree"));
             exeMenu = root.Q<ToolbarMenu>("exe-select");
             UpdateAssetDropdown();
-
-            undo = root.Q<ToolbarButton>("undo");
-            undo.clicked += OnUndoClick;
-            redo = root.Q<ToolbarButton>("redo");
-            redo.clicked += OnRedoClick;
-            UpdateUndoRedo();
 
             treeName = root.Q<Label>("tree-name");
 
@@ -386,11 +366,17 @@ namespace ZetanStudio.BehaviourTree
             EditorApplication.pauseStateChanged += OnPauseStateChanged;
             ChangeTreeBySelection();
         }
-
-
         private void OnDisable()
         {
             EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+        }
+        private void OnDestroy()
+        {
+            if (tree)
+            {
+                EditorUtility.SetDirty(tree);
+                Undo.ClearUndo(tree);
+            }
         }
         #endregion
 
@@ -466,12 +452,7 @@ namespace ZetanStudio.BehaviourTree
             }
             if (EditorUtility.DisplayDialog("保存到本地", "保存到本地的行为树将失去对场景对象的引用，是否继续？", "继续", "取消"))
             {
-                BehaviourTree localTree = ZetanEditorUtility.SaveFilePanel(() => BehaviourTree.ConvertToLocal(tree), assetName, true);
-                for (int i = 0; i < localTree.Nodes.Count; i++)
-                {
-                    AssetDatabase.AddObjectToAsset(localTree.Nodes[i], localTree);
-                }
-                AssetDatabase.SaveAssets();
+                ZetanEditorUtility.SaveFilePanel(() => BehaviourTree.ConvertToLocal(tree), assetName, true);
             }
         }
         #endregion

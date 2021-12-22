@@ -1,186 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8599469560084693122
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ff1dfce8b479734c8bf533182248820, type: 3}
-  m_Name: (1) Repeater
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 785d38a00fe0ed344bf636903f3395f9
-  _position: {x: 236.26462, y: 325.38525}
-  _description: 
-  child: {fileID: 4457901579468244061}
-  stopOnFailure: 0
-  count:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 0
---- !u!114 &-8538923950621602905
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e686550d5e89e7448869d39254309c4, type: 3}
-  m_Name: (18) UntilSuccess
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 614a16ac6c0c31c499c74afe194e70d2
-  _position: {x: -217.99992, y: 325.00006}
-  _description: 
-  child: {fileID: 5131726000886982299}
---- !u!114 &-8279204925400381292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74d44d70587ecae4bb089b97f556e0ba, type: 3}
-  m_Name: (18) Idle
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: fba9eed0c416612498d3f17946de48a6
-  _position: {x: 460.99988, y: 595.9999}
-  _description: 
---- !u!114 &-6739320512372274476
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ddba8651ff3ae3c42921b76d74540306, type: 3}
-  m_Name: (13) Sequence
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: ac3c5462fadba6642abe94d86b8348fe
-  _position: {x: -292.99988, y: 595.9999}
-  _description: 
-  children:
-  - {fileID: 5465056014895924026}
-  - {fileID: -3953251515193293871}
-  - {fileID: 7145209022686938395}
-  abortType: 1
---- !u!114 &-3953251515193293871
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b95c1691d382e74daa71c6d1bbd8fef, type: 3}
-  m_Name: (15) Seek
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 8214d53458ce9074dab37aeec7bcfa17
-  _position: {x: -293, y: 738.48505}
-  _description: 
-  arriveDistance:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
-  pickNextWaypointDist:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
-  point:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: {x: 0, y: 0, z: 0}
-  target:
-    _name: sharedGameObject_2
-    isGlobal: 0
-    isShared: 1
-    value: {fileID: 0}
-  radius:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
-  repathRate:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 0.5
---- !u!114 &-3740498926136104235
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
-  m_Name: (16) Log
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 029e2ae6389dac24dbefd60f5261b5c0
-  _position: {x: -68.00001, y: 885.485}
-  _description: 
-  logType: 0
-  message:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: "\u4F7F\u7528\u6280\u80FD2"
---- !u!114 &-411093341972322293
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b12828a7cc58a647ae519d6440f98e5, type: 3}
-  m_Name: (16) Selector
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: b4bba1e68f1bb3040af17fdf21a88bfc
-  _position: {x: 236, y: 596}
-  _description: 
-  children:
-  - {fileID: 6715906316799700215}
-  - {fileID: 5613145345997147096}
-  abortType: 0
---- !u!114 &-83186865474465916
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74d44d70587ecae4bb089b97f556e0ba, type: 3}
-  m_Name: (16) Idle
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 2073ee1343e21154ba5f491ed0edbb50
-  _position: {x: 236, y: 885}
-  _description: 
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -195,337 +14,371 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _name: "\u79FB\u52A8\u6D4B\u8BD5"
   description: 
-  entry: {fileID: 6010367299264760620}
+  entry:
+    rid: 4391261938407964672
   nodes:
-  - {fileID: 6010367299264760620}
-  - {fileID: -8599469560084693122}
-  - {fileID: 7511397711317786164}
-  - {fileID: 5131726000886982299}
-  - {fileID: -6739320512372274476}
-  - {fileID: 5465056014895924026}
-  - {fileID: -3953251515193293871}
-  - {fileID: -3740498926136104235}
-  - {fileID: 7145209022686938395}
-  - {fileID: 8021095495707417499}
-  - {fileID: 5613145345997147096}
-  - {fileID: -8279204925400381292}
-  - {fileID: 7783525911070721732}
-  - {fileID: -411093341972322293}
-  - {fileID: 7222516056588065130}
-  - {fileID: -83186865474465916}
-  - {fileID: 6715906316799700215}
-  - {fileID: -8538923950621602905}
-  - {fileID: 4457901579468244061}
+  - rid: 4391261938407964672
+  - rid: 4391261938407964673
+  - rid: 4391261938407964674
+  - rid: 4391261938407964675
+  - rid: 4391261938407964676
+  - rid: 4391261938407964677
+  - rid: 4391261938407964678
+  - rid: 4391261938407964679
+  - rid: 4391261938407964680
+  - rid: 4391261938407964683
+  - rid: 4391261938407964684
+  - rid: 4391261938407964685
+  - rid: 4391261938407964686
+  - rid: 4391261938407964687
+  - rid: 4391261938407964688
+  - rid: 4391261938407964689
+  - rid: 4391261938407964690
+  - rid: 4391261938407964691
+  - rid: 4391261938407964697
   variables:
-  - rid: 5373739391182176262
-  - rid: 5373739391182176263
-  - rid: 5373739391182176264
-  - rid: 5373739391182176265
-  - rid: 5373739391182176266
+  - rid: 4391261938407964692
+  - rid: 4391261938407964693
+  - rid: 4391261938407964694
+  - rid: 4391261938407964695
+  - rid: 4391261938407964696
   isRuntime: 0
   references:
     version: 2
     RefIds:
-    - rid: 5373739391182176262
+    - rid: 4391261938407964672
+      type: {class: Entry, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (0) Entry
+        isRuntime: 0
+        guid: f65fdbc95c0d1d346a469d2c3ec23d24
+        _position: {x: 0, y: 0}
+        _description: 
+        start:
+          rid: 4391261938407964673
+    - rid: 4391261938407964673
+      type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (1) Sequence
+        isRuntime: 0
+        guid: 583d4022f8998184ebce9f7e09a0d3ab
+        _position: {x: 0, y: 131}
+        _description: 
+        children:
+        - rid: 4391261938407964674
+        - rid: 4391261938407964676
+        abortType: 0
+    - rid: 4391261938407964674
+      type: {class: UntilSuccess, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (2) UntilSuccess
+        isRuntime: 0
+        guid: ae2f09b021bfef44097955441340e6fa
+        _position: {x: -203.50452, y: 268}
+        _description: 
+        child:
+          rid: 4391261938407964675
+    - rid: 4391261938407964675
+      type: {class: FindWithTag, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (3) FindWithTag
+        isRuntime: 0
+        guid: 0df8f2abe4f0e27449e8fad0106c514e
+        _position: {x: -203.50452, y: 399}
+        _description: 
+        tag:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: Player
+        register:
+          _name: sharedGameObject_1
+          isGlobal: 0
+          isShared: 1
+          value: {fileID: 0}
+    - rid: 4391261938407964676
+      type: {class: Repeater, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (4) Repeater
+        isRuntime: 0
+        guid: 9ae8d1a82b119e04e99a67c383dca9d2
+        _position: {x: 220.49548, y: 268}
+        _description: 
+        child:
+          rid: 4391261938407964677
+        stopOnFailure: 0
+        count:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 0
+    - rid: 4391261938407964677
+      type: {class: SelectorEvaluator, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (5) SelectorEvaluator
+        isRuntime: 0
+        guid: 7bb22820153958644986b60d76924e4c
+        _position: {x: 220.49548, y: 399}
+        _description: 
+        children:
+        - rid: 4391261938407964678
+        - rid: 4391261938407964686
+        - rid: 4391261938407964691
+        abortType: 0
+    - rid: 4391261938407964678
+      type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (6) Sequence
+        isRuntime: 0
+        guid: 87ce4e5d8f7ef7e4c93142b963637c83
+        _position: {x: -304.50458, y: 557}
+        _description: 
+        children:
+        - rid: 4391261938407964679
+        - rid: 4391261938407964680
+        - rid: 4391261938407964683
+        abortType: 1
+    - rid: 4391261938407964679
+      type: {class: WithinDistance2D, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (7) WithinDistance2D
+        isRuntime: 0
+        guid: 0aecf50637c76a64487558c9044554b2
+        _position: {x: -454.50452, y: 690.00006}
+        _description: 
+        distance:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 5
+        usePoint: 0
+        point:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: {x: 0, y: 0, z: 0}
+        target:
+          _name: sharedGameObject_1
+          isGlobal: 0
+          isShared: 1
+          value: {fileID: 0}
+        lineOfSight:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 1
+        obstacleLayer:
+          serializedVersion: 2
+          m_Bits: 1024
+        eyesOffset:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: {x: 0, y: 0, z: 0}
+    - rid: 4391261938407964680
+      type: {class: Seek, ns: , asm: Assembly-CSharp}
+      data:
+        name: (8) Seek
+        isRuntime: 0
+        guid: 578a7bc5fb1cb2e47beeea29b00c1438
+        _position: {x: -304.50458, y: 690.00006}
+        _description: 
+        arriveDistance:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 1
+        pickNextWaypointDist:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 1
+        point:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: {x: 0, y: 0, z: 0}
+        target:
+          _name: sharedGameObject_1
+          isGlobal: 0
+          isShared: 1
+          value: {fileID: 0}
+        radius:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 1
+        repathRate:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 0.5
+    - rid: 4391261938407964683
+      type: {class: RandomSelector, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (9) RandomSelector
+        isRuntime: 0
+        guid: cd57891622a671f40b58c5a31e909fc3
+        _position: {x: -154.5046, y: 690.00006}
+        _description: 
+        children:
+        - rid: 4391261938407964684
+        - rid: 4391261938407964685
+        abortType: 0
+    - rid: 4391261938407964684
+      type: {class: Log, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (10) Log
+        isRuntime: 0
+        guid: 155d253993d6a7343b78e8e362bafd0d
+        _position: {x: -229.50458, y: 829.00006}
+        _description: 
+        logType: 0
+        message:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: "\u4F7F\u7528\u6280\u80FD1"
+    - rid: 4391261938407964685
+      type: {class: Log, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (11) Log
+        isRuntime: 0
+        guid: 026d444b31c20ef4084cbdc373df5315
+        _position: {x: -79.50461, y: 829.00006}
+        _description: 
+        logType: 0
+        message:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: "\u4F7F\u7528\u6280\u80FD2"
+    - rid: 4391261938407964686
+      type: {class: Selector, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (12) Selector
+        isRuntime: 0
+        guid: 01925e17f7067df40920e688c2876979
+        _position: {x: 220.49548, y: 557}
+        _description: 
+        children:
+        - rid: 4391261938407964687
+        - rid: 4391261938407964690
+        abortType: 0
+    - rid: 4391261938407964687
+      type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (13) Sequence
+        isRuntime: 0
+        guid: 0e13ff2131d31984bbcd76015e12987a
+        _position: {x: 145.4955, y: 690.00006}
+        _description: 
+        children:
+        - rid: 4391261938407964688
+        - rid: 4391261938407964697
+        abortType: 0
+    - rid: 4391261938407964688
+      type: {class: Inverter, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (14) Inverter
+        isRuntime: 0
+        guid: 7e7a1d0014fd81345a5648e0a63b2e95
+        _position: {x: 70.49551, y: 829.00006}
+        _description: 
+        child:
+          rid: 4391261938407964689
+    - rid: 4391261938407964689
+      type: {class: CheckCharacterState, ns: , asm: Assembly-CSharp}
+      data:
+        name: (15) CheckCharacterState
+        isRuntime: 0
+        guid: 4fdcc4532c44a5649862ae37d9e3d2b7
+        _position: {x: 70.49551, y: 951.00006}
+        _description: 
+        mainState: 0
+        checkSubState: 0
+        subState: 0
+    - rid: 4391261938407964690
+      type: {class: Patrol, ns: , asm: Assembly-CSharp}
+      data:
+        name: (16) Patrol
+        isRuntime: 0
+        guid: a720605408a3e2747bba809fbabd2974
+        _position: {x: 295.49548, y: 690.00006}
+        _description: 
+        arriveDistance:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 1
+        pickNextWaypointDist:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 1
+        random: 0
+        waypoints:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value:
+          - {x: 0.5, y: 0.5, z: 0}
+          - {x: 0.5, y: -5.5, z: 0}
+          - {x: 0.5, y: -10.5, z: 0}
+          - {x: 0.5, y: -5.5, z: 0}
+        interval:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 1
+    - rid: 4391261938407964691
+      type: {class: Idle, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (17) Idle
+        isRuntime: 0
+        guid: bf52921ea63e82247870e9ce4d625a8d
+        _position: {x: 444.9999, y: 557}
+        _description: 
+    - rid: 4391261938407964692
       type: {class: SharedGameObject, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
-        _name: sharedGameObject_2
+        _name: sharedGameObject_1
         isGlobal: 0
         isShared: 1
         value: {fileID: 0}
-    - rid: 5373739391182176263
+    - rid: 4391261938407964693
       type: {class: SharedString, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
-        _name: sharedString_3
+        _name: sharedString_2
         isGlobal: 0
         isShared: 1
-        value: 123456
-    - rid: 5373739391182176264
+        value: 12345
+    - rid: 4391261938407964694
       type: {class: SharedTransform, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
-        _name: sharedTransform_4
+        _name: sharedTransform_3
         isGlobal: 0
         isShared: 1
         value: {fileID: 0}
-    - rid: 5373739391182176265
+    - rid: 4391261938407964695
       type: {class: SharedVector3, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedVector3_4
         isGlobal: 0
         isShared: 1
         value: {x: 0, y: 0, z: 0}
-    - rid: 5373739391182176266
+    - rid: 4391261938407964696
       type: {class: SharedBool, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         _name: sharedBool_5
         isGlobal: 0
         isShared: 1
         value: 0
---- !u!114 &4457901579468244061
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f1e8586e4f2b3a4b91b605f3508127b, type: 3}
-  m_Name: (18) SelectorEvaluator
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 0f32522b0b6d6ef42ba4b64e14a1d58e
-  _position: {x: 235.9999, y: 452.99997}
-  _description: 
-  children:
-  - {fileID: -6739320512372274476}
-  - {fileID: -411093341972322293}
-  - {fileID: -8279204925400381292}
-  abortType: 0
---- !u!114 &5131726000886982299
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 687defbcdf3fa4344aeefba2e8d98279, type: 3}
-  m_Name: (12) FindWithTag
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 80fddec9ace7e234fa6c5e92b127eaa9
-  _position: {x: -217.99995, y: 453}
-  _description: 
-  tag:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: Player
-  register:
-    _name: sharedGameObject_2
-    isGlobal: 0
-    isShared: 1
-    value: {fileID: 0}
---- !u!114 &5465056014895924026
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 929bd5e44c7d1d2408fe39814cbb73fb, type: 3}
-  m_Name: (14) WithinDistance
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 28464a0e5e070d54fb7597a1cb87187b
-  _position: {x: -443, y: 739.485}
-  _description: 
-  distance:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 5
-  usePoint: 0
-  point:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: {x: 0, y: 0, z: 0}
-  target:
-    _name: sharedGameObject_2
-    isGlobal: 0
-    isShared: 1
-    value: {fileID: 0}
-  lineOfSight:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 1024
-  eyesOffset:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: {x: 0, y: 0, z: 0}
---- !u!114 &5613145345997147096
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ea6923e20db6bd4299b55422b9a6472, type: 3}
-  m_Name: (16) Patrol
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 524d265a9074ca34a92ee3775597785e
-  _position: {x: 325.00003, y: 739}
-  _description: 
-  arriveDistance:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
-  pickNextWaypointDist:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
-  random: 0
-  waypoints:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value:
-    - {x: 0.5, y: 0.5, z: 0}
-    - {x: 0.5, y: -5.5, z: 0}
-    - {x: 0.5, y: -10.5, z: 0}
-    - {x: 0.5, y: -5.5, z: 0}
-  interval:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: 1
---- !u!114 &6010367299264760620
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fc8a77ec6687a064cb1a4682f5739e49, type: 3}
-  m_Name: (0) Entry
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 7e08a642cff7a35499976a4011869aa1
-  _position: {x: -0.000034332275, y: 59.744755}
-  _description: 
-  start: {fileID: 7511397711317786164}
---- !u!114 &6715906316799700215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ddba8651ff3ae3c42921b76d74540306, type: 3}
-  m_Name: (16) Sequence
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 1a33c370703a1bf478d2628ac401d80a
-  _position: {x: 161.00002, y: 739}
-  _description: 
-  children:
-  - {fileID: 7222516056588065130}
-  - {fileID: -83186865474465916}
-  abortType: 0
---- !u!114 &7145209022686938395
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ef06685521663d468450cda8b4aa9f8, type: 3}
-  m_Name: (16) RandomSelector
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 8463377966aea434ebddf402f2a3160e
-  _position: {x: -142.99998, y: 737.485}
-  _description: 
-  children:
-  - {fileID: 8021095495707417499}
-  - {fileID: -3740498926136104235}
-  abortType: 0
---- !u!114 &7222516056588065130
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: afb7122724951794390d96b7879db112, type: 3}
-  m_Name: (17) Inverter
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 1719e4a657bc0424495ad5a0c08a7be4
-  _position: {x: 82.000015, y: 885}
-  _description: 
-  child: {fileID: 7783525911070721732}
---- !u!114 &7511397711317786164
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ddba8651ff3ae3c42921b76d74540306, type: 3}
-  m_Name: (11) Sequence
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: e927879006351ec4295530f65b01c475
-  _position: {x: -0.000011920929, y: 169}
-  _description: 
-  children:
-  - {fileID: -8538923950621602905}
-  - {fileID: -8599469560084693122}
-  abortType: 0
---- !u!114 &7783525911070721732
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3b8fd3d0eb4d7d45ad8481caeeb7608, type: 3}
-  m_Name: (8) CheckCharacterState
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 4ef9312f536aaa64a84784d292c8ca03
-  _position: {x: 82.000015, y: 987}
-  _description: 
-  mainState: 0
-  checkSubState: 0
-  subState: 0
---- !u!114 &8021095495707417499
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fddbb9a8640cf7f49becf4a022770a0c, type: 3}
-  m_Name: (17) Log
-  m_EditorClassIdentifier: 
-  isRuntime: 0
-  guid: 794a5ffea540f2041ac503ce01d63ee2
-  _position: {x: -217.99995, y: 885.485}
-  _description: 
-  logType: 0
-  message:
-    _name: 
-    isGlobal: 0
-    isShared: 0
-    value: "\u4F7F\u7528\u6280\u80FD1"
+    - rid: 4391261938407964697
+      type: {class: Idle, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (18) Idle
+        isRuntime: 0
+        guid: e5f0208c8d4226e4bb65b3f756605242
+        _position: {x: 220.49548, y: 829.00006}
+        _description: 

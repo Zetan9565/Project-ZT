@@ -769,7 +769,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
 
     public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, string path, string label = "", string nameNull = "未选择")
     {
-        objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
+        objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
         List<string> objectNames = new List<string>() { nameNull };
         foreach (var obj in objects)
         {
@@ -787,7 +787,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
     }
     public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, string path, string label = "", string nameNull = "未选择")
     {
-        objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
+        objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
         List<string> objectNames = new List<string>() { nameNull };
         foreach (var obj in objects)
         {
@@ -814,7 +814,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
 
     public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, string path, string label = "", string nameNull = "未选择")
     {
-        objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
+        objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
         List<string> objectNames = new List<string>() { nameNull };
         foreach (var obj in objects)
         {
@@ -835,7 +835,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
     }
     public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, Func<T, string> groupPicker, string path, string label = "", string nameNull = "未选择")
     {
-        objects = Resources.LoadAll<T>(string.IsNullOrEmpty(path) ? string.Empty : path);
+        objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
         List<string> objectNames = new List<string>() { nameNull };
         foreach (var obj in objects)
         {

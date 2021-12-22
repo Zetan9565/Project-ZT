@@ -8,7 +8,7 @@ namespace ZetanStudio.BehaviourTree
     /// </summary>
     public abstract class Decorator : Node
     {
-        [SerializeField]
+        [SerializeReference]
         protected Node child;
 
         public override bool IsValid => child;
@@ -38,16 +38,9 @@ namespace ZetanStudio.BehaviourTree
             if (child == this.child) this.child = null;
         }
 
-        public override Node ConvertToLocal()
-        {
-            Decorator decorator = ConvertToLocal<Decorator>();
-            decorator.child = child.ConvertToLocal();
-            return decorator;
-        }
-
         public override Node Copy()
         {
-            Decorator decorator = Instantiate(this);
+            Decorator decorator = MemberwiseClone() as Decorator;
             if (child) decorator.child = child.Copy();
             return decorator;
         }

@@ -32,7 +32,7 @@ public sealed class Interactive : MonoBehaviour
     /// <summary>
     /// 可否交互
     /// </summary>
-    public bool IsInteractive => interactiveFunc();
+    public bool IsInteractive => interactiveFunc != null && interactiveFunc();
 
     [SerializeField]
     private Component component;

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using System;
 
 namespace ZetanStudio.BehaviourTree
 {
@@ -31,7 +32,8 @@ namespace ZetanStudio.BehaviourTree
             nodeEditor = node;
             if (tree && nodeEditor != null && nodeEditor.node)
             {
-                serializedObject = new SerializedObject(nodeEditor.node);
+                serializedObject = new SerializedObject(tree);
+                SerializedProperty nodes = serializedObject.FindProperty("nodes");
                 IMGUIContainer container = new IMGUIContainer(() =>
                 {
                     if (tree && nodeEditor != null && nodeEditor.node)
@@ -39,12 +41,25 @@ namespace ZetanStudio.BehaviourTree
                         serializedObject.Update();
                         EditorGUI.BeginChangeCheck();
                         EditorGUILayout.LabelField("结点名称", nodeEditor.node.name);
-                        SerializedProperty property = serializedObject.GetIterator();
-                        property.NextVisible(true);
-                        while (property.NextVisible(false))
+                        var nType = nodeEditor.node.GetType();
+                        var fields = new HashSet<string>(nType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).Select(f => f.Name));
+                        var fieldsMap = new HashSet<string>();
+                        using (SerializedProperty property = nodes.GetArrayElementAtIndex(tree.Nodes.IndexOf(nodeEditor.node)))
                         {
-                            if (property.name == "child" || property.name == "children" || property.name == "start" || property.name == "isRuntime") continue;
-                            DrawProperty(property);
+                            using var end = property.GetEndProperty();
+                            property.Next(true);
+                            while (property.NextVisible(false) && !SerializedProperty.EqualContents(property, end))
+                            {
+                                string field = property.name;
+                                if (field == "name" || field == "child" || field == "children" || field == "start" || field == "isRuntime") continue;
+                                if (fields.Contains(field))
+                                {
+                                    if (fieldsMap.Contains(field)) break;
+                                    fieldsMap.Add(field);
+                                    var fInfo = nType.GetField(field, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                                    DrawProperty(property, fInfo.GetValue(nodeEditor.node), fInfo);
+                                }
+                            }
                         }
                         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
                     }
@@ -96,39 +111,39 @@ namespace ZetanStudio.BehaviourTree
             }
         }
 
-        public void InspectNodes(System.Action<System.Type> insertCallback)
+        public void InspectNodes(Action<Type> insertCallback)
         {
             Clear();
-            Dictionary<string, System.Action> action = new Dictionary<string, System.Action>();
-            Dictionary<string, System.Action> conditional = new Dictionary<string, System.Action>();
-            Dictionary<string, System.Action> composite = new Dictionary<string, System.Action>();
-            Dictionary<string, System.Action> decorator = new Dictionary<string, System.Action>();
+            Dictionary<Type, System.Action> action = new Dictionary<Type, System.Action>();
+            Dictionary<Type, System.Action> conditional = new Dictionary<Type, System.Action>();
+            Dictionary<Type, System.Action> composite = new Dictionary<Type, System.Action>();
+            Dictionary<Type, System.Action> decorator = new Dictionary<Type, System.Action>();
             var types = TypeCache.GetTypesDerivedFrom<Action>().OrderBy(x => x.Name);
             foreach (var type in types)
             {
                 if (!type.IsAbstract && !type.IsGenericType)
-                    action.Add(type.Name, () => insertCallback(type));
+                    action.Add(type, () => insertCallback(type));
             }
 
             types = TypeCache.GetTypesDerivedFrom<Conditional>().OrderBy(x => x.Name);
             foreach (var type in types)
             {
                 if (!type.IsAbstract && !type.IsGenericType)
-                    conditional.Add(type.Name, () => insertCallback(type));
+                    conditional.Add(type, () => insertCallback(type));
             }
 
             types = TypeCache.GetTypesDerivedFrom<Composite>().OrderBy(x => x.Name);
             foreach (var type in types)
             {
                 if (!type.IsAbstract && !type.IsGenericType)
-                    composite.Add(type.Name, () => insertCallback(type));
+                    composite.Add(type, () => insertCallback(type));
             }
 
             types = TypeCache.GetTypesDerivedFrom<Decorator>().OrderBy(x => x.Name);
             foreach (var type in types)
             {
                 if (!type.IsAbstract && !type.IsGenericType)
-                    decorator.Add(type.Name, () => insertCallback(type));
+                    decorator.Add(type, () => insertCallback(type));
             }
 
             searchKey = string.Empty;
@@ -140,8 +155,8 @@ namespace ZetanStudio.BehaviourTree
                 EditorGUILayout.LabelField("行为结点");
                 foreach (var node in action)
                 {
-                    if (Contains(node.Key, searchKey))
-                        if (GUILayout.Button(node.Key))
+                    if (Contains(node.Key.Name, searchKey))
+                        if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
                             node.Value?.Invoke();
                 }
                 EditorGUILayout.EndVertical();
@@ -150,8 +165,8 @@ namespace ZetanStudio.BehaviourTree
                 EditorGUILayout.LabelField("条件结点");
                 foreach (var node in conditional)
                 {
-                    if (Contains(node.Key, searchKey))
-                        if (GUILayout.Button(node.Key))
+                    if (Contains(node.Key.Name, searchKey))
+                        if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
                             node.Value?.Invoke();
                 }
                 EditorGUILayout.EndVertical();
@@ -160,8 +175,8 @@ namespace ZetanStudio.BehaviourTree
                 EditorGUILayout.LabelField("复合结点");
                 foreach (var node in composite)
                 {
-                    if (Contains(node.Key, searchKey))
-                        if (GUILayout.Button(node.Key))
+                    if (Contains(node.Key.Name, searchKey))
+                        if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
                             node.Value?.Invoke();
                 }
                 EditorGUILayout.EndVertical();
@@ -170,8 +185,8 @@ namespace ZetanStudio.BehaviourTree
                 EditorGUILayout.LabelField("修饰结点");
                 foreach (var node in decorator)
                 {
-                    if (Contains(node.Key, searchKey))
-                        if (GUILayout.Button(node.Key))
+                    if (Contains(node.Key.Name, searchKey))
+                        if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
                             node.Value?.Invoke();
                 }
                 EditorGUILayout.EndVertical();
@@ -180,13 +195,25 @@ namespace ZetanStudio.BehaviourTree
                 {
                     return empty || content.ToLower().Contains(key.ToLower());
                 }
+
+                string GetNodeDesc(Type type)
+                {
+                    if (type.IsSubclassOf(typeof(Node)))
+                    {
+                        var descAttr = type.GetCustomAttribute<NodeDescriptionAttribute>();
+                        if (descAttr != null)
+                            return descAttr.description;
+                        else return string.Empty;
+                    }
+                    else return string.Empty;
+                }
             });
             Add(container);
         }
 
-        private void DrawProperty(SerializedProperty property)
+        private void DrawProperty(SerializedProperty property, object proValue, FieldInfo fieldInfo)
         {
-            if (!ZetanEditorUtility.TryGetValue(property, out var proValue, out var fieldInfo)) return;
+            if (fieldInfo == null) return;
             ShouldHide(fieldInfo, out var shouldHide, out var readOnly);
             if (shouldHide && !readOnly) return;
             string displayName = property.displayName;
@@ -234,7 +261,7 @@ namespace ZetanStudio.BehaviourTree
                         break;
                     default:
                         valueRect = new Rect(rect.x, rect.y, rect.width - 34, EditorGUI.GetPropertyHeight(value, true));
-                        if (type == typeof(SharedString) && fieldInfo.GetCustomAttribute<Tag>() != null)
+                        if (type == typeof(SharedString) && fieldInfo.GetCustomAttribute<Tag_BTAttribute>() != null)
                             value.stringValue = EditorGUI.TagField(valueRect, new GUIContent(displayName, tooltip),
                                 string.IsNullOrEmpty(value.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : value.stringValue);
                         else EditorGUI.PropertyField(valueRect, value, new GUIContent(displayName, tooltip), true);
@@ -273,12 +300,12 @@ namespace ZetanStudio.BehaviourTree
             }
             else if (type == typeof(string))
             {
-                if (fieldInfo.GetCustomAttribute<Tag>() != null)
+                if (fieldInfo.GetCustomAttribute<Tag_BTAttribute>() != null)
                     property.stringValue = EditorGUILayout.TagField(new GUIContent(displayName, tooltip),
                         string.IsNullOrEmpty(property.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : property.stringValue);
                 else
                 {
-                    VariableName varNameAttr = fieldInfo.GetCustomAttribute<VariableName>();
+                    NameOfVariableAttribute varNameAttr = fieldInfo.GetCustomAttribute<NameOfVariableAttribute>();
                     if (varNameAttr != null)
                     {
                         var variables = tree.GetVariables(varNameAttr.type);
@@ -304,7 +331,7 @@ namespace ZetanStudio.BehaviourTree
 
         private void ShouldHide(FieldInfo fieldInfo, out bool should, out bool readOnly)
         {
-            HideIfAttribute hideAttr = fieldInfo.GetCustomAttribute<HideIfAttribute>();
+            HideIf_BTAttribute hideAttr = fieldInfo.GetCustomAttribute<HideIf_BTAttribute>();
             ReadOnlyAttribute roAttr = fieldInfo.GetCustomAttribute<ReadOnlyAttribute>();
             should = false;
             readOnly = false;
