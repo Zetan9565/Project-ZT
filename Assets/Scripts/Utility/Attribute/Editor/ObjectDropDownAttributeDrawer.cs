@@ -26,15 +26,16 @@ public class ObjectDropDownAttributeDrawer : PropertyDrawer
     {
         objects = Resources.LoadAll(string.IsNullOrEmpty(resPath) ? string.Empty : resPath, type);
         List<GUIContent> objectNames = new List<GUIContent>() { new GUIContent(nameNull) };
-        foreach (var obj in objects)
+        for (int i = 0; i < objects.Length; i++)
         {
+            var obj = objects[i];
             if (!string.IsNullOrEmpty(fieldAsName))
             {
-                var field = obj.GetType().GetField(fieldAsName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (field != null) objectNames.Add(new GUIContent(field.GetValue(obj).ToString()));
-                else objectNames.Add(new GUIContent(obj.name));
+                var field = obj.GetType().GetField(fieldAsName, ZetanUtility.CommonBindingFlags);
+                if (field != null) objectNames.Add(new GUIContent($"[{i + 1}] {field.GetValue(obj)}"));
+                else objectNames.Add(new GUIContent($"[{i + 1}] {obj.name}"));
             }
-            else objectNames.Add(new GUIContent(obj.name));
+            else objectNames.Add(new GUIContent($"[{i + 1}] {obj.name}"));
         }
         objectNamesArray = objectNames.ToArray();
     }

@@ -135,10 +135,12 @@ namespace ZetanStudio.BehaviourTree
             }
             if (!Application.isPlaying && tree && tree.IsRuntime) assetsMenu.menu.InsertAction(1, "保存到本地", (a) => { SaveToLocal("new behaviour tree"); });
             if (behaviourTrees.Count > 0) assetsMenu.menu.AppendSeparator();
+            int counter = 1;
             behaviourTrees.ForEach(tree =>
             {
                 if (tree)
-                    assetsMenu.menu.AppendAction($"本地/{tree.name} ({ZetanEditorUtility.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
+                {
+                    assetsMenu.menu.AppendAction($"本地/[{counter}] {tree.name} ({ZetanEditorUtility.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
                     {
                         EditorApplication.delayCall += () =>
                         {
@@ -146,10 +148,14 @@ namespace ZetanStudio.BehaviourTree
                             SelectTree(tree);
                         };
                     });
+                    counter++;
+                }
             });
+            counter = 1;
             foreach (var exe in FindObjectsOfType<BehaviourExecutor>(true))
                 if (exe.Behaviour)
-                    assetsMenu.menu.AppendAction($"场景/{exe.gameObject.name} ({exe.gameObject.GetPath().Replace("/", "\u2215")})", (a) =>
+                {
+                    assetsMenu.menu.AppendAction($"场景/[{counter}] {exe.gameObject.name} ({exe.gameObject.GetPath().Replace("/", "\u2215")})", (a) =>
                     {
                         EditorApplication.delayCall += () =>
                         {
@@ -157,6 +163,8 @@ namespace ZetanStudio.BehaviourTree
                             SelectTree(exe.Behaviour);
                         };
                     });
+                    counter++;
+                }
         }
         private void UpdateTreeDropdown()
         {

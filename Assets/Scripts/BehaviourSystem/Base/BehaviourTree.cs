@@ -442,13 +442,17 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         /// <param name="node">指定的结点</param>
         /// <param name="onAccess">带终止条件的结点访问回调(返回值决定是否终止）</param>
-        public static void Traverse(Node node, Func<Node, bool> onAccess)
+        /// <returns>是否在遍历时产生终止</returns>
+        public static bool Traverse(Node node, Func<Node, bool> onAccess)
         {
             if (node)
             {
-                if (onAccess.Invoke(node)) return;
-                node.GetChildren().ForEach(n => Traverse(n, onAccess));
+                if (onAccess.Invoke(node)) return true;
+                foreach (Node n in node.GetChildren())
+                    if (Traverse(n, onAccess))
+                        return true;
             }
+            return false;
         }
 
         public bool Reachable(Node node)

@@ -153,7 +153,7 @@ namespace ZetanStudio.BehaviourTree
             if (tree.Reachable(node) && !node.IsValid)
             {
                 invalid.text = "!";
-                invalid.tooltip = "有未补全信息";
+                invalid.tooltip = "存在错误";
             }
             else
             {

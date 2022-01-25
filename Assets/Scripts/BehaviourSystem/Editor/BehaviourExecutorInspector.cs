@@ -88,7 +88,7 @@ namespace ZetanStudio.BehaviourTree
             }
             EditorGUILayout.PropertyField(frequency, new GUIContent("执行频率"));
             if (frequency.enumValueIndex == (int)BehaviourExecutor.Frequency.FixedTime)
-                EditorGUILayout.PropertyField(interval, new GUIContent("间隔"));
+                EditorGUILayout.PropertyField(interval, new GUIContent("间隔(秒)"));
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(startOnStart, new GUIContent("开始时执行"));
             EditorGUILayout.PropertyField(restartOnComplete, new GUIContent("完成时重启"));

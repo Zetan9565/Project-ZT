@@ -18,7 +18,7 @@ namespace ZetanStudio.BehaviourTree
         public LayerMask obstacleLayer;
 
         public override bool IsValid => direction != null && direction.IsValid && eyesOffset != null && eyesOffset.IsValid
-            && fieldOfView != null && fieldOfView.IsValid && distance != null && distance.IsValid;
+            && fieldOfView != null && fieldOfView.IsValid && distance != null && distance.IsValid && target != null && target.Value != null;
 
         public override bool CheckCondition()
         {

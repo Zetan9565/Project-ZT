@@ -6,11 +6,11 @@ namespace ZetanStudio.BehaviourTree
     public class FindWithTag : Action
     {
         [DisplayName("标签"), Tag_BT]
-        public SharedString tag;
+        public SharedString tag = "Player";
         [DisplayName("结果寄存器")]
         public SharedGameObject register;
 
-        public override bool IsValid => tag != null && tag.IsValid && !string.IsNullOrEmpty(tag.Value) && register != null && register.IsValid;
+        public override bool IsValid => tag != null && tag.IsValid && !string.IsNullOrEmpty(tag.Value) && tag.Value != "Untagged" && register != null && register.IsValid;
 
         protected override NodeStates OnUpdate()
         {

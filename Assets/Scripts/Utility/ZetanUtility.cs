@@ -409,7 +409,7 @@ public sealed class ZetanUtility
         return names.ToArray();
     }
 
-    public static BindingFlags CommonBindingFlags => BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+    public const BindingFlags CommonBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
     #region Vector相关
     public static Vector2 ScreenCenter => new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
 

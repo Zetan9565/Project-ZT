@@ -62,7 +62,7 @@ MonoBehaviour:
         name: (1) Sequence
         isRuntime: 0
         guid: 583d4022f8998184ebce9f7e09a0d3ab
-        _position: {x: 0, y: 131}
+        _position: {x: -0.000015258789, y: 112.96803}
         _description: 
         children:
         - rid: 4391261938407964674
@@ -74,7 +74,7 @@ MonoBehaviour:
         name: (2) UntilSuccess
         isRuntime: 0
         guid: ae2f09b021bfef44097955441340e6fa
-        _position: {x: -203.50452, y: 268}
+        _position: {x: -204, y: 244.8694}
         _description: 
         child:
           rid: 4391261938407964675
@@ -84,7 +84,7 @@ MonoBehaviour:
         name: (3) FindWithTag
         isRuntime: 0
         guid: 0df8f2abe4f0e27449e8fad0106c514e
-        _position: {x: -203.50452, y: 399}
+        _position: {x: -204, y: 375.86945}
         _description: 
         tag:
           _name: 
@@ -102,7 +102,7 @@ MonoBehaviour:
         name: (4) Repeater
         isRuntime: 0
         guid: 9ae8d1a82b119e04e99a67c383dca9d2
-        _position: {x: 220.49548, y: 268}
+        _position: {x: 220, y: 244.8694}
         _description: 
         child:
           rid: 4391261938407964677
@@ -118,7 +118,7 @@ MonoBehaviour:
         name: (5) SelectorEvaluator
         isRuntime: 0
         guid: 7bb22820153958644986b60d76924e4c
-        _position: {x: 220.49548, y: 399}
+        _position: {x: 220, y: 375.86945}
         _description: 
         children:
         - rid: 4391261938407964678
@@ -131,7 +131,7 @@ MonoBehaviour:
         name: (6) Sequence
         isRuntime: 0
         guid: 87ce4e5d8f7ef7e4c93142b963637c83
-        _position: {x: -304.50458, y: 557}
+        _position: {x: -304.99997, y: 509.86945}
         _description: 
         children:
         - rid: 4391261938407964679
@@ -144,7 +144,7 @@ MonoBehaviour:
         name: (7) WithinDistance2D
         isRuntime: 0
         guid: 0aecf50637c76a64487558c9044554b2
-        _position: {x: -454.50452, y: 690.00006}
+        _position: {x: -455, y: 642.86945}
         _description: 
         distance:
           _name: 
@@ -181,7 +181,7 @@ MonoBehaviour:
         name: (8) Seek
         isRuntime: 0
         guid: 578a7bc5fb1cb2e47beeea29b00c1438
-        _position: {x: -304.50458, y: 690.00006}
+        _position: {x: -304.99997, y: 642.86945}
         _description: 
         arriveDistance:
           _name: 
@@ -219,7 +219,7 @@ MonoBehaviour:
         name: (9) RandomSelector
         isRuntime: 0
         guid: cd57891622a671f40b58c5a31e909fc3
-        _position: {x: -154.5046, y: 690.00006}
+        _position: {x: -155.00006, y: 642.86945}
         _description: 
         children:
         - rid: 4391261938407964684
@@ -231,7 +231,7 @@ MonoBehaviour:
         name: (10) Log
         isRuntime: 0
         guid: 155d253993d6a7343b78e8e362bafd0d
-        _position: {x: -229.50458, y: 829.00006}
+        _position: {x: -230, y: 774}
         _description: 
         logType: 0
         message:
@@ -245,7 +245,7 @@ MonoBehaviour:
         name: (11) Log
         isRuntime: 0
         guid: 026d444b31c20ef4084cbdc373df5315
-        _position: {x: -79.50461, y: 829.00006}
+        _position: {x: -80, y: 774}
         _description: 
         logType: 0
         message:
@@ -259,7 +259,7 @@ MonoBehaviour:
         name: (12) Selector
         isRuntime: 0
         guid: 01925e17f7067df40920e688c2876979
-        _position: {x: 220.49548, y: 557}
+        _position: {x: 220, y: 509.86945}
         _description: 
         children:
         - rid: 4391261938407964687
@@ -271,7 +271,7 @@ MonoBehaviour:
         name: (13) Sequence
         isRuntime: 0
         guid: 0e13ff2131d31984bbcd76015e12987a
-        _position: {x: 145.4955, y: 690.00006}
+        _position: {x: 145.00002, y: 642.86945}
         _description: 
         children:
         - rid: 4391261938407964688
@@ -283,7 +283,7 @@ MonoBehaviour:
         name: (14) Inverter
         isRuntime: 0
         guid: 7e7a1d0014fd81345a5648e0a63b2e95
-        _position: {x: 70.49551, y: 829.00006}
+        _position: {x: 70, y: 774}
         _description: 
         child:
           rid: 4391261938407964689
@@ -293,7 +293,7 @@ MonoBehaviour:
         name: (15) CheckCharacterState
         isRuntime: 0
         guid: 4fdcc4532c44a5649862ae37d9e3d2b7
-        _position: {x: 70.49551, y: 951.00006}
+        _position: {x: 70, y: 883}
         _description: 
         mainState: 0
         checkSubState: 0
@@ -304,7 +304,7 @@ MonoBehaviour:
         name: (16) Patrol
         isRuntime: 0
         guid: a720605408a3e2747bba809fbabd2974
-        _position: {x: 295.49548, y: 690.00006}
+        _position: {x: 295, y: 642.86945}
         _description: 
         arriveDistance:
           _name: 
@@ -337,7 +337,7 @@ MonoBehaviour:
         name: (17) Idle
         isRuntime: 0
         guid: bf52921ea63e82247870e9ce4d625a8d
-        _position: {x: 444.9999, y: 557}
+        _position: {x: 444.99997, y: 509.86945}
         _description: 
     - rid: 4391261938407964692
       type: {class: SharedGameObject, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
@@ -380,5 +380,5 @@ MonoBehaviour:
         name: (18) Idle
         isRuntime: 0
         guid: e5f0208c8d4226e4bb65b3f756605242
-        _position: {x: 220.49548, y: 829.00006}
+        _position: {x: 220, y: 774}
         _description: 

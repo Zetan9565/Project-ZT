@@ -45,7 +45,7 @@ public class QuestInspector : Editor
 
     TalkerInformation holder;
 
-    AnimBool[] showState;
+    AnimBool showState;
 
     ObjectSelectionDrawer<TalkerInformation> npcSelector;
     ObjectSelectionDrawer<QuestGroup> groupSelector;
@@ -83,8 +83,7 @@ public class QuestInspector : Editor
         acceptConditionDrawer = new ConditionGroupDrawer(serializedObject, acceptCondition, lineHeight, lineHeightSpace, "接取条件列表");
         rewardDrawer = new ItemAmountListDrawer(serializedObject, rewardItems, lineHeight, lineHeightSpace, "奖励列表");
         HandlingObjectiveList();
-        showState = new AnimBool[1];
-        showState[0] = new AnimBool(objectives.isExpanded);
+        showState = new AnimBool(objectives.isExpanded);
         AddAnimaListener(OnAnima);
     }
 
@@ -96,7 +95,7 @@ public class QuestInspector : Editor
     private void OnAnima()
     {
         Repaint();
-        objectives.isExpanded = showState[0].target;
+        objectives.isExpanded = showState.target;
     }
 
     public override void OnInspectorGUI()
@@ -258,9 +257,9 @@ public class QuestInspector : Editor
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
 
-                showState[0].target = EditorGUILayout.Foldout(objectives.isExpanded, "任务目标\t\t"
+                showState.target = EditorGUILayout.Foldout(objectives.isExpanded, "任务目标\t\t"
                     + (objectives.isExpanded ? string.Empty : (objectives.arraySize > 0 ? "数量：" + objectives.arraySize : "无")), true);
-                if (EditorGUILayout.BeginFadeGroup(showState[0].faded))
+                if (EditorGUILayout.BeginFadeGroup(showState.faded))
                 {
                     serializedObject.Update();
                     objectiveList.DoLayoutList();
@@ -701,17 +700,10 @@ public class QuestInspector : Editor
 
     private void AddAnimaListener(UnityEngine.Events.UnityAction callback)
     {
-        foreach (var state in showState)
-        {
-            state.valueChanged.AddListener(callback);
-        }
+        showState.valueChanged.AddListener(callback);
     }
     private void RemoveAnimaListener(UnityEngine.Events.UnityAction callback)
     {
-        foreach (var state in showState)
-        {
-            state.valueChanged.RemoveListener(callback);
-        }
+        showState.valueChanged.RemoveListener(callback);
     }
-
 }

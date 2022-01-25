@@ -520,6 +520,7 @@ public class ConditionGroupDrawer
         SerializedProperty conditions = property.FindPropertyRelative("conditions");
         npcSelectors = new Dictionary<int, ObjectSelectionDrawer<TalkerInformation>>();
         var talkers = Resources.LoadAll<TalkerInformation>("").Where(x => x.Enable).ToArray();
+        var quests = Resources.LoadAll<Quest>("").Where(x => x != (owner.targetObject as Quest)).ToArray();
         List = new ReorderableList(property.serializedObject, conditions, true, true, true, true)
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
@@ -539,29 +540,20 @@ public class ConditionGroupDrawer
                         case ConditionType.AcceptQuest:
                             SerializedProperty day = condition.FindPropertyRelative("intValue");
                             SerializedProperty relatedQuest = condition.FindPropertyRelative("relatedQuest");
-                            day.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), "后第几天", day.intValue, 0, 30);
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), relatedQuest, new GUIContent("对应任务"));
+                            new ObjectSelectionDrawer<Quest>(relatedQuest, "title", quests, "对应任务").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight));
                             if (relatedQuest.objectReferenceValue == owner.targetObject as Quest) relatedQuest.objectReferenceValue = null;
-                            if (relatedQuest.objectReferenceValue)
-                            {
-                                Quest quest = relatedQuest.objectReferenceValue as Quest;
-                                EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 3, rect.width, lineHeight), "任务标题", quest.Title);
-                            }
+                            day.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "后第几天", day.intValue, 0, 30);
                             break;
                         case ConditionType.HasItem:
                             SerializedProperty relatedItem = condition.FindPropertyRelative("relatedItem");
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), relatedItem, new GUIContent("对应道具"));
-                            if (relatedItem.objectReferenceValue)
-                            {
-                                ItemBase item = relatedItem.objectReferenceValue as ItemBase;
-                                EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "道具名称", item.Name);
-                            }
+                            new ObjectSelectionDrawer<ItemBase>(relatedItem, "_name", i => ZetanUtility.GetInspectorName(i.ItemType), "",
+                                    "对应道具").DoDraw(new Rect(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight)));
                             break;
                         case ConditionType.Level:
                             SerializedProperty level = condition.FindPropertyRelative("intValue");
                             SerializedProperty compareType = condition.FindPropertyRelative("compareType");
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), level, new GUIContent("对应等级"));
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), compareType, new GUIContent("比较方式"));
+                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), compareType, new GUIContent("比较方式"));
+                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), level, new GUIContent("对应等级"));
                             if (level.intValue < 1) level.intValue = 1;
                             break;
                         case ConditionType.TriggerSet:
@@ -604,17 +596,11 @@ public class ConditionGroupDrawer
                     {
                         case ConditionType.CompleteQuest:
                         case ConditionType.AcceptQuest:
-                            if (condition.FindPropertyRelative("relatedQuest").objectReferenceValue)
-                                return 4 * lineHeightSpace;
-                            else return 3 * lineHeightSpace;
-                        case ConditionType.HasItem:
-                            if (condition.FindPropertyRelative("relatedItem").objectReferenceValue)
-                                return 3 * lineHeightSpace;
-                            else return 2 * lineHeightSpace;
                         case ConditionType.Level:
                             return 3 * lineHeightSpace;
                         case ConditionType.NPCIntimacy:
                             return 5 * lineHeightSpace;
+                        case ConditionType.HasItem:
                         case ConditionType.TriggerSet:
                         case ConditionType.TriggerReset:
                             return 2 * lineHeightSpace;
@@ -684,7 +670,8 @@ public class ConditionGroupDrawer
         {
             owner?.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(property.FindPropertyRelative("relational"), new GUIContent("(?)条件关系表达式"));
+            var re = property.FindPropertyRelative("relational");
+            EditorGUILayout.PropertyField(re, new GUIContent("(?)条件关系表达式", re.tooltip));
             if (EditorGUI.EndChangeCheck())
                 owner?.ApplyModifiedProperties();
         }
@@ -699,7 +686,8 @@ public class ConditionGroupDrawer
         {
             owner?.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUI.PropertyField(rect, property.FindPropertyRelative("relational"), new GUIContent("(?)条件关系表达式"));
+            var re = property.FindPropertyRelative("relational");
+            EditorGUILayout.PropertyField(re, new GUIContent("(?)条件关系表达式", re.tooltip));
             if (EditorGUI.EndChangeCheck())
                 owner?.ApplyModifiedProperties();
         }
@@ -767,198 +755,34 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
     private readonly SerializedProperty property;
     private readonly string label;
 
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, string path, string label = "", string nameNull = "未选择")
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, string path, string label = "", string nameNull = "未选择") :
+        this(property, fieldAsName, filter: null, path, label, nameNull)
+    { }
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, string path, string label = "", string nameNull = "未选择") :
+        this(property, fieldAsName, groupPicker, null, path, label, nameNull)
+    { }
+
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, string path, string label = "", string nameNull = "未选择") :
+        this(property, fieldAsName, null, filter, path, label, nameNull)
+    { }
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, Func<T, bool> filter, string path, string label = "", string nameNull = "未选择")
     {
-        objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
-        List<string> objectNames = new List<string>() { nameNull };
-        foreach (var obj in objects)
-        {
-            if (!string.IsNullOrEmpty(fieldAsName))
-            {
-                var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                if (field != null) objectNames.Add(field.GetValue(obj).ToString());
-                else objectNames.Add(obj.name);
-            }
-            else objectNames.Add(obj.name);
-        }
+        if (filter == null) objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
+        else objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).Where(x => filter.Invoke(x)).ToArray();
+        objectNames = HandleByGroup(fieldAsName, groupPicker, nameNull);
         this.property = property;
         this.label = label;
-        this.objectNames = objectNames.ToArray();
-    }
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, string path, string label = "", string nameNull = "未选择")
-    {
-        objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
-        List<string> objectNames = new List<string>() { nameNull };
-        foreach (var obj in objects)
-        {
-            if (!string.IsNullOrEmpty(fieldAsName))
-            {
-                var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                if (field != null) objectNames.Add(GetGroupedName(obj, field.GetValue(obj).ToString()));
-                else objectNames.Add(GetGroupedName(obj, obj.name));
-            }
-            else objectNames.Add(GetGroupedName(obj, obj.name));
-        }
-        this.property = property;
-        this.label = label;
-        this.objectNames = objectNames.ToArray();
-
-        string GetGroupedName(T obj, string name)
-        {
-            if (groupPicker == null) return name;
-            string group = groupPicker(obj);
-            if (string.IsNullOrEmpty(group)) return name;
-            else return $"{group}/{name}";
-        }
     }
 
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, string path, string label = "", string nameNull = "未选择")
-    {
-        objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
-        List<string> objectNames = new List<string>() { nameNull };
-        foreach (var obj in objects)
-        {
-            if (filter == null || filter != null && filter.Invoke(obj))
-            {
-                if (!string.IsNullOrEmpty(fieldAsName))
-                {
-                    var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                    if (field != null) objectNames.Add(field.GetValue(obj).ToString());
-                    else objectNames.Add(obj.name);
-                }
-                else objectNames.Add(obj.name);
-            }
-        }
-        this.property = property;
-        this.label = label;
-        this.objectNames = objectNames.ToArray();
-    }
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, Func<T, string> groupPicker, string path, string label = "", string nameNull = "未选择")
-    {
-        objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
-        List<string> objectNames = new List<string>() { nameNull };
-        foreach (var obj in objects)
-        {
-            if (filter == null || filter != null && filter.Invoke(obj))
-            {
-
-                if (!string.IsNullOrEmpty(fieldAsName))
-                {
-                    var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                    if (field != null) objectNames.Add(GetGroupedName(obj, field.GetValue(obj).ToString()));
-                    else objectNames.Add(GetGroupedName(obj, obj.name));
-                }
-                else objectNames.Add(GetGroupedName(obj, obj.name));
-            }
-        }
-        this.property = property;
-        this.label = label;
-        this.objectNames = objectNames.ToArray();
-
-        string GetGroupedName(T obj, string name)
-        {
-            if (groupPicker == null) return name;
-            string group = groupPicker(obj);
-            if (string.IsNullOrEmpty(group)) return name;
-            else return $"{group}/{name}";
-        }
-    }
-
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, T[] resources, string label = "", string nameNull = "未选择")
-    {
-        objects = resources;
-        List<string> objectNames = new List<string>() { nameNull };
-        foreach (var obj in objects)
-        {
-            if (!string.IsNullOrEmpty(fieldAsName))
-            {
-                var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                if (field != null) objectNames.Add(field.GetValue(obj).ToString());
-                else objectNames.Add(obj.name);
-            }
-            else objectNames.Add(obj.name);
-        }
-        this.property = property;
-        this.label = label;
-        this.objectNames = objectNames.ToArray();
-    }
+    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, T[] resources, string label = "", string nameNull = "未选择") :
+        this(property, fieldAsName, null, resources, label, nameNull)
+    { }
     public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, T[] resources, string label = "", string nameNull = "未选择")
     {
         objects = resources;
-        List<string> objectNames = new List<string>() { nameNull };
-        foreach (var obj in objects)
-        {
-            if (!string.IsNullOrEmpty(fieldAsName))
-            {
-                var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                if (field != null) objectNames.Add(GetGroupedName(obj, field.GetValue(obj).ToString()));
-                else objectNames.Add(GetGroupedName(obj, obj.name));
-            }
-            else objectNames.Add(GetGroupedName(obj, obj.name));
-        }
+        objectNames = HandleByGroup(fieldAsName, groupPicker, nameNull);
         this.property = property;
         this.label = label;
-        this.objectNames = objectNames.ToArray();
-
-        string GetGroupedName(T obj, string name)
-        {
-            if (groupPicker == null) return name;
-            string group = groupPicker(obj);
-            if (string.IsNullOrEmpty(group)) return name;
-            else return $"{group}/{name}";
-        }
-    }
-
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, T[] resources, string label = "", string nameNull = "未选择")
-    {
-        objects = resources;
-        List<string> objectNames = new List<string>() { nameNull };
-        foreach (var obj in objects)
-        {
-            if (filter == null || filter != null && filter.Invoke(obj))
-            {
-                if (!string.IsNullOrEmpty(fieldAsName))
-                {
-                    var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                    if (field != null) objectNames.Add(field.GetValue(obj).ToString());
-                    else objectNames.Add(obj.name);
-                }
-                else objectNames.Add(obj.name);
-            }
-        }
-        this.property = property;
-        this.label = label;
-        this.objectNames = objectNames.ToArray();
-    }
-    public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, bool> filter, Func<T, string> groupPicker, T[] resources, string label = "", string nameNull = "未选择")
-    {
-        objects = resources;
-        List<string> objectNames = new List<string>() { nameNull };
-        foreach (var obj in objects)
-        {
-            if (filter == null || filter != null && filter.Invoke(obj))
-            {
-
-                if (!string.IsNullOrEmpty(fieldAsName))
-                {
-                    var field = obj.GetType().GetField(fieldAsName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                    if (field != null) objectNames.Add(GetGroupedName(obj, field.GetValue(obj).ToString()));
-                    else objectNames.Add(GetGroupedName(obj, obj.name));
-                }
-                else objectNames.Add(GetGroupedName(obj, obj.name));
-            }
-        }
-        this.property = property;
-        this.label = label;
-        this.objectNames = objectNames.ToArray();
-
-        string GetGroupedName(T obj, string name)
-        {
-            if (groupPicker == null) return name;
-            string group = groupPicker(obj);
-            if (string.IsNullOrEmpty(group)) return name;
-            else return $"{group}/{name}";
-        }
     }
 
     public int DoLayoutDraw()
@@ -982,5 +806,49 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         else property.objectReferenceValue = objects[index - 1];
         EditorGUI.PropertyField(new Rect(rect.x + rect.width - 20, rect.y, 20, rect.height), property, new GUIContent(string.Empty));
         return index;
+    }
+
+    private string[] HandleByGroup(string fieldAsName, Func<T, string> groupPicker, string nameNull)
+    {
+        List<string> objectNames = new List<string>() { nameNull };
+        int ungrouped = 0;
+        Dictionary<string, List<char>> counters = new Dictionary<string, List<char>>();
+        foreach (var obj in objects)
+        {
+            if (!string.IsNullOrEmpty(fieldAsName))
+            {
+                var field = obj.GetType().GetField(fieldAsName, ZetanUtility.CommonBindingFlags);
+                if (field != null) objectNames.Add(GetGroupedName(obj, field.GetValue(obj).ToString()));
+                else objectNames.Add(GetGroupedName(obj, obj.name));
+            }
+            else objectNames.Add(GetGroupedName(obj, obj.name));
+        }
+        return objectNames.ToArray();
+
+        string GetGroupedName(T obj, string name)
+        {
+            if (groupPicker == null)
+            {
+                ungrouped++;
+                return $"[{ungrouped}] { name}";
+            }
+            string group = groupPicker(obj);
+            if (string.IsNullOrEmpty(group))
+            {
+                ungrouped++;
+                return $"[{ungrouped}] {name}";
+            }
+            else
+            {
+                int index = 1;
+                if (counters.TryGetValue(group, out var counter))
+                {
+                    counter.Add(' ');
+                    index = counter.Count;
+                }
+                else counters.Add(group, new List<char>() { ' ' });
+                return $"{group}/[{index}] {name}";
+            }
+        }
     }
 }
