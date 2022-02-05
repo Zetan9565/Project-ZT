@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -128,27 +127,56 @@ public static class ZetanEditorUtility
     }
 
     /// <summary>
-    /// 设置property关联字段的值，该字段必须是property.serializedObject.targetObject的顶级成员或者有SerializeRenference标签
+    /// 设置SerializedProperty关联字段的值
     /// </summary>
     /// <returns>是否成功</returns>
     public static bool TrySetValue(SerializedProperty property, object value)
     {
-        if (property.propertyType == SerializedPropertyType.ManagedReference) property.managedReferenceValue = value;
-        var onwerType = property.serializedObject.targetObject.GetType();
-        var fieldInfo = onwerType.GetField(property.propertyPath, ZetanUtility.CommonBindingFlags);
-        if (fieldInfo != null)
+        object temp = property.serializedObject.targetObject;
+        FieldInfo fieldInfo = null;
+        if (temp != null)
         {
             try
             {
-                fieldInfo.SetValue(property.serializedObject.targetObject, value);
-                return true;
+                string[] paths = property.propertyPath.Split('.');
+                for (int i = 0; i < paths.Length; i++)
+                {
+                    if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
+                    {
+                        if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
+                        {
+                            if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
+                            {
+                                fieldInfo = temp.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
+                                temp = (fieldInfo.GetValue(temp) as IList)[index];
+                                i += 2;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        fieldInfo = temp.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
+                        if (fieldInfo != null)
+                        {
+                            if (i < paths.Length - 1)
+                                temp = fieldInfo.GetValue(temp);
+                        }
+                        else break;
+                    }
+                }
+                if (fieldInfo != null)
+                {
+                    fieldInfo.SetValue(temp, value);
+                    return true;
+                }
+                else return false;
             }
             catch
             {
                 return false;
             }
         }
-        else return false;
+        return false;
     }
 
     /// <summary>
@@ -248,7 +276,7 @@ public static class ZetanEditorUtility
     {
         while (true)
         {
-            string path = EditorUtility.SaveFilePanel(title, string.Empty, assetName, extension);
+            string path = EditorUtility.SaveFilePanel(title, Application.dataPath, assetName, extension);
             if (!string.IsNullOrEmpty(path))
             {
                 if (IsValidPath(path))
@@ -270,7 +298,7 @@ public static class ZetanEditorUtility
                 }
                 else
                 {
-                    if (!EditorUtility.DisplayDialog("提示", "请选择Assets目录或以下的文件夹。", "确定", "取消"))
+                    if (!EditorUtility.DisplayDialog("提示", "请选择Assets目录或子文件夹。", "确定", "取消"))
                         return null;
                 }
             }

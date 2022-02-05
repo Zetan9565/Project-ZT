@@ -144,8 +144,11 @@ namespace ZetanStudio.BehaviourTree
         #region 事件回调
         private void OnUndoRedo()
         {
-            DrawTreeView(tree);
-            AssetDatabase.SaveAssets();
+            if (tree)
+            {
+                DrawTreeView(tree);
+                AssetDatabase.SaveAssetIfDirty(tree);
+            }
         }
         private GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
         {

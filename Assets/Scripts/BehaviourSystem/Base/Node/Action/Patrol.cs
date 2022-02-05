@@ -9,7 +9,7 @@ public class Patrol : PathMovement
     public bool random;
     [DisplayName("导航点")]
     public SharedVector3List waypoints = new List<Vector3>();
-    [DisplayName("巡逻间隔")]
+    [DisplayName("巡逻间隔(秒)")]
     public SharedFloat interval = 1f;
 
     private int waypointIndex;

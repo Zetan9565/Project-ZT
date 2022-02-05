@@ -86,6 +86,20 @@ namespace ZetanStudio.BehaviourTree
                 EditorGUILayout.PropertyField(serializedTree.FindProperty("description"));
                 if (EditorGUI.EndChangeCheck()) serializedTree.ApplyModifiedProperties();
             }
+            else
+            {
+                if (GUILayout.Button("新建"))
+                {
+                    BehaviourTree tree = ZetanEditorUtility.SaveFilePanel(CreateInstance<BehaviourTree>, "new behaviour tree");
+                    if (tree)
+                    {
+                        behaviour.objectReferenceValue = tree;
+                        InitTree();
+                        treeDrawer = new ObjectSelectionDrawer<BehaviourTree>(behaviour, string.Empty, string.Empty, "行为树");
+                        EditorApplication.delayCall += delegate { BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor); };
+                    }
+                }
+            }
             EditorGUILayout.PropertyField(frequency, new GUIContent("执行频率"));
             if (frequency.enumValueIndex == (int)BehaviourExecutor.Frequency.FixedTime)
                 EditorGUILayout.PropertyField(interval, new GUIContent("间隔(秒)"));
@@ -107,7 +121,7 @@ namespace ZetanStudio.BehaviourTree
                 EditorGUILayout.EndFadeGroup();
                 if (target is not RuntimeBehaviourExecutor && !Application.isPlaying)
                 {
-                    
+
                     showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, "变量预设列表", true);
                     if (EditorGUILayout.BeginFadeGroup(showPreset.faded))
                         presetVariableList.DoLayoutList();

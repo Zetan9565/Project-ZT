@@ -42,7 +42,7 @@ namespace ZetanStudio.BehaviourTree
                         EditorGUI.BeginChangeCheck();
                         EditorGUILayout.LabelField("结点名称", nodeEditor.node.name);
                         var nType = nodeEditor.node.GetType();
-                        var fields = new HashSet<string>(nType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).Select(f => f.Name));
+                        var fields = new HashSet<string>(nType.GetFields(ZetanUtility.CommonBindingFlags).Select(f => f.Name));
                         var fieldsMap = new HashSet<string>();
                         using (SerializedProperty property = nodes.GetArrayElementAtIndex(tree.Nodes.IndexOf(nodeEditor.node)))
                         {
@@ -51,13 +51,14 @@ namespace ZetanStudio.BehaviourTree
                             while (property.NextVisible(false) && !SerializedProperty.EqualContents(property, end))
                             {
                                 string field = property.name;
-                                if (field == "name" || field == "child" || field == "children" || field == "start" || field == "isRuntime") continue;
+                                if (field == "name" || field == "child" || field == "children" || field == "start" ||
+                                field == "isRuntime" || field == "isShared" || field == "isGlobal") continue;
                                 if (fields.Contains(field))
                                 {
                                     if (fieldsMap.Contains(field)) break;
                                     fieldsMap.Add(field);
-                                    var fInfo = nType.GetField(field, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                                    DrawProperty(property, fInfo.GetValue(nodeEditor.node), fInfo);
+                                    var fInfo = nType.GetField(field, ZetanUtility.CommonBindingFlags);
+                                    DrawProperty(property, fInfo);
                                 }
                             }
                         }
@@ -151,45 +152,73 @@ namespace ZetanStudio.BehaviourTree
             {
                 searchKey = EditorGUILayout.TextField(searchKey);
                 bool empty = string.IsNullOrEmpty(searchKey);
-                EditorGUILayout.BeginVertical("Box");
-                EditorGUILayout.LabelField("行为结点");
+                bool showBox = true;
                 foreach (var node in action)
                 {
                     if (Contains(node.Key.Name, searchKey))
+                    {
+                        if (showBox)
+                        {
+                            EditorGUILayout.BeginVertical("Box");
+                            EditorGUILayout.LabelField("行为结点");
+                            showBox = false;
+                        }
                         if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
                             node.Value?.Invoke();
+                    }
                 }
-                EditorGUILayout.EndVertical();
+                if (!showBox) EditorGUILayout.EndVertical();
 
-                EditorGUILayout.BeginVertical("Box");
-                EditorGUILayout.LabelField("条件结点");
+                showBox = true;
                 foreach (var node in conditional)
                 {
                     if (Contains(node.Key.Name, searchKey))
+                    {
+                        if (showBox)
+                        {
+                            EditorGUILayout.BeginVertical("Box");
+                            EditorGUILayout.LabelField("条件结点");
+                            showBox = false;
+                        }
                         if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
                             node.Value?.Invoke();
+                    }
                 }
-                EditorGUILayout.EndVertical();
+                if (!showBox) EditorGUILayout.EndVertical();
 
-                EditorGUILayout.BeginVertical("Box");
-                EditorGUILayout.LabelField("复合结点");
+                showBox = true;
                 foreach (var node in composite)
                 {
                     if (Contains(node.Key.Name, searchKey))
+                    {
+                        if (showBox)
+                        {
+                            EditorGUILayout.BeginVertical("Box");
+                            EditorGUILayout.LabelField("复合结点");
+                            showBox = false;
+                        }
                         if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
                             node.Value?.Invoke();
+                    }
                 }
-                EditorGUILayout.EndVertical();
+                if (!showBox) EditorGUILayout.EndVertical();
 
-                EditorGUILayout.BeginVertical("Box");
-                EditorGUILayout.LabelField("修饰结点");
+                showBox = true;
                 foreach (var node in decorator)
                 {
                     if (Contains(node.Key.Name, searchKey))
+                    {
+                        if (showBox)
+                        {
+                            EditorGUILayout.BeginVertical("Box");
+                            EditorGUILayout.LabelField("修饰结点");
+                            showBox = false;
+                        }
                         if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
                             node.Value?.Invoke();
+                    }
                 }
-                EditorGUILayout.EndVertical();
+                if (!showBox) EditorGUILayout.EndVertical();
 
                 bool Contains(string content, string key)
                 {
@@ -211,7 +240,7 @@ namespace ZetanStudio.BehaviourTree
             Add(container);
         }
 
-        private void DrawProperty(SerializedProperty property, object proValue, FieldInfo fieldInfo)
+        private void DrawProperty(SerializedProperty property, FieldInfo fieldInfo)
         {
             if (fieldInfo == null) return;
             ShouldHide(fieldInfo, out var shouldHide, out var readOnly);
@@ -226,28 +255,32 @@ namespace ZetanStudio.BehaviourTree
             var type = fieldInfo.FieldType;
             if (type.IsSubclassOf(typeof(SharedVariable)))
             {
-                SharedVariable variable = proValue as SharedVariable;
-                int typeIndex = variable.isGlobal ? 2 : (variable.isShared ? 1 : 0);
                 SerializedProperty name = property.FindPropertyRelative("_name");
                 SerializedProperty value = property.FindPropertyRelative("value");
+                //使用HideInInspector标签后仍可Find出来
+                SerializedProperty isShared = property.FindPropertyRelative("isShared");
+                SerializedProperty isGlobal = property.FindPropertyRelative("isGlobal");
+                int typeIndex = isGlobal.boolValue ? 2 : (isShared.boolValue ? 1 : 0);
+                int oldTypeIndex = typeIndex;
                 Rect rect = EditorGUILayout.GetControlRect();
                 EditorGUI.BeginDisabledGroup(nodeEditor.node.IsInstance);
                 typeIndex = EditorGUI.Popup(new Rect(rect.x + rect.width - 32, rect.y, 32, EditorGUIUtility.singleLineHeight), typeIndex, varType);
-                switch (typeIndex)
-                {
-                    case 1:
-                        variable.isShared = true;
-                        variable.isGlobal = false;
-                        break;
-                    case 2:
-                        variable.isShared = false;
-                        variable.isGlobal = true;
-                        break;
-                    default:
-                        variable.isShared = false;
-                        variable.isGlobal = false;
-                        break;
-                }
+                if (oldTypeIndex != typeIndex)
+                    switch (typeIndex)
+                    {
+                        case 1:
+                            isShared.boolValue = true;
+                            isGlobal.boolValue = false;
+                            break;
+                        case 2:
+                            isShared.boolValue = false;
+                            isGlobal.boolValue = true;
+                            break;
+                        default:
+                            isShared.boolValue = false;
+                            isGlobal.boolValue = false;
+                            break;
+                    }
                 EditorGUI.EndDisabledGroup();
                 switch (typeIndex)
                 {
@@ -278,7 +311,7 @@ namespace ZetanStudio.BehaviourTree
                     {
                         contents[i] = new GUIContent(varNames[i]);
                     }
-                    int nameIndex = System.Array.IndexOf(varNames, variable.name);
+                    int nameIndex = Array.IndexOf(varNames, name.stringValue);
                     if (nameIndex < 0) nameIndex = 0;
                     nameIndex = EditorGUI.Popup(valueRect, new GUIContent(displayName, tooltip), nameIndex, contents);
                     string nameStr = string.Empty;
@@ -289,10 +322,10 @@ namespace ZetanStudio.BehaviourTree
                         var val = variableHandler.GetVariable(varNames[nameIndex]);
                         if (val == null)
                         {
-                            val = System.Activator.CreateInstance(type) as SharedVariable;
+                            val = Activator.CreateInstance(type) as SharedVariable;
                             val.isShared = variableHandler is BehaviourTree;
                             val.isGlobal = variableHandler is GlobalVariables;
-                            type.GetField("_name", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public).SetValue(val, nameStr);
+                            type.GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(val, nameStr);
                         }
                         ZetanEditorUtility.TrySetValue(property, val);
                     }
@@ -315,7 +348,7 @@ namespace ZetanStudio.BehaviourTree
                         {
                             contents[i] = new GUIContent(varNames[i]);
                         }
-                        int nameIndex = System.Array.IndexOf(varNames, property.stringValue);
+                        int nameIndex = Array.IndexOf(varNames, property.stringValue);
                         if (nameIndex < 0) nameIndex = 0;
                         nameIndex = EditorGUILayout.Popup(new GUIContent(displayName, tooltip), nameIndex, contents);
                         string nameStr = string.Empty;

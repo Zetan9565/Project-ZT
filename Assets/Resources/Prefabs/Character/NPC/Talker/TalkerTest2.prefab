@@ -141,7 +141,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5729784439181124921}
   - component: {fileID: 5729784439181124917}
-  - component: {fileID: -4027490250092188733}
   - component: {fileID: 3621944093514496759}
   - component: {fileID: 345350267368019675}
   - component: {fileID: 4999703559838116204}
@@ -151,6 +150,7 @@ GameObject:
   - component: {fileID: 2429067774158318337}
   - component: {fileID: 840760797740629695}
   - component: {fileID: 7903210529052645866}
+  - component: {fileID: 267209658116374718}
   m_Layer: 7
   m_Name: TalkerTest2
   m_TagString: NPC
@@ -196,29 +196,6 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
---- !u!114 &-4027490250092188733
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5729784439181124927}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de3699ba1d38e394ca0f01d1dbb2fe67, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  behaviour: {fileID: 11400000, guid: 4e305828a1d2ad54686be53a22418a4b, type: 2}
-  frequency: 0
-  interval: 0.02
-  startOnStart: 1
-  restartOnComplete: 0
-  resetOnRestart: 0
-  gizmos: 1
-  presetVariables: []
-  references:
-    version: 2
-    RefIds: []
 --- !u!114 &3621944093514496759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -410,6 +387,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0047d9f1181fdb41a0d39cb65ce0c2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &267209658116374718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5729784439181124927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de3699ba1d38e394ca0f01d1dbb2fe67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  behaviour: {fileID: 11400000, guid: 4e305828a1d2ad54686be53a22418a4b, type: 2}
+  frequency: 0
+  interval: 0.02
+  startOnStart: 1
+  restartOnComplete: 0
+  resetOnRestart: 0
+  gizmos: 1
+  presetVariables: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &8689191005776426144
 GameObject:
   m_ObjectHideFlags: 0

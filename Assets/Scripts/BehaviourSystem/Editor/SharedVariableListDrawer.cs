@@ -143,6 +143,7 @@ namespace ZetanStudio.BehaviourTree
                     Rect valueRect = new Rect(rect.x, rect.y + lineHeightSpace, rect.width - 46, lineHeight);
                     if (variable.isExpanded)
                     {
+                        //这里的isShared用来标识变量名的填写方式，不作正常用途
                         SerializedProperty isShared = variable.FindPropertyRelative("isShared");
                         int typeIndex = isShared.boolValue ? 1 : 0;
                         typeIndex = EditorGUI.Popup(new Rect(rect.x + rect.width - 44, rect.y + lineHeightSpace, 44, lineHeight), typeIndex, varType);

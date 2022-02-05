@@ -47,6 +47,7 @@ namespace ZetanStudio.BehaviourTree
         }
         public static void CreateWindow(BehaviourExecutor executor)
         {
+            if (!executor) return;
             BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>();
             wnd.titleContent = new GUIContent("行为树编辑器");
             Selection.activeGameObject = executor.gameObject;
@@ -55,6 +56,7 @@ namespace ZetanStudio.BehaviourTree
         }
         public static void CreateWindow(BehaviourTree tree)
         {
+            if (!tree) return;
             BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>();
             wnd.titleContent = new GUIContent("行为树编辑器");
             Selection.activeObject = tree;
@@ -200,7 +202,7 @@ namespace ZetanStudio.BehaviourTree
         }
         private void UpdateTreeName()
         {
-            if (tree)
+            if (tree && treeName != null)
             {
                 if (latestGo)
                 {
