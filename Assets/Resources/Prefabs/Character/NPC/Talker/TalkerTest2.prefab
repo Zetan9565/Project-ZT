@@ -150,7 +150,7 @@ GameObject:
   - component: {fileID: 2429067774158318337}
   - component: {fileID: 840760797740629695}
   - component: {fileID: 7903210529052645866}
-  - component: {fileID: 267209658116374718}
+  - component: {fileID: 5444953366977586423}
   m_Layer: 7
   m_Name: TalkerTest2
   m_TagString: NPC
@@ -387,7 +387,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0047d9f1181fdb41a0d39cb65ce0c2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &267209658116374718
+--- !u!114 &5444953366977586423
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -151,11 +151,13 @@ namespace ZetanStudio.BehaviourTree
             IMGUIContainer container = new IMGUIContainer(() =>
             {
                 searchKey = EditorGUILayout.TextField(searchKey);
+                string desc = string.Empty;
                 bool empty = string.IsNullOrEmpty(searchKey);
                 bool showBox = true;
                 foreach (var node in action)
                 {
-                    if (Contains(node.Key.Name, searchKey))
+                    desc = GetNodeDesc(node.Key);
+                    if (Contains(node.Key.Name, desc, searchKey))
                     {
                         if (showBox)
                         {
@@ -163,7 +165,7 @@ namespace ZetanStudio.BehaviourTree
                             EditorGUILayout.LabelField("行为结点");
                             showBox = false;
                         }
-                        if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
+                        if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
                             node.Value?.Invoke();
                     }
                 }
@@ -172,7 +174,8 @@ namespace ZetanStudio.BehaviourTree
                 showBox = true;
                 foreach (var node in conditional)
                 {
-                    if (Contains(node.Key.Name, searchKey))
+                    desc = GetNodeDesc(node.Key);
+                    if (Contains(node.Key.Name, desc, searchKey))
                     {
                         if (showBox)
                         {
@@ -180,7 +183,7 @@ namespace ZetanStudio.BehaviourTree
                             EditorGUILayout.LabelField("条件结点");
                             showBox = false;
                         }
-                        if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
+                        if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
                             node.Value?.Invoke();
                     }
                 }
@@ -189,7 +192,8 @@ namespace ZetanStudio.BehaviourTree
                 showBox = true;
                 foreach (var node in composite)
                 {
-                    if (Contains(node.Key.Name, searchKey))
+                    desc = GetNodeDesc(node.Key);
+                    if (Contains(node.Key.Name, desc, searchKey))
                     {
                         if (showBox)
                         {
@@ -197,7 +201,7 @@ namespace ZetanStudio.BehaviourTree
                             EditorGUILayout.LabelField("复合结点");
                             showBox = false;
                         }
-                        if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
+                        if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
                             node.Value?.Invoke();
                     }
                 }
@@ -206,7 +210,8 @@ namespace ZetanStudio.BehaviourTree
                 showBox = true;
                 foreach (var node in decorator)
                 {
-                    if (Contains(node.Key.Name, searchKey))
+                    desc = GetNodeDesc(node.Key);
+                    if (Contains(node.Key.Name, desc, searchKey))
                     {
                         if (showBox)
                         {
@@ -214,15 +219,15 @@ namespace ZetanStudio.BehaviourTree
                             EditorGUILayout.LabelField("修饰结点");
                             showBox = false;
                         }
-                        if (GUILayout.Button(new GUIContent(node.Key.Name, GetNodeDesc(node.Key))))
+                        if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
                             node.Value?.Invoke();
                     }
                 }
                 if (!showBox) EditorGUILayout.EndVertical();
 
-                bool Contains(string content, string key)
+                bool Contains(string name, string desc, string key)
                 {
-                    return empty || content.ToLower().Contains(key.ToLower());
+                    return empty || name.ToLower().Contains(key.ToLower()) || desc.ToLower().Contains(key.ToLower());
                 }
 
                 string GetNodeDesc(Type type)

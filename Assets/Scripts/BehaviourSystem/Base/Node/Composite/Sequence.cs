@@ -8,19 +8,15 @@ namespace ZetanStudio.BehaviourTree
     {
         protected override NodeStates OnUpdate()
         {
-            switch (currentChild.Evaluate())
+            switch (currentChild?.Evaluate())
             {
                 case NodeStates.Success:
-                    if (currentChildIndex + 1 >= children.Count) //执行到这一步，还没有失败的，说明所有子结点都评估成功了
+                    currentChildIndex++;
+                    if (currentChildIndex >= children.Count) //执行到这一步，还没有失败的，说明所有子结点都评估成功了
                         return NodeStates.Success;
                     else
                     {
-                        currentChildIndex++;
-                        currentChild = children[currentChildIndex];
-                        while (!currentChild.IsValid)
-                        {
-                            currentChild = children[currentChildIndex++];
-                        }
+                        HandlingCurrentChild();
                         InactivateFrom(currentChildIndex);
                         return NodeStates.Running;
                     }

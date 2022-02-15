@@ -790,10 +790,10 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         int index = Array.IndexOf(objects, property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
         Rect rect = EditorGUILayout.GetControlRect();
-        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 21, rect.height), label, index, objectNames);
+        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 23.5f, rect.height), label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
-        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 20, rect.y, 20, rect.height), property, new GUIContent(string.Empty));
+        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 22.5f, rect.y, 22.5f, rect.height), property, new GUIContent(string.Empty));
         return index;
     }
 
@@ -801,10 +801,10 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
     {
         int index = Array.FindIndex(objects, x => x == property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
-        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 21, rect.height), label, index, objectNames);
+        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 23.5f, rect.height), label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
-        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 20, rect.y, 20, rect.height), property, new GUIContent(string.Empty));
+        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 22.5f, rect.y, 22.5f, rect.height), property, new GUIContent(string.Empty));
         return index;
     }
 

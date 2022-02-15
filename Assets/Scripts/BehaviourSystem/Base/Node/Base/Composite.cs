@@ -40,15 +40,22 @@ namespace ZetanStudio.BehaviourTree
         {
             abort = false;
             currentChildIndex = 0;
-            if (children.Count > 0)
-            {
-                currentChild = children[currentChildIndex];
-                while (!currentChild.IsValid)
-                {
-                    currentChild = children[currentChildIndex++];
-                }
-            }
+            HandlingCurrentChild();
             Owner.OnCompositeEvaluate(this);
+        }
+
+        protected void HandlingCurrentChild()
+        {
+            currentChild = null;
+            if (currentChildIndex >= 0 && currentChildIndex < children.Count)
+                currentChild = children[currentChildIndex];
+            while ((!currentChild || !currentChild.IsValid) && currentChildIndex < children.Count)
+            {
+                currentChild = null;
+                currentChildIndex++;
+                if (currentChildIndex >= 0 && currentChildIndex < children.Count)
+                    currentChild = children[currentChildIndex];
+            }
         }
 
         protected virtual void OnConditionalAbort(int index, bool lowerAbort)
@@ -88,7 +95,7 @@ namespace ZetanStudio.BehaviourTree
                 abort = true;
                 isStarted = true;
                 currentChildIndex = index;
-                currentChild = children[index];
+                HandlingCurrentChild();
             }
         }
 
@@ -125,12 +132,15 @@ namespace ZetanStudio.BehaviourTree
         {
             children.Add(child);
             SortByPosition();
+            currentChildIndex = children.IndexOf(currentChild);
         }
 
         public override void RemoveChild(Node child)
         {
             children.Remove(child);
             SortByPosition();
+            if (currentChild == child) HandlingCurrentChild();
+            currentChildIndex = children.IndexOf(currentChild);
         }
 
         public override Node Copy()

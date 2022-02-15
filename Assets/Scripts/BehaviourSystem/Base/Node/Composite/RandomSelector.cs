@@ -23,7 +23,7 @@ namespace ZetanStudio.BehaviourTree
 
         protected override NodeStates OnUpdate()
         {
-            switch (currentChild.Evaluate())
+            switch (currentChild?.Evaluate())
             {
                 case NodeStates.Success:
                     InactivateFrom(currentChildIndex);
@@ -33,8 +33,19 @@ namespace ZetanStudio.BehaviourTree
                         return NodeStates.Failure;
                     else
                     {
+                        currentChild = null;
                         currentChildIndex = childrenExecutionOrder.Pop();
-                        currentChild = children[currentChildIndex];
+                        if (currentChildIndex >= 0 && currentChildIndex < children.Count)
+                            currentChild = children[currentChildIndex];
+                        while ((!currentChild || !currentChild.IsValid) && childrenExecutionOrder.Count > 0)
+                        {
+                            currentChild = null;
+                            currentChildIndex = childrenExecutionOrder.Pop();
+                            if (currentChildIndex >= 0 && currentChildIndex < children.Count)
+                                currentChild = children[currentChildIndex];
+                        }
+                        if (!currentChild || !currentChild.IsValid && childrenExecutionOrder.Count < 1)
+                            return NodeStates.Failure;
                         InactivateFrom(currentChildIndex);
                         return NodeStates.Running;
                     }

@@ -152,8 +152,6 @@ namespace ZetanStudio.BehaviourTree
         }
         private GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
         {
-            //if (graphViewChange.elementsToRemove != null && graphViewChange.elementsToRemove.Exists(elem => elem is NodeEditor))
-            //    Undo.RegisterCompleteObjectUndo(tree, "行为树变化");
             if (graphViewChange.elementsToRemove != null)
             {
                 HashSet<NodeEditor> removedNodes = new HashSet<NodeEditor>();
