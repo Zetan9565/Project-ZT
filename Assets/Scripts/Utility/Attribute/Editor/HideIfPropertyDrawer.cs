@@ -37,7 +37,7 @@ public class HideIfPropertyDrawer : PropertyDrawer
     {
         if (ZetanEditorUtility.TryGetValue(property, out var target))
         {
-            if (ZetanEditorUtility.TryGetMemberValue(hideAttr.path, target, out var value, out _))
+            if (ZetanUtility.TryGetMemberValue(hideAttr.path, target, out var value, out _))
             {
                 if (Equals(value, hideAttr.value)) return true;
                 else return false;

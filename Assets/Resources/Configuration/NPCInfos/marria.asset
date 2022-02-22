@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCInfomation
   _ID: NPC001
   _name: "\u739B\u4E3D\u4E9A"
+  _SMParams: {fileID: 0}
   attribute:
     attributes: []
   level: 0
@@ -21,7 +22,7 @@ MonoBehaviour:
   enable: 1
   scene: UI
   position: {x: 0, y: -12.6, z: 0}
-  prefab: {fileID: 8466547411494483014, guid: a67902aeef35a3e4f953e660710595df, type: 3}
+  prefab: {fileID: 4978224793417098153, guid: a67902aeef35a3e4f953e660710595df, type: 3}
   defaultDialogue: {fileID: 11400000, guid: 443c980ec87b8384e87fa0711e323969, type: 2}
   conditionDialogues: []
   isWarehouseAgent: 0

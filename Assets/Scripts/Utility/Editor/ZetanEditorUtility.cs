@@ -92,40 +92,6 @@ public static class ZetanEditorUtility
         return false;
     }
 
-    public static bool TryGetMemberValue(string path, object target, out object value, out MemberInfo memberInfo)
-    {
-        value = default;
-        memberInfo = null;
-        string[] fields = path.Split('.');
-        object mv = target;
-        var mType = mv.GetType();
-        for (int i = 0; i < fields.Length; i++)
-        {
-            memberInfo = mType?.GetField(fields[i], ZetanUtility.CommonBindingFlags);
-            if (memberInfo is FieldInfo field)
-            {
-                mv = field.GetValue(mv);
-                mType = mv?.GetType();
-            }
-            else
-            {
-                memberInfo = mType?.GetProperty(fields[i], ZetanUtility.CommonBindingFlags);
-                if (memberInfo is PropertyInfo property)
-                {
-                    mv = property.GetValue(mv);
-                    mType = mv?.GetType();
-                }
-                else return false;
-            }
-        }
-        if (memberInfo != null)
-        {
-            value = mv;
-            return true;
-        }
-        else return false;
-    }
-
     /// <summary>
     /// 设置SerializedProperty关联字段的值
     /// </summary>

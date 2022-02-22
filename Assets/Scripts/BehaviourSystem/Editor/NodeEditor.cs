@@ -32,7 +32,7 @@ namespace ZetanStudio.BehaviourTree
             this.onSetPosition = onSetPosition;
             viewDataKey = node.guid;
             Type type = node.GetType();
-            title = type.Name + (node.IsInstance && !node.IsRuntime ? "(clone)" : (node.IsRuntime ? "(R)" : string.Empty));
+            title = type.Name + (node.IsRuntime ? "(R)" : string.Empty);
             var attr = type.GetCustomAttribute<NodeDescriptionAttribute>();
             if (attr != null) tooltip = attr.description;
             else tooltip = string.Empty;

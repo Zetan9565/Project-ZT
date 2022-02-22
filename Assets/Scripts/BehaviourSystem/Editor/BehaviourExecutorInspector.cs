@@ -119,7 +119,7 @@ namespace ZetanStudio.BehaviourTree
                 if (EditorGUILayout.BeginFadeGroup(showList.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
-                if (target is not RuntimeBehaviourExecutor && !Application.isPlaying)
+                if (target is not RuntimeBehaviourExecutor && !Application.isPlaying && !ZetanUtility.IsPrefab((target as BehaviourExecutor).gameObject))
                 {
 
                     showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, "变量预设列表", true);

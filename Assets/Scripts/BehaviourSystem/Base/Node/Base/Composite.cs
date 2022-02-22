@@ -23,13 +23,6 @@ namespace ZetanStudio.BehaviourTree
 
         public Composite() { children = new List<Node>(); }
 
-        public override Node GetInstance()
-        {
-            Composite composite = GetInstance<Composite>();
-            if (children != null) composite.children = children.ConvertAll(c => c.GetInstance());
-            return composite;
-        }
-
         public override List<Node> GetChildren()
         {
             if (children == null) children = new List<Node>();
@@ -101,16 +94,19 @@ namespace ZetanStudio.BehaviourTree
 
         public bool CheckConditionalAbort()
         {
-            for (int i = 0; i < children.Count; i++)
+            if (abortType != AbortType.None)
             {
-                if (children[i] is Conditional conditional && conditional.IsDone)
+                for (int i = 0; i < children.Count; i++)
                 {
-                    bool lowerAbort = conditional.CheckCondition();
-                    if (State == NodeStates.Failure && (abortType == AbortType.LowerPriority || abortType == AbortType.Both) && lowerAbort
-                        || (State == NodeStates.Success || State == NodeStates.Running) && (abortType == AbortType.Self || abortType == AbortType.Both) && !lowerAbort)
+                    if (children[i] is Conditional conditional && conditional.IsDone)
                     {
-                        OnConditionalAbort(i, lowerAbort);
-                        return true;
+                        bool lowerAbort = conditional.CheckCondition();
+                        if (State == NodeStates.Failure && (abortType == AbortType.LowerPriority || abortType == AbortType.Both) && lowerAbort
+                            || (State == NodeStates.Success || State == NodeStates.Running) && (abortType == AbortType.Self || abortType == AbortType.Both) && !lowerAbort)
+                        {
+                            OnConditionalAbort(i, lowerAbort);
+                            return true;
+                        }
                     }
                 }
             }

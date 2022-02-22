@@ -1,4 +1,4 @@
-//using System.Collections;
+ï»¿//using System.Collections;
 //using System.Collections.Generic;
 //using System.Linq;
 //using UnityEngine;
@@ -117,13 +117,13 @@
 //    private int maxStartIndex = 0;
 //    public void CheckGridPosition(Vector2 move)
 //    {
-//        //Debug.Log($"¹ö¶¯£º{scrollRect.velocity.y}");
+//        //Debug.Log($"æ»šåŠ¨ï¼š{scrollRect.velocity.y}");
 //        Vector3[] vCorners = new Vector3[4];
 //        rectTransform.GetWorldCorners(vCorners);
-//        if (grids[constraintCount])//µÚ¶þÐÐµÚÒ»¸ö
+//        if (grids[constraintCount])//ç¬¬äºŒè¡Œç¬¬ä¸€ä¸ª
 //        {
-//            //  1 ©³©¥©· 2
-//            //  0 ©»©¥©¿ 3
+//            //  1 â”â”â”“ 2
+//            //  0 â”—â”â”› 3
 //            Vector3[] gCorners = new Vector3[4];
 //            grids[constraintCount].rectTransform.GetWorldCorners(gCorners);
 //            if (gCorners[0].y > vCorners[1].y)
@@ -135,11 +135,11 @@
 //                dataStartIndex = dataStartIndex > maxStartIndex ? maxStartIndex : dataStartIndex;
 //                if (grids[0].dataIndex < dataStartIndex && dataStartIndex <= maxStartIndex && move.y > 0 && move.y < 1)
 //                {
-//                    Debug.Log($"¶¥²¿Ô½½çÁË: {dataStartIndex}");
+//                    Debug.Log($"é¡¶éƒ¨è¶Šç•Œäº†: {dataStartIndex}");
 //                    int swapTimes = Mathf.CeilToInt((gCorners[0].y - vCorners[1].y) / (cellSize.y + spacing.y));
 //                    int offset = constraintCount * (swapTimes - 1);
 //                    if (swapTimes > 1)
-//                        Debug.Log($"¶¥²¿³¬¹ý1´Î£º{swapTimes}");
+//                        Debug.Log($"é¡¶éƒ¨è¶…è¿‡1æ¬¡ï¼š{swapTimes}");
 //                    Reverse(0, constraintCount * swapTimes - 1);
 //                    Reverse(constraintCount * swapTimes, grids.Count - 1);
 //                    Reverse(0, grids.Count - 1);
@@ -154,7 +154,7 @@
 //                return;
 //            }
 //        }
-//        if (grids[grids.Count - constraintCount * 2])//µ¹ÊýµÚ¶þÐÐµÚÒ»¸ö
+//        if (grids[grids.Count - constraintCount * 2])//å€’æ•°ç¬¬äºŒè¡Œç¬¬ä¸€ä¸ª
 //        {
 //            Vector3[] gCorners = new Vector3[4];
 //            grids[grids.Count - constraintCount * 2].rectTransform.GetWorldCorners(gCorners);
@@ -167,11 +167,11 @@
 //                dataStartIndex = dataStartIndex > maxStartIndex ? maxStartIndex : dataStartIndex;
 //                if (grids[0].dataIndex > dataStartIndex && scrollRect.content.anchoredPosition.y > 0)
 //                {
-//                    Debug.Log($"µ×²¿Ô½½çÁË: {dataStartIndex}");
+//                    Debug.Log($"åº•éƒ¨è¶Šç•Œäº†: {dataStartIndex}");
 //                    int swapTimes = Mathf.CeilToInt((vCorners[0].y - gCorners[1].y) / (cellSize.y + spacing.y));
 //                    int offset = constraintCount * (swapTimes - 1);
 //                    if (swapTimes > 1)
-//                        Debug.Log($"µ×²¿³¬¹ý1´Î£º{swapTimes}");
+//                        Debug.Log($"åº•éƒ¨è¶…è¿‡1æ¬¡ï¼š{swapTimes}");
 //                    Reverse(0, grids.Count - 1);
 //                    Reverse(0, constraintCount * swapTimes - 1);
 //                    Reverse(constraintCount * swapTimes, grids.Count - 1);
@@ -201,25 +201,25 @@
 
 //    public void CheckGridPosition2(Vector2 move)
 //    {
-//        //Debug.Log($"¹ö¶¯£º{scrollRect.velocity.y}");
+//        //Debug.Log($"æ»šåŠ¨ï¼š{scrollRect.velocity.y}");
 //        Vector3[] vCorners = new Vector3[4];
 //        rectTransform.GetWorldCorners(vCorners);
 //        CalStartIndex();
-//        if (grids[0])//µÚ¶þÐÐµÚÒ»¸ö
+//        if (grids[0])//ç¬¬äºŒè¡Œç¬¬ä¸€ä¸ª
 //        {
-//            //  1 ©³©¥©· 2
-//            //  0 ©»©¥©¿ 3
+//            //  1 â”â”â”“ 2
+//            //  0 â”—â”â”› 3
 //            Vector3[] gCorners = new Vector3[4];
 //            grids[0].rectTransform.GetWorldCorners(gCorners);
 //            if (gCorners[0].y > vCorners[1].y && scrollRect.velocity.y > 0)
 //            {
 //                if (grids[0].dataIndex < dataStartIndex && dataStartIndex <= maxStartIndex && move.y > 0 && move.y < 1)
 //                {
-//                    Debug.Log($"¶¥²¿Ô½½çÁË: {dataStartIndex}");
+//                    Debug.Log($"é¡¶éƒ¨è¶Šç•Œäº†: {dataStartIndex}");
 //                    int swapTimes = Mathf.CeilToInt((gCorners[0].y - vCorners[1].y) / (cellSize.y + spacing.y));
 //                    int offset = constraintCount * (swapTimes - 1);
 //                    if (swapTimes > 1)
-//                        Debug.Log($"¶¥²¿³¬¹ý1´Î£º{swapTimes}");
+//                        Debug.Log($"é¡¶éƒ¨è¶…è¿‡1æ¬¡ï¼š{swapTimes}");
 //                    Reverse(0, constraintCount * swapTimes - 1);
 //                    Reverse(constraintCount * swapTimes, grids.Count - 1);
 //                    Reverse(0, grids.Count - 1);
@@ -236,11 +236,11 @@
 //            {
 //                if (grids[0].dataIndex > dataStartIndex && scrollRect.content.anchoredPosition.y > 0)
 //                {
-//                    Debug.Log($"µ×²¿Ô½½çÁË: {dataStartIndex}");
+//                    Debug.Log($"åº•éƒ¨è¶Šç•Œäº†: {dataStartIndex}");
 //                    int swapTimes = Mathf.CeilToInt((vCorners[1].y - gCorners[1].y) / (cellSize.y + spacing.y));
 //                    int offset = constraintCount * (swapTimes - 1);
 //                    if (swapTimes > 1)
-//                        Debug.Log($"µ×²¿³¬¹ý1´Î£º{swapTimes}");
+//                        Debug.Log($"åº•éƒ¨è¶…è¿‡1æ¬¡ï¼š{swapTimes}");
 //                    Reverse(0, grids.Count - 1);
 //                    Reverse(0, constraintCount * swapTimes - 1);
 //                    Reverse(constraintCount * swapTimes, grids.Count - 1);

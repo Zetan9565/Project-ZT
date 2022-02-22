@@ -41,7 +41,7 @@ namespace ZetanStudio.BehaviourTree
         {
             return globalVariables.GetVariable(name);
         }
-        public bool TryGetVariable<T>(string name, out SharedVariable<T> variable)
+        public bool TryGetVariable(string name, out SharedVariable variable)
         {
             return globalVariables.TryGetVariable(name, out variable);
         }

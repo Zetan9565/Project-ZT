@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using UnityEngine.Events;
 
 [DisallowMultipleComponent]
@@ -18,7 +18,7 @@ public class DontDestroyOnLoad : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"÷ÿ∏¥DontDestroyOnLoad£∫{gameObject.name}");
+            Debug.LogError($"ÈáçÂ§çDontDestroyOnLoadÔºö{gameObject.name}");
             DestroyImmediate(gameObject);
         }
     }

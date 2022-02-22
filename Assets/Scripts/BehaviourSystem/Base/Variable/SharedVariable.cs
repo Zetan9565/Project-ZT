@@ -16,8 +16,30 @@ namespace ZetanStudio.BehaviourTree
         [HideInInspector]
         public bool isShared;
 
-        public bool IsValid => !(isGlobal || isShared) || (isGlobal || isShared) && !string.IsNullOrEmpty(_name);
+        protected SharedVariable linkedVariable;
+        protected HashSet<SharedVariable> linkedVariables = new HashSet<SharedVariable>();
 
+        public bool IsValid => !isGlobal && !isShared || (isGlobal || isShared) && !string.IsNullOrEmpty(_name);
+
+        /// <summary>
+        /// 关联共享或全局变量（结点成员变量专用，在共享变量或全局变量列表里的变量不应使用）
+        /// </summary>
+        /// <param name="variable">关联的变量</param>
+        public void Link(SharedVariable variable)
+        {
+            if (linkedVariable == variable) return;
+            Unlink();
+            if (variable != null)
+            {
+                linkedVariable = variable;
+                if (!variable.linkedVariables.Contains(this)) variable.linkedVariables.Add(this);
+            }
+        }
+        public void Unlink()
+        {
+            linkedVariable?.linkedVariables.Remove(this);
+            linkedVariable = null;
+        }
         public abstract object GetValue();
         public abstract void SetValue(object value);
 
@@ -30,41 +52,44 @@ namespace ZetanStudio.BehaviourTree
         [SerializeField]
         protected T value;
         /// <summary>
-        /// 赋值要使用此字段，如果直接把泛型值赋值给此对象，此对象会被覆盖，泛型值赋值只是为了方便声明变量的初始值
+        /// 在运行中赋值请使用此属性或SetValue方法，如果直接把泛型值赋值给此对象，此对象会被覆盖，泛型值赋值只是为了方便声明变量的初始值
         /// </summary>
-        public T Value {
+        public T Value
+        {
             get
             {
-                return value;
+                if (linkedVariable != null) return (T)linkedVariable.GetValue();
+                else return value;
             }
             set
             {
-                this.value = value;
+                if (linkedVariable != null) linkedVariable.SetValue(value);
+                else this.value = value;
                 onValueChanged?.Invoke(value);
             }
         }
 
         public override object GetValue()
         {
-            return value;
+            return Value;
         }
         public override void SetValue(object value)
         {
-            this.value = (T)value;
+            Value = (T)value;
         }
 
         public virtual T GetGenericValue()
         {
-            return value;
+            return Value;
         }
         public virtual void SetGenericValue(T value)
         {
-            this.value = value;
+            Value = value;
         }
 
         public static implicit operator T(SharedVariable<T> self)
         {
-            return self.value;
+            return self.Value;
         }
     }
 
@@ -72,11 +97,9 @@ namespace ZetanStudio.BehaviourTree
     {
         public List<SharedVariable> Variables { get; }
 
-        public Dictionary<string, SharedVariable> KeyedVariables { get; }
-
         public SharedVariable GetVariable(string name);
 
-        public bool TryGetVariable<T>(string name, out SharedVariable<T> variable);
+        public bool TryGetVariable(string name, out SharedVariable value);
 
         public List<SharedVariable> GetVariables(Type type);
 

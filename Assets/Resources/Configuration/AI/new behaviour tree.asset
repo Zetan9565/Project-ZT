@@ -22,7 +22,6 @@ MonoBehaviour:
   - rid: 4391261938407964674
   - rid: 4391261938407964675
   - rid: 4391261938407964676
-  - rid: 4391261938407964677
   - rid: 4391261938407964678
   - rid: 4391261938407964679
   - rid: 4391261938407964680
@@ -36,6 +35,7 @@ MonoBehaviour:
   - rid: 4391261938407964690
   - rid: 4391261938407964691
   - rid: 4391261938407964697
+  - rid: 28978044484190301
   variables:
   - rid: 4391261938407964692
   - rid: 4391261938407964693
@@ -46,6 +46,19 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: 28978044484190301
+      type: {class: SelectorEvaluator, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (18) SelectorEvaluator
+        isRuntime: 0
+        guid: d1f518eaabf2abd4fbf2cdfbf41fad45
+        _position: {x: 220.0001, y: 376.0001}
+        _description: 
+        children:
+        - rid: 4391261938407964678
+        - rid: 4391261938407964686
+        - rid: 4391261938407964691
+        abortType: 0
     - rid: 4391261938407964672
       type: {class: Entry, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
@@ -102,29 +115,16 @@ MonoBehaviour:
         name: (4) Repeater
         isRuntime: 0
         guid: 9ae8d1a82b119e04e99a67c383dca9d2
-        _position: {x: 220, y: 244.8694}
+        _position: {x: 219.99998, y: 245.00006}
         _description: 
         child:
-          rid: 4391261938407964677
+          rid: 28978044484190301
         stopOnFailure: 0
         count:
           _name: 
           isGlobal: 0
           isShared: 0
           value: 0
-    - rid: 4391261938407964677
-      type: {class: SelectorEvaluator, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        name: (5) SelectorEvaluator
-        isRuntime: 0
-        guid: 7bb22820153958644986b60d76924e4c
-        _position: {x: 220, y: 375.86945}
-        _description: 
-        children:
-        - rid: 4391261938407964678
-        - rid: 4391261938407964686
-        - rid: 4391261938407964691
-        abortType: 0
     - rid: 4391261938407964678
       type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:

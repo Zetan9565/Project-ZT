@@ -1,7 +1,5 @@
 using UnityEngine;
 using UnityEditor;
-using System.Linq;
-using System;
 
 [CustomEditor(typeof(Talker), true)]
 public class TalkerInspector : Editor
@@ -20,7 +18,7 @@ public class TalkerInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        if (talker.GetGenericData())
+        if (talker.GetData())
         {
             EditorGUILayout.BeginVertical("Box");
             EditorGUILayout.LabelField("NPC识别码：" + talker.TalkerID);

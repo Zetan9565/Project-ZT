@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using System.Linq;
 
 namespace ZetanStudio.BehaviourTree
 {
@@ -58,27 +59,9 @@ namespace ZetanStudio.BehaviourTree
         #endregion
 
         #region 运行时方法
-        public virtual Node GetInstance()
+        public void Instantiate()
         {
-            if (isRuntime)
-            {
-                IsInstance = true;
-                return this;
-            }
-            Node node = MemberwiseClone() as Node;
-            node.IsInstance = true;
-            return node;
-        }
-        protected virtual T GetInstance<T>() where T : Node
-        {
-            if (isRuntime)
-            {
-                IsInstance = true;
-                return this as T;
-            }
-            Node node = MemberwiseClone() as Node;
-            node.IsInstance = true;
-            return node as T;
+            IsInstance = true;
         }
         public void Init(BehaviourTree owner)
         {
@@ -88,16 +71,18 @@ namespace ZetanStudio.BehaviourTree
                 return;
             }
             this.owner = owner;
-            Type type = GetType();
-            foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+            foreach (var field in GetType().GetFields(ZetanUtility.CommonBindingFlags).Where(field => field.FieldType.IsSubclassOf(typeof(SharedVariable))))
             {
-                if (field.FieldType.IsSubclassOf(typeof(SharedVariable)))
-                {
-                    SharedVariable variable = field.GetValue(this) as SharedVariable;
-                    if (variable.isShared) field.SetValue(this, this.owner.GetVariable(variable.name));
-                    else if (variable.isGlobal) field.SetValue(this, BehaviourManager.Instance.GetVariable(variable.name));
-                }
+                var hideAttr = field.GetCustomAttribute<HideIf_BTAttribute>();
+                if (hideAttr != null && ZetanUtility.TryGetMemberValue(hideAttr.path, this, out var value, out _) && Equals(value, hideAttr.value))
+                    continue;
+                SharedVariable variable = field.GetValue(this) as SharedVariable;
+                //if (variable.isShared) field.SetValue(this, this.owner.GetVariable(variable.name));
+                //else if (variable.isGlobal) field.SetValue(this, BehaviourManager.Instance.GetVariable(variable.name));
+                if (variable.isShared) variable.Link(this.owner.GetVariable(variable.name));
+                else if (variable.isGlobal) variable.Link(BehaviourManager.Instance.GetVariable(variable.name));
             }
+
             Shortcut = new NodeShortcut(owner.Executor);
             OnAwake();
 #if false
@@ -364,7 +349,7 @@ namespace ZetanStudio.BehaviourTree
         /// <summary>
         /// 用于在编辑器中备注结点，不应在游戏逻辑中使用
         /// </summary>
-        [TextArea, DisplayName("描述")] public string _description;
+        [TextArea(1, 3), DisplayName("结点描述")] public string _description;
 
         /// <summary>
         /// 用于在编辑器中连接子结点，不应在游戏逻辑中使用

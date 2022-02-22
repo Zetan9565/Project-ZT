@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -7,25 +7,25 @@ public class ItemSlotBase : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("Í¼±ê")]
+    [DisplayName("å›¾æ ‡")]
 #endif
     protected Image icon;
 
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("ÊıÁ¿")]
+    [DisplayName("æ•°é‡")]
 #endif
     protected Text amount;
 
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("Æ·ÖÊÊ¶±ğ¿ò")]
+    [DisplayName("å“è´¨è¯†åˆ«æ¡†")]
 #endif
     protected Image qualityEdge;
 
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("¸´Ñ¡¿ò")]
+    [DisplayName("å¤é€‰æ¡†")]
 #endif
     protected GameObject mark;
 

@@ -10,11 +10,11 @@ namespace ZetanStudio.BehaviourTree
     {
         [DisplayName("等待随机时长")]
         public SharedBool randomWait = false;
-        [DisplayName("最小随机时长"), HideIf_BT("randomWait.value", false)]
+        [DisplayName("最小随机时长"), HideIf_BT("randomWait", false)]
         public SharedFloat randomWaitMin = 1;
-        [DisplayName("最大随机时长"), HideIf_BT("randomWait.value", false)]
+        [DisplayName("最大随机时长"), HideIf_BT("randomWait", false)]
         public SharedFloat randomWaitMax = 1;
-        [DisplayName("等待时长(秒)"), HideIf_BT("randomWait.value", true)]
+        [DisplayName("等待时长(秒)"), HideIf_BT("randomWait", true)]
         public SharedFloat duration = 1;
 
         private float waitTime;

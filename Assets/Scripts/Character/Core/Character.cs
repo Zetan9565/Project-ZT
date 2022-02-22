@@ -1,38 +1,6 @@
 using UnityEngine;
 using ZetanExtends;
 
-public abstract class Character<T> : Character where T : CharacterData
-{
-    [SerializeReference, ReadOnly]
-    protected T data;
-
-    public override CharacterData GetData()
-    {
-        return data;
-    }
-    public override void SetData(CharacterData value)
-    {
-        data = (T)value;
-    }
-
-    public virtual T GetGenericData()
-    {
-        return data;
-    }
-    protected void SetGenericData(T value)
-    {
-        data = value;
-    }
-
-    public virtual void Init(T data)
-    {
-        SetGenericData(data);
-        GetData().entity = this;
-        StateMachine?.Init(this);
-    }
-}
-
-[RequireComponent(typeof(CharacterSMRunner))]
 public abstract class Character : MonoBehaviour
 {
     public Vector3 Position => transform.position;
@@ -41,30 +9,9 @@ public abstract class Character : MonoBehaviour
 
     public CharacterController2D Controller { get; protected set; }
 
-    public CharacterSMRunner StateMachine { get; protected set; }
+    public CharacterStateMachine StateMachine { get; protected set; }
 
-    protected void Awake()
-    {
-        StateMachine = GetComponent<CharacterSMRunner>();
-        Animator = this.GetComponentInFamily<CharacterAnimator>();
-        if (!Animator) Animator = gameObject.AddComponent<CharacterAnimator>();
-        OnAwake();
-    }
-
-    protected void OnDestroy()
-    {
-        OnDestroy_();
-#if UNITY_EDITOR
-        if (GetComponent<CharacterSMRunner>() is CharacterSMRunner machine)
-            machine.hideFlags = HideFlags.None;
-#endif
-    }
-
-    protected virtual void OnValidate()
-    {
-        if (GetComponent<CharacterSMRunner>() is CharacterSMRunner machine)
-            machine.hideFlags = HideFlags.HideInInspector;
-    }
+    public CharacterMachineStates MachineState => StateMachine?.CurrentState;
 
     public abstract CharacterData GetData();
     public T GetData<T>() where T : CharacterData
@@ -73,6 +20,55 @@ public abstract class Character : MonoBehaviour
     }
     public abstract void SetData(CharacterData value);
 
+    public virtual void Init<T>(T data) where T : CharacterData
+    {
+        SetData(data);
+        GetData().entity = this;
+        StateMachine = new CharacterStateMachine(this);
+    }
+    public void SetController(CharacterController2D controller)
+    {
+        Controller = controller;
+    }
+
+    public void SetMachineState<T>() where T : CharacterMachineStates
+    {
+        StateMachine?.SetCurrentState<T>();
+    }
+
+    #region MonoBehaviour
+    protected void Awake()
+    {
+        Animator = this.GetComponentInFamily<CharacterAnimator>();
+        if (!Animator) Animator = gameObject.AddComponent<CharacterAnimator>();
+        OnAwake();
+    }
+
+    private void Update()
+    {
+        StateMachine?.Update();
+        OnUpdate();
+    }
+
+    private void LateUpdate()
+    {
+        StateMachine?.LateUpdate();
+        OnLateUpdate();
+    }
+
+    private void FixedUpdate()
+    {
+        StateMachine?.FixedUpdate();
+        OnFixedUpdate();
+    }
+
+    protected void OnDestroy()
+    {
+        OnDestroy_();
+    }
+    #endregion
+
+    #region 角色状态相关
     public void SetState(CharacterStates mainState, dynamic subState)
     {
         GetData().mainState = mainState;
@@ -129,13 +125,25 @@ public abstract class Character : MonoBehaviour
             return true;
         }
     }
+    #endregion
 
-    public void SetController(CharacterController2D controller)
+    #region 虚方法
+    protected virtual void OnAwake()
     {
-        Controller = controller;
+
     }
 
-    protected virtual void OnAwake()
+    protected virtual void OnUpdate()
+    {
+
+    }
+
+    protected virtual void OnLateUpdate()
+    {
+
+    }
+
+    protected virtual void OnFixedUpdate()
     {
 
     }
@@ -144,5 +152,5 @@ public abstract class Character : MonoBehaviour
     {
 
     }
-
+    #endregion
 }

@@ -4,26 +4,23 @@ using UnityEngine;
 
 public class CharacterStateMachine
 {
-    private readonly Dictionary<Type, CharacterState> stateMap = new Dictionary<Type, CharacterState>();
-
-    public CharacterSMRunner Runner { get; }
+    private readonly Dictionary<Type, CharacterMachineStates> stateMap = new Dictionary<Type, CharacterMachineStates>();
 
     public Character Character { get; }
 
     public CharacterSMParams Params { get; }
 
-    public CharacterState CurrentState { get; private set; }
+    public CharacterMachineStates CurrentState { get; private set; }
 
-    public CharacterStateMachine(CharacterSMRunner runner)
+    public CharacterStateMachine(Character character)
     {
-        Runner = runner;
-        Character = runner.Character;
+        Character = character;
         Params = Character.GetData().GetInfo().SMParams;
         if (!Params) Params = ScriptableObject.CreateInstance<CharacterSMParams>();
         SetCurrentState<CharacterIdleState>();
     }
 
-    public void SetCurrentState<T>() where T : CharacterState
+    public void SetCurrentState<T>() where T : CharacterMachineStates
     {
         Type type = typeof(T);
         if (type.IsAbstract)

@@ -383,6 +383,40 @@ public sealed class ZetanUtility
         return ((MemberExpression)memberAccessor.Body).Member.Name;
     }
 
+    public static bool TryGetMemberValue(string path, object target, out object value, out MemberInfo memberInfo)
+    {
+        value = default;
+        memberInfo = null;
+        string[] fields = path.Split('.');
+        object mv = target;
+        var mType = mv.GetType();
+        for (int i = 0; i < fields.Length; i++)
+        {
+            memberInfo = mType?.GetField(fields[i], ZetanUtility.CommonBindingFlags);
+            if (memberInfo is FieldInfo field)
+            {
+                mv = field.GetValue(mv);
+                mType = mv?.GetType();
+            }
+            else
+            {
+                memberInfo = mType?.GetProperty(fields[i], ZetanUtility.CommonBindingFlags);
+                if (memberInfo is PropertyInfo property)
+                {
+                    mv = property.GetValue(mv);
+                    mType = mv?.GetType();
+                }
+                else return false;
+            }
+        }
+        if (memberInfo != null)
+        {
+            value = mv;
+            return true;
+        }
+        else return false;
+    }
+
     public static string GetInspectorName(Enum enumValue)
     {
         if (enumValue != null)

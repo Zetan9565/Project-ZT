@@ -34,9 +34,6 @@ namespace ZetanStudio.BehaviourTree
         {
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            EditorGUI.BeginDisabledGroup(true);
-            //EditorGUILayout.ObjectField("脚本", MonoScript.FromScriptableObject(target as BehaviourTree), typeof(MonoScript), false);
-            EditorGUI.EndDisabledGroup();
             EditorGUILayout.PropertyField(_name);
             EditorGUILayout.PropertyField(description);
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();

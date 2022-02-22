@@ -15,18 +15,13 @@ namespace ZetanStudio.BehaviourTree
         public SharedGameObject target;
         [DisplayName("检查视线")]
         public SharedBool lineOfSight;
-        [HideIf_BT("lineOfSight.value", false)]
+        [DisplayName("障碍检测层"), HideIf_BT("lineOfSight", false)]
         public LayerMask obstacleLayer;
-        [DisplayName("眼睛位置偏移"), HideIf_BT("lineOfSight.value", false)]
+        [DisplayName("眼睛位置偏移"), HideIf_BT("lineOfSight", false)]
         public SharedVector3 eyesOffset;
 
         public override bool IsValid => distance != null && (usePoint && point != null && point.IsValid || !usePoint && target != null && target.IsValid)
             && lineOfSight != null && lineOfSight.IsValid && (!lineOfSight || lineOfSight && eyesOffset != null && eyesOffset.IsValid);
-
-        protected override bool ShouldKeepRunning()
-        {
-            return !usePoint && target.Value == null;
-        }
 
         public override bool CheckCondition()
         {

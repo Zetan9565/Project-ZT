@@ -265,7 +265,7 @@ namespace ZetanStudio.BehaviourTree
             newNode.guid = GUID.Generate().ToString();
             if (tree.IsInstance)
             {
-                if (!tree.IsRuntime) newNode = newNode.GetInstance();
+                if (!tree.IsRuntime) newNode.Instantiate();// = newNode.GetInstance();
                 newNode.Init(tree);
             }
             if (record) Undo.RegisterCompleteObjectUndo(tree, "新增结点");

@@ -13,13 +13,6 @@ namespace ZetanStudio.BehaviourTree
 
         public override bool IsValid => child;
 
-        public override Node GetInstance()
-        {
-            Decorator decorator = GetInstance<Decorator>();
-            if (child) decorator.child = child.GetInstance();
-            return decorator;
-        }
-
         public override List<Node> GetChildren()
         {
             List<Node> children = new List<Node>();

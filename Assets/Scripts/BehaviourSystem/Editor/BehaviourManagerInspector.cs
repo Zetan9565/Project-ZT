@@ -70,7 +70,7 @@ namespace ZetanStudio.BehaviourTree
                 if (EditorGUILayout.BeginFadeGroup(showGlobal.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
-                if (!Application.isPlaying)
+                if (!Application.isPlaying && !ZetanUtility.IsPrefab((target as BackpackManager).gameObject))
                 {
                     showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, "变量预设列表", true);
                     if (EditorGUILayout.BeginFadeGroup(showPreset.faded))

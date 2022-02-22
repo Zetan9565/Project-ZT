@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using ZetanExtends;
 
-public abstract class CharacterState
+public abstract class CharacterMachineStates
 {
     protected CharacterStateMachine Machine { get; }
     protected float EnterTime { get; private set; }
@@ -11,7 +11,7 @@ public abstract class CharacterState
     protected CharacterAnimator animator;
     protected Rigidbody2DMotion motion;
 
-    public CharacterState(CharacterStateMachine stateMachine)
+    public CharacterMachineStates(CharacterStateMachine stateMachine)
     {
         Machine = stateMachine;
         control = Machine.Character.GetComponentInFamily<CharacterControlInput>();
@@ -51,17 +51,17 @@ public abstract class CharacterState
 
     protected Coroutine StartCoroutine(IEnumerator routine)
     {
-        if (Machine == null || !Machine.Runner) return null;
-        return Machine.Runner.StartCoroutine(routine);
+        if (Machine == null || !Machine.Character) return null;
+        return Machine.Character.StartCoroutine(routine);
     }
     protected void StopCoroutine(Coroutine routine)
     {
-        if (Machine == null || !Machine.Runner) return;
-        Machine.Runner.StopCoroutine(routine);
+        if (Machine == null || !Machine.Character) return;
+        Machine.Character.StopCoroutine(routine);
     }
     protected void StopAllCoroutines()
     {
-        if (Machine == null || !Machine.Runner) return;
-        Machine.Runner.StopAllCoroutines();
+        if (Machine == null || !Machine.Character) return;
+        Machine.Character.StopAllCoroutines();
     }
 }

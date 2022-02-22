@@ -24,6 +24,12 @@ namespace ZetanStudio.BehaviourTree
                         SerializedProperty variable = serializedVariables.GetArrayElementAtIndex(index);
                         EditorGUI.PropertyField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), variable, true);
                         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+                        if (ZetanEditorUtility.TryGetValue(variable, out var value) && value is SharedVariable sv
+                        && sv.GetType().GetField("linkedVariables", ZetanUtility.CommonBindingFlags).GetValue(sv) is HashSet<SharedVariable> lvs)
+                            foreach (var lv in lvs)
+                            {
+                                lv.GetType().GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(lv, sv.name);
+                            }
                     }
                 },
                 elementHeightCallback = (index) =>
@@ -46,7 +52,16 @@ namespace ZetanStudio.BehaviourTree
                     serializedObject.Update();
                     SerializedProperty _name = serializedVariables.GetArrayElementAtIndex(list.index).FindPropertyRelative("_name");
                     if (EditorUtility.DisplayDialog("删除变量", $"确定要删除变量 {_name.stringValue} 吗？", "确定", "取消"))
+                    {
+                        if (ZetanEditorUtility.TryGetValue(serializedVariables.GetArrayElementAtIndex(list.index), out var value) && value is SharedVariable sv
+                            && sv.GetType().GetField("linkedVariables", ZetanUtility.CommonBindingFlags).GetValue(sv) is HashSet<SharedVariable> lvs)
+                            foreach (var lv in lvs)
+                            {
+                                lv.GetType().GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(lv, string.Empty);
+                                lv.GetType().GetField("linkedVariable", ZetanUtility.CommonBindingFlags).SetValue(lv, null);
+                            }
                         list.serializedProperty.DeleteArrayElementAtIndex(list.index);
+                    }
                     serializedObject.ApplyModifiedProperties();
                 },
                 onCanRemoveCallback = (list) =>
@@ -63,18 +78,17 @@ namespace ZetanStudio.BehaviourTree
 
             void InsertNewVariable(Type type)
             {
-                serializedObject.Update();
-                int index = serializedVariables.arraySize;
-                serializedVariables.InsertArrayElementAtIndex(index);
-                SerializedProperty element = serializedVariables.GetArrayElementAtIndex(index);
-                SharedVariable variable = (SharedVariable)Activator.CreateInstance(type);
-                string newName = $"{char.ToLower(type.Name[0])}{type.Name.Substring(1)}_{serializedVariables.arraySize}";
-                variable.GetType().GetField("_name", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(variable, newName);
-                variable.isShared = isShared;
-                variable.isGlobal = !isShared;
-                element.managedReferenceValue = variable;
-                serializedObject.ApplyModifiedProperties();
-                variableList.Select(serializedVariables.arraySize - 1);
+                if (ZetanEditorUtility.TryGetValue(serializedVariables, out var value) && value is List<SharedVariable> list)
+                {
+                    SharedVariable variable = (SharedVariable)Activator.CreateInstance(type);
+                    string newName = $"{char.ToLower(type.Name[0])}{type.Name.Substring(1)}_{serializedVariables.arraySize}";
+                    variable.GetType().GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(variable, newName);
+                    variable.isShared = isShared;
+                    variable.isGlobal = !isShared;
+                    list.Add(variable);
+                    variableList.Select(serializedVariables.arraySize);
+                }
+                else Debug.LogError("添加失败，请检查变量列表归属");
             }
         }
 
@@ -210,7 +224,10 @@ namespace ZetanStudio.BehaviourTree
                     serializedObject.Update();
                     SerializedProperty _name = presetVariables.GetArrayElementAtIndex(list.index).FindPropertyRelative("_name");
                     if (EditorUtility.DisplayDialog("删除变量", $"确定要删除预设 {_name.stringValue} 吗？", "确定", "取消"))
+                    {
                         list.serializedProperty.DeleteArrayElementAtIndex(list.index);
+                        GUIUtility.ExitGUI();
+                    }
                     serializedObject.ApplyModifiedProperties();
                 },
                 onCanRemoveCallback = (list) =>
@@ -226,16 +243,15 @@ namespace ZetanStudio.BehaviourTree
 
             void InsertNewVariable(Type type, bool select, string name = "")
             {
-                serializedObject.Update();
-                int index = presetVariables.arraySize;
-                presetVariables.InsertArrayElementAtIndex(index);
-                SerializedProperty element = presetVariables.GetArrayElementAtIndex(index);
-                SharedVariable variable = (SharedVariable)Activator.CreateInstance(type);
-                variable.GetType().GetField("_name", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(variable, name);
-                variable.isShared = select;
-                element.managedReferenceValue = variable;
-                serializedObject.ApplyModifiedProperties();
-                presetVariableList.Select(presetVariables.arraySize - 1);
+                if (ZetanEditorUtility.TryGetValue(presetVariables, out var value) && value is List<SharedVariable> list)
+                {
+                    SharedVariable variable = (SharedVariable)Activator.CreateInstance(type);
+                    variable.GetType().GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(variable, name);
+                    variable.isShared = select;
+                    list.Add(variable);
+                    presetVariableList.Select(presetVariables.arraySize);
+                }
+                else Debug.LogError("添加失败，请检查变量列表归属");
             }
         }
 

@@ -18,20 +18,45 @@ MonoBehaviour:
     rid: 4391261938407964698
   nodes:
   - rid: 4391261938407964698
-  variables: []
+  - rid: 28978044484190209
+  variables:
+  - rid: 28978044484190210
   isRuntime: 0
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 28978044484190209
+      type: {class: FindWithTag, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (1) FindWithTag
+        isRuntime: 0
+        guid: 4250703ab96acfa4ba9ffc62a4bd966d
+        _position: {x: 0, y: 144}
+        _description: 
+        tag:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: Player
+        register:
+          _name: sharedGameObject_1
+          isGlobal: 0
+          isShared: 1
+          value: {fileID: 0}
+    - rid: 28978044484190210
+      type: {class: SharedGameObject, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _name: sharedGameObject_1
+        isGlobal: 0
+        isShared: 1
+        value: {fileID: 0}
     - rid: 4391261938407964698
       type: {class: Entry, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (0) Entry
         isRuntime: 0
-        guid: 
+        guid: 6c1785e35fea819499a00357c3158d67
         _position: {x: 0, y: 0}
         _description: 
         start:
-          rid: -2
+          rid: 28978044484190209

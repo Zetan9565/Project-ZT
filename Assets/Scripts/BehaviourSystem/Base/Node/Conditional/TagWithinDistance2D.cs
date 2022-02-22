@@ -10,12 +10,13 @@ namespace ZetanStudio.BehaviourTree
         public SharedFloat distance;
         [DisplayName("标签"), Tag_BT]
         public SharedString tag;
+        [DisplayName("可视检测层")]
         public LayerMask sightLayer = 1 << 2;
         [DisplayName("检查视线")]
         public SharedBool lineOfSight;
-        [HideIf_BT("lineOfSight.value", false)]
+        [DisplayName("障碍检测曾"), HideIf_BT("lineOfSight", false)]
         public LayerMask obstacleLayer;
-        [DisplayName("眼睛位置偏移"), HideIf_BT("lineOfSight.value", false)]
+        [DisplayName("眼睛位置偏移"), HideIf_BT("lineOfSight", false)]
         public SharedVector3 eyesOffset;
         [DisplayName("寄存器")]
         public SharedGameObject register;

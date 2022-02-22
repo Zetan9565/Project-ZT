@@ -48,7 +48,7 @@ namespace ZetanStudio.BehaviourTree
             if (!behaviour) return null;
             return behaviour.GetVariable(name);
         }
-        public bool TryGetVariable<T>(string name, out SharedVariable<T> variable)
+        public bool TryGetVariable(string name, out SharedVariable variable)
         {
             variable = null;
             if (!behaviour) return false;

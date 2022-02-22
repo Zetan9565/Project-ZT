@@ -10,42 +10,28 @@ namespace ZetanStudio.BehaviourTree
         private List<SharedVariable> variables;
         public List<SharedVariable> Variables => variables;
 
-        public Dictionary<string, SharedVariable> KeyedVariables { get; private set; }
-
         public bool IsInstance { get; private set; }
 
         public GlobalVariables()
         {
             variables = new List<SharedVariable>();
-            KeyedVariables = new Dictionary<string, SharedVariable>();
         }
 
         public GlobalVariables GetInstance()
         {
             GlobalVariables global = Instantiate(this);
             global.IsInstance = true;
-            foreach (var variable in global.variables)
-            {
-                if (!global.KeyedVariables.ContainsKey(variable.name)) global.KeyedVariables.Add(variable.name, variable);
-            }
             return global;
         }
 
         public SharedVariable GetVariable(string name)
         {
-            if (KeyedVariables.TryGetValue(name, out var variable)) return variable;
-            else return null;
+            return Variables.Find(x => x.name == name);
         }
-
-        public bool TryGetVariable<T>(string name, out SharedVariable<T> variable)
+        public bool TryGetVariable(string name, out SharedVariable value)
         {
-            variable = null;
-            if (KeyedVariables.TryGetValue(name, out var find))
-            {
-                variable = find as SharedVariable<T>;
-                return true;
-            }
-            else return false;
+            value = GetVariable(name);
+            return value != null;
         }
 
         public List<SharedVariable> GetVariables(Type type)
@@ -78,7 +64,8 @@ namespace ZetanStudio.BehaviourTree
                 Debug.LogError("尝试对未实例化的全局变量赋值");
                 return false;
             }
-            if (KeyedVariables.TryGetValue(name, out var variable))
+            var variable = Variables.Find(x => x.name == name);
+            if (variable != null)
             {
                 variable.SetValue(value);
                 return true;
@@ -93,7 +80,8 @@ namespace ZetanStudio.BehaviourTree
                 Debug.LogError("尝试对未实例化的全局变量赋值");
                 return false;
             }
-            if (KeyedVariables.TryGetValue(name, out var variable))
+            var variable = Variables.Find(x => x.name == name);
+            if (variable != null)
             {
                 if (variable is SharedVariable<T> var)
                 {
@@ -107,10 +95,10 @@ namespace ZetanStudio.BehaviourTree
 
         public void PresetVariables(List<SharedVariable> variables)
         {
-            foreach (var variable in variables)
+            foreach (var preVar in variables)
             {
-                if (KeyedVariables.TryGetValue(variable.name, out var keyedVar) && keyedVar.GetType() == variable.GetType())
-                    keyedVar.SetValue(variable.GetValue());
+                SharedVariable variable = Variables.Find(x => x.name == preVar.name);
+                if (variable != null) variable.SetValue(preVar.GetValue());
             }
         }
     }

@@ -104,16 +104,15 @@ namespace ZetanStudio.BehaviourTree
 
             if (treeView == null || !selected)
             {
-                UpdateTreeName();
+                UpdateVariables();
                 return;
             }
+
             tree = selected;
 
             treeView.DrawTreeView(tree);
 
             serializedTree = new SerializedObject(tree);
-            var global = Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanEditorUtility.LoadAsset<GlobalVariables>();
-            serializedGlobal = new SerializedObject(global);
             UpdateVariables();
             UpdateAssetDropdown();
             UpdateTreeDropdown();
@@ -125,6 +124,12 @@ namespace ZetanStudio.BehaviourTree
                 treeView.FrameAll();
                 inspectorView.InspectTree(tree);
             };
+
+            void UpdateVariables()
+            {
+                serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanEditorUtility.LoadAsset<GlobalVariables>());
+                this.UpdateVariables();
+            }
         }
         private void UpdateAssetDropdown()
         {
@@ -195,10 +200,9 @@ namespace ZetanStudio.BehaviourTree
         }
         private void UpdateVariables()
         {
-            shared.SetEnabled(!showShared);
-            global.SetEnabled(showShared);
+            shared?.SetEnabled(!showShared);
+            global?.SetEnabled(showShared);
             InitVariables();
-            variables.onGUIHandler = DrawVariables;
         }
         private void UpdateTreeName()
         {
@@ -331,6 +335,7 @@ namespace ZetanStudio.BehaviourTree
             inspectorView = root.Q<InspectorView>();
             SwitchInspector();
             variables = root.Q<IMGUIContainer>("variables");
+            variables.onGUIHandler = DrawVariables;
 
             assetsMenu = root.Q<ToolbarMenu>("assets");
             assetsMenu.menu.AppendAction("新建", (a) => CreateNewTree("new behaviour tree"));
@@ -360,6 +365,7 @@ namespace ZetanStudio.BehaviourTree
             treeView?.OnUpdate();
             if (!treeView?.tree) treeView?.DrawTreeView(tree);
             UpdateTreeDropdown();
+            UpdateTreeName();
         }
         private void OnProjectChange()
         {
@@ -414,11 +420,15 @@ namespace ZetanStudio.BehaviourTree
         }
         private void DrawVariables()
         {
-            if (!showShared && (serializedObject == null || serializedObject.targetObject == null))
+            if (serializedObject == null || serializedObject.targetObject == null)
             {
-                if (GUILayout.Button("新建")) CreateGlobalVariables("global variables");
+                if (!showShared)
+                {
+                    if (GUILayout.Button("新建")) CreateGlobalVariables("global variables");
+                }
+                else EditorGUILayout.HelpBox("没有编辑中的行为树", MessageType.Info);
+                return;
             }
-            if (serializedObject == null || serializedVariables == null) return;
             if (serializedObject.targetObject)
             {
                 serializedObject.Update();

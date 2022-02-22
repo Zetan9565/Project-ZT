@@ -5,13 +5,10 @@ namespace ZetanStudio.BehaviourTree
     /// </summary>
     public abstract class Conditional : Node
     {
-        protected virtual bool ShouldKeepRunning() { return false; }
-
         public abstract bool CheckCondition();
 
         protected override NodeStates OnUpdate()
         {
-            if (ShouldKeepRunning()) return NodeStates.Running;
             if (CheckCondition()) return NodeStates.Success;
             else return NodeStates.Failure;
         }

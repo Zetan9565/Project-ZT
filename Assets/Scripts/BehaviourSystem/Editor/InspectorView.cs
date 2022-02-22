@@ -111,7 +111,10 @@ namespace ZetanStudio.BehaviourTree
                 Add(container);
             }
         }
-
+        bool showAction = true;
+        bool showConditional = true;
+        bool showComposite = true;
+        bool showDecorator = true;
         public void InspectNodes(Action<Type> insertCallback)
         {
             Clear();
@@ -162,14 +165,19 @@ namespace ZetanStudio.BehaviourTree
                         if (showBox)
                         {
                             EditorGUILayout.BeginVertical("Box");
-                            EditorGUILayout.LabelField("行为结点");
+                            showAction = EditorGUILayout.BeginFoldoutHeaderGroup(showAction, "行为结点");
                             showBox = false;
                         }
-                        if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
-                            node.Value?.Invoke();
+                        if (showAction)
+                            if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
+                                node.Value?.Invoke();
                     }
                 }
-                if (!showBox) EditorGUILayout.EndVertical();
+                if (!showBox)
+                {
+                    EditorGUILayout.EndFoldoutHeaderGroup();
+                    EditorGUILayout.EndVertical();
+                }
 
                 showBox = true;
                 foreach (var node in conditional)
@@ -180,14 +188,19 @@ namespace ZetanStudio.BehaviourTree
                         if (showBox)
                         {
                             EditorGUILayout.BeginVertical("Box");
-                            EditorGUILayout.LabelField("条件结点");
+                            showConditional = EditorGUILayout.BeginFoldoutHeaderGroup(showConditional, "条件结点");
                             showBox = false;
                         }
-                        if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
-                            node.Value?.Invoke();
+                        if (showConditional)
+                            if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
+                                node.Value?.Invoke();
                     }
                 }
-                if (!showBox) EditorGUILayout.EndVertical();
+                if (!showBox)
+                {
+                    EditorGUILayout.EndFoldoutHeaderGroup();
+                    EditorGUILayout.EndVertical();
+                }
 
                 showBox = true;
                 foreach (var node in composite)
@@ -198,14 +211,19 @@ namespace ZetanStudio.BehaviourTree
                         if (showBox)
                         {
                             EditorGUILayout.BeginVertical("Box");
-                            EditorGUILayout.LabelField("复合结点");
+                            showComposite = EditorGUILayout.BeginFoldoutHeaderGroup(showComposite, "复合结点");
                             showBox = false;
                         }
-                        if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
-                            node.Value?.Invoke();
+                        if (showComposite)
+                            if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
+                                node.Value?.Invoke();
                     }
                 }
-                if (!showBox) EditorGUILayout.EndVertical();
+                if (!showBox)
+                {
+                    EditorGUILayout.EndFoldoutHeaderGroup();
+                    EditorGUILayout.EndVertical();
+                }
 
                 showBox = true;
                 foreach (var node in decorator)
@@ -216,14 +234,19 @@ namespace ZetanStudio.BehaviourTree
                         if (showBox)
                         {
                             EditorGUILayout.BeginVertical("Box");
-                            EditorGUILayout.LabelField("修饰结点");
+                            showDecorator = EditorGUILayout.BeginFoldoutHeaderGroup(showDecorator, "修饰结点");
                             showBox = false;
                         }
-                        if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
-                            node.Value?.Invoke();
+                        if (showDecorator)
+                            if (GUILayout.Button(new GUIContent(node.Key.Name, desc)))
+                                node.Value?.Invoke();
                     }
                 }
-                if (!showBox) EditorGUILayout.EndVertical();
+                if (!showBox)
+                {
+                    EditorGUILayout.EndFoldoutHeaderGroup();
+                    EditorGUILayout.EndVertical();
+                }
 
                 bool Contains(string name, string desc, string key)
                 {
@@ -268,7 +291,7 @@ namespace ZetanStudio.BehaviourTree
                 int typeIndex = isGlobal.boolValue ? 2 : (isShared.boolValue ? 1 : 0);
                 int oldTypeIndex = typeIndex;
                 Rect rect = EditorGUILayout.GetControlRect();
-                EditorGUI.BeginDisabledGroup(nodeEditor.node.IsInstance);
+                //EditorGUI.BeginDisabledGroup(nodeEditor.node.IsInstance);
                 typeIndex = EditorGUI.Popup(new Rect(rect.x + rect.width - 32, rect.y, 32, EditorGUIUtility.singleLineHeight), typeIndex, varType);
                 if (oldTypeIndex != typeIndex)
                     switch (typeIndex)
@@ -286,7 +309,7 @@ namespace ZetanStudio.BehaviourTree
                             isGlobal.boolValue = false;
                             break;
                     }
-                EditorGUI.EndDisabledGroup();
+                //EditorGUI.EndDisabledGroup();
                 switch (typeIndex)
                 {
                     case 1:
@@ -316,24 +339,36 @@ namespace ZetanStudio.BehaviourTree
                     {
                         contents[i] = new GUIContent(varNames[i]);
                     }
+                    if (ZetanEditorUtility.TryGetValue(property, out var value))
+                    {
+                        var link = type.GetField("linkedVariable", ZetanUtility.CommonBindingFlags).GetValue(value);
+                        if (link != null) name.stringValue = (link as SharedVariable).name;
+                    }
                     int nameIndex = Array.IndexOf(varNames, name.stringValue);
                     if (nameIndex < 0) nameIndex = 0;
                     nameIndex = EditorGUI.Popup(valueRect, new GUIContent(displayName, tooltip), nameIndex, contents);
                     string nameStr = string.Empty;
                     if (nameIndex > 0 && nameIndex <= variables.Count) nameStr = varNames[nameIndex];
+                    //if (!nodeEditor.node.IsInstance) name.stringValue = nameStr;
+                    //else if (nameStr != name.stringValue)
+                    //{
+                    //    var val = variableHandler.GetVariable(varNames[nameIndex]);
+                    //    if (val == null)
+                    //    {
+                    //        val = Activator.CreateInstance(type) as SharedVariable;
+                    //        val.isShared = variableHandler is BehaviourTree;
+                    //        val.isGlobal = variableHandler is GlobalVariables;
+                    //        type.GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(val, nameStr);
+                    //    }
+                    //    ZetanEditorUtility.TrySetValue(property, val);
+                    //}
                     if (!nodeEditor.node.IsInstance) name.stringValue = nameStr;
-                    else if (nameStr != name.stringValue)
+                    if (!string.IsNullOrEmpty(nameStr))
                     {
-                        var val = variableHandler.GetVariable(varNames[nameIndex]);
-                        if (val == null)
-                        {
-                            val = Activator.CreateInstance(type) as SharedVariable;
-                            val.isShared = variableHandler is BehaviourTree;
-                            val.isGlobal = variableHandler is GlobalVariables;
-                            type.GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(val, nameStr);
-                        }
-                        ZetanEditorUtility.TrySetValue(property, val);
+                        var val = variableHandler.GetVariable(nameStr);
+                        if (val != null && value != null) (value as SharedVariable).Link(val);
                     }
+                    else (value as SharedVariable).Unlink();
                 }
             }
             else if (type == typeof(string))
@@ -376,9 +411,21 @@ namespace ZetanStudio.BehaviourTree
             if (hideAttr != null)
             {
                 readOnly = hideAttr.readOnly;
-                if (ZetanEditorUtility.TryGetMemberValue(hideAttr.path, nodeEditor.node, out var fv, out _))
-                    if (Equals(fv, hideAttr.value))
-                        should = true;
+                if (ZetanUtility.TryGetMemberValue(hideAttr.path, nodeEditor.node, out var fv, out var mi) && mi != null)
+                    if (typeof(SharedVariable).IsAssignableFrom(fv.GetType()))
+                    {
+                        if (fv is SharedVariable sv)
+                        {
+                            if ((sv.isGlobal || sv.isShared) && !string.IsNullOrEmpty(sv.name))
+                            {
+                                if (sv.isGlobal) sv = global.GetVariable(sv.name);
+                                else if (sv.isShared) sv = tree.GetVariable(sv.name);
+                                if (sv != null && Equals(sv.GetValue(), hideAttr.value)) should = true;
+                            }
+                            else if (!sv.isGlobal && !sv.isShared && Equals(sv.GetValue(), hideAttr.value)) should = true;
+                        }
+                    }
+                    else if (Equals(fv, hideAttr.value)) should = true;
             }
             else if (roAttr != null)
             {

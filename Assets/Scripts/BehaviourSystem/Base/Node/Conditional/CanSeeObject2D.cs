@@ -15,6 +15,7 @@ namespace ZetanStudio.BehaviourTree
         public SharedFloat distance = 10f;
         [DisplayName("目标")]
         public SharedGameObject target;
+        [DisplayName("障碍检测层")]
         public LayerMask obstacleLayer;
 
         public override bool IsValid => direction != null && direction.IsValid && eyesOffset != null && eyesOffset.IsValid

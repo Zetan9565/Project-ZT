@@ -3,16 +3,19 @@ using UnityEngine;
 using ZetanExtends;
 
 [DisallowMultipleComponent]
-public class Talker : Character<TalkerData>
+public class Talker : Character
 {
-    public string TalkerID => GetGenericData() ? GetGenericData().Info.ID : string.Empty;
+    [SerializeReference, ReadOnly]
+    protected TalkerData data;
 
-    public string TalkerName => GetGenericData() ? GetGenericData().Info.Name : string.Empty;
+    public string TalkerID => GetData<TalkerData>() ? GetData<TalkerData>().Info.ID : string.Empty;
+
+    public string TalkerName => GetData<TalkerData>() ? GetData<TalkerData>().Info.Name : string.Empty;
 
     public Vector3 questFlagOffset;
     private QuestFlag flagAgent;
 
-    public List<QuestData> QuestInstances => GetGenericData() ? GetGenericData().questInstances : null;
+    public List<QuestData> QuestInstances => GetData<TalkerData>() ? GetData<TalkerData>().questInstances : null;
 
     [SerializeField]
     private MapIconHolder iconHolder;
@@ -22,7 +25,7 @@ public class Talker : Character<TalkerData>
     {
         get
         {
-            return GetGenericData().Info && data && !DialogueManager.Instance.IsTalking;
+            return GetData<TalkerData>().Info && data && !DialogueManager.Instance.IsTalking;
         }
     }
 
@@ -30,19 +33,30 @@ public class Talker : Character<TalkerData>
     {
         get
         {
-            foreach (var cd in GetGenericData().Info.ConditionDialogues)
+            foreach (var cd in GetData<TalkerData>().Info.ConditionDialogues)
             {
                 if (MiscFuntion.CheckCondition(cd.Condition))
                     return cd.Dialogue;
             }
-            return GetGenericData().Info.DefaultDialogue;
+            return GetData<TalkerData>().Info.DefaultDialogue;
         }
     }
 
-    public override void Init(TalkerData data)
+
+    public override CharacterData GetData()
+    {
+        return data;
+    }
+
+    public override void SetData(CharacterData value)
+    {
+        data = (TalkerData)value;
+    }
+
+    public void Init(TalkerData data)
     {
         base.Init(data);
-        transform.position = GetGenericData().GetInfo<NPCInformation>().Position;
+        transform.position = GetData<TalkerData>().GetInfo<NPCInformation>().Position;
         flagAgent = ObjectPool.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject, UIManager.Instance.QuestFlagParent).GetComponent<QuestFlag>();
         flagAgent.Init(this);
         if (iconHolder)
@@ -57,17 +71,17 @@ public class Talker : Character<TalkerData>
 
     public void OnTalkBegin()
     {
-        GetGenericData()?.OnTalkBegin();
+        GetData<TalkerData>()?.OnTalkBegin();
     }
 
     public void OnTalkFinished()
     {
-        GetGenericData()?.OnTalkFinished();
+        GetData<TalkerData>()?.OnTalkFinished();
     }
 
     public Dialogue OnGetGift(ItemBase gift)
     {
-        return GetGenericData()?.OnGetGift(gift);
+        return GetData<TalkerData>()?.OnGetGift(gift);
     }
 
     public bool DoInteract()
@@ -107,12 +121,12 @@ public class Talker : Character<TalkerData>
     private string GetMapIconName()
     {
         System.Text.StringBuilder name = new System.Text.StringBuilder(TalkerName);
-        if (GetGenericData().Info.IsVendor && GetGenericData().Info.Shop || GetGenericData().Info.IsWarehouseAgent && GetGenericData().Info.WarehouseCapcity > 0)
+        if (GetData<TalkerData>().Info.IsVendor && GetData<TalkerData>().Info.Shop || GetData<TalkerData>().Info.IsWarehouseAgent && GetData<TalkerData>().Info.WarehouseCapcity > 0)
         {
             name.Append("<");
-            if (GetGenericData().Info.IsVendor) name.Append(GetGenericData().Info.Shop.ShopName);
-            if (GetGenericData().Info.IsVendor && GetGenericData().Info.IsWarehouseAgent) name.Append(",");
-            if (GetGenericData().Info.IsWarehouseAgent) name.Append("仓库");
+            if (GetData<TalkerData>().Info.IsVendor) name.Append(GetData<TalkerData>().Info.Shop.ShopName);
+            if (GetData<TalkerData>().Info.IsVendor && GetData<TalkerData>().Info.IsWarehouseAgent) name.Append(",");
+            if (GetData<TalkerData>().Info.IsWarehouseAgent) name.Append("仓库");
             name.Append(">");
         }
         return name.ToString();
@@ -145,7 +159,7 @@ public class Talker : Character<TalkerData>
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        Gizmos.DrawWireCube(base.transform.position + questFlagOffset, new Vector3(1, 1, 0));
+        Gizmos.DrawWireCube(transform.position + questFlagOffset, new Vector3(1, 1, 0));
     }
 #endif
     #endregion

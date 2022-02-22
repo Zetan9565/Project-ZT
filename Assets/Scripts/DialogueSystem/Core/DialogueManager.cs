@@ -91,7 +91,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         if (!UI) return;
         CurrentTalker = talker;
         CurrentType = DialogueType.Normal;
-        ShowButtons(talker.GetGenericData().Info.CanDEV_RLAT, talker.GetGenericData().Info.IsVendor, talker.GetGenericData().Info.IsWarehouseAgent, talker.QuestInstances.FindAll(q => !q.IsFinished && MiscFuntion.CheckCondition(q.Info.AcceptCondition)).Count > 0);
+        ShowButtons(talker.GetData<TalkerData>().Info.CanDEV_RLAT, talker.GetData<TalkerData>().Info.IsVendor, talker.GetData<TalkerData>().Info.IsWarehouseAgent, talker.QuestInstances.FindAll(q => !q.IsFinished && MiscFuntion.CheckCondition(q.Info.AcceptCondition)).Count > 0);
         HideQuestDescription();
         StartDialogue(talker.DefaultDialogue);
         talker.OnTalkBegin();
@@ -282,7 +282,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             QuestData qParent = currentTalkObj.runtimeParent;
             //该目标是任务的最后一个目标，则可以直接提交任务
-            if (qParent.currentQuestHolder == CurrentTalker.GetGenericData() && qParent.IsComplete && qParent.ObjectiveInstances.IndexOf(currentTalkObj) == qParent.ObjectiveInstances.Count - 1)
+            if (qParent.currentQuestHolder == CurrentTalker.GetData<TalkerData>() && qParent.IsComplete && qParent.ObjectiveInstances.IndexOf(currentTalkObj) == qParent.ObjectiveInstances.Count - 1)
             {
                 buttonDatas.Add(new ButtonWithTextData("继续", delegate
                 {
@@ -306,7 +306,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
         {
             QuestData qParent = currentSubmitObj.runtimeParent;
             //若该目标是任务的最后一个目标，则可以直接提交任务
-            if (qParent.currentQuestHolder == CurrentTalker.GetGenericData() && qParent.IsComplete && qParent.ObjectiveInstances.IndexOf(currentSubmitObj) == qParent.ObjectiveInstances.Count - 1)
+            if (qParent.currentQuestHolder == CurrentTalker.GetData<TalkerData>() && qParent.IsComplete && qParent.ObjectiveInstances.IndexOf(currentSubmitObj) == qParent.ObjectiveInstances.Count - 1)
             {
                 buttonDatas.Add(new ButtonWithTextData("继续", delegate
                 {
@@ -338,7 +338,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     private void HandlingLast_Normal()
     {
-        foreach (TalkObjectiveData to in CurrentTalker.GetGenericData().objectivesTalkToThis.Where(o => !o.IsComplete))
+        foreach (TalkObjectiveData to in CurrentTalker.GetData<TalkerData>().objectivesTalkToThis.Where(o => !o.IsComplete))
         {
             if (to.AllPrevObjCmplt && !to.HasNextObjOngoing)
             {
@@ -351,7 +351,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 }));
             }
         }
-        foreach (SubmitObjectiveData so in CurrentTalker.GetGenericData().objectivesSubmitToThis.Where(o => !o.IsComplete))
+        foreach (SubmitObjectiveData so in CurrentTalker.GetData<TalkerData>().objectivesSubmitToThis.Where(o => !o.IsComplete))
         {
             if (so.AllPrevObjCmplt && !so.HasNextObjOngoing)
             {
@@ -472,7 +472,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
     {
         string talkerName = words.TalkerName;
         if (currentDialogue)
-            talkerName = currentDialogue.origin.UseUnifiedNPC ? (currentDialogue.origin.UseCurrentTalkerInfo ? CurrentTalker.GetGenericData().Info.Name : currentDialogue.origin.UnifiedNPC.Name) : talkerName;
+            talkerName = currentDialogue.origin.UseUnifiedNPC ? (currentDialogue.origin.UseCurrentTalkerInfo ? CurrentTalker.GetData<TalkerData>().Info.Name : currentDialogue.origin.UnifiedNPC.Name) : talkerName;
         if (words.TalkerType == TalkerType.Player && PlayerManager.Instance.PlayerInfo)
             talkerName = PlayerManager.Instance.PlayerInfo.Name;
         UI.nameText.text = talkerName;
@@ -597,7 +597,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
                 if (!option.parent.parent.origin.UseUnifiedNPC)
                     talkerInfo = option.parent.origin.TalkerInfo;
                 else if (option.parent.parent.origin.UseUnifiedNPC && option.parent.parent.origin.UseCurrentTalkerInfo)
-                    talkerInfo = CurrentTalker.GetGenericData().Info;
+                    talkerInfo = CurrentTalker.GetData<TalkerData>().Info;
                 else if (option.parent.parent.origin.UseUnifiedNPC && !option.parent.parent.origin.UseCurrentTalkerInfo)
                     talkerInfo = option.parent.parent.origin.UnifiedNPC;
                 wordsToSay.Push(new DialogueWordsData(new DialogueWords(talkerInfo, words), null));
@@ -713,15 +713,15 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     public void OpenTalkerWarehouse()
     {
-        if (!CurrentTalker || !CurrentTalker.GetGenericData().Info.IsWarehouseAgent) return;
+        if (!CurrentTalker || !CurrentTalker.GetData<TalkerData>().Info.IsWarehouseAgent) return;
         PauseDisplay(true);
         BackpackManager.Instance.PauseDisplay(false);
-        WarehouseManager.Instance.Manage(CurrentTalker.GetGenericData().warehouse);
+        WarehouseManager.Instance.Manage(CurrentTalker.GetData<TalkerData>().warehouse);
     }
     public void OpenTalkerShop()
     {
-        if (!CurrentTalker || !CurrentTalker.GetGenericData().Info.IsVendor) return;
-        ShopManager.Instance.Init(CurrentTalker.GetGenericData().shop);
+        if (!CurrentTalker || !CurrentTalker.GetData<TalkerData>().Info.IsVendor) return;
+        ShopManager.Instance.Init(CurrentTalker.GetData<TalkerData>().shop);
         ShopManager.Instance.OpenWindow();
         PauseDisplay(true);
     }
@@ -807,7 +807,7 @@ public class DialogueManager : WindowHandler<DialogueUI, DialogueManager>
 
     public void SendTalkerGifts()
     {
-        if (!CurrentTalker || !CurrentTalker.GetGenericData().Info.CanDEV_RLAT) return;
+        if (!CurrentTalker || !CurrentTalker.GetData<TalkerData>().Info.CanDEV_RLAT) return;
         OpenGiftWindow();
     }
 

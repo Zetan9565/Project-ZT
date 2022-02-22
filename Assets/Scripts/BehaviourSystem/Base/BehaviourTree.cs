@@ -48,25 +48,19 @@ namespace ZetanStudio.BehaviourTree
         public NodeStates ExecutionState { get; private set; }
 
         public BehaviourExecutor Executor { get; private set; }
-        public Dictionary<string, SharedVariable> KeyedVariables { get; private set; }
         #endregion
 
         #region 共享变量获取
         public SharedVariable GetVariable(string name)
         {
-            if (KeyedVariables.TryGetValue(name, out var variable)) return variable;
-            else return null;
+            return Variables.Find(x => x.name == name);
         }
-        public bool TryGetVariable<T>(string name, out SharedVariable<T> variable)
+        public bool TryGetVariable(string name, out SharedVariable value)
         {
-            variable = null;
-            if (KeyedVariables.TryGetValue(name, out var find))
-            {
-                variable = find as SharedVariable<T>;
-                return true;
-            }
-            else return false;
+            value = GetVariable(name);
+            return value != null;
         }
+
         public List<SharedVariable> GetVariables(Type type)
         {
             List<SharedVariable> variables = new List<SharedVariable>();
@@ -97,7 +91,8 @@ namespace ZetanStudio.BehaviourTree
                 Debug.LogError("尝试对未实例化的局部变量赋值");
                 return false;
             }
-            if (KeyedVariables.TryGetValue(name, out var variable))
+            var variable = Variables.Find(x => x.name == name);
+            if (variable != null)
             {
                 variable.SetValue(value);
                 return true;
@@ -111,7 +106,8 @@ namespace ZetanStudio.BehaviourTree
                 Debug.LogError("尝试对未实例化的局部变量赋值");
                 return false;
             }
-            if (KeyedVariables.TryGetValue(name, out var variable))
+            var variable = Variables.Find(x => x.name == name);
+            if (variable != null)
             {
                 if (variable is SharedVariable<T> var)
                 {
@@ -129,12 +125,12 @@ namespace ZetanStudio.BehaviourTree
                 Debug.LogError("尝试替换未实例化的局部变量");
                 return false;
             }
-            if (KeyedVariables.ContainsKey(name))
+            if (Variables.Exists(x => x.name == name))
             {
                 Traverse(entry, n =>
                 {
                     Type type = n.GetType();
-                    foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+                    foreach (var field in type.GetFields(ZetanUtility.CommonBindingFlags))
                     {
                         if (field.FieldType.Equals(typeof(SharedVariable<T>)))
                         {
@@ -153,19 +149,8 @@ namespace ZetanStudio.BehaviourTree
             BehaviourTree tree;
             if (isRuntime) tree = this;
             else tree = Instantiate(this);
-            tree.entry = entry.GetInstance() as Entry;
-            if (!isRuntime)
-            {
-                tree.nodes = new List<Node>();
-                Traverse(tree.entry, n => { tree.nodes.Add(n); });
-            }
-            else
-            {
-                for (int i = 0; i < tree.nodes.Count; i++)
-                {
-                    tree.nodes[i] = tree.nodes[i].GetInstance();
-                }
-            }
+            //Traverse(tree.entry, n => n.Instantiate());
+            tree.nodes.ForEach(n => n.Instantiate());
             tree.IsInstance = true;
             return tree;
         }
@@ -178,15 +163,8 @@ namespace ZetanStudio.BehaviourTree
                 return;
             }
             Executor = executor;
-            KeyedVariables = new Dictionary<string, SharedVariable>();
-            foreach (var variable in variables)
-            {
-                if (!KeyedVariables.ContainsKey(variable.name))
-                {
-                    KeyedVariables.Add(variable.name, variable);
-                }
-            }
-            Nodes.ForEach(n => n.Init(this));
+            //Traverse(entry, n => n.Init(this));
+            nodes.ForEach(n => n.Init(this));
             executedComposites = new List<Composite>();
             compositesMap = new HashSet<Composite>();
         }
@@ -198,10 +176,10 @@ namespace ZetanStudio.BehaviourTree
                 Debug.LogError($"尝试预设未实例化的行为树：{(Executor ? $"{Executor.gameObject.name}." : string.Empty)}{name}");
                 return;
             }
-            foreach (var variable in variables)
+            foreach (var preVar in variables)
             {
-                if (KeyedVariables.TryGetValue(variable.name, out var keyedVar) && keyedVar.GetType() == variable.GetType())
-                    keyedVar.SetValue(variable.GetValue());
+                SharedVariable variable = Variables.Find(x => x.name == preVar.name);
+                if (variable != null) variable.SetValue(preVar.GetValue());
             }
         }
 

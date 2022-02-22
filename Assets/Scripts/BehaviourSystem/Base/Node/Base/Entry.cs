@@ -21,14 +21,6 @@ namespace ZetanStudio.BehaviourTree
             else return start.Evaluate();
         }
 
-        public override Node GetInstance()
-        {
-            Entry entry = GetInstance<Entry>();
-            if (start) entry.start = start.GetInstance();
-            entry.IsInstance = true;
-            return entry;
-        }
-
         public override List<Node> GetChildren()
         {
             List<Node> children = new List<Node>();
