@@ -3,7 +3,7 @@ using UnityEngine;
 using ZetanExtends;
 
 [DisallowMultipleComponent]
-public class Talker : Character
+public class Talker : Character, IInteractive
 {
     [SerializeReference, ReadOnly]
     protected TalkerData data;
@@ -19,13 +19,13 @@ public class Talker : Character
 
     [SerializeField]
     private MapIconHolder iconHolder;
-    private Interactive interactive;
+    public Transform interactive;
 
     public bool IsInteractive
     {
         get
         {
-            return GetData<TalkerData>().Info && data && !DialogueManager.Instance.IsTalking;
+            return GetData<TalkerData>().Info && data && !NewWindowsManager.IsWindowOpen<DialogueWindow>();
         }
     }
 
@@ -42,6 +42,7 @@ public class Talker : Character
         }
     }
 
+    public Sprite Icon => null;
 
     public override CharacterData GetData()
     {
@@ -57,7 +58,7 @@ public class Talker : Character
     {
         base.Init(data);
         transform.position = GetData<TalkerData>().GetInfo<NPCInformation>().Position;
-        flagAgent = ObjectPool.Get(QuestManager.Instance.QuestFlagsPrefab.gameObject, UIManager.Instance.QuestFlagParent).GetComponent<QuestFlag>();
+        flagAgent = ObjectPool.Get(MiscSettings.Instance.QuestFlagsPrefab, UIManager.Instance.QuestFlagParent);
         flagAgent.Init(this);
         if (iconHolder)
         {
@@ -86,23 +87,23 @@ public class Talker : Character
 
     public bool DoInteract()
     {
-        if (DialogueManager.Instance.Talk(this))
+        if (DialogueWindow.TalkWith(this))
         {
-            SetState(CharacterStates.Busy, CharacterBusyStates.Talking);
+            SetMachineState<CharacterTalkingState>();
             return true;
         }
         return false;
     }
-    public void FinishInteraction()
+    public void EndInteraction()
     {
-        SetState(CharacterStates.Normal, CharacterNormalStates.Idle);
-        interactive.FinishInteraction();
+        interactable = false;
+        SetMachineState<CharacterIdleState>();
     }
 
-    public void OnExit(Collider2D collision)
+    private void OnNotInteractable()
     {
-        if (collision.CompareTag("Player") && DialogueManager.Instance.CurrentTalker == this)
-            DialogueManager.Instance.CancelTalk();
+        if (NewWindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && dialogue.Target == this)
+            dialogue.CancelTalk();
     }
 
     #region UI相关
@@ -112,11 +113,11 @@ public class Talker : Character
 #if UNITY_ANDROID
         time = 2;
 #endif
-        TipsManager.Instance.ShowText(InputManager.mousePosition, GetMapIconName(), time);
+        FloatTipsPanel.ShowText(InputManager.mousePosition, GetMapIconName(), time);
     }
     private void HideNameImmediately()
     {
-        TipsManager.Instance.Hide();
+        NewWindowsManager.CloseWindow<FloatTipsPanel>();
     }
     private string GetMapIconName()
     {
@@ -136,18 +137,10 @@ public class Talker : Character
     #region MonoBehaviour
     protected override void OnAwake()
     {
-        interactive = GetComponentInChildren<Interactive>();
-        if (!interactive)
-        {
-            interactive = transform.FindOrCreate("Interactive").GetOrAddComponent<Interactive>();
-            interactive.interactFunc = () => DoInteract();
-            interactive.interactiveFunc = () => IsInteractive;
-            interactive.getNameFunc = () => TalkerName;
-            interactive.OnExit2D.AddListener(OnExit);
-            var collider = interactive.GetOrAddComponent<CircleCollider2D>();
-            collider.isTrigger = true;
-            collider.radius = 1.0f;
-        }
+        if (!interactive) interactive = transform.FindOrCreate("Interactive");
+        var collider = interactive.GetOrAddComponent<CircleCollider2D>();
+        collider.isTrigger = true;
+        collider.radius = 1.0f;
         iconHolder = GetComponentInChildren<MapIconHolder>();
     }
 
@@ -156,6 +149,33 @@ public class Talker : Character
         if (flagAgent) flagAgent.Recycle();
     }
 
+    private bool interactable;
+
+    protected override void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!interactable && IsInteractive && collision.CompareTag("Player"))
+        {
+            InteractionPanel.Instance.Insert(this);
+            interactable = true;
+        }
+    }
+    protected override void OnTriggerStay2D(Collider2D collision)
+    {
+        if (!interactable && IsInteractive && collision.CompareTag("Player"))
+        {
+            InteractionPanel.Instance.Insert(this);
+            interactable = true;
+        }
+    }
+    protected override void OnTriggerExit2D(Collider2D collision)
+    {
+        if (interactable && IsInteractive && collision.CompareTag("Player"))
+        {
+            InteractionPanel.Instance.Remove(this);
+            interactable = false;
+            OnNotInteractable();
+        }
+    }
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {

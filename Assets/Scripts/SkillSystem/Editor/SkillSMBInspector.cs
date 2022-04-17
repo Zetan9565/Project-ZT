@@ -15,7 +15,7 @@ public class SkillSMBInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(parentSkill, new GUIContent("归属技能"));
         if (Application.isPlaying) GUI.enabled = false;

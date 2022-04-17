@@ -1,27 +1,18 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class BuildingData
+public class BuildingData : SceneObjectData<Building2D>
 {
-    public string IDPrefix;
-
-    public string IDTail;
-
-    public string entityID;
-    public Building entity;
-    public BuildingPreview preview;
-
-    public string scene;
-    public Vector3 position;
+    public BuildingPreview2D preview;
+    public BuildingAgent buildingAgent;
 
     public WarehouseData materialsKeeper;
 
     public List<ItemInfoBase> materialsStored = new List<ItemInfoBase>();
 
-    public string name
+    public override string Name
     {
         get
         {
@@ -41,6 +32,7 @@ public class BuildingData
     public BuildingData(BuildingInformation info, Vector3 position)
     {
         Info = info;
+        ID = $"{Info.ID}-{Guid.NewGuid():N}";
         this.position = position;
         scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
     }
@@ -48,17 +40,8 @@ public class BuildingData
     public bool StartBuild()
     {
         if (!Info) return false;
-        IDPrefix = Info.IDPrefix;
-        GetIDTail();
-        if (string.IsNullOrEmpty(IDTail))
-        {
-            MessageManager.Instance.New($"[{name}]已经达到最大建设数量");
-            return false;
-        }
-        entityID = IDPrefix + IDTail;
         IsBuilt = false;
         currentStageIndex = 0;
-        leftBuildTime = 0;
         HandlingStage();
         if (Info.AutoBuild)
             StartConstruct();
@@ -70,23 +53,23 @@ public class BuildingData
         currentStageIndex++;
         if (currentStageIndex >= Info.Stages.Count)
         {
-            if (preview) preview.OnDoneConstruct();
+            if (!Info.AutoBuild && preview) preview.OnDoneConstruct();
             BuildComplete();
         }
         else
         {
             HandlingStage();
             if (Info.AutoBuild && IsMaterialsEnough(currentStage.Materials)) return;//自动建造且材料充足，则不停止施工
-            if (preview) preview.OnDoneConstruct();
+            if (!Info.AutoBuild && preview) preview.OnDoneConstruct();
             PauseConstruct();
         }
     }
 
     private bool IsMaterialsEnough(IEnumerable<MaterialInfo> targetMaterials)
     {
-        if (targetMaterials == null || materialsStored == null || materialsStored.Count() < 1) return false;
         foreach (var material in targetMaterials)
         {
+            if (targetMaterials == null || materialsStored == null || materialsStored.Count < 1) return false;
             if (material.MakingType == MakingType.SingleItem)
             {
                 if (material.Item.StackAble)
@@ -162,11 +145,9 @@ public class BuildingData
     public void LoadBuild(BuildingInformation info, BuildingSaveData buildingData)
     {
         if (Info != info) return;
-        IDPrefix = buildingData.IDPrefix;
-        IDTail = buildingData.IDTail;
         leftBuildTime = buildingData.leftBuildTime;
         currentStageIndex = buildingData.stageIndex;
-        entityID = IDPrefix + IDTail;
+        ID = buildingData.ID;
         if (leftBuildTime > 0 && currentStageIndex >= 0 && currentStageIndex < info.Stages.Count)
         {
             IsBuilt = false;
@@ -183,7 +164,7 @@ public class BuildingData
     {
         IsBuilt = true;
         IsBuilding = false;
-        OnBuilt();
+        BuildingManager.Instance.DoneBuild(this);
     }
 
     public void StartConstruct()
@@ -203,12 +184,6 @@ public class BuildingData
         {
             ToNextStage();
         }
-    }
-
-    private void OnBuilt()
-    {
-        if (preview) preview.OnBuilt();
-        preview = null;
     }
 
     public void PutMaterials(IEnumerable<ItemInfoBase> materials)
@@ -231,19 +206,6 @@ public class BuildingData
         {
             if (IsMaterialsEnough(currentStage.Materials))
                 StartConstruct();
-        }
-    }
-
-    private void GetIDTail()
-    {
-        Building[] buildings = UnityEngine.Object.FindObjectsOfType<Building>();
-        IDTail = string.Empty;
-        for (int i = 1; i < 1000; i++)
-        {
-            IDTail = i.ToString().PadLeft(3, '0');
-            string newID = IDPrefix + IDTail;
-            if (!Array.Exists(buildings, x => x.EntityID == newID && x.Data != this))
-                break;
         }
     }
 

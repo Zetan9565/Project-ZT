@@ -1,77 +1,80 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class QuestAgent : MonoBehaviour
+public class QuestAgent : ListItem<QuestAgent, QuestAgentData>
 {
-    [HideInInspector]
-    public QuestData MQuest { get; private set; }
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("标题文字")]
-#endif
-    private Text TitleText;
+    [SerializeField] private GameObject groupContent;
+    //public Image groupIcon;
+    [SerializeField] private Text groupText;
+    [SerializeField] private SubQuestList questList;
+    public SubQuestList SubList => questList;
 
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("隶属于完成列表", true)]
-#endif
-    private bool belongToCmplt;
+    [SerializeField] private GameObject questContent;
+    //public Image questIcon;
+    [SerializeField] private Text questText;
 
-    [SerializeField]
-    private Outline selectedOutline;
+    [SerializeField] private GameObject selected;
 
-    [SerializeField]
-    private Color selectedColor = Color.yellow;
-
-    [HideInInspector]
-    public QuestGroupAgent parent;
-
-    /// <summary>
-    /// 使用前的初始化
-    /// </summary>
-    /// <param name="quest">对应任务</param>
-    /// <param name="isFinished">任务完成情况</param>
-    public void Init(QuestData quest, bool isFinished = false)
+    protected override void RefreshSelected()
     {
-        if (!selectedOutline.effectColor.Equals(selectedColor)) selectedOutline.effectColor = selectedColor;
-        MQuest = quest;
-        belongToCmplt = isFinished;
-        Deselect();
-        UpdateStatus();
+        ZetanUtility.SetActive(selected, IsSelected);
+        ZetanUtility.SetActive(questList, Data.group && IsSelected);
+        if (!IsSelected) questList.DeselectAll();
     }
 
-    public void Recycle()
+    public override void Refresh()
     {
-        MQuest = null;
-        TitleText.text = string.Empty;
-        Deselect();
-        belongToCmplt = false;
-        ObjectPool.Put(gameObject);
-    }
-
-    public void UpdateStatus()
-    {
-        if (MQuest)
+        if (!Data.group)
         {
-            if (!belongToCmplt) TitleText.text = MQuest.Info.Title + (MQuest.IsComplete ? "(完成)" : string.Empty);
-            else TitleText.text = MQuest.Info.Title;
+            ZetanUtility.SetActive(groupContent, false);
+            if (Data.quests.Count > 0)
+            {
+                ZetanUtility.SetActive(questContent, true);
+                var quest = base.Data.quests[0];
+                questText.text = quest.IsFinished ? quest.Model.Title : (quest.IsComplete ? $"{quest.Model.Title}(已完成)" :
+                    (quest.InProgress ? $"{quest.Model.Title}(进行中)" : $"{quest.Model.Title}(未接取)"));
+            }
+            questList.Clear();
+        }
+        else
+        {
+            ZetanUtility.SetActive(groupContent, true);
+            groupText.text = Data.group.Name;
+            questList.Refresh(Convert(Data.quests));
+            ZetanUtility.SetActive(questContent, false);
         }
     }
 
-    public void OnClick()
+    private static List<QuestAgentData> Convert(IEnumerable<QuestData> quests)
     {
-        if (!MQuest) return;
-        QuestManager.Instance.ShowDescription(this);
+        List<QuestAgentData> results = new List<QuestAgentData>();
+        foreach (var quest in quests)
+        {
+            results.Add(new QuestAgentData(quest));
+        }
+        return results;
     }
 
-    public void Select()
+    public override void OnClear()
     {
-        if (!selectedOutline.enabled) selectedOutline.enabled = true;
+        base.OnClear();
+        questList.Clear();
     }
+}
+public class QuestAgentData
+{
+    public readonly QuestGroup group;
+    public readonly List<QuestData> quests;
 
-    public void Deselect()
+    public QuestAgentData(QuestData quest)
     {
-        if (selectedOutline.enabled) selectedOutline.enabled = false;
+        quests = new List<QuestData>() { quest };
+    }
+    public QuestAgentData(QuestGroup group, IEnumerable<QuestData> quests)
+    {
+        this.group = group;
+        this.quests = new List<QuestData>(quests);
     }
 }

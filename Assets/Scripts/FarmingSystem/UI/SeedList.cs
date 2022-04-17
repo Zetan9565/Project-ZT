@@ -1,0 +1,1 @@
+﻿public class SeedList : ScrollListView<SeedAgent, SeedItem> { }

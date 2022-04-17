@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b13253652fc1994d831e3533e382fbd, type: 3}
+  m_Name: misc settings
+  m_EditorClassIdentifier: 
+  <QuestIcon>k__BackingField: {fileID: 21300000, guid: d7e626b430cfda24ea47c259db76dade,
+    type: 3}
+  <QuestFlagsPrefab>k__BackingField: {fileID: 936108245830383460, guid: 02f764c1e3fc6ef44851c7289caefd98,
+    type: 3}
+  <QualityColors>k__BackingField:
+  - {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  - {r: 0.16834284, g: 0.9150943, b: 0.16834284, a: 1}
+  - {r: 0.25743148, g: 0.8396226, b: 0.8396226, a: 1}
+  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - {r: 1, g: 0.51344156, b: 0, a: 1}
+  <KeywordColors>k__BackingField:
+  - {r: 0.25787643, g: 0.8962264, b: 0.8962264, a: 1}
+  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - {r: 0.8584906, g: 0.17412782, b: 0.17412782, a: 1}
+  <DefaultLootPrefab>k__BackingField: {fileID: 4971178635026308411, guid: 7786fb215e3056c4e93993db12bea13e,
+    type: 3}
+  <BuildingFlagPrefab>k__BackingField: {fileID: 2251644173115849084, guid: d8fa9ba7b45f47f4e852a5a0931d303f,
+    type: 3}

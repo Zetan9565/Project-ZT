@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.OnScreen;
+using UnityEngine.UI;
 using ZetanExtends;
 
 [RequireComponent(typeof(Image))]
@@ -13,18 +13,23 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     public OnScreenStick handle;
 
     public bool autoHide = true;
+    [HideIf("autoHide", false)]
     public bool fade = true;
+    [HideIf(new string[] { "autoHide", "fade" }, new object[] { false, false }, false)]
     public float duration = 0.5f;
 
     private RectTransform baseRect;
     private Image bgImg;
     private Image hdImg;
+    private readonly Dictionary<Image, Coroutine> fadeCoroutines = new Dictionary<Image, Coroutine>();
 
     private void Awake()
     {
         baseRect = GetComponent<RectTransform>();
         bgImg = background.GetComponent<Image>();
         hdImg = handle.GetComponent<Image>();
+        fadeCoroutines.Add(bgImg, null);
+        fadeCoroutines.Add(hdImg, null);
         Stop();
     }
 
@@ -81,8 +86,8 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
             ZetanUtility.SetActive(background, true);
             if (fade)
             {
-                bgImg.CrossFadeAlpha(1, 0, true);
-                hdImg.CrossFadeAlpha(1, 0, true);
+                if (bgImg) CrossFadeAlpha(bgImg, 1, 0);
+                if (hdImg) CrossFadeAlpha(hdImg, 1, 0);
             }
         }
     }
@@ -94,13 +99,28 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         {
             if (fade)
             {
-                if (bgImg) bgImg.CrossFadeAlpha(0, duration, true);
-                if (hdImg) hdImg.CrossFadeAlpha(0, duration, true);
+                if (bgImg) CrossFadeAlpha(bgImg, 0, duration);
+                if (hdImg) CrossFadeAlpha(hdImg, 0, duration);
             }
-            else
+            else ZetanUtility.SetActive(background, false);
+        }
+    }
+
+    private void CrossFadeAlpha(Image image, float alpha, float duration)
+    {
+        if (fadeCoroutines[image] != null) StopCoroutine(fadeCoroutines[image]);
+        fadeCoroutines[image] = StartCoroutine(Fade(image, alpha, duration));
+
+        static IEnumerator Fade(Image target, float alpha, float duration)
+        {
+            float time = 0;
+            while (time < duration)
             {
-                ZetanUtility.SetActive(background, false);
+                yield return null;
+                if (time <= duration) target.color = new Color(target.color.r, target.color.g, target.color.b, target.color.a + (alpha - target.color.a) * Time.unscaledDeltaTime / (duration - time));
+                time += Time.unscaledDeltaTime;
             }
+            target.color = new Color(target.color.r, target.color.g, target.color.b, alpha);
         }
     }
 }

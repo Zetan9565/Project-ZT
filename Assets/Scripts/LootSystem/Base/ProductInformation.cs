@@ -20,14 +20,9 @@ public class ProductInformation : ScriptableObject
 
     public bool IsValid => products != null && products.Count > 0;
 
-    public List<ItemInfoBase> DoDrop()
+    public List<ItemWithAmount> DoDrop()
     {
-        List<ItemInfoBase> lootItems = new List<ItemInfoBase>();
-        foreach (DropItemInfo di in Products)
-            if (di.IsValid && ZetanUtility.Probability(di.DropRate))
-                if (!di.OnlyDropForQuest || (di.OnlyDropForQuest && QuestManager.Instance.HasOngoingQuestWithID(di.BindedQuest.ID)))
-                    lootItems.Add(new ItemInfo(di.Item, Random.Range(di.MinAmount, di.MaxAmount + 1)));
-        return lootItems;
+        return DropItemInfo.Drop(products);
     }
 
     public string GetDropInfoString()

@@ -1,92 +1,94 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class ItemSlotBase : MonoBehaviour, IPointerClickHandler
+public class ItemSlotBase : GridItem<ItemSlotBase, ItemSlotData>, IPointerClickHandler
 {
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("图标")]
-#endif
+    [SerializeField, DisplayName("图标")]
     protected Image icon;
 
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("数量")]
-#endif
+    [SerializeField, DisplayName("数量")]
     protected Text amount;
 
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("品质识别框")]
-#endif
+    [SerializeField, DisplayName("品质识别框")]
     protected Image qualityEdge;
 
-    [SerializeField]
-#if UNITY_EDITOR
-    [DisplayName("复选框")]
-#endif
+    [SerializeField, DisplayName("复选框")]
     protected GameObject mark;
 
     public bool IsDark { get; protected set; }
+    public bool IsMarked { get; protected set; }
 
-    [HideInInspector]
-    public ItemInfo MItemInfo { get; protected set; }
+    public ItemInfo Info { get; protected set; }
 
-    public bool IsEmpty { get { return MItemInfo == null || !MItemInfo.item; } }
+    public ItemData Item => Data ? Data.item : null;
+
+    public bool IsEmpty { get { return Data == null || Data.IsEmpty; } }
 
     public void Init()
     {
-        Empty();
+        Clear();
     }
-    public void Empty()
+    public void Vacate()
     {
         Mark(false);
-        Light();
+        Dark(false);
         icon.overrideSprite = null;
         amount.text = string.Empty;
-        MItemInfo = null;
         qualityEdge.color = Color.white;
+    }
+    public void Clear()
+    {
+        Vacate();
+        Info = null;
+        Data = null;
+        View = null;
+        darkCondition = null;
+        markCondition = null;
     }
     public void Recycle()
     {
-        Empty();
+        Clear();
         ObjectPool.Put(gameObject);
     }
 
-    public void Dark()
+    private Predicate<ItemSlotBase> darkCondition;
+    public void SetDarkCondition(Predicate<ItemSlotBase> darkCondition, bool immediate = false)
     {
-        icon.color = Color.grey;
-        IsDark = true;
+        this.darkCondition = darkCondition;
+        if (immediate)
+            if (darkCondition != null) Dark(darkCondition(this));
+            else Dark(false);
     }
-    public void Light()
+    private Predicate<ItemSlotBase> markCondition;
+    public void SetMarkCondition(Predicate<ItemSlotBase> markCondition, bool immediate = false)
     {
-        icon.color = Color.white;
-        IsDark = false;
+        this.markCondition = markCondition;
+        if (immediate)
+            if (markCondition != null) Mark(markCondition(this));
+            else Mark(false);
     }
 
-    public void Select()
+    public void Dark(bool dark = true)
     {
-        if (IsDark)
-        {
-            icon.color = (Color.yellow + Color.grey) / 2;
-        }
-        else
-        {
-            icon.color = Color.yellow;
-        }
+        icon.color = !IsEmpty && dark ? Color.grey : Color.white;
+        IsDark = dark;
     }
-    public void DeSelect()
+
+    public void Highlight(bool highlight = true)
     {
-        if (IsDark)
-        {
-            Dark();
-        }
-        else
-        {
-            Light();
-        }
+        if (highlight)
+            if (IsDark)
+            {
+                icon.color = (Color.yellow + Color.grey) / 2;
+            }
+            else
+            {
+                icon.color = Color.yellow;
+            }
+        else Dark(IsDark);
     }
 
     public void Show()
@@ -98,51 +100,62 @@ public class ItemSlotBase : MonoBehaviour, IPointerClickHandler
         ZetanUtility.SetActive(gameObject, false);
     }
 
-    public void Mark(bool mark)
+    public void Mark(bool mark = true)
     {
-        ZetanUtility.SetActive(this.mark, mark);
+        if (this.mark) ZetanUtility.SetActive(this.mark, !IsEmpty && mark);
     }
 
-    public virtual void SetItem(ItemInfo info)
+    /// <summary>
+    /// 用于单独展示
+    /// </summary>
+    /// <param name="item"></param>
+    public virtual void SetItem(ItemBase item, string amountText = null)
     {
-        if (info == null) return;
-        MItemInfo = info;
-        if (GameManager.QualityColors.Count >= 5)
-        {
-            qualityEdge.color = GameManager.QualityColors[(int)info.item.Quality];
-        }
-        UpdateInfo();
+        if (!Data) Data = new ItemSlotData(new ItemData(item, false));
+        else Data.item = new ItemData(item, false);
+        icon.overrideSprite = item.Icon;
+        qualityEdge.color = ItemUtility.QualityToColor(Data.Model.Quality);
+        amount.text = amountText ?? string.Empty;
+        Dark(false);
+        Mark(false);
     }
 
-    public virtual void SetItem(ItemInfoBase info)
+    public override void Refresh()
     {
-        if (info == null) return;
-        MItemInfo = new ItemInfo(info.item, info.Amount);
-        if (GameManager.QualityColors.Count >= 5)
+        if (Data == null || Data.IsEmpty)
         {
-            qualityEdge.color = GameManager.QualityColors[(int)info.item.Quality];
+            Vacate();
+            return;
         }
-        UpdateInfo();
+        if (Data.Model.Icon) icon.overrideSprite = Data.Model.Icon;
+        amount.text = Data.amount > 0 && Data.Model.StackAble ? Data.amount.ToString() : string.Empty;
+        qualityEdge.color = ItemUtility.QualityToColor(Data.Model.Quality);
+        if (darkCondition != null) Dark(darkCondition(this));
+        if (markCondition != null) Mark(markCondition(this));
     }
 
     public virtual void UpdateInfo()
     {
-        if (MItemInfo == null || !MItemInfo.item)
+        if (Info == null || !Info.item || Info.Amount < 1)
         {
-            Empty();
+            Vacate();
             return;
         }
-        if (MItemInfo.item.Icon) icon.overrideSprite = MItemInfo.item.Icon;
-        amount.text = MItemInfo.Amount > 0 && MItemInfo.item.StackAble ? MItemInfo.Amount.ToString() : string.Empty;
-        if (MItemInfo.Amount < 1) Empty();
+        if (Info.item.Icon) icon.overrideSprite = Info.item.Icon;
+        amount.text = Info.Amount > 0 && Info.item.StackAble ? Info.Amount.ToString() : string.Empty;
     }
 
     public virtual void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (!IsEmpty) ItemWindowManager.Instance.ShowItemInfo(this);
+            if (!IsEmpty) NewWindowsManager.OpenWindow<ItemWindow>(this);
             return;
         }
     }
+}
+public interface ISlotContainer
+{
+    void MarkIf(Predicate<ItemSlotBase> slot);
+    void DarkIf(Predicate<ItemSlotBase> slot);
 }

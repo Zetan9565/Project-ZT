@@ -14,7 +14,7 @@ public class Roll : Action
 
     protected override NodeStates OnUpdate()
     {
-        controller.SetRollInput(true);
+        controller.SetTrigger(CharacterInputNames.Instance.Roll);
         return NodeStates.Success;
     }
 }

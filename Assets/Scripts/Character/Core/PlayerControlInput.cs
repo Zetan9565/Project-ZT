@@ -1,10 +1,10 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerControlInput : CharacterControlInput
 {
-    private void Awake()
+    protected override void OnAwake()
     {
         InputManager.Control.Player.Movement.performed += GetMovementInput;
         InputManager.Control.Player.Movement.canceled += GetMovementInput;
@@ -23,10 +23,11 @@ public class PlayerControlInput : CharacterControlInput
             atkHoldTime = 0;
             atkHoldCouroutine = StartCoroutine(AttackHold());
         }
-        else if(context.canceled)
+        else if (context.canceled)
         {
             if (atkHoldCouroutine != null) StopCoroutine(atkHoldCouroutine);
-            Debug.Log(atkHoldTime);
+            if (atkHoldTime > 0.5f) Debug.Log("蓄力释放");
+            else Debug.Log("轻击");
         }
     }
     private IEnumerator AttackHold()
@@ -35,27 +36,30 @@ public class PlayerControlInput : CharacterControlInput
         {
             yield return null;
             atkHoldTime += Time.deltaTime;
+            if (atkHoldTime > 0.5f) Debug.Log("蓄力中");
         }
     }
     private void Roll(InputAction.CallbackContext context)
     {
-        SetRollInput(true);
+        SetTrigger(CharacterInputNames.Instance.Roll);
     }
 
     private void Dash(InputAction.CallbackContext context)
     {
-        SetDashInput(true);
+        SetTrigger(CharacterInputNames.Instance.Dash);
     }
 
     public void GetMovementInput(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
-            SetMoveInput(context.ReadValue<Vector2>());
+            var input = context.ReadValue<Vector2>();
+            SetValue(CharacterInputNames.Instance.Move, input);
+            SetValue(CharacterInputNames.Instance.Direction, input);
         }
-        else if(context.canceled)
+        else if (context.canceled)
         {
-            SetMoveInput(Vector2.zero);
+            SetValue(CharacterInputNames.Instance.Move, Vector2.zero);
         }
     }
 }

@@ -732,10 +732,10 @@ public class ConfigurationFinding : EditorWindow
             switch (buildingType)
             {
                 case BuildingKeyType.Prefab:
-                    objKeys = new Building[1];
+                    objKeys = new Building2D[1];
                     break;
                 case BuildingKeyType.Preview:
-                    objKeys = new BuildingPreview[1];
+                    objKeys = new BuildingPreview2D[1];
                     break;
                 default:
                     objKeys = new ScriptableObject[1];
@@ -765,11 +765,11 @@ public class ConfigurationFinding : EditorWindow
                 canSeek = true;
                 break;
             case BuildingKeyType.Prefab:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("预制件"), objKeys[0], typeof(Building), false);
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("预制件"), objKeys[0], typeof(Building2D), false);
                 canSeek = objKeys[0];
                 break;
             case BuildingKeyType.Preview:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("预制件"), objKeys[0], typeof(BuildingPreview), false);
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("预制件"), objKeys[0], typeof(BuildingPreview2D), false);
                 canSeek = objKeys[0];
                 break;
             default:
@@ -787,10 +787,10 @@ public class ConfigurationFinding : EditorWindow
             switch (buildingType)
             {
                 case BuildingKeyType.ID:
-                    if (CompareString(building.IDPrefix, strKeys[0]))
+                    if (CompareString(building.ID, strKeys[0]))
                     {
                         take = true;
-                        remark = $"识别码前缀：{building.IDPrefix}";
+                        remark = $"识别码前缀：{building.ID}";
                     }
                     break;
                 case BuildingKeyType.Name:

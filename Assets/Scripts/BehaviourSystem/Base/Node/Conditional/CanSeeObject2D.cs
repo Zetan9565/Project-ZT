@@ -40,7 +40,7 @@ namespace ZetanStudio.BehaviourTree
             return Target() - transform.position + eyesOffset;
         }
 
-        public Vector3 Target()
+        private Vector3 Target()
         {
             return target.Value.transform.position;
         }

@@ -24,5 +24,5 @@ MonoBehaviour:
     dropRate: 0
     onlyDropForQuest: 0
     bindedQuest: {fileID: 0}
-  lootPrefab: {fileID: 4971178635026308412, guid: 7786fb215e3056c4e93993db12bea13e,
+  lootPrefab: {fileID: 4971178635026308411, guid: 7786fb215e3056c4e93993db12bea13e,
     type: 3}

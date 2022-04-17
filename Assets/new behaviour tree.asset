@@ -29,13 +29,13 @@ MonoBehaviour:
   - rid: 28978064716988457
   - rid: 28978064716988458
   - rid: 28978064716988459
-  - rid: 28978064716988462
   - rid: 28978064716988463
   - rid: 28978064716988464
   - rid: 28978064716988465
   - rid: 28978064716988466
   - rid: 28978064716988467
   - rid: 28978064716988468
+  - rid: 6007091964120137736
   variables:
   - rid: 28978064716988450
   - rid: 28978064716988460
@@ -48,6 +48,7 @@ MonoBehaviour:
       type: {class: Entry, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (0) Entry
+        priority: 0
         isRuntime: 0
         guid: 47cf2a24cbe8d1e4dbc614a035557197
         _position: {x: 0, y: 0}
@@ -58,6 +59,7 @@ MonoBehaviour:
       type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (1) Sequence
+        priority: 1
         isRuntime: 0
         guid: 450f0c7fd0db35347868b3a638b075d3
         _position: {x: 0, y: 127}
@@ -70,6 +72,7 @@ MonoBehaviour:
       type: {class: UntilSuccess, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (2) UntilSuccess
+        priority: 2
         isRuntime: 0
         guid: 33ad53b27f7e684499926c3228978d4d
         _position: {x: -219.99004, y: 260.35248}
@@ -80,6 +83,7 @@ MonoBehaviour:
       type: {class: FindWithTag, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (3) FindWithTag
+        priority: 3
         isRuntime: 0
         guid: 496b46e9c874a694d9319702df423de1
         _position: {x: -220.00005, y: 387.3125}
@@ -105,6 +109,7 @@ MonoBehaviour:
       type: {class: Repeater, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (4) Repeater
+        priority: 4
         isRuntime: 0
         guid: 0dce6a060b854404291c3959aad2288f
         _position: {x: 215.99998, y: 260}
@@ -121,35 +126,39 @@ MonoBehaviour:
       type: {class: SelectorEvaluator, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (5) SelectorEvaluator
+        priority: 5
         isRuntime: 0
         guid: 2e078f612ab82ff468e9f6cc66ca2c15
         _position: {x: 216.00002, y: 387}
         _description: 
         children:
+        - rid: 28978064716988463
         - rid: 28978064716988453
-        - rid: 28978064716988462
+        - rid: 6007091964120137736
         - rid: 28978064716988468
         abortType: 0
     - rid: 28978064716988453
       type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (6) Sequence
+        priority: 10
         isRuntime: 0
         guid: 3b9b3adbd97b2e847b1f3a6a8c0b4cf2
-        _position: {x: -220, y: 522.4525}
+        _position: {x: -83.529495, y: 524}
         _description: 
         children:
         - rid: 28978064716988454
         - rid: 28978064716988455
         - rid: 28978064716988457
-        abortType: 1
+        abortType: 3
     - rid: 28978064716988454
       type: {class: WithinDistance2D, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (7) WithinDistance2D
+        priority: 11
         isRuntime: 0
         guid: 66436484b0cc385489a4e9b3120d9b34
-        _position: {x: -370.0001, y: 648.065}
+        _position: {x: -233.52945, y: 650}
         _description: 
         distance:
           _name: 
@@ -184,9 +193,10 @@ MonoBehaviour:
       type: {class: Seek, ns: , asm: Assembly-CSharp}
       data:
         name: (8) Seek
+        priority: 12
         isRuntime: 0
         guid: d1bc4f4dd62a2ad43b2fc3e7f3236e21
-        _position: {x: -220.00003, y: 648}
+        _position: {x: -83.529495, y: 650}
         _description: 
         arriveDistance:
           _name: 
@@ -222,9 +232,10 @@ MonoBehaviour:
       type: {class: RandomSelector, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (9) RandomSelector
+        priority: 13
         isRuntime: 0
         guid: e497ce426598505498bcaedf5dd94005
-        _position: {x: -70.00001, y: 648}
+        _position: {x: 66.47048, y: 650}
         _description: 
         children:
         - rid: 28978064716988459
@@ -234,9 +245,10 @@ MonoBehaviour:
       type: {class: Log, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (10) Log
+        priority: 15
         isRuntime: 0
         guid: 4604977a7a1054240bba0ba37dd9b573
-        _position: {x: 5.000046, y: 769.00006}
+        _position: {x: 141.47047, y: 771}
         _description: 
         logType: 0
         message:
@@ -248,9 +260,10 @@ MonoBehaviour:
       type: {class: Log, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (11) Log
+        priority: 14
         isRuntime: 0
         guid: 40b296652fbfbdb48bad38381db88bcd
-        _position: {x: -144.99998, y: 768.6675}
+        _position: {x: -8.529495, y: 771}
         _description: 
         logType: 0
         message:
@@ -272,37 +285,27 @@ MonoBehaviour:
         isGlobal: 0
         isShared: 1
         value: 
-    - rid: 28978064716988462
-      type: {class: Selector, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        name: (12) Selector
-        isRuntime: 0
-        guid: 263e2d99a7b9adb4695dd9d643938c93
-        _position: {x: 305.49753, y: 523.71}
-        _description: 
-        children:
-        - rid: 28978064716988463
-        - rid: 28978064716988467
-        abortType: 0
     - rid: 28978064716988463
       type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (13) Sequence
+        priority: 6
         isRuntime: 0
         guid: d068c8a3e3f0d444ba6eb5fdd3f7bbf4
-        _position: {x: 229.99998, y: 648}
+        _position: {x: -466.52948, y: 524}
         _description: 
         children:
         - rid: 28978064716988464
         - rid: 28978064716988466
-        abortType: 0
+        abortType: 3
     - rid: 28978064716988464
       type: {class: Inverter, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (14) Inverter
+        priority: 7
         isRuntime: 0
         guid: 58afda4ee7aad3f48a6da9bebd57ad4b
-        _position: {x: 155.00002, y: 769}
+        _position: {x: -541.52954, y: 645.00006}
         _description: 
         child:
           rid: 28978064716988465
@@ -310,9 +313,10 @@ MonoBehaviour:
       type: {class: CheckCharacterState, ns: , asm: Assembly-CSharp}
       data:
         name: (15) CheckCharacterState
+        priority: 8
         isRuntime: 0
         guid: ba4f2e9933086c94bae35ac0f1660d15
-        _position: {x: 155.00002, y: 883.21}
+        _position: {x: -541.52954, y: 754}
         _description: 
         mainState: 0
         checkSubState: 0
@@ -321,17 +325,19 @@ MonoBehaviour:
       type: {class: Idle, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (16) Idle
+        priority: 9
         isRuntime: 0
         guid: 33b6c7ea4b99c4148a0257d9de7f0540
-        _position: {x: 305.00003, y: 769}
+        _position: {x: -391.52948, y: 645.00006}
         _description: 
     - rid: 28978064716988467
       type: {class: Patrol, ns: , asm: Assembly-CSharp}
       data:
         name: (17) Patrol
+        priority: 17
         isRuntime: 0
         guid: 5e2e8e5471ae15d4e8d271a6789368ac
-        _position: {x: 380.00006, y: 648}
+        _position: {x: 215.99998, y: 648}
         _description: 
         arriveDistance:
           _name: 
@@ -362,7 +368,20 @@ MonoBehaviour:
       type: {class: Idle, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (18) Idle
+        priority: 18
         isRuntime: 0
         guid: f91722788fb2dbd45929298ace4a65b9
-        _position: {x: 529.99994, y: 524}
+        _position: {x: 534.30695, y: 524}
         _description: 
+    - rid: 6007091964120137736
+      type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: (18) Sequence
+        priority: 16
+        isRuntime: 0
+        guid: 646e21c22e4ea094ba5f990a3f1a5792
+        _position: {x: 215.99995, y: 524}
+        _description: 
+        children:
+        - rid: 28978064716988467
+        abortType: 0

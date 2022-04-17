@@ -11,13 +11,13 @@ public class BuildingFlag : MonoBehaviour
 
     private CanvasGroup canvasGroup;
 
-    private BuildingPreview building;
+    private BuildingPreview2D building;
 
     private Vector3 targetPos;
 
     private bool IsValid => building && building.gameObject && building.Data;
 
-    public void Init(BuildingPreview building)
+    public void Init(BuildingPreview2D building)
     {
         this.building = building;
         building.flag = this;

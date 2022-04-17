@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using System.Linq;
 
 namespace ZetanStudio.BehaviourTree
 {
@@ -14,6 +14,8 @@ namespace ZetanStudio.BehaviourTree
     public abstract class Node
     {
         public string name;
+
+        public int priority;
 
         /// <summary>
         /// 结点是否有效
@@ -33,8 +35,7 @@ namespace ZetanStudio.BehaviourTree
 
         public bool IsDone => State == NodeStates.Success || State == NodeStates.Failure;
 
-        protected BehaviourTree owner;
-        public BehaviourTree Owner => owner;
+        public BehaviourTree Tree { get; private set; }
 
         public NodeShortcut Shortcut { get; private set; }
 
@@ -63,14 +64,14 @@ namespace ZetanStudio.BehaviourTree
         {
             IsInstance = true;
         }
-        public void Init(BehaviourTree owner)
+        public void Init(BehaviourTree tree)
         {
             if (!IsInstance)
             {
                 Debug.LogError("尝试初始化未实例化的结点: " + name);
                 return;
             }
-            this.owner = owner;
+            Tree = tree;
             foreach (var field in GetType().GetFields(ZetanUtility.CommonBindingFlags).Where(field => field.FieldType.IsSubclassOf(typeof(SharedVariable))))
             {
                 var hideAttr = field.GetCustomAttribute<HideIf_BTAttribute>();
@@ -79,11 +80,10 @@ namespace ZetanStudio.BehaviourTree
                 SharedVariable variable = field.GetValue(this) as SharedVariable;
                 //if (variable.isShared) field.SetValue(this, this.owner.GetVariable(variable.name));
                 //else if (variable.isGlobal) field.SetValue(this, BehaviourManager.Instance.GetVariable(variable.name));
-                if (variable.isShared) variable.Link(this.owner.GetVariable(variable.name));
+                if (variable.isShared) variable.Link(Tree.GetVariable(variable.name));
                 else if (variable.isGlobal) variable.Link(BehaviourManager.Instance.GetVariable(variable.name));
             }
-
-            Shortcut = new NodeShortcut(owner.Executor);
+            Shortcut = new NodeShortcut(Tree.Executor);
             OnAwake();
 #if false
             void TryLinkSharedVariable(object onwer, FieldInfo field)
@@ -155,6 +155,7 @@ namespace ZetanStudio.BehaviourTree
                     isStarted = false;
                 }
             }
+            Tree.OnNodeEvaluated(this);
             return State;
         }
         /// <summary>
@@ -186,42 +187,47 @@ namespace ZetanStudio.BehaviourTree
         /// <returns></returns>
         protected abstract NodeStates OnUpdate();
         /// <summary>
-        /// 评估开始回调，在第一次OnUpdate()之前调用
+        /// 评估开始回调，在第一次OnUpdate()之前调用，默认为空
         /// </summary>
         protected virtual void OnStart() { }
         /// <summary>
-        /// 评估结束回调，在最后一次OnUpdate()之后调用
+        /// 评估结束回调，在最后一次OnUpdate()之后调用，默认为空
         /// </summary>
         protected virtual void OnEnd() { }
         /// <summary>
-        /// 结点被暂停时
+        /// 结点被暂停时，默认为空
         /// </summary>
         /// <param name="paused"></param>
         protected virtual void OnPause(bool paused) { }
         /// <summary>
-        /// 结点被重置时
+        /// 结点被重置时，默认为空
         /// </summary>
         protected virtual void OnReset() { }
 
         public virtual void OnBehaviourStart() { }
         public virtual void OnBehaviourRestart() { }
         public virtual void OnBehaviourEnd() { }
-
+        /// <summary>
+        /// 中断此节点
+        /// </summary>
         public void Abort()
         {
             if (State != NodeStates.Inactive)
             {
                 isStarted = false;
                 State = NodeStates.Failure;
-                GetChildren().ForEach(n => n.Abort());
+                if(this is ParentNode parent) parent.GetChildren().ForEach(n => n.Abort());
                 OnEnd();
             }
         }
+        /// <summary>
+        /// 失活此节点
+        /// </summary>
         public void Inactivate()
         {
             isStarted = false;
             State = NodeStates.Inactive;
-            GetChildren().ForEach(n => n.Inactivate());
+            if(this is ParentNode parent) parent.GetChildren().ForEach(n => n.Inactivate());
         }
         #endregion
 
@@ -289,18 +295,18 @@ namespace ZetanStudio.BehaviourTree
         }
         public Coroutine StartCoroutine(IEnumerator routine)
         {
-            if (!Owner || !Owner.Executor) return null;
-            return Owner.Executor.StartCoroutine(routine);
+            if (!Tree || !Tree.Executor) return null;
+            return Tree.Executor.StartCoroutine(routine);
         }
         public void StopCoroutine(Coroutine routine)
         {
-            if (Owner && Owner.Executor)
-                Owner.Executor.StopCoroutine(routine);
+            if (Tree && Tree.Executor)
+                Tree.Executor.StopCoroutine(routine);
         }
         public void StopAllCoroutines()
         {
-            if (Owner && Owner.Executor)
-                Owner.Executor.StopAllCoroutines();
+            if (Tree && Tree.Executor)
+                Tree.Executor.StopAllCoroutines();
         }
         #endregion
 
@@ -329,11 +335,21 @@ namespace ZetanStudio.BehaviourTree
         public virtual void OnDrawGizmosSelected() { }
         #endregion
 
-        public virtual List<Node> GetChildren() { return new List<Node>(); }
-
         public static implicit operator bool(Node self)
         {
             return self != null;
+        }
+
+        public class Comparer : IComparer<Node>
+        {
+            public static Comparer Default = new Comparer();
+
+            public int Compare(Node x, Node y)
+            {
+                if (x.priority < y.priority) return -1;
+                else if (x.priority > y.priority) return 1;
+                else return 0;
+            }
         }
 
         #region EDITOR
@@ -381,7 +397,7 @@ namespace ZetanStudio.BehaviourTree
         /// 用于在编辑器中本地化行为树，不应在游戏逻辑中使用
         /// </summary>
         /// <returns></returns>
-        public void ConvertToLocal()
+        public void PrepareLocalization()
         {
             name = name.Replace("(R)", "");
             isRuntime = false;

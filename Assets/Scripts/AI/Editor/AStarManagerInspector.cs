@@ -58,7 +58,7 @@ public class AStarInspector : SingletonMonoBehaviourInspector
             EditorGUILayout.HelpBox(text, MessageType.Error);
         else
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.BeginVertical("Box");
             EditorGUILayout.LabelField("Gizmos", new GUIStyle() { fontStyle = FontStyle.Bold });

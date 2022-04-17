@@ -51,7 +51,7 @@ public class MapIconHolderInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         if (Application.isPlaying) if (GUILayout.Button("重新生成")) holder.CreateIcon();
         icon.objectReferenceValue = EditorGUILayout.ObjectField("图标", icon.objectReferenceValue as Sprite, typeof(Sprite), false);

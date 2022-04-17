@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [DisallowMultipleComponent]
-public class Warehouse : Building
+public class Warehouse : Building2D
 {
     [SerializeField]
 #if UNITY_EDITOR
@@ -14,48 +14,35 @@ public class Warehouse : Building
     {
         get
         {
-            return Data && base.IsInteractive && !WarehouseManager.Instance.Managing;
-        }
-
-        protected set
-        {
-            base.IsInteractive = value;
+            return Data && base.IsInteractive && !NewWindowsManager.IsWindowOpen<WarehouseWindow>();
         }
     }
 
-    public override void OnManage()
+    public override bool DoManage()
     {
-        base.OnManage();
-        WarehouseManager.Instance.Manage(WData);
+        return NewWindowsManager.OpenWindow<WarehouseWindow>(WarehouseWindow.OpenType.Store, this, NewWindowsManager.FindWindow<BackpackWindow>());
     }
 
-    public override void OnCancelManage()
+    protected override void OnNotInteractable()
     {
-        base.OnCancelManage();
-        if (WarehouseManager.Instance.CurrentData == WData && isActiveAndEnabled && IsBuilt)
-        {
-            WarehouseManager.Instance.CancelManage();
-        }
+        if (IsBuilt && NewWindowsManager.IsWindowOpen<WarehouseWindow>(out var warehouse) && warehouse.Handler.Inventory == WData.Inventory)
+            warehouse.Close();
+        base.OnNotInteractable();
     }
 
-    protected override void OnBuilt()
+    protected override void OnInit()
     {
-        base.OnBuilt();
-        WData = new WarehouseData(defaultSize)
+        base.OnInit();
+        WData = new WarehouseData(Info, transform.position, defaultSize)
         {
             entity = this,
-            entityID = EntityID,
+            ID = EntityID,
             scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,
-            position = transform.position
         };
     }
-
-    private void OnDestroy()
-    {
-        if (WarehouseManager.Instance)
-            if (WarehouseManager.Instance.CurrentData == WData && isActiveAndEnabled && IsBuilt)
-            {
-                WarehouseManager.Instance.CancelManage();
-            }
-    }
+}
+public interface IWarehouseKeeper
+{
+    string WarehouseName { get; }
+    Inventory Inventory { get; }
 }

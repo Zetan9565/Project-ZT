@@ -15,7 +15,7 @@ public partial class ItemInspector
         boxItemList = new ReorderableList(serializedObject, boxItems, true, true, true, true);
         boxItemList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             SerializedProperty itemInfo = boxItems.GetArrayElementAtIndex(index);
             if (box.ItemsInBox[index] != null && box.ItemsInBox[index].Item != null)
                 EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent(box.ItemsInBox[index].ItemName));
@@ -60,7 +60,7 @@ public partial class ItemInspector
 
         boxItemList.onAddCallback = (list) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             box.ItemsInBox.Add(new DropItemInfo());
             if (EditorGUI.EndChangeCheck())
@@ -69,7 +69,7 @@ public partial class ItemInspector
 
         boxItemList.onRemoveCallback = (list) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
             {
@@ -105,7 +105,7 @@ public partial class ItemInspector
         if (boxItems.isExpanded)
         {
             EditorGUILayout.HelpBox("目前只设计8个容量。", MessageType.Info);
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             boxItemList.DoLayoutList();
             serializedObject.ApplyModifiedProperties();
             if (box.ItemsInBox.Count >= 8)

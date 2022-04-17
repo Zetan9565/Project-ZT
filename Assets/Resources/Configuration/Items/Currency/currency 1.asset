@@ -22,7 +22,7 @@ MonoBehaviour:
   buyPrice: 0
   icon: {fileID: 21300000, guid: 92042bc197ea09b4597415b7a9e4d8c7, type: 3}
   description: "\u5192\u9669\u83B7\u5F97\u7684\u9605\u5386\uFF0C\u7528\u4E8E\u89D2\u8272\u5347\u7EA7\u3002"
-  stackAble: 1
+  stackNum: 999
   discardAble: 1
   lockAble: 1
   usable: 1
@@ -33,5 +33,6 @@ MonoBehaviour:
   maxYield: 1
   materialType: 0
   formulation: {fileID: 0}
-  currencyType: 0
+  _DIYAble: 0
+  currencyType: 1
   valueEach: 1

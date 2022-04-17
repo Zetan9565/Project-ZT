@@ -1,15 +1,15 @@
 using System.Collections.Generic;
+using UnityEngine;
 
+[DefaultExecutionOrder(-2)]
 public class NotifyCenter : SingletonMonoBehaviour<NotifyCenter>
 {
-    public abstract class CommonKeys
+    public static class CommonKeys
     {
-        public const string DayChange = "DayChange";
-        public const string QuestChange = "QuestChange";
-        public const string ObjectiveChange = "ObjectiveChange";
-        public const string TriggerChange = "TriggerChange";
-        public const string WindowStateChange = "WindowStateChange";
-        public const string GatheringStateChange = "GatheringStateChange";
+        public const string DayChanged = "DayChanged";
+        public const string TriggerChanged = "TriggerChanged";
+        public const string GatheringStateChanged = "GatheringStateChanged";
+        public const string PlayerStateChanged = "PlayerStateChanged";
         public const string PlayerGetHurt = "PlayerGetHurt";
     }
 
@@ -17,62 +17,76 @@ public class NotifyCenter : SingletonMonoBehaviour<NotifyCenter>
 
     private readonly Dictionary<object, Dictionary<string, HashSet<NotifyListener>>> notifiesWithOwner = new Dictionary<object, Dictionary<string, HashSet<NotifyListener>>>();
 
-    public bool IsInit { get; private set; }
-
-    public bool Init()
+    public static void Clear()
     {
-        notifies.Clear();
-        return true;
+        if (!Instance) return;
+        Instance.notifies.Clear();
+        Instance.notifiesWithOwner.Clear();
     }
 
-    public void AddListener(string msgType, NotifyListener listener, object owner = null)
+    /// <summary>
+    /// 消息订阅。订阅者不需要额外对消息进行判空，发布消息时已做非空处理。
+    /// </summary>
+    /// <param name="msgType">消息类型</param>
+    /// <param name="listener">订阅者</param>
+    /// <param name="owner">订阅者拥有人</param>
+    public static void AddListener(string msgType, NotifyListener listener, object owner = null)
     {
-        if (notifies.TryGetValue(msgType, out Notify find)) find.AddListener(listener);
-        else notifies.Add(msgType, new Notify(listener));
+        if (!Instance) return;
+        if (Instance.notifies.TryGetValue(msgType, out Notify find)) find.AddListener(listener);
+        else Instance.notifies.Add(msgType, new Notify(listener));
 
         object target = owner ?? listener.Target;
         if (target != null)
         {
-            if (notifiesWithOwner.TryGetValue(target, out var dict))
+            if (Instance.notifiesWithOwner.TryGetValue(target, out var dict))
             {
-                if (dict.TryGetValue(msgType, out var list))
+                if (dict.TryGetValue(msgType, out var set))
                 {
-                    if (!list.Contains(listener))
-                        list.Add(listener);
+                    if (!set.Contains(listener))
+                        set.Add(listener);
                 }
                 else
                     dict.Add(msgType, new HashSet<NotifyListener>() { listener });
             }
             else
-                notifiesWithOwner.Add(target, new Dictionary<string, HashSet<NotifyListener>>() { { msgType, new HashSet<NotifyListener>() { listener } } });
+                Instance.notifiesWithOwner.Add(target, new Dictionary<string, HashSet<NotifyListener>>() { { msgType, new HashSet<NotifyListener>() { listener } } });
         }
     }
-    public void RemoveListener(string msgType, NotifyListener listener)
+    public static void RemoveListener(string msgType, NotifyListener listener)
     {
-        if (notifies.TryGetValue(msgType, out Notify find))
+        if (!Instance) return;
+        if (Instance.notifies.TryGetValue(msgType, out Notify find))
             find.RemoveListener(listener);
-        if (notifiesWithOwner.TryGetValue(listener.Target, out var dict))
+        if (Instance.notifiesWithOwner.TryGetValue(listener.Target, out var dict))
             if (dict.TryGetValue(msgType, out var list))
                 list.Remove(listener);
     }
-
-    public void RemoveListener(object owner)
+    public static void RemoveListener(object owner)
     {
-        if (notifiesWithOwner.TryGetValue(owner, out var dict))
+        if (!Instance) return;
+        if (Instance.notifiesWithOwner.TryGetValue(owner, out var dict))
             foreach (var item in dict)
             {
                 foreach (var listener in item.Value)
                 {
-                    if (notifies.TryGetValue(item.Key, out Notify find))
+                    if (Instance.notifies.TryGetValue(item.Key, out Notify find))
                         find.RemoveListener(listener);
                 }
             }
-        notifiesWithOwner.Remove(owner);
+        Instance.notifiesWithOwner.Remove(owner);
     }
-
-    public void PostNotify(string msgType, params object[] msg)
+    /// <summary>
+    /// 消息发布。发布者不需要额外对消息进行非空处理，发布消息时已做非空处理。
+    /// </summary>
+    /// <param name="msgType">消息类型</param>
+    /// <param name="msg">消息内容</param>
+    public static void PostNotify(string msgType, params object[] msg)
     {
-        if (notifies.TryGetValue(msgType, out Notify find))
+        if (!Instance) return;
+        //Debug.Log($"发布消息{msgType}，内容：{ZetanUtility.SerializeObject(msg, true, 2)}");
+        if (msg == null) msg = new object[0];
+        if (Instance.notifies.TryGetValue(msgType, out Notify find))
             find.Invoke(msg);
     }
 

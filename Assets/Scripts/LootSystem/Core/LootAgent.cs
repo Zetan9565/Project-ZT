@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LootAgent : InteractiveObject
+public class LootAgent : Interactive2D
 {
     [SerializeField]
     private float disappearTime;
@@ -10,22 +10,17 @@ public class LootAgent : InteractiveObject
     private Coroutine recycleRoutine;
 
     [HideInInspector]
-    public List<ItemInfoBase> lootItems = new List<ItemInfoBase>();
+    public List<ItemWithAmount> lootItems = new List<ItemWithAmount>();
 
     public override bool IsInteractive
     {
         get
         {
-            return base.IsInteractive && !LootManager.Instance.IsPicking;
-        }
-
-        protected set
-        {
-            base.IsInteractive = value;
+            return lootItems.Count > 0 && !NewWindowsManager.IsWindowOpen<LootWindow>();
         }
     }
 
-    public void Init(List<ItemInfoBase> lootItems, Vector3 position)
+    public void Init(List<ItemWithAmount> lootItems, Vector3 position)
     {
         if (lootItems == null)
         {
@@ -54,8 +49,6 @@ public class LootAgent : InteractiveObject
 
     public override bool DoInteract()
     {
-        if (LootManager.Instance.Pick(this))
-            return base.DoInteract();
-        return false;
+        return NewWindowsManager.OpenWindowBy<LootWindow>(this);
     }
 }

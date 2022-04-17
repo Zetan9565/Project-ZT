@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public class BuildingAgent : MonoBehaviour, IPointerClickHandler
+public class BuildingAgent : ListItem<BuildingAgent, BuildingData>, IPointerClickHandler
 {
     [SerializeField]
     private Text buildingPosition;
@@ -13,58 +13,65 @@ public class BuildingAgent : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private Button destoryButton;
 
-    public BuildingData MBuilding { get; private set; }
+    private BuildingWindow window;
 
     private void Awake()
     {
         destoryButton.onClick.AddListener(AskDestroy);
     }
 
-    public void Init(BuildingData building)
+    public void SetWindow(BuildingWindow window)
     {
-        if (!building) return;
-        MBuilding = building;
-        MBuilding.entity.buildingAgent = this;
-        destoryButton.interactable = MBuilding.IsBuilt;
-        buildingPosition.text = "位置" + ((Vector2)MBuilding.entity.transform.position).ToString();
-        buildingStates.text = MBuilding.IsBuilt ? "已建成" : "建设中[" + MBuilding.leftBuildTime.ToString("F2") + "s]";
+        this.window = window;
     }
 
-    public void Clear(bool recycle = false)
+    public override void OnClear()
     {
-        if (MBuilding) MBuilding.entity.buildingAgent = null;
-        MBuilding = null;
+        base.OnClear();
+        if (Data) Data.buildingAgent = null;
+        Data = null;
+        window = null;
         buildingPosition.text = string.Empty;
-        if (recycle) ObjectPool.Put(gameObject);
+    }
+
+    private void Update()
+    {
+        if (Data && Data.IsBuilding)
+        {
+            buildingStates.text = Data.IsBuilt ? "已建成" : !Data.IsBuilding ? $"等待中[剩余{Data.leftBuildTime:F2}s]" : $"建造中[剩余{Data.leftBuildTime:F2}s]";
+        }
     }
 
     public void UpdateUI()
     {
-        if (MBuilding)
+        if (Data)
         {
-            destoryButton.interactable = MBuilding.IsBuilt;
-            buildingStates.text = MBuilding.IsBuilt ? "已建成" : "建设中[" + MBuilding.leftBuildTime.ToString("F2") + "s]";
+            destoryButton.interactable = Data.IsBuilt;
+            buildingStates.text = Data.IsBuilt ? "已建成" : !Data.IsBuilding ? $"等待中[剩余{Data.leftBuildTime:F2}s]" : $"建造中[剩余{Data.leftBuildTime:F2}s]";
         }
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
         //TODO 移动视野至相应建筑
-        BuildingManager.Instance.LocateBuilding(MBuilding.entity);
-    }
-
-    public void Show()
-    {
-        ZetanUtility.SetActive(gameObject, true);
-    }
-
-    public void Hide()
-    {
-        ZetanUtility.SetActive(gameObject, false);
+        window.LocateBuilding(Data);
     }
 
     public void AskDestroy()
     {
-        if (MBuilding) BuildingManager.Instance.DestroyBuilding(MBuilding);
+        if (Data) BuildingManager.Instance.DestroyBuilding(Data);
+    }
+
+    public override void Refresh()
+    {
+        Data.buildingAgent = this;
+        destoryButton.interactable = Data.IsBuilt;
+        buildingPosition.text = "位置" + ((Vector2)Data.position).ToString();
+        buildingStates.text = Data.IsBuilt ? "已建成" : !Data.IsBuilding ? $"等待中[剩余{Data.leftBuildTime:F2}s]" : $"建造中[剩余{Data.leftBuildTime:F2}s]";
+    }
+
+    protected override void OnInit()
+    {
+
     }
 }

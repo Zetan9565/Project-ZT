@@ -1,19 +1,9 @@
 using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "char anima param names", menuName = "Zetan Studio/角色动画参数名称")]
-public class CharacterAnimaParams : ScriptableObject
+[CreateAssetMenu(fileName = "char anima param names", menuName = "Zetan Studio/角色系统/角色动画参数名称")]
+public class CharacterAnimaParams : SingletonScriptableObject<CharacterAnimaParams>
 {
-    private static CharacterAnimaParams instance;
-    private static CharacterAnimaParams Instance
-    {
-        get
-        {
-            if (!instance) CreateInstance<CharacterAnimaParams>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private string directionX = "horizontal";
     public static string DirectionX => Instance.directionX;
@@ -93,9 +83,4 @@ public class CharacterAnimaParams : ScriptableObject
     [SerializeField]
     private string interrupt = "interrupt";
     public static string Interrupt => Instance.interrupt;
-
-    public CharacterAnimaParams()
-    {
-        instance = this;
-    }
 }

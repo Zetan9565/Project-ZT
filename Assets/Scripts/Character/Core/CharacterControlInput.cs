@@ -1,55 +1,80 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public class CharacterControlInput : MonoBehaviour
 {
     public float actionInputInterval = 0.2f;
+    [SerializeField, HideWhenPlaying]
+    protected Vector2 startDirection = Vector2.right;
 
-    [SerializeField,ReadOnly]
-    private Vector2 moveInput;
-    public Vector2 MoveInput => moveInput;
+    protected readonly HashSet<string> triggers = new HashSet<string>();
+    protected readonly Dictionary<string, ValueType> values = new Dictionary<string, ValueType>();
 
-    [SerializeField,ReadOnly]
-    private Vector2 validMoveInput;
-    public Vector2 ValidMoveInput => validMoveInput;
-
-    [SerializeField, ReadOnly]
-    private bool rollInput;
-    public bool RollInput => rollInput;
-
-    [SerializeField, ReadOnly]
-    private bool dashInput;
-    public bool DashInput => dashInput;
-
-    public virtual void SetMoveInput(Vector2 input)
+    public void SetTrigger(string name)
     {
-        moveInput = input.normalized;
-        if (moveInput.x != 0 || moveInput.y != 0)
-            validMoveInput = moveInput;
+        if (!triggers.Contains(name)) triggers.Add(name);
+    }
+    public bool ReadTrigger(string name)
+    {
+        return triggers.Contains(name);
+    }
+    public void ResetTrigger(string name)
+    {
+        triggers.Remove(name);
+    }
+    public void SetValue<T>(string name, T value) where T : struct
+    {
+        values[name] = value;
+    }
+    public bool ReadValue<T>(string name, out T value) where T : struct
+    {
+        value = default;
+        return values.TryGetValue(name, out var find) && canConvert(find, out value);
+
+        static bool canConvert(ValueType find, out T result)
+        {
+            result = default;
+            try
+            {
+                result = (T)(dynamic)find;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 
-    public virtual void SetRollInput(bool input)
+    private void Awake()
     {
-        rollInput = input;
+        SetValue(CharacterInputNames.Instance.Direction, startDirection);
+        OnAwake();
     }
 
-    public virtual void SetDashInput(bool input)
+    private void Start()
     {
-        dashInput = input;
+        OnStart();
+    }
+    private void Update()
+    {
+        OnUpdate();
+    }
+    private void LateUpdate()
+    {
+        triggers.Clear();
+        OnLateUpdate();
+    }
+    private void FixedUpdate()
+    {
+        OnFixedUpdate();
     }
 
-    public void UseRollInput()
-    {
-        rollInput = false;
-    }
-    public void UseDashInput()
-    {
-        dashInput = false;
-    }
-
-    public void UseActionInputs()
-    {
-        UseRollInput();
-        UseDashInput();
-    }
+    protected virtual void OnAwake() { }
+    protected virtual void OnStart() { }
+    protected virtual void OnUpdate() { }
+    protected virtual void OnLateUpdate() { }
+    protected virtual void OnFixedUpdate() { }
 }

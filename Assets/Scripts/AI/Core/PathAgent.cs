@@ -1,4 +1,5 @@
 using Pathfinding;
+using System.ComponentModel;
 using UnityEngine;
 using ZetanExtends;
 
@@ -43,7 +44,7 @@ public class PathAgent : MonoBehaviour
         get => _isStopped;
         set
         {
-            if (!value) controller.SetMoveInput(Vector2.zero);
+            if (value) controller.SetValue(CharacterInputNames.Instance.Move, Vector2.zero);
             _isStopped = value;
         }
     }
@@ -71,8 +72,12 @@ public class PathAgent : MonoBehaviour
         CalNextWaypoint();
         if (!IsStopped)
         {
-            if (HasPath && !HasArrive) controller.SetMoveInput(DesiredDirection);
-            else controller.SetMoveInput(Vector2.zero);
+            if (HasPath && !HasArrive)
+            {
+                controller.SetValue(CharacterInputNames.Instance.Move, DesiredDirection);
+                controller.SetValue(CharacterInputNames.Instance.Direction, DesiredDirection);
+            }
+            else controller.SetValue(CharacterInputNames.Instance.Move, Vector2.zero);
         }
         if (autoRepath)
         {

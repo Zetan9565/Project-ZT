@@ -10,6 +10,12 @@ public class CheckPointManager : SingletonMonoBehaviour<CheckPointManager>
 
     private Dictionary<CheckPointInformation, CheckPointData> checkPoints = new Dictionary<CheckPointInformation, CheckPointData>();
 
+    private void Awake()
+    {
+        if (!pointRoot) pointRoot = new GameObject("CheckPoints").transform;
+        pointRoot.position = Vector3.zero;
+    }
+
     public CheckPointData CreateCheckPoint(CheckPointInformation info, Action<CheckPointInformation> moveIntoAction, Action<CheckPointInformation> leaveAction = null)
     {
         if (!info || !info.IsValid || info.Scene != ZetanUtility.ActiveScene.name) return null;
@@ -24,7 +30,6 @@ public class CheckPointManager : SingletonMonoBehaviour<CheckPointManager>
 
     public CheckPoint CreateCheckPointEntity(CheckPointData data, Vector3 position)
     {
-        if (!pointRoot) pointRoot = new GameObject("CheckPoints").transform;
         if (!pointParents.TryGetValue(data.Info.ID, out var parent))
         {
             parent = pointRoot.CreateChild(data.Info.ID);

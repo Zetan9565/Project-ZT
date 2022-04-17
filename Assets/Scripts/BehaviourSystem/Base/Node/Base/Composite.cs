@@ -4,9 +4,9 @@ using UnityEngine;
 namespace ZetanStudio.BehaviourTree
 {
     /// <summary>
-    /// 复合结点：可以有多个子结点
+    /// 复合结点：可以有多个子结点的父型结点
     /// </summary>
-    public abstract class Composite : Node
+    public abstract class Composite : ParentNode
     {
         [SerializeReference]
         protected List<Node> children;
@@ -34,7 +34,6 @@ namespace ZetanStudio.BehaviourTree
             abort = false;
             currentChildIndex = 0;
             HandlingCurrentChild();
-            Owner.OnCompositeEvaluate(this);
         }
 
         protected void HandlingCurrentChild()
@@ -51,68 +50,6 @@ namespace ZetanStudio.BehaviourTree
             }
         }
 
-        protected virtual void OnConditionalAbort(int index, bool lowerAbort)
-        {
-            if (lowerAbort && abortType == AbortType.None)
-            {
-                if (children[index] is Composite)
-                {
-                    for (int i = index + 1; i < children.Count; i++)
-                    {
-                        children[i].Abort();
-                    }
-                    Composite parent = Owner.FindParent(this, out var childIndex) as Composite;
-                    if (parent) parent.OnConditionalAbort(childIndex, lowerAbort);
-                    AcceptAbort();
-                }
-            }
-            else if (lowerAbort && (abortType == AbortType.LowerPriority || abortType == AbortType.Both))
-            {
-                Composite parent = Owner.FindParent(this, out var childIndex) as Composite;
-                if (parent) parent.OnConditionalAbort(childIndex, lowerAbort);
-                AcceptAbort();
-            }
-            else if (!lowerAbort && (abortType == AbortType.Self || abortType == AbortType.Both))
-            {
-                for (int i = index + 1; i < children.Count; i++)
-                {
-                    if (children[i] is Action action)
-                        action.Abort();
-                    else children[i].Inactivate();
-                }
-                AcceptAbort();
-            }
-
-            void AcceptAbort()
-            {
-                abort = true;
-                isStarted = true;
-                currentChildIndex = index;
-                HandlingCurrentChild();
-            }
-        }
-
-        public bool CheckConditionalAbort()
-        {
-            if (abortType != AbortType.None)
-            {
-                for (int i = 0; i < children.Count; i++)
-                {
-                    if (children[i] is Conditional conditional && conditional.IsDone)
-                    {
-                        bool lowerAbort = conditional.CheckCondition();
-                        if (State == NodeStates.Failure && (abortType == AbortType.LowerPriority || abortType == AbortType.Both) && lowerAbort
-                            || (State == NodeStates.Success || State == NodeStates.Running) && (abortType == AbortType.Self || abortType == AbortType.Both) && !lowerAbort)
-                        {
-                            OnConditionalAbort(i, lowerAbort);
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
         protected void InactivateFrom(int childIndex)
         {
             if (abort) return;
@@ -120,6 +57,66 @@ namespace ZetanStudio.BehaviourTree
             {
                 children[j].Inactivate();
             }
+        }
+
+        public bool ReciveConditionalAbort(Node node)
+        {
+            bool lowerAbort = node is Composite composite && composite.abortType == AbortType.LowerPriority;
+            if (abortType != AbortType.None || lowerAbort)
+            {
+                int index = FindBranchIndex(node);
+                if (index >= 0)
+                {
+                    if (abortType == AbortType.Self || abortType == AbortType.Both || lowerAbort)
+                    {
+                        for (int i = index + 1; i < children.Count; i++)
+                        {
+                            if (!lowerAbort)
+                                if (children[i] is Action action) action.Abort();
+                                else children[i].Inactivate();
+                            else children[i].Abort();
+                        }
+                        abort = true;
+                        isStarted = true;
+                        currentChildIndex = index;
+                        HandlingCurrentChild();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 找包含某节点的分支下标
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        protected int FindBranchIndex(Node node)
+        {
+            for (int i = 0; i < children.Count; i++)
+            {
+                bool find = false;
+                BehaviourTree.Traverse(children[i], accesser);
+                if (find) return i;
+
+                bool accesser(Node child)
+                {
+                    if (child == node)
+                    {
+                        find = true;
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            return -1;
+        }
+
+        public override Conditional CheckConditionalAbort()
+        {
+            if (abortType != AbortType.None) return base.CheckConditionalAbort();
+            return null;
         }
 
         #region EDITOR方法

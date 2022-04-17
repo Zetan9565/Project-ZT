@@ -17,7 +17,7 @@ public class SetContoller2DSpeedInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         float start = startTime.floatValue, end = endTime.floatValue;
         ZetanEditorUtility.MinMaxSlider("起始时间", ref start, ref end, 0, 1);

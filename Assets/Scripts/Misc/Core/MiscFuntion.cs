@@ -47,6 +47,8 @@ public static class MiscFuntion
                 if (talkers == null) talkers = Resources.LoadAll<TalkerInformation>("Configuration");
                 var talker = Array.Find(talkers, x => x.ID == keyWords);
                 if (talker) keyWords = talker.Name;
+                if (MiscSettings.Instance && MiscSettings.Instance.KeywordColors.Count > 0)
+                    return color ? ZetanUtility.ColorText(keyWords, MiscSettings.Instance.KeywordColors[0]) : keyWords;
                 return color ? ZetanUtility.ColorText(keyWords, Color.green) : keyWords;
             }
             else if (keyWords.StartsWith("[ITEM]"))
@@ -65,6 +67,8 @@ public static class MiscFuntion
                 if (items == null) items = Resources.LoadAll<ItemBase>("Configuration");
                 var item = Array.Find(items, x => x.ID == keyWords);
                 if (item) keyWords = item.Name;
+                if (MiscSettings.Instance && MiscSettings.Instance.KeywordColors.Count > 1)
+                    return color ? ZetanUtility.ColorText(keyWords, MiscSettings.Instance.KeywordColors[1]) : keyWords;
                 return color ? ZetanUtility.ColorText(keyWords, Color.yellow) : keyWords;
             }
             else if (keyWords.StartsWith("[ENMY]"))
@@ -83,21 +87,13 @@ public static class MiscFuntion
                 if (enemies == null) enemies = Resources.LoadAll<EnemyInformation>("Configuration");
                 var enemy = Array.Find(enemies, x => x.ID == keyWords);
                 if (enemy) keyWords = enemy.Name;
+                if (MiscSettings.Instance && MiscSettings.Instance.KeywordColors.Count > 2)
+                    return color ? ZetanUtility.ColorText(keyWords, MiscSettings.Instance.KeywordColors[2]) : keyWords;
                 return color ? ZetanUtility.ColorText(keyWords, Color.red) : keyWords;
             }
             return keyWords;
         }
     }
-
-    public static string GetFirstWords(Dialogue dialogue)
-    {
-        if (dialogue&& dialogue.Words.Count > 0)
-        {
-            return HandlingKeyWords(dialogue.Words[0].ToString());
-        }
-        return string.Empty;
-    }
-
     public static bool CheckCondition(ConditionGroup group)
     {
         if (!group) return true;

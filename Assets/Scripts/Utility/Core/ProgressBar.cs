@@ -69,7 +69,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         loopTimes = 0;
         ZetanUtility.SetActive(bar, true);
         ZetanUtility.SetActive(cancel, displayCancel);
-        barCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
+        //barCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         if (progressCoroutine != null) StopCoroutine(progressCoroutine);
         progressCoroutine = StartCoroutine(Progress());
     }
@@ -101,7 +101,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         }
         ZetanUtility.SetActive(bar, true);
         ZetanUtility.SetActive(cancel, displayCancel);
-        barCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
+        //barCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         breakCondition = null;
         progressCoroutine = StartCoroutine(Progress());
     }
@@ -133,7 +133,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
         }
         ZetanUtility.SetActive(bar, true);
         ZetanUtility.SetActive(cancel, displayCancel);
-        barCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
+        //barCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
         this.breakCondition = breakCondition;
         progressCoroutine = StartCoroutine(Progress());
     }

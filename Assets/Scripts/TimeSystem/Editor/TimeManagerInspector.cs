@@ -28,7 +28,7 @@ public class TimeManagerInspector : SingletonMonoBehaviourInspector
             EditorGUILayout.HelpBox(text, MessageType.Error);
             return;
         }
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(UI);
         EditorGUILayout.PropertyField(timeSystem, new GUIContent("时制"));
@@ -65,7 +65,7 @@ public class TimeManagerInspector : SingletonMonoBehaviourInspector
         EditorGUILayout.LabelField("总周数", "第 " + manager.Weeks + " 周");
         EditorGUILayout.LabelField("总月数", "第 " + manager.Months + " 月");
         EditorGUILayout.LabelField("总年数", "第 " + manager.Years + " 年");
-        EditorGUILayout.LabelField("当月第一天", TimeManager.WeekDayToString(manager.WeekDayOfTheFirstDayOfCurrentMonth, manager.TimeSystem));
+        EditorGUILayout.LabelField("当月第一天", TimeManager.WeekDayToString(manager.FirstWeekDayOfCurrentMonth, manager.TimeSystem));
         EditorGUILayout.LabelField("折合现实总时间(秒)", manager.TimeStamp.ToString("F0"));
         EditorGUILayout.EndVertical();
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();

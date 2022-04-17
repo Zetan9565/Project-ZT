@@ -163,10 +163,15 @@ namespace ZetanStudio.BehaviourTree
                 return;
             }
             Executor = executor;
-            //Traverse(entry, n => n.Init(this));
             nodes.ForEach(n => n.Init(this));
-            executedComposites = new List<Composite>();
-            compositesMap = new HashSet<Composite>();
+            SortPriority();
+            evaluatedComposites.Clear();
+        }
+
+        public void SortPriority()
+        {
+            int i = 0;
+            Traverse(entry, n => n.priority = i++);
         }
 
         public void PresetVariables(List<SharedVariable> variables)
@@ -197,19 +202,7 @@ namespace ZetanStudio.BehaviourTree
             }
             if (!IsPaused)
             {
-                bool abort = false;
-                for (int i = 0; i < executedComposites.Count; i++)
-                {
-                    Composite composite = executedComposites[i];
-                    if (composite.CheckConditionalAbort())
-                    {
-                        executedComposites.RemoveAt(i);
-                        compositesMap.Remove(composite);
-                        abort = true;
-                        break;
-                    }
-                }
-                if (entry.State == NodeStates.Inactive || entry.State == NodeStates.Running || abort)
+                if (CheckConditionalAbort() || entry.State == NodeStates.Inactive || entry.State == NodeStates.Running)
                 {
                     if (!entry.IsStarted) Traverse(entry, n => n.OnBehaviourStart());
                     ExecutionState = entry.Evaluate();
@@ -240,9 +233,8 @@ namespace ZetanStudio.BehaviourTree
             }
             if (reset) Reset_();
             else entry.Reset();
-            executedComposites = new List<Composite>();
-            compositesMap = new HashSet<Composite>();
-            Traverse(entry, n => n.OnBehaviourRestart());
+            evaluatedComposites.Clear();
+            nodes.ForEach(n => n.OnBehaviourRestart());
             Execute();
         }
         public void Pause(bool paused)
@@ -254,15 +246,30 @@ namespace ZetanStudio.BehaviourTree
         {
             Traverse(entry, n => n.Reset());
         }
-        private List<Composite> executedComposites;
-        private HashSet<Composite> compositesMap;
-        public void OnCompositeEvaluate(Composite composite)
+        private SortedSet<Composite> evaluatedComposites = new SortedSet<Composite>(Node.Comparer.Default);
+
+        public void OnNodeEvaluated(Node node)
         {
-            if (!compositesMap.Contains(composite))
+            if (node is Composite composite) evaluatedComposites.Add(composite);
+        }
+        private bool CheckConditionalAbort()
+        {
+            foreach (var composite in evaluatedComposites)
             {
-                executedComposites.Add(composite);
-                compositesMap.Add(composite);
+                if (composite.CheckConditionalAbort() is Conditional conditional)
+                {
+                    PostConditionalAbort(conditional);
+                    return true;
+                }
             }
+            return false;
+        }
+        private void PostConditionalAbort(Conditional conditional)
+        {
+            Traverse(Entry, n =>
+            {
+                if (n is Composite c) c.ReciveConditionalAbort(conditional);
+            });
         }
 
         #region Unity回调
@@ -334,15 +341,21 @@ namespace ZetanStudio.BehaviourTree
         #endregion
 
         #region 结点搜索相关
-        public Node FindParent(Node child, bool nonTraverse = false)
+        /// <summary>
+        /// 在此树中查找某结点的父结点
+        /// </summary>
+        /// <param name="child">结点</param>
+        /// <param name="nonTraverse">遍历结点列表而不是树</param>
+        /// <returns>找到的父结点</returns>
+        public ParentNode FindParent(Node child, bool nonTraverse = false)
         {
-            Node parent = null;
-            if (nonTraverse) parent = nodes.Find(n => n.GetChildren().Contains(child));
+            ParentNode parent = null;
+            if (nonTraverse) parent = nodes.Find(n => n is ParentNode p && p.GetChildren().Contains(child)) as ParentNode;
             else Traverse(entry, n =>
             {
-                if (n.GetChildren().Contains(child))
+                if (n is ParentNode p && p.GetChildren().Contains(child))
                 {
-                    parent = n;
+                    parent = p;
                     return true;
                 }
                 return false;
@@ -355,14 +368,17 @@ namespace ZetanStudio.BehaviourTree
             int index = -1;
             Traverse(entry, n =>
             {
-                var children = n.GetChildren();
-                for (int i = 0; i < children.Count; i++)
+                if (n is ParentNode p)
                 {
-                    if (children[i] == child)
+                    var children = p.GetChildren();
+                    for (int i = 0; i < children.Count; i++)
                     {
-                        parent = n;
-                        index = i;
-                        return true;
+                        if (children[i] == child)
+                        {
+                            parent = n;
+                            index = i;
+                            return true;
+                        }
                     }
                 }
                 return false;
@@ -411,7 +427,7 @@ namespace ZetanStudio.BehaviourTree
             if (node)
             {
                 onAccess?.Invoke(node);
-                node.GetChildren().ForEach(n => Traverse(n, onAccess));
+                if (node is ParentNode parent) parent.GetChildren().ForEach(n => Traverse(n, onAccess));
             }
         }
 
@@ -426,9 +442,10 @@ namespace ZetanStudio.BehaviourTree
             if (node)
             {
                 if (onAccess.Invoke(node)) return true;
-                foreach (Node n in node.GetChildren())
-                    if (Traverse(n, onAccess))
-                        return true;
+                if (node is ParentNode parent)
+                    foreach (Node n in parent.GetChildren())
+                        if (Traverse(n, onAccess))
+                            return true;
             }
             return false;
         }
@@ -443,6 +460,7 @@ namespace ZetanStudio.BehaviourTree
             });
             return reachable;
         }
+
         #region EDITOR
 #if UNITY_EDITOR
         /// <summary>
@@ -452,12 +470,9 @@ namespace ZetanStudio.BehaviourTree
         public void AddNode(Node newNode)
         {
             if (nodes.Contains(newNode)) return;
-            UnityEditor.Undo.RegisterCompleteObjectUndo(this, "新增结点");
             nodes.Add(newNode);
-            if (!IsInstance && !IsRuntime)
-            {
-                UnityEditor.EditorUtility.SetDirty(this);
-            }
+            if (!IsInstance && !IsRuntime) UnityEditor.EditorUtility.SetDirty(this);
+            else SortPriority();
         }
 
         /// <summary>
@@ -466,11 +481,12 @@ namespace ZetanStudio.BehaviourTree
         /// <param name="node"></param>
         public void DeleteNode(Node node)
         {
-            UnityEditor.Undo.RegisterCompleteObjectUndo(this, "删除结点");
             nodes.Remove(node);
-            if (!IsInstance && !IsRuntime)
+            if (!IsInstance && !IsRuntime) UnityEditor.EditorUtility.SetDirty(this);
+            else
             {
-                UnityEditor.EditorUtility.SetDirty(this);
+                if (node is Composite conditional) evaluatedComposites.Remove(conditional);
+                SortPriority();
             }
         }
 
@@ -490,13 +506,18 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         /// <param name="runtimeTree">运行时行为树</param>
         /// <returns>准备好本地化的行为树</returns>
-        public static BehaviourTree ConvertToLocal(BehaviourTree runtimeTree)
+        public static BehaviourTree PrepareLocalization(BehaviourTree runtimeTree)
         {
             if (runtimeTree.IsInstance || !runtimeTree.isRuntime) return null;
             BehaviourTree localTree = Instantiate(runtimeTree);
             localTree.isRuntime = false;
-            localTree.nodes.ForEach(x => x.ConvertToLocal());
+            localTree.nodes.ForEach(x => x.PrepareLocalization());
             return localTree;
+        }
+
+        public SortedSet<Composite> GetEvaluatedComposites()
+        {
+            return evaluatedComposites;
         }
 #endif
         #endregion

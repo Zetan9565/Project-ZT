@@ -22,7 +22,7 @@ namespace ZetanStudio.BehaviourTree
         public bool IsValid => !isGlobal && !isShared || (isGlobal || isShared) && !string.IsNullOrEmpty(_name);
 
         /// <summary>
-        /// 关联共享或全局变量（结点成员变量专用，在共享变量或全局变量列表里的变量不应使用）
+        /// 关联共享或全局变量（结点成员变量专用，在<see cref="BehaviourTree.Variables"/>或<see cref="GlobalVariables"/>里的变量不应使用）
         /// </summary>
         /// <param name="variable">关联的变量</param>
         public void Link(SharedVariable variable)

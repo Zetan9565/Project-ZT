@@ -32,12 +32,12 @@ namespace ZetanStudio.BehaviourTree
 
         public override void OnInspectorGUI()
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(_name);
             EditorGUILayout.PropertyField(description);
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             variableList.DoLayoutList();
             serializedObject.ApplyModifiedProperties();
         }

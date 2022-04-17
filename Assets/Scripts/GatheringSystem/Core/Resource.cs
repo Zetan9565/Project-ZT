@@ -1,23 +1,23 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Resource : InteractiveObject
+public class Resource : Interactive2D
 {
     [SerializeField]
     protected ResourceInformation resourceInfo;
     public ResourceInformation ResourceInfo => resourceInfo;
 
-    protected override string CustomName { get => resourceInfo.Name; }
+    public override string Name { get => resourceInfo.Name; }
 
     [SerializeField]
     protected bool hideOnGathered;
 
+    protected bool isRefresh = true;
     public override bool IsInteractive
     {
         get
         {
-            return resourceInfo && resourceInfo.ProductItems.Count > 0 && GatherManager.Instance.Gathering != this;
+            return isRefresh && resourceInfo && resourceInfo.ProductItems.Count > 0 && GatherManager.Instance.Resource != this;
         }
     }
 
@@ -28,18 +28,13 @@ public class Resource : InteractiveObject
     [HideInInspector]
     public UnityEngine.Events.UnityEvent onGatherFinish = new UnityEngine.Events.UnityEvent();
 
-    private void Awake()
-    {
-        customName = true;
-    }
-
     public virtual void GatherSuccess()
     {
         onGatherFinish?.Invoke();
         if (hideOnGathered) GetComponent<Renderer>().enabled = false;
         if (ResourceInfo.ProductItems.Count > 0)
         {
-            List<ItemInfoBase> lootItems = DropItemInfo.Drop(ResourceInfo.ProductItems);
+            var lootItems = DropItemInfo.Drop(ResourceInfo.ProductItems);
             if (lootItems.Count > 0)
             {
                 LootAgent la = ObjectPool.Get(ResourceInfo.LootPrefab).GetComponent<LootAgent>();
@@ -55,7 +50,7 @@ public class Resource : InteractiveObject
         if (ResourceInfo.RefreshTime < 0) yield break;
 
         LeftRefreshTime = ResourceInfo.RefreshTime;
-        while (!IsInteractive && ResourceInfo)
+        while (!isRefresh && ResourceInfo)
         {
             LeftRefreshTime -= Time.deltaTime;
             if (LeftRefreshTime <= 0)
@@ -70,7 +65,6 @@ public class Resource : InteractiveObject
 
     public virtual void Refresh()
     {
-        IsInteractive = true;
         if (hideOnGathered) GetComponent<Renderer>().enabled = true;
     }
 
@@ -78,16 +72,14 @@ public class Resource : InteractiveObject
     {
         if (GatherManager.Instance.Gather(this))
         {
-            return base.DoInteract();
+            return true;
         }
         return false;
     }
 
-    protected override void OnExit(Collider2D collision)
+    protected override void OnNotInteractable()
     {
-        if (collision.CompareTag("Player") && GatherManager.Instance.Gathering == this)
-        {
+        if (GatherManager.Instance.Resource == this)
             GatherManager.Instance.Cancel();
-        }
     }
 }

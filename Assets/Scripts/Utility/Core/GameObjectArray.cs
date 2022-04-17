@@ -18,7 +18,7 @@ public class GameObjectArray : MonoBehaviour
         }
         return null;
     }
-    public GameObject GetWithTag(string tag)
+    public GameObject GetByTag(string tag)
     {
         if (gameObjects == null) return null;
         for (int i = 0; i < gameObjects.Length; i++)

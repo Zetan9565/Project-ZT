@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,8 +13,7 @@ public class InteractionButton : MonoBehaviour
 
     private Button button;
 
-    private InteractiveObject interactiveObj;
-    private Interactive interactiveCom;
+    private IInteractive interactive;
 
     private void Awake()
     {
@@ -25,17 +22,9 @@ public class InteractionButton : MonoBehaviour
         button.onClick.AddListener(Interact);
     }
 
-    public void Init(InteractiveObject interactive)
+    public void Init(IInteractive interactive)
     {
-        interactiveObj = interactive;
-        buttonText.text = interactive.Name;
-        buttonIcon.overrideSprite = interactive.Icon;
-        SetSelected(false);
-    }
-
-    public void Init(Interactive interactive)
-    {
-        interactiveCom = interactive;
+        this.interactive = interactive;
         buttonText.text = interactive.Name;
         buttonIcon.overrideSprite = interactive.Icon;
         SetSelected(false);
@@ -43,23 +32,15 @@ public class InteractionButton : MonoBehaviour
 
     private void Interact()
     {
-        if (interactiveCom)
+        if (interactive?.DoInteract() ?? false)
         {
-            if (interactiveCom.DoInteract())
-            {
-                InteractionManager.Instance.Remove(interactiveCom);
-            }
-        }
-        else if (interactiveObj.DoInteract())
-        {
-            InteractionManager.Instance.Remove(interactiveObj);
+            InteractionPanel.Instance.Remove(interactive);
         }
     }
 
     public void Clear(bool recycle = false)
     {
-        interactiveObj = null;
-        interactiveCom = null;
+        interactive = null;
         SetSelected(false);
         buttonText.text = string.Empty;
         buttonIcon.overrideSprite = null;

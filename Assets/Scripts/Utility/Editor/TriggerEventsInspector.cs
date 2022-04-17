@@ -27,7 +27,7 @@ public class TriggerEventsInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(activated, new GUIContent("启用"));
         EditorGUILayout.PropertyField(_3D, new GUIContent("3D碰撞器"));

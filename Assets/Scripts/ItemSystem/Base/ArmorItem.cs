@@ -46,7 +46,7 @@ public class ArmorItem : EquipmentItem
     public ArmorItem()
     {
         itemType = ItemType.Armor;
-        stackAble = false;
+        stackNum = 1;
     }
 }
 

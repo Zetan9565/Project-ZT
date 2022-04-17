@@ -40,14 +40,15 @@ MonoBehaviour:
   _NPCToSubmit: {fileID: 0}
   cmpltObjctvInOrder: 1
   objectives:
-  - id: 0
-  - id: 1
-  - id: 2
-  - id: 3
-  - id: 4
+  - rid: 0
+  - rid: 1
+  - rid: 2
+  - rid: 3
+  - rid: 4
   references:
-    version: 1
-    00000000:
+    version: 2
+    RefIds:
+    - rid: 0
       type: {class: TalkObjective, ns: , asm: Assembly-CSharp}
       data:
         displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
@@ -60,7 +61,7 @@ MonoBehaviour:
         orderIndex: 1
         _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
         dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491, type: 2}
-    00000001:
+    - rid: 1
       type: {class: MoveObjective, ns: , asm: Assembly-CSharp}
       data:
         displayName: "\u53BB\u5230\u6751\u5B50\u5317\u90E8\u8C03\u67E5"
@@ -72,7 +73,7 @@ MonoBehaviour:
         inOrder: 1
         orderIndex: 2
         itemToUseHere: {fileID: 0}
-    00000002:
+    - rid: 2
       type: {class: KillObjective, ns: , asm: Assembly-CSharp}
       data:
         displayName: "\u51FB\u6740\u6751\u5317\u7684\u602A\u7269"
@@ -87,7 +88,7 @@ MonoBehaviour:
         enemy: {fileID: 0}
         race: {fileID: 11400000, guid: 150e8a581f32093459fd9b32c975e6f7, type: 2}
         group: {fileID: 11400000, guid: e3f0673e98f57e246b4162cc7596550b, type: 2}
-    00000003:
+    - rid: 3
       type: {class: CollectObjective, ns: , asm: Assembly-CSharp}
       data:
         displayName: "\u6536\u96C6\u602A\u7269\u7684\u5251"
@@ -102,7 +103,7 @@ MonoBehaviour:
           type: 2}
         checkBagAtStart: 1
         loseItemAtSbmt: 1
-    00000004:
+    - rid: 4
       type: {class: CollectObjective, ns: , asm: Assembly-CSharp}
       data:
         displayName: "\u6536\u96C6\u602A\u7269\u7684\u5200"

@@ -7,8 +7,6 @@ public class PlayerInformation : CharacterInformation
     protected CharacterSex sex;
     public CharacterSex Sex => sex;
 
-    public Backpack backpack;
-
     #region 装备相关
     public ItemInfo primaryWeapon;
 

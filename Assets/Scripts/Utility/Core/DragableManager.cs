@@ -1,6 +1,8 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.Events;
 
 [DisallowMultipleComponent]
 public class DragableManager : SingletonMonoBehaviour<DragableManager>
@@ -15,12 +17,12 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
         }
     }
 
-    [HideInInspector]
-    public UnityEvent onCancelDrag;
-
     private Image icon;
 
     private Canvas iconSortCanvas;
+    private Action<PointerEventData> onEndDrag;
+    private PointerEventData eventData;
+    private readonly List<RaycastResult> raycastResults = new List<RaycastResult>();
 
     private void Awake()
     {
@@ -29,36 +31,36 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
         iconSortCanvas = icon.GetComponent<Canvas>();
         iconSortCanvas.overrideSorting = true;
     }
-#if UNITY_STANDALONE
 
     private void Update()
     {
+        eventData = new PointerEventData(EventSystem.current);
+        eventData.position = InputManager.mousePosition;
         MoveIcon();
     }
-#endif
 
     public void MoveIcon()
     {
         if (Current != null)
         {
-            if (InputManager.GetMouseButtonDown(1) || UnityEngine.InputSystem.EnhancedTouch.Touch.fingers.Count > 1)
-            {
+            if (InputManager.GetMouseButtonDown(1) || UnityEngine.InputSystem.Touchscreen.current != null && UnityEngine.InputSystem.Touchscreen.current.touches.Count > 0
+                && UnityEngine.InputSystem.Touchscreen.current.touches[1].press.wasPressedThisFrame)
                 CancelDrag();
-            }
-            icon.transform.position = InputManager.mousePosition;
+            if (InputManager.GetMouseButtonDown(0) || UnityEngine.InputSystem.Pointer.current.press.wasReleasedThisFrame)
+                EndDrag();
+            icon.transform.position = eventData.position;
         }
     }
 
-    public void StartDrag(IDragAble dragable, UnityAction cancelDragAction = null, float width = 100, float height = 100)
+    public void BeginDrag(IDragAble dragable, Action<PointerEventData> endDragAction, float width = 100, float height = 100)
     {
         if (!dragable.DragAbleIcon) return;
-        iconSortCanvas.sortingOrder = WindowsManager.Instance.TopOrder + 1;
+        iconSortCanvas.sortingOrder = 999;
         Current = dragable;
         icon.overrideSprite = dragable.DragAbleIcon;
         icon.color = Color.white;
         ZetanUtility.SetActive(icon.gameObject, true);
-        onCancelDrag.RemoveAllListeners();
-        if (cancelDragAction != null) onCancelDrag.AddListener(cancelDragAction);
+        onEndDrag = endDragAction;
         icon.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
         icon.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
         MoveIcon();
@@ -67,12 +69,23 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
     public void ResetIcon()
     {
         Current = null;
+        onEndDrag = null;
+        raycastResults.Clear();
         ZetanUtility.SetActive(icon.gameObject, false);
     }
 
     public void CancelDrag()
     {
-        onCancelDrag?.Invoke();
+        ResetIcon();
+    }
+
+    public void EndDrag()
+    {
+        EventSystem.current.RaycastAll(eventData, raycastResults);
+        eventData.button = PointerEventData.InputButton.Left;
+        if (raycastResults.Count > 0) eventData.pointerCurrentRaycast = raycastResults[0];
+        else eventData.pointerCurrentRaycast = new RaycastResult();
+        onEndDrag?.Invoke(eventData);
         ResetIcon();
     }
 }

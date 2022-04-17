@@ -71,7 +71,7 @@ public partial class CharacterInfoInspector
 
     void DrawTalkerInfo()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         bool enableBef = enable.boolValue;
         EditorGUILayout.PropertyField(enable, new GUIContent("启用", "若启用，将在场景中生成实体"));
@@ -87,7 +87,7 @@ public partial class CharacterInfoInspector
         {
             case 0:
                 #region case 0
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
                 if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID())
@@ -115,7 +115,7 @@ public partial class CharacterInfoInspector
                 break;
             case 1:
                 #region case 1
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(defalutDialogue, new GUIContent("默认对话"));
                 if (talker.DefaultDialogue)
@@ -142,7 +142,7 @@ public partial class CharacterInfoInspector
                     serializedObject.ApplyModifiedProperties();
                 if (conditionDialogues.isExpanded)
                 {
-                    serializedObject.Update();
+                    serializedObject.UpdateIfRequiredOrScript();
                     conditionDialogList.DoLayoutList();
                     serializedObject.ApplyModifiedProperties();
                 }
@@ -150,7 +150,7 @@ public partial class CharacterInfoInspector
                 break;
             case 2:
                 #region case 2
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (talker)
                 {
@@ -191,7 +191,7 @@ public partial class CharacterInfoInspector
                 #region case 3
                 if (talker)
                 {
-                    serializedObject.Update();
+                    serializedObject.UpdateIfRequiredOrScript();
                     questList.DoLayoutList();
                     serializedObject.ApplyModifiedProperties();
                 }
@@ -199,14 +199,14 @@ public partial class CharacterInfoInspector
                 break;
             case 4:
                 #region case 4
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(canDEV_RLAT, new GUIContent("可培养感情"));
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
                 if (canDEV_RLAT.boolValue)
                 {
-                    serializedObject.Update();
+                    serializedObject.UpdateIfRequiredOrScript();
                     EditorGUI.BeginChangeCheck();
                     EditorGUILayout.PropertyField(normalItemDialogue, new GUIContent("赠送中性物品时的对话"));
                     if (talker.NormalItemDialogue)
@@ -232,18 +232,18 @@ public partial class CharacterInfoInspector
                         serializedObject.ApplyModifiedProperties();
                     if (giftDialogues.isExpanded)
                     {
-                        serializedObject.Update();
+                        serializedObject.UpdateIfRequiredOrScript();
                         giftDialoguesList.DoLayoutList();
                         serializedObject.ApplyModifiedProperties();
                     }
                     EditorGUILayout.PropertyField(affectiveItems, new GUIContent("亲密值道具\t\t" + (affectiveItems.arraySize > 0 ? "数量：" + affectiveItems.arraySize : "无")), false);
                     if (affectiveItems.isExpanded)
                     {
-                        serializedObject.Update();
+                        serializedObject.UpdateIfRequiredOrScript();
                         affectiveItemsList.DoLayoutList();
                         serializedObject.ApplyModifiedProperties();
                     }
-                    serializedObject.Update();
+                    serializedObject.UpdateIfRequiredOrScript();
                     EditorGUI.BeginChangeCheck();
                     EditorGUILayout.PropertyField(canMarry, new GUIContent("可结婚"));
                     if (EditorGUI.EndChangeCheck())
@@ -260,7 +260,7 @@ public partial class CharacterInfoInspector
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 SerializedProperty conditionDialogue = conditionDialogues.GetArrayElementAtIndex(index);
                 SerializedProperty dialogue = conditionDialogue.FindPropertyRelative("dialogue");
@@ -290,7 +290,7 @@ public partial class CharacterInfoInspector
                         drawer = new ConditionGroupDrawer(conditionDialogue.serializedObject, condition, lineHeight, lineHeightSpace);
                         conditionDrawers.Add(talker.ConditionDialogues[index], drawer);
                     }
-                    serializedObject.Update();
+                    serializedObject.UpdateIfRequiredOrScript();
                     drawer.DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
                     serializedObject.ApplyModifiedProperties();
                 }
@@ -314,7 +314,7 @@ public partial class CharacterInfoInspector
 
             onRemoveCallback = (list) =>
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个对话吗？", "确定", "取消"))
                 {
@@ -351,7 +351,7 @@ public partial class CharacterInfoInspector
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 SerializedProperty giftDialogue = giftDialogues.GetArrayElementAtIndex(index);
                 SerializedProperty dialogue = giftDialogue.FindPropertyRelative("dialogue");
@@ -401,7 +401,7 @@ public partial class CharacterInfoInspector
 
             onRemoveCallback = (list) =>
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个对话吗？", "确定", "取消"))
                     giftDialogues.DeleteArrayElementAtIndex(list.index);
@@ -433,7 +433,7 @@ public partial class CharacterInfoInspector
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 if (talker.AffectiveItems[index].Item != null)
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), talker.AffectiveItems[index].Item.Name);
                 else
@@ -457,7 +457,7 @@ public partial class CharacterInfoInspector
 
             onRemoveCallback = (list) =>
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
                     affectiveItems.DeleteArrayElementAtIndex(list.index);
@@ -489,7 +489,7 @@ public partial class CharacterInfoInspector
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 SerializedProperty quest = questsStored.GetArrayElementAtIndex(index);
                 if (quest.objectReferenceValue != null)
                 {
@@ -504,7 +504,7 @@ public partial class CharacterInfoInspector
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
                     if (GUI.Button(new Rect(rect.x + rect.width * 0.8f, rect.y, rect.width * 0.2f, lineHeight), "新建"))
                     {
-                        Quest questInstance = ZetanEditorUtility.SaveFilePanel(CreateInstance<Quest>, "quest", true);
+                        Quest questInstance = ZetanEditorUtility.SaveFilePanel(CreateInstance<Quest>, "quest", ping: true);
                         if (questInstance)
                         {
                             quest.objectReferenceValue = questInstance;
@@ -547,7 +547,7 @@ public partial class CharacterInfoInspector
 
             onAddCallback = (list) =>
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (list.index + 1 < talker.QuestsStored.Count)
                     talker.QuestsStored.Insert(list.index + 1, null);
@@ -558,7 +558,7 @@ public partial class CharacterInfoInspector
 
             onRemoveCallback = (list) =>
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个任务吗？", "确定", "取消"))
                     talker.QuestsStored.RemoveAt(list.index);

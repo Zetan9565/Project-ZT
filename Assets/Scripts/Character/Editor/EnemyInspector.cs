@@ -29,7 +29,7 @@ public class EnemyInspector : Editor
         {
             EditorGUILayout.HelpBox("敌人信息为空！", MessageType.Warning);
         }
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(info, new GUIContent("信息"));
         if (EditorGUI.EndChangeCheck())

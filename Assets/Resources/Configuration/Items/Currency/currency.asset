@@ -22,7 +22,7 @@ MonoBehaviour:
   buyPrice: 0
   icon: {fileID: 21300000, guid: 06fda7a937b34e84a943612d88029328, type: 3}
   description: "\u5168\u5927\u9646\u6D41\u901A\u7684\u901A\u7528\u8D27\u5E01\u3002"
-  stackAble: 1
+  stackNum: 999
   discardAble: 1
   lockAble: 1
   usable: 1

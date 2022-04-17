@@ -1,18 +1,9 @@
 using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "char anima tags", menuName = "Zetan Studio/角色动画标签")]
-public class CharacterAnimaTags : ScriptableObject
+[CreateAssetMenu(fileName = "char anima tags", menuName = "Zetan Studio/角色系统/角色动画标签")]
+public class CharacterAnimaTags : SingletonScriptableObject<CharacterAnimaTags>
 {
-    private static CharacterAnimaTags instance;
-    public static CharacterAnimaTags Instance {
-        get
-        {
-            if (!instance) instance = CreateInstance<CharacterAnimaTags>();
-            return instance;
-        }
-    }
-
     [SerializeField]
     private string idle = "Idle";
     public static string Idle => Instance.idle;
@@ -48,9 +39,4 @@ public class CharacterAnimaTags : ScriptableObject
     [SerializeField]
     private string attack = "Attack";
     public static string Attack => Instance.attack;
-
-    public CharacterAnimaTags()
-    {
-        instance = this;
-    }
 }

@@ -34,7 +34,7 @@ public class CharacterController2DInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(rigidbody, new GUIContent("刚体(可选)"));
         if (!rigidbody.objectReferenceValue || (rigidbody.objectReferenceValue as Rigidbody2D).collisionDetectionMode == CollisionDetectionMode2D.Discrete)

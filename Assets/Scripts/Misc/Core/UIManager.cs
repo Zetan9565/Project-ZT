@@ -16,12 +16,6 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
     private Button calendarButton;
 
     [SerializeField]
-    private Button buildingButton;
-
-    [SerializeField]
-    private Button settingButton;
-
-    [SerializeField]
     private Transform questFlagParent;
     [SerializeField]
     private Transform buildingFlagParent;
@@ -55,11 +49,9 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 #elif UNITY_ANDROID
         ZetanUtility.SetActive(JoyStick.gameObject, true);
 #endif
-        questButton.onClick.AddListener(QuestManager.Instance.OpenCloseWindow);
-        backpackButton.onClick.AddListener(BackpackManager.Instance.OpenCloseWindow);
-        calendarButton.onClick.AddListener(CalendarManager.Instance.OpenCloseWindow);
-        buildingButton.onClick.AddListener(BuildingManager.Instance.OpenCloseWindow);
-        settingButton.onClick.AddListener(EscapeMenuManager.Instance.OpenCloseWindow);
+        //questButton.onClick.AddListener(QuestManager.Instance.OpenCloseWindow);
+        //backpackButton.onClick.AddListener(BackpackManager.Instance.OpenCloseWindow);
+        //calendarButton.onClick.AddListener(CalendarManager.Instance.OpenCloseWindow);
         if (!dontDestroyOnLoadOnce)
         {
             DontDestroyOnLoad(this);
@@ -76,8 +68,8 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 #if UNITY_STANDALONE
         joyStick.enabled = false;
 #elif UNITY_ANDROID
-        JoyStick.enabled = value && !(DialogueManager.Instance.IsUIOpen || ShopManager.Instance.IsUIOpen ||
-            WarehouseManager.Instance.IsUIOpen || QuestManager.Instance.IsUIOpen || BuildingManager.Instance.IsPreviewing);
+        JoyStick.enabled = value && !(NewWindowsManager.IsWindowOpen<DialogueWindow>() || NewWindowsManager.IsWindowOpen<ShopWindow>() ||
+            NewWindowsManager.IsWindowOpen<QuestWindow>() || NewWindowsManager.IsWindowOpen<BuildingWindow>(out var building) && building.IsPreviewing);
 #endif
         if (!JoyStick.enabled) JoyStick.Stop();
     }
@@ -99,26 +91,8 @@ public class UIManager : SingletonMonoBehaviour<UIManager>
 
     public void Init()
     {
-        WindowsManager.Instance.CloseAll();
 
         DragableManager.Instance.ResetIcon();
         ProgressBar.Instance.Cancel();
-
-        BackpackManager.Instance.SetUI(FindObjectOfType<BackpackUI>());
-        BackpackManager.Instance.Init();
-        BuildingManager.Instance.SetUI(FindObjectOfType<BuildingUI>());
-        CalendarManager.Instance.SetUI(FindObjectOfType<CalendarUI>());
-        DialogueManager.Instance.SetUI(FindObjectOfType<DialogueUI>());
-        EscapeMenuManager.Instance.SetUI(FindObjectOfType<EscapeUI>());
-        FieldManager.Instance.SetUI(FindObjectOfType<FieldUI>());
-        InteractionManager.Instance.SetUI(FindObjectOfType<InteractionUI>());
-        ItemSelectionManager.Instance.SetUI(FindObjectOfType<ItemSelectionUI>());
-        ItemWindowManager.Instance.SetUI(FindObjectOfType<ItemWindowUI>());
-        LootManager.Instance.SetUI(FindObjectOfType<LootUI>());
-        MakingManager.Instance.SetUI(FindObjectOfType<MakingUI>());
-        PlantManager.Instance.SetUI(FindObjectOfType<PlantUI>());
-        QuestManager.Instance.SetUI(FindObjectOfType<QuestUI>());
-        ShopManager.Instance.SetUI(FindObjectOfType<ShopUI>());
-        WarehouseManager.Instance.SetUI(FindObjectOfType<WarehouseUI>());
     }
 }

@@ -21,7 +21,7 @@ public class TriggerHolderInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(triggerName, new GUIContent("触发器名称"));
         if (string.IsNullOrEmpty(triggerName.stringValue)) EditorGUILayout.HelpBox("触发器名称不能为空！", MessageType.Error);

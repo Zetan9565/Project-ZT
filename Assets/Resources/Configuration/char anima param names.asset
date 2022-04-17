@@ -17,6 +17,8 @@ MonoBehaviour:
   dash: dash
   roll: roll
   getHurt: getHurt
+  hurtDirX: hurtDirX
+  hurtDirY: hurtDirY
   gather: gather
   dead: dead
   relive: relive

@@ -53,6 +53,15 @@ public class Dialogue : ScriptableObject
         //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
         return find != dialogue || (find == dialogue && Array.FindAll(all, x => x.ID == dialogue.ID).Length > 1);
     }
+
+    public static string GetFirstWords(Dialogue dialogue)
+    {
+        if (dialogue && dialogue.Words.Count > 0)
+        {
+            return MiscFuntion.HandlingKeyWords(dialogue.Words[0].ToString(), true);
+        }
+        return string.Empty;
+    }
 }
 [Serializable]
 public class DialogueWords

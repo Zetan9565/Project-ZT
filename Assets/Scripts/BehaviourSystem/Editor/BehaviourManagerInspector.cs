@@ -49,7 +49,7 @@ namespace ZetanStudio.BehaviourTree
                 EditorGUILayout.HelpBox("存在多个激活的BehaviourManager，请删除或失活其它", MessageType.Error);
                 return;
             }
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             bool shouldDisable = Application.isPlaying && !PrefabUtility.IsPartOfAnyPrefab(target);
             EditorGUI.BeginDisabledGroup(shouldDisable);
@@ -64,13 +64,13 @@ namespace ZetanStudio.BehaviourTree
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (globalVariables.objectReferenceValue)
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
 
                 showGlobal.target = EditorGUILayout.Foldout(serializedVariables.isExpanded, "全局变量列表", true); ;
                 if (EditorGUILayout.BeginFadeGroup(showGlobal.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
-                if (!Application.isPlaying && !ZetanUtility.IsPrefab((target as BackpackManager).gameObject))
+                if (!Application.isPlaying && !ZetanUtility.IsPrefab((target as BehaviourManager).gameObject))
                 {
                     showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, "变量预设列表", true);
                     if (EditorGUILayout.BeginFadeGroup(showPreset.faded))

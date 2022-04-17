@@ -106,7 +106,7 @@ public class QuestInspector : Editor
             EditorGUILayout.HelpBox("该任务信息已完整。", MessageType.Info);
         barIndex = GUILayout.Toolbar(barIndex, new string[] { "基本", "条件", "奖励", "对话", "目标" });
         EditorGUILayout.Space();
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         switch (barIndex)
         {
@@ -261,7 +261,7 @@ public class QuestInspector : Editor
                     + (objectives.isExpanded ? string.Empty : (objectives.arraySize > 0 ? "数量：" + objectives.arraySize : "无")), true);
                 if (EditorGUILayout.BeginFadeGroup(showState.faded))
                 {
-                    serializedObject.Update();
+                    serializedObject.UpdateIfRequiredOrScript();
                     objectiveList.DoLayoutList();
                     serializedObject.ApplyModifiedProperties();
                 }
@@ -278,7 +278,7 @@ public class QuestInspector : Editor
         {
             if (GUILayout.Button("新建"))
             {
-                Dialogue dialogInstance = ZetanEditorUtility.SaveFilePanel(CreateInstance<Dialogue>, "dialogue", true);
+                Dialogue dialogInstance = ZetanEditorUtility.SaveFilePanel(CreateInstance<Dialogue>, "dialogue", ping: true);
                 if (dialogInstance)
                 {
                     dialogue.objectReferenceValue = dialogInstance;
@@ -571,7 +571,7 @@ public class QuestInspector : Editor
             },
             onRemoveCallback = (list) =>
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 SerializedProperty displayName = objectives.GetArrayElementAtIndex(list.index).FindPropertyRelative("displayName");
                 if (EditorUtility.DisplayDialog("删除", "确定删除目标 [ " + (string.IsNullOrEmpty(displayName.stringValue) ? "空标题" : displayName.stringValue) + " ] 吗？", "确定", "取消"))

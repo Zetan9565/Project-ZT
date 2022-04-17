@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1827504e3a4d6184ca30c3ead316328c, type: 3}
   m_Name: building info 1
   m_EditorClassIdentifier: 
-  _IDPrefix: FIELD
+  _ID: FARM001
+  icon: {fileID: 0}
   _name: "\u6D4B\u8BD5\u7528\u519C\u7530"
   description: "\u53EF\u79CD\u690D\u4F5C\u7269\u7684\u519C\u7530\u3002"
   manageable: 1

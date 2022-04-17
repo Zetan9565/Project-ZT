@@ -1,24 +1,32 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class ShopData
 {
+    public TalkerData Vendor { get; private set; }
 
     public ShopInformation Info { get; private set; }
 
-    public List<MerchandiseData> Commodities { get; } = new List<MerchandiseData>();
-    public List<MerchandiseData> Acquisitions { get; } = new List<MerchandiseData>();
+    /// <summary>
+    /// 出售的物品
+    /// </summary>
+    public List<GoodsData> Commodities { get; } = new List<GoodsData>();
+    /// <summary>
+    /// 收购的物品
+    /// </summary>
+    public List<GoodsData> Acquisitions { get; } = new List<GoodsData>();
 
-    public ShopData(ShopInformation info)
+    public ShopData(TalkerData vendor, ShopInformation info)
     {
+        Vendor = vendor;
         Info = info;
         foreach (MerchandiseInfo mi in Info.Commodities)
         {
-            Commodities.Add(new MerchandiseData(mi));
+            Commodities.Add(new GoodsData(this, mi, GoodsType.SellToPlayer));
         }
         foreach (MerchandiseInfo mi in Info.Acquisitions)
         {
-            Acquisitions.Add(new MerchandiseData(mi));
+            Acquisitions.Add(new GoodsData(this, mi, GoodsType.BuyFromPlayer));
         }
     }
 
@@ -43,9 +51,13 @@ public class ShopData
     }
 }
 
-public class MerchandiseData
+public class GoodsData
 {
+    public ShopData Shop { get; private set; }
+
     public MerchandiseInfo Info { get; private set; }
+
+    public GoodsType Type { get; private set; }
 
     public ItemBase Item => Info.Item;
 
@@ -80,14 +92,22 @@ public class MerchandiseData
             {
                 leftRefreshTime = Info.RefreshTime;
                 LeftAmount += Random.Range(Info.MinRefreshAmount, Info.MaxRefreshAmount);
+                NotifyCenter.PostNotify(ShopManager.VendorGoodsRefresh, this);
             }
         }
     }
 
-    public MerchandiseData(MerchandiseInfo info)
+    public GoodsData(ShopData shop, MerchandiseInfo info, GoodsType type)
     {
+        Shop = shop;
         Info = info;
+        Type = type;
         leftRefreshTime = info.RefreshTime;
         leftAmount = info.MaxAmount;
     }
+}
+public enum GoodsType
+{
+    SellToPlayer,
+    BuyFromPlayer
 }

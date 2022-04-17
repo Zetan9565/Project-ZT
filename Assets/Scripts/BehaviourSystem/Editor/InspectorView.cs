@@ -38,9 +38,10 @@ namespace ZetanStudio.BehaviourTree
                 {
                     if (tree && nodeEditor != null && nodeEditor.node)
                     {
-                        serializedObject.Update();
+                        serializedObject.UpdateIfRequiredOrScript();
                         EditorGUI.BeginChangeCheck();
-                        EditorGUILayout.LabelField("结点名称", nodeEditor.node.name);
+                        EditorGUILayout.LabelField($"[结点名称]\t{nodeEditor.node.name}");
+                        EditorGUILayout.LabelField($"[优先级]\t{nodeEditor.node.priority}");
                         var nType = nodeEditor.node.GetType();
                         var fields = new HashSet<string>(nType.GetFields(ZetanUtility.CommonBindingFlags).Select(f => f.Name));
                         var fieldsMap = new HashSet<string>();
@@ -51,7 +52,7 @@ namespace ZetanStudio.BehaviourTree
                             while (property.NextVisible(false) && !SerializedProperty.EqualContents(property, end))
                             {
                                 string field = property.name;
-                                if (field == "name" || field == "child" || field == "children" || field == "start" ||
+                                if (field == "name" || field == "priority" || field == "child" || field == "children" || field == "start" ||
                                 field == "isRuntime" || field == "isShared" || field == "isGlobal") continue;
                                 if (fields.Contains(field))
                                 {
@@ -81,7 +82,7 @@ namespace ZetanStudio.BehaviourTree
                 {
                     if (tree)
                     {
-                        serializedObject.Update();
+                        serializedObject.UpdateIfRequiredOrScript();
                         EditorGUI.BeginChangeCheck();
                         EditorGUILayout.PropertyField(serializedObject.FindProperty("_name"), new GUIContent("行为树名称"));
                         EditorGUILayout.PropertyField(serializedObject.FindProperty("description"), new GUIContent("行为树描述"));

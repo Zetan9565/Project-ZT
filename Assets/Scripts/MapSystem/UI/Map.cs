@@ -2,11 +2,12 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(RectTransform))]
 public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public void OnDrag(PointerEventData eventData)
     {
-        if (UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count < 2 && ((Application.platform == RuntimePlatform.Android) || eventData.button == PointerEventData.InputButton.Right))
+        if (eventData.button == PointerEventData.InputButton.Left)
             MapManager.Instance.DragWorldMap(-eventData.delta);
     }
 
@@ -20,7 +21,7 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             if (clickCount < 1) isClick = true;
-            if (clickTime <= 0.2f && UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count < 2) clickCount++;
+            if (clickTime <= 0.2f) clickCount++;
             if (clickCount > 1)
             {
                 if (MapManager.Instance.IsViewingWorldMap) MapManager.Instance.CreateDefaultMarkAtMousePos(eventData.position);
@@ -36,35 +37,40 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
     public void OnPointerEnter(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
-#endif
         canZoom = true;
+#endif
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
-#endif
         canZoom = false;
+#endif
+        isClick = false;
+        clickCount = 0;
+        clickTime = 0;
     }
 
     private void Update()
     {
-        if (UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count == 2)
+        if (Touchscreen.current != null && Touchscreen.current.touches.Count > 2)
         {
-            var first = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches[0];
-            var second = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches[1];
+            var first = Touchscreen.current.touches[0];
+            var second = Touchscreen.current.touches[1];
+            if (first.press.wasPressedThisFrame && second.press.wasPressedThisFrame)
+            {
+                var firstPos = first.position.ReadValue();
+                var secondPos = second.position.ReadValue();
+                var curDis = (firstPos - secondPos).magnitude;
 
-            var firstPos = first.screenPosition;
-            var secondPos = second.screenPosition;
-            var curDis = (firstPos - secondPos).magnitude;
+                var firstPrePos = first.position.ReadValue() - first.delta.ReadValue();
+                var secondPrePos = second.position.ReadValue() - second.delta.ReadValue();
+                var preDis = (firstPrePos - secondPrePos).magnitude;
 
-            var firstPrePos = first.screenPosition - first.delta;
-            var secondPrePos = second.screenPosition - second.delta;
-            var preDis = (firstPrePos - secondPrePos).magnitude;
+                var zoomValue = curDis - preDis;
 
-            var zoomValue = curDis - preDis;
-
-            MapManager.Instance.Zoom(zoomValue);
+                MapManager.Instance.Zoom(zoomValue);
+            }
         }
         else if (canZoom)
         {

@@ -32,28 +32,7 @@ public class Formulation : ScriptableObject
     public static bool CheckMaterialsDuplicate(Formulation left, Formulation right)
     {
         if (!left || !right) return false;
-        return CheckMaterialsDuplicate(left.materials, right.materials);
-    }
-    public static bool CheckMaterialsDuplicate(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<MaterialInfo> otherMaterials)
-    {
-        if (itemMaterials == null || itemMaterials.Count() < 1 || otherMaterials == null || otherMaterials.Count() < 1 || itemMaterials.Count() != otherMaterials.Count()) return false;
-        using (var materialEnum = itemMaterials.GetEnumerator())
-            while (materialEnum.MoveNext())
-            {
-                var material = materialEnum.Current;
-                if (material.MakingType == MakingType.SingleItem)
-                {
-                    var find = otherMaterials.FirstOrDefault(x => x.Item == material.Item);
-                    if (!find || find.Amount != material.Amount) return false;
-                }
-            }
-        foreach (MaterialType type in Enum.GetValues(typeof(MaterialType)))
-        {
-            int amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == type).Select(x => x.Amount).Sum();
-            int amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == type).Select(x => x.Amount).Sum();
-            if (amout1 != amout2) return false;
-        }
-        return true;
+        return MaterialInfo.CheckMaterialsDuplicate(left.materials, right.materials);
     }
 
     public override string ToString()

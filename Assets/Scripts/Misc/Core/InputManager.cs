@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,14 +13,13 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
 
     public InputCustomInfo customInfo;
 
-    public static bool IsTyping => BackpackManager.Instance && BackpackManager.Instance.IsInputFocused ||
-        PlantManager.Instance && PlantManager.Instance.IsInputFocused ||
-        WarehouseManager.Instance && WarehouseManager.Instance.IsInputFocused;
+    public static bool IsTyping => /*BackpackManager.Instance && BackpackManager.Instance.IsInputFocused ||*/
+        NewWindowsManager.IsWindowOpen<PlantWindow>(out var plantWindow) && plantWindow.IsInputFocused;
 
     private void ShowBuilding(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        BuildingManager.Instance.OpenCloseWindow();
+        else NewWindowsManager.OpenClose<BuildingWindow>();
     }
 
     private void Awake()
@@ -45,13 +43,13 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
 #if UNITY_EDITOR || UNITY_STANDALONE
         if (Mouse.current.scroll.ReadValue().y > 0)
         {
-            if (DialogueManager.Instance.IsUIOpen && !DialogueManager.Instance.IsPausing) DialogueManager.Instance.OptionPageUp();
-            else if (InteractionManager.Instance.ScrollAble) InteractionManager.Instance.Up();
+            if (NewWindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && !dialogue.IsHidden) dialogue.OptionPageUp();
+            else if (InteractionPanel.Instance.ScrollAble) InteractionPanel.Instance.Up();
         }
         if (Mouse.current.scroll.ReadValue().y < 0)
         {
-            if (DialogueManager.Instance.IsUIOpen && !DialogueManager.Instance.IsPausing) DialogueManager.Instance.OptionPageDown();
-            else if (InteractionManager.Instance.ScrollAble) InteractionManager.Instance.Down();
+            if (NewWindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && !dialogue.IsHidden) dialogue.OptionPageDown();
+            else if (InteractionPanel.Instance.ScrollAble) InteractionPanel.Instance.Down();
         }
 #endif
     }
@@ -59,57 +57,55 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
     private void ShowQuest(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        QuestManager.Instance.OpenCloseWindow();
+        //QuestManager.Instance.OpenCloseWindow();
     }
 
     private void ShowBackpack(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        BackpackManager.Instance.OpenCloseWindow();
+        NewWindowsManager.OpenClose<BackpackWindow>();
     }
 
     private void Interact(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        if (LootManager.Instance.IsPicking)
-            LootManager.Instance.TakeAll();
-        else if (DialogueManager.Instance.IsTalking)
+        if (NewWindowsManager.IsWindowOpen<LootWindow>(out var loot))
+            loot.TakeAll();
+        else if (NewWindowsManager.IsWindowOpen<DialogueWindow>(out var window))
         {
-            if (DialogueManager.Instance.CurrentType == DialogueType.Normal && DialogueManager.Instance.OptionsCount < 1
-                  && DialogueManager.Instance.ShouldShowQuest)
-                DialogueManager.Instance.ShowTalkerQuest();
-            else if (DialogueManager.Instance.OptionsCount > 0)
-                DialogueManager.Instance.FirstOption.OnClick();
+            if (window.CurrentType == DialogueType.Normal && window.OptionsCount < 1
+                  && window.ShouldShowQuest)
+                window.ShowTalkerQuest();
+            else if (window.OptionsCount > 0)
+                window.FirstOption.OnClick();
         }
-        else InteractionManager.Instance.DoSelectInteract();
+        else InteractionPanel.Instance.DoSelectInteract();
     }
 
     private void Submit(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        if (AmountManager.Instance.IsUIOpen && !ConfirmManager.Instance.IsUIOpen) AmountManager.Instance.Confirm();
-        else if (!AmountManager.Instance.IsUIOpen && ConfirmManager.Instance.IsUIOpen) ConfirmManager.Instance.Confirm();
+        if (NewWindowsManager.IsWindowOpen<AmountWindow>(out var amount) && !NewWindowsManager.IsWindowOpen<ConfirmWindow>()) amount.Confirm();
+        else if (!NewWindowsManager.IsWindowOpen<AmountWindow>() && NewWindowsManager.IsWindowOpen<ConfirmWindow>(out var confirm)) confirm.Confirm();
     }
 
     private void Cancel(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        if (ConfirmManager.Instance.IsUIOpen) ConfirmManager.Instance.Cancel();
-        else if (AmountManager.Instance.IsUIOpen) AmountManager.Instance.Cancel();
-        else if (BuildingManager.Instance.IsLocating || BuildingManager.Instance.IsPreviewing) BuildingManager.Instance.GoBack();
-        else if (WindowsManager.Instance.WindowsCount > 0) WindowsManager.Instance.CloseTop();
-        else EscapeMenuManager.Instance.OpenWindow();
+        if (NewWindowsManager.IsWindowOpen<BuildingWindow>(out var building) && (building.IsLocating || building.IsPreviewing)) building.GoBack();
+        else if (NewWindowsManager.Count > 0) NewWindowsManager.CloseTop();
+        else NewWindowsManager.OpenWindow<EscapeWindow>();
     }
 
     public static bool GetMouseButtonDown(int index)
     {
         if (Mouse.current == null) return false;
         if (index == 0)
-            return Mouse.current.leftButton.isPressed;
+            return Mouse.current.leftButton.wasPressedThisFrame;
         else if (index == 1)
-            return Mouse.current.rightButton.isPressed;
+            return Mouse.current.rightButton.wasPressedThisFrame;
         else if (index == 2)
-            return Mouse.current.middleButton.isPressed;
+            return Mouse.current.middleButton.wasPressedThisFrame;
         return false;
     }
 

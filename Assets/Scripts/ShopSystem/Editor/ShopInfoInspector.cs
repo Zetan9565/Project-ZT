@@ -32,7 +32,7 @@ public class ShopInfoInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(shopName, new GUIContent("商店名称"));
         EditorGUILayout.PropertyField(commodities, new GUIContent("在售品列表\t\t" + (commodities.arraySize > 0 ? "数量：" + commodities.arraySize : "无")), false);
@@ -40,18 +40,18 @@ public class ShopInfoInspector : Editor
             serializedObject.ApplyModifiedProperties();
         if (commodities.isExpanded)
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             commodityList.DoLayoutList();
             serializedObject.ApplyModifiedProperties();
         }
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(acquisitions, new GUIContent("收购品列表\t\t" + (acquisitions.arraySize > 0 ? "数量：" + acquisitions.arraySize : "无")), false);
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
         if (acquisitions.isExpanded)
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             acquisitionList.DoLayoutList();
             serializedObject.ApplyModifiedProperties();
         }
@@ -63,7 +63,7 @@ public class ShopInfoInspector : Editor
 
         commodityList.drawElementCallback = (rect, index, isActive, isFocusd) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             SerializedProperty commodity = commodities.GetArrayElementAtIndex(index);
             SerializedProperty item = commodity.FindPropertyRelative("item");
@@ -129,7 +129,7 @@ public class ShopInfoInspector : Editor
 
         commodityList.onAddCallback = (list) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             shop.Commodities.Add(new MerchandiseInfo());
             if (EditorGUI.EndChangeCheck())
@@ -138,7 +138,7 @@ public class ShopInfoInspector : Editor
 
         commodityList.onRemoveCallback = (list) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             if (EditorUtility.DisplayDialog("删除", "确定删除这个商品吗？", "确定", "取消"))
                 shop.Commodities.RemoveAt(list.index);
@@ -164,7 +164,7 @@ public class ShopInfoInspector : Editor
 
         acquisitionList.drawElementCallback = (rect, index, isActive, isFocusd) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             SerializedProperty acquisition = acquisitions.GetArrayElementAtIndex(index);
             SerializedProperty item = acquisition.FindPropertyRelative("item");
@@ -233,7 +233,7 @@ public class ShopInfoInspector : Editor
 
         acquisitionList.onAddCallback = (list) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             shop.Acquisitions.Add(new MerchandiseInfo());
             if (EditorGUI.EndChangeCheck())
@@ -242,7 +242,7 @@ public class ShopInfoInspector : Editor
 
         acquisitionList.onRemoveCallback = (list) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             if (EditorUtility.DisplayDialog("删除", "确定删除这个收购品吗？", "确定", "取消"))
                 shop.Acquisitions.RemoveAt(list.index);

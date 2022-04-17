@@ -1,39 +1,34 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class SeedAgent : MonoBehaviour,
+public class SeedAgent : ListItem<SeedAgent, SeedItem>,
     IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public Text nameText;
 
-    public SeedItem Seed { get; private set; }
-
     private ScrollRect parentRect;
 
-    public void Init(SeedItem seed, ScrollRect parentRect = null)
+    private PlantWindow window;
+
+    public void SetWindow(PlantWindow window)
     {
-        Seed = seed;
-        nameText.text = Seed.Name;
+        this.window = window;
     }
 
-    public void Clear(bool recycle = false)
+    protected override void OnInit()
     {
+        parentRect = (View as SeedList).ScrollRect;
+    }
+
+    public override void OnClear()
+    {
+        base.OnClear();
         nameText.text = string.Empty;
-        Seed = null;
-        if (recycle) ObjectPool.Put(gameObject);
-    }
-
-    public void OnClick()
-    {
-        PlantManager.Instance.ShowDescription(Seed);
     }
 
     public void TryBuild()
     {
-        PlantManager.Instance.CreatPreview(Seed.Crop);
+        window.CreatPreview(Data.Crop);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -46,8 +41,8 @@ public class SeedAgent : MonoBehaviour,
     public void OnDrag(PointerEventData eventData)
     {
 #if UNITY_ANDROID
-        if (PlantManager.Instance.IsPreviewing && eventData.button == PointerEventData.InputButton.Left)
-            PlantManager.Instance.ShowAndMovePreview();
+        if (window.IsPreviewing && eventData.button == PointerEventData.InputButton.Left)
+            window.ShowAndMovePreview();
         else if (parentRect) parentRect.OnDrag(eventData);
 #endif
     }
@@ -56,13 +51,18 @@ public class SeedAgent : MonoBehaviour,
     {
 #if UNITY_ANDROID
         if (parentRect) parentRect.OnEndDrag(eventData);
-        if (PlantManager.Instance.IsPreviewing && eventData.button == PointerEventData.InputButton.Left)
+        if (window.IsPreviewing && eventData.button == PointerEventData.InputButton.Left)
         {
-            if (eventData.pointerCurrentRaycast.gameObject && eventData.pointerCurrentRaycast.gameObject == PlantManager.Instance.CancelArea)
-                PlantManager.Instance.FinishPreview();
+            if (eventData.pointerCurrentRaycast.gameObject && eventData.pointerCurrentRaycast.gameObject == window.CancelArea)
+                window.FinishPreview();
             else
-                PlantManager.Instance.Plant();
+                window.Plant();
         }
 #endif
+    }
+
+    public override void Refresh()
+    {
+        nameText.text = Data.Name;
     }
 }

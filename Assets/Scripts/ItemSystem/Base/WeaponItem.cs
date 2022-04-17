@@ -26,7 +26,7 @@ public class WeaponItem : EquipmentItem
     public WeaponItem()
     {
         itemType = ItemType.Weapon;
-        stackAble = false;
+        stackNum = 1;
     }
 
 }

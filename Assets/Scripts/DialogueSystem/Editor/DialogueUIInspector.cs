@@ -1,12 +1,10 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(DialogueUI))]
-public class DialogueUIInspector : Editor
+[CustomEditor(typeof(DialogueWindow))]
+public class DialogueWindowInspector : WindowInspector
 {
-    //DialogueUI dialogueUI;
 
-    SerializedProperty window;
     SerializedProperty nameText;
     SerializedProperty wordsText;
     SerializedProperty buttonArea;
@@ -14,9 +12,7 @@ public class DialogueUIInspector : Editor
     SerializedProperty warehouseButton;
     SerializedProperty shopButton;
     SerializedProperty backButton;
-    SerializedProperty closeButton;
-    SerializedProperty optionsParent;
-    SerializedProperty optionPrefab;
+    SerializedProperty optionList;
     SerializedProperty pageUpButton;
     SerializedProperty pageDownButton;
     SerializedProperty pageText;
@@ -27,14 +23,10 @@ public class DialogueUIInspector : Editor
     SerializedProperty descriptionText;
     SerializedProperty moneyText;
     SerializedProperty EXPText;
-    SerializedProperty rewardCellPrefab;
-    SerializedProperty rewardCellsParent;
+    SerializedProperty rewardList;
 
-    private void OnEnable()
+    protected override void EnableOther()
     {
-        //dialogueUI = target as DialogueUI;
-
-        window = serializedObject.FindProperty("window");
         nameText = serializedObject.FindProperty("nameText");
         wordsText = serializedObject.FindProperty("nameText");
         buttonArea = serializedObject.FindProperty("buttonArea");
@@ -42,9 +34,7 @@ public class DialogueUIInspector : Editor
         warehouseButton = serializedObject.FindProperty("warehouseButton");
         shopButton = serializedObject.FindProperty("shopButton");
         backButton = serializedObject.FindProperty("backButton");
-        closeButton = serializedObject.FindProperty("closeButton");
-        optionsParent = serializedObject.FindProperty("optionsParent");
-        optionPrefab = serializedObject.FindProperty("optionPrefab");
+        optionList = serializedObject.FindProperty("optionList");
         pageUpButton = serializedObject.FindProperty("pageUpButton");
         pageDownButton = serializedObject.FindProperty("pageDownButton");
         pageText = serializedObject.FindProperty("pageText");
@@ -55,17 +45,13 @@ public class DialogueUIInspector : Editor
         descriptionText = serializedObject.FindProperty("descriptionText");
         moneyText = serializedObject.FindProperty("moneyText");
         EXPText = serializedObject.FindProperty("EXPText");
-        rewardCellPrefab = serializedObject.FindProperty("rewardCellPrefab");
-        rewardCellsParent = serializedObject.FindProperty("rewardCellsParent");
+        rewardList = serializedObject.FindProperty("rewardList");
     }
 
-    public override void OnInspectorGUI()
+    protected override void InspectOther()
     {
-        serializedObject.Update();
-        EditorGUI.BeginChangeCheck();
         EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.LabelField("对话框相关", new GUIStyle() { fontStyle = FontStyle.Bold });
-        EditorGUILayout.PropertyField(window, new GUIContent("对话框"));
         EditorGUILayout.PropertyField(nameText, new GUIContent("说话者名字"));
         EditorGUILayout.PropertyField(wordsText, new GUIContent("语句文字"));
         EditorGUILayout.PropertyField(buttonArea, new GUIContent("按钮区"));
@@ -73,14 +59,12 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.PropertyField(warehouseButton, new GUIContent("仓库按钮"));
         EditorGUILayout.PropertyField(shopButton, new GUIContent("商店按钮"));
         EditorGUILayout.PropertyField(backButton, new GUIContent("返回按钮"));
-        EditorGUILayout.PropertyField(closeButton, new GUIContent("结束按钮"));
         EditorGUILayout.PropertyField(textLineHeight, new GUIContent("每行高度"));
         EditorGUILayout.PropertyField(lineAmount, new GUIContent("总行数"));
         EditorGUILayout.EndVertical();
         EditorGUILayout.BeginVertical("Box");
         EditorGUILayout.LabelField("选项相关", new GUIStyle() { fontStyle = FontStyle.Bold });
-        EditorGUILayout.PropertyField(optionPrefab, new GUIContent("选项预制件"));
-        EditorGUILayout.PropertyField(optionsParent, new GUIContent("选项放置根"));
+        EditorGUILayout.PropertyField(optionList, new GUIContent("选项放置根"));
         EditorGUILayout.PropertyField(pageUpButton, new GUIContent("上翻页按钮"));
         EditorGUILayout.PropertyField(pageDownButton, new GUIContent("下翻页按钮"));
         EditorGUILayout.PropertyField(pageText, new GUIContent("页数文字"));
@@ -93,10 +77,7 @@ public class DialogueUIInspector : Editor
         EditorGUILayout.PropertyField(descriptionText, new GUIContent("任务描述文字"));
         EditorGUILayout.PropertyField(moneyText, new GUIContent("金钱奖励文字"));
         EditorGUILayout.PropertyField(EXPText, new GUIContent("经验奖励文字"));
-        EditorGUILayout.PropertyField(rewardCellPrefab, new GUIContent("道具奖励格预制件"), true);
-        EditorGUILayout.PropertyField(rewardCellsParent, new GUIContent("道具奖励放置根"), true);
+        EditorGUILayout.PropertyField(rewardList, new GUIContent("道具奖励列表"), true);
         EditorGUILayout.EndVertical();
-        if (EditorGUI.EndChangeCheck())
-            serializedObject.ApplyModifiedProperties();
     }
 }

@@ -1,10 +1,15 @@
 public abstract class ObjectiveData
 {
-    public Objective Info { get; }
+    public Objective Model { get; }
+
+    public T GetInfo<T>() where T : Objective
+    {
+        return Model as T;
+    }
 
     public ObjectiveData(Objective objective)
     {
-        Info = objective;
+        Model = objective;
     }
 
     private int currentAmount;
@@ -18,53 +23,54 @@ public abstract class ObjectiveData
         {
             bool befCmplt = IsComplete;
             int befAmount = currentAmount;
-            if (value < Info.Amount && value >= 0)
+            if (value < Model.Amount && value >= 0)
                 currentAmount = value;
             else if (value < 0)
             {
                 currentAmount = 0;
             }
-            else currentAmount = Info.Amount;
+            else currentAmount = Model.Amount;
             if (befAmount != currentAmount) OnStateChangeEvent?.Invoke(this, befCmplt);
         }
     }
 
-    public string AmountString => $"{CurrentAmount}/{Info.Amount}";
+    public string AmountString => $"{CurrentAmount}/{Model.Amount}";
 
     public bool IsComplete
     {
         get
         {
-            if (currentAmount >= Info.Amount)
-                return true;
-            return false;
+            return currentAmount >= Model.Amount;
         }
     }
 
     public ObjectiveData prevObjective;
     public ObjectiveData nextObjective;
 
-    public string entityID;
+    public string ID;
 
-    public QuestData runtimeParent;
+    public QuestData parent;
 
     public System.Action<ObjectiveData, bool> OnStateChangeEvent;
 
     protected virtual void UpdateAmountUp(int amount = 1)
     {
         if (IsComplete) return;
-        if (!Info.InOrder) CurrentAmount += amount;
-        else if (AllPrevObjCmplt) CurrentAmount += amount;
+        if (!Model.InOrder) CurrentAmount += amount;
+        else if (AllPrevComplete) CurrentAmount += amount;
     }
 
-    public bool AllPrevObjCmplt//判定所有前置目标是否都完成
+    /// <summary>
+    /// 判定所有前置目标是否都完成
+    /// </summary>
+    public bool AllPrevComplete
     {
         get
         {
             ObjectiveData tempObj = prevObjective;
             while (tempObj != null)
             {
-                if (!tempObj.IsComplete && tempObj.Info.OrderIndex < Info.OrderIndex)
+                if (!tempObj.IsComplete && tempObj.Model.OrderIndex < Model.OrderIndex)
                 {
                     return false;
                 }
@@ -73,14 +79,17 @@ public abstract class ObjectiveData
             return true;
         }
     }
-    public bool HasNextObjOngoing//判定是否有后置目标正在进行
+    /// <summary>
+    /// 判定是否有后置目标正在进行
+    /// </summary>
+    public bool AnyNextOngoing
     {
         get
         {
             ObjectiveData tempObj = nextObjective;
             while (tempObj != null)
             {
-                if (tempObj.CurrentAmount > 0 && tempObj.Info.OrderIndex > Info.OrderIndex)
+                if (tempObj.CurrentAmount > 0 && tempObj.Model.OrderIndex > Model.OrderIndex)
                 {
                     return true;
                 }
@@ -97,11 +106,17 @@ public abstract class ObjectiveData
     {
         get
         {
-            if (!Info.InOrder) return true;//不按顺序，说明可以并行执行
-            if (prevObjective && prevObjective.Info.OrderIndex == Info.OrderIndex) return true;//有前置目标，而且顺序码与前置目标相同，说明可以并行执行
-            if (nextObjective && nextObjective.Info.OrderIndex == Info.OrderIndex) return true;//有后置目标，而且顺序码与后置目标相同，说明可以并行执行
+            if (!Model.InOrder) return true;//不按顺序，说明可以并行执行
+            if (!prevObjective || prevObjective.Model.OrderIndex == Model.OrderIndex) return true;//没有有前置目标，或者顺序码与前置目标相同，说明可以并行执行
+            if (!nextObjective || nextObjective.Model.OrderIndex == Model.OrderIndex) return true;//没有有后置目标，或者顺序码与后置目标相同，说明可以并行执行
             return false;
         }
+    }
+    public bool CanParallelWith(ObjectiveData other)
+    {
+        if (!other || !other.Model.InOrder || !Model.InOrder) return true;
+        else if (other.Model.OrderIndex == Model.OrderIndex) return true;
+        return false;
     }
 
     public static implicit operator bool(ObjectiveData self)
@@ -110,48 +125,44 @@ public abstract class ObjectiveData
     }
 }
 
-public class CollectObjectiveData : ObjectiveData
+public abstract class ObjectiveData<T> : ObjectiveData where T : Objective
 {
-    public new CollectObjective Info
-    {
-        get
-        {
-            return base.Info as CollectObjective;
-        }
-    }
+    public new T Model { get; }
 
+    protected ObjectiveData(T objective) : base(objective)
+    {
+        Model = objective;
+    }
+}
+
+public class CollectObjectiveData : ObjectiveData<CollectObjective>
+{
     public CollectObjectiveData(CollectObjective objective) : base(objective) { }
 
     public int amountWhenStart;
 
-    public void UpdateCollectAmount(string id, int leftAmount)//得道具时用到
+    public void UpdateCollectAmount(ItemData item, int oldAmount, int newAmount)
     {
-        if (id == Info.ItemToCollect.ID)
+        if (IsComplete) return;
+        if (item.Model == Model.ItemToCollect)
         {
-            if (IsComplete) return;
-            if (!Info.InOrder) CurrentAmount = leftAmount - (!Info.CheckBagAtStart ? amountWhenStart : 0);
-            else if (AllPrevObjCmplt) CurrentAmount = leftAmount - (!Info.CheckBagAtStart ? amountWhenStart : 0);
+            if (oldAmount < newAmount)//获得道具
+            {
+                if (!Model.InOrder || AllPrevComplete) CurrentAmount = newAmount - (!Model.CheckBagAtStart ? amountWhenStart : 0);
+                else UnityEngine.Debug.LogWarning($"任务 [{parent.Model.Title}] 的目标 [{Model.DisplayName}] 发生置数错误");
+            }
+            else if (Model.LoseItemAtSbmt)//失去道具，且在提交任务时要上交此目标收集的道具
+            {
+                if (AllPrevComplete && !AnyNextOngoing)//前置目标都完成且没有后置目标在进行时，才允许更新
+                    CurrentAmount = newAmount;
+                else UnityEngine.Debug.LogWarning($"任务 [{parent.Model.Title}] 的目标 [{Model.DisplayName}] 发生置数错误");
+            }
         }
-    }
-
-    public void UpdateCollectAmountDown(string id, int leftAmount)//丢道具时用到
-    {
-        if (id == Info.ItemToCollect.ID && AllPrevObjCmplt && !HasNextObjOngoing && Info.LoseItemAtSbmt)
-            //前置目标都完成且没有后置目标在进行时，才允许更新；在提交任务时不需要提交相应道具，也不会更新减少值。
-            CurrentAmount = leftAmount;
     }
 }
 
-public class KillObjectiveData : ObjectiveData
+public class KillObjectiveData : ObjectiveData<KillObjective>
 {
-    public new KillObjective Info
-    {
-        get
-        {
-            return base.Info as KillObjective;
-        }
-    }
-
     public KillObjectiveData(KillObjective objective) : base(objective) { }
 
     public void UpdateKillAmount()
@@ -160,16 +171,8 @@ public class KillObjectiveData : ObjectiveData
     }
 }
 
-public class TalkObjectiveData : ObjectiveData
+public class TalkObjectiveData : ObjectiveData<TalkObjective>
 {
-    public new TalkObjective Info
-    {
-        get
-        {
-            return base.Info as TalkObjective;
-        }
-    }
-
     public TalkObjectiveData(TalkObjective objective) : base(objective) { }
 
     public void UpdateTalkState()
@@ -178,36 +181,20 @@ public class TalkObjectiveData : ObjectiveData
     }
 }
 
-public class MoveObjectiveData : ObjectiveData
+public class MoveObjectiveData : ObjectiveData<MoveObjective>
 {
-    public new MoveObjective Info
-    {
-        get
-        {
-            return base.Info as MoveObjective;
-        }
-    }
-
     public CheckPointData targetPoint;
 
     public MoveObjectiveData(MoveObjective objective) : base(objective) { }
 
     public void UpdateMoveState(CheckPointInformation point)
     {
-        if (point == Info.AuxiliaryPos) UpdateAmountUp();
+        if (point == Model.AuxiliaryPos) UpdateAmountUp();
     }
 }
 
-public class SubmitObjectiveData : ObjectiveData
+public class SubmitObjectiveData : ObjectiveData<SubmitObjective>
 {
-    public new SubmitObjective Info
-    {
-        get
-        {
-            return base.Info as SubmitObjective;
-        }
-    }
-
     public SubmitObjectiveData(SubmitObjective objective) : base(objective) { }
 
     public void UpdateSubmitState(int amount = 1)
@@ -216,22 +203,14 @@ public class SubmitObjectiveData : ObjectiveData
     }
 }
 
-public class TriggerObjectiveData : ObjectiveData
+public class TriggerObjectiveData : ObjectiveData<TriggerObjective>
 {
-    public new TriggerObjective Info
-    {
-        get
-        {
-            return base.Info as TriggerObjective;
-        }
-    }
-
     public TriggerObjectiveData(TriggerObjective objective) : base(objective) { }
 
     public void UpdateTriggerState(string name, bool state)
     {
-        if (name != Info.TriggerName) return;
+        if (name != Model.TriggerName) return;
         if (state) UpdateAmountUp();
-        else if (AllPrevObjCmplt && !HasNextObjOngoing) CurrentAmount--;
+        else if (AllPrevComplete && !AnyNextOngoing) CurrentAmount--;
     }
 }

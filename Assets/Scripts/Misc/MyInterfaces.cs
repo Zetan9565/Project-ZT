@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -32,6 +33,24 @@ public interface IWindowHandler
     Canvas CanvasToSort { get; }
 }
 
+public interface IHideable
+{
+    bool IsHidden { get; }
+    /// <summary>
+    /// 显隐窗口，不应单独使用，显隐窗口请使用<see cref="NewWindowsManager.HideWindow(string, bool, object[])"/>
+    /// 、<see cref="NewWindowsManager.HideWindow{T}(bool, object[])"/>、<see cref="NewWindowsManager.HideWindow(IHideable, bool, object[])"/>
+    /// </summary>
+    /// <param name="hide">是否隐藏</param>
+    /// <param name="args">变长参数</param>
+    void Hide(bool hide, params object[] args);
+
+    public static void HideHelper(CanvasGroup canvas, bool hide)
+    {
+        canvas.alpha = hide ? 0 : 1;
+        canvas.blocksRaycasts = !hide;
+    }
+}
+
 public interface IOpenCloseAbleWindow
 {
     void OpenCloseWindow();
@@ -41,36 +60,60 @@ public interface IFadeAble<T> where T : MonoBehaviour
 {
     T MonoBehaviour { get; }
 
+    CanvasGroup FadeTarget { get; }
+
     Coroutine FadeCoroutine { get; set; }
 
-    IEnumerator Fade(float alpha, float duration);
+    static void FadeTo(IFadeAble<T> fader, float alpha, float duration, Action onDone = null)
+    {
+        if (!fader.FadeTarget) return;
+        if (fader.FadeCoroutine != null) fader.MonoBehaviour.StopCoroutine(fader.FadeCoroutine);
+        fader.FadeCoroutine = fader.MonoBehaviour.StartCoroutine(Fade(fader.FadeTarget, alpha, duration, onDone));
+
+        static IEnumerator Fade(CanvasGroup target, float alpha, float duration, Action onDone)
+        {
+            float time = 0;
+            while (time < duration)
+            {
+                yield return null;
+                if (time < duration) target.alpha += (alpha - target.alpha) * Time.deltaTime / (duration - time);
+                time += Time.deltaTime;
+            }
+            target.alpha = alpha;
+            onDone?.Invoke();
+        }
+    }
 }
 
 public interface IScaleAble<T> where T : MonoBehaviour
 {
     T MonoBehaviour { get; }
 
-    Vector3 OriginalScale { get; }
-
     Coroutine ScaleCoroutine { get; set; }
 
-    IEnumerator Scale(Vector3 scale, float duration);
+    static void ScaleTo(IScaleAble<T> scaler, Vector3 scale, float duration, Action onDone = null)
+    {
+        if (scaler.ScaleCoroutine != null) scaler.MonoBehaviour.StopCoroutine(scaler.ScaleCoroutine);
+        scaler.ScaleCoroutine = scaler.MonoBehaviour.StartCoroutine(Scale(scaler.MonoBehaviour.transform, scale, duration, onDone));
+
+        static IEnumerator Scale(Transform target, Vector3 scale, float duration, Action onDone)
+        {
+            float time = 0;
+            while (time < duration)
+            {
+                yield return null;
+                if (time < duration) target.localScale += (scale - target.localScale) * Time.deltaTime / (duration - time);
+                time += Time.deltaTime;
+            }
+            target.localScale = scale;
+            onDone?.Invoke();
+        }
+    }
 }
 
 public interface IDragAble
 {
     Sprite DragAbleIcon { get; }
-}
-
-public interface IInteractive<T> where T : MonoBehaviour
-{
-    T MonoBehaviour { get; }
-
-    void OnTriggerEnter2D(Collider2D collision);
-
-    void OnTriggerStay2D(Collider2D collision);
-
-    void OnTriggerExit2D(Collider2D collision);
 }
 
 public interface IManageAble

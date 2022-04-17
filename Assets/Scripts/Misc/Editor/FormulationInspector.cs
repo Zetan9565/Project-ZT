@@ -51,7 +51,7 @@ public class FormulationInspector : Editor
             }
             if (bre) break;
         }
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(remark, new GUIContent("备注"));
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();

@@ -20,14 +20,15 @@ public class MoveToPoint : Action
     protected override NodeStates OnUpdate()
     {
         if (!controller) return NodeStates.Failure;
-        controller.SetMoveInput(GetDirection());
+        controller.SetValue(CharacterInputNames.Instance.Move, GetDirection());
+        controller.SetValue(CharacterInputNames.Instance.Direction, GetDirection());
         if (!Arrive()) return NodeStates.Running;
         else return NodeStates.Success;
     }
 
     protected override void OnEnd()
     {
-        controller.SetMoveInput(Vector2.zero);
+        controller.SetValue(CharacterInputNames.Instance.Move, Vector2.zero);
     }
 
     private bool Arrive()

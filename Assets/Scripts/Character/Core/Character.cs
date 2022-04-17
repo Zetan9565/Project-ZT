@@ -1,23 +1,24 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using ZetanExtends;
 
 public abstract class Character : MonoBehaviour
 {
     public Vector3 Position => transform.position;
-
+    public string Name => GetData()?.GetInfo().Name;
     public CharacterAnimator Animator { get; protected set; }
 
     public CharacterController2D Controller { get; protected set; }
 
     public CharacterStateMachine StateMachine { get; protected set; }
 
-    public CharacterMachineStates MachineState => StateMachine?.CurrentState;
+    public CharacterMachineState MachineState => StateMachine?.CurrentState;
 
     public abstract CharacterData GetData();
     public T GetData<T>() where T : CharacterData
     {
         return GetData() as T;
     }
+
     public abstract void SetData(CharacterData value);
 
     public virtual void Init<T>(T data) where T : CharacterData
@@ -25,15 +26,21 @@ public abstract class Character : MonoBehaviour
         SetData(data);
         GetData().entity = this;
         StateMachine = new CharacterStateMachine(this);
+        StateMachine.SetCurrentState<CharacterIdleState>();
     }
     public void SetController(CharacterController2D controller)
     {
         Controller = controller;
     }
 
-    public void SetMachineState<T>() where T : CharacterMachineStates
+    public void SetMachineState<T>() where T : CharacterMachineState
     {
         StateMachine?.SetCurrentState<T>();
+    }
+    public void SetMachineAndCharacterState<T>(CharacterStates main, dynamic sub) where T : CharacterMachineState
+    {
+        StateMachine?.SetCurrentState<T>();
+        SetState(main, sub);
     }
 
     #region MonoBehaviour
@@ -66,22 +73,40 @@ public abstract class Character : MonoBehaviour
     {
         OnDestroy_();
     }
+
+    protected virtual void OnTriggerEnter2D(Collider2D collision)
+    {
+
+    }
+
+    protected virtual void OnTriggerStay2D(Collider2D collision)
+    {
+
+    }
+
+    protected virtual void OnTriggerExit2D(Collider2D collision)
+    {
+
+    }
     #endregion
 
-    #region ½ÇÉ«×´Ì¬Ïà¹Ø
+    #region è§’è‰²çŠ¶æ€ç›¸å…³
     public void SetState(CharacterStates mainState, dynamic subState)
     {
         GetData().mainState = mainState;
         GetData().subState = subState;
+        OnStateChange(mainState, subState);
     }
     public void SetMainState(CharacterStates state)
     {
         GetData().mainState = state;
         GetData().subState = default;
+        OnStateChange(state, default);
     }
     public void SetSubState(dynamic state)
     {
         GetData().subState = state;
+        OnStateChange(GetData().mainState, state);
     }
 
     public bool GetState(out CharacterStates mainState, out dynamic subState)
@@ -127,7 +152,7 @@ public abstract class Character : MonoBehaviour
     }
     #endregion
 
-    #region Ğé·½·¨
+    #region è™šæ–¹æ³•
     protected virtual void OnAwake()
     {
 
@@ -149,6 +174,11 @@ public abstract class Character : MonoBehaviour
     }
 
     protected virtual void OnDestroy_()
+    {
+
+    }
+
+    protected virtual void OnStateChange(CharacterStates main, dynamic sub)
     {
 
     }

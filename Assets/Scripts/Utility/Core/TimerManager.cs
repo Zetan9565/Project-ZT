@@ -24,11 +24,13 @@ public class TimerManager : SingletonMonoBehaviour<TimerManager>
         }
     }
 
+
+    private readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
     private IEnumerator UpdateRealtime()
     {
         while (true)
         {
-            yield return new WaitForEndOfFrame();
+            yield return waitForEndOfFrame;
             realTimers.RemoveAll(x => x.IsStop);
             using var timerEnum = realTimers.GetEnumerator();
             while (timerEnum.MoveNext())
@@ -94,58 +96,69 @@ public class TimerManager : SingletonMonoBehaviour<TimerManager>
 }
 public class Timer
 {
-    private readonly float targetTime;
+    public float TargetTime { get; }
+    public int TargetInvokeTimes { get; }
+    public float CurrentTime { get; private set; }
+    public int InvokeTimes { get; private set; }
+    public bool IsStop { get; private set; }
+
     private readonly Action callback;
     private readonly Action<Timer> callback_transfer;
-
-    private readonly Action<int> callback_loop;
     private readonly bool loop;
-    private readonly int targetTimes;
+    private readonly Action<int> callback_loop;
 
-    private float currentTime;
-    public float CurrentTime => currentTime;
-
-    private int times;
-    public int Times => times;
-
-    private bool isStop;
-    public bool IsStop => isStop;
-
+    /// <summary>
+    /// 只回调一次的简易计时器
+    /// </summary>
+    /// <param name="callback">回调动作</param>
+    /// <param name="time">回调延时</param>
     public Timer(Action callback, float time)
     {
         this.callback = callback;
-        targetTime = time;
+        TargetTime = time;
     }
+    /// <summary>
+    /// 可访问计时器本体的计时器
+    /// </summary>
+    /// <param name="callback">回调动作</param>
+    /// <param name="times">回调次数</param>
+    /// <param name="time">回调间隔</param>
     public Timer(Action<Timer> callback, int times, float time)
     {
         callback_transfer = callback;
-        targetTime = time;
-        targetTimes = times;
+        TargetTime = time;
+        TargetInvokeTimes = times;
         loop = times != 0;
     }
 
+    /// <summary>
+    /// 可访问循环次数的计时器
+    /// </summary>
+    /// <param name="callback">回调动作</param>
+    /// <param name="times">回调次数</param>
+    /// <param name="time">回调间隔</param>
     public Timer(Action<int> callback, int times, float time)
     {
         callback_loop = callback;
-        targetTime = time;
-        targetTimes = times;
+        TargetTime = time;
+        TargetInvokeTimes = times;
         loop = times != 0;
     }
 
     public void Update(float time)
     {
-        if (!isStop)
+        if (!IsStop)
         {
-            currentTime += time;
-            if (currentTime >= targetTime)
+            CurrentTime += time;
+            if (CurrentTime >= TargetTime)
             {
                 if (loop)
                 {
-                    times++;
-                    callback_loop?.Invoke(times);
+                    InvokeTimes++;
+                    callback_loop?.Invoke(InvokeTimes);
                     callback_transfer?.Invoke(this);
-                    currentTime -= targetTime;
-                    if (targetTimes > 0 && times >= targetTimes) Stop();
+                    CurrentTime -= TargetTime;
+                    if (TargetInvokeTimes > 0 && InvokeTimes >= TargetInvokeTimes) Stop();
                 }
                 else
                 {
@@ -159,6 +172,6 @@ public class Timer
 
     public void Stop()
     {
-        isStop = true;
+        IsStop = true;
     }
 }

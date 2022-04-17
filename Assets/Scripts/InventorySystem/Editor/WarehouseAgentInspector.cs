@@ -15,7 +15,7 @@ public class WarehouseAgentInspector : BuildingInspector
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(defaultSize, new GUIContent("默认容量"));
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();

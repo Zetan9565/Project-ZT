@@ -1,10 +1,7 @@
-using UnityEngine;
 using UnityEngine.UI;
 
-public class CropAgent : MonoBehaviour
+public class CropAgent : ListItem<CropAgent, Crop>
 {
-    public Crop MCrop { get; private set; }
-
     public Text nameText;
 
     public Text totalDays;
@@ -15,37 +12,25 @@ public class CropAgent : MonoBehaviour
 
     private CropStage stageBef;
 
-    public void Init(Crop crop)
+    private FieldWindow window;
+
+    public void SetWindow(FieldWindow window)
     {
-        Clear();
-        MCrop = crop;
-        MCrop.UI = this;
-        MCrop.Data.OnStageChange += UpdateInfo;
-        UpdateInfo();
+        this.window = window;
     }
 
-    public void UpdateInfo()
+    public void OnStageChanged(CropStage stage)
     {
-        if (!MCrop) return;
-        totalDays.text = MCrop.Data.growthDays.ToString();
-        nameText.text = MCrop.Data.Info.Name;
-        ZetanUtility.SetActive(dryIcon.gameObject, MCrop.Dry);
-        ZetanUtility.SetActive(pestIcon.gameObject, MCrop.Pest);
-        ZetanUtility.SetActive(matureIcon.gameObject, MCrop.Data.HarvestAble);
-    }
-
-    public void UpdateInfo(CropStage stage)
-    {
-        if(stage!=stageBef)
+        if (stage != stageBef)
         {
             stageBef = stage;
-            UpdateInfo();
+            Refresh();
         }
     }
 
     public void Clear(bool recycle = false)
     {
-        MCrop = null;
+        Data = null;
         nameText.text = string.Empty;
         totalDays.text = string.Empty;
         ZetanUtility.SetActive(dryIcon.gameObject, false);
@@ -56,9 +41,36 @@ public class CropAgent : MonoBehaviour
 
     public void DestroyCrop()
     {
-        ConfirmManager.Instance.New("销毁作物不会有任何产物，确定销毁吗？", delegate
+        ConfirmWindow.StartConfirm("销毁作物不会有任何产物，确定销毁吗？", delegate
          {
-             FieldManager.Instance.Remove(MCrop);
+             window.Remove(Data);
          });
+    }
+
+    public override void Refresh(Crop data)
+    {
+        base.Refresh(data);
+        Data.UI = this;
+        Data.Data.OnStageChanged -= OnStageChanged;
+        Data.Data.OnStageChanged += OnStageChanged;
+    }
+
+    public override void OnClear()
+    {
+        if (Data)
+        {
+            Data.UI = null;
+            Data.Data.OnStageChanged -= OnStageChanged;
+        }
+        base.OnClear();
+    }
+
+    public override void Refresh()
+    {
+        totalDays.text = Data.Data.growthDays.ToString();
+        nameText.text = Data.Data.Info.Name;
+        ZetanUtility.SetActive(dryIcon.gameObject, Data.Dry);
+        ZetanUtility.SetActive(pestIcon.gameObject, Data.Pest);
+        ZetanUtility.SetActive(matureIcon.gameObject, Data.Data.HarvestAble);
     }
 }

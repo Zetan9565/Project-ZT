@@ -22,7 +22,7 @@ MonoBehaviour:
   buyPrice: 0
   icon: {fileID: 21300000, guid: d7e626b430cfda24ea47c259db76dade, type: 3}
   description: "\u6D4B\u8BD5\u7528\u79CD\u5B50\uFF0C\u53EF\u79CD\u51FA\u6D4B\u8BD5\u7528\u4F5C\u7269\u3002"
-  stackAble: 1
+  stackNum: 999
   discardAble: 1
   lockAble: 1
   usable: 1
@@ -32,5 +32,5 @@ MonoBehaviour:
   minYield: 1
   maxYield: 1
   materialType: 7
-  materials: []
+  formulation: {fileID: 0}
   crop: {fileID: 11400000, guid: 74fe5b9417d08164195908a81e191983, type: 2}

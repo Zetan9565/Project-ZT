@@ -19,7 +19,7 @@ namespace ZetanStudio.BehaviourTree
                 {
                     if (serializedObject.targetObject)
                     {
-                        serializedObject.Update();
+                        serializedObject.UpdateIfRequiredOrScript();
                         EditorGUI.BeginChangeCheck();
                         SerializedProperty variable = serializedVariables.GetArrayElementAtIndex(index);
                         EditorGUI.PropertyField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), variable, true);
@@ -34,6 +34,7 @@ namespace ZetanStudio.BehaviourTree
                 },
                 elementHeightCallback = (index) =>
                 {
+                    if (index >= serializedVariables.arraySize) return 0;
                     return EditorGUI.GetPropertyHeight(serializedVariables.GetArrayElementAtIndex(index), true);
                 },
                 onAddDropdownCallback = (rect, list) =>
@@ -49,7 +50,7 @@ namespace ZetanStudio.BehaviourTree
                 },
                 onRemoveCallback = (list) =>
                 {
-                    serializedObject.Update();
+                    serializedObject.UpdateIfRequiredOrScript();
                     SerializedProperty _name = serializedVariables.GetArrayElementAtIndex(list.index).FindPropertyRelative("_name");
                     if (EditorUtility.DisplayDialog("删除变量", $"确定要删除变量 {_name.stringValue} 吗？", "确定", "取消"))
                     {
@@ -146,7 +147,7 @@ namespace ZetanStudio.BehaviourTree
             {
                 drawElementCallback = (rect, index, isFocused, isActive) =>
                 {
-                    serializedObject.Update();
+                    serializedObject.UpdateIfRequiredOrScript();
                     EditorGUI.BeginChangeCheck();
                     SerializedProperty variable = presetVariables.GetArrayElementAtIndex(index);
                     Type type = elementTypeGetter(index);
@@ -190,6 +191,7 @@ namespace ZetanStudio.BehaviourTree
                 },
                 elementHeightCallback = (index) =>
                 {
+                    if (index >= presetVariables.arraySize) return 0;
                     SerializedProperty variable = presetVariables.GetArrayElementAtIndex(index);
                     if (variable.isExpanded)
                     {
@@ -221,7 +223,7 @@ namespace ZetanStudio.BehaviourTree
                 },
                 onRemoveCallback = (list) =>
                 {
-                    serializedObject.Update();
+                    serializedObject.UpdateIfRequiredOrScript();
                     SerializedProperty _name = presetVariables.GetArrayElementAtIndex(list.index).FindPropertyRelative("_name");
                     if (EditorUtility.DisplayDialog("删除变量", $"确定要删除预设 {_name.stringValue} 吗？", "确定", "取消"))
                     {

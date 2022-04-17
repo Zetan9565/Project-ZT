@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1827504e3a4d6184ca30c3ead316328c, type: 3}
   m_Name: building info
   m_EditorClassIdentifier: 
-  _IDPrefix: WRHS
+  _ID: BUILD001
   _name: "\u6D4B\u8BD5\u7528\u4ED3\u5E93"
   description: "30\u5BB9\u91CF\u7684\u4ED3\u5E93"
   manageable: 1
@@ -30,3 +30,11 @@ MonoBehaviour:
     makingType: 0
     materialType: 0
   addendas: []
+  autoBuild: 0
+  stages:
+  - materials: []
+    graph: {fileID: 0}
+    buildTime: 10
+    destroyReturnRate: 0.5
+    formulation: {fileID: 0}
+  formulation: {fileID: 0}

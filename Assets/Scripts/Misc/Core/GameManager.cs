@@ -30,18 +30,6 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }
     }
 
-    [SerializeField]
-    private List<Color> qualityColors = new List<Color>();
-    public static List<Color> QualityColors
-    {
-        get
-        {
-            if (Instance)
-                return Instance.qualityColors;
-            else return null;
-        }
-    }
-
     private static bool dontDestroyOnLoadOnce;
 
     public static bool IsExiting { get; private set; }
@@ -121,24 +109,6 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         MapManager.Instance.SetPlayer(PlayerManager.Instance.PlayerTransform);
         MapManager.Instance.RemakeCamera();
         GatherManager.Instance.Init();
-        WindowsManager.Instance.Clear();
-    }
-
-    /// <summary>
-    /// 尝试获取道具（原型，非实例）
-    /// </summary>
-    /// <param name="id">道具ID</param>
-    /// <returns>获得的道具</returns>
-    public static ItemBase GetItemByID(string id)
-    {
-        Items.TryGetValue(id, out var item);
-        return item;
-    }
-
-    public static Color QualityToColor(ItemQuality quality)
-    {
-        if (quality > 0 && QualityColors != null && (int)quality < QualityColors.Count)
-            return QualityColors[(int)quality];
-        else return Color.black;
+        NewWindowsManager.Clear();
     }
 }

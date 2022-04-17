@@ -46,8 +46,9 @@ public abstract class ItemBase : ScriptableObject
     public virtual string Description => description;
 
     [SerializeField]
-    protected bool stackAble = true;
-    public virtual bool StackAble => Inexhaustible ? false : stackAble;
+    protected int stackNum = 1;
+    public virtual int StackNum => stackNum;
+    public virtual bool StackAble => Inexhaustible ? false : stackNum > 1;
 
     [SerializeField]
     protected bool discardAble = true;
@@ -100,6 +101,9 @@ public abstract class ItemBase : ScriptableObject
     protected Formulation formulation;
     public Formulation Formulation => formulation;
 
+    [SerializeField]
+    protected bool _DIYAble = false;
+
     public MakingToolType MakingTool
     {
         get
@@ -130,7 +134,7 @@ public abstract class ItemBase : ScriptableObject
         }
     }
 
-    public bool DIYAble => MakingTool != MakingToolType.None && formulation && !formulation.Materials.TrueForAll(x => x.MakingType == MakingType.SingleItem);
+    public bool DIYAble => _DIYAble && MakingTool != MakingToolType.None && formulation && !formulation.Materials.TrueForAll(x => x.MakingType == MakingType.SingleItem);
 
     public bool Makable => MakingMethod != MakingMethod.None && formulation && formulation.IsValid;
     #endregion
@@ -230,5 +234,10 @@ public abstract class ItemBase : ScriptableObject
             default:
                 return typeof(ItemBase);
         }
+    }
+
+    public virtual ItemData CreateData(bool instance = true)
+    {
+        return new ItemData(this, instance);
     }
 }

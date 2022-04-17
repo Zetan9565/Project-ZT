@@ -52,7 +52,7 @@ public partial class CharacterInfoInspector
         }
         else
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             bool enableBef = enable.boolValue;
             EditorGUILayout.PropertyField(enable, new GUIContent("启用", "若启用，将在场景中生成实体"));

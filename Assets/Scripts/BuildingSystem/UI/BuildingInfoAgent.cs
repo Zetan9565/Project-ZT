@@ -1,9 +1,9 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class BuildingInfoAgent : MonoBehaviour,
+public class BuildingInfoAgent : ListItem<BuildingInfoAgent, BuildingInformation>,
     IPointerClickHandler, IPointerDownHandler, IPointerUpHandler,
     IPointerEnterHandler, IPointerExitHandler,
     IBeginDragHandler, IDragHandler, IEndDragHandler
@@ -13,19 +13,36 @@ public class BuildingInfoAgent : MonoBehaviour,
 
     private ScrollRect parentRect;
 
-    public BuildingInformation Info { get; private set; }
+    private BuildingWindow window;
 
     public void Init(BuildingInformation buildingInfo, ScrollRect parentRect = null)
     {
-        Info = buildingInfo;
+        Data = buildingInfo;
         nameText.text = buildingInfo.Name;
         this.parentRect = parentRect;
+    }
+
+    public void SetWindow(BuildingWindow window)
+    {
+        this.window = window;
+    }
+
+    public override void Refresh()
+    {
+        if (!Data) return;
+        nameText.text = Data.Name;
+    }
+
+    protected override void OnInit()
+    {
+        parentRect = (View as BuildingInfoList).ScrollRect;
     }
 
     public void Clear(bool recycle = false)
     {
         nameText.text = string.Empty;
-        Info = null;
+        Data = null;
+        window = null;
         if (recycle) ObjectPool.Put(gameObject);
     }
 
@@ -35,12 +52,12 @@ public class BuildingInfoAgent : MonoBehaviour,
         if(eventData.button == PointerEventData.InputButton.Right)
             TryBuild();
         else if(eventData.button == PointerEventData.InputButton.Left)
-            BuildingManager.Instance.ShowBuiltList(Info);
+            window.ShowBuiltList(Info);
 #elif UNITY_ANDROID
-        if (touchTime < 0.5f)
+        if (touchTime < 0.5f && window)
         {
-            BuildingManager.Instance.ShowDescription(Info);
-            BuildingManager.Instance.ShowBuiltList(Info);
+            window.ShowDescription(Data);
+            window.ShowBuiltList(Data);
         }
 #endif
     }
@@ -65,12 +82,12 @@ public class BuildingInfoAgent : MonoBehaviour,
 
     void TryBuild()
     {
-        if (!BackpackManager.Instance.IsMaterialsEnough(Info.Materials))
+        if (!BackpackManager.Instance.IsMaterialsEnough(Data.Materials))
         {
             MessageManager.Instance.New("耗材不足");
             return;
         }
-        else BuildingManager.Instance.CreatPreview(Info);
+        else if(window) window.CreatPreview(Data);
     }
 
     public void OnLongPress()
@@ -101,14 +118,14 @@ public class BuildingInfoAgent : MonoBehaviour,
     public void OnPointerEnter(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
-        BuildingManager.Instance.ShowDescription(Info);
+        window.ShowDescription(Info);
 #endif
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
-        BuildingManager.Instance.HideDescription();
+        window.HideDescription();
 #endif
 #if UNITY_ANDROID
         isPress = false;
@@ -125,8 +142,8 @@ public class BuildingInfoAgent : MonoBehaviour,
     public void OnDrag(PointerEventData eventData)
     {
 #if UNITY_ANDROID
-        if (BuildingManager.Instance.IsPreviewing && eventData.button == PointerEventData.InputButton.Left)
-            BuildingManager.Instance.ShowAndMovePreview();
+        if (window.IsPreviewing && eventData.button == PointerEventData.InputButton.Left)
+            window.ShowAndMovePreview();
         else if (parentRect) parentRect.OnDrag(eventData);
 #endif
     }
@@ -135,8 +152,8 @@ public class BuildingInfoAgent : MonoBehaviour,
     {
 #if UNITY_ANDROID
         if (parentRect) parentRect.OnEndDrag(eventData);
-        if (BuildingManager.Instance.IsPreviewing && eventData.button == PointerEventData.InputButton.Left)
-            BuildingManager.Instance.DoPlace();
+        if (window.IsPreviewing && eventData.button == PointerEventData.InputButton.Left)
+            window.DoPlace();
 #endif
     }
 }

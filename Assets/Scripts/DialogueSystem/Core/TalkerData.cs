@@ -1,7 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 [System.Serializable]
-public class TalkerData : CharacterData
+public class TalkerData : CharacterData, IWarehouseKeeper
 {
     public TalkerInformation Info => GetInfo<TalkerInformation>();
 
@@ -25,7 +25,9 @@ public class TalkerData : CharacterData
 
     public Relationship relationshipInstance;
 
-    public WarehouseData warehouse;
+    public Inventory Inventory { get; private set; }
+
+    public string WarehouseName => $"{TalkerName}的仓库";
 
     public ShopData shop;
 
@@ -42,13 +44,12 @@ public class TalkerData : CharacterData
     {
         if (Info.IsVendor)
         {
-            shop = new ShopData(info.Shop);
+            shop = new ShopData(this, info.Shop);
             ShopManager.Vendors.Add(this);
         }
-        if(Info.IsWarehouseAgent)
+        if (Info.IsWarehouseAgent)
         {
-            warehouse = new WarehouseData(Info.WarehouseCapcity);
-            warehouse.scene = ZetanUtility.ActiveScene.name;
+            Inventory = new Inventory(Info.WarehouseCapcity, ignoreLock: true);
         }
         relationshipInstance = new Relationship();
         InitQuest();

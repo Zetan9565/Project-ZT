@@ -11,8 +11,7 @@ GameObject:
   - component: {fileID: 2056658706833345845}
   - component: {fileID: 6972957327784061452}
   - component: {fileID: 4208488074336117648}
-  - component: {fileID: 6150037022374805737}
-  m_Layer: 8
+  m_Layer: 11
   m_Name: WarehousePreview
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29,7 +28,9 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 2624839255905230699}
   - {fileID: 2850851020005493044}
   - {fileID: 8836544503572275709}
   m_Father: {fileID: 0}
@@ -48,10 +49,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activated: 1
-  customName: 0
-  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
-  icon: {fileID: 0}
-  hidePanelOnInteract: 0
+  defaultName: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
+  defaultIcon: {fileID: 0}
   preview: {fileID: 2850851020005493040}
   building: {fileID: 8836544503572275705}
   ignoreLayer:
@@ -81,32 +80,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!61 &6150037022374805737
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2056658706833345841}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.28, y: 1.28}
-    newSize: {x: 2, y: 2}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 1
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 2, y: 2}
-  m_EdgeRadius: 0
 --- !u!1 &2850851020005493040
 GameObject:
   m_ObjectHideFlags: 0
@@ -118,7 +91,7 @@ GameObject:
   - component: {fileID: 2850851020005493044}
   - component: {fileID: 2850851020005493047}
   - component: {fileID: 6432731890747891080}
-  m_Layer: 8
+  m_Layer: 11
   m_Name: WarehousePreview (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -135,9 +108,10 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2056658706833345845}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &2850851020005493047
 SpriteRenderer:
@@ -217,6 +191,64 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.95, y: 0.95}
   m_EdgeRadius: 0
+--- !u!1 &3125109994366597705
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2624839255905230699}
+  - component: {fileID: 2325976700550632541}
+  m_Layer: 13
+  m_Name: Interactive
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2624839255905230699
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3125109994366597705}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2056658706833345845}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &2325976700550632541
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3125109994366597705}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: -0.5}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 3, y: 2}
+  m_EdgeRadius: 0
 --- !u!1 &8836544503572275705
 GameObject:
   m_ObjectHideFlags: 0
@@ -230,7 +262,7 @@ GameObject:
   - component: {fileID: 1284488398181623145}
   - component: {fileID: 2389814962853581355}
   - component: {fileID: 7853451795923355305}
-  m_Layer: 10
+  m_Layer: 11
   m_Name: Warehouse
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -247,9 +279,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2056658706833345845}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &8836544503572275710
 SpriteRenderer:

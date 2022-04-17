@@ -68,7 +68,7 @@ public class MapManagerInspector : SingletonMonoBehaviourInspector
             EditorGUILayout.HelpBox(text, MessageType.Error);
             return;
         }
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(player, new GUIContent("跟随目标"));
         EditorGUILayout.PropertyField(offset, new GUIContent("位置偏移量"));

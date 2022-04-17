@@ -5,7 +5,6 @@ TagManager:
   serializedVersion: 2
   tags:
   - DiscardArea
-  - ItamCellBP
   - NPC
   - MapCamera
   layers:
@@ -22,7 +21,7 @@ TagManager:
   - Unwalkable
   - BuildingPreview
   - CropPreview
-  - 
+  - Interactive
   - 
   - 
   - 

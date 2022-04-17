@@ -36,7 +36,7 @@ public class StoryInspector : Editor
             EditorGUILayout.HelpBox("该剧情存在未补全信息。", MessageType.Warning);
         else
             EditorGUILayout.HelpBox("该剧情信息已完整。", MessageType.Info);
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         plotList.DoLayoutList();
         serializedObject.ApplyModifiedProperties();
     }
@@ -50,7 +50,7 @@ public class StoryInspector : Editor
             SerializedProperty plot = plots.GetArrayElementAtIndex(index);
             SerializedProperty remark = plot.FindPropertyRelative("remark");
             SerializedProperty actions = plot.FindPropertyRelative("actions");
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             if (!string.IsNullOrEmpty(remark.stringValue))
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), remark.stringValue);
@@ -71,7 +71,7 @@ public class StoryInspector : Editor
                     plotActionLists.Add(story.Plots[index], actionsList);
                     actionsList.drawElementCallback = (rect2, index2, isActive2, isFocused2) =>
                     {
-                        plot.serializedObject.Update();
+                        plot.serializedObject.UpdateIfRequiredOrScript();
                         EditorGUI.BeginChangeCheck();
                         SerializedProperty action = actions.GetArrayElementAtIndex(index2);
                         SerializedProperty actionType = action.FindPropertyRelative("actionType");
@@ -318,7 +318,7 @@ public class StoryInspector : Editor
 
                     actionsList.onAddCallback = (list) =>
                     {
-                        serializedObject.Update();
+                        serializedObject.UpdateIfRequiredOrScript();
                         EditorGUI.BeginChangeCheck();
                         story.Plots[index].Actions.Add(new PlotAction());
                         if (EditorGUI.EndChangeCheck())
@@ -327,7 +327,7 @@ public class StoryInspector : Editor
 
                     actionsList.onRemoveCallback = (list) =>
                     {
-                        serializedObject.Update();
+                        serializedObject.UpdateIfRequiredOrScript();
                         EditorGUI.BeginChangeCheck();
                         if (EditorUtility.DisplayDialog("删除", "确定删除这个行为吗？", "确定", "取消"))
                         {
@@ -354,7 +354,7 @@ public class StoryInspector : Editor
                     };
                 }
                 else actionsList = plotActionLists[story.Plots[index]];
-                plot.serializedObject.Update();
+                plot.serializedObject.UpdateIfRequiredOrScript();
                 actionsList.DoList(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight * (actions.arraySize + 1)));
                 plot.serializedObject.ApplyModifiedProperties();
             }
@@ -377,7 +377,7 @@ public class StoryInspector : Editor
 
         plotList.onAddCallback = (list) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             story.Plots.Add(new Plot());
             if (EditorGUI.EndChangeCheck())
@@ -386,7 +386,7 @@ public class StoryInspector : Editor
 
         plotList.onRemoveCallback = (list) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             if (EditorUtility.DisplayDialog("删除", "确定删除这个情节吗？", "确定", "取消"))
             {

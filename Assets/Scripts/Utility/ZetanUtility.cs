@@ -25,10 +25,31 @@ namespace ZetanExtends
             return child.transform;
         }
 
+        /// <summary>
+        /// 查找子对象，没有则创建
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="n">名字</param>
+        /// <returns>子对象（注意：当子对象的<see cref="Transform"/>被替换成<see cref="RectTransform"/>时，会销毁此处返回的<see cref="Transform"/>）</returns>
         public static Transform FindOrCreate(this Transform source, string n)
         {
             var child = source.Find(n);
             return child != null ? child : source.CreateChild(n);
+        }
+    }
+
+    public static class RectTransformExtend
+    {
+        /// <summary>
+        /// 查找子对象，没有则创建
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="n">名字</param>
+        /// <returns>子对象</returns>
+        public static RectTransform FindOrCreate(this RectTransform source, string n)
+        {
+            var child = source.Find(n);
+            return child != null ? child.GetOrAddComponent<RectTransform>() : source.CreateChild(n).GetOrAddComponent<RectTransform>();
         }
     }
 
@@ -56,6 +77,17 @@ namespace ZetanExtends
             T component = source.GetComponentInParent<T>();
             if (Equals(component, null)) component = source.GetComponentInChildren<T>();
             return component;
+        }
+
+        public static T[] GetComponentsInChildrenInOrder<T>(this Component source)
+        {
+            List<T> finds = new List<T>();
+            for (int i = 0; i < source.transform.childCount; i++)
+            {
+                var c = source.transform.GetChild(i).GetComponent<T>();
+                if (c != null) finds.Add(c);
+            }
+            return finds.ToArray();
         }
 
         public static string GetPath(this Component source)
@@ -136,11 +168,16 @@ namespace ZetanExtends
         {
             StringBuilder sb = new StringBuilder();
             Transform parent = source.transform.parent;
+            Stack<string> parents = new Stack<string>();
             while (parent)
             {
-                sb.Append(parent.gameObject.name);
-                sb.Append("/");
+                parents.Push(parent.gameObject.name);
                 parent = parent.parent;
+            }
+            while (parents.Count > 0)
+            {
+                sb.Append(parents.Pop());
+                sb.Append("/");
             }
             sb.Append(source.name);
             return sb.ToString();
@@ -178,11 +215,13 @@ public sealed class ZetanUtility
 
     public static string ColorText(string text, Color color)
     {
-        return string.Format("<color=#{0}>{1}</color>", ColorUtility.ToHtmlStringRGB(color), text);
+        if (!color.Equals(Color.clear)) return string.Format("<color=#{0}>{1}</color>", ColorUtility.ToHtmlStringRGB(color), text);
+        else return text;
     }
 
     public static bool IsPrefab(GameObject gameObject)
     {
+        if (!gameObject) return false;
         return gameObject.scene.name == null;
     }
 
@@ -283,17 +322,6 @@ public sealed class ZetanUtility
         return viewportPoint.x > 0 && viewportPoint.x < 1 && viewportPoint.y > 0 && viewportPoint.y < 1;
     }
 
-    public static void FadeTo<T>(float alpha, float duration, IFadeAble<T> fader) where T : MonoBehaviour
-    {
-        if (fader.FadeCoroutine != null) fader.MonoBehaviour.StopCoroutine(fader.FadeCoroutine);
-        fader.FadeCoroutine = fader.MonoBehaviour.StartCoroutine(fader.Fade(alpha, duration));
-    }
-    public static void ScaleTo<T>(Vector3 scale, float duration, IScaleAble<T> scaler) where T : MonoBehaviour
-    {
-        if (scaler.ScaleCoroutine != null) scaler.MonoBehaviour.StopCoroutine(scaler.ScaleCoroutine);
-        scaler.ScaleCoroutine = scaler.MonoBehaviour.StartCoroutine(scaler.Scale(scale, duration));
-    }
-
     private static string SerializeObject(object target, bool includeProperty, int depth, int indentation)
     {
         if (target == null) return "空";
@@ -392,7 +420,7 @@ public sealed class ZetanUtility
         var mType = mv.GetType();
         for (int i = 0; i < fields.Length; i++)
         {
-            memberInfo = mType?.GetField(fields[i], ZetanUtility.CommonBindingFlags);
+            memberInfo = mType?.GetField(fields[i], CommonBindingFlags);
             if (memberInfo is FieldInfo field)
             {
                 mv = field.GetValue(mv);
@@ -400,7 +428,7 @@ public sealed class ZetanUtility
             }
             else
             {
-                memberInfo = mType?.GetProperty(fields[i], ZetanUtility.CommonBindingFlags);
+                memberInfo = mType?.GetProperty(fields[i], CommonBindingFlags);
                 if (memberInfo is PropertyInfo property)
                 {
                     mv = property.GetValue(mv);
@@ -415,6 +443,11 @@ public sealed class ZetanUtility
             return true;
         }
         else return false;
+    }
+
+    public static Type GetTypeWithoutAssembly(string name)
+    {
+        return Assembly.GetCallingAssembly().GetType(name);
     }
 
     public static string GetInspectorName(Enum enumValue)
@@ -1472,146 +1505,252 @@ public class ScopeFloat
 }
 #endregion
 
-public class Heap<T> where T : class, IHeapItem<T>
+namespace ZetanCollections
 {
-    private readonly T[] items;
-    private readonly int maxSize;
-    private readonly HeapType heapType;
-
-    public int Count { get; private set; }
-
-    public Heap(int size, HeapType heapType = HeapType.MinHeap)
+    public class Heap<T> where T : class, IHeapItem<T>
     {
-        items = new T[size];
-        maxSize = size;
-        this.heapType = heapType;
-    }
+        private readonly T[] items;
+        private readonly int maxSize;
+        private readonly HeapType heapType;
 
-    public void Add(T item)
-    {
-        if (Count >= maxSize) return;
-        item.HeapIndex = Count;
-        items[Count] = item;
-        Count++;
-        SortUpForm(item);
-    }
+        public int Count { get; private set; }
 
-    public T RemoveRoot()
-    {
-        if (Count < 1) return default;
-        T root = items[0];
-        root.HeapIndex = -1;
-        Count--;
-        if (Count > 0)
+        public Heap(int size, HeapType heapType = HeapType.MinHeap)
         {
-            items[0] = items[Count];
-            items[0].HeapIndex = 0;
-            SortDownFrom(items[0]);
+            items = new T[size];
+            maxSize = size;
+            this.heapType = heapType;
         }
-        return root;
-    }
 
-    public bool Contains(T item)
-    {
-        if (item == default || item.HeapIndex < 0 || item.HeapIndex > Count - 1) return false;
-        return Equals(items[item.HeapIndex], item);//用items.Contains()就等着哭吧
-    }
-
-    public void Clear()
-    {
-        Count = 0;
-    }
-
-    public bool Exists(Predicate<T> predicate)
-    {
-        return Array.Exists(items, predicate);
-    }
-
-    public T[] ToArray()
-    {
-        return items;
-    }
-
-    public List<T> ToList()
-    {
-        return items.ToList();
-    }
-
-    private void SortUpForm(T item)
-    {
-        int parentIndex = (int)((item.HeapIndex - 1) * 0.5f);
-        while (true)
+        public void Add(T item)
         {
-            T parent = items[parentIndex];
-            if (Equals(parent, item)) return;
-            if (heapType == HeapType.MinHeap ? item.CompareTo(parent) < 0 : item.CompareTo(parent) > 0)
+            if (Count >= maxSize) return;
+            item.HeapIndex = Count;
+            items[Count] = item;
+            Count++;
+            SortUpForm(item);
+        }
+
+        public T RemoveRoot()
+        {
+            if (Count < 1) return default;
+            T root = items[0];
+            root.HeapIndex = -1;
+            Count--;
+            if (Count > 0)
             {
-                if (!Swap(item, parent))
-                    return;//交换不成功则退出，防止死循环
+                items[0] = items[Count];
+                items[0].HeapIndex = 0;
+                SortDownFrom(items[0]);
             }
-            else return;
-            parentIndex = (int)((item.HeapIndex - 1) * 0.5f);
+            return root;
         }
-    }
 
-    private void SortDownFrom(T item)
-    {
-        while (true)
+        public bool Contains(T item)
         {
-            int leftChildIndex = item.HeapIndex * 2 + 1;
-            int rightChildIndex = item.HeapIndex * 2 + 2;
-            if (leftChildIndex < Count)
+            if (item == default || item.HeapIndex < 0 || item.HeapIndex > Count - 1) return false;
+            return Equals(items[item.HeapIndex], item);//用items.Contains()就等着哭吧
+        }
+
+        public void Clear()
+        {
+            Count = 0;
+        }
+
+        public bool Exists(Predicate<T> predicate)
+        {
+            return Array.Exists(items, predicate);
+        }
+
+        public T[] ToArray()
+        {
+            return items;
+        }
+
+        public List<T> ToList()
+        {
+            return items.ToList();
+        }
+
+        private void SortUpForm(T item)
+        {
+            int parentIndex = (int)((item.HeapIndex - 1) * 0.5f);
+            while (true)
             {
-                int swapIndex = leftChildIndex;
-                if (rightChildIndex < Count && (heapType == HeapType.MinHeap ?
-                    items[rightChildIndex].CompareTo(items[leftChildIndex]) < 0 : items[rightChildIndex].CompareTo(items[leftChildIndex]) > 0))
-                    swapIndex = rightChildIndex;
-                if (heapType == HeapType.MinHeap ? items[swapIndex].CompareTo(item) < 0 : items[swapIndex].CompareTo(item) > 0)
+                T parent = items[parentIndex];
+                if (Equals(parent, item)) return;
+                if (heapType == HeapType.MinHeap ? item.CompareTo(parent) < 0 : item.CompareTo(parent) > 0)
                 {
-                    if (!Swap(item, items[swapIndex]))
+                    if (!Swap(item, parent))
                         return;//交换不成功则退出，防止死循环
                 }
                 else return;
+                parentIndex = (int)((item.HeapIndex - 1) * 0.5f);
             }
-            else return;
+        }
+
+        private void SortDownFrom(T item)
+        {
+            while (true)
+            {
+                int leftChildIndex = item.HeapIndex * 2 + 1;
+                int rightChildIndex = item.HeapIndex * 2 + 2;
+                if (leftChildIndex < Count)
+                {
+                    int swapIndex = leftChildIndex;
+                    if (rightChildIndex < Count && (heapType == HeapType.MinHeap ?
+                        items[rightChildIndex].CompareTo(items[leftChildIndex]) < 0 : items[rightChildIndex].CompareTo(items[leftChildIndex]) > 0))
+                        swapIndex = rightChildIndex;
+                    if (heapType == HeapType.MinHeap ? items[swapIndex].CompareTo(item) < 0 : items[swapIndex].CompareTo(item) > 0)
+                    {
+                        if (!Swap(item, items[swapIndex]))
+                            return;//交换不成功则退出，防止死循环
+                    }
+                    else return;
+                }
+                else return;
+            }
+        }
+
+        public void Update()
+        {
+            if (Count < 1) return;
+            SortDownFrom(items[0]);
+            SortUpForm(items[Count - 1]);
+        }
+
+        private bool Swap(T item1, T item2)
+        {
+            if (!Contains(item1) || !Contains(item2)) return false;
+            items[item1.HeapIndex] = item2;
+            items[item2.HeapIndex] = item1;
+            int item1Index = item1.HeapIndex;
+            item1.HeapIndex = item2.HeapIndex;
+            item2.HeapIndex = item1Index;
+            return true;
+        }
+
+        public static implicit operator bool(Heap<T> self)
+        {
+            return self != null;
+        }
+
+        public enum HeapType
+        {
+            MinHeap,
+            MaxHeap
         }
     }
 
-    public void Update()
+    public interface IHeapItem<T> : IComparable<T>
     {
-        if (Count < 1) return;
-        SortDownFrom(items[0]);
-        SortUpForm(items[Count - 1]);
+        int HeapIndex { get; set; }
     }
 
-    private bool Swap(T item1, T item2)
+    public class ReadOnlySet<T> : ISet<T>, IReadOnlyCollection<T>
     {
-        if (!Contains(item1) || !Contains(item2)) return false;
-        items[item1.HeapIndex] = item2;
-        items[item2.HeapIndex] = item1;
-        int item1Index = item1.HeapIndex;
-        item1.HeapIndex = item2.HeapIndex;
-        item2.HeapIndex = item1Index;
-        return true;
-    }
+        private ISet<T> set;
 
-    public static implicit operator bool(Heap<T> self)
-    {
-        return self != null;
-    }
+        public int Count => set.Count;
 
-    public enum HeapType
-    {
-        MinHeap,
-        MaxHeap
+        public bool IsReadOnly => throw new System.NotImplementedException();
+
+        public ReadOnlySet(ISet<T> set)
+        {
+            this.set = set;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return set.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)set).GetEnumerator();
+        }
+
+        public bool Add(T item)
+        {
+            throw new System.InvalidOperationException("只读");
+        }
+
+        public void ExceptWith(IEnumerable<T> other)
+        {
+            throw new System.InvalidOperationException("只读");
+        }
+
+        public void IntersectWith(IEnumerable<T> other)
+        {
+            throw new System.InvalidOperationException("只读");
+        }
+
+        public bool IsProperSubsetOf(IEnumerable<T> other)
+        {
+            return set.IsProperSubsetOf(other);
+        }
+
+        public bool IsProperSupersetOf(IEnumerable<T> other)
+        {
+            return set.IsProperSupersetOf(other);
+        }
+
+        public bool IsSubsetOf(IEnumerable<T> other)
+        {
+            return set.IsSubsetOf(other);
+        }
+
+        public bool IsSupersetOf(IEnumerable<T> other)
+        {
+            return set.IsSupersetOf(other);
+        }
+
+        public bool Overlaps(IEnumerable<T> other)
+        {
+            return set.Overlaps(other);
+        }
+
+        public bool SetEquals(IEnumerable<T> other)
+        {
+            return set.Equals(other);
+        }
+
+        public void SymmetricExceptWith(IEnumerable<T> other)
+        {
+            throw new System.InvalidOperationException("只读");
+        }
+
+        public void UnionWith(IEnumerable<T> other)
+        {
+            throw new System.InvalidOperationException("只读");
+        }
+
+        void ICollection<T>.Add(T item)
+        {
+            throw new System.InvalidOperationException("只读");
+        }
+
+        public void Clear()
+        {
+            throw new System.InvalidOperationException("只读");
+        }
+
+        public bool Contains(T item)
+        {
+            return set.Contains(item);
+        }
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            set.CopyTo(array, arrayIndex);
+        }
+
+        public bool Remove(T item)
+        {
+            throw new System.InvalidOperationException("只读");
+        }
     }
 }
-
-public interface IHeapItem<T> : IComparable<T>
-{
-    int HeapIndex { get; set; }
-}
-
 public abstract class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
 {
     private static T instance;
@@ -1620,7 +1759,7 @@ public abstract class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBe
         get
         {
             if (!instance || !instance.gameObject)
-                instance = FindObjectOfType<T>();
+                instance = FindObjectOfType<T>(true);
             return instance;
         }
     }

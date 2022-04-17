@@ -25,7 +25,7 @@ public partial class ItemInspector : Editor
     SerializedProperty buyPrice;
     SerializedProperty icon;
     SerializedProperty description;
-    SerializedProperty stackAble;
+    SerializedProperty stackNum;
     SerializedProperty discardAble;
     SerializedProperty lockAble;
     SerializedProperty usable;
@@ -34,6 +34,7 @@ public partial class ItemInspector : Editor
     SerializedProperty makingMethod;
     SerializedProperty minYield;
     SerializedProperty maxYield;
+    SerializedProperty _DIYAble;
     SerializedProperty formulation;
 
     SerializedProperty materialType;
@@ -61,12 +62,13 @@ public partial class ItemInspector : Editor
         buyPrice = serializedObject.FindProperty("buyPrice");
         icon = serializedObject.FindProperty("icon");
         description = serializedObject.FindProperty("description");
-        stackAble = serializedObject.FindProperty("stackAble");
+        stackNum = serializedObject.FindProperty("stackNum");
         discardAble = serializedObject.FindProperty("discardAble");
         lockAble = serializedObject.FindProperty("lockAble");
         usable = serializedObject.FindProperty("usable");
         inexhaustible = serializedObject.FindProperty("inexhaustible");
         maxDurability = serializedObject.FindProperty("maxDurability");
+        _DIYAble = serializedObject.FindProperty("_DIYAble");
         formulation = serializedObject.FindProperty("formulation");
         makingMethod = serializedObject.FindProperty("makingMethod");
         minYield = serializedObject.FindProperty("minYield");
@@ -97,7 +99,7 @@ public partial class ItemInspector : Editor
         {
             EditorGUILayout.HelpBox("该道具信息已完整。", MessageType.Info);
         }
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
         if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID() || string.IsNullOrEmpty(Regex.Replace(_ID.stringValue, @"[^0-9]+", "")) || !Regex.IsMatch(_ID.stringValue, @"(\d+)$"))
@@ -135,7 +137,8 @@ public partial class ItemInspector : Editor
         }
         EditorGUILayout.PropertyField(description, new GUIContent("描述"));
         if (!item.IsEquipment && !item.IsBag)
-            EditorGUILayout.PropertyField(stackAble, new GUIContent("可叠加"));
+            EditorGUILayout.PropertyField(stackNum, new GUIContent("叠加上限"));
+        if (stackNum.intValue < 1) stackNum.intValue = 1;
         if (!item.IsForQuest) EditorGUILayout.PropertyField(discardAble, new GUIContent("可丢弃"));
         EditorGUILayout.PropertyField(lockAble, new GUIContent("可上锁"));
         if (item.IsForQuest) EditorGUILayout.PropertyField(usable, new GUIContent("可使用"));
@@ -148,7 +151,7 @@ public partial class ItemInspector : Editor
         if (item is not BoxItem && item is not BookItem && item is not CurrencyItem)
         {
             EditorGUILayout.Space();
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(makingMethod, new GUIContent("制作方法"));
             if (makingMethod.enumValueIndex != (int)MakingMethod.None)
@@ -161,6 +164,7 @@ public partial class ItemInspector : Editor
             if (minYield.intValue > maxYield.intValue) minYield.intValue = maxYield.intValue;
             if (makingMethod.enumValueIndex != (int)MakingMethod.None)
             {
+                EditorGUILayout.PropertyField(_DIYAble, new GUIContent("可无图纸制作"), false);
                 EditorGUILayout.PropertyField(formulation, new GUIContent("制作配方"), false);
                 if (!formulation.objectReferenceValue)
                 {
@@ -267,6 +271,9 @@ public partial class ItemInspector : Editor
                 break;
             case ItemType.Seed:
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("crop"), new GUIContent("农作物信息"));
+                break;
+            case ItemType.Currency:
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("currencyType"), new GUIContent("货币类型"));
                 break;
             default: break;
         }

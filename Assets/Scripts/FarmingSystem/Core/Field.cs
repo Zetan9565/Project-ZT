@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Field : Building
+public class Field : Building2D
 {
     public FieldData FData { get; private set; }
 
@@ -11,7 +11,6 @@ public class Field : Building
 
     private void Awake()
     {
-        customName = true;
         Range = GetComponent<Renderer>();
     }
 
@@ -19,15 +18,15 @@ public class Field : Building
     {
         get
         {
-            return base.IsInteractive && FData && FieldManager.Instance.CurrentField != this;
+            return base.IsInteractive && FData && !NewWindowsManager.IsWindowOpen<FieldWindow>();
         }
     }
 
-    public override void OnCancelManage()
+    protected override void OnNotInteractable()
     {
-        base.OnCancelManage();
-        if (FieldManager.Instance.CurrentField == this)
-            FieldManager.Instance.CancelManage();
+        if (NewWindowsManager.IsWindowOpen<FieldWindow>(out var window) && window.CurrentField == this)
+            window.CancelManage();
+        base.OnNotInteractable();
     }
 
     public void Init(FieldInformation field)
@@ -55,7 +54,7 @@ public class Field : Building
         {
             Crop entity = ObjectPool.Get(crop.Prefab, transform);
             entity.Init(cropData, this, position);
-            FieldManager.Instance.Plant(entity);
+            NotifyCenter.PostNotify(FieldManager.FieldCropPlanted, this, cropData);
         }
     }
 
@@ -71,8 +70,9 @@ public class Field : Building
         base.Destroy();
     }
 
-    protected override void OnBuilt()
+    protected override void OnInit()
     {
+        base.OnInit();
         if (Info.Addendas.Count > 0)
         {
             if (Info.Addendas[0] is FieldInformation info)
@@ -80,9 +80,8 @@ public class Field : Building
         }
     }
 
-    public override void OnManage()
+    public override bool DoManage()
     {
-        base.OnManage();
-        FieldManager.Instance.Manage(this);
+        return NewWindowsManager.OpenWindowBy<FieldWindow>(this);
     }
 }

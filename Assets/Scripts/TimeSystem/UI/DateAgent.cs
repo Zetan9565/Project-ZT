@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class DateAgent : MonoBehaviour
+[RequireComponent(typeof(Image))]
+public class DateAgent : GridItem<DateAgent, (int day, Color color)>
 {
     public Text dateText;
     public int date;
@@ -71,15 +70,13 @@ public class DateAgent : MonoBehaviour
         GetComponent<Image>().color = today ? todayColor : Color.white; ;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    protected override void RefreshSelected()
     {
-
+        GetComponent<Image>().color = isSelected ? todayColor : Color.white;
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void Refresh()
     {
-
+        Init(Data.day, Data.color);
     }
 }

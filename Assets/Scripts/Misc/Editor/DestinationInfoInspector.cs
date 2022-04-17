@@ -13,7 +13,7 @@ public partial class DestinationInfoInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
         sceneSelector.DoLayoutDraw();

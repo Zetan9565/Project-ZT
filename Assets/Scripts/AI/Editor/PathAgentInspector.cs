@@ -25,7 +25,7 @@ public class PathAgentInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(stoppingDistance);
         EditorGUILayout.PropertyField(pickNextWaypointDist);

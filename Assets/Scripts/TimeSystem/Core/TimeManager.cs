@@ -248,7 +248,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         }
     }
     public Seaon CurrentSeason => MonthToSeason(CurrentMonth);
-    public DayOfWeek WeekDayOfTheFirstDayOfCurrentMonth
+    public DayOfWeek FirstWeekDayOfCurrentMonth
     {
         get
         {
@@ -266,7 +266,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
 
     #region 计数相关
     private bool daysNeedUpdate;
-    private int days;
+    private int days = 1;
     public int Days
     {
         get
@@ -282,7 +282,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     }//从1开始计
 
     private bool weeksNeedUpdate;
-    private int weeks;
+    private int weeks = 1;
     public int Weeks
     {
         get
@@ -298,7 +298,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     }//从1开始计
 
     private bool monthsNeedUpdate;
-    private int months;
+    private int months = 1;
     public int Months
     {
         get
@@ -313,7 +313,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     }//从1开始计
 
     private bool yearsNeedUpdate;
-    public int years;
+    private int years = 1;
     public int Years
     {
         get
@@ -331,7 +331,6 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     #region 运行时相关
     public float NormalizeTimeline => timeline / 24;
 
-    [SerializeField]
     private decimal timeStamp = 0;
     public decimal TimeStamp
     {
@@ -340,6 +339,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         {
             OnTimePassed?.Invoke(value - timeStamp);
             timeStamp = value;
+            SetDirty();
         }
     }
 
@@ -381,7 +381,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         if (dayBefore != dayNow)
         {
             UpdateDate();
-            NotifyCenter.Instance.PostNotify(NotifyCenter.CommonKeys.DayChange, dayBefore, dayNow);
+            NotifyCenter.PostNotify(NotifyCenter.CommonKeys.DayChanged, dayBefore, dayNow);
             dayBefore = dayNow;
         }
     }
@@ -453,6 +453,11 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     {
         TimePase((decimal)Time.deltaTime);
     }
+    #endregion
+
+    #region 消息
+    public const string DayChanged = "DayChanged";
+    public const string MonthChanged = "MonthChanged";
     #endregion
 
     [Serializable]

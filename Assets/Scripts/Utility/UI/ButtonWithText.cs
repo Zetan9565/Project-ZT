@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent, RequireComponent(typeof(Button))]
-public class ButtonWithText : MonoBehaviour
+public class ButtonWithText : ListItem<ButtonWithText, ButtonWithTextData>
 {
     private Text text;
 
@@ -12,7 +12,7 @@ public class ButtonWithText : MonoBehaviour
     private Action<object> callback_param;
     private Func<object> callback_getParam;
 
-    private void Awake()
+    protected override void OnAwake()
     {
         text = GetComponentInChildren<Text>();
         if (!text)
@@ -23,21 +23,10 @@ public class ButtonWithText : MonoBehaviour
             RectTransform rectTransform = text.transform as RectTransform;
             rectTransform.anchorMin = Vector2.zero;
             rectTransform.anchorMax = Vector2.one;
+            rectTransform.sizeDelta = Vector2.zero;
+            rectTransform.anchoredPosition = Vector2.zero;
         }
         GetComponent<Button>().onClick.AddListener(OnClick);
-    }
-
-    public void Init(string text, Action callback)
-    {
-        this.text.text = text;
-        this.callback = callback;
-    }
-
-    public void Init(string text, Action<object> callback, Func<object> param)
-    {
-        this.text.text = text;
-        callback_param = callback;
-        callback_getParam = param;
     }
 
     public void Init(ButtonWithTextData data)
@@ -46,6 +35,13 @@ public class ButtonWithText : MonoBehaviour
         callback = data.callback;
         callback_param = data.callback_param;
         callback_getParam = data.callcack_getParam;
+    }
+    public void Init(string text, Action callback)
+    {
+        this.text.text = text;
+        this.callback = callback;
+        callback_param = null;
+        callback_getParam = null;
     }
 
     public void OnClick()
@@ -61,6 +57,14 @@ public class ButtonWithText : MonoBehaviour
         callback_param = null;
         callback_getParam = null;
         ObjectPool.Put(gameObject);
+    }
+
+    public override void Refresh()
+    {
+        text.text = Data.text;
+        callback = Data.callback;
+        callback_param = Data.callback_param;
+        callback_getParam = Data.callcack_getParam;
     }
 }
 

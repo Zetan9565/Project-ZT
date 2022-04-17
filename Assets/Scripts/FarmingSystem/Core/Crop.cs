@@ -47,7 +47,7 @@ public class Crop : Resource
         Clear();
         data.entity = this;
         Data = data;
-        Data.OnStageChange += OnStageChange;
+        Data.OnStageChanged += OnStageChange;
         Parent = parent;
         transform.SetParent(parent.transform);
         transform.position = position;

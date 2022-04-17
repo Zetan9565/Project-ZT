@@ -2,14 +2,16 @@
 
 public class DialogueData
 {
-    public readonly Dialogue origin;
+    public string ID => model ? model.ID : string.Empty;
+
+    public readonly Dialogue model;
 
     public readonly List<DialogueWordsData> wordsDatas = new List<DialogueWordsData>();
 
     public DialogueData(Dialogue dialogue)
     {
-        origin = dialogue;
-        foreach (DialogueWords words in origin.Words)
+        model = dialogue;
+        foreach (DialogueWords words in model.Words)
         {
             wordsDatas.Add(new DialogueWordsData(words, this));
         }
@@ -23,7 +25,7 @@ public class DialogueData
 
 public class DialogueWordsData
 {
-    public readonly DialogueWords origin;
+    public readonly DialogueWords model;
     public readonly DialogueData parent;
 
     public bool IsDone => optionDatas.TrueForAll(x => x.isDone);
@@ -32,24 +34,24 @@ public class DialogueWordsData
 
     public DialogueWordsData(DialogueWords words, DialogueData parent)
     {
-        origin = words;
+        model = words;
         this.parent = parent;
-        if (origin.Options.Count > 0 && parent)
+        if (model.Options.Count > 0 && parent)
         {
-            int index = parent.origin.Words.IndexOf(words);
-            for (int i = 0; i < origin.Options.Count; i++)
+            int index = parent.model.Words.IndexOf(words);
+            for (int i = 0; i < model.Options.Count; i++)
             {
                 int indexBack = index;
-                WordsOption option = origin.Options[i];
+                WordsOption option = model.Options[i];
                 if (words.NeedToChusCorrectOption)
                 {
-                    if (origin.IndexOfCorrectOption == i)
+                    if (model.IndexOfCorrectOption == i)
                         indexBack++;
                 }
                 else
                 {
                     indexBack = option.IndexToGoBack > 0 && option.OptionType != WordsOptionType.SubmitAndGet && option.OptionType != WordsOptionType.OnlyGet &&
-                        parent.origin.StoryDialogue && (option.OptionType == WordsOptionType.BranchDialogue || option.OptionType == WordsOptionType.BranchWords) && !option.GoBack
+                        parent.model.StoryDialogue && (option.OptionType == WordsOptionType.BranchDialogue || option.OptionType == WordsOptionType.BranchWords) && !option.GoBack
                         ? option.IndexToGoBack : indexBack;
                 }
                 WordsOptionData od = new WordsOptionData(option, this, indexBack);
@@ -66,7 +68,7 @@ public class DialogueWordsData
 
 public class WordsOptionData
 {
-    public readonly WordsOption origin;
+    public readonly WordsOption model;
     public readonly DialogueWordsData parent;
     public readonly int indexToGoBack;
 
@@ -74,7 +76,7 @@ public class WordsOptionData
 
     public WordsOptionData(WordsOption option, DialogueWordsData parent, int indexToGoBack)
     {
-        origin = option;
+        model = option;
         this.parent = parent;
         this.indexToGoBack = indexToGoBack;
     }

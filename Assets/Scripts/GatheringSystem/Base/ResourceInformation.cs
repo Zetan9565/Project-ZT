@@ -65,11 +65,12 @@ public class ResourceInformation : ScriptableObject
     }
 
     [SerializeField]
-    private GameObject lootPrefab;
-    public GameObject LootPrefab
+    private LootAgent lootPrefab;
+    public LootAgent LootPrefab
     {
         get
         {
+            if (!lootPrefab) return MiscSettings.Instance.DefaultLootPrefab;
             return lootPrefab;
         }
     }

@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -21,7 +23,7 @@ public static class ZetanEditorUtility
         else return string.Empty;
     }
 
-    public static bool IsValidPath(string path)
+    public static bool IsValidFolder(string path)
     {
         return path.Contains(Application.dataPath);
     }
@@ -230,22 +232,15 @@ public static class ZetanEditorUtility
         return null;
     }
 
-    public static T SaveFilePanel<T>(Func<T> instantiate, string assetName, bool ping = false, bool select = false) where T : Object
-    {
-        return SaveFilePanel(instantiate, "选择保存位置", assetName, ping, select);
-    }
-    public static T SaveFilePanel<T>(Func<T> instantiate, string title, string assetName, bool ping = false, bool select = false) where T : Object
-    {
-        return SaveFilePanel(instantiate, title, assetName, "asset", ping, select);
-    }
-    public static T SaveFilePanel<T>(Func<T> instantiate, string title, string assetName, string extension, bool ping = false, bool select = false) where T : Object
+    public static T SaveFilePanel<T>(Func<T> instantiate, string assetName = "", string title = "选择保存位置", string extension= "asset", bool ping = false, bool select = false) where T : Object
     {
         while (true)
         {
+            if (string.IsNullOrEmpty(assetName)) assetName = System.Text.RegularExpressions.Regex.Replace(typeof(T).Name, "([a-z])([A-Z])", "$1 $2").ToLower();
             string path = EditorUtility.SaveFilePanel(title, Application.dataPath, assetName, extension);
             if (!string.IsNullOrEmpty(path))
             {
-                if (IsValidPath(path))
+                if (IsValidFolder(path))
                 {
                     try
                     {

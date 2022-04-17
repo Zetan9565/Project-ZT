@@ -4,109 +4,133 @@ using UnityEngine.UI;
 
 public class ItemInfoDisplayer : MonoBehaviour
 {
-    public Image icon;
-    public GameObject contrastMark;
-    public Text nameText;
-    public Text typeText;
+    [SerializeField]
+    private Image icon;
+    [SerializeField]
+    private GameObject contrastMark;
+    [SerializeField]
+    private Text nameText;
+    [SerializeField]
+    private Text typeText;
 
-    public Text priceTitle;
-    public Text priceText;
-    public Text weightText;
+    [SerializeField]
+    private Text priceTitle;
+    [SerializeField]
+    private Text priceText;
+    [SerializeField]
+    private Text weightText;
 
-    public Transform contentParent;
+    [SerializeField]
+    private Transform contentParent;
 
-    public DurabilityAgent durability;
+    [SerializeField]
+    private DurabilityAgent durability;
 
-    public Text titlePrefab;
-    public Text contentPrefab;
-    public RoleAttributeAgent attributePrefab;
-    public GemstoneAgent gemPrefab;
+    [SerializeField]
+    private Text titlePrefab;
+    [SerializeField]
+    private Text contentPrefab;
+    [SerializeField]
+    private LayoutElement separatorPrefab;
+    [SerializeField]
+    private RoleAttributeAgent attributePrefab;
+    [SerializeField]
+    private GemAgent gemPrefab;
+
+    [SerializeField]
+    private Text debugIDText;
 
     private List<Text> titles = new List<Text>();
     private List<Text> contents = new List<Text>();
     private List<RoleAttributeAgent> attributes = new List<RoleAttributeAgent>();
+    private List<GemAgent> gems = new List<GemAgent>();
+    private List<LayoutElement> separators = new List<LayoutElement>();
 
-    private Stack<Text> titleCache = new Stack<Text>();
-    private Stack<Text> contentCache = new Stack<Text>();
-    private Stack<RoleAttributeAgent> attrCache = new Stack<RoleAttributeAgent>();
+    private SimplePool<Text> titleCache;
+    private SimplePool<Text> contentCache;
+    private SimplePool<RoleAttributeAgent> attrCache;
+    private SimplePool<LayoutElement> separCache;
 
     private int elementsCount;
 
-    private ItemInfo info;
+    private ItemData item;
 
-    public void ShowItemInfo(ItemInfo info, bool contrast = false)
+    public void ShowItemInfo(ItemData item, bool isContrast = false)
     {
-        if (!info || !info.item)
+        if (!item || !item.Model)
         {
             Hide(true);
             return;
         }
-        if (this.info == info) return;
+        if (this.item == item) return;
         Clear();
-        this.info = info;
-        icon.overrideSprite = info.item.Icon;
-        ZetanUtility.SetActive(contrastMark, contrast);
-        nameText.text = info.ItemName;
-        nameText.color = GameManager.QualityToColor(info.item.Quality);
-        typeText.text = ItemBase.GetItemTypeString(info.item.ItemType);
-        priceText.text = info.item.SellAble ? info.item.SellPrice + GameManager.CoinName : "不可出售";
-        weightText.text = info.item.Weight.ToString("F2") + "WL";
-        if (info.item.IsEquipment)
+        this.item = item;
+        icon.overrideSprite = item.Model.Icon;
+        ZetanUtility.SetActive(contrastMark, isContrast);
+        nameText.text = item.Name;
+        nameText.color = ItemUtility.QualityToColor(item.Model.Quality);
+        typeText.text = ItemBase.GetItemTypeString(item.Model.ItemType);
+        priceText.text = item.Model.SellAble ? item.Model.SellPrice + GameManager.CoinName : "不可出售";
+        weightText.text = item.Model.Weight.ToString("F2") + "WL";
+        if (item.Model.IsEquipment)
         {
             PushTitle("属性：");
-            foreach (RoleAttribute attr in (info.item as EquipmentItem).Attribute.Attributes)
+            foreach (RoleAttribute attr in (item.Model as EquipmentItem).Attribute.Attributes)
             {
                 PushAttribute(attr);
             }
         }
         PushTitle("描述：");
-        PushContent(info.item.Description);
-        ZetanUtility.SetActive(durability, info.item.IsEquipment);
+        PushContent(item.Model.Description);
+        ZetanUtility.SetActive(durability, item.Model.IsEquipment);
+#if true
+        ZetanUtility.SetActive(debugIDText, true);
+        debugIDText.text = item.ID;
+#else
+        ZetanUtility.SetActive(debugIDText, false);
+#endif
         Show();
     }
 
     private void PushTitle(string content)
     {
-        Text find;
-        if (titleCache.Count < 1)
-            find = ObjectPool.Get(titlePrefab, contentParent).GetComponent<Text>();
-        else find = titleCache.Pop();
-        ZetanUtility.SetActive(find.gameObject, true);
-        find.text = content;
-        find.transform.SetSiblingIndex(elementsCount);
-        titles.Add(find);
+        Text title = titleCache.Get(contentParent);
+        title.text = content;
+        title.transform.SetSiblingIndex(elementsCount);
+        titles.Add(title);
         elementsCount++;
     }
 
     private void PushContent(string content)
     {
-        Text find;
-        if (contentCache.Count < 1)
-            find = ObjectPool.Get(contentPrefab, contentParent).GetComponent<Text>();
-        else find = contentCache.Pop();
-        ZetanUtility.SetActive(find.gameObject, true);
-        find.text = content;
-        find.transform.SetSiblingIndex(elementsCount);
-        contents.Add(find);
+        Text cont = contentCache.Get(contentParent);
+        cont.text = content;
+        cont.transform.SetSiblingIndex(elementsCount);
+        contents.Add(cont);
         elementsCount++;
     }
 
     private void PushAttribute(RoleAttribute left, RoleAttribute right = null)
     {
-        RoleAttributeAgent find;
-        if (attrCache.Count < 1)
-            find = ObjectPool.Get(attributePrefab, contentParent).GetComponent<RoleAttributeAgent>();
-        else find = attrCache.Pop();
-        ZetanUtility.SetActive(find, true);
-        find.Init(left, right);
-        find.transform.SetSiblingIndex(elementsCount);
-        attributes.Add(find);
+        RoleAttributeAgent attr = attrCache.Get(contentParent);
+        attr.Init(left, right);
+        attr.transform.SetSiblingIndex(elementsCount);
+        attributes.Add(attr);
         elementsCount++;
     }
 
-    private void PushGem()
+    private void PushGem(GemItem gem)
     {
+        elementsCount++;
+    }
 
+    private void PushSeparator(float? height)
+    {
+        LayoutElement separ = separCache.Get(contentParent);
+        if (height.HasValue) separ.minHeight = height.Value;
+        separ.transform.SetSiblingIndex(elementsCount);
+        separators.Add(separ);
+        elementsCount++;
     }
 
     public void Clear()
@@ -114,26 +138,28 @@ public class ItemInfoDisplayer : MonoBehaviour
         foreach (Text title in titles)
         {
             title.text = string.Empty;
-            titleCache.Push(title);
-            ZetanUtility.SetActive(title, false);
+            titleCache.Put(title);
         }
         titles.Clear();
         foreach (Text content in contents)
         {
             content.text = string.Empty;
-            contentCache.Push(content);
-            ZetanUtility.SetActive(content, false);
+            contentCache.Put(content);
         }
         contents.Clear();
         foreach (RoleAttributeAgent attribute in attributes)
         {
             attribute.Clear();
-            attrCache.Push(attribute);
-            ZetanUtility.SetActive(attribute, false);
+            attrCache.Put(attribute);
         }
         attributes.Clear();
+        foreach (var separ in separators)
+        {
+            separCache.Put(separ);
+        }
+        separators.Clear();
         elementsCount = 0;
-        info = null;
+        item = null;
         icon.overrideSprite = null;
         nameText.text = string.Empty;
         typeText.text = string.Empty;
@@ -147,8 +173,28 @@ public class ItemInfoDisplayer : MonoBehaviour
     }
     public void Hide(bool clear = false)
     {
-        if (clear)
-            Clear();
+        if (clear) Clear();
         ZetanUtility.SetActive(gameObject, false);
     }
+
+    private void Awake()
+    {
+        titleCache = new SimplePool<Text>(titlePrefab);
+        contentCache = new SimplePool<Text>(contentPrefab);
+        separCache = new SimplePool<LayoutElement>(separatorPrefab);
+        attrCache = new SimplePool<RoleAttributeAgent>(attributePrefab);
+#if DEBUG
+        debugIDText.GetComponent<Button>().onClick.AddListener(DebugGetter);
+#endif
+    }
+
+#if DEBUG
+    private void DebugGetter()
+    {
+        if (item)
+        {
+            AmountWindow.StartInput(a => { if (item) BackpackManager.Instance.GetItem(item.Model, (int)a); }, 999, position: icon.transform.position);
+        }
+    }
+#endif
 }

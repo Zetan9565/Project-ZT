@@ -33,7 +33,7 @@ public class CropData
     public bool dry;
     public bool pest;
 
-    public event CropStageListner OnStageChange;
+    public event CropStageListner OnStageChanged;
 
     public CropData(CropInformation info, FieldData field)
     {
@@ -91,7 +91,7 @@ public class CropData
         stageDays = Mathf.CeilToInt(stageTime / TimeManager.Instance.ScaleDayToReal);
 
         currentStage = nextStage;
-        OnStageChange?.Invoke(currentStage);
+        OnStageChanged?.Invoke(currentStage);
         if (!currentStage)
         {
             parent.RemoveCrop(this);

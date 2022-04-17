@@ -18,7 +18,7 @@ public class MultLanTextInspector : UnityEditor.UI.TextEditor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(ID);
         EditorGUILayout.PropertyField(language);

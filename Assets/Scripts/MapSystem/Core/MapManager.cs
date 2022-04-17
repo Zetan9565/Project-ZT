@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -101,6 +100,8 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 
     private readonly Dictionary<MapIconHolder, MapIcon> iconsWithHolder = new Dictionary<MapIconHolder, MapIcon>();
     public List<MapIcon> NormalIcons { get; private set; } = new List<MapIcon>();
+
+    private bool isInit;
 
     #region 地图图标相关
     public void CreateMapIcon(MapIconHolder holder)
@@ -246,7 +247,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         if (!playerIconInstance) playerIconInstance = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(MapIconType.Main)).GetComponent<MapIcon>();
         playerIconInstance.iconImage.overrideSprite = playerIcon;
-        playerIconInstance.iconImage.rectTransform.sizeDelta = playerIconSize;
+        playerIconInstance.rectTransform.sizeDelta = playerIconSize;
         playerIconInstance.iconType = MapIconType.Main;
         playerIconInstance.iconImage.raycastTarget = false;
     }
@@ -503,10 +504,11 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 
     public void Zoom(float value)
     {
-        if (isSwitching || value == 0) return;
-        MapCamera.orthographicSize = Mathf.Clamp(MapCamera.orthographicSize - value, zoomLimit.x, zoomLimit.y);
-        if (IsViewingWorldMap) worldModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
-        else miniModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
+        Debug.Log(value);
+        //if (isSwitching || value == 0) return;
+        //MapCamera.orthographicSize = Mathf.Clamp(MapCamera.orthographicSize - value, zoomLimit.x, zoomLimit.y);
+        //if (IsViewingWorldMap) worldModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
+        //else miniModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
     }
 
     public float CameraZoom => IsViewingWorldMap ? (worldModeInfo.defaultSizeOfCam / MapCamera.orthographicSize) : (miniModeInfo.defaultSizeOfCam / MapCamera.orthographicSize);
@@ -520,6 +522,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
 
     private void Update()
     {
+        if (!isInit) return;
         if (updateMode == UpdateMode.Update) DrawMapIcons();
         if (isSwitching) AnimateSwitching();
         if (isMovingCamera)
@@ -536,10 +539,12 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
     }
     private void LateUpdate()
     {
+        if (!isInit) return;
         if (updateMode == UpdateMode.LateUpdate) DrawMapIcons();
     }
     private void FixedUpdate()
     {
+        if (!isInit) return;
         if (updateMode == UpdateMode.FixedUpdate) DrawMapIcons();
         FollowPlayer();//放在FixedUpdate()可以有效防止主图标抖动
     }
@@ -587,6 +592,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         miniModeInfo.currentSizeOfCam = miniModeInfo.defaultSizeOfCam;
         worldModeInfo.currentSizeOfCam = worldModeInfo.defaultSizeOfCam;
         ToMiniMap();
+        isInit = true;
     }
 
     private void ClearMarks()

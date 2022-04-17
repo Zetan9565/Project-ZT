@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1827504e3a4d6184ca30c3ead316328c, type: 3}
   m_Name: building info 2
   m_EditorClassIdentifier: 
-  _IDPrefix: TOOLA
+  _ID: TOOL001
   _name: "\u6D4B\u8BD5\u7528\u953B\u9020\u7089"
   description: "\u7528\u4E8E\u953B\u51B6\u91D1\u5C5E\u7684\u5DE5\u4F5C\u5957\u4EF6\u3002"
   manageable: 1

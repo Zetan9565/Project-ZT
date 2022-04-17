@@ -24,7 +24,7 @@ public partial class CharacterInfoInspector
 
     void DrawEnemyInfo()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(race, new GUIContent("种族"));
         if (race.objectReferenceValue)

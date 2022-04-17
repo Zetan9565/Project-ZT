@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
@@ -59,6 +60,7 @@ public class BackpackSaveData
     public float maxWeightLoad;
 
     public List<ItemSaveData> itemDatas = new List<ItemSaveData>();
+    public List<string> items;
 }
 
 [Serializable]
@@ -84,16 +86,19 @@ public class WarehouseSaveData
         posX = warehouse.position.x;
         posY = warehouse.position.y;
         posZ = warehouse.position.z;
-        money = warehouse.Money;
-        currentSize = (int)warehouse.size;
-        maxSize = warehouse.size.Max;
-        foreach (ItemInfo info in warehouse.Items)
-        {
-            itemDatas.Add(new ItemSaveData(info));
-        }
+        money = warehouse.Inventory.Money;
+        currentSize = warehouse.Inventory.SpaceCost;
+        maxSize = warehouse.Inventory.SpaceLimit;
+        //foreach (ItemInfo info in warehouse.Items)
+        //{
+        //    itemDatas.Add(new ItemSaveData(info));
+        //}
     }
 }
-
+public class InventorySaveData
+{
+    public List<InventoryItemSaveData> items;
+}
 [Serializable]
 public class ItemSaveData
 {
@@ -110,6 +115,51 @@ public class ItemSaveData
         indexInGrid = itemInfo.indexInGrid;
     }
 }
+[Serializable]
+public class NewItemSaveData//因为存在同一个ItemData可能分别存储在不同Inventory中的情况，所以用一个总的列表存储它们，最后读档时再根据ID从中依次读取到相应的Inventory。
+{
+    public string modelID;
+    public string ID;
+
+    public NewItemSaveData(ItemData item)
+    {
+        modelID = item.ModelID;
+        ID = item.ID;
+    }
+}
+[Serializable]
+public class InventoryItemSaveData
+{
+    public string ID;
+    public int amount;
+    public bool isLocked;
+    public List<SlotSaveData> slots = new List<SlotSaveData>();
+
+    public string warehouseID;
+    public string buildingID;
+
+    public InventoryItemSaveData(ItemData data, int amount, List<ItemSlotData> slots, Warehouse warehouse = null, Building2D building = null)
+    {
+        ID = data.ID;
+        this.amount = amount;
+        isLocked = data.isLocked;
+        this.slots.AddRange(slots.ConvertAll(x => new SlotSaveData(x)));
+        warehouseID = warehouse != null ? warehouse.EntityID : string.Empty;
+        buildingID = building != null ? building.EntityID : string.Empty;
+    }
+}
+[Serializable]
+public class SlotSaveData
+{
+    public int index;
+    public int amount;
+
+    public SlotSaveData(ItemSlotData slot)
+    {
+        index = slot.index;
+        amount = slot.amount;
+    }
+}
 #endregion
 
 #region 建筑相关
@@ -124,9 +174,8 @@ public class BuildingSystemSaveData
 [Serializable]
 public class BuildingSaveData
 {
-    public string IDPrefix;
-
-    public string IDTail;
+    public string modelID;
+    public string ID;
 
     public string scene;
     public float posX;
@@ -138,8 +187,8 @@ public class BuildingSaveData
 
     public BuildingSaveData(BuildingData building)
     {
-        IDPrefix = building.IDPrefix;
-        IDTail = building.IDTail;
+        modelID = building.Info.ID;
+        ID = building.ID;
         scene = building.scene;
         posX = building.position.x;
         posY = building.position.y;
@@ -161,9 +210,9 @@ public class QuestSaveData
 
     public QuestSaveData(QuestData quest)
     {
-        questID = quest.Info.ID;
+        questID = quest.Model.ID;
         originalGiverID = quest.originalQuestHolder.TalkerID;
-        foreach (ObjectiveData o in quest.ObjectiveInstances)
+        foreach (ObjectiveData o in quest.Objectives)
         {
             objectiveDatas.Add(new ObjectiveSaveData(o));
         }
@@ -178,7 +227,7 @@ public class ObjectiveSaveData
 
     public ObjectiveSaveData(ObjectiveData objective)
     {
-        objectiveID = objective.entityID;
+        objectiveID = objective.ID;
         currentAmount = objective.CurrentAmount;
     }
 }
@@ -194,7 +243,7 @@ public class DialogueSaveData
 
     public DialogueSaveData(DialogueData dialogue)
     {
-        dialogID = dialogue.origin.ID;
+        dialogID = dialogue.model.ID;
         foreach (DialogueWordsData words in dialogue.wordsDatas)
         {
             wordsDatas.Add(new DialogueWordsSaveData(words));
@@ -271,11 +320,11 @@ public class ActionSaveData
 
     public ActionSaveData(ActionStackData stackElement)
     {
-        ID = stackElement. executor.ID;
+        ID = stackElement.executor.ID;
         isExecuting = stackElement.executor.IsExecuting;
-        executionTime = stackElement. executor.ExecutionTime;
-        endDelayTime = stackElement. executor.EndDelayTime;
-        isDone = stackElement. executor.IsDone;
+        executionTime = stackElement.executor.ExecutionTime;
+        endDelayTime = stackElement.executor.EndDelayTime;
+        isDone = stackElement.executor.IsDone;
         actionType = (int)stackElement.actionType;
     }
 }
@@ -301,3 +350,9 @@ public class MapMarkSaveData
     }
 }
 #endregion
+
+public interface ISaveLoad
+{
+    void SaveData(SaveData data);
+    void LoadData(SaveData data);
+}

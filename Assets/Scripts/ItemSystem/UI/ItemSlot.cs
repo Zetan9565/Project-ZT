@@ -1,14 +1,13 @@
+using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using System;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class ItemSlot : ItemSlotBase, IDragAble,
     IPointerDownHandler, IPointerUpHandler,
-    IPointerEnterHandler, IPointerExitHandler,
-    IBeginDragHandler, IDragHandler, IEndDragHandler
+    IPointerEnterHandler, IPointerExitHandler
 {
     public Sprite DragAbleIcon => icon.overrideSprite;
 
@@ -17,40 +16,30 @@ public class ItemSlot : ItemSlotBase, IDragAble,
 
     private ScrollRect parentScrollRect;
 
-    private Action<ItemSlot> onRightClick;
-    private Func<ItemSlot, ButtonWithTextData[]> getButtonsCallback;
+    private Action<ItemSlot> rightClickAction;
+    private Func<ItemSlot, ButtonWithTextData[]> buttonGetter;
     private bool dragable;
-    private Action<GameObject, ItemSlot> onEndDrag;
+    private Action<GameObject, ItemSlot> dragPutAction;
 
     #region 操作相关
-    public void Init(int index, ScrollRect parentScrollRect, Func<ItemSlot, ButtonWithTextData[]> getButtons, Action<ItemSlot> rightClick = null, Action<GameObject, ItemSlot> onEndDrag = null)
+    public void SetCallbacks(Func<ItemSlot, ButtonWithTextData[]> buttonGetter, Action<ItemSlot> rightClickAction = null, Action<GameObject, ItemSlot> dragPutAction = null)
     {
-        Empty();
-        indexInGrid = index;
-        this.parentScrollRect = parentScrollRect;
-        getButtonsCallback = getButtons;
-        onRightClick = rightClick;
-        this.onEndDrag = onEndDrag;
-        dragable = onEndDrag != null;
+        this.buttonGetter = buttonGetter;
+        this.rightClickAction = rightClickAction;
+        this.dragPutAction = dragPutAction;
+        dragable = dragPutAction != null;
     }
-    public void Init(Func<ItemSlot, ButtonWithTextData[]> getButtons, Action<ItemSlot> rightClick = null, Action<GameObject, ItemSlot> onEndDrag = null)
+    public void SetScrollRect(ScrollRect scrollRect)
     {
-        Init(-1, null, getButtons, rightClick, onEndDrag);
-    }
-
-    public override void SetItem(ItemInfo info)
-    {
-        if (info == null) return;
-        base.SetItem(info);
-        info.indexInGrid = indexInGrid;
+        parentScrollRect = scrollRect;
     }
 
     public void OnRightClick()
     {
         if (!DragableManager.Instance.IsDraging)
         {
-            onRightClick?.Invoke(this);
-            ItemWindowManager.Instance.CloseWindow();
+            rightClickAction?.Invoke(this);
+            NewWindowsManager.CloseWindow<ItemWindow>();
         }
     }
 
@@ -110,36 +99,26 @@ public class ItemSlot : ItemSlotBase, IDragAble,
     /// 交换单元格内容
     /// </summary>
     /// <param name="target"></param>
-    public void SwapInfoTo(ItemSlot target)
+    public void Swap(ItemSlot target)
     {
         if (target != this)
         {
             if (target.IsEmpty)
             {
-                target.SetItem(MItemInfo);
+                Data.Swap(target.Data);
+                target.Refresh();
                 target.Mark(mark.activeSelf);
-                if (IsDark) target.Dark();
-                else target.Light();
-                Empty();
             }
             else
             {
                 bool targetMark = target.mark.activeSelf;
-                bool targetDark = target.IsDark;
 
-                ItemInfo targetInfo = target.MItemInfo;
-                target.SetItem(MItemInfo);
-
+                Data.Swap(target.Data);
+                target.Refresh();
                 target.Mark(mark.activeSelf);
 
-                SetItem(targetInfo);
+                Refresh();
                 Mark(targetMark);
-
-                if (IsDark) target.Dark();
-                else target.Light();
-
-                if (targetDark) Dark();
-                else Light();
             }
         }
         FinishDrag();
@@ -147,18 +126,18 @@ public class ItemSlot : ItemSlotBase, IDragAble,
 
     private void BeginDrag()
     {
-        if (ItemSelectionManager.Instance.IsUIOpen && IsDark || !dragable)
+        if (NewWindowsManager.IsWindowOpen<ItemSelectionWindow>() && IsDark || !dragable)
             return;
-        DragableManager.Instance.StartDrag(this, FinishDrag, icon.rectTransform.rect.width, icon.rectTransform.rect.height);
-        ItemWindowManager.Instance.CloseWindow();
-        Select();
+        DragableManager.Instance.BeginDrag(this, OnEndDrag, icon.rectTransform.rect.width, icon.rectTransform.rect.height);
+        NewWindowsManager.CloseWindow<ItemWindow>();
+        if (parentScrollRect) parentScrollRect.enabled = false;
+        Highlight(true);
     }
     public void FinishDrag()
     {
         if (!DragableManager.Instance.IsDraging) return;
-        DeSelect();
-        DragableManager.Instance.ResetIcon();
-        ItemWindowManager.Instance.CloseWindow();
+        Highlight(false);
+        NewWindowsManager.CloseWindow<ItemWindow>();
     }
     #endregion
 
@@ -185,12 +164,13 @@ public class ItemSlot : ItemSlotBase, IDragAble,
                 }
                 else if (clickCount == 1 && touchTime < 0.5f)
                 {
-                    ButtonWithTextData[] buttonDatas = getButtonsCallback?.Invoke(this);
-                    foreach (var data in buttonDatas)
-                    {
-                        data.callback += ItemWindowManager.Instance.CloseWindow;
-                    }
-                    ItemWindowManager.Instance.ShowItemInfo(this, buttonDatas);
+                    ButtonWithTextData[] buttonDatas = buttonGetter?.Invoke(this);
+                    if (buttonDatas != null)
+                        foreach (var data in buttonDatas)
+                        {
+                            data.callback += () => NewWindowsManager.CloseWindow<ItemWindow>();
+                        }
+                    NewWindowsManager.OpenWindow<ItemWindow>(this, buttonDatas);
                 }
             }
         }
@@ -212,15 +192,13 @@ public class ItemSlot : ItemSlotBase, IDragAble,
     {
 #if UNITY_ANDROID
         if (pressCoroutine != null) StopCoroutine(pressCoroutine);
-        if (DragableManager.Instance.IsDraging && dragable && (DragableManager.Instance.Current as ItemSlot) == this)
-            OnEndDrag(eventData);
 #endif
     }
 
     public void OnPointerEnter(PointerEventData eventData)//用于PC悬停
     {
 #if UNITY_STANDALONE
-        ItemWindowManager.Instance.ShowItemInfo(this);
+        NewWindowsManager.OpenWindow<ItemWindow>(this);
         if (!DragableManager.Instance.IsDraging)
             Select();
 #endif
@@ -229,7 +207,7 @@ public class ItemSlot : ItemSlotBase, IDragAble,
     public void OnPointerExit(PointerEventData eventData)//用于安卓拖拽、PC悬停
     {
 #if UNITY_STANDALONE
-        ItemWindowManager.Instance.CloseWindow();
+        NewWindowsManager.CloseWindow<ItemWindow>();
         if (!DragableManager.Instance.IsDraging)
         {
             DeSelect();
@@ -239,33 +217,13 @@ public class ItemSlot : ItemSlotBase, IDragAble,
 #endif
     }
 
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        if (parentScrollRect) parentScrollRect.OnBeginDrag(eventData);//修复ScrollRect冲突
-#if UNITY_ANDROID
-        if (pressCoroutine != null) StopCoroutine(pressCoroutine);
-        isClick = false;
-#endif
-    }
-
-    public void OnDrag(PointerEventData eventData)//用于安卓拖拽
-    {
-        if (!DragableManager.Instance.IsDraging && parentScrollRect) parentScrollRect.OnDrag(eventData);//修复ScrollRect冲突
-#if UNITY_ANDROID
-        if (!IsEmpty && dragable && eventData.button == PointerEventData.InputButton.Left && (DragableManager.Instance.Current as ItemSlot) == this)
-        {
-            DragableManager.Instance.MoveIcon();
-        }
-#endif
-    }
-
     public void OnEndDrag(PointerEventData eventData)//用于安卓拖拽
     {
-        if (parentScrollRect) parentScrollRect.OnEndDrag(eventData);//修复ScrollRect冲突
+        if (parentScrollRect) parentScrollRect.enabled = true;//修复ScrollRect冲突
 #if UNITY_ANDROID
         if (!IsEmpty && dragable && eventData.button == PointerEventData.InputButton.Left && DragableManager.Instance.IsDraging && eventData.pointerCurrentRaycast.gameObject)
         {
-            onEndDrag?.Invoke(eventData.pointerCurrentRaycast.gameObject, this);
+            dragPutAction?.Invoke(eventData.pointerCurrentRaycast.gameObject, this);
         }
 #endif
         FinishDrag();

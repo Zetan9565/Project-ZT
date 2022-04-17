@@ -59,6 +59,7 @@ MonoBehaviour:
     rid: -2
   questFlagOffset: {x: 0, y: 2.8, z: 0}
   iconHolder: {fileID: 0}
+  interactive: {fileID: 0}
   references:
     version: 2
     RefIds:
@@ -133,10 +134,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actionInputInterval: 0.2
-  moveInput: {x: 0, y: 0}
-  validMoveInput: {x: 0, y: 0}
-  rollInput: 0
-  dashInput: 0
+  startDirection: {x: 1, y: 0}
 --- !u!114 &8273591174858142080
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -223,7 +221,7 @@ Rigidbody2D:
   m_AngularDrag: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
@@ -250,7 +248,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1429737066326795183}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de3699ba1d38e394ca0f01d1dbb2fe67, type: 3}
   m_Name: 
@@ -422,9 +420,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2260592791508134399}
-  - component: {fileID: 944977268002478786}
   - component: {fileID: 2755063222261814629}
-  m_Layer: 7
+  m_Layer: 13
   m_Name: Interactive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -446,57 +443,6 @@ Transform:
   m_Father: {fileID: 1429737066326795177}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &944977268002478786
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2649541484155449904}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76f521c22894b2d4d8f75ddcb24c38b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  activated: 1
-  _3D: 0
-  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
-  icon: {fileID: 21300000, guid: 56b94c01694ae5648824eb62a97f268a, type: 3}
-  hidePanelOnInteract: 1
-  component: {fileID: 0}
-  interactMethod: DoInteract
-  interactiveMethod: get_IsInteractive
-  nameMethod: get_TalkerName
-  OnEnter:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStay:
-    m_PersistentCalls:
-      m_Calls: []
-  OnExit:
-    m_PersistentCalls:
-      m_Calls: []
-  OnEnter2D:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStay2D:
-    m_PersistentCalls:
-      m_Calls: []
-  OnExit2D:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: Talker, Assembly-CSharp
-        m_MethodName: OnExit
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!58 &2755063222261814629
 CircleCollider2D:
   m_ObjectHideFlags: 0

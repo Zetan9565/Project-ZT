@@ -65,7 +65,7 @@ namespace ZetanStudio.BehaviourTree
                 }
                 else EditorGUILayout.HelpBox("只在本场景生效，若要制作预制件，请使用BehaviourExecutor", MessageType.Info);
             }
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             var hasTreeBef = behaviour.objectReferenceValue;
             if (target is not RuntimeBehaviourExecutor)
@@ -80,7 +80,7 @@ namespace ZetanStudio.BehaviourTree
             if (behaviour.objectReferenceValue)
             {
                 if (GUILayout.Button("编辑")) BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor);
-                serializedTree.Update();
+                serializedTree.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(serializedTree.FindProperty("_name"));
                 EditorGUILayout.PropertyField(serializedTree.FindProperty("description"));
@@ -114,7 +114,7 @@ namespace ZetanStudio.BehaviourTree
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
             if (behaviour.objectReferenceValue)
             {
-                serializedTree.Update();
+                serializedTree.UpdateIfRequiredOrScript();
                 showList.target = EditorGUILayout.Foldout(serializedVariables.isExpanded, "行为树共享变量", true);
                 if (EditorGUILayout.BeginFadeGroup(showList.faded))
                     variableList.DoLayoutList();

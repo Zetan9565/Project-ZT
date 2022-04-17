@@ -27,7 +27,7 @@ public class ActionExecutorInspetor : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         if (Application.isPlaying)
         {

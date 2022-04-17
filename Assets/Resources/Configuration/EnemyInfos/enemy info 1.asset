@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ID: ENMY002
   _name: "\u50F5\u5C38"
-  sex: 0
+  _SMParams: {fileID: 0}
+  attribute:
+    attributes: []
+  level: 0
   race: {fileID: 11400000, guid: 150e8a581f32093459fd9b32c975e6f7, type: 2}
   dropItems: {fileID: 11400000, guid: 3e811b99296efdc4c831f86080b2803f, type: 2}
   lootPrefab: {fileID: 4971178635026308412, guid: 7786fb215e3056c4e93993db12bea13e,

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
@@ -163,10 +164,21 @@ namespace ZetanStudio.BehaviourTree
         }
         private void UpdateRecheck()
         {
-            if (node.IsInstance && node is Conditional)
+            if (node.IsInstance && node.IsDone && node is Conditional)
             {
-                Composite parent = node.Owner.FindParent(node) as Composite;
-                if (parent && parent.AbortType != AbortType.None)
+                bool rechecking = false;
+                var input = this.input;
+                while (input != null && input.connections.Count() > 0 && input.connections.ElementAt(0) is Edge edge && edge.output is Port output && output.node is NodeEditor node && node.node is ParentNode parent)
+                {
+                    if (parent is Composite composite)
+                    {
+                        rechecking = composite.AbortType != AbortType.None;
+                        break;
+                    }
+                    else input = node.input;
+                }
+
+                if (rechecking)
                 {
                     repeat.text = "Recheck";
                     repeat.tooltip = "后台检查中";
@@ -199,7 +211,7 @@ namespace ZetanStudio.BehaviourTree
                         break;
                     case AbortType.Both:
                         abort.text = "↓→";
-                        abort.tooltip = "中止自我或更低优先";
+                        abort.tooltip = "中止自我和更低优先";
                         break;
                     default:
                         abort.text = string.Empty;

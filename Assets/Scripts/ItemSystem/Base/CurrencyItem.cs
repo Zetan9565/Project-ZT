@@ -19,7 +19,12 @@ public class CurrencyItem : ItemBase
 
 public enum CurrencyType
 {
+    [InspectorName("金币")]
     Money,
+    [InspectorName("经验")]
     EXP,
+    [InspectorName("技能点")]
     SkillPoint,
+    [InspectorName("技能经验")]
+    SkillEXP,
 }

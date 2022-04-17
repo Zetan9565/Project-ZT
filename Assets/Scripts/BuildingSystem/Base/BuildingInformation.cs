@@ -6,8 +6,12 @@ using UnityEngine;
 public class BuildingInformation : ScriptableObject
 {
     [SerializeField]
-    private string _IDPrefix;
-    public string IDPrefix => _IDPrefix;
+    private string _ID;
+    public string ID => _ID;
+
+    [SerializeField, SpriteSelector]
+    private Sprite icon;
+    public Sprite Icon => icon;
 
     [SerializeField]
     private string _name;
@@ -37,12 +41,12 @@ public class BuildingInformation : ScriptableObject
     }
 
     [SerializeField]
-    private Building prefab;
-    public Building Prefab => prefab;
+    private Building2D prefab;
+    public Building2D Prefab => prefab;
 
     [SerializeField]
-    private BuildingPreview preview;
-    public BuildingPreview Preview => preview;
+    private BuildingPreview2D preview;
+    public BuildingPreview2D Preview => preview;
 
     [SerializeField]
     private List<MaterialInfo> materials = new List<MaterialInfo>();

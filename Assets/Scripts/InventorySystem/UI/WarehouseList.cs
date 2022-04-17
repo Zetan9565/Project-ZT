@@ -1,0 +1,1 @@
+public class WarehouseList : ScrollListView<WarehouseAgent, IWarehouseKeeper> { }

@@ -47,7 +47,7 @@ public class CropInfoInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
         if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID())
@@ -75,7 +75,7 @@ public class CropInfoInspector : Editor
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         if (stages.isExpanded)
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             stageList.DoLayoutList();
             serializedObject.ApplyModifiedProperties();
         }
@@ -89,7 +89,7 @@ public class CropInfoInspector : Editor
 
         stageList.drawElementCallback = (rect, index, isActive, isFocused) =>
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             SerializedProperty cropStage = stages.GetArrayElementAtIndex(index);
             SerializedProperty lastingDays = cropStage.FindPropertyRelative("lastingDays");
@@ -149,7 +149,7 @@ public class CropInfoInspector : Editor
             if (cropStage.isExpanded)
             {
                 int lineCount = 1;
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 graph.objectReferenceValue = EditorGUI.ObjectField(new Rect(rect.x - rect.width + lineHeight * 4.2f, rect.y + lineHeightSpace * lineCount, rect.width - 8, lineHeight * 3.2f),
                     string.Empty, graph.objectReferenceValue, typeof(Sprite), false);
@@ -233,7 +233,7 @@ public class CropInfoInspector : Editor
         {
             if (crop.Stages.Count < 10)
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个阶段吗？", "确定", "取消"))
                     serializedObject.FindProperty("stages").DeleteArrayElementAtIndex(list.index);
@@ -269,7 +269,7 @@ public class CropInfoInspector : Editor
                     else if (x.Stage > y.Stage) return 1;
                     else return 0;
                 });
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 foreach (var returnStage in returnStages)
                 {

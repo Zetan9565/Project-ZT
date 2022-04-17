@@ -16,7 +16,7 @@ namespace ZetanStudio.BehaviourTree
 
         public override void OnInspectorGUI()
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             variableList.DoLayoutList();
             serializedObject.ApplyModifiedProperties();
         }

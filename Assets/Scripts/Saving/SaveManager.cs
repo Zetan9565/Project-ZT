@@ -28,41 +28,39 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
     #region 存档相关
     public bool Save()
     {
-        using (FileStream fs = ZetanUtility.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create))
+        using FileStream fs = ZetanUtility.OpenFile(Application.persistentDataPath + "/" + dataName, FileMode.Create);
+        try
         {
-            try
-            {
-                BinaryFormatter bf = new BinaryFormatter();
+            BinaryFormatter bf = new BinaryFormatter();
 
-                SaveData data = new SaveData(Application.version);
+            SaveData data = new SaveData(Application.version);
 
-                SaveTime(data);
-                SaveBag(data);
-                SaveBuilding(data);
-                SaveMaking(data);
-                SaveWarehouse(data);
-                SaveQuest(data);
-                SaveDialogue(data);
-                SaveTrigger(data);
-                SaveActions(data);
-                SaveMapMark(data);
+            SaveTime(data);
+            SaveBag(data);
+            SaveBuilding(data);
+            SaveMaking(data);
+            SaveWarehouse(data);
+            SaveQuest(data);
+            SaveDialogue(data);
+            SaveTrigger(data);
+            SaveActions(data);
+            SaveMapMark(data);
 
-                bf.Serialize(fs, data);
-                ZetanUtility.Encrypt(fs, encryptKey);
+            bf.Serialize(fs, data);
+            ZetanUtility.Encrypt(fs, encryptKey);
 
-                fs.Close();
+            fs.Close();
 
-                MessageManager.Instance.New("保存成功！");
-                //Debug.Log("存档版本号：" + data.version);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning(ex.Message);
-                if (fs != null) fs.Close();
-                MessageManager.Instance.New("保存失败！");
-                return false;
-            }
+            MessageManager.Instance.New("保存成功！");
+            //Debug.Log("存档版本号：" + data.version);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning(ex.Message);
+            if (fs != null) fs.Close();
+            MessageManager.Instance.New("保存失败！");
+            return false;
         }
     }
 
@@ -73,7 +71,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void SaveBag(SaveData data)
     {
-        BackpackManager.Instance.SaveData(data);
+        //BackpackManager.Instance.SaveData(data);
     }
 
     void SaveBuilding(SaveData data)
@@ -83,20 +81,20 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void SaveMaking(SaveData data)
     {
-        MakingManager.Instance.SaveData(data);
+        //MakingManager.Instance.SaveData(data);
     }
 
     void SaveWarehouse(SaveData data)
     {
-        foreach (var talker in DialogueManager.Instance.Talkers.Values)
-        {
-            if (talker.Info.IsWarehouseAgent)
-                data.warehouseDatas.Add(new WarehouseSaveData(talker.TalkerID, talker.warehouse));
-        }
-        foreach (var kvp in FindObjectsOfType<Warehouse>())
-        {
-            data.warehouseDatas.Add(new WarehouseSaveData(kvp.EntityID, kvp.WData));
-        }
+        //foreach (var talker in DialogueManager.Instance.Talkers.Values)
+        //{
+        //    if (talker.Info.IsWarehouseAgent)
+        //        data.warehouseDatas.Add(new WarehouseSaveData(talker.TalkerID, talker.warehouse));
+        //}
+        //foreach (var kvp in FindObjectsOfType<Warehouse>())
+        //{
+        //    data.warehouseDatas.Add(new WarehouseSaveData(kvp.EntityID, kvp.WData));
+        //}
     }
 
     void SaveQuest(SaveData data)
@@ -160,7 +158,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         GameManager.InitGame(typeof(TriggerHolder));
 
         LoadPlayer(data);
-        yield return new WaitUntil(() => { return PlayerManager.Instance.Backpack != null; });
+        yield return new WaitUntil(() => { return BackpackManager.Instance.Inventory != null; });
         LoadBackpack(data);
         LoadBuilding(data);
         LoadMaking(data);
@@ -189,48 +187,47 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void LoadBackpack(SaveData data)
     {
-        BackpackManager.Instance.LoadData(data.backpackData);
+        //BackpackManager.Instance.LoadData(data.backpackData);
     }
 
     void LoadBuilding(SaveData data)
     {
-        BuildingManager.Instance.Init();
         BuildingManager.Instance.LoadData(data.buildingSystemData);
     }
 
     void LoadMaking(SaveData data)
     {
-        MakingManager.Instance.LoadData(data);
+        //MakingManager.Instance.LoadData(data);
     }
 
     void LoadWarehouse(SaveData data)
     {
-        Warehouse[] warehouses = FindObjectsOfType<Warehouse>();
-        foreach (WarehouseSaveData wd in data.warehouseDatas)
-        {
-            WarehouseData warehouse = null;
-            DialogueManager.Instance.Talkers.TryGetValue(wd.handlerID, out TalkerData handler);
-            if (handler) warehouse = handler.warehouse;
-            else
-            {
-                Warehouse wagent = Array.Find(warehouses, x => x.EntityID == wd.handlerID);
-                if (wagent) warehouse = wagent.WData;
-            }
-            if (warehouse != null)
-            {
-                warehouse.size = new ScopeInt(wd.maxSize) { Current = wd.currentSize };
-                warehouse.Items.Clear();
-                foreach (ItemSaveData id in wd.itemDatas)
-                {
-                    ItemInfo newInfo = new ItemInfo(GameManager.GetItemByID(id.itemID), id.amount)
-                    {
-                        indexInGrid = id.indexInGrid
-                    };
-                    //TODO 把newInfo的耐久度等信息处理
-                    warehouse.Items.Add(newInfo);
-                }
-            }
-        }
+        //Warehouse[] warehouses = FindObjectsOfType<Warehouse>();
+        //foreach (WarehouseSaveData wd in data.warehouseDatas)
+        //{
+        //    WarehouseData warehouse = null;
+        //    DialogueManager.Instance.Talkers.TryGetValue(wd.handlerID, out TalkerData handler);
+        //    if (handler) warehouse = handler.warehouse;
+        //    else
+        //    {
+        //        Warehouse wagent = Array.Find(warehouses, x => x.EntityID == wd.handlerID);
+        //        if (wagent) warehouse = wagent.WData;
+        //    }
+        //    if (warehouse != null)
+        //    {
+        //        warehouse.size = new ScopeInt(wd.maxSize) { Current = wd.currentSize };
+        //        warehouse.Items.Clear();
+        //        foreach (ItemSaveData id in wd.itemDatas)
+        //        {
+        //            ItemInfo newInfo = new ItemInfo(ItemUtility.GetItemByID(id.itemID), id.amount)
+        //            {
+        //                indexInGrid = id.indexInGrid
+        //            };
+        //            //TODO 把newInfo的耐久度等信息处理
+        //            warehouse.Items.Add(newInfo);
+        //        }
+        //    }
+        //}
     }
 
     void LoadQuest(SaveData data)

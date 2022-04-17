@@ -22,7 +22,7 @@ MonoBehaviour:
   buyPrice: 0
   icon: {fileID: 21300000, guid: fd7a4f97e0beced4999a4791b794b75d, type: 3}
   description: "\u88C5\u6709\u4E00\u4E9B\u5236\u4F5C\u6750\u6599\u7684\u7BB1\u5B50\u3002"
-  stackAble: 0
+  stackNum: 5
   discardAble: 1
   lockAble: 1
   usable: 1
@@ -32,7 +32,8 @@ MonoBehaviour:
   minYield: 1
   maxYield: 1
   materialType: 0
-  materials: []
+  formulation: {fileID: 0}
+  _DIYAble: 0
   minAmount: 0
   maxAmount: 0
   itemsInBox:
@@ -57,6 +58,12 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 6dd284fcfbbd47f45902a74655b20192, type: 2}
     minAmount: 5
     maxAmount: 5
+    dropRate: 100
+    onlyDropForQuest: 0
+    bindedQuest: {fileID: 0}
+  - item: {fileID: 11400000, guid: 51aadb36e347b054d83df1f9f38e705e, type: 2}
+    minAmount: 1
+    maxAmount: 1
     dropRate: 100
     onlyDropForQuest: 0
     bindedQuest: {fileID: 0}

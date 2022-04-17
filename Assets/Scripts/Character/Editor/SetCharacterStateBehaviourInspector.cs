@@ -27,7 +27,7 @@ public class SetCharacterStateBehaviourInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(normalizedTime, new GUIContent("进入时间"));
         EditorGUILayout.PropertyField(state, new GUIContent("主状态"));

@@ -1,0 +1,1 @@
+public class MakingList : ScrollListView<MakingAgent, ItemBase> { }

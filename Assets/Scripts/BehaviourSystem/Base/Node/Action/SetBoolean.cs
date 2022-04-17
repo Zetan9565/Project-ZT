@@ -12,7 +12,7 @@ namespace ZetanStudio.BehaviourTree
 
         protected override NodeStates OnUpdate()
         {
-            if (Owner.SetVariable<bool>(varName, value)) return NodeStates.Success;
+            if (Tree.SetVariable<bool>(varName, value)) return NodeStates.Success;
             else return NodeStates.Failure;
         }
     }

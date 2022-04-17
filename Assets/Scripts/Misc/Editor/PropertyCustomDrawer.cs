@@ -21,7 +21,7 @@ public class RoleAttributeGroupDrawer
             {
                 drawElementCallback = (rect, index, isActive, isFocused) =>
                 {
-                    owner.Update();
+                    owner.UpdateIfRequiredOrScript();
                     EditorGUI.BeginChangeCheck();
                     SerializedProperty attr = attrs.GetArrayElementAtIndex(index);
                     SerializedProperty type = attr.FindPropertyRelative("type");
@@ -52,14 +52,14 @@ public class RoleAttributeGroupDrawer
 
     public void DoLayoutDraw()
     {
-        owner?.Update();
+        owner?.UpdateIfRequiredOrScript();
         List?.DoLayoutList();
         owner?.ApplyModifiedProperties();
     }
 
     public void DoDraw(Rect rect)
     {
-        owner?.Update();
+        owner?.UpdateIfRequiredOrScript();
         List?.DoList(rect);
         owner?.ApplyModifiedProperties();
     }
@@ -108,7 +108,7 @@ public class ItemAmountListDrawer
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                owner.Update();
+                owner.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 SerializedProperty itemInfo = property.GetArrayElementAtIndex(index);
                 SerializedProperty item = itemInfo.FindPropertyRelative("item");
@@ -133,7 +133,7 @@ public class ItemAmountListDrawer
 
             onRemoveCallback = (list) =>
             {
-                owner.Update();
+                owner.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
                 {
@@ -170,14 +170,14 @@ public class ItemAmountListDrawer
 
     public void DoLayoutDraw()
     {
-        owner?.Update();
+        owner?.UpdateIfRequiredOrScript();
         List?.DoLayoutList();
         owner?.ApplyModifiedProperties();
     }
 
     public void DoDraw(Rect rect)
     {
-        owner?.Update();
+        owner?.UpdateIfRequiredOrScript();
         List?.DoList(rect);
         owner?.ApplyModifiedProperties();
     }
@@ -202,7 +202,7 @@ public class MaterialListDrawer
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                owner.Update();
+                owner.UpdateIfRequiredOrScript();
                 SerializedProperty material = property.GetArrayElementAtIndex(index);
                 SerializedProperty materialType = material.FindPropertyRelative("materialType");
                 SerializedProperty makingType = material.FindPropertyRelative("makingType");
@@ -287,7 +287,7 @@ public class MaterialListDrawer
 
             onAddCallback = (list) =>
             {
-                owner.Update();
+                owner.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 property.InsertArrayElementAtIndex(property.arraySize);
                 SerializedProperty material = property.GetArrayElementAtIndex(property.arraySize - 1);
@@ -306,7 +306,7 @@ public class MaterialListDrawer
 
             onRemoveCallback = (list) =>
             {
-                owner.Update();
+                owner.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
                 {
@@ -343,14 +343,14 @@ public class MaterialListDrawer
 
     public void DoLayoutDraw()
     {
-        owner?.Update();
+        owner?.UpdateIfRequiredOrScript();
         List?.DoLayoutList();
         owner?.ApplyModifiedProperties();
     }
 
     public void DoDraw(Rect rect)
     {
-        owner?.Update();
+        owner?.UpdateIfRequiredOrScript();
         List?.DoList(rect);
         owner?.ApplyModifiedProperties();
     }
@@ -375,7 +375,7 @@ public class DropItemListDrawer
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                owner.Update();
+                owner.UpdateIfRequiredOrScript();
                 SerializedProperty itemInfo = property.GetArrayElementAtIndex(index);
                 EditorGUI.BeginChangeCheck();
                 SerializedProperty item = itemInfo.FindPropertyRelative("item");
@@ -445,7 +445,7 @@ public class DropItemListDrawer
 
             onRemoveCallback = (list) =>
             {
-                owner.Update();
+                owner.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个掉落道具吗？", "确定", "取消"))
                 {
@@ -482,14 +482,14 @@ public class DropItemListDrawer
 
     public void DoLayoutDraw()
     {
-        owner?.Update();
+        owner?.UpdateIfRequiredOrScript();
         List?.DoLayoutList();
         owner?.ApplyModifiedProperties();
     }
 
     public void DoDraw(Rect rect)
     {
-        owner?.Update();
+        owner?.UpdateIfRequiredOrScript();
         List?.DoList(rect);
         owner?.ApplyModifiedProperties();
     }
@@ -525,7 +525,7 @@ public class ConditionGroupDrawer
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                owner.Update();
+                owner.UpdateIfRequiredOrScript();
                 SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
                 SerializedProperty type = condition.FindPropertyRelative("type");
                 ConditionType conditionType = (ConditionType)type.enumValueIndex;
@@ -588,6 +588,7 @@ public class ConditionGroupDrawer
 
             elementHeightCallback = (int index) =>
             {
+                if (index < 0 || index >= conditions.arraySize) return lineHeightSpace;
                 SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
                 SerializedProperty type = condition.FindPropertyRelative("type");
                 ConditionType conditionType = (ConditionType)type.enumValueIndex;
@@ -611,7 +612,7 @@ public class ConditionGroupDrawer
 
             onRemoveCallback = (list) =>
             {
-                owner.Update();
+                owner.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个条件吗？", "确定", "取消"))
                 {
@@ -668,14 +669,14 @@ public class ConditionGroupDrawer
     {
         if (List != null && List.count > 0)
         {
-            owner?.Update();
+            owner?.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             var re = property.FindPropertyRelative("relational");
             EditorGUILayout.PropertyField(re, new GUIContent("(?)条件关系表达式", re.tooltip));
             if (EditorGUI.EndChangeCheck())
                 owner?.ApplyModifiedProperties();
         }
-        owner?.Update();
+        owner?.UpdateIfRequiredOrScript();
         List?.DoLayoutList();
         owner?.ApplyModifiedProperties();
     }
@@ -684,14 +685,14 @@ public class ConditionGroupDrawer
     {
         if (List != null && List.count > 0)
         {
-            owner?.Update();
+            owner?.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             var re = property.FindPropertyRelative("relational");
             EditorGUILayout.PropertyField(re, new GUIContent("(?)条件关系表达式", re.tooltip));
             if (EditorGUI.EndChangeCheck())
                 owner?.ApplyModifiedProperties();
         }
-        owner?.Update();
+        owner?.UpdateIfRequiredOrScript();
         List?.DoList(List != null && List.count > 0 ? new Rect(rect.x, rect.y + lineHeightSpace, rect.width, rect.height) : rect);
         owner?.ApplyModifiedProperties();
     }

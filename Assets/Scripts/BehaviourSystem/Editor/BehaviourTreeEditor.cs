@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.UIElements;
@@ -23,6 +24,7 @@ namespace ZetanStudio.BehaviourTree
         private ToolbarButton redo;
         private Label treeName;
         private GameObject latestGo;
+
         private BehaviourTreeSettings settings;
         #endregion
 
@@ -173,10 +175,33 @@ namespace ZetanStudio.BehaviourTree
                     counter++;
                 }
         }
+        private void UpdateTreeView()
+        {
+            if (tree && latestGo)
+            {
+                BehaviourExecutor[] exes = latestGo.GetComponents<BehaviourExecutor>();
+                if (!System.Array.Exists(exes, e => e.Behaviour == tree))
+                {
+                    if (tree.IsRuntime)
+                    {
+                        tree = null;
+                        treeView.Vocate();
+                    }
+                    else if (exes.Length > 0)
+                    {
+                        ChangeTreeBySelection();
+                    }
+                    else if (!treeView.tree) treeView.DrawTreeView(tree);
+                }
+                else if (!treeView.tree) treeView.DrawTreeView(tree);
+            }
+            else if (!treeView.tree) treeView.DrawTreeView(tree);
+            treeView.OnUpdate();
+        }
         private void UpdateTreeDropdown()
         {
             if (exeMenu != null)
-                if (latestGo)
+                if (tree && latestGo && System.Array.Exists(latestGo.GetComponents<BehaviourExecutor>(), e => e.Behaviour == tree))
                 {
                     for (int i = exeMenu.menu.MenuItems().Count - 1; i >= 0; i--)
                     {
@@ -206,24 +231,50 @@ namespace ZetanStudio.BehaviourTree
         }
         private void UpdateTreeName()
         {
-            if (tree && treeName != null)
+            if (treeName != null)
             {
-                if (latestGo)
+                treeName.text = "行为树视图";
+                if (tree)
                 {
-                    BehaviourExecutor[] exes = latestGo.GetComponents<BehaviourExecutor>();
-                    foreach (var exe in exes)
+                    if (latestGo)
                     {
-                        if (exe.Behaviour == tree)
+                        foreach (var exe in latestGo.GetComponents<BehaviourExecutor>())
                         {
-                            treeName.text = $"行为树视图\t当前：{(string.IsNullOrEmpty(tree.Name) ? "(未命名)" : tree.Name)} ({exe.gameObject.GetPath()} <{exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)}>)";
-                            break;
+                            if (exe.Behaviour == tree)
+                            {
+                                treeName.text = $"行为树视图\t当前：{(string.IsNullOrEmpty(tree.Name) ? "(未命名)" : tree.Name)} ({exe.gameObject.GetPath()} <{exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)}>)";
+                                return;
+                            }
                         }
                     }
+                    if (!tree.IsRuntime) treeName.text = $"行为树视图\t当前：{(string.IsNullOrEmpty(tree.Name) ? "(未命名)" : tree.Name)} ({AssetDatabase.GetAssetPath(tree)})";
                 }
-                else treeName.text = $"行为树视图\t当前：{(string.IsNullOrEmpty(tree.Name) ? "(未命名)" : tree.Name)} ({AssetDatabase.GetAssetPath(tree)})";
             }
-            else treeName.text = "行为树视图";
         }
+        private void UpdateUndoRedo()
+        {
+            if (undo == null || redo == null) return;
+            undo.visible = treeView != null && Application.isPlaying;
+            redo.visible = treeView != null && Application.isPlaying;
+            if (treeView != null)
+            {
+                undo.SetEnabled(treeView.CanUndo);
+                undo.tooltip = treeView.UndoName;
+                redo.SetEnabled(treeView.CanRedo);
+                redo.tooltip = treeView.RedoName;
+            }
+        }
+        private void OnUndoClick()
+        {
+            treeView?.UndoOperation();
+            UpdateUndoRedo();
+        }
+        private void OnRedoClick()
+        {
+            treeView?.RedoOperation();
+            UpdateUndoRedo();
+        }
+
         private void OnNodeSelected(NodeEditor selected)
         {
             if (!showInspector) return;
@@ -242,13 +293,20 @@ namespace ZetanStudio.BehaviourTree
             if (!treeView.nodes.ToList().Exists(x => x.selected))
                 inspectorView?.InspectTree(tree);
         }
+        private GameObject goBefPlay;
         private void OnPlayModeStateChanged(PlayModeStateChange state)
         {
             switch (state)
             {
                 case PlayModeStateChange.EnteredEditMode:
+                    if (goBefPlay) ChangeTreeBySelection(goBefPlay.GetComponent<BehaviourExecutor>());
+                    else ChangeTreeBySelection();
+                    UpdateUndoRedo();
+                    break;
                 case PlayModeStateChange.EnteredPlayMode:
+                    goBefPlay = latestGo;
                     ChangeTreeBySelection();
+                    UpdateUndoRedo();
                     break;
             }
         }
@@ -325,6 +383,7 @@ namespace ZetanStudio.BehaviourTree
             treeView = root.Q<BehaviourTreeView>();
             treeView.nodeSelectedCallback = OnNodeSelected;
             treeView.nodeUnselectedCallback = OnNodeUnselected;
+            treeView.undoRecordsChangedCallback = UpdateUndoRedo;
 
             inspectorLabel = root.Q<Label>("inspector-label");
             inspector = root.Q<Button>("view-inspector");
@@ -352,6 +411,12 @@ namespace ZetanStudio.BehaviourTree
             serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanEditorUtility.LoadAsset<GlobalVariables>());
             UpdateVariables();
 
+            undo = root.Q<ToolbarButton>("undo");
+            undo.clicked += OnUndoClick;
+            redo = root.Q<ToolbarButton>("redo");
+            redo.clicked += OnRedoClick;
+            UpdateUndoRedo();
+
             if (tree == null) ChangeTreeBySelection();
             else SelectTree(tree);
         }
@@ -362,8 +427,7 @@ namespace ZetanStudio.BehaviourTree
         }
         private void OnInspectorUpdate()
         {
-            treeView?.OnUpdate();
-            if (!treeView?.tree) treeView?.DrawTreeView(tree);
+            if (treeView != null) UpdateTreeView();
             UpdateTreeDropdown();
             UpdateTreeName();
         }
@@ -431,7 +495,7 @@ namespace ZetanStudio.BehaviourTree
             }
             if (serializedObject.targetObject)
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 variableList?.DoLayoutList();
                 serializedObject.ApplyModifiedProperties();
             }
@@ -441,7 +505,7 @@ namespace ZetanStudio.BehaviourTree
         #region 新建相关
         private void CreateNewTree(string assetName)
         {
-            BehaviourTree tree = ZetanEditorUtility.SaveFilePanel(CreateInstance<BehaviourTree>, assetName, true, true);
+            BehaviourTree tree = ZetanEditorUtility.SaveFilePanel(CreateInstance<BehaviourTree>, assetName, ping: true, select: true);
             if (tree)
             {
                 serializedTree = new SerializedObject(tree);
@@ -472,7 +536,7 @@ namespace ZetanStudio.BehaviourTree
             }
             if (EditorUtility.DisplayDialog("保存到本地", "保存到本地的行为树将失去对场景对象的引用，是否继续？", "继续", "取消"))
             {
-                ZetanEditorUtility.SaveFilePanel(() => BehaviourTree.ConvertToLocal(tree), assetName, true);
+                ZetanEditorUtility.SaveFilePanel(() => BehaviourTree.PrepareLocalization(tree), assetName, ping: true);
             }
         }
         #endregion

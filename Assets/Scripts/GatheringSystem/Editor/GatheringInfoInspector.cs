@@ -48,7 +48,7 @@ public class GatheringInfoInspector : Editor
         {
             EditorGUILayout.HelpBox("该采集物信息已完整。", MessageType.Info);
         }
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
         if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID())
@@ -72,7 +72,7 @@ public class GatheringInfoInspector : Editor
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         if (productItems.isExpanded)
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             dropList.DoLayoutDraw();
             serializedObject.ApplyModifiedProperties();
         }

@@ -17,13 +17,13 @@ public class ProductInfoInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(remark, new GUIContent("备注"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
 
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         listDrawer.DoLayoutDraw();
         serializedObject.ApplyModifiedProperties();
     }

@@ -16,6 +16,6 @@ public class BagItem : ItemBase
     public BagItem()
     {
         itemType = ItemType.Bag;
-        stackAble = false;
+        stackNum = 1;
     }
 }

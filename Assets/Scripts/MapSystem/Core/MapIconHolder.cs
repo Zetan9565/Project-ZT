@@ -91,7 +91,7 @@ public class MapIconHolder : MonoBehaviour
             if (iconInstance)
             {
                 if (iconInstance.iconImage.overrideSprite != icon) iconInstance.iconImage.overrideSprite = icon;
-                if (iconInstance.iconImage.rectTransform.rect.size != iconSize) iconInstance.iconImage.rectTransform.sizeDelta = iconSize;
+                if (iconInstance.rectTransform.rect.size != iconSize) iconInstance.rectTransform.sizeDelta = iconSize;
                 iconInstance.iconType = iconType;
                 yield return WaitForSeconds;
             }

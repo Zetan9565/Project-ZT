@@ -2,15 +2,15 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using ZetanExtends;
 
-[RequireComponent(typeof(Image))]
+[RequireComponent(typeof(RectTransform))]
 public class MapIcon : MonoBehaviour, IPointerClickHandler,
     IPointerDownHandler, IPointerUpHandler,
     IPointerEnterHandler, IPointerExitHandler
 {
     public new Transform transform { get; private set; }
 
-    [HideInInspector]
     public Image iconImage;
 
     public MapIconRange iconRange;
@@ -50,11 +50,15 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
     private bool keepOnMap;
     public bool KeepOnMap => holder ? holder.keepOnMap : keepOnMap;
 
+    public RectTransform rectTransform { get; private set; }
+
+    private FloatTipsPanel tips;
+
     public void Init(MapIconHolder holder)
     {
-        iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.sizeDelta = holder.iconSize;
         iconImage.overrideSprite = holder.icon;
-        iconImage.rectTransform.sizeDelta = holder.iconSize;
         iconType = holder.iconType;
         holder.iconInstance = this;
         this.holder = holder;
@@ -65,9 +69,9 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
     public void Init(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap,
 MapIconType iconType, bool removeAble, string textToDisplay = "")
     {
-        iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.sizeDelta = size;
         iconImage.overrideSprite = iconSprite;
-        iconImage.rectTransform.sizeDelta = size;
         this.iconType = iconType;
         ZetanUtility.SetActive(iconRange.gameObject, false);
         position = worldPosition;
@@ -79,9 +83,9 @@ MapIconType iconType, bool removeAble, string textToDisplay = "")
     public void Init(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap, float rangeSize,
     MapIconType iconType, bool removeAble, string textToDisplay = "")
     {
-        iconImage.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.sizeDelta = size;
         iconImage.overrideSprite = iconSprite;
-        iconImage.rectTransform.sizeDelta = size;
         this.iconType = iconType;
         if (rangeSize > 0)
         {
@@ -116,7 +120,7 @@ MapIconType iconType, bool removeAble, string textToDisplay = "")
         }
         iconImage.raycastTarget = true;
         removeAble = true;
-        if (!string.IsNullOrEmpty(TextToDisplay) && TipsManager.Instance) TipsManager.Instance.Hide();
+        if (!string.IsNullOrEmpty(TextToDisplay) && tips && tips.openBy is MapIcon icon && icon == this) tips.Close();
         textToDisplay = string.Empty;
         ObjectPool.Put(gameObject);
     }
@@ -134,7 +138,11 @@ MapIconType iconType, bool removeAble, string textToDisplay = "")
             if (holder) holder.OnMouseClick?.Invoke();
 #elif UNITY_ANDROID
             if (holder) holder.OnFingerClick?.Invoke();
-            if (!string.IsNullOrEmpty(TextToDisplay)) TipsManager.Instance.ShowText(transform.position, TextToDisplay, 2);
+            if (!string.IsNullOrEmpty(TextToDisplay))
+            {
+                tips = NewWindowsManager.OpenWindowBy<FloatTipsPanel>(transform.position, TextToDisplay, 2, false);
+                if (tips) tips.onClose += () => tips = null;
+            }
 #endif
         }
         if (eventData.button == PointerEventData.InputButton.Right) OnRightClick();
@@ -179,8 +187,8 @@ MapIconType iconType, bool removeAble, string textToDisplay = "")
 
     private void Awake()
     {
-        iconImage = GetComponent<Image>();
-        ImageCanvas = iconImage.GetComponent<CanvasGroup>();
+        rectTransform = GetComponent<RectTransform>();
+        ImageCanvas = this.GetOrAddComponent<CanvasGroup>();
         if (!ImageCanvas) ImageCanvas = iconImage.gameObject.AddComponent<CanvasGroup>();
         transform = base.transform;
     }

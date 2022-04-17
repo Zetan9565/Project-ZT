@@ -66,7 +66,7 @@ public partial class CharacterInfoInspector : Editor
         else EditorGUILayout.HelpBox("该角色信息已完整。", MessageType.Info);
         if (!NPC)
         {
-            serializedObject.Update();
+            serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
             if (string.IsNullOrEmpty(_ID.stringValue) || ExistsID())
@@ -88,17 +88,12 @@ public partial class CharacterInfoInspector : Editor
             }
             else if (player)
             {
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(SMParams, new GUIContent("状态机参数"));
-                EditorGUILayout.LabelField("背包信息");
-                SerializedProperty size = backpack.FindPropertyRelative("size");
-                SerializedProperty weight = backpack.FindPropertyRelative("weight");
-                size.FindPropertyRelative("max").intValue = EditorGUILayout.IntSlider("默认容量(格)", size.FindPropertyRelative("max").intValue, 30, 200);
-                weight.FindPropertyRelative("max").floatValue = EditorGUILayout.Slider("默认负重(WL)", weight.FindPropertyRelative("max").floatValue, 100, 1000);
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
                 attrDrawer.DoLayoutDraw();
                 serializedObject.ApplyModifiedProperties();
             }

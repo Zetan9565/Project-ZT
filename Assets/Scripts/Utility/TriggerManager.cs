@@ -18,7 +18,7 @@ public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
             triggers.Add(triggerName, value ? TriggerState.On : TriggerState.Off);
         else triggers[triggerName] = value ? TriggerState.On : TriggerState.Off;
         OnTriggerSetEvent?.Invoke(triggerName, value);
-        NotifyCenter.Instance.PostNotify("TriggerChange", triggerName, value);
+        NotifyCenter.PostNotify(NotifyCenter.CommonKeys.TriggerChanged, triggerName, value);
     }
 
     public TriggerState GetTriggerState(string triggerName)
@@ -75,7 +75,6 @@ public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
         foreach (TriggerHolderSaveData hd in data.triggerData.holderDatas)
             foreach (var holder in holders)
                 holder.LoadData(hd);
-        QuestManager.Instance.UpdateUI();
     }
 }
 public enum TriggerState

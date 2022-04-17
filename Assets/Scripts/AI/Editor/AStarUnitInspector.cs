@@ -67,7 +67,7 @@ public class AStarUnitInspector : Editor
         EditorGUILayout.BeginVertical("Box");
         if (manager) EditorGUILayout.LabelField("寻路单元格大小", manager.BaseCellSize.ToString());
         else EditorGUILayout.HelpBox("未找到A*管理器对象!", MessageType.Warning);
-        serializedObject.Update();
+        serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(unitSize, new GUIContent("单位大小"));
         if (unitSize.vector2IntValue.x < 1) unitSize.vector2IntValue = new Vector2Int(1, unitSize.vector2IntValue.y);

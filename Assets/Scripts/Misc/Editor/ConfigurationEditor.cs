@@ -94,7 +94,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
                     string folder = EditorUtility.OpenFolderPanel("选择移动文件夹", latestFolder, "");
                     if (!string.IsNullOrEmpty(folder))
                     {
-                        if (ZetanEditorUtility.IsValidPath(folder))
+                        if (ZetanEditorUtility.IsValidFolder(folder))
                         {
                             try
                             {
@@ -104,13 +104,13 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
                             }
                             catch
                             {
-                                if (EditorUtility.DisplayDialog("移动失败", "请选择Assets目录以下的文件夹。", "确定"))
+                                if (EditorUtility.DisplayDialog("移动失败", "请选择Assets目录或以下的文件夹。", "确定"))
                                     goto selection;
                             }
                         }
                         else
                         {
-                            if (EditorUtility.DisplayDialog("提示", "请选择Assets目录以下的文件夹。", "确定"))
+                            if (EditorUtility.DisplayDialog("提示", "请选择Assets目录或以下的文件夹。", "确定"))
                                 goto selection;
                         }
                     }
@@ -187,7 +187,9 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
                     searching = false;
                     Refresh();
                 }
-                EditorGUI.LabelField(new Rect(rect.x + rect.width - 150, rect.y, 30, lineHeight), $"{page}/{maxPage}");
+                GUIStyle style = new GUIStyle() { alignment = TextAnchor.MiddleRight };
+                style.normal.textColor = GUI.contentColor;
+                EditorGUI.LabelField(new Rect(rect.x + rect.width - 150, rect.y, 30, lineHeight), $"{page}/{maxPage}", style);
                 if (GUI.Button(new Rect(rect.x + rect.width - 120, rect.y, 60, lineHeight), "上一页"))
                     if (page > 1)
                     {
@@ -232,7 +234,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
         string folder = EditorUtility.OpenFolderPanel("选择保存文件夹", latestFolder, "");
         if (!string.IsNullOrEmpty(folder))
         {
-            if (ZetanEditorUtility.IsValidPath(folder))
+            if (ZetanEditorUtility.IsValidFolder(folder))
             {
                 try
                 {
@@ -247,13 +249,13 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
                 }
                 catch
                 {
-                    if (EditorUtility.DisplayDialog("新建失败", "请选择Assets目录以下的文件夹。", "确定"))
+                    if (EditorUtility.DisplayDialog("新建失败", "请选择Assets目录或以下的文件夹。", "确定"))
                         goto selection;
                 }
             }
             else
             {
-                if (EditorUtility.DisplayDialog("提示", "请选择Assets目录以下的文件夹。", "确定"))
+                if (EditorUtility.DisplayDialog("提示", "请选择Assets目录或以下的文件夹。", "确定"))
                     goto selection;
             }
         }

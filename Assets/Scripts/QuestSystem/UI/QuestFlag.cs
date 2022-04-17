@@ -34,23 +34,23 @@ public class QuestFlag : MonoBehaviour
         triggerNames.Clear();
         foreach (var quest in questHolder.QuestInstances)
         {
-            Condition find = quest.Info.AcceptCondition.Conditions.Find(x => x.Type == ConditionType.TriggerSet || x.Type == ConditionType.TriggerReset);
+            Condition find = quest.Model.AcceptCondition.Conditions.Find(x => x.Type == ConditionType.TriggerSet || x.Type == ConditionType.TriggerReset);
             if (find) triggerNames.Add(find.TriggerName);
         }
         UpdateUI();
         Update();
-        if (QuestManager.Instance) QuestManager.Instance.OnQuestStatusChange += UpdateUI;
-
-        NotifyCenter.Instance.RemoveListener(this);
-        NotifyCenter.Instance.AddListener("TriggerChange", OnTriggerChange);
+        NotifyCenter.RemoveListener(this);
+        NotifyCenter.AddListener(QuestManager.QuestStateChanged, _ => UpdateUI(), this);
+        NotifyCenter.AddListener(QuestManager.ObjectiveUpdate, _ => UpdateUI(), this);
+        NotifyCenter.AddListener(NotifyCenter.CommonKeys.TriggerChanged, OnTriggerChange, this);
     }
 
     private bool conditionShow;
     public void UpdateUI()
     {
         //Debug.Log(questHolder.TalkerName);
-        bool hasObjective = questHolder.GetData<TalkerData>().objectivesTalkToThis.FindAll(x => x.AllPrevObjCmplt && !x.IsComplete).Count > 0
-            || questHolder.GetData<TalkerData>().objectivesSubmitToThis.FindAll(x => x.AllPrevObjCmplt && !x.IsComplete).Count > 0;
+        bool hasObjective = questHolder.GetData<TalkerData>().objectivesTalkToThis.FindAll(x => x.AllPrevComplete && !x.IsComplete).Count > 0
+            || questHolder.GetData<TalkerData>().objectivesSubmitToThis.FindAll(x => x.AllPrevComplete && !x.IsComplete).Count > 0;
         if (questHolder.QuestInstances.Count < 1 && !hasObjective)
         {
             if (icon.enabled) icon.enabled = false;
@@ -68,7 +68,7 @@ public class QuestFlag : MonoBehaviour
         }
         foreach (var quest in questHolder.QuestInstances)
         {
-            if (!quest.IsComplete && !quest.InProgress && MiscFuntion.CheckCondition(quest.Info.AcceptCondition))//只要有一个没接取
+            if (!quest.IsComplete && !quest.InProgress && MiscFuntion.CheckCondition(quest.Model.AcceptCondition))//只要有一个没接取
             {
                 icon.overrideSprite = notAccepted;
                 mapIcon.iconImage.overrideSprite = notAccepted;
@@ -120,7 +120,7 @@ public class QuestFlag : MonoBehaviour
 
     public void Recycle()
     {
-        if (NotifyCenter.Instance) NotifyCenter.Instance.RemoveListener(this);
+        NotifyCenter.RemoveListener(this);
         if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(mapIcon, true);
         questHolder = null;
         mapIcon = null;
@@ -162,7 +162,6 @@ public class QuestFlag : MonoBehaviour
     private void OnDestroy()
     {
         if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(mapIcon);
-        if (QuestManager.Instance) QuestManager.Instance.OnQuestStatusChange -= UpdateUI;
-        if (NotifyCenter.Instance) NotifyCenter.Instance.RemoveListener(this);
+        NotifyCenter.RemoveListener(this);
     }
 }

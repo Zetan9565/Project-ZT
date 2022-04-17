@@ -4,9 +4,9 @@ using UnityEngine;
 namespace ZetanStudio.BehaviourTree
 {
     /// <summary>
-    /// 修饰结点：只有一个子结点
+    /// 修饰结点：只有一个子结点的父型结点
     /// </summary>
-    public abstract class Decorator : Node
+    public abstract class Decorator : ParentNode
     {
         [SerializeReference]
         protected Node child;
