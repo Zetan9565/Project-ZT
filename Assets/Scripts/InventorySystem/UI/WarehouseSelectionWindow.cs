@@ -38,7 +38,7 @@ public class WarehouseSelectionWindow : Window
     public static WarehouseSelectionWindow StartSelection(Action<IWarehouseKeeper> selectCallback, Action cancelCallback, Predicate<IWarehouseKeeper> defaultSelector,
         bool noneCheck, bool physics2D, Vector3 point, float? range = null, LayerMask? layer = null)
     {
-        return NewWindowsManager.OpenWindow<WarehouseSelectionWindow>(selectCallback, cancelCallback, defaultSelector, noneCheck, physics2D, point, range, layer);
+        return WindowsManager.OpenWindow<WarehouseSelectionWindow>(selectCallback, cancelCallback, defaultSelector, noneCheck, physics2D, point, range, layer);
     }
 
     protected override bool OnOpen(params object[] args)
@@ -87,7 +87,7 @@ public class WarehouseSelectionWindow : Window
         }
         list.Refresh(warehouses);
         list.SelectIf(par.defaultSelector);
-        deselect.interactable = list.SelectedIndexes.Count > 0;
+        deselect.interactable = list.SelectedIndices.Count > 0;
         doConfirm = false;
         return true;
     }
@@ -104,7 +104,7 @@ public class WarehouseSelectionWindow : Window
     {
         if (warehouse.IsSelected) selected = warehouse.Data;
         else if (warehouse.Data == selected) selected = null;
-        deselect.interactable = list.SelectedIndexes.Count > 0;
+        deselect.interactable = list.SelectedIndices.Count > 0;
     }
 
     private void Deselect()

@@ -31,5 +31,5 @@ public class MiscSettings : SingletonScriptableObject<MiscSettings>
     public LootAgent DefaultLootPrefab { get; private set; }
 
     [field: SerializeField]
-    public BuildingFlag BuildingFlagPrefab { get; private set; }
+    public StructureFlag StructureFlagPrefab { get; private set; }
 }

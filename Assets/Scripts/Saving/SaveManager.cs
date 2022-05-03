@@ -37,7 +37,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
             SaveTime(data);
             SaveBag(data);
-            SaveBuilding(data);
+            SaveStructure(data);
             SaveMaking(data);
             SaveWarehouse(data);
             SaveQuest(data);
@@ -74,9 +74,9 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         //BackpackManager.Instance.SaveData(data);
     }
 
-    void SaveBuilding(SaveData data)
+    void SaveStructure(SaveData data)
     {
-        BuildingManager.Instance.SaveData(data);
+        StructureManager.Instance.SaveData(data);
     }
 
     void SaveMaking(SaveData data)
@@ -160,7 +160,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         LoadPlayer(data);
         yield return new WaitUntil(() => { return BackpackManager.Instance.Inventory != null; });
         LoadBackpack(data);
-        LoadBuilding(data);
+        LoadStructure(data);
         LoadMaking(data);
         LoadWarehouse(data);
         LoadQuest(data);
@@ -190,9 +190,9 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         //BackpackManager.Instance.LoadData(data.backpackData);
     }
 
-    void LoadBuilding(SaveData data)
+    void LoadStructure(SaveData data)
     {
-        BuildingManager.Instance.LoadData(data.buildingSystemData);
+        StructureManager.Instance.LoadData(data.structureSystemData);
     }
 
     void LoadMaking(SaveData data)

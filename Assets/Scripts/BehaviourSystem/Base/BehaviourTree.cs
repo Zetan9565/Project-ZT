@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
+//using System.Reflection;
 using UnityEngine;
 
 namespace ZetanStudio.BehaviourTree
@@ -30,7 +30,7 @@ namespace ZetanStudio.BehaviourTree
         private List<SharedVariable> variables;
         public List<SharedVariable> Variables => variables;
 
-        #region 运行时属性
+        #region 运行时变量
         public bool IsPaused { get; private set; }
 
         public bool IsStarted => entry.IsStarted;
@@ -48,6 +48,8 @@ namespace ZetanStudio.BehaviourTree
         public NodeStates ExecutionState { get; private set; }
 
         public BehaviourExecutor Executor { get; private set; }
+
+        private readonly SortedSet<Composite> evaluatedComposites = new SortedSet<Composite>(Node.Comparer.Default);
         #endregion
 
         #region 共享变量获取
@@ -163,11 +165,15 @@ namespace ZetanStudio.BehaviourTree
                 return;
             }
             Executor = executor;
-            nodes.ForEach(n => n.Init(this));
+            nodes.ForEach(InitNode);
             SortPriority();
             evaluatedComposites.Clear();
         }
-
+        public void InitNode(Node node)
+        {
+            node.Init(this);
+            node.OnEvaluated += OnNodeEvaluated;
+        }
         public void SortPriority()
         {
             int i = 0;
@@ -246,9 +252,8 @@ namespace ZetanStudio.BehaviourTree
         {
             Traverse(entry, n => n.Reset());
         }
-        private SortedSet<Composite> evaluatedComposites = new SortedSet<Composite>(Node.Comparer.Default);
 
-        public void OnNodeEvaluated(Node node)
+        private void OnNodeEvaluated(Node node)
         {
             if (node is Composite composite) evaluatedComposites.Add(composite);
         }
@@ -259,6 +264,7 @@ namespace ZetanStudio.BehaviourTree
                 if (composite.CheckConditionalAbort() is Conditional conditional)
                 {
                     PostConditionalAbort(conditional);
+                    evaluatedComposites.Clear();
                     return true;
                 }
             }
@@ -266,10 +272,24 @@ namespace ZetanStudio.BehaviourTree
         }
         private void PostConditionalAbort(Conditional conditional)
         {
-            Traverse(Entry, n =>
+            using var cEnum = evaluatedComposites.GetEnumerator();
+            //已进入评估的Composite优先级更高才有可能包含此Conditional并接收它发起的ConditionalAbort，
+            //换句话说，此Conditional已进入评估，但包含它的Composite未进入评估，是不可能发生的。
+            while (cEnum.MoveNext() && cEnum.Current && cEnum.Current.ComparePriority(conditional))
             {
-                if (n is Composite c) c.ReciveConditionalAbort(conditional);
-            });
+                if (cEnum.Current.ReciveConditionalAbort(conditional))
+                    if (cEnum.Current.AbortLowerPriority)//接收了Abort，而且是中止低优先级，则向更先进入评估的Composite发起低优先中止
+                        PostLowerPriorityAbort(cEnum.Current);
+            }
+        }
+        private void PostLowerPriorityAbort(Composite composite)
+        {
+            using var cEunm = evaluatedComposites.GetEnumerator();
+            //已进入评估的Composite优先级更高才有可能包含此Composite并接收它发起的LowerPriorityAbort
+            while (cEunm.MoveNext() && cEunm.Current && cEunm.Current.ComparePriority(composite))
+            {
+                cEunm.Current.ReciveLowerPriorityAbort(composite);
+            }
         }
 
         #region Unity回调
@@ -471,7 +491,11 @@ namespace ZetanStudio.BehaviourTree
         {
             if (nodes.Contains(newNode)) return;
             nodes.Add(newNode);
-            if (!IsInstance && !IsRuntime) UnityEditor.EditorUtility.SetDirty(this);
+            if (!IsInstance && !IsRuntime)
+            {
+                UnityEditor.EditorUtility.SetDirty(this);
+                UnityEditor.AssetDatabase.SaveAssetIfDirty(this);
+            }
             else SortPriority();
         }
 
@@ -482,7 +506,11 @@ namespace ZetanStudio.BehaviourTree
         public void DeleteNode(Node node)
         {
             nodes.Remove(node);
-            if (!IsInstance && !IsRuntime) UnityEditor.EditorUtility.SetDirty(this);
+            if (!IsInstance && !IsRuntime)
+            {
+                UnityEditor.EditorUtility.SetDirty(this);
+                UnityEditor.AssetDatabase.SaveAssetIfDirty(this);
+            }
             else
             {
                 if (node is Composite conditional) evaluatedComposites.Remove(conditional);

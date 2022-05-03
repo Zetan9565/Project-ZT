@@ -39,7 +39,7 @@ public class LootWindow : InteractionWindow<LootAgent>
     public void TakeItem(ItemSlotData info, bool all = false)
     {
         if (!lootAgent || info == null || !info.item) return;
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
         if (!all)
             if (info.amount == 1) OnTake(info, 1);
             else

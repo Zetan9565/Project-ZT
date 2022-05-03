@@ -45,7 +45,7 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
         args ??= new object[0];
         if (OnOpen(args))
         {
-            NewWindowsManager.Push(this);
+            WindowsManager.Push(this);
             NotifyCenter.PostNotify(WindowStateChanged, GetType().Name, WindowStates.Open);
             IsOpen = true;
             closeBy = null;
@@ -80,7 +80,7 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
         args ??= new object[0];
         if (OnClose(args))
         {
-            NewWindowsManager.Remove(this);
+            WindowsManager.Remove(this);
             NotifyCenter.PostNotify(WindowStateChanged, GetType().Name, WindowStates.Closed);
             IsOpen = false;
             onClose?.Invoke();
@@ -156,7 +156,7 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
     #region MonoBehaviour
     private void Awake()
     {
-        NewWindowsManager.Cache(this);
+        WindowsManager.Cache(this);
         if (!content.gameObject.GetComponent<GraphicRaycaster>()) content.gameObject.AddComponent<GraphicRaycaster>();
         windowCanvas = content.GetComponent<Canvas>();
         windowCanvas.overrideSorting = true;

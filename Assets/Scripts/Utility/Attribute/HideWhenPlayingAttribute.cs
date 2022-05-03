@@ -1,6 +1,7 @@
-﻿using System.Collections;
+﻿using System;
 using UnityEngine;
 
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public class HideWhenPlayingAttribute : PropertyAttribute
 {
     public readonly bool readOnly;

@@ -108,8 +108,6 @@ public class ItemAmountListDrawer
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                owner.UpdateIfRequiredOrScript();
-                EditorGUI.BeginChangeCheck();
                 SerializedProperty itemInfo = property.GetArrayElementAtIndex(index);
                 SerializedProperty item = itemInfo.FindPropertyRelative("item");
                 SerializedProperty amount = itemInfo.FindPropertyRelative("amount");
@@ -122,8 +120,6 @@ public class ItemAmountListDrawer
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight),
                     amount, new GUIContent("数量"));
                 if (amount.intValue < 1) amount.intValue = 1;
-                if (EditorGUI.EndChangeCheck())
-                    owner.ApplyModifiedProperties();
             },
 
             elementHeightCallback = (int index) =>
@@ -133,14 +129,8 @@ public class ItemAmountListDrawer
 
             onRemoveCallback = (list) =>
             {
-                owner.UpdateIfRequiredOrScript();
-                EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
-                {
-                    property.DeleteArrayElementAtIndex(list.index);
-                }
-                if (EditorGUI.EndChangeCheck())
-                    owner.ApplyModifiedProperties();
+                    ReorderableList.defaultBehaviours.DoRemoveButton(list);
             },
 
             onCanRemoveCallback = (list) =>
@@ -202,7 +192,6 @@ public class MaterialListDrawer
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                owner.UpdateIfRequiredOrScript();
                 SerializedProperty material = property.GetArrayElementAtIndex(index);
                 SerializedProperty materialType = material.FindPropertyRelative("materialType");
                 SerializedProperty makingType = material.FindPropertyRelative("makingType");
@@ -217,7 +206,6 @@ public class MaterialListDrawer
                     headLabel = $"[{index}] {ZetanUtility.GetInspectorName((MaterialType)materialType.enumValueIndex)}";
                 }
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), headLabel);
-                EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight), makingType, new GUIContent(string.Empty));
                 if (makingType.enumValueIndex == (int)MakingType.SameType)
                 {
@@ -276,8 +264,6 @@ public class MaterialListDrawer
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight),
                     amount, new GUIContent("所需数量"));
                 if (amount.intValue < 1) amount.intValue = 1;
-                if (EditorGUI.EndChangeCheck())
-                    owner.ApplyModifiedProperties();
             },
 
             elementHeightCallback = (int index) =>
@@ -287,8 +273,6 @@ public class MaterialListDrawer
 
             onAddCallback = (list) =>
             {
-                owner.UpdateIfRequiredOrScript();
-                EditorGUI.BeginChangeCheck();
                 property.InsertArrayElementAtIndex(property.arraySize);
                 SerializedProperty material = property.GetArrayElementAtIndex(property.arraySize - 1);
                 list.Select(property.arraySize - 1);
@@ -300,20 +284,12 @@ public class MaterialListDrawer
                 item.objectReferenceValue = null;
                 SerializedProperty amount = material.FindPropertyRelative("amount");
                 amount.intValue = 1;
-                if (EditorGUI.EndChangeCheck())
-                    owner.ApplyModifiedProperties();
             },
 
             onRemoveCallback = (list) =>
             {
-                owner.UpdateIfRequiredOrScript();
-                EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
-                {
-                    property.DeleteArrayElementAtIndex(list.index);
-                }
-                if (EditorGUI.EndChangeCheck())
-                    owner.ApplyModifiedProperties();
+                    ReorderableList.defaultBehaviours.DoRemoveButton(list);
             },
 
             onCanRemoveCallback = (list) =>
@@ -375,9 +351,7 @@ public class DropItemListDrawer
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                owner.UpdateIfRequiredOrScript();
                 SerializedProperty itemInfo = property.GetArrayElementAtIndex(index);
-                EditorGUI.BeginChangeCheck();
                 SerializedProperty item = itemInfo.FindPropertyRelative("item");
                 if (item.objectReferenceValue != null)
                     EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent($"[{index}] {(item.objectReferenceValue as ItemBase).Name}"));
@@ -394,7 +368,7 @@ public class DropItemListDrawer
                 {
                     int lineCount = 1;
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                        dropRate, new GUIContent("掉落概率百分比"));
+                        dropRate, new GUIContent("产出概率百分比"));
                     if (dropRate.floatValue < 0) dropRate.floatValue = 0.0f;
                     lineCount++;
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
@@ -410,7 +384,7 @@ public class DropItemListDrawer
                     }
                     lineCount++;
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
-                        onlyDropForQuest, new GUIContent("只在进行任务时掉落"));
+                        onlyDropForQuest, new GUIContent("只在进行任务时产出"));
                     if (onlyDropForQuest.boolValue)
                     {
                         EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
@@ -423,12 +397,11 @@ public class DropItemListDrawer
                         }
                     }
                 }
-                if (EditorGUI.EndChangeCheck())
-                    owner.ApplyModifiedProperties();
             },
 
             elementHeightCallback = (int index) =>
             {
+                if (index < 0 || index > property.arraySize - 1) return 0;
                 int lineCount = 1;
                 SerializedProperty dropItem = property.GetArrayElementAtIndex(index);
                 if (dropItem.isExpanded)
@@ -443,21 +416,15 @@ public class DropItemListDrawer
                 return lineCount * lineHeightSpace;
             },
 
-            onRemoveCallback = (list) =>
-            {
-                owner.UpdateIfRequiredOrScript();
-                EditorGUI.BeginChangeCheck();
-                if (EditorUtility.DisplayDialog("删除", "确定删除这个掉落道具吗？", "确定", "取消"))
-                {
-                    property.DeleteArrayElementAtIndex(list.index);
-                }
-                if (EditorGUI.EndChangeCheck())
-                    owner.ApplyModifiedProperties();
-            },
-
             onCanRemoveCallback = (list) =>
             {
                 return list.IsSelected(list.index);
+            },
+
+            onRemoveCallback = (list) =>
+            {
+                if (EditorUtility.DisplayDialog("删除", "确定删除这个产出吗？", "确定", "取消"))
+                    ReorderableList.defaultBehaviours.DoRemoveButton(list);
             },
 
             drawHeaderCallback = (rect) =>
@@ -482,16 +449,12 @@ public class DropItemListDrawer
 
     public void DoLayoutDraw()
     {
-        owner?.UpdateIfRequiredOrScript();
         List?.DoLayoutList();
-        owner?.ApplyModifiedProperties();
     }
 
     public void DoDraw(Rect rect)
     {
-        owner?.UpdateIfRequiredOrScript();
         List?.DoList(rect);
-        owner?.ApplyModifiedProperties();
     }
 
     public float GetDrawHeight()
@@ -588,7 +551,7 @@ public class ConditionGroupDrawer
 
             elementHeightCallback = (int index) =>
             {
-                if (index < 0 || index >= conditions.arraySize) return lineHeightSpace;
+                if (index < 0 || index > conditions.arraySize - 1) return 0;
                 SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
                 SerializedProperty type = condition.FindPropertyRelative("type");
                 ConditionType conditionType = (ConditionType)type.enumValueIndex;
@@ -616,6 +579,7 @@ public class ConditionGroupDrawer
                 EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个条件吗？", "确定", "取消"))
                 {
+                    list.Deselect(list.index);
                     conditions.DeleteArrayElementAtIndex(list.index);
                     npcSelectors.Clear();
                 }
@@ -768,8 +732,8 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
     { }
     public ObjectSelectionDrawer(SerializedProperty property, string fieldAsName, Func<T, string> groupPicker, Func<T, bool> filter, string path, string label = "", string nameNull = "未选择")
     {
-        if (filter == null) objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
-        else objects = ZetanEditorUtility.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).Where(x => filter.Invoke(x)).ToArray();
+        if (filter == null) objects = ZetanUtility.Editor.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).ToArray();
+        else objects = ZetanUtility.Editor.LoadAssets<T>(string.IsNullOrEmpty(path) ? string.Empty : path).Where(x => filter.Invoke(x)).ToArray();
         objectNames = HandleByGroup(fieldAsName, groupPicker, nameNull);
         this.property = property;
         this.label = label;
@@ -791,10 +755,10 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         int index = Array.IndexOf(objects, property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
         Rect rect = EditorGUILayout.GetControlRect();
-        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 23.5f, rect.height), label, index, objectNames);
+        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 25f, rect.height), label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
-        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 22.5f, rect.y, 22.5f, rect.height), property, new GUIContent(string.Empty));
+        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 23f, rect.y, 23f, rect.height), property, new GUIContent(string.Empty));
         return index;
     }
 
@@ -802,10 +766,10 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
     {
         int index = Array.FindIndex(objects, x => x == property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
-        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 23.5f, rect.height), label, index, objectNames);
+        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 25f, rect.height), label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
-        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 22.5f, rect.y, 22.5f, rect.height), property, new GUIContent(string.Empty));
+        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 23f, rect.y, 23f, rect.height), property, new GUIContent(string.Empty));
         return index;
     }
 

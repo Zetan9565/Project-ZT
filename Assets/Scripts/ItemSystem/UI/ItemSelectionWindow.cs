@@ -55,7 +55,7 @@ public class ItemSelectionWindow : Window
     public static ItemSelectionWindow StartSelection(ItemSelectionType selectionType, ISlotContainer container, IInventoryHandler handler, Action<List<ItemWithAmount>> confirm, string title = null, string confirmDialog = null,
         int? typeLimit = null, int? amountLimit = null, Predicate<ItemSlotBase> selectCondition = null, Action cancel = null)
     {
-        return NewWindowsManager.OpenWindow<ItemSelectionWindow>(selectionType, container, handler, confirm, title, confirmDialog, typeLimit ?? default, amountLimit ?? default, selectCondition, cancel);
+        return WindowsManager.OpenWindow<ItemSelectionWindow>(selectionType, container, handler, confirm, title, confirmDialog, typeLimit ?? default, amountLimit ?? default, selectCondition, cancel);
     }
 
     public void Confirm()
@@ -93,7 +93,7 @@ public class ItemSelectionWindow : Window
         copySlots.Clear();
         selectedItems.Clear();
         ZetanUtility.SetActive(tips, true);
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
     }
 
     public void Place(ItemSlot source)
@@ -241,7 +241,7 @@ public class ItemSelectionWindow : Window
         if (IsOpen) return true;
         if (args != null && args.Length > 8)
         {
-            NewWindowsManager.CloseWindow<ItemWindow>();
+            WindowsManager.CloseWindow<ItemWindow>();
             var par = (selectionType: (ItemSelectionType)args[0], container: (ISlotContainer)args[1], handler: (IInventoryHandler)args[2], confirm: args[3] as Action<List<ItemWithAmount>>,
                 title: args[4] as string, confirmDialog: args[5] as string, typeLimit: (int)args[6], amountLimit: (int)args[7], selectCondition: args[8] as Predicate<ItemSlotBase>, cancel: args[9] as Action);
             SelectionType = par.selectionType;
@@ -283,7 +283,7 @@ public class ItemSelectionWindow : Window
         onConfirm = null;
         if (!confirm) onCancel?.Invoke();
         onCancel = null;
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
         return true;
     }
 

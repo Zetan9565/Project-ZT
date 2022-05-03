@@ -20,7 +20,7 @@ public class SetContoller2DSpeedInspector : Editor
         serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         float start = startTime.floatValue, end = endTime.floatValue;
-        ZetanEditorUtility.MinMaxSlider("起始时间", ref start, ref end, 0, 1);
+        ZetanUtility.Editor.MinMaxSlider("起始时间", ref start, ref end, 0, 1);
         startTime.floatValue = start;
         endTime.floatValue = end;
         EditorGUILayout.PropertyField(speedCurve, new GUIContent("速度曲线", speedCurve.tooltip));

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [DisallowMultipleComponent]
-public class MakingTool : Building2D
+public class MakingTool : Structure2D
 {
     public MakingToolInformation ToolInfo { get; private set; }
 
@@ -9,20 +9,20 @@ public class MakingTool : Building2D
     {
         get
         {
-            return base.IsInteractive && ToolInfo && !NewWindowsManager.IsWindowOpen<MakingWindow>();
+            return base.IsInteractive && ToolInfo && !WindowsManager.IsWindowOpen<MakingWindow>();
         }
     }
 
     protected override void OnNotInteractable()
     {
-        if (NewWindowsManager.IsWindowOpen<MakingWindow>(out var making) && making.CurrentTool == this)
+        if (WindowsManager.IsWindowOpen<MakingWindow>(out var making) && making.CurrentTool == this)
             making.Interrupt();
         base.OnNotInteractable();
     }
 
     public override bool DoManage()
     {
-        return NewWindowsManager.OpenWindowBy<MakingWindow>(this, BackpackManager.Instance);
+        return WindowsManager.OpenWindowBy<MakingWindow>(this, BackpackManager.Instance);
     }
 
     protected override void OnInit()

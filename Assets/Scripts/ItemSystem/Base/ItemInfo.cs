@@ -26,7 +26,7 @@ public class ItemInfoBase
         }
     }
 
-    [SerializeField]
+    [SerializeField, ZetanStudio.Item.ItemSelector]
     public ItemBase item;
 
     [SerializeField]
@@ -63,7 +63,7 @@ public class ItemInfoBase
         List<ItemInfoBase> results = new List<ItemInfoBase>();
         foreach (var item in items)
         {
-            if (item.IsValid) results.Add(new ItemInfoBase(item.source.Model, item.amount));
+            if (item.IsValid) results.Add(new ItemInfoBase(item.source.Model_old, item.amount));
         }
         return results.ToArray();
     }
@@ -96,22 +96,6 @@ public class ItemInfo : ItemInfoBase //在这个类进行拓展，如强化、�
     {
         return self != null;
     }
-}
-
-public class EquipmentInfo : ItemInfo
-{
-    #region 装备相关
-    [HideInInspector]
-    public ScopeInt durability;//耐久度
-
-    public int gemSlotAmount;
-
-    public GemItem gemstone1;
-
-    public GemItem gemstone2;
-
-    public EquipmentInfo(ItemBase item, int amount = 1) : base(item, amount) { }
-    #endregion
 }
 
 [Serializable]
@@ -149,6 +133,8 @@ public class DropItemInfo
             item = value;
         }
     }
+    [SerializeField]
+    private ZetanStudio.Item.ItemNew itemNew;
 
     [SerializeField]
     private int minAmount = 1;

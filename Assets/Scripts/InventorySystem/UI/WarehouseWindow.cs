@@ -24,7 +24,7 @@ public class WarehouseWindow : InventoryWindow
                     buttons.Add(new ButtonWithTextData("全部取出", () => TakeOutItem(slot.Item, true)));
                 break;
             case OpenType.Making:
-                if (NewWindowsManager.IsWindowOpen<ItemSelectionWindow>(out var selecter))
+                if (WindowsManager.IsWindowOpen<ItemSelectionWindow>(out var selecter))
                 {
                     if (!slot.IsDark)
                         buttons.Add(new ButtonWithTextData("选取", () => selecter.Place(slot)));
@@ -61,7 +61,7 @@ public class WarehouseWindow : InventoryWindow
                     otherOpenBef = OtherWindow.IsOpen;
                     if (!otherOpenBef) OtherWindow.Open();
                     else otherHiddenBef = OtherWindow.IsHidden;
-                    if (otherHiddenBef) NewWindowsManager.HideWindow(OtherWindow, false);
+                    if (otherHiddenBef) WindowsManager.HideWindow(OtherWindow, false);
                     OtherWindow.onClose += () => CloseBy(OtherWindow);
                     break;
                 }
@@ -81,7 +81,7 @@ public class WarehouseWindow : InventoryWindow
         if (Type == OpenType.Store && OtherWindow && !OtherWindow.Equals(closeBy))//被自己关闭
         {
             if (!otherOpenBef) OtherWindow.Close();
-            else if (otherHiddenBef) NewWindowsManager.HideWindow(OtherWindow, true);
+            else if (otherHiddenBef) WindowsManager.HideWindow(OtherWindow, true);
             OtherWindow = null;
         }
         if (warehouse) warehouse.EndManagement();
@@ -94,25 +94,25 @@ public class WarehouseWindow : InventoryWindow
     public void TakeOutItem(ItemData item, bool all = false)
     {
         if (Handler == null || item == null) return;
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
         int have = Handler.GetAmount(item);
         if (!all)
             if (have == 1 && OnTakeOut(item, 1, 1) > 0)
-                MessageManager.Instance.New($"取出了1个 [{ItemUtility.GetColorName(item.Model)}");
+                MessageManager.Instance.New($"取出了1个 [{ItemUtility.GetColorName(item.Model_old)}");
             else
             {
                 AmountWindow.StartInput(delegate (long amount)
                 {
                     int take = OnTakeOut(item, (int)amount, have);
                     if (take > 0)
-                        MessageManager.Instance.New($"取出了{take}个 [{ItemUtility.GetColorName(item.Model)}]");
+                        MessageManager.Instance.New($"取出了{take}个 [{ItemUtility.GetColorName(item.Model_old)}]");
                 }, have, "取出数量", ZetanUtility.ScreenCenter, Vector2.zero);
             }
         else
         {
             int take = OnTakeOut(item, have, have);
             if (take > 0)
-                MessageManager.Instance.New($"取出了{have + take}个 [{ItemUtility.GetColorName(item.Model)}]");
+                MessageManager.Instance.New($"取出了{have + take}个 [{ItemUtility.GetColorName(item.Model_old)}]");
         }
     }
 
@@ -131,13 +131,13 @@ public class WarehouseWindow : InventoryWindow
     public void StoreItem(ItemData item, bool all = false)
     {
         if (Handler == null || OtherWindow == null || !OtherWindow.Handler.Inventory || !item) return;
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
         int have = OtherWindow.Handler.GetAmount(item);
         if (have < 1) return;
         if (!all)
         {
             if (have == 1 && OnStore(item, 1) > 0)
-                MessageManager.Instance.New($"存入了1个 [{ItemUtility.GetColorName(item.Model)}]");
+                MessageManager.Instance.New($"存入了1个 [{ItemUtility.GetColorName(item.Model_old)}]");
             else
             {
                 int maxGet = Handler.Inventory.PeekGet(item, have);
@@ -145,7 +145,7 @@ public class WarehouseWindow : InventoryWindow
                 {
                     int store = OnStore(item, (int)amount);
                     if (store > 0)
-                        MessageManager.Instance.New($"存入了{store}个 [{ItemUtility.GetColorName(item.Model)}]");
+                        MessageManager.Instance.New($"存入了{store}个 [{ItemUtility.GetColorName(item.Model_old)}]");
                 }, have > maxGet ? maxGet : have, "存入数量", ZetanUtility.ScreenCenter, Vector2.zero);
             }
         }
@@ -154,7 +154,7 @@ public class WarehouseWindow : InventoryWindow
             int amountBef = Handler.GetAmount(item);
             int store = OnStore(item, have);
             if (store > 0)
-                MessageManager.Instance.New($"存入了{store}个 [{ItemUtility.GetColorName(item.Model)}]");
+                MessageManager.Instance.New($"存入了{store}个 [{ItemUtility.GetColorName(item.Model_old)}]");
         }
     }
 
@@ -174,7 +174,7 @@ public class WarehouseWindow : InventoryWindow
         {
             InventoryUtility.DiscardItem(Handler, slot.Item, discardButton.transform.position);
         }
-        else if (NewWindowsManager.IsWindowOpen<ItemSelectionWindow>(out var selecter) && (target && selecter.ContainsSlot(target) || go == selecter.PlacementArea))
+        else if (WindowsManager.IsWindowOpen<ItemSelectionWindow>(out var selecter) && (target && selecter.ContainsSlot(target) || go == selecter.PlacementArea))
             selecter.Place(slot);
         else if (Type == OpenType.Store && OtherWindow && (target && OtherWindow.Grid.ContainsItem(target) || target == OtherWindow.Grid.Container))
             TakeOutItem(slot.Item);

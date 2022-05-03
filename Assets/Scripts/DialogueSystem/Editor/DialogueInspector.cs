@@ -707,6 +707,11 @@ public class DialogueInspector : Editor
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         };
 
+        wordsList.onCanRemoveCallback = (list) =>
+        {
+            return list.IsSelected(list.index);
+        };
+
         wordsList.drawHeaderCallback = (rect) =>
         {
             int notCmpltCount = dialogue.Words.FindAll(w => w.TalkerType == TalkerType.NPC && (!w.TalkerInfo || string.IsNullOrEmpty(w.Content)) || w.Options.Exists(b => b && !b.IsValid)).Count;

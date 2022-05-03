@@ -48,7 +48,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         if (!Inventory) return false;
 
         if (!data) return false;
-        if (!CanGet(data.Model, amount, simulLoseItems))
+        if (!CanGet(data.Model_old, amount, simulLoseItems))
             return false;
         Inventory.Get(data, amount, simulLoseItems);
         return true;
@@ -330,7 +330,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
             else
             {
 
-                int amount = Inventory.GetAmount(x => x.Model.MaterialType == materialEnum.Current.MaterialType);
+                int amount = Inventory.GetAmount(x => x.Model_old.MaterialType == materialEnum.Current.MaterialType);
                 if (amount < materialEnum.Current.Amount) return false;
             }
         }
@@ -421,7 +421,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
             }
             else
             {
-                Inventory.TryGetDatas(x => x.Model.MaterialType == materialEnum.Current.MaterialType, out var finds);
+                Inventory.TryGetDatas(x => x.Model_old.MaterialType == materialEnum.Current.MaterialType, out var finds);
                 if (finds.Count > 0)
                 {
                     int need = materialEnum.Current.Amount;
@@ -431,7 +431,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
                         int leftAmount = find.amount;
                         if (itemsToken.Contains(find.source.ID))
                         {
-                            if (!find.source.Model.StackAble) continue;//不可叠加且选取过了，则跳过选取
+                            if (!find.source.Model_old.StackAble) continue;//不可叠加且选取过了，则跳过选取
                             else
                             {
                                 ItemWithAmount find2 = items.Find(x => x.source == find);
@@ -459,7 +459,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         {
             if (itemsToken.Contains(item.ID))
             {
-                if (item.Model.StackAble)
+                if (item.Model_old.StackAble)
                 {
                     var find = items.Find(x => x.source == item);
                     find.amount += amount;
@@ -483,7 +483,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
                     info.Add(string.Format("{0}\t[{1}/{2}]", materialEnum.Current.ItemName, GetAmount(materialEnum.Current.Item), materialEnum.Current.Amount));
                 else
                 {
-                    Inventory.TryGetDatas(x => x.Model.MaterialType == materialEnum.Current.MaterialType, out var finds);
+                    Inventory.TryGetDatas(x => x.Model_old.MaterialType == materialEnum.Current.MaterialType, out var finds);
                     int amount = 0;
                     foreach (var item in finds)
                     {
@@ -506,7 +506,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
                     amounts.Add(GetAmount(materialEnum.Current.Item) / materialEnum.Current.Amount);
                 else
                 {
-                    Inventory.TryGetDatas(x => x.Model.MaterialType == materialEnum.Current.MaterialType, out var finds);
+                    Inventory.TryGetDatas(x => x.Model_old.MaterialType == materialEnum.Current.MaterialType, out var finds);
                     int amount = 0;
                     foreach (var item in finds)
                     {
@@ -585,9 +585,9 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
     {
         if (inventory == Inventory) NotifyCenter.PostNotify(InventoryMoneyChangedMsgKey, inventory, oldWeightLimit);
     }
-    protected virtual void OnItemAmountChanged(ItemData item, int oldAmount, int newAmount)
+    protected virtual void OnItemAmountChanged(ItemBase model, int oldAmount, int newAmount)
     {
-        NotifyCenter.PostNotify(ItemAmountChangedMsgKey, item, oldAmount, newAmount);
+        NotifyCenter.PostNotify(ItemAmountChangedMsgKey, model, oldAmount, newAmount);
     }
     protected virtual void OnSlotStateChanged(ItemSlotData slot)
     {

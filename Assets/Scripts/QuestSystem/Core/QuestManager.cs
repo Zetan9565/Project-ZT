@@ -33,14 +33,19 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
             MessageManager.Instance.New("已经在执行");
             return false;
         }
-        foreach (ObjectiveData o in quest.Objectives)
+        ObjectiveData currentObjective = quest.Objectives[0];
+        for (int i = 0; i < quest.Objectives.Count; i++)
         {
+            var o = quest.Objectives[i];
             o.OnStateChangeEvent += OnObjectiveStateChange;
             if (o is CollectObjectiveData co)
             {
                 BackpackManager.Instance.Inventory.OnItemAmountChanged += co.UpdateCollectAmount;
-                if (co.Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.CurrentAmount = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect);
-                else if (!co.Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.amountWhenStart = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect);
+                if (o.AllPrevComplete)
+                {
+                    if (co.Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.CurrentAmount = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect);
+                    else if (!co.Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.amountWhenStart = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect);
+                }
             }
             if (o is KillObjectiveData ko)
             {
@@ -409,9 +414,9 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
             }
             else CreateObjectiveMapIcon(nextToDo);
             RemoveObjectiveMapIcon(objective);
-            NotifyCenter.PostNotify(ObjectiveUpdate, objective.parent, objective, befCmplt);
         }
         //else Debug.Log("无操作");
+        NotifyCenter.PostNotify(ObjectiveUpdate, objective, befCmplt);
     }
     #endregion
 
@@ -511,14 +516,15 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
         ObjectiveData nextObjective = objective.nextObjective;
         while (nextObjective != null)
         {
-            if (nextObjective is not CollectObjectiveData && nextObjective.Model.InOrder && nextObjective.nextObjective != null && nextObjective.nextObjective.Model.InOrder && nextObjective.Model.OrderIndex < nextObjective.nextObjective.Model.OrderIndex)
+            if (nextObjective is not CollectObjectiveData && nextObjective.Model.InOrder && nextObjective.nextObjective != null && nextObjective.nextObjective.Model.InOrder && nextObjective.Model.Priority < nextObjective.nextObjective.Model.Priority)
             {
                 //若相邻后置目标不是收集类目标，该后置目标按顺序执行，其相邻后置也按顺序执行，且两者不可同时执行，则说明无法继续更新后置的收集类目标
                 return;
             }
             if (nextObjective is CollectObjectiveData co)
             {
-                if (co.Model.CheckBagAtStart) co.CurrentAmount = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect.ID);
+                if (co.Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.CurrentAmount = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect);
+                else if (!co.Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.amountWhenStart = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect);
             }
             nextObjective = nextObjective.nextObjective;
         }
@@ -568,7 +574,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
                                 while (tempObj != null)
                                 {
                                     //则判断是否有后置目标在进行，以保证在打破该目标的完成状态时，后置目标不受影响
-                                    if (tempObj.CurrentAmount > 0 && tempObj.Model.OrderIndex > o.Model.OrderIndex)
+                                    if (tempObj.CurrentAmount > 0 && tempObj.Model.Priority > o.Model.Priority)
                                     {
                                         //Debug.Log("Required");
                                         return true;
@@ -673,7 +679,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
     /// </summary>
     public const string QuestStateChanged = "QuestStateChanged";
     /// <summary>
-    /// 目标更新消息，格式：([发生变化的任务：<see cref="QuestData"/>]，[发生变化的目标：<see cref="ObjectiveData"/>]，[目标之前的完成状态：<see cref="bool"/>])
+    /// 目标更新消息，格式：([发生变化的目标：<see cref="ObjectiveData"/>]，[目标之前的完成状态：<see cref="bool"/>])
     /// </summary>
     public const string ObjectiveUpdate = "ObjectiveUpdate";
     #endregion

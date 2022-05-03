@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Field : Building2D
+public class Field : Structure2D
 {
     public FieldData FData { get; private set; }
 
@@ -18,13 +18,13 @@ public class Field : Building2D
     {
         get
         {
-            return base.IsInteractive && FData && !NewWindowsManager.IsWindowOpen<FieldWindow>();
+            return base.IsInteractive && FData && !WindowsManager.IsWindowOpen<FieldWindow>();
         }
     }
 
     protected override void OnNotInteractable()
     {
-        if (NewWindowsManager.IsWindowOpen<FieldWindow>(out var window) && window.CurrentField == this)
+        if (WindowsManager.IsWindowOpen<FieldWindow>(out var window) && window.CurrentField == this)
             window.CancelManage();
         base.OnNotInteractable();
     }
@@ -82,6 +82,6 @@ public class Field : Building2D
 
     public override bool DoManage()
     {
-        return NewWindowsManager.OpenWindowBy<FieldWindow>(this);
+        return WindowsManager.OpenWindowBy<FieldWindow>(this);
     }
 }

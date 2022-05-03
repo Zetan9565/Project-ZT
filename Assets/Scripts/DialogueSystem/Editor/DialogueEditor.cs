@@ -16,7 +16,7 @@ public class DialogueEditor : ConfigurationEditor<Dialogue>
         if (!element) return false;
         if (element.ID.Contains(keyWords))
         {
-            remark = $"识别码：{ZetanEditorUtility.TrimContentByKey(element.ID, keyWords, 16)}";
+            remark = $"识别码：{ZetanUtility.Editor.TrimContentByKey(element.ID, keyWords, 16)}";
             return true;
         }
         for (int i = 0; i < element.Words.Count; i++)
@@ -24,12 +24,12 @@ public class DialogueEditor : ConfigurationEditor<Dialogue>
             var words = element.Words[i];
             if (words.Content.Contains(keyWords))
             {
-                remark = $"第[{i}]句：{ZetanEditorUtility.TrimContentByKey(words.Content, keyWords, 20)}";
+                remark = $"第[{i}]句：{ZetanUtility.Editor.TrimContentByKey(words.Content, keyWords, 20)}";
                 return true;
             }
             else if (MiscFuntion.HandlingKeyWords(words.Content).Contains(keyWords))
             {
-                remark = $"第[{i}]句：{ZetanEditorUtility.TrimContentByKey(MiscFuntion.HandlingKeyWords(words.Content, false, objects.ToArray()), keyWords, 20)}";
+                remark = $"第[{i}]句：{ZetanUtility.Editor.TrimContentByKey(MiscFuntion.HandlingKeyWords(words.Content, false, objects.ToArray()), keyWords, 20)}";
                 return true;
             }
             for (int j = 0; j < words.Options.Count; j++)
@@ -37,7 +37,7 @@ public class DialogueEditor : ConfigurationEditor<Dialogue>
                 var option = words.Options[j];
                 if (option.Title.Contains(keyWords))
                 {
-                    remark = $"第[{i}]句第[{j}]个选项标题：{ZetanEditorUtility.TrimContentByKey(option.Title, keyWords, 16)}";
+                    remark = $"第[{i}]句第[{j}]个选项标题：{ZetanUtility.Editor.TrimContentByKey(option.Title, keyWords, 16)}";
                     return true;
                 }
             }

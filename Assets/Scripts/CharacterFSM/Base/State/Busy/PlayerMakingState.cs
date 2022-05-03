@@ -13,7 +13,7 @@ public class PlayerMakingState : CharacterBusyState
         base.OnEnter();
         Character.SetSubState(CharacterBusyStates.UI);
         NotifyCenter.AddListener(MakingManager.MakingCanceled, OnMakingCanceled, this);
-        making = NewWindowsManager.FindWindow<MakingWindow>();
+        making = WindowsManager.FindWindow<MakingWindow>();
     }
 
     private void OnMakingCanceled(params object[] msg)

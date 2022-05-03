@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [DisallowMultipleComponent]
-public class Warehouse : Building2D
+public class Warehouse : Structure2D
 {
     [SerializeField]
 #if UNITY_EDITOR
@@ -14,18 +14,18 @@ public class Warehouse : Building2D
     {
         get
         {
-            return Data && base.IsInteractive && !NewWindowsManager.IsWindowOpen<WarehouseWindow>();
+            return Data && base.IsInteractive && !WindowsManager.IsWindowOpen<WarehouseWindow>();
         }
     }
 
     public override bool DoManage()
     {
-        return NewWindowsManager.OpenWindow<WarehouseWindow>(WarehouseWindow.OpenType.Store, this, NewWindowsManager.FindWindow<BackpackWindow>());
+        return WindowsManager.OpenWindow<WarehouseWindow>(WarehouseWindow.OpenType.Store, this, WindowsManager.FindWindow<BackpackWindow>());
     }
 
     protected override void OnNotInteractable()
     {
-        if (IsBuilt && NewWindowsManager.IsWindowOpen<WarehouseWindow>(out var warehouse) && warehouse.Handler.Inventory == WData.Inventory)
+        if (IsBuilt && WindowsManager.IsWindowOpen<WarehouseWindow>(out var warehouse) && warehouse.Handler.Inventory == WData.Inventory)
             warehouse.Close();
         base.OnNotInteractable();
     }

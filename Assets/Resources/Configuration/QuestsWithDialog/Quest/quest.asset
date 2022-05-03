@@ -26,8 +26,6 @@ MonoBehaviour:
   beginDialogue: {fileID: 11400000, guid: 751fe4671932886419688231ec9e5518, type: 2}
   ongoingDialogue: {fileID: 11400000, guid: 3dd42e42c554ed947a725a4b4ca24641, type: 2}
   completeDialogue: {fileID: 11400000, guid: 4590ede6f624ae34883291bfd21fa8a5, type: 2}
-  rewardMoney: 50
-  rewardEXP: 0
   rewardItems:
   - item: {fileID: 11400000, guid: 6c7872e2f8dbf2948bc18ceed18c26ad, type: 2}
     amount: 1000
@@ -58,7 +56,7 @@ MonoBehaviour:
         auxiliaryPos: {fileID: 0}
         amount: 1
         inOrder: 1
-        orderIndex: 1
+        priority: 1
         _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
         dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491, type: 2}
     - rid: 1
@@ -71,7 +69,7 @@ MonoBehaviour:
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
         inOrder: 1
-        orderIndex: 2
+        priority: 2
         itemToUseHere: {fileID: 0}
     - rid: 2
       type: {class: KillObjective, ns: , asm: Assembly-CSharp}
@@ -83,7 +81,7 @@ MonoBehaviour:
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 5
         inOrder: 1
-        orderIndex: 3
+        priority: 3
         killType: 2
         enemy: {fileID: 0}
         race: {fileID: 11400000, guid: 150e8a581f32093459fd9b32c975e6f7, type: 2}
@@ -98,7 +96,7 @@ MonoBehaviour:
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
         inOrder: 1
-        orderIndex: 3
+        priority: 3
         itemToCollect: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75,
           type: 2}
         checkBagAtStart: 1
@@ -113,7 +111,7 @@ MonoBehaviour:
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
         inOrder: 1
-        orderIndex: 3
+        priority: 3
         itemToCollect: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17,
           type: 2}
         checkBagAtStart: 1

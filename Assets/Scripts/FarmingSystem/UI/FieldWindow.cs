@@ -34,7 +34,6 @@ public class FieldWindow : Window, IHideable
         if (!CurrentField) return false;
         UpdateCropsArea();
         UpdateUI();
-        UIManager.Instance.EnableJoyStick(false);
         return true;
     }
 
@@ -42,7 +41,6 @@ public class FieldWindow : Window, IHideable
     {
         if (CurrentField) CurrentField.EndManagement();
         CurrentField = null;
-        UIManager.Instance.EnableJoyStick(true);
         return true;
     }
 
@@ -66,7 +64,7 @@ public class FieldWindow : Window, IHideable
 
     public void DestroyCurrentField()
     {
-        if (CurrentField) BuildingManager.Instance.DestroyBuilding(CurrentField.Data);
+        if (CurrentField) StructureManager.Instance.DestroyStructure(CurrentField.Data);
     }
 
     public void DispatchWorker()
@@ -89,8 +87,8 @@ public class FieldWindow : Window, IHideable
 
     public void OpenClosePlantWindow()
     {
-        if (NewWindowsManager.IsWindowOpen<PlantWindow>(out var plant)) plant.Close();
-        else NewWindowsManager.OpenWindow<PlantWindow>(CurrentField);
+        if (WindowsManager.IsWindowOpen<PlantWindow>(out var plant)) plant.Close();
+        else WindowsManager.OpenWindow<PlantWindow>(CurrentField);
     }
 
     public void Hide(bool hide, params object[] args)

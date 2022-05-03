@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ public partial class CharacterInfoInspector
 
     void EnemyHeader()
     {
-        if (string.IsNullOrEmpty(enemy.Name) || string.IsNullOrEmpty(enemy.ID) || enemy.DropItems && enemy.DropItems.Products.Exists(x => !x.Item))
+        if (string.IsNullOrEmpty(enemy.Name) || string.IsNullOrEmpty(enemy.ID) || enemy.DropItems && enemy.DropItems.Products.Any(x => !x.Item))
             EditorGUILayout.HelpBox("该敌人信息未补全。", MessageType.Warning);
         else EditorGUILayout.HelpBox("该敌人信息已完整。", MessageType.Info);
     }

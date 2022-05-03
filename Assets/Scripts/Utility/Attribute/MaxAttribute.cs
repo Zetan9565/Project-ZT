@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-[AttributeUsage(AttributeTargets.Field)]
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public class MaxAttribute : PropertyAttribute
 {
     public readonly int intValue;

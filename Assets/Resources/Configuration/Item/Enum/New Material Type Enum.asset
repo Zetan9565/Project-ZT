@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e83582d71a765c348bbc4f9a4808a6c5, type: 3}
+  m_Name: New Material Type Enum
+  m_EditorClassIdentifier: 
+  enum:
+  - <Name>k__BackingField: "\u77FF\u77F3"
+  - <Name>k__BackingField: "\u91D1\u5C5E"
+  - <Name>k__BackingField: "\u7EA4\u7EF4"
+  - <Name>k__BackingField: "\u852C\u83DC"
+  - <Name>k__BackingField: "\u836F\u6750"
+  - <Name>k__BackingField: "\u6728\u6750"
+  - <Name>k__BackingField: "\u5E03\u6599"
+  - <Name>k__BackingField: "\u517D\u8089"
+  - <Name>k__BackingField: "\u79BD\u8089"
+  - <Name>k__BackingField: "\u9C7C\u8089"
+  - <Name>k__BackingField: "\u517D\u6BDB"
+  - <Name>k__BackingField: "\u7FBD\u6BDB"
+  - <Name>k__BackingField: "\u679C\u5B9E"
+  - <Name>k__BackingField: "\u6DB2\u4F53"
+  - <Name>k__BackingField: "\u8C03\u6599"

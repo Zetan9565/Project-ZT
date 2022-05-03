@@ -46,7 +46,7 @@ public class ItemWindow : Window
     {
         if (contrast != null)
         {
-            contrast = contrast.Where(x => x && x.Model).ToArray();
+            contrast = contrast.Where(x => x && x.Model_old).ToArray();
             MakeWindows(contrast.Length + 1);
         }
         else MakeWindows(1);

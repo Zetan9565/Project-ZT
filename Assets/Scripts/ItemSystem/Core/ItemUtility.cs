@@ -8,7 +8,7 @@ public static class ItemUtility
         //TODO 获取可以比较的道具信息
         if (data)
         {
-            if (data.Model is WeaponItem weapon)
+            if (data.Model_old is WeaponItem weapon)
                 if (weapon.IsPrimary && PlayerManager.Instance.PlayerInfo.primaryWeapon.item)
                     return new ItemData[] { new ItemData(PlayerManager.Instance.PlayerInfo.primaryWeapon.item, false) };
                 else if (PlayerManager.Instance.PlayerInfo.secondaryWeapon.item) return new ItemData[] { new ItemData(PlayerManager.Instance.PlayerInfo.secondaryWeapon.item, false) };
@@ -49,21 +49,21 @@ public static class ItemUsage
 {
     public static void UseItem(ItemData itemInfo)
     {
-        if (!itemInfo.Model.Usable)
+        if (!itemInfo.Model_old.Usable)
         {
             MessageManager.Instance.New("该物品不可使用");
             return;
         }
-        if (itemInfo.Model.IsBox) UseBox(itemInfo);
-        else if (itemInfo.Model.IsEquipment) UseEuipment(itemInfo);
-        else if (itemInfo.Model.IsBook) UseBook(itemInfo);
-        else if (itemInfo.Model.IsBag) UseBag(itemInfo);
-        else if (itemInfo.Model.IsForQuest) UseQuest(itemInfo);
+        if (itemInfo.Model_old.IsBox) UseBox(itemInfo);
+        else if (itemInfo.Model_old.IsEquipment) UseEuipment(itemInfo);
+        else if (itemInfo.Model_old.IsBook) UseBook(itemInfo);
+        else if (itemInfo.Model_old.IsBag) UseBag(itemInfo);
+        else if (itemInfo.Model_old.IsForQuest) UseQuest(itemInfo);
     }
 
     public static void UseBox(ItemData item)
     {
-        BoxItem box = item.Model as BoxItem;
+        BoxItem box = item.Model_old as BoxItem;
         BackpackManager.Instance.LoseItem(item, 1, box.GetItems());
     }
 
@@ -74,11 +74,11 @@ public static class ItemUsage
 
     public static void UseBook(ItemData item)
     {
-        BookItem book = item.Model as BookItem;
+        BookItem book = item.Model_old as BookItem;
         switch (book.BookType)
         {
             case BookType.Building:
-                if (BackpackManager.Instance.CanLose(item, 1) && BuildingManager.Instance.Learn(book.BuildingToLearn))
+                if (BackpackManager.Instance.CanLose(item, 1) && StructureManager.Instance.Learn(book.BuildingToLearn))
                 {
                     BackpackManager.Instance.LoseItem(item, 1);
                 }
@@ -96,10 +96,10 @@ public static class ItemUsage
 
     public static void UseBag(ItemData item)
     {
-        BagItem bag = item.Model as BagItem;
+        BagItem bag = item.Model_old as BagItem;
         if (BackpackManager.Instance.CanLose(item, 1))
         {
-            if (BackpackManager.Instance.ExpandSize(bag.ExpandSize))
+            if (BackpackManager.Instance.ExpandSpace(bag.ExpandSize))
                 BackpackManager.Instance.LoseItem(item, 1);
         }
     }
@@ -107,7 +107,7 @@ public static class ItemUsage
     public static void UseQuest(ItemData item)
     {
         if (!BackpackManager.Instance.CanLose(item, 1)) return;
-        QuestItem quest = item.Model as QuestItem;
+        QuestItem quest = item.Model_old as QuestItem;
         TriggerManager.Instance.SetTrigger(quest.TriggerName, quest.StateToSet);
         BackpackManager.Instance.LoseItem(item, 1);
     }
@@ -115,7 +115,7 @@ public static class ItemUsage
 
 public sealed class SlotComparer : IComparer<ItemSlotData>
 {
-    public static SlotComparer Default { get; } = new SlotComparer();
+    public static SlotComparer Default => new SlotComparer();
 
     public int Compare(ItemSlotData x, ItemSlotData y)
     {
@@ -179,7 +179,7 @@ public sealed class SlotComparer : IComparer<ItemSlotData>
 
 public sealed class ItemComparer : IComparer<ItemBase>
 {
-    public static ItemComparer Default { get; } = new ItemComparer();
+    public static ItemComparer Default => new ItemComparer();
 
     public int Compare(ItemBase x, ItemBase y)
     {
@@ -234,7 +234,7 @@ public class ItemWithAmount
     public readonly ItemData source;
     public int amount;
 
-    public bool IsValid => source && amount > 0 && source.Model;
+    public bool IsValid => source && amount > 0 && source.Model_old;
 
     public ItemWithAmount(ItemData source, int amount)
     {

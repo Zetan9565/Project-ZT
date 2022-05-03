@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.UIElements;
@@ -15,8 +15,8 @@ namespace ZetanStudio.BehaviourTree
         private BehaviourTree tree;
         private Label inspectorLabel;
         private InspectorView inspectorView;
-        private Button inspector;
-        private Button searcher;
+        private TabbedBar inspectorTaber;
+        private TabbedBar variableTaber;
         private IMGUIContainer variables;
         private ToolbarMenu assetsMenu;
         private ToolbarMenu exeMenu;
@@ -45,12 +45,14 @@ namespace ZetanStudio.BehaviourTree
         public static void CreateWindow()
         {
             BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>();
+            wnd.minSize = BehaviourTreeSettings.GetOrCreate().minWindowSize;
             wnd.titleContent = new GUIContent("行为树编辑器");
         }
         public static void CreateWindow(BehaviourExecutor executor)
         {
             if (!executor) return;
             BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>();
+            wnd.minSize = BehaviourTreeSettings.GetOrCreate().minWindowSize;
             wnd.titleContent = new GUIContent("行为树编辑器");
             Selection.activeGameObject = executor.gameObject;
             EditorGUIUtility.PingObject(executor);
@@ -60,13 +62,16 @@ namespace ZetanStudio.BehaviourTree
         {
             if (!tree) return;
             BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>();
+            wnd.minSize = BehaviourTreeSettings.GetOrCreate().minWindowSize;
             wnd.titleContent = new GUIContent("行为树编辑器");
             Selection.activeObject = tree;
             wnd.ChangeTreeBySelection();
         }
 
         [OnOpenAsset]
+#pragma warning disable IDE0060 // 删除未使用的参数
         public static bool OnOpenAsset(int instanceID, int line)
+#pragma warning restore IDE0060 // 删除未使用的参数
         {
             if (EditorUtility.InstanceIDToObject(instanceID) is BehaviourTree tree)
             {
@@ -74,29 +79,6 @@ namespace ZetanStudio.BehaviourTree
                 return true;
             }
             return false;
-        }
-        #endregion
-
-        #region 按钮点击
-        private void OnInspectorClick()
-        {
-            showInspector = true;
-            SwitchInspector();
-        }
-        private void OnSeacherClick()
-        {
-            showInspector = false;
-            SwitchInspector();
-        }
-        private void OnGlobalClick()
-        {
-            showShared = false;
-            UpdateVariables();
-        }
-        private void OnSharedClick()
-        {
-            showShared = true;
-            UpdateVariables();
         }
         #endregion
 
@@ -119,7 +101,9 @@ namespace ZetanStudio.BehaviourTree
             UpdateAssetDropdown();
             UpdateTreeDropdown();
             UpdateTreeName();
-            SwitchInspector();
+            UpdateUndoVisible();
+            UpdateUndoEnable();
+            OnInspectorTab(inspectorTaber.SelectedIndex);
 
             EditorApplication.delayCall += () =>
             {
@@ -129,7 +113,7 @@ namespace ZetanStudio.BehaviourTree
 
             void UpdateVariables()
             {
-                serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanEditorUtility.LoadAsset<GlobalVariables>());
+                serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanUtility.Editor.LoadAsset<GlobalVariables>());
                 this.UpdateVariables();
             }
         }
@@ -137,7 +121,7 @@ namespace ZetanStudio.BehaviourTree
         {
             if (assetsMenu == null) return;
             settings = settings ? settings : BehaviourTreeSettings.GetOrCreate();
-            var behaviourTrees = ZetanEditorUtility.LoadAssets<BehaviourTree>();
+            var behaviourTrees = ZetanUtility.Editor.LoadAssets<BehaviourTree>();
             for (int i = assetsMenu.menu.MenuItems().Count - 1; i > 0; i--)
             {
                 assetsMenu.menu.RemoveItemAt(i);
@@ -149,7 +133,7 @@ namespace ZetanStudio.BehaviourTree
             {
                 if (tree)
                 {
-                    assetsMenu.menu.AppendAction($"本地/[{counter}] {tree.name} ({ZetanEditorUtility.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
+                    assetsMenu.menu.AppendAction($"本地/[{counter}] {tree.name} ({ZetanUtility.Editor.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
                     {
                         EditorApplication.delayCall += () =>
                         {
@@ -251,11 +235,16 @@ namespace ZetanStudio.BehaviourTree
                 }
             }
         }
-        private void UpdateUndoRedo()
+        private void UpdateUndoVisible()
         {
             if (undo == null || redo == null) return;
-            undo.visible = treeView != null && Application.isPlaying;
-            redo.visible = treeView != null && Application.isPlaying;
+            bool isLocal = ZetanUtility.Editor.IsLocalAssets(tree);
+            undo.visible = treeView != null && tree && !isLocal;
+            redo.visible = treeView != null && tree && !isLocal;
+        }
+        private void UpdateUndoEnable()
+        {
+            if (undo == null || redo == null) return;
             if (treeView != null)
             {
                 undo.SetEnabled(treeView.CanUndo);
@@ -264,15 +253,16 @@ namespace ZetanStudio.BehaviourTree
                 redo.tooltip = treeView.RedoName;
             }
         }
+
         private void OnUndoClick()
         {
             treeView?.UndoOperation();
-            UpdateUndoRedo();
+            UpdateUndoEnable();
         }
         private void OnRedoClick()
         {
             treeView?.RedoOperation();
-            UpdateUndoRedo();
+            UpdateUndoEnable();
         }
 
         private void OnNodeSelected(NodeEditor selected)
@@ -301,12 +291,12 @@ namespace ZetanStudio.BehaviourTree
                 case PlayModeStateChange.EnteredEditMode:
                     if (goBefPlay) ChangeTreeBySelection(goBefPlay.GetComponent<BehaviourExecutor>());
                     else ChangeTreeBySelection();
-                    UpdateUndoRedo();
+                    UpdateUndoVisible();
                     break;
                 case PlayModeStateChange.EnteredPlayMode:
                     goBefPlay = latestGo;
                     ChangeTreeBySelection();
-                    UpdateUndoRedo();
+                    UpdateUndoVisible();
                     break;
             }
         }
@@ -348,77 +338,107 @@ namespace ZetanStudio.BehaviourTree
                 SelectTree(tree);
             };
         }
-        private void SwitchInspector()
+        private void OnInspectorTab(int index)
         {
-            inspectorLabel.text = showInspector ? "检查器" : "结点类型列表";
-            inspector.SetEnabled(!showInspector);
-            searcher.SetEnabled(showInspector && tree);
-            if (showInspector)
+            switch (index)
             {
-                var nodesSelected = treeView.nodes.ToList().FindAll(x => x.selected);
-                if (nodesSelected.Count > 1)
-                {
-                    inspectorView.InspectMultSelect(nodesSelected.ConvertAll(x => x as NodeEditor));
-                }
-                else if (nodesSelected.Count > 0) inspectorView?.InspectNode(tree, nodesSelected[0] as NodeEditor);
-                else inspectorView?.InspectTree(tree);
+                case 1:
+                    showInspector = true;
+                    break;
+                case 2:
+                    showInspector = false;
+                    break;
+                default:
+                    break;
             }
-            else inspectorView.InspectNodes(treeView.InsertNode);
+            if (inspectorLabel != null) inspectorLabel.text = showInspector ? "检查器" : "结点类型列表";
+            if (inspectorView != null && treeView != null)
+                if (showInspector)
+                {
+                    var nodesSelected = treeView.nodes.ToList().FindAll(x => x.selected);
+                    if (nodesSelected.Count > 1)
+                    {
+                        inspectorView.InspectMultSelect(nodesSelected.ConvertAll(x => x as NodeEditor));
+                    }
+                    else if (nodesSelected.Count > 0) inspectorView.InspectNode(tree, nodesSelected[0] as NodeEditor);
+                    else inspectorView.InspectTree(tree);
+                }
+                else inspectorView.InspectNodes(treeView.InsertNode);
+        }
+        private void OnVariableTab(int index)
+        {
+            switch (index)
+            {
+                case 1:
+                    showShared = true;
+                    UpdateVariables();
+                    break;
+                case 2:
+                    showShared = false;
+                    UpdateVariables();
+                    break;
+                default:
+                    break;
+            }
         }
         #endregion
 
         #region Unity回调
         public void CreateGUI()
         {
-            settings = settings ? settings : BehaviourTreeSettings.GetOrCreate();
+            try
+            {
+                settings = settings ? settings : BehaviourTreeSettings.GetOrCreate();
 
-            VisualElement root = rootVisualElement;
+                VisualElement root = rootVisualElement;
 
-            var visualTree = settings.treeUxml;
-            visualTree.CloneTree(root);
+                var visualTree = settings.treeUxml;
+                visualTree.CloneTree(root);
 
-            var styleSheet = settings.treeUss;
-            root.styleSheets.Add(styleSheet);
+                var styleSheet = settings.treeUss;
+                root.styleSheets.Add(styleSheet);
 
-            treeView = root.Q<BehaviourTreeView>();
-            treeView.nodeSelectedCallback = OnNodeSelected;
-            treeView.nodeUnselectedCallback = OnNodeUnselected;
-            treeView.undoRecordsChangedCallback = UpdateUndoRedo;
+                treeView = root.Q<BehaviourTreeView>();
+                treeView.nodeSelectedCallback = OnNodeSelected;
+                treeView.nodeUnselectedCallback = OnNodeUnselected;
+                treeView.undoRecordsChangedCallback = UpdateUndoEnable;
 
-            inspectorLabel = root.Q<Label>("inspector-label");
-            inspector = root.Q<Button>("view-inspector");
-            inspector.clicked += OnInspectorClick;
-            searcher = root.Q<Button>("search-node");
-            searcher.clicked += OnSeacherClick;
-            showInspector = true;
-            inspectorView = root.Q<InspectorView>();
-            SwitchInspector();
-            variables = root.Q<IMGUIContainer>("variables");
-            variables.onGUIHandler = DrawVariables;
+                inspectorTaber = root.Q<TabbedBar>("inspector-tab");
+                inspectorTaber.Refresh(new string[] { "检视器", "快速插入" }, OnInspectorTab, 4);
+                inspectorLabel = root.Q<Label>("inspector-label");
+                showInspector = true;
+                inspectorView = root.Q<InspectorView>();
+                variables = root.Q<IMGUIContainer>("variables");
+                variables.onGUIHandler = DrawVariables;
 
-            assetsMenu = root.Q<ToolbarMenu>("assets");
-            assetsMenu.menu.AppendAction("新建", (a) => CreateNewTree("new behaviour tree"));
-            exeMenu = root.Q<ToolbarMenu>("exe-select");
-            UpdateAssetDropdown();
+                assetsMenu = root.Q<ToolbarMenu>("assets");
+                assetsMenu.menu.AppendAction("新建", (a) => CreateNewTree("new behaviour tree"));
+                exeMenu = root.Q<ToolbarMenu>("exe-select");
+                UpdateAssetDropdown();
 
-            treeName = root.Q<Label>("tree-name");
+                treeName = root.Q<Label>("tree-name");
 
-            shared = root.Q<Button>("shared");
-            shared.clicked += OnSharedClick;
-            global = root.Q<Button>("global");
-            global.clicked += OnGlobalClick;
-            showShared = true;
-            serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanEditorUtility.LoadAsset<GlobalVariables>());
-            UpdateVariables();
+                variableTaber = root.Q<TabbedBar>("variable-tab");
+                variableTaber.Refresh(new string[] { "共享变量", "全局变量" }, OnVariableTab, 4);
+                serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanUtility.Editor.LoadAsset<GlobalVariables>());
 
-            undo = root.Q<ToolbarButton>("undo");
-            undo.clicked += OnUndoClick;
-            redo = root.Q<ToolbarButton>("redo");
-            redo.clicked += OnRedoClick;
-            UpdateUndoRedo();
+                undo = root.Q<ToolbarButton>("undo");
+                undo.clicked += OnUndoClick;
+                redo = root.Q<ToolbarButton>("redo");
+                redo.clicked += OnRedoClick;
+                UpdateUndoVisible();
+                UpdateUndoEnable();
 
-            if (tree == null) ChangeTreeBySelection();
-            else SelectTree(tree);
+                inspectorTaber.SetSelected(1);
+                variableTaber.SetSelected(1);
+
+                if (tree == null) ChangeTreeBySelection();
+                else SelectTree(tree);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
         private void OnSelectionChange()
         {
@@ -505,7 +525,7 @@ namespace ZetanStudio.BehaviourTree
         #region 新建相关
         private void CreateNewTree(string assetName)
         {
-            BehaviourTree tree = ZetanEditorUtility.SaveFilePanel(CreateInstance<BehaviourTree>, assetName, ping: true, select: true);
+            BehaviourTree tree = ZetanUtility.Editor.SaveFilePanel(CreateInstance<BehaviourTree>, assetName, ping: true, select: true);
             if (tree)
             {
                 serializedTree = new SerializedObject(tree);
@@ -519,7 +539,7 @@ namespace ZetanStudio.BehaviourTree
         private void CreateGlobalVariables(string assetName)
         {
             if (serializedGlobal != null && serializedGlobal.targetObject != null) return;
-            GlobalVariables global = ZetanEditorUtility.SaveFilePanel(CreateInstance<GlobalVariables>, assetName);
+            GlobalVariables global = ZetanUtility.Editor.SaveFilePanel(CreateInstance<GlobalVariables>, assetName);
             if (global)
             {
                 serializedGlobal = new SerializedObject(global);
@@ -536,7 +556,7 @@ namespace ZetanStudio.BehaviourTree
             }
             if (EditorUtility.DisplayDialog("保存到本地", "保存到本地的行为树将失去对场景对象的引用，是否继续？", "继续", "取消"))
             {
-                ZetanEditorUtility.SaveFilePanel(() => BehaviourTree.PrepareLocalization(tree), assetName, ping: true);
+                ZetanUtility.Editor.SaveFilePanel(() => BehaviourTree.PrepareLocalization(tree), assetName, ping: true);
             }
         }
         #endregion

@@ -18,6 +18,7 @@ namespace ZetanStudio.BehaviourTree
         public BehaviourTree tree;
 
         private BehaviourTree treeBef;
+        private bool isLocal;
         private readonly BehaviourTreeSettings settings;
         private readonly RuntimeUndo runtimeUndo = new RuntimeUndo();
 
@@ -150,6 +151,7 @@ namespace ZetanStudio.BehaviourTree
         }
         public void InsertNode(Type type)
         {
+            if (!tree) return;
             var newNode = CreateTreeNode(type, this.ChangeCoordinatesTo(contentViewContainer, viewport.localBound.center - new Vector2(20, 80)));
             if (newNode != null)
             {
@@ -186,7 +188,7 @@ namespace ZetanStudio.BehaviourTree
                 {
                     if (elem is NodeEditor editor)
                     {
-                        if (!Application.isPlaying) Undo.RegisterCompleteObjectUndo(tree, "删除结点");
+                        if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "删除结点");
                         else runtimeUndo.RecordTreeChange(tree, "删除结点");
                         tree.DeleteNode(editor.node);
                         removedNodes.Add(editor);
@@ -199,7 +201,7 @@ namespace ZetanStudio.BehaviourTree
                         NodeEditor parent = edge.output.node as NodeEditor;
                         NodeEditor child = edge.input.node as NodeEditor;
                         if (!removedNodes.Contains(parent) && !removedNodes.Contains(child))//不是是因删除结点引起的断连才记录
-                            if (!Application.isPlaying) Undo.RegisterCompleteObjectUndo(tree, "断开子结点");
+                            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "断开子结点");
                             else runtimeUndo.RecordTreeChange(tree, "断开子结点");
                         parent.node.RemoveChild(child.node);
                         UpdateValid(parent);
@@ -212,7 +214,7 @@ namespace ZetanStudio.BehaviourTree
             {
                 graphViewChange.edgesToCreate.ForEach(edge =>
                 {
-                    if (!Application.isPlaying) Undo.RegisterCompleteObjectUndo(tree, "连接子结点");
+                    if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "连接子结点");
                     else runtimeUndo.RecordTreeChange(tree, "连接子结点");
                     NodeEditor parent = edge.output.node as NodeEditor;
                     NodeEditor child = edge.input.node as NodeEditor;
@@ -237,13 +239,13 @@ namespace ZetanStudio.BehaviourTree
 
         private void UpdateValid(NodeEditor editor)
         {
-            if (editor.node is not Action && editor.node is not Conditional)
+            if (editor.node is ParentNode)
                 editor.UpdateValid(tree);
         }
 
         private void OnNodePositionChanged(NodeEditor editor, Vector2 oldPos)
         {
-            if (!Application.isPlaying) Undo.RegisterCompleteObjectUndo(tree, "移动结点");
+            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "移动结点");
             else if (selection.Count > 1) runtimeUndo.RecordMultNodePosition(editor.node, oldPos, "移动多个结点");
             else runtimeUndo.RecordNodePosition(editor.node, oldPos, "移动结点");
         }
@@ -273,13 +275,14 @@ namespace ZetanStudio.BehaviourTree
             if (newTree)
             {
                 if (treeBef != newTree)
-                    if (!Application.isPlaying) Undo.ClearUndo(treeBef);
+                    if (ZetanUtility.Editor.IsLocalAssets(treeBef)) Undo.ClearUndo(treeBef);
                     else runtimeUndo.Clear();
                 tree = newTree;
             }
             if (tree != null) treeBef = tree;
             Vocate();
             if (!tree) return;
+            isLocal = ZetanUtility.Editor.IsLocalAssets(tree);
             if (string.IsNullOrEmpty(tree.Entry.guid))
                 tree.Entry.guid = GUID.Generate().ToString();
             tree.Nodes.ForEach(n => CreateNode(n));
@@ -289,8 +292,8 @@ namespace ZetanStudio.BehaviourTree
         private NodeEditor CreateTreeNode(Type type, Vector2 position)
         {
             if (type.IsSubclassOf(typeof(Node)))
-                if (tree.IsRuntime) return CreateNewNode(Node.GetRuntimeNode(type), $"({tree.Nodes.Count}) {type.Name}(R)", position);
-                else return CreateNewNode(Activator.CreateInstance(type) as Node, $"({tree.Nodes.Count}) {type.Name}", position);
+                if (tree.IsRuntime) return CreateNewNode(Node.GetRuntimeNode(type), $"{ObjectNames.GetUniqueName(tree.Nodes.Select(x => x.name).ToArray(), type.Name)}(R)", position);
+                else return CreateNewNode(Activator.CreateInstance(type) as Node, $"{ObjectNames.GetUniqueName(tree.Nodes.Select(x => x.name).ToArray(), type.Name)}", position);
             else return null;
         }
         #endregion
@@ -304,9 +307,9 @@ namespace ZetanStudio.BehaviourTree
             if (tree.IsInstance)
             {
                 if (!tree.IsRuntime) newNode.Instantiate();
-                newNode.Init(tree);
+                tree.InitNode(newNode);
             }
-            if (!Application.isPlaying) Undo.RegisterCompleteObjectUndo(tree, "新增结点");
+            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "新增结点");
             else runtimeUndo.RecordTreeChange(tree, "新增结点");
             tree.AddNode(newNode);
             return CreateNode(newNode);
@@ -326,7 +329,7 @@ namespace ZetanStudio.BehaviourTree
         private void CopyNode(NodeEditor editor)
         {
             Node node = editor.node.Copy();
-            if (!Application.isPlaying) Undo.RegisterCompleteObjectUndo(tree, "复制结点");
+            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "复制结点");
             else runtimeUndo.RecordTreeChange(tree, "复制结点");
             BehaviourTree.Traverse(node, n =>
             {

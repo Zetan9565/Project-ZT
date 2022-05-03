@@ -25,7 +25,7 @@ public class Talker : Character, IInteractive
     {
         get
         {
-            return GetData<TalkerData>().Info && data && !NewWindowsManager.IsWindowOpen<DialogueWindow>();
+            return GetData<TalkerData>().Info && data && !WindowsManager.IsWindowOpen<DialogueWindow>();
         }
     }
 
@@ -102,7 +102,7 @@ public class Talker : Character, IInteractive
 
     private void OnNotInteractable()
     {
-        if (NewWindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && dialogue.Target == this)
+        if (WindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && dialogue.Target == this)
             dialogue.CancelTalk();
     }
 
@@ -117,7 +117,7 @@ public class Talker : Character, IInteractive
     }
     private void HideNameImmediately()
     {
-        NewWindowsManager.CloseWindow<FloatTipsPanel>();
+        WindowsManager.CloseWindow<FloatTipsPanel>();
     }
     private string GetMapIconName()
     {

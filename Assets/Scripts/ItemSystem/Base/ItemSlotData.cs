@@ -8,11 +8,11 @@ public class ItemSlotData
 
     public string ModelID => item ? item.ModelID : string.Empty;
 
-    public ItemBase Model => item ? item.Model : null;
+    public ItemBase Model => item ? item.Model_old : null;
 
     public bool IsEmpty => item == null;
 
-    public bool IsFull => item && item.Model.StackNum <= amount;
+    public bool IsFull => item && item.Model_old.StackNum <= amount;
 
     public ItemData item;
 
@@ -59,7 +59,7 @@ public class ItemSlotData
     public int Put(int amount = 1)
     {
         if (!item) return 0;
-        int left = item.Model.StackNum - this.amount;
+        int left = item.Model_old.StackNum - this.amount;
         if (left >= amount)
         {
             this.amount += amount;
@@ -148,7 +148,7 @@ public class ItemSlotData
         foreach (var item in items)
         {
             if (!fixedSlotCount.HasValue || slots.Count < fixedSlotCount)
-                if (item.source.Model.StackAble)
+                if (item.source.Model_old.StackAble)
                     slots.Add(new ItemSlotData(item.source, item.amount));
                 else for (int i = 0; i < item.amount; i++)
                     {

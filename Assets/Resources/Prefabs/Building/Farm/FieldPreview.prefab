@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7294374229007079958}
   - component: {fileID: 889545161639848672}
   m_Layer: 13
-  m_Name: Building
+  m_Name: Structure
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -203,7 +203,7 @@ MonoBehaviour:
   defaultName: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
   defaultIcon: {fileID: 0}
   preview: {fileID: 8355541123688651094}
-  building: {fileID: 5135588854725394626}
+  structure: {fileID: 5135588854725394626}
   ignoreLayer:
     serializedVersion: 2
     m_Bits: 256

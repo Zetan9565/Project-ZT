@@ -52,7 +52,7 @@ MonoBehaviour:
   defaultName: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
   defaultIcon: {fileID: 0}
   preview: {fileID: 2850851020005493040}
-  building: {fileID: 8836544503572275705}
+  structure: {fileID: 8836544503572275705}
   ignoreLayer:
     serializedVersion: 2
     m_Bits: 256

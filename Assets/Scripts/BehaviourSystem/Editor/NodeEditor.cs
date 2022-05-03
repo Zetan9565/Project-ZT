@@ -142,7 +142,6 @@ namespace ZetanStudio.BehaviourTree
                         break;
                 }
             }
-
             UpdateRecheck();
         }
         public void UpdateDesc()
@@ -172,7 +171,7 @@ namespace ZetanStudio.BehaviourTree
                 {
                     if (parent is Composite composite)
                     {
-                        rechecking = composite.AbortType != AbortType.None;
+                        rechecking = composite.NeedReevaluate();
                         break;
                     }
                     else input = node.input;

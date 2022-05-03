@@ -69,13 +69,8 @@ public class GatheringInfoInspector : Editor
         EditorGUILayout.PropertyField(refreshTime, new GUIContent("刷新时间"));
         EditorGUILayout.PropertyField(lootPrefab, new GUIContent("掉落预制件"));
         EditorGUILayout.PropertyField(productItems, new GUIContent("产出道具"), false);
+        if (productItems.isExpanded) dropList.DoLayoutDraw();
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
-        if (productItems.isExpanded)
-        {
-            serializedObject.UpdateIfRequiredOrScript();
-            dropList.DoLayoutDraw();
-            serializedObject.ApplyModifiedProperties();
-        }
     }
 
     private bool CheckEditComplete()

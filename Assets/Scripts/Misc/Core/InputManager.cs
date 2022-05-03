@@ -14,12 +14,12 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
     public InputCustomInfo customInfo;
 
     public static bool IsTyping => /*BackpackManager.Instance && BackpackManager.Instance.IsInputFocused ||*/
-        NewWindowsManager.IsWindowOpen<PlantWindow>(out var plantWindow) && plantWindow.IsInputFocused;
+        WindowsManager.IsWindowOpen<PlantWindow>(out var plantWindow) && plantWindow.IsInputFocused;
 
-    private void ShowBuilding(InputAction.CallbackContext context)
+    private void ShowStructure(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        else NewWindowsManager.OpenClose<BuildingWindow>();
+        else WindowsManager.OpenClose<StructureWindow>();
     }
 
     private void Awake()
@@ -32,7 +32,7 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
         control.UI.Cancel.started += Cancel;
         control.UI.ShowQuest.started += ShowQuest;
         control.UI.ShowBackpack.started += ShowBackpack;
-        control.UI.ShowBuilding.started += ShowBuilding;
+        control.UI.ShowBuilding.started += ShowStructure;
         control.UI.Interact.started += Interact;
         control.UI.Enable();
     }
@@ -43,12 +43,12 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
 #if UNITY_EDITOR || UNITY_STANDALONE
         if (Mouse.current.scroll.ReadValue().y > 0)
         {
-            if (NewWindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && !dialogue.IsHidden) dialogue.OptionPageUp();
+            if (WindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && !dialogue.IsHidden) dialogue.OptionPageUp();
             else if (InteractionPanel.Instance.ScrollAble) InteractionPanel.Instance.Up();
         }
         if (Mouse.current.scroll.ReadValue().y < 0)
         {
-            if (NewWindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && !dialogue.IsHidden) dialogue.OptionPageDown();
+            if (WindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && !dialogue.IsHidden) dialogue.OptionPageDown();
             else if (InteractionPanel.Instance.ScrollAble) InteractionPanel.Instance.Down();
         }
 #endif
@@ -63,15 +63,15 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
     private void ShowBackpack(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        NewWindowsManager.OpenClose<BackpackWindow>();
+        WindowsManager.OpenClose<BackpackWindow>();
     }
 
     private void Interact(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        if (NewWindowsManager.IsWindowOpen<LootWindow>(out var loot))
+        if (WindowsManager.IsWindowOpen<LootWindow>(out var loot))
             loot.TakeAll();
-        else if (NewWindowsManager.IsWindowOpen<DialogueWindow>(out var window))
+        else if (WindowsManager.IsWindowOpen<DialogueWindow>(out var window))
         {
             if (window.CurrentType == DialogueType.Normal && window.OptionsCount < 1
                   && window.ShouldShowQuest)
@@ -85,16 +85,16 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
     private void Submit(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        if (NewWindowsManager.IsWindowOpen<AmountWindow>(out var amount) && !NewWindowsManager.IsWindowOpen<ConfirmWindow>()) amount.Confirm();
-        else if (!NewWindowsManager.IsWindowOpen<AmountWindow>() && NewWindowsManager.IsWindowOpen<ConfirmWindow>(out var confirm)) confirm.Confirm();
+        if (WindowsManager.IsWindowOpen<AmountWindow>(out var amount) && !WindowsManager.IsWindowOpen<ConfirmWindow>()) amount.Confirm();
+        else if (!WindowsManager.IsWindowOpen<AmountWindow>() && WindowsManager.IsWindowOpen<ConfirmWindow>(out var confirm)) confirm.Confirm();
     }
 
     private void Cancel(InputAction.CallbackContext context)
     {
         if (IsTyping) return;
-        if (NewWindowsManager.IsWindowOpen<BuildingWindow>(out var building) && (building.IsLocating || building.IsPreviewing)) building.GoBack();
-        else if (NewWindowsManager.Count > 0) NewWindowsManager.CloseTop();
-        else NewWindowsManager.OpenWindow<EscapeWindow>();
+        if (WindowsManager.IsWindowOpen<StructureWindow>(out var structure) && (structure.IsLocating || structure.IsPreviewing)) structure.GoBack();
+        else if (WindowsManager.Count > 0) WindowsManager.CloseTop();
+        else WindowsManager.OpenWindow<EscapeWindow>();
     }
 
     public static bool GetMouseButtonDown(int index)

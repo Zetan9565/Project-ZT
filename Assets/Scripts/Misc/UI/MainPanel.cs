@@ -1,13 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public sealed class MainPanel : SingletonWindow<MainPanel>, IHideable
 {
     [SerializeField]
-    private Joystick joyStick;
-    public Joystick JoyStick => joyStick;
+    private Joystick joystick;
+    public Joystick Joystick => joystick;
 
     public override bool IsOpen => true;
     public bool IsHidden { get; private set; }
@@ -20,7 +17,7 @@ public sealed class MainPanel : SingletonWindow<MainPanel>, IHideable
 
     protected override bool OnOpen(params object[] args)
     {
-        return false;
+        return true;
     }
     protected override bool OnClose(params object[] args)
     {

@@ -76,11 +76,10 @@ public class PlantWindow : Window, IHideable
         HideBuiltList();
         currentInfo = info;
         preview = Instantiate(currentInfo.PreviewPrefab);
-        NewWindowsManager.HideAll(true);
+        WindowsManager.HideAll(true);
         IsPreviewing = true;
 #if UNITY_ANDROID
         ZetanUtility.SetActive(CancelArea, true);
-        UIManager.Instance.EnableJoyStick(false);
 #endif
         ShowAndMovePreview();
     }
@@ -133,12 +132,11 @@ public class PlantWindow : Window, IHideable
         if (preview) Destroy(preview.gameObject);
         preview = null;
         currentInfo = null;
-        NewWindowsManager.HideAll(false);
+        WindowsManager.HideAll(false);
         IsPreviewing = false;
 #if UNITY_ANDROID
         ZetanUtility.SetActive(CancelArea, false);
 #endif
-        UIManager.Instance.EnableJoyStick(true);
     }
 
     private void HideBuiltList()
@@ -205,10 +203,9 @@ public class PlantWindow : Window, IHideable
         if (args.Length < 1) return false;
         CurrentField = args[0] as Field;
         if (!CurrentField) return false;
-        BackpackManager.Instance.Inventory.TryGetDatas(x => x.Model is SeedItem, out var seeds);
-        seedList.Refresh(seeds.Select(x => x.source.Model as SeedItem));
+        BackpackManager.Instance.Inventory.TryGetDatas(x => x.Model_old is SeedItem, out var seeds);
+        seedList.Refresh(seeds.Select(x => x.source.Model_old as SeedItem));
         HideDescription();
-        UIManager.Instance.EnableJoyStick(false);
         pageSelector.SetValueWithoutNotify(0);
         SetPage(0);
         return true;

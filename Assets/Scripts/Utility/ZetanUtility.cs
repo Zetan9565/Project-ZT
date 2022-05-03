@@ -11,9 +11,48 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using ZetanExtends;
+#if UNITY_EDITOR
+using UnityEditor;
+using Object = UnityEngine.Object;
+#endif
 
 namespace ZetanExtends
 {
+    public static class IEnumerableExtend
+    {
+        public static int IndexOf<T>(this IEnumerable<T> source, T item)
+        {
+            if (source == null || source is ISet<T>) return -1;
+            if (source is IList<T> gList) return gList.IndexOf(item);
+            if (source is IList list) return list.IndexOf(item);
+            int index = 0;
+            foreach (var temp in source)
+            {
+                if (Equals(temp, item)) return index;
+                index++;
+            }
+            return -1;
+        }
+        public static int FindIndex<T>(this IEnumerable<T> source, Predicate<T> predicate)
+        {
+            if (source == null || predicate == null || source is ISet<T>) return -1;
+            if (source is List<T> list) return list.FindIndex(predicate);
+            if (source is T[] array) return Array.FindIndex(array, predicate);
+            int index = 0;
+            foreach (var item in source)
+            {
+                if (predicate(item)) return index;
+                index++;
+            }
+            return -1;
+        }
+        public static bool IsSubsetOf<T>(this IEnumerable<T> source, IEnumerable<T> other)
+        {
+            if (source == null || other == null) return false;
+            return source.Except(other).Any();
+        }
+    }
+
     public static class TransformExtend
     {
         public static Transform CreateChild(this Transform source, string name = null)
@@ -185,6 +224,26 @@ namespace ZetanExtends
     }
 }
 
+#if UNITY_EDITOR
+namespace ZetanExtends.Editor
+{
+    public static class SerializedObjectExtends
+    {
+        public static SerializedProperty FindAutoProperty(this SerializedObject obj, string propName)
+        {
+            return obj.FindProperty(string.Format("<{0}>k__BackingField", propName));
+        }
+    }
+    public static class SerializedPropertyExtends
+    {
+        public static SerializedProperty FindAutoPropertyRelative(this SerializedProperty prop, string propName)
+        {
+            return prop.FindPropertyRelative(string.Format("<{0}>k__BackingField", propName));
+        }
+    }
+}
+#endif
+
 public sealed class ZetanUtility
 {
     public static bool IsMouseInsideScreen
@@ -255,6 +314,7 @@ public sealed class ZetanUtility
 
     public static void DrawGizmosCircle(Vector3 center, float radius, Vector3? normal = null, Color? color = null)
     {
+#if UNITY_EDITOR
         float delta = radius * 0.001f;
         if (delta < 0.0001f) delta = 0.0001f;
         Color colorBef = Gizmos.color;
@@ -276,6 +336,7 @@ public sealed class ZetanUtility
         }
         Gizmos.DrawLine(firstPoint, fromPoint);
         Gizmos.color = colorBef;
+#endif
     }
     public static void DrawGizmosSector(Vector3 origin, Vector3 direction, float radius, float angle, Vector3? normal = null)
     {
@@ -287,7 +348,7 @@ public sealed class ZetanUtility
         Gizmos.DrawLine(origin, origin + end * radius);
         Vector3 from = (Quaternion.AngleAxis(-angle / 2, axis) * direction).normalized;
         Gizmos.DrawLine(origin, origin + from * radius);
-        UnityEditor.Handles.DrawWireArc(origin, axis, from, angle, radius);
+        Handles.DrawWireArc(origin, axis, from, angle, radius);
 #endif
     }
 
@@ -364,7 +425,7 @@ public sealed class ZetanUtility
         else if (type.IsClass)
         {
             sb.Append("{\n");
-            foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
             {
                 for (int i = 0; i < indentation + 1; i++)
                 {
@@ -377,7 +438,7 @@ public sealed class ZetanUtility
                 sb.Append(",\n");
             }
             if (includeProperty)
-                foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetProperty))
+                foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
                 {
                     for (int i = 0; i < indentation + 1; i++)
                     {
@@ -445,8 +506,13 @@ public sealed class ZetanUtility
         else return false;
     }
 
+    /// <summary>
+    /// 通过类名获取类<see cref="Type"/>
+    /// </summary>
+    /// <param name="name">类名，含命名空间</param>
     public static Type GetTypeWithoutAssembly(string name)
     {
+        if (string.IsNullOrEmpty(name)) return null;
         return Assembly.GetCallingAssembly().GetType(name);
     }
 
@@ -466,7 +532,7 @@ public sealed class ZetanUtility
         return enumValue.ToString();
     }
 
-    public static string[] GetEnumNames(Type type)
+    public static string[] GetInspectorNames(Type type)
     {
         List<string> names = new List<string>();
         foreach (Enum value in Enum.GetValues(type))
@@ -476,7 +542,46 @@ public sealed class ZetanUtility
         return names.ToArray();
     }
 
-    public const BindingFlags CommonBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+    public const BindingFlags CommonBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
+    #region Debug.Log相关
+    public static void Log(params object[] messages)
+    {
+        if (messages == null) Debug.Log(messages);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < messages.Length; i++)
+        {
+            sb.Append(messages[i]);
+            if (i != messages.Length - 1)
+                sb.Append(',');
+        }
+        Debug.Log(sb);
+    }
+    public static void LogWarning(params object[] messages)
+    {
+        if (messages == null) Debug.Log(messages);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < messages.Length; i++)
+        {
+            sb.Append(messages[i]);
+            if (i != messages.Length - 1)
+                sb.Append(',');
+        }
+        Debug.LogWarning(sb);
+    }
+    public static void LogError(params object[] messages)
+    {
+        if (messages == null) Debug.Log(messages);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < messages.Length; i++)
+        {
+            sb.Append(messages[i]);
+            if (i != messages.Length - 1)
+                sb.Append(',');
+        }
+        Debug.LogError(sb);
+    }
+    #endregion
+
     #region Vector相关
     public static Vector2 ScreenCenter => new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
 
@@ -745,6 +850,398 @@ public sealed class ZetanUtility
             return false;
         }
     }
+    #endregion
+
+    #region Editor相关
+#if UNITY_EDITOR
+    public static class Editor
+    {
+        public static string GetDirectoryName(Object target)
+        {
+            return GetDirectoryName(AssetDatabase.GetAssetPath(target));
+        }
+
+        public static string GetDirectoryName(string path)
+        {
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                return Path.GetDirectoryName(path);
+            else return string.Empty;
+        }
+
+        public static bool IsValidFolder(string path)
+        {
+            return path.Contains(Application.dataPath);
+        }
+
+        public static string ConvertToAssetsPath(string path)
+        {
+            return path.Replace(Application.dataPath, "Assets");
+        }
+
+        public static string GetFileName(string path)
+        {
+            return Path.GetFileName(path);
+        }
+
+        public static void SaveChange(Object asset)
+        {
+            EditorUtility.SetDirty(asset);
+            AssetDatabase.SaveAssetIfDirty(asset);
+        }
+
+        /// <summary>
+        /// 获取SerializedProperty关联字段的值
+        /// </summary>
+        public static bool TryGetValue(SerializedProperty property, out object value)
+        {
+            return TryGetValue(property, out value, out _);
+        }
+
+        /// <summary>
+        /// 获取SerializedProperty关联字段的值
+        /// </summary>
+        /// <param name="property"><see cref="SerializedProperty"/></param>
+        /// <param name="fieldInfo">字段信息，找不到关联字段时是null</param>
+        /// <returns>获取到的字段值</returns>
+        public static bool TryGetValue(SerializedProperty property, out object value, out FieldInfo fieldInfo)
+        {
+            value = default;
+            fieldInfo = null;
+            if (property.serializedObject.targetObject)
+            {
+                try
+                {
+                    string[] paths = property.propertyPath.Split('.');
+                    value = property.serializedObject.targetObject;
+                    for (int i = 0; i < paths.Length; i++)
+                    {
+                        if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
+                        {
+                            if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
+                            {
+                                if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
+                                {
+                                    fieldInfo = value.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
+                                    value = (fieldInfo.GetValue(value) as IList)[index];
+                                    i += 2;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            fieldInfo = value.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
+                            value = fieldInfo.GetValue(value);
+                        }
+                    }
+                    return fieldInfo != null;
+                }
+                catch
+                {
+                    value = default;
+                    fieldInfo = null;
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 设置SerializedProperty关联字段的值
+        /// </summary>
+        /// <returns>是否成功</returns>
+        public static bool TrySetValue(SerializedProperty property, object value)
+        {
+            object temp = property.serializedObject.targetObject;
+            FieldInfo fieldInfo = null;
+            if (temp != null)
+            {
+                try
+                {
+                    string[] paths = property.propertyPath.Split('.');
+                    for (int i = 0; i < paths.Length; i++)
+                    {
+                        if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
+                        {
+                            if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
+                            {
+                                if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
+                                {
+                                    fieldInfo = temp.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
+                                    temp = (fieldInfo.GetValue(temp) as IList)[index];
+                                    i += 2;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            fieldInfo = temp.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
+                            if (fieldInfo != null)
+                            {
+                                if (i < paths.Length - 1)
+                                    temp = fieldInfo.GetValue(temp);
+                            }
+                            else break;
+                        }
+                    }
+                    if (fieldInfo != null)
+                    {
+                        fieldInfo.SetValue(temp, value);
+                        return true;
+                    }
+                    else return false;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 根据关键字截取给定内容中的一段
+        /// </summary>
+        /// <param name="input">内容</param>
+        /// <param name="key">关键字</param>
+        /// <param name="length">截取长度</param>
+        /// <returns>截取到的内容</returns>
+        public static string TrimContentByKey(string input, string key, int length)
+        {
+            string output;
+            if (length > input.Length) length = input.Length;
+            int cut = (length - key.Length) / 2;
+            int index = input.IndexOf(key);
+            int start = index - cut;
+            int end = index + key.Length + cut;
+            while (start < 0)
+            {
+                start++;
+                if (end < input.Length - 1) end++;
+            }
+            while (end > input.Length - 1)
+            {
+                end--;
+                if (start > 0) start--;
+            }
+            start = start < 0 ? 0 : start;
+            end = end > input.Length - 1 ? input.Length - 1 : end;
+            int len = end - start + 1;
+            output = input.Substring(start, Mathf.Min(len, input.Length - start));
+            index = output.IndexOf(key);
+            end = index + 1 + key.Length;
+            output = output.Insert(index, "<").Insert(end, ">");
+            return output;
+        }
+        public static string HighlightContentByKey(string input, string key, int length)
+        {
+            string output;
+            int cut = (length - key.Length) / 2;
+            int index = input.IndexOf(key);
+            int start = index - cut;
+            int end = index + key.Length + cut;
+            while (start < 0)
+            {
+                start++;
+                if (end < input.Length - 1) end++;
+            }
+            while (end > input.Length - 1)
+            {
+                end--;
+                if (start > 0) start--;
+            }
+            start = start < 0 ? 0 : start;
+            end = end > input.Length - 1 ? input.Length - 1 : end;
+            int len = end - start + 1;
+            output = input.Substring(start, Mathf.Min(len, input.Length - start));
+            index = output.IndexOf(key);
+            end = index + 3 + key.Length;
+            output = output.Insert(index, "<b>").Insert(end, "</b>");
+            return output;
+        }
+
+        /// <summary>
+        /// 加载所有<typeparamref name="T"/>类型的资源
+        /// </summary>
+        /// <typeparam name="T">UnityEngine.Object类型</typeparam>
+        /// <param name="folder">以Assets开头的指定加载文件夹路径</param>
+        /// <returns>找到的资源</returns>
+        public static List<T> LoadAssets<T>(string folder = null) where T : Object
+        {
+            string[] guids = AssetDatabase.FindAssets($"t:{typeof(T).Name}", string.IsNullOrEmpty(folder) ? null : new string[] { folder });
+            List<T> assets = new List<T>();
+            foreach (var guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                try
+                {
+                    T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+                    assets.Add(asset);
+                }
+                catch
+                {
+                    Debug.LogWarning($"找不到路径：{path}");
+                }
+            }
+            return assets;
+        }
+
+        /// <summary>
+        /// 加载第一个T类型的资源
+        /// </summary>
+        /// <typeparam name="T">UnityEngine.Object类型</typeparam>
+        /// <returns>找到的资源</returns>
+        public static T LoadAsset<T>(string folder = null) where T : Object
+        {
+            string[] guids = AssetDatabase.FindAssets($"t:{typeof(T).Name}", string.IsNullOrEmpty(folder) ? null : new string[] { folder });
+            foreach (var guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                try
+                {
+                    T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+                    if (asset) return asset;
+                }
+                catch
+                {
+                    Debug.LogWarning($"找不到路径：{path}");
+                }
+            }
+            return null;
+        }
+        public static bool IsLocalAssets(Object asset)
+        {
+            if (!asset) return false;
+            return AssetDatabase.TryGetGUIDAndLocalFileIdentifier(asset, out _, out long _);
+        }
+        public static T SaveFilePanel<T>(Func<T> instantiate, string assetName = "", string title = "选择保存位置", string extension = "asset", bool ping = false, bool select = false) where T : Object
+        {
+            while (true)
+            {
+                if (string.IsNullOrEmpty(assetName)) assetName = "new " + System.Text.RegularExpressions.Regex.Replace(typeof(T).Name, "([a-z])([A-Z])", "$1 $2").ToLower();
+                string path = EditorUtility.SaveFilePanel(title, Application.dataPath, assetName, extension);
+                if (!string.IsNullOrEmpty(path))
+                {
+                    if (IsValidFolder(path))
+                    {
+                        try
+                        {
+                            T obj = instantiate();
+                            AssetDatabase.CreateAsset(obj, ConvertToAssetsPath(path));
+                            if (select) Selection.activeObject = obj;
+                            if (ping) EditorGUIUtility.PingObject(obj);
+                            return obj;
+                        }
+                        catch
+                        {
+                            if (!EditorUtility.DisplayDialog("保存失败", "请检查路径或者资源的有效性。", "确定", "取消"))
+                                return null;
+                        }
+                    }
+                    else
+                    {
+                        if (!EditorUtility.DisplayDialog("提示", "请选择Assets目录或子文件夹。", "确定", "取消"))
+                            return null;
+                    }
+                }
+                return null;
+            }
+        }
+
+        public static void MinMaxSlider(string label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
+        {
+            MinMaxSlider(EditorGUILayout.GetControlRect(), label, ref minValue, ref maxValue, minLimit, maxLimit);
+        }
+        public static void MinMaxSlider(GUIContent label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
+        {
+            MinMaxSlider(EditorGUILayout.GetControlRect(), label, ref minValue, ref maxValue, minLimit, maxLimit);
+        }
+        public static void MinMaxSlider(Rect rect, string label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
+        {
+            EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), label);
+            minValue = EditorGUI.FloatField(new Rect(rect.x + EditorGUIUtility.labelWidth + 2, rect.y, 40, rect.height), minValue);
+            if (minValue < minLimit) minValue = minLimit;
+            maxValue = EditorGUI.FloatField(new Rect(rect.x + rect.width - 40, rect.y, 40, rect.height), maxValue);
+            if (maxValue > maxLimit) maxValue = maxLimit;
+            EditorGUI.MinMaxSlider(new Rect(rect.x + EditorGUIUtility.labelWidth + 45, rect.y, rect.width - EditorGUIUtility.labelWidth - 88, rect.height), ref minValue, ref maxValue, minLimit, maxLimit);
+        }
+        public static void MinMaxSlider(Rect rect, GUIContent label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
+        {
+            EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), label);
+            minValue = EditorGUI.FloatField(new Rect(rect.x + EditorGUIUtility.labelWidth + 2, rect.y, 40, rect.height), minValue);
+            if (minValue < minLimit) minValue = minLimit;
+            maxValue = EditorGUI.FloatField(new Rect(rect.x + rect.width - 40, rect.y, 40, rect.height), maxValue);
+            if (maxValue > maxLimit) maxValue = maxLimit;
+            EditorGUI.MinMaxSlider(new Rect(rect.x + EditorGUIUtility.labelWidth + 45, rect.y, rect.width - EditorGUIUtility.labelWidth - 88, rect.height), ref minValue, ref maxValue, minLimit, maxLimit);
+        }
+
+        public static class Style
+        {
+            public static GUIStyle middleRight
+            {
+                get
+                {
+                    GUIStyle style = GUIStyle.none;
+                    style.alignment = TextAnchor.MiddleRight;
+                    style.normal.textColor = GUI.skin.label.normal.textColor;
+                    return style;
+                }
+            }
+            public static GUIStyle bold
+            {
+                get
+                {
+                    GUIStyle style = GUIStyle.none;
+                    style.normal.textColor = GUI.skin.label.normal.textColor;
+                    style.fontStyle = FontStyle.Bold;
+                    return style;
+                }
+            }
+
+            public static GUIStyle Colorful(Color color)
+            {
+                GUIStyle style = GUIStyle.none;
+                style.normal.textColor = color;
+                return style;
+            }
+        }
+
+        public static class Script
+        {
+            public struct ScriptTemplate
+            {
+                public string fileName;
+                public string folder;
+                public TextAsset templateFile;
+            }
+
+            public static void CreateNewScript(ScriptTemplate template)
+            {
+                string path = $"{template.folder}";
+                if (path.EndsWith("/")) path = path[0..^1];
+
+                Object script = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
+                Selection.activeObject = script;
+                EditorGUIUtility.PingObject(script);
+
+                string templatePath = AssetDatabase.GetAssetPath(template.templateFile);
+                ProjectWindowUtil.CreateScriptAssetFromTemplateFile(templatePath, template.fileName);
+            }
+            public static void CreateNewScript(string fileName, string folder, TextAsset templateFile)
+            {
+                var template = new ScriptTemplate() { fileName = fileName, folder = folder, templateFile = templateFile };
+                string path = $"{template.folder}";
+                if (path.EndsWith("/")) path = path[0..^1];
+
+                Object script = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
+                Selection.activeObject = script;
+                EditorGUIUtility.PingObject(script);
+
+                string templatePath = AssetDatabase.GetAssetPath(template.templateFile);
+                ProjectWindowUtil.CreateScriptAssetFromTemplateFile(templatePath, template.fileName);
+            }
+        }
+    }
+#endif
     #endregion
 }
 public enum UpdateMode
@@ -1649,11 +2146,11 @@ namespace ZetanCollections
 
     public class ReadOnlySet<T> : ISet<T>, IReadOnlyCollection<T>
     {
-        private ISet<T> set;
+        private readonly ISet<T> set;
 
         public int Count => set.Count;
 
-        public bool IsReadOnly => throw new System.NotImplementedException();
+        public bool IsReadOnly => true;
 
         public ReadOnlySet(ISet<T> set)
         {
@@ -1672,17 +2169,17 @@ namespace ZetanCollections
 
         public bool Add(T item)
         {
-            throw new System.InvalidOperationException("只读");
+            throw new InvalidOperationException("只读");
         }
 
         public void ExceptWith(IEnumerable<T> other)
         {
-            throw new System.InvalidOperationException("只读");
+            throw new InvalidOperationException("只读");
         }
 
         public void IntersectWith(IEnumerable<T> other)
         {
-            throw new System.InvalidOperationException("只读");
+            throw new InvalidOperationException("只读");
         }
 
         public bool IsProperSubsetOf(IEnumerable<T> other)
@@ -1717,22 +2214,22 @@ namespace ZetanCollections
 
         public void SymmetricExceptWith(IEnumerable<T> other)
         {
-            throw new System.InvalidOperationException("只读");
+            throw new InvalidOperationException("只读");
         }
 
         public void UnionWith(IEnumerable<T> other)
         {
-            throw new System.InvalidOperationException("只读");
+            throw new InvalidOperationException("只读");
         }
 
         void ICollection<T>.Add(T item)
         {
-            throw new System.InvalidOperationException("只读");
+            throw new InvalidOperationException("只读");
         }
 
         public void Clear()
         {
-            throw new System.InvalidOperationException("只读");
+            throw new InvalidOperationException("只读");
         }
 
         public bool Contains(T item)
@@ -1747,7 +2244,7 @@ namespace ZetanCollections
 
         public bool Remove(T item)
         {
-            throw new System.InvalidOperationException("只读");
+            throw new InvalidOperationException("只读");
         }
     }
 }

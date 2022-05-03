@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using ZetanCollections;
+using ZetanStudio.Item;
 
 public class MakingManager : SingletonMonoBehaviour<MakingManager>, ISaveLoad
 {
@@ -30,6 +31,11 @@ public class MakingManager : SingletonMonoBehaviour<MakingManager>, ISaveLoad
         //MessageManager.Instance.NewMessage(string.Format("学会了 [{0}] 的制作方法!", item.name));
         ConfirmWindow.StartConfirm(string.Format("学会了 [{0}] 的制作方法!", item.Name));
         NotifyCenter.PostNotify(LearnedNewMakingItem, item);
+        return true;
+    }
+
+    public bool Learn(ItemNew item)
+    {
         return true;
     }
 

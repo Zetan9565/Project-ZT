@@ -78,7 +78,7 @@ public class AmountWindow : Window
     public static AmountWindow StartInput(Action<long> confirmAction, Action cancelAction, long min, long max, string title = "", Vector2? position = null, Vector2? offset = null)
     {
         if (min < 0 || max < 1) return null;
-        return NewWindowsManager.OpenWindow<AmountWindow>(confirmAction, cancelAction, min, max, title, position, offset);
+        return WindowsManager.OpenWindow<AmountWindow>(confirmAction, cancelAction, min, max, title, position, offset);
     }
 
     private void Refresh(string title)

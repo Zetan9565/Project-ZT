@@ -27,7 +27,7 @@ public class HorizontalAttributeDrawer : PropertyDrawer
     {
         SerializedProperty next = property.GetEndProperty();
         if (next != null && EditorGUI.GetPropertyHeight(next) < 0) return false;
-        if (next != null && ZetanEditorUtility.TryGetValue(next, out _, out var fieldInfo))
+        if (next != null && ZetanUtility.Editor.TryGetValue(next, out _, out var fieldInfo))
             return fieldInfo.GetCustomAttribute<HorizontalAttribute>() != null;
         return false;
     }

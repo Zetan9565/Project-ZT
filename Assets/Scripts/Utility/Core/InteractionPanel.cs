@@ -59,7 +59,7 @@ public class InteractionPanel : SingletonWindow<InteractionPanel>,IHideable
 
     private void PauseDisplay(bool v)
     {
-        NewWindowsManager.HideWindow(this, v);
+        WindowsManager.HideWindow(this, v);
     }
 
     public bool Remove(IInteractive interactive)

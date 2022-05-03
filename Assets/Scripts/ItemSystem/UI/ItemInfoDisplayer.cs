@@ -57,7 +57,7 @@ public class ItemInfoDisplayer : MonoBehaviour
 
     public void ShowItemInfo(ItemData item, bool isContrast = false)
     {
-        if (!item || !item.Model)
+        if (!item || !item.Model_old)
         {
             Hide(true);
             return;
@@ -65,24 +65,24 @@ public class ItemInfoDisplayer : MonoBehaviour
         if (this.item == item) return;
         Clear();
         this.item = item;
-        icon.overrideSprite = item.Model.Icon;
+        icon.overrideSprite = item.Model_old.Icon;
         ZetanUtility.SetActive(contrastMark, isContrast);
         nameText.text = item.Name;
-        nameText.color = ItemUtility.QualityToColor(item.Model.Quality);
-        typeText.text = ItemBase.GetItemTypeString(item.Model.ItemType);
-        priceText.text = item.Model.SellAble ? item.Model.SellPrice + GameManager.CoinName : "不可出售";
-        weightText.text = item.Model.Weight.ToString("F2") + "WL";
-        if (item.Model.IsEquipment)
+        nameText.color = ItemUtility.QualityToColor(item.Model_old.Quality);
+        typeText.text = ItemBase.GetItemTypeString(item.Model_old.ItemType);
+        priceText.text = item.Model_old.SellAble ? item.Model_old.SellPrice + GameManager.CoinName : "不可出售";
+        weightText.text = item.Model_old.Weight.ToString("F2") + "WL";
+        if (item.Model_old.IsEquipment)
         {
             PushTitle("属性：");
-            foreach (RoleAttribute attr in (item.Model as EquipmentItem).Attribute.Attributes)
+            foreach (RoleAttribute attr in (item.Model_old as EquipmentItem).Attribute.Attributes)
             {
                 PushAttribute(attr);
             }
         }
         PushTitle("描述：");
-        PushContent(item.Model.Description);
-        ZetanUtility.SetActive(durability, item.Model.IsEquipment);
+        PushContent(item.Model_old.Description);
+        ZetanUtility.SetActive(durability, item.Model_old.IsEquipment);
 #if true
         ZetanUtility.SetActive(debugIDText, true);
         debugIDText.text = item.ID;
@@ -193,7 +193,7 @@ public class ItemInfoDisplayer : MonoBehaviour
     {
         if (item)
         {
-            AmountWindow.StartInput(a => { if (item) BackpackManager.Instance.GetItem(item.Model, (int)a); }, 999, position: icon.transform.position);
+            AmountWindow.StartInput(a => { if (item) BackpackManager.Instance.GetItem(item.Model_old, (int)a); }, 999, position: icon.transform.position);
         }
     }
 #endif

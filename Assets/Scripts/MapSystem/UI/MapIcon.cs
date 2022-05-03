@@ -140,7 +140,7 @@ MapIconType iconType, bool removeAble, string textToDisplay = "")
             if (holder) holder.OnFingerClick?.Invoke();
             if (!string.IsNullOrEmpty(TextToDisplay))
             {
-                tips = NewWindowsManager.OpenWindowBy<FloatTipsPanel>(transform.position, TextToDisplay, 2, false);
+                tips = WindowsManager.OpenWindowBy<FloatTipsPanel>(transform.position, TextToDisplay, 2, false);
                 if (tips) tips.onClose += () => tips = null;
             }
 #endif

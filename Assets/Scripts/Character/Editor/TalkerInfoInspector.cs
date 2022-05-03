@@ -504,7 +504,7 @@ public partial class CharacterInfoInspector
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), "(空)");
                     if (GUI.Button(new Rect(rect.x + rect.width * 0.8f, rect.y, rect.width * 0.2f, lineHeight), "新建"))
                     {
-                        Quest questInstance = ZetanEditorUtility.SaveFilePanel(CreateInstance<Quest>, "quest", ping: true);
+                        Quest questInstance = ZetanUtility.Editor.SaveFilePanel(CreateInstance<Quest>, "quest", ping: true);
                         if (questInstance)
                         {
                             quest.objectReferenceValue = questInstance;

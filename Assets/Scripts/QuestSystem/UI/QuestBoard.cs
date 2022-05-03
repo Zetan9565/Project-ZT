@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -17,7 +19,7 @@ public class QuestBoard : SingletonMonoBehaviour<QuestBoard>, IPointerClickHandl
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left) NewWindowsManager.OpenWindowBy<QuestWindow>(this);
+        if (eventData.button == PointerEventData.InputButton.Left) WindowsManager.OpenWindowBy<QuestWindow>(this);
     }
 
     public void FocusOnQuest(QuestData quest)
@@ -42,26 +44,20 @@ public class QuestBoard : SingletonMonoBehaviour<QuestBoard>, IPointerClickHandl
             return;
         }
         ZetanUtility.SetActive(gameObject, true);
-        titleText.text = Quest.Model.Title + (Quest.IsComplete ? "(完成)" : string.Empty);
+        titleText.text = $"{(Quest.IsComplete ? "[完成]" : string.Empty)}{Quest.Model.Title}";
         StringBuilder objectives = new StringBuilder();
         if (Quest.IsComplete) objectiveText.text = string.Empty;
         else
         {
-            for (int i = 0; i < Quest.Objectives.Count; i++)
+            var displayObjectives = Quest.Objectives.Where(x => x.Model.Display).ToArray();
+            int lineCount = displayObjectives.Length - 1;
+            for (int i = 0; i < displayObjectives.Length; i++)
             {
-                var objective = Quest.Objectives[i];
-                if (objective.Model.Display && !objective.IsComplete)
+                var objective = displayObjectives[i];
+                if (!objective.IsComplete && (!objective.Model.InOrder || objective.AllPrevComplete))
                 {
-                    objectives.Append('-');
-                    objectives.Append(objective.Model.DisplayName);
-                    if (objective is not TalkObjectiveData && objective is not MoveObjectiveData)
-                    {
-                        objectives.Append('[');
-                        objectives.Append(objective.AmountString);
-                        objectives.Append(']');
-                    }
-                    if (i + 1 >= Quest.Objectives.Count || !Quest.Objectives[i + 1].CanParallelWith(objective)) break;
-                    if (i < Quest.Objectives.Count - 1) objectives.Append('\n');
+                    string endLine = i == lineCount ? string.Empty : "\n";
+                    objectives.AppendFormat("-{0}{1}", objective, endLine);
                 }
             }
         }
@@ -91,6 +87,6 @@ public class QuestBoard : SingletonMonoBehaviour<QuestBoard>, IPointerClickHandl
 
     private void OnObjectiveUpdate(object[] msg)
     {
-        if (msg.Length > 0 && msg[0] is QuestData quest && quest == Quest) Refresh();
+        if (msg.Length > 0 && msg[0] is ObjectiveData objective && objective.parent == Quest) Refresh();
     }
 }

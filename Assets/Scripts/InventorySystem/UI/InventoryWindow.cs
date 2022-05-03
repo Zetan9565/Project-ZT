@@ -47,8 +47,8 @@ public abstract class InventoryWindow : Window, IHideable
 
     protected override bool OnClose(params object[] args)
     {
-        if (NewWindowsManager.IsWindowOpen<ItemSelectionWindow>(out var selector) && selector.IsSelectFor(grid as ISlotContainer))
-            NewWindowsManager.CloseWindow<ItemSelectionWindow>();
+        if (WindowsManager.IsWindowOpen<ItemSelectionWindow>(out var selector) && selector.IsSelectFor(grid as ISlotContainer))
+            WindowsManager.CloseWindow<ItemSelectionWindow>();
         pageSelector.value = 0;
         IsHidden = false;
         return true;
@@ -115,7 +115,7 @@ public abstract class InventoryWindow : Window, IHideable
     {
         grid.ForEach(ia =>
         {
-            if (ia.IsEmpty || ia.Item.Model.IsEquipment) ia.Show();
+            if (ia.IsEmpty || ia.Item.Model_old.IsEquipment) ia.Show();
             else ia.Hide();
         });
     }
@@ -124,7 +124,7 @@ public abstract class InventoryWindow : Window, IHideable
     {
         grid.ForEach(ia =>
         {
-            if (ia.IsEmpty || ia.Item.Model.IsConsumable) ia.Show();
+            if (ia.IsEmpty || ia.Item.Model_old.IsConsumable) ia.Show();
             else ia.Hide();
         });
     }
@@ -133,7 +133,7 @@ public abstract class InventoryWindow : Window, IHideable
     {
         grid.ForEach(ia =>
         {
-            if (ia.IsEmpty || ia.Item.Model.IsMaterial) ia.Show();
+            if (ia.IsEmpty || ia.Item.Model_old.IsMaterial) ia.Show();
             else ia.Hide();
         });
     }
@@ -214,23 +214,23 @@ public abstract class InventoryWindow : Window, IHideable
     {
         Handler.Inventory.Arrange();
         Refresh();
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
     }
 
     public static ItemSelectionWindow OpenSelectionWindow<T>(ItemSelectionType selectionType, Action<List<ItemWithAmount>> confirm, string title = null, string confirmDialog = null,
         int? typeLimit = null, int? amountLimit = null, Predicate<ItemSlotBase> selectCondition = null, Action cancel = null, params object[] args) where T : InventoryWindow
     {
-        var window = NewWindowsManager.FindWindow<T>();
+        var window = WindowsManager.FindWindow<T>();
         if (window)
         {
             bool openBef = window.IsOpen, hiddenBef = window.IsHidden;
-            if (window.IsHidden) NewWindowsManager.HideWindow<T>(false);
+            if (window.IsHidden) WindowsManager.HideWindow<T>(false);
             if (!window.IsOpen) window.Open(args);
             var selection = ItemSelectionWindow.StartSelection(selectionType, window.grid as ISlotContainer, window.Handler, confirm, title, confirmDialog, typeLimit, amountLimit, selectCondition, cancel);
             selection.onClose += () =>
             {
                 if (!openBef) window.Close(typeof(ItemSelectionWindow));
-                else if (hiddenBef) NewWindowsManager.HideWindow<T>(true);
+                else if (hiddenBef) WindowsManager.HideWindow<T>(true);
             };
             return selection;
         }

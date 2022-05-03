@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69c3bb92a0c4dc648aa119210316ce85, type: 3}
+  m_Name: New Role Attribute Enum
+  m_EditorClassIdentifier: 
+  names:
+  - "\u653B\u51FB\u529B"
+  - "\u9632\u5FA1\u529B"
+  - "\u751F\u547D\u503C"
+  - "\u9B54\u6CD5\u503C"
+  - "\u5C5E\u60274"
+  - "\u5C5E\u6027"
+  types: 000000000000000000000000000000000000000000000000

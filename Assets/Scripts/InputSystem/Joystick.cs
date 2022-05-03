@@ -6,14 +6,15 @@ using UnityEngine.InputSystem.OnScreen;
 using UnityEngine.UI;
 using ZetanExtends;
 
-[RequireComponent(typeof(Image))]
+[RequireComponent(typeof(EmptyGraphic))]
 public class Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IBeginDragHandler, IDragHandler
 {
     public RectTransform background;
     public OnScreenStick handle;
 
+    [HideWhenPlaying(true)]
     public bool autoHide = true;
-    [HideIf("autoHide", false)]
+    [HideIf("autoHide", false), HideWhenPlaying(true)]
     public bool fade = true;
     [HideIf(new string[] { "autoHide", "fade" }, new object[] { false, false }, false)]
     public float duration = 0.5f;
@@ -27,7 +28,9 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     {
         baseRect = GetComponent<RectTransform>();
         bgImg = background.GetComponent<Image>();
+        if (bgImg) bgImg.raycastTarget = false;
         hdImg = handle.GetComponent<Image>();
+        if (hdImg) hdImg.raycastTarget = false;
         fadeCoroutines.Add(bgImg, null);
         fadeCoroutines.Add(hdImg, null);
         Stop();
@@ -36,10 +39,10 @@ public class Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     public void OnPointerDown(PointerEventData eventData)
     {
         if (eventData.button != PointerEventData.InputButton.Left) return;
-        OnStart();
         background.anchoredPosition = ScreenPointToAnchoredPosition(eventData.position);
         handle.OnPointerDown(eventData);
         handle.OnDrag(eventData);
+        OnStart();
     }
 
     private Vector2 ScreenPointToAnchoredPosition(Vector2 screenPosition)

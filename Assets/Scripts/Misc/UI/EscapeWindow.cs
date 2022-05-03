@@ -6,6 +6,8 @@ public class EscapeWindow : Window
     [SerializeField]
     private Button exitButton;
 
+    private float scaleBef;
+
     protected override void OnAwake()
     {
         exitButton.onClick.AddListener(Exit);
@@ -13,12 +15,16 @@ public class EscapeWindow : Window
 
     protected override bool OnOpen(params object[] args)
     {
-        NewWindowsManager.HideAllExcept(true, this);
+        if (IsOpen) return false;
+        WindowsManager.HideAll(true);
+        scaleBef = Time.timeScale;
+        Time.timeScale = 0;
         return true;
     }
     protected override bool OnClose(params object[] args)
     {
-        NewWindowsManager.HideAllExcept(false);
+        WindowsManager.HideAll(false);
+        Time.timeScale = scaleBef;
         return true;
     }
 

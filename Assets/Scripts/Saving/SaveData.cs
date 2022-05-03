@@ -20,7 +20,7 @@ public class SaveData
 
     public List<string> makingDatas = new List<string>();
 
-    public BuildingSystemSaveData buildingSystemData = new BuildingSystemSaveData();
+    public StructureSystemSaveData structureSystemData = new StructureSystemSaveData();
 
     public List<WarehouseSaveData> warehouseDatas = new List<WarehouseSaveData>();
 
@@ -136,16 +136,16 @@ public class InventoryItemSaveData
     public List<SlotSaveData> slots = new List<SlotSaveData>();
 
     public string warehouseID;
-    public string buildingID;
+    public string structureID;
 
-    public InventoryItemSaveData(ItemData data, int amount, List<ItemSlotData> slots, Warehouse warehouse = null, Building2D building = null)
+    public InventoryItemSaveData(ItemData data, int amount, List<ItemSlotData> slots, Warehouse warehouse = null, Structure2D structure = null)
     {
         ID = data.ID;
         this.amount = amount;
         isLocked = data.isLocked;
         this.slots.AddRange(slots.ConvertAll(x => new SlotSaveData(x)));
         warehouseID = warehouse != null ? warehouse.EntityID : string.Empty;
-        buildingID = building != null ? building.EntityID : string.Empty;
+        structureID = structure != null ? structure.EntityID : string.Empty;
     }
 }
 [Serializable]
@@ -164,15 +164,15 @@ public class SlotSaveData
 
 #region 建筑相关
 [Serializable]
-public class BuildingSystemSaveData
+public class StructureSystemSaveData
 {
     public string[] learneds;
 
-    public List<BuildingSaveData> buildingDatas = new List<BuildingSaveData>();
+    public List<StructureSaveData> structureDatas = new List<StructureSaveData>();
 }
 
 [Serializable]
-public class BuildingSaveData
+public class StructureSaveData
 {
     public string modelID;
     public string ID;
@@ -185,15 +185,15 @@ public class BuildingSaveData
     public float leftBuildTime;
     public int stageIndex;
 
-    public BuildingSaveData(BuildingData building)
+    public StructureSaveData(StructureData structure)
     {
-        modelID = building.Info.ID;
-        ID = building.ID;
-        scene = building.scene;
-        posX = building.position.x;
-        posY = building.position.y;
-        posZ = building.position.z;
-        leftBuildTime = building.leftBuildTime;
+        modelID = structure.Info.ID;
+        ID = structure.ID;
+        scene = structure.scene;
+        posX = structure.position.x;
+        posY = structure.position.y;
+        posZ = structure.position.z;
+        leftBuildTime = structure.leftBuildTime;
     }
 }
 #endregion

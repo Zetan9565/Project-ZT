@@ -109,6 +109,6 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         MapManager.Instance.SetPlayer(PlayerManager.Instance.PlayerTransform);
         MapManager.Instance.RemakeCamera();
         GatherManager.Instance.Init();
-        NewWindowsManager.Clear();
+        WindowsManager.Clear();
     }
 }

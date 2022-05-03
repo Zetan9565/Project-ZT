@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Collections.ObjectModel;
 
 [Serializable]
 public class RoleAttribute
@@ -543,4 +544,367 @@ public class RoleAttributeGroup
         return self != null;
     }
     #endregion
+}
+
+namespace ZetanStudio.Character
+{
+    public sealed class RoleAttributeType
+    {
+        [field: SerializeField]
+        public string Name { get; private set; }
+
+        [field: SerializeField]
+        public int Priority { get; private set; }
+
+        [field: SerializeField]
+        public RoleAttributeValueType ValueType { get; private set; }
+
+        public class Comparer : IComparer<RoleAttributeType>
+        {
+            public static Comparer Default => new Comparer();
+
+            public int Compare(RoleAttributeType x, RoleAttributeType y)
+            {
+                if (x.Priority < y.Priority) return -1;
+                else if (x.Priority > y.Priority) return 1;
+                else return 0;
+            }
+        }
+
+        public static implicit operator string(RoleAttributeType self)
+        {
+            return self.Name;
+        }
+    }
+
+    public enum RoleAttributeValueType
+    {
+        Integer,
+        Float,
+        Boolean
+    }
+
+    public class RoleAttributeGroup
+    {
+        private Dictionary<string, RoleAttribute> attributes = new Dictionary<string, RoleAttribute>();
+
+        public RoleAttribute this[string name]
+        {
+            get => attributes[name];
+        }
+
+        public bool TryGetAttribute(string name, out RoleAttribute attribute)
+        {
+            return attributes.TryGetValue(name, out attribute);
+        }
+
+        public void PlusAttribute(RoleAttribute attr)
+        {
+            if (!attr) return;
+            if (attributes.TryGetValue(attr.Type, out var find)) find.Plus(attr.Value);
+            else attributes.Add(attr.Type, find.Clone());
+        }
+
+        public void PlusAttributes(IEnumerable<RoleAttribute> attrs)
+        {
+            foreach (var attr in attrs)
+            {
+                PlusAttribute(attr);
+            }
+        }
+
+        public void SubAttribute(RoleAttribute attr)
+        {
+            if (!attr) return;
+            if (attributes.TryGetValue(attr.Type, out var find))
+            {
+                find.Minus(attr.Value);
+            }
+        }
+
+        public void SubAttributes(IEnumerable<RoleAttribute> attrs)
+        {
+            foreach (var attr in attrs)
+            {
+                SubAttribute(attr);
+            }
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder str = new System.Text.StringBuilder();
+            int i = 0;
+            foreach (var kvp in attributes.Values.OrderBy(x => x.Type.Priority))
+            {
+                str.Append(kvp.Value);
+                if (i != attributes.Count - 1)
+                    str.Append("\n");
+                i++;
+            }
+            return str.ToString();
+        }
+
+        #region 运算符重载
+        /// <summary>
+        /// 两个属性组相加，返回一个全新的属性组。其中，对于布尔类型的属性值，会进行同或运算
+        /// </summary>
+        /// <param name="left">左侧属性组</param>
+        /// <param name="right">右侧属性组</param>
+        /// <returns>全新的属性组</returns>
+        public static RoleAttributeGroup operator +(RoleAttributeGroup left, RoleAttributeGroup right)
+        {
+            RoleAttributeGroup temp = new RoleAttributeGroup();
+            temp.PlusAttributes(left.attributes.Values);
+            temp.PlusAttributes(right.attributes.Values);
+            return temp;
+        }
+        /// <summary>
+        /// 属性组和属性列表相加，返回一个全新的属性组。其中，对于布尔类型的属性值，会进行同或运算
+        /// </summary>
+        /// <param name="left">左侧属性组</param>
+        /// <param name="right">右侧属性列表</param>
+        /// <returns>全新的属性组</returns>
+        public static RoleAttributeGroup operator +(RoleAttributeGroup left, IEnumerable<RoleAttribute> right)
+        {
+            RoleAttributeGroup temp = new RoleAttributeGroup();
+            temp.PlusAttributes(left.attributes.Values);
+            temp.PlusAttributes(right);
+            return temp;
+        }
+
+        /// <summary>
+        /// 两个属性组相减，返回一个全新的属性组。其中，对于数字类型的属性值，可能产生负值；
+        /// 对于布尔类型的属性值，会进行异或运算
+        /// </summary>
+        /// <param name="left">左侧属性组</param>
+        /// <param name="right">右侧属性组</param>
+        /// <returns>全新的属性组</returns>
+        public static RoleAttributeGroup operator -(RoleAttributeGroup left, RoleAttributeGroup right)
+        {
+            RoleAttributeGroup temp = new RoleAttributeGroup();
+            temp.PlusAttributes(left.attributes.Values);
+            temp.SubAttributes(right.attributes.Values);
+            return temp;
+        }
+        /// <summary>
+        /// 属性组和属性列表相减，返回一个全新的属性组。其中，对于数字类型的属性值，可能产生负值；
+        /// 对于布尔类型的属性值，会进行异或运算
+        /// </summary>
+        /// <param name="left">左侧属性组</param>
+        /// <param name="right">右侧属性列表</param>
+        /// <returns>全新的属性组</returns>
+        public static RoleAttributeGroup operator -(RoleAttributeGroup left, IEnumerable<RoleAttribute> right)
+        {
+            RoleAttributeGroup temp = new RoleAttributeGroup();
+            temp.PlusAttributes(left.attributes.Values);
+            temp.SubAttributes(right);
+            return temp;
+        }
+        #endregion
+
+        public static implicit operator bool(RoleAttributeGroup self)
+        {
+            return self != null;
+        }
+    }
+
+    public class RoleAttribute
+    {
+        public string Name => Type.Name;
+
+        public event Action<RoleAttribute, ValueType> OnValueChanged;
+
+        public ValueType Value
+        {
+            get
+            {
+                switch (Type.ValueType)
+                {
+                    case RoleAttributeValueType.Integer:
+                        return IntValue;
+                    case RoleAttributeValueType.Float:
+                        return FloatValue;
+                    case RoleAttributeValueType.Boolean:
+                        return BoolValue;
+                    default:
+                        throw new InvalidOperationException("意料之外的错误");
+                }
+            }
+            set
+            {
+                try
+                {
+                    switch (Type.ValueType)
+                    {
+                        case RoleAttributeValueType.Integer:
+                            IntValue = (int)value;
+                            break;
+                        case RoleAttributeValueType.Float:
+                            FloatValue = (float)value;
+                            break;
+                        case RoleAttributeValueType.Boolean:
+                            BoolValue = (bool)value;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                catch
+                {
+                    Debug.LogError($"尝试给 [{Name}] 属性设置类型不匹配的值");
+                }
+            }
+        }
+
+        [field: SerializeField]
+        public RoleAttributeType Type { get; private set; }
+
+        public bool HasIntValue => Type.ValueType == RoleAttributeValueType.Integer;
+        public bool HasFloatValue => Type.ValueType == RoleAttributeValueType.Float;
+        public bool HasBoolValue => Type.ValueType == RoleAttributeValueType.Boolean;
+
+        [SerializeField]
+        private int intValue;
+        public int IntValue
+        {
+            get
+            {
+                if (!HasIntValue) Debug.LogWarning($"[{Name}] 属性使用的不是整型数值");
+                return intValue;
+            }
+            set
+            {
+                if (HasIntValue)
+                {
+                    if (intValue != value)
+                    {
+                        var oldValue = intValue;
+                        intValue = value;
+                        OnValueChanged?.Invoke(this, oldValue);
+                    }
+                }
+                else Debug.LogWarning($"[{Name}] 属性使用的不是整型数值");
+            }
+        }
+
+        [SerializeField]
+        private float floatValue;
+        public float FloatValue
+        {
+            get
+            {
+                if (!HasFloatValue) Debug.LogWarning($"[{Name}] 属性使用的不是浮点型数值");
+                return floatValue;
+            }
+            set
+            {
+                if (HasFloatValue)
+                {
+                    if (floatValue != value)
+                    {
+                        var oldValue = floatValue;
+                        floatValue = value;
+                        OnValueChanged?.Invoke(this, oldValue);
+                    }
+                }
+                else Debug.LogWarning($"[{Name}] 属性使用的不是浮点型数值");
+            }
+        }
+
+        [SerializeField]
+        private bool boolValue;
+        public bool BoolValue
+        {
+            get
+            {
+                if (!HasBoolValue) Debug.LogWarning($"[{Name}] 属性使用的不是布尔型数值");
+                return boolValue;
+            }
+            set
+            {
+                if (HasBoolValue)
+                {
+                    if (boolValue != value)
+                    {
+                        var oldValue = boolValue;
+                        boolValue = value;
+                        OnValueChanged?.Invoke(this, oldValue);
+                    }
+                }
+                else Debug.LogWarning($"[{Name}] 属性使用的不是布尔型数值");
+            }
+        }
+
+        public void Plus(ValueType value)
+        {
+            try
+            {
+                switch (Type.ValueType)
+                {
+                    case RoleAttributeValueType.Integer:
+                        IntValue += (int)value;
+                        break;
+                    case RoleAttributeValueType.Float:
+                        FloatValue += (float)value;
+                        break;
+                    case RoleAttributeValueType.Boolean:
+                        BoolValue = !(BoolValue ^ (bool)value);
+                        break;
+                }
+            }
+            catch
+            {
+                Debug.LogError($"尝试给 [{Name}] 属性设置类型不匹配的值");
+            }
+        }
+        public void Minus(ValueType value)
+        {
+            try
+            {
+                switch (Type.ValueType)
+                {
+                    case RoleAttributeValueType.Integer:
+                        IntValue -= (int)value;
+                        break;
+                    case RoleAttributeValueType.Float:
+                        FloatValue -= (float)value;
+                        break;
+                    case RoleAttributeValueType.Boolean:
+                        BoolValue = BoolValue || !(bool)value;
+                        break;
+                }
+            }
+            catch
+            {
+                Debug.LogError($"尝试给 [{Name}] 属性设置类型不匹配的值");
+            }
+        }
+
+        public RoleAttribute Clone()
+        {
+            return new RoleAttribute() { Type = Type, intValue = intValue, floatValue = floatValue, boolValue = boolValue };
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}\t{Value}";
+        }
+
+        public static implicit operator bool(RoleAttribute self)
+        {
+            return self != null;
+        }
+
+        public class Comparer : IComparer<RoleAttribute>
+        {
+            public static Comparer Default => new Comparer();
+
+            public int Compare(RoleAttribute x, RoleAttribute y)
+            {
+                if (x.Type.Priority < y.Type.Priority) return -1;
+                else if (x.Type.Priority > y.Type.Priority) return 1;
+                else return 0;
+            }
+        }
+    }
 }

@@ -37,7 +37,7 @@ public class ShopWindow : Window
                 break;
             default: break;
         }
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
     }
 
     #region 货物处理相关
@@ -154,7 +154,7 @@ public class ShopWindow : Window
             else MessageManager.Instance.New($"无{data.Item.Name}收购需求");
             return false;
         }
-        ItemBase item = items[0].source.Model;
+        ItemBase item = items[0].source.Model_old;
         if (!BackpackManager.Instance.CanLose(items[0].source, amount)) return false;
         BackpackManager.Instance.GetMoney(amount * data.Info.PurchasePrice);
         BackpackManager.Instance.LoseItem(items[0].source, amount);
@@ -173,12 +173,12 @@ public class ShopWindow : Window
     /// <param name="force">强制购入</param>
     public void PurchaseItem(ItemData item, int have, bool force = false)
     {
-        if (MShop == null || item == null || !item.Model)
+        if (MShop == null || item == null || !item.Model_old)
         {
             Debug.Log(item);
             return;
         }
-        if (!item.Model.SellAble)
+        if (!item.Model_old.SellAble)
         {
             MessageManager.Instance.New("这种物品不可出售");
             return;
@@ -189,7 +189,7 @@ public class ShopWindow : Window
                 MessageManager.Instance.New("镶嵌宝石的物品不可出售");
                 return;
             }
-        GoodsData find = MShop.Acquisitions.Find(x => x.Item == item.Model);
+        GoodsData find = MShop.Acquisitions.Find(x => x.Item == item.Model_old);
         if (find != null && !force)//采购品列表里有该道具，说明对该道具有特殊购价
         {
             PurchaseItem(find);
@@ -197,45 +197,45 @@ public class ShopWindow : Window
         }
         if (have == 1)
         {
-            ConfirmWindow.StartConfirm(string.Format("确定出售1个 [{0}] 吗？", item.Model.Name), delegate
+            ConfirmWindow.StartConfirm(string.Format("确定出售1个 [{0}] 吗？", item.Model_old.Name), delegate
             {
                 if (OnPurchase(item, have))
-                    MessageManager.Instance.New(string.Format("出售了1个 [{0}]", item.Model.Name));
+                    MessageManager.Instance.New(string.Format("出售了1个 [{0}]", item.Model_old.Name));
             });
         }
         else
         {
             AmountWindow.StartInput(delegate (long amount)
             {
-                ConfirmWindow.StartConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, item.Model.Name), delegate
+                ConfirmWindow.StartConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, item.Model_old.Name), delegate
                 {
                     if (OnPurchase(item, have, (int)amount))
-                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, item.Model.Name));
+                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, item.Model_old.Name));
                 });
             }, have, "出售数量", ZetanUtility.ScreenCenter, Vector2.zero);
         }
     }
     bool OnPurchase(ItemData item, int have, int amount = 1)
     {
-        if (MShop == null || item == null || !item.Model || amount < 1)
+        if (MShop == null || item == null || !item.Model_old || amount < 1)
             return false;
-        if (!item.Model.SellAble)
+        if (!item.Model_old.SellAble)
         {
             MessageManager.Instance.New("这种物品不可出售");
             return false;
         }
         if (have < 1)
         {
-            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{item.Model.Name}");
+            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{item.Model_old.Name}");
             return false;
         }
         if (amount > have)
         {
-            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有这么多的{item.Model.Name}");
+            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有这么多的{item.Model_old.Name}");
             return false;
         }
         if (!BackpackManager.Instance.CanLose(item, amount)) return false;
-        BackpackManager.Instance.GetMoney(amount * item.Model.SellPrice);
+        BackpackManager.Instance.GetMoney(amount * item.Model_old.SellPrice);
         BackpackManager.Instance.LoseItem(item, amount);
         return true;
     }
@@ -247,12 +247,12 @@ public class ShopWindow : Window
         if (args.Length > 0 && args[0] is ShopData shop)
         {
             MShop = shop;
-            UIManager.Instance.EnableJoyStick(false);
-            bagHiddenBef = NewWindowsManager.IsWindowHidden<BackpackWindow>();
-            bagOpenBef = NewWindowsManager.IsWindowOpen<BackpackWindow>();
-            var backpack = NewWindowsManager.UnhideOrOpenWindow<BackpackWindow>();
+            bagHiddenBef = WindowsManager.IsWindowHidden<BackpackWindow>();
+            bagOpenBef = WindowsManager.IsWindowOpen<BackpackWindow>();
+            var backpack = WindowsManager.UnhideOrOpenWindow<BackpackWindow>();
             if (!backpack) return false;
             backpack.onClose += () => CloseBy(backpack);
+            tabBar.SetIndex(1);
             return true;
         }
         else return false;
@@ -261,14 +261,13 @@ public class ShopWindow : Window
     protected override bool OnClose(params object[] args)
     {
         MShop = null;
-        NewWindowsManager.CloseWindow<ItemWindow>();
-        NewWindowsManager.HideWindow<DialogueWindow>(false);
-        NewWindowsManager.CloseWindow<AmountWindow>();
-        UIManager.Instance.EnableJoyStick(true);
+        WindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.HideWindow<DialogueWindow>(false);
+        WindowsManager.CloseWindow<AmountWindow>();
         if (closeBy is not BackpackWindow)
         {
-            if (bagHiddenBef) NewWindowsManager.HideWindow<BackpackWindow>(true);
-            else if (!bagOpenBef) NewWindowsManager.CloseWindow<BackpackWindow>();
+            if (bagHiddenBef) WindowsManager.HideWindow<BackpackWindow>(true);
+            else if (!bagOpenBef) WindowsManager.CloseWindow<BackpackWindow>();
         }
         bagHiddenBef = false;
         bagOpenBef = false;

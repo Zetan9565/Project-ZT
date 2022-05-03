@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-[AttributeUsage(AttributeTargets.Field)]
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public class ObjectDropDownAttribute : PropertyAttribute
 {
     public readonly Type type;

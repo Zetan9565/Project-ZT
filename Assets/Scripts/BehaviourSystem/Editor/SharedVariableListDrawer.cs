@@ -24,7 +24,7 @@ namespace ZetanStudio.BehaviourTree
                         SerializedProperty variable = serializedVariables.GetArrayElementAtIndex(index);
                         EditorGUI.PropertyField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), variable, true);
                         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
-                        if (ZetanEditorUtility.TryGetValue(variable, out var value) && value is SharedVariable sv
+                        if (ZetanUtility.Editor.TryGetValue(variable, out var value) && value is SharedVariable sv
                         && sv.GetType().GetField("linkedVariables", ZetanUtility.CommonBindingFlags).GetValue(sv) is HashSet<SharedVariable> lvs)
                             foreach (var lv in lvs)
                             {
@@ -54,7 +54,7 @@ namespace ZetanStudio.BehaviourTree
                     SerializedProperty _name = serializedVariables.GetArrayElementAtIndex(list.index).FindPropertyRelative("_name");
                     if (EditorUtility.DisplayDialog("删除变量", $"确定要删除变量 {_name.stringValue} 吗？", "确定", "取消"))
                     {
-                        if (ZetanEditorUtility.TryGetValue(serializedVariables.GetArrayElementAtIndex(list.index), out var value) && value is SharedVariable sv
+                        if (ZetanUtility.Editor.TryGetValue(serializedVariables.GetArrayElementAtIndex(list.index), out var value) && value is SharedVariable sv
                             && sv.GetType().GetField("linkedVariables", ZetanUtility.CommonBindingFlags).GetValue(sv) is HashSet<SharedVariable> lvs)
                             foreach (var lv in lvs)
                             {
@@ -79,7 +79,7 @@ namespace ZetanStudio.BehaviourTree
 
             void InsertNewVariable(Type type)
             {
-                if (ZetanEditorUtility.TryGetValue(serializedVariables, out var value) && value is List<SharedVariable> list)
+                if (ZetanUtility.Editor.TryGetValue(serializedVariables, out var value) && value is List<SharedVariable> list)
                 {
                     SharedVariable variable = (SharedVariable)Activator.CreateInstance(type);
                     string newName = $"{char.ToLower(type.Name[0])}{type.Name.Substring(1)}_{serializedVariables.arraySize}";
@@ -209,7 +209,7 @@ namespace ZetanStudio.BehaviourTree
                             menu.AddItem(new GUIContent($"自定义/{type.Name}"), false, () => { InsertNewVariable(type, false); });
                         }
                     }
-                    if (ZetanEditorUtility.TryGetValue(presetVariables, out var value))
+                    if (ZetanUtility.Editor.TryGetValue(presetVariables, out var value))
                     {
                         List<SharedVariable> variables = value as List<SharedVariable>;
                         foreach (var variable in variableHandler.Variables)
@@ -245,7 +245,7 @@ namespace ZetanStudio.BehaviourTree
 
             void InsertNewVariable(Type type, bool select, string name = "")
             {
-                if (ZetanEditorUtility.TryGetValue(presetVariables, out var value) && value is List<SharedVariable> list)
+                if (ZetanUtility.Editor.TryGetValue(presetVariables, out var value) && value is List<SharedVariable> list)
                 {
                     SharedVariable variable = (SharedVariable)Activator.CreateInstance(type);
                     variable.GetType().GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(variable, name);

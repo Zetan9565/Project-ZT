@@ -15,16 +15,16 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
 
     private bool CheckQuest(ItemData data, int amount)
     {
-        if (QuestManager.Instance.HasQuestRequiredItem(data.Model, Inventory.GetAmount(data.ModelID) - amount))
+        if (QuestManager.Instance.HasQuestRequiredItem(data.Model_old, Inventory.GetAmount(data.ModelID) - amount))
         {
-            MessageManager.Instance.New($"部分[{ItemUtility.GetColorName(data.Model)}]已被任务锁定");
+            MessageManager.Instance.New($"部分[{ItemUtility.GetColorName(data.Model_old)}]已被任务锁定");
             return false;
         }
         return true;
     }
     private bool TryGetCurrency(ItemData data, int amount)
     {
-        if (data.Model is CurrencyItem currency)
+        if (data.Model_old is CurrencyItem currency)
             switch (currency.CurrencyType)
             {
                 case CurrencyType.Money:
@@ -48,17 +48,17 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
     /// <summary>
     /// 扩展容量
     /// </summary>
-    /// <param name="size">扩展数量</param>
+    /// <param name="space">扩展数量</param>
     /// <returns>是否成功扩展</returns>
-    public bool ExpandSize(int size)
+    public bool ExpandSpace(int space)
     {
-        if (size < 1) return false;
+        if (space < 1) return false;
         if (maxSpaceLimit > 0 && Inventory.SpaceLimit >= maxSpaceLimit)
         {
             MessageManager.Instance.New(Name + "已经达到最大容量了");
             return false;
         }
-        int finallyExpand = maxSpaceLimit > 0 ? (Inventory.SpaceLimit + size > maxSpaceLimit ? maxSpaceLimit - Inventory.SpaceLimit : size) : size;
+        int finallyExpand = maxSpaceLimit > 0 ? (Inventory.SpaceLimit + space > maxSpaceLimit ? maxSpaceLimit - Inventory.SpaceLimit : space) : space;
         Inventory.ExpandSpace(finallyExpand);
         NotifyCenter.PostNotify(BackpackSpaceChanged);
         MessageManager.Instance.New(Name + "空间增加了" + finallyExpand);
@@ -109,23 +109,23 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
     #region 道具使用相关
     public void UseItem(ItemData item)
     {
-        if (!item.Model.Usable)
+        if (!item.Model_old.Usable)
         {
             MessageManager.Instance.New("该物品不可使用");
             return;
         }
         bool used = false;
-        if (item.Model.IsBox) used = UseBox(item);
-        else if (item.Model.IsEquipment) used = UseEuipment(item);
-        else if (item.Model.IsBook) used = UseBook(item);
-        else if (item.Model.IsBag) used = UseBag(item);
-        else if (item.Model.IsForQuest) used = UseQuest(item);
+        if (item.Model_old.IsBox) used = UseBox(item);
+        else if (item.Model_old.IsEquipment) used = UseEuipment(item);
+        else if (item.Model_old.IsBook) used = UseBook(item);
+        else if (item.Model_old.IsBag) used = UseBag(item);
+        else if (item.Model_old.IsForQuest) used = UseQuest(item);
         if (used) NotifyCenter.PostNotify(BackpackUseItem, item);
     }
 
     public bool UseBox(ItemData item)
     {
-        BoxItem box = item.Model as BoxItem;
+        BoxItem box = item.Model_old as BoxItem;
         return LoseItem(item, 1, box.GetItems());
     }
 
@@ -137,11 +137,11 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
 
     public bool UseBook(ItemData item)
     {
-        BookItem book = item.Model as BookItem;
+        BookItem book = item.Model_old as BookItem;
         switch (book.BookType)
         {
             case BookType.Building:
-                if (CheckQuest(item, 1) && BuildingManager.Instance.Learn(book.BuildingToLearn))
+                if (CheckQuest(item, 1) && StructureManager.Instance.Learn(book.BuildingToLearn))
                     return LoseItem(item, 1);
                 break;
             case BookType.Making:
@@ -156,10 +156,10 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
 
     public bool UseBag(ItemData item)
     {
-        BagItem bag = item.Model as BagItem;
+        BagItem bag = item.Model_old as BagItem;
         if (CheckQuest(item, 1))
         {
-            if (ExpandSize(bag.ExpandSize))
+            if (ExpandSpace(bag.ExpandSize))
                 return LoseItem(item, 1);
         }
         return false;
@@ -168,7 +168,7 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
     public bool UseQuest(ItemData item)
     {
         if (!CheckQuest(item, 1)) return false;
-        QuestItem quest = item.Model as QuestItem;
+        QuestItem quest = item.Model_old as QuestItem;
         TriggerManager.Instance.SetTrigger(quest.TriggerName, quest.StateToSet);
         return LoseItem(item, 1);
     }

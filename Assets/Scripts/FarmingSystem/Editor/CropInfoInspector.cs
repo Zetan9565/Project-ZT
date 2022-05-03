@@ -177,7 +177,6 @@ public class CropInfoInspector : Editor
                             {
                                 AssetDatabase.RemoveObjectFromAsset(gatherInfo.objectReferenceValue);
                                 gatherInfo.objectReferenceValue = null;
-                                AssetDatabase.SaveAssets();
                             }
                             lineCount++;
                         }
@@ -187,7 +186,6 @@ public class CropInfoInspector : Editor
                         ResourceInformation infoInstance = CreateInstance<ResourceInformation>();
                         infoInstance.SetBaseName("resource info");
                         AssetDatabase.AddObjectToAsset(infoInstance, target);
-                        AssetDatabase.SaveAssets();
 
                         gatherInfo.objectReferenceValue = infoInstance;
                         SerializedObject gInfoObj = new SerializedObject(gatherInfo.objectReferenceValue);

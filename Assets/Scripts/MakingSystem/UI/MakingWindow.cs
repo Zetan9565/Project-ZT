@@ -146,11 +146,11 @@ public class MakingWindow : Window, IHideable
                 ConfirmWindow.StartConfirm(string.Format("确定制作1次 [{0}] 吗？", currentItem.Name), delegate
                 {
                     IsMaking = true;
-                    NewWindowsManager.HideWindow(this, true);
+                    WindowsManager.HideWindow(this, true);
                     ProgressBar.Instance.New(ToolInfo.MakingTime, delegate
                     {
                         IsMaking = false;
-                        NewWindowsManager.HideWindow(this, false);
+                        WindowsManager.HideWindow(this, false);
                         int amoutBef = handler.GetAmount(currentItem.ID);
                         if (MakeItem(currentItem))
                             MessageManager.Instance.New(string.Format("制作了 {0} 个 [{1}]", handler.GetAmount(currentItem.ID) - amoutBef,
@@ -167,7 +167,7 @@ public class MakingWindow : Window, IHideable
                     {
                         int num = (int)amount;
                         IsMaking = true;
-                        NewWindowsManager.HideWindow(this, true);
+                        WindowsManager.HideWindow(this, true);
                         ProgressBar.Instance.New(ToolInfo.MakingTime, num - 1,
                             OnCancel,
                             delegate
@@ -180,7 +180,7 @@ public class MakingWindow : Window, IHideable
                                 }
                                 else IsMaking = false;
                                 NotifyCenter.PostNotify(MakingManager.MakingCanceled);
-                                NewWindowsManager.HideWindow(this, false);
+                                WindowsManager.HideWindow(this, false);
                                 ProgressBar.Instance.Cancel();
                             },
                             OnCancel, "制作中", true);
@@ -192,7 +192,7 @@ public class MakingWindow : Window, IHideable
         {
             InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, MakeCurrent, "放入一份材料", selectCondition: (slot) =>
             {
-                return slot.Item && slot.Item.Model.MaterialType != MaterialType.None;
+                return slot.Item && slot.Item.Model_old.MaterialType != MaterialType.None;
             });
         }
     }
@@ -202,7 +202,7 @@ public class MakingWindow : Window, IHideable
         //Debug.Log("Start making");
         var materials = ItemInfoBase.Convert(materialsRaw);
         IsMaking = true;
-        NewWindowsManager.HideWindow(this, true);
+        WindowsManager.HideWindow(this, true);
         if (loopToggle.isOn)
             ProgressBar.Instance.New(ToolInfo.MakingTime,
             delegate
@@ -228,7 +228,7 @@ public class MakingWindow : Window, IHideable
                     MakeItem(currentItem, materialsRaw);
                     //Debug.Log("Finished");
                     IsMaking = false;
-                    NewWindowsManager.HideWindow(this, false);
+                    WindowsManager.HideWindow(this, false);
                     ProgressBar.Instance.Cancel();
                 },
                 OnCancel, "制作中 ", true);
@@ -238,7 +238,7 @@ public class MakingWindow : Window, IHideable
     {
         static bool canSelect(ItemSlotBase slot)
         {
-            return slot.Item && slot.Item.Model.MaterialType != MaterialType.None;
+            return slot.Item && slot.Item.Model_old.MaterialType != MaterialType.None;
         }
         if (handler is BackpackManager) InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, DIYMake, "放入一份材料", selectCondition: canSelect);
         else if (handler is WarehouseManager) InventoryWindow.OpenSelectionWindow<WarehouseWindow>(ItemSelectionType.SelectNum, DIYMake, "放入一份材料", selectCondition: canSelect, args:
@@ -247,21 +247,21 @@ public class MakingWindow : Window, IHideable
     public void DIYMake(IEnumerable<ItemWithAmount> materialsRaw)
     {
         IsMaking = true;
-        NewWindowsManager.HideWindow(this, true);
+        WindowsManager.HideWindow(this, true);
         ProgressBar.Instance.New(ToolInfo.MakingTime,
             delegate
             {
                 MakeItem(materialsRaw);
                 //Debug.Log("Finished");
                 IsMaking = false;
-                NewWindowsManager.HideWindow(this, false);
+                WindowsManager.HideWindow(this, false);
             },
             delegate
             {
                 //Debug.Log("Cancel");
                 IsMaking = false;
                 NotifyCenter.PostNotify(MakingManager.MakingCanceled);
-                NewWindowsManager.HideWindow(this, false);
+                WindowsManager.HideWindow(this, false);
             }, "制作中", true);
     }
 
@@ -316,7 +316,7 @@ public class MakingWindow : Window, IHideable
                 }
                 else
                 {
-                    var finds = materialsRaw.Where(x => x.source.Model.MaterialType == material.MaterialType);//找到种类相同的道具
+                    var finds = materialsRaw.Where(x => x.source.Model_old.MaterialType == material.MaterialType);//找到种类相同的道具
                     if (finds.Count() > 0)
                     {
                         if (finds.Select(x => x.amount).Sum() != material.Amount)
@@ -347,7 +347,7 @@ public class MakingWindow : Window, IHideable
             }
             if (handler.GetItem(production, amount, itemsToLose.ToArray()))
             {
-                MessageManager.Instance.New(string.Format("生产了 {0} 个[{1}]", amount, ItemUtility.GetColorName(production.Model)));
+                MessageManager.Instance.New(string.Format("生产了 {0} 个[{1}]", amount, ItemUtility.GetColorName(production.Model_old)));
                 if (!MakingManager.Instance.HadLearned(item)) MakingManager.Instance.Learn(item);
                 return true;
             }
@@ -398,7 +398,7 @@ public class MakingWindow : Window, IHideable
         SetPage(0);
         inventorySelector.ClearOptions();
         inventorySelector.AddOptions(new List<string> { $"从{BackpackManager.Instance.Name}中制作", $"从{WarehouseManager.Instance.Name}中制作" });
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
         PlayerManager.Instance.Player.SetMachineState<PlayerMakingState>();
         return base.OnOpen(args);
     }
@@ -418,9 +418,9 @@ public class MakingWindow : Window, IHideable
         if (handler != null) NotifyCenter.RemoveListener(handler.ItemAmountChangedMsgKey, OnItemAmountChanged);
         handler = null;
         HideDescription();
-        NewWindowsManager.CloseWindow<AmountWindow>();
-        NewWindowsManager.CloseWindow<ItemWindow>();
-        NewWindowsManager.CloseWindow<ItemSelectionWindow>();
+        WindowsManager.CloseWindow<AmountWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemSelectionWindow>();
         PlayerManager.Instance.Player.SetMachineState<CharacterIdleState>();
         if (wsWindow) wsWindow.Close();
         return true;
@@ -488,7 +488,7 @@ public class MakingWindow : Window, IHideable
     public void OnCancel()
     {
         IsMaking = false;
-        NewWindowsManager.HideWindow(this, false);
+        WindowsManager.HideWindow(this, false);
         NotifyCenter.PostNotify(MakingManager.MakingCanceled);
     }
 

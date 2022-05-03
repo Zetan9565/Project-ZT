@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d13affa5a091e948aba43071789505b, type: 3}
+  m_Name: New Equipment Type Enum
+  m_EditorClassIdentifier: 
+  enum:
+  - <Name>k__BackingField: "\u4E3B\u6B66\u5668"
+    <Priority>k__BackingField: 0
+    <Icon>k__BackingField: {fileID: 0}
+  - <Name>k__BackingField: "\u526F\u6B66\u5668"
+    <Priority>k__BackingField: 1
+    <Icon>k__BackingField: {fileID: 0}
+  - <Name>k__BackingField: "\u5934\u76D4"
+    <Priority>k__BackingField: 2
+    <Icon>k__BackingField: {fileID: 0}
+  - <Name>k__BackingField: "\u76D4\u7532"
+    <Priority>k__BackingField: 3
+    <Icon>k__BackingField: {fileID: 0}
+  - <Name>k__BackingField: "\u624B\u5957"
+    <Priority>k__BackingField: 4
+    <Icon>k__BackingField: {fileID: 0}
+  - <Name>k__BackingField: "\u978B\u5B50"
+    <Priority>k__BackingField: 5
+    <Icon>k__BackingField: {fileID: 0}
+  - <Name>k__BackingField: "\u9879\u94FE"
+    <Priority>k__BackingField: 6
+    <Icon>k__BackingField: {fileID: 0}
+  - <Name>k__BackingField: "\u6212\u6307"
+    <Priority>k__BackingField: 7
+    <Icon>k__BackingField: {fileID: 0}

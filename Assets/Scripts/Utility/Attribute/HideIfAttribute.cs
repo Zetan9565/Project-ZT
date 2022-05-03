@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-[AttributeUsage(validOn: AttributeTargets.Field, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public class HideIfAttribute : PropertyAttribute
 {
     public readonly string[] paths;

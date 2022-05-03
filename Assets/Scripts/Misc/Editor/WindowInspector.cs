@@ -34,7 +34,7 @@ public partial class WindowInspector : Editor
                 window.Close();
             if (window is IHideable hideable)
                 if (GUILayout.Button("显隐"))
-                    NewWindowsManager.HideWindow(hideable, !hideable.IsHidden);
+                    WindowsManager.HideWindow(hideable, !hideable.IsHidden);
         }
         else
         {

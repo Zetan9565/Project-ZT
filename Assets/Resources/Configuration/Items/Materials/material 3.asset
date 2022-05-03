@@ -33,3 +33,4 @@ MonoBehaviour:
   maxYield: 1
   materialType: 3
   formulation: {fileID: 0}
+  _DIYAble: 0

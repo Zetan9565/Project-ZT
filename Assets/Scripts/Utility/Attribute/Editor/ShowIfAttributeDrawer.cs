@@ -44,7 +44,7 @@ public class ShowIfAttributeDrawer : PropertyDrawer
         bool ShouldShow(string p, object v)
         {
             if (p == "typeof(this)") return (v as System.Type).IsAssignableFrom(fieldInfo.ReflectedType);
-            else if (ZetanEditorUtility.TryGetValue(property, out _))
+            else if (ZetanUtility.Editor.TryGetValue(property, out _))
             {
                 bool type = p.StartsWith("typeof(");
                 if (type) p = p.Replace("typeof(", "").Replace(")", "");

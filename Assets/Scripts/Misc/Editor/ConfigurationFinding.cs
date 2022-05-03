@@ -1,4 +1,5 @@
 using System;
+using ZetanExtends;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -732,10 +733,10 @@ public class ConfigurationFinding : EditorWindow
             switch (buildingType)
             {
                 case BuildingKeyType.Prefab:
-                    objKeys = new Building2D[1];
+                    objKeys = new Structure2D[1];
                     break;
                 case BuildingKeyType.Preview:
-                    objKeys = new BuildingPreview2D[1];
+                    objKeys = new StructurePreview2D[1];
                     break;
                 default:
                     objKeys = new ScriptableObject[1];
@@ -765,11 +766,11 @@ public class ConfigurationFinding : EditorWindow
                 canSeek = true;
                 break;
             case BuildingKeyType.Prefab:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("预制件"), objKeys[0], typeof(Building2D), false);
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("预制件"), objKeys[0], typeof(Structure2D), false);
                 canSeek = objKeys[0];
                 break;
             case BuildingKeyType.Preview:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("预制件"), objKeys[0], typeof(BuildingPreview2D), false);
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("预制件"), objKeys[0], typeof(StructurePreview2D), false);
                 canSeek = objKeys[0];
                 break;
             default:
@@ -779,7 +780,7 @@ public class ConfigurationFinding : EditorWindow
     }
     private void SeekBuilding()
     {
-        var buildings = Resources.LoadAll<BuildingInformation>("Configuration");
+        var buildings = Resources.LoadAll<StructureInformation>("Configuration");
         foreach (var building in buildings)
         {
             bool take = false;

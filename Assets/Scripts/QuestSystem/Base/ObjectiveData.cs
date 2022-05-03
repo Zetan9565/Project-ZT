@@ -70,7 +70,7 @@ public abstract class ObjectiveData
             ObjectiveData tempObj = prevObjective;
             while (tempObj != null)
             {
-                if (!tempObj.IsComplete && tempObj.Model.OrderIndex < Model.OrderIndex)
+                if (!tempObj.IsComplete && tempObj.Model.Priority < Model.Priority)
                 {
                     return false;
                 }
@@ -89,7 +89,7 @@ public abstract class ObjectiveData
             ObjectiveData tempObj = nextObjective;
             while (tempObj != null)
             {
-                if (tempObj.CurrentAmount > 0 && tempObj.Model.OrderIndex > Model.OrderIndex)
+                if (tempObj.CurrentAmount > 0 && tempObj.Model.Priority > Model.Priority)
                 {
                     return true;
                 }
@@ -107,21 +107,26 @@ public abstract class ObjectiveData
         get
         {
             if (!Model.InOrder) return true;//不按顺序，说明可以并行执行
-            if (!prevObjective || prevObjective.Model.OrderIndex == Model.OrderIndex) return true;//没有有前置目标，或者顺序码与前置目标相同，说明可以并行执行
-            if (!nextObjective || nextObjective.Model.OrderIndex == Model.OrderIndex) return true;//没有有后置目标，或者顺序码与后置目标相同，说明可以并行执行
+            if (!prevObjective || prevObjective.Model.Priority == Model.Priority) return true;//没有有前置目标，或者顺序码与前置目标相同，说明可以并行执行
+            if (!nextObjective || nextObjective.Model.Priority == Model.Priority) return true;//没有有后置目标，或者顺序码与后置目标相同，说明可以并行执行
             return false;
         }
     }
     public bool CanParallelWith(ObjectiveData other)
     {
         if (!other || !other.Model.InOrder || !Model.InOrder) return true;
-        else if (other.Model.OrderIndex == Model.OrderIndex) return true;
+        else if (other.Model.Priority == Model.Priority) return true;
         return false;
     }
 
     public static implicit operator bool(ObjectiveData self)
     {
         return self != null;
+    }
+
+    public override string ToString()
+    {
+        return $"{Model.DisplayName}{(Model.ShowAmount ? $" [{currentAmount}/{Model.Amount}]" : string.Empty)}";
     }
 }
 
@@ -141,10 +146,10 @@ public class CollectObjectiveData : ObjectiveData<CollectObjective>
 
     public int amountWhenStart;
 
-    public void UpdateCollectAmount(ItemData item, int oldAmount, int newAmount)
+    public void UpdateCollectAmount(ItemBase model, int oldAmount, int newAmount)
     {
         if (IsComplete) return;
-        if (item.Model == Model.ItemToCollect)
+        if (model == Model.ItemToCollect)
         {
             if (oldAmount < newAmount)//获得道具
             {

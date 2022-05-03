@@ -213,9 +213,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c72c6b2dc6f71874b990481d23879cba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  container: {fileID: 0}
-  prefab: {fileID: 6872456793810074503}
-  cacheCapacity: 200
   direction: 1
   childAlignment: 0
   padding:
@@ -223,14 +220,18 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  spacing: 2
+  spacing: {x: 2, y: 2}
   overrideCellSize: 1
-  autoWidth: 1
-  autoHeight: 1
+  fillWidth: 0
+  fillHeight: 0
   cellSize: {x: 100, y: 100}
+  applyCellSize: {x: 0, y: 0}
   clickable: 1
   selectable: 1
   multiSelection: 0
+  cacheCapacity: 200
+  container: {fileID: 0}
+  prefab: {fileID: 6872456793810074503}
 --- !u!1 &4087608628127687784
 GameObject:
   m_ObjectHideFlags: 0

@@ -22,7 +22,7 @@ public class FloatTipsPanel : Window
 
     public static FloatTipsPanel ShowText(Vector2 position, string text, float duration = 0, bool closeBtn = false)
     {
-        return NewWindowsManager.OpenWindow<FloatTipsPanel>(position, text, duration, closeBtn);
+        return WindowsManager.OpenWindow<FloatTipsPanel>(position, text, duration, closeBtn);
     }
 
     public void Hide()

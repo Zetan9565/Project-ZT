@@ -56,9 +56,9 @@ namespace ZetanStudio.BehaviourTree
             var globalBef = globalVariables.objectReferenceValue;
             if (shouldDisable) EditorGUILayout.PropertyField(globalVariables, new GUIContent("全局变量"));
             else globalDrawer.DoLayoutDraw();
-            if (!globalVariables.objectReferenceValue && ZetanEditorUtility.LoadAsset<GlobalVariables>() == null)
+            if (!globalVariables.objectReferenceValue && ZetanUtility.Editor.LoadAsset<GlobalVariables>() == null)
                 if (GUILayout.Button("新建"))
-                    globalVariables.objectReferenceValue = ZetanEditorUtility.SaveFilePanel(CreateInstance<GlobalVariables>, "global variables");
+                    globalVariables.objectReferenceValue = ZetanUtility.Editor.SaveFilePanel(CreateInstance<GlobalVariables>, "global variables");
             EditorGUI.EndDisabledGroup();
             if (globalVariables.objectReferenceValue != globalBef) InitGlobal();
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();

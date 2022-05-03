@@ -27,7 +27,7 @@ namespace ZetanStudio.BehaviourTree
             Clear();
             if (serializedObject != null) serializedObject.Dispose();
             this.tree = tree;
-            if (!tree.IsInstance) global = ZetanEditorUtility.LoadAsset<GlobalVariables>();
+            if (!tree.IsInstance) global = ZetanUtility.Editor.LoadAsset<GlobalVariables>();
             else global = BehaviourManager.Instance.GlobalVariables;
             nodeEditor = node;
             if (tree && nodeEditor != null && nodeEditor.node)
@@ -155,6 +155,28 @@ namespace ZetanStudio.BehaviourTree
             IMGUIContainer container = new IMGUIContainer(() =>
             {
                 searchKey = EditorGUILayout.TextField(searchKey);
+                //if (GUILayout.Button("搜索", EditorStyles.toolbarSearchField))
+                //{
+                //    string groupGetter(Type type)
+                //    {
+                //        var baseType = type.BaseType;
+                //        System.Text.StringBuilder group = new System.Text.StringBuilder();
+                //        Stack<string> groups = new Stack<string>();
+                //        while (baseType != null && baseType != typeof(Node) && baseType != typeof(ParentNode))
+                //        {
+                //            groups.Push(baseType.Name);
+                //            baseType = baseType.BaseType;
+                //        }
+                //        while (groups.Count > 0)
+                //        {
+                //            group.Append(groups.Pop());
+                //            if (groups.Count > 0) group.Append('/');
+                //        }
+                //        return group.ToString();
+                //    }
+                //    var dropdown = new AdvancedDropdown<Type>("搜索结点", TypeCache.GetTypesDerivedFrom<Node>().Where(t => t != typeof(Entry) && !t.IsAbstract && !t.IsGenericType), t => Debug.Log(t), t => t.Name, groupGetter);
+                //    dropdown.Show(EditorGUILayout.GetControlRect());
+                //}
                 string desc = string.Empty;
                 bool empty = string.IsNullOrEmpty(searchKey);
                 bool showBox = true;
@@ -340,7 +362,7 @@ namespace ZetanStudio.BehaviourTree
                     {
                         contents[i] = new GUIContent(varNames[i]);
                     }
-                    if (ZetanEditorUtility.TryGetValue(property, out var value))
+                    if (ZetanUtility.Editor.TryGetValue(property, out var value))
                     {
                         var link = type.GetField("linkedVariable", ZetanUtility.CommonBindingFlags).GetValue(value);
                         if (link != null) name.stringValue = (link as SharedVariable).name;
@@ -361,7 +383,7 @@ namespace ZetanStudio.BehaviourTree
                     //        val.isGlobal = variableHandler is GlobalVariables;
                     //        type.GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(val, nameStr);
                     //    }
-                    //    ZetanEditorUtility.TrySetValue(property, val);
+                    //    ZetanUtility.Editor.TrySetValue(property, val);
                     //}
                     if (!nodeEditor.node.IsInstance) name.stringValue = nameStr;
                     if (!string.IsNullOrEmpty(nameStr))

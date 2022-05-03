@@ -9,11 +9,13 @@ namespace ZetanStudio.BehaviourTree
     public abstract class Composite : ParentNode
     {
         [SerializeReference]
-        protected List<Node> children;
+        protected List<Node> children = new List<Node>();
 
         [SerializeField, DisplayName("中止类型")]
         protected AbortType abortType;
         public AbortType AbortType => abortType;
+        public bool AbortSelf => abortType == AbortType.Self || abortType == AbortType.Both;
+        public bool AbortLowerPriority => abortType == AbortType.LowerPriority || abortType == AbortType.Both;
 
         public override bool IsValid => children.Count > 0;
 
@@ -21,9 +23,7 @@ namespace ZetanStudio.BehaviourTree
         protected Node currentChild;
         protected bool abort;
 
-        public Composite() { children = new List<Node>(); }
-
-        public override List<Node> GetChildren()
+        public sealed override List<Node> GetChildren()
         {
             if (children == null) children = new List<Node>();
             return children;
@@ -58,33 +58,49 @@ namespace ZetanStudio.BehaviourTree
                 children[j].Inactivate();
             }
         }
-
-        public bool ReciveConditionalAbort(Node node)
+        /// <summary>
+        /// 接收ConditionalAbort
+        /// </summary>
+        /// <param name="conditional">发起ConditionalAbort的<see cref="Conditional"/></param>
+        /// <returns>是否成功接收</returns>
+        public bool ReciveConditionalAbort(Conditional conditional)
         {
-            bool lowerAbort = node is Composite composite && composite.abortType == AbortType.LowerPriority;
-            if (abortType != AbortType.None || lowerAbort)
+            int index = FindBranchIndex(conditional);
+            if (index >= 0)
             {
-                int index = FindBranchIndex(node);
-                if (index >= 0)
+                if (AbortSelf)
                 {
-                    if (abortType == AbortType.Self || abortType == AbortType.Both || lowerAbort)
-                    {
-                        for (int i = index + 1; i < children.Count; i++)
-                        {
-                            if (!lowerAbort)
-                                if (children[i] is Action action) action.Abort();
-                                else children[i].Inactivate();
-                            else children[i].Abort();
-                        }
-                        abort = true;
-                        isStarted = true;
-                        currentChildIndex = index;
-                        HandlingCurrentChild();
-                        return true;
-                    }
+                    currentChild.Abort();
+                    AbortFrom(index);
                 }
+                return true;
             }
             return false;
+        }
+        /// <summary>
+        /// 接收LowerPriorityAbort
+        /// </summary>
+        /// <param name="composite">发起LowerPriorityAbort的<see cref="Composite"/></param>
+        /// <returns>是否成功接收</returns>
+        public bool ReciveLowerPriorityAbort(Composite composite)
+        {
+            //评估已结束或当前评估结点比发起中止的Composite优先级高，则不会被中止
+            if (State != NodeStates.Running || currentChild.ComparePriority(composite)) return false;
+            int index = FindBranchIndex(composite);
+            if (index >= 0)
+            {
+                currentChild.Abort();
+                AbortFrom(index);
+                return true;
+            }
+            return false;
+        }
+        private void AbortFrom(int index)
+        {
+            abort = true;
+            isStarted = true;
+            currentChildIndex = index;
+            HandlingCurrentChild();
         }
 
         /// <summary>
@@ -92,7 +108,7 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected int FindBranchIndex(Node node)
+        private int FindBranchIndex(Node node)
         {
             for (int i = 0; i < children.Count; i++)
             {
@@ -113,22 +129,26 @@ namespace ZetanStudio.BehaviourTree
             return -1;
         }
 
-        public override Conditional CheckConditionalAbort()
+        public sealed override Conditional CheckConditionalAbort()
         {
-            if (abortType != AbortType.None) return base.CheckConditionalAbort();
+            if (NeedReevaluate()) return base.CheckConditionalAbort();
             return null;
+        }
+        public bool NeedReevaluate()
+        {
+            return IsDone && AbortLowerPriority || State == NodeStates.Running && AbortSelf;
         }
 
         #region EDITOR方法
 #if UNITY_EDITOR
-        public override void AddChild(Node child)
+        public sealed override void AddChild(Node child)
         {
             children.Add(child);
             SortByPosition();
             currentChildIndex = children.IndexOf(currentChild);
         }
 
-        public override void RemoveChild(Node child)
+        public sealed override void RemoveChild(Node child)
         {
             children.Remove(child);
             SortByPosition();
@@ -136,7 +156,7 @@ namespace ZetanStudio.BehaviourTree
             currentChildIndex = children.IndexOf(currentChild);
         }
 
-        public override Node Copy()
+        public sealed override Node Copy()
         {
             Composite composite = MemberwiseClone() as Composite;
             if (children != null) composite.children = children.ConvertAll(c => c.Copy());
@@ -161,10 +181,10 @@ namespace ZetanStudio.BehaviourTree
         [InspectorName("无")]
         None,
         [InspectorName("自我")]
-        Self,
+        Self,//如果正在执行的Action在这个Composite分支内，则可以中止
         [InspectorName("更低优先")]
-        LowerPriority,
+        LowerPriority,//如果正在执行的Action在这个分支外优先级更低的位置，则可以中止
         [InspectorName("以上两种")]
-        Both
+        Both//既能中止此分支内部正在执行的Action又可以中止分支外部优先级更低的分支中的Action
     }
 }

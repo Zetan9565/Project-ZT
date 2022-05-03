@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class WarehouseData : BuildingData, IWarehouseKeeper
+public class WarehouseData : StructureData, IWarehouseKeeper
 {
     public string name;
 
@@ -18,7 +18,7 @@ public class WarehouseData : BuildingData, IWarehouseKeeper
 
     public string WarehouseName => Name;
 
-    public WarehouseData(BuildingInformation info, Vector3 position, int space) : base(info, position)
+    public WarehouseData(StructureInformation info, Vector3 position, int space) : base(info, position)
     {
         Inventory = new Inventory(space, ignoreLock: true);
     }

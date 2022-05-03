@@ -13,7 +13,7 @@ namespace ZetanStudio.BehaviourTree
 
         public override bool IsValid => child;
 
-        public override List<Node> GetChildren()
+        public sealed override List<Node> GetChildren()
         {
             List<Node> children = new List<Node>();
             if (child) children.Add(child);
@@ -21,17 +21,17 @@ namespace ZetanStudio.BehaviourTree
         }
 
 #if UNITY_EDITOR
-        public override void AddChild(Node child)
+        public sealed override void AddChild(Node child)
         {
             this.child = child;
         }
 
-        public override void RemoveChild(Node child)
+        public sealed override void RemoveChild(Node child)
         {
             if (child == this.child) this.child = null;
         }
 
-        public override Node Copy()
+        public sealed override Node Copy()
         {
             Decorator decorator = MemberwiseClone() as Decorator;
             if (child) decorator.child = child.Copy();

@@ -57,6 +57,7 @@ namespace ZetanStudio.BehaviourTree
         protected bool isRuntime;//要暴露给Unity，要不然每运行一次就会被重置
         public bool IsRuntime => isRuntime;
 
+        public event Action<Node> OnEvaluated;
         #endregion
 
         #region 运行时方法
@@ -155,7 +156,7 @@ namespace ZetanStudio.BehaviourTree
                     isStarted = false;
                 }
             }
-            Tree.OnNodeEvaluated(this);
+            OnEvaluated?.Invoke(this);
             return State;
         }
         /// <summary>
@@ -212,7 +213,7 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         public void Abort()
         {
-            if (State != NodeStates.Inactive)
+            if (State == NodeStates.Running)
             {
                 isStarted = false;
                 State = NodeStates.Failure;
@@ -225,9 +226,11 @@ namespace ZetanStudio.BehaviourTree
         /// </summary>
         public void Inactivate()
         {
+            bool running = State == NodeStates.Running;
             isStarted = false;
             State = NodeStates.Inactive;
             if(this is ParentNode parent) parent.GetChildren().ForEach(n => n.Inactivate());
+            if (running) OnEnd();
         }
         #endregion
 
@@ -334,6 +337,17 @@ namespace ZetanStudio.BehaviourTree
         public virtual void OnDrawGizmos() { }
         public virtual void OnDrawGizmosSelected() { }
         #endregion
+
+        /// <summary>
+        /// 是否比某个结点优先级高
+        /// </summary>
+        /// <param name="other">其它结点</param>
+        /// <returns>优先级更高</returns>
+        public bool ComparePriority(Node other)
+        {
+            if (!other) return true;
+            return priority < other.priority;
+        }
 
         public static implicit operator bool(Node self)
         {

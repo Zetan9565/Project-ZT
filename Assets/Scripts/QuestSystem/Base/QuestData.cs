@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 public enum QuestState
 {
@@ -12,7 +13,16 @@ public class QuestData
 {
     public Quest Model { get; }
 
-    public List<ObjectiveData> Objectives { get; } = new List<ObjectiveData>();
+    private List<ObjectiveData> objectives = new List<ObjectiveData>();
+    private ReadOnlyCollection<ObjectiveData> readOnlyObjectives;
+    public ReadOnlyCollection<ObjectiveData> Objectives
+    {
+        get
+        {
+            if (readOnlyObjectives == null) readOnlyObjectives = objectives.AsReadOnly();
+            return readOnlyObjectives;
+        }
+    }
 
     public TalkerData originalQuestHolder;
 
@@ -29,7 +39,7 @@ public class QuestData
     {
         get
         {
-            return Objectives.TrueForAll(x => x.IsComplete);
+            return objectives.TrueForAll(x => x.IsComplete);
         }
     }
 
@@ -49,29 +59,18 @@ public class QuestData
         Model = quest;
         foreach (Objective objective in Model.Objectives)
         {
-            if (objective is CollectObjective co)
-            { if (co.IsValid) Objectives.Add(new CollectObjectiveData(co)); }
-            else if (objective is KillObjective ko)
-            { if (ko.IsValid) Objectives.Add(new KillObjectiveData(ko)); }
-            else if (objective is TalkObjective to)
-            { if (to.IsValid) Objectives.Add(new TalkObjectiveData(to)); }
-            else if (objective is MoveObjective mo)
-            { if (mo.IsValid) Objectives.Add(new MoveObjectiveData(mo)); }
-            else if (objective is SubmitObjective so)
-            { if (so.IsValid) Objectives.Add(new SubmitObjectiveData(so)); }
-            else if (objective is TriggerObjective tgo)
-            { if (tgo.IsValid) Objectives.Add(new TriggerObjectiveData(tgo)); }
+            objectives.Add(objective.CreateData());
         }
-        Objectives.Sort((x, y) =>
+        objectives.Sort((x, y) =>
         {
-            if (x.Model.OrderIndex > y.Model.OrderIndex) return 1;
-            else if (x.Model.OrderIndex < y.Model.OrderIndex) return -1;
+            if (x.Model.Priority > y.Model.Priority) return 1;
+            else if (x.Model.Priority < y.Model.Priority) return -1;
             else return 0;
         });
-        if (this.Model.CmpltObjctvInOrder)
+        if (Model.CmpltObjctvInOrder)
             for (int i = 1; i < Objectives.Count; i++)
             {
-                if (Objectives[i].Model.OrderIndex >= Objectives[i - 1].Model.OrderIndex)
+                if (Objectives[i].Model.Priority >= Objectives[i - 1].Model.Priority)
                 {
                     Objectives[i].prevObjective = Objectives[i - 1];
                     Objectives[i - 1].nextObjective = Objectives[i];

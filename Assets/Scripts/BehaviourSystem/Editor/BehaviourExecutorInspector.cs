@@ -90,7 +90,7 @@ namespace ZetanStudio.BehaviourTree
             {
                 if (GUILayout.Button("新建"))
                 {
-                    BehaviourTree tree = ZetanEditorUtility.SaveFilePanel(CreateInstance<BehaviourTree>, "new behaviour tree");
+                    BehaviourTree tree = ZetanUtility.Editor.SaveFilePanel(CreateInstance<BehaviourTree>, "new behaviour tree");
                     if (tree)
                     {
                         behaviour.objectReferenceValue = tree;

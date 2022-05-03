@@ -129,13 +129,13 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
             if (multiSelection != value)
             {
                 multiSelection = value;
-                if (!value && selectedIndexes.Count > 1)
+                if (!value && selectedIndices.Count > 1)
                 {
-                    foreach (var index in selectedIndexes)
+                    foreach (var index in selectedIndices)
                     {
                         items[index].IsSelected = false;
                     }
-                    selectedIndexes.Clear();
+                    selectedIndices.Clear();
                 }
             }
         }
@@ -173,7 +173,7 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
 
     #region 刷新相关
     /// <summary>
-    /// 设置<typeparamref name="TItem"/>的额外修改方法
+    /// 设置<typeparamref name="TItem"/>的额外修改方法，每次<see cref="Refresh()"/>都会调用
     /// </summary>
     /// <param name="itemModifier">修改方法</param>
     /// <param name="setImmediate">是否立即生效</param>
@@ -235,7 +235,7 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
         items[index].Refresh();
     }
     /// <summary>
-    /// 为指定数据位置的元素设置新<see cref="ListItem{TSelf, TData}.Data"/>并刷新，这个方法不会修改<see cref="Datas"/>，所以在调用<see cref="Refresh"/>后会还原
+    /// 为指定数据位置的元素设置新<see cref="ListItem{TSelf, TData}.Data"/>并刷新，这个方法不会修改<see cref="Datas"/>，所以在调用<see cref="Refresh()"/>后会还原
     /// </summary>
     /// <param name="index">数据下标，从0开始</param>
     /// <param name="data">新数据</param>
@@ -376,7 +376,7 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
         cache.Put(item);
     }
     /// <summary>
-    /// 从现状列表中移除所有满足条件的元素，这个方法不会修改<see cref="Datas"/>，所以在调用<see cref="Refresh"/>后会还原
+    /// 从现状列表中移除所有满足条件的元素，这个方法不会修改<see cref="Datas"/>，所以在调用<see cref="Refresh()"/>后会还原
     /// </summary>
     /// <param name="predicate">条件</param>
     public void RemoveItemIf(Predicate<TItem> predicate)
@@ -416,6 +416,21 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
     public virtual void Clear()
     {
         Refresh(null);
+    }
+
+    public virtual void PreplacePrefab(TItem prefab, bool rebuild = false)
+    {
+        this.prefab = prefab;
+        CreateCache();
+        if (rebuild) Refresh();
+    }
+    private void CreateCache()
+    {
+        var poolRoot = container.FindOrCreate("Caches");
+        poolRoot.SetAsFirstSibling();
+        ZetanUtility.SetActive(poolRoot, false);
+        if (cache != null) cache.Clear();
+        cache = new SimplePool<TItem>(prefab, cacheCapacity, poolRoot);
     }
     #endregion
 
@@ -493,19 +508,19 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
                 {
                     if (i != item.Index) items[i].IsSelected = false;
                 }
-                selectedIndexes.Clear();
-                selectedIndexes.Add(item.Index);
+                selectedIndices.Clear();
+                selectedIndices.Add(item.Index);
             }
             else
             {
-                if (!selectedIndexes.Contains(item.Index)) selectedIndexes.Add(item.Index);
-                var map = selectedIndexes.ToHashSet();
+                if (!selectedIndices.Contains(item.Index)) selectedIndices.Add(item.Index);
+                var map = selectedIndices.ToHashSet();
                 for (int i = 0; i < items.Count; i++)
                 {
                     if (!map.Contains(i)) items[i].IsSelected = false;
                 }
             }
-        else selectedIndexes.Remove(item.Index);
+        else selectedIndices.Remove(item.Index);
     }
     #endregion
 
@@ -513,10 +528,7 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
     private void Awake()
     {
         RefreshLayoutGroup();
-        var poolRoot = container.FindOrCreate("Caches");
-        poolRoot.SetAsFirstSibling();
-        ZetanUtility.SetActive(poolRoot, false);
-        cache = new SimplePool<TItem>(prefab, cacheCapacity, poolRoot);
+        CreateCache();
         OnAwake();
     }
     /// <summary>
@@ -564,8 +576,17 @@ public abstract class ListViewBase : MonoBehaviour
     protected RectTransform container;
     public RectTransform Container => container;
 
-    protected readonly List<int> selectedIndexes = new List<int>();
-    public ReadOnlyCollection<int> SelectedIndexes => selectedIndexes.AsReadOnly();
+    public int SelectedIndex
+    {
+        get
+        {
+            if (!selectable || selectedIndices.Count < 1) return -1;
+            return selectedIndices.FirstOrDefault();
+        }
+    }
+
+    protected readonly List<int> selectedIndices = new List<int>();
+    public ReadOnlyCollection<int> SelectedIndices => selectedIndices.AsReadOnly();
 }
 
 public enum LayoutDirection

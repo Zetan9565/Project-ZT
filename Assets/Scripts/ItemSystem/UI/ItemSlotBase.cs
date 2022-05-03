@@ -149,7 +149,7 @@ public class ItemSlotBase : GridItem<ItemSlotBase, ItemSlotData>, IPointerClickH
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if (!IsEmpty) NewWindowsManager.OpenWindow<ItemWindow>(this);
+            if (!IsEmpty) WindowsManager.OpenWindow<ItemWindow>(this);
             return;
         }
     }

@@ -42,10 +42,6 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     [SerializeField]
     private Text descriptionText;
     [SerializeField]
-    private Text moneyText;
-    [SerializeField]
-    private Text EXPText;
-    [SerializeField]
     private ItemGrid rewardList;
 
     public event DialogueListner OnBeginDialogueEvent;
@@ -631,7 +627,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         }
         if (PlayerManager.Instance.CheckIsNormalWithAlert())
         {
-            NewWindowsManager.OpenWindow<DialogueWindow>(talker);
+            WindowsManager.OpenWindow<DialogueWindow>(talker);
             return true;
         }
         return false;
@@ -646,12 +642,10 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     {
         if (args == null || args.Length < 1) return false;
         if (currentTalker && currentTalker.GetData<TalkerData>().Info.IsWarehouseAgent)
-            if (NewWindowsManager.IsWindowOpen<WarehouseWindow>(out var warehouse) && warehouse.Handler.Inventory == currentTalker.GetData<TalkerData>().Inventory)
+            if (WindowsManager.IsWindowOpen<WarehouseWindow>(out var warehouse) && warehouse.Handler.Inventory == currentTalker.GetData<TalkerData>().Inventory)
                 warehouse.Close(); ;
         Clear();
-        NewWindowsManager.HideAllExcept(true, this);
-        UIManager.Instance.EnableJoyStick(false);
-        //PlayerManager.Instance.Controller.ForceStop();
+        WindowsManager.HideAllExcept(true, this);
         PlayerManager.Instance.Player.SetMachineState<PlayerTalkingState>();
         currentTalker = args[0] as Talker;
         BeginNewDialogue();
@@ -662,13 +656,12 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         base.OnClose(args);
         CurrentType = DialogueType.Normal;
         Clear();
-        NewWindowsManager.HideAll(false);
-        NewWindowsManager.HideWindow<WarehouseWindow>(false);
-        NewWindowsManager.CloseWindow<WarehouseWindow>();
-        NewWindowsManager.CloseWindow<ShopWindow>();
+        WindowsManager.HideAll(false);
+        WindowsManager.HideWindow<WarehouseWindow>(false);
+        WindowsManager.CloseWindow<WarehouseWindow>();
+        WindowsManager.CloseWindow<ShopWindow>();
         PlayerManager.Instance.Player.SetMachineState<CharacterIdleState>();
         IsHidden = false;
-        UIManager.Instance.EnableJoyStick(true);
         return true;
     }
 
@@ -699,8 +692,6 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
             currentQuest.Model.Title,
             currentQuest.originalQuestHolder.TalkerName,
             currentQuest.Model.Description).ToString();
-        moneyText.text = currentQuest.Model.RewardMoney > 0 ? currentQuest.Model.RewardMoney.ToString() : "无";
-        EXPText.text = currentQuest.Model.RewardEXP > 0 ? currentQuest.Model.RewardEXP.ToString() : "无";
         rewardList.Refresh(ItemSlotData.Convert(currentQuest.Model.RewardItems, 10));
         descriptionWindow.alpha = 1;
         descriptionWindow.blocksRaycasts = true;
@@ -710,41 +701,41 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         currentQuest = null;
         descriptionWindow.alpha = 0;
         descriptionWindow.blocksRaycasts = false;
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
     }
 
     public void OpenTalkerWarehouse()
     {
         if (!currentTalker || !currentTalker.GetData<TalkerData>().Info.IsWarehouseAgent) return;
-        var warehouse = NewWindowsManager.OpenWindow<WarehouseWindow>(WarehouseWindow.OpenType.Store, currentTalker.GetData<TalkerData>(),
-            NewWindowsManager.FindWindow<BackpackWindow>());
+        var warehouse = WindowsManager.OpenWindow<WarehouseWindow>(WarehouseWindow.OpenType.Store, currentTalker.GetData<TalkerData>(),
+            WindowsManager.FindWindow<BackpackWindow>());
         if (warehouse)
         {
-            warehouse.onClose += () => NewWindowsManager.HideWindow(this, false);
-            NewWindowsManager.HideWindow(this, true);
+            warehouse.onClose += () => WindowsManager.HideWindow(this, false);
+            WindowsManager.HideWindow(this, true);
         }
     }
     public void OpenTalkerShop()
     {
         if (!currentTalker || !currentTalker.GetData<TalkerData>().Info.IsVendor) return;
-        var shop = NewWindowsManager.OpenWindow<ShopWindow>(currentTalker.GetData<TalkerData>().shop);
+        var shop = WindowsManager.OpenWindow<ShopWindow>(currentTalker.GetData<TalkerData>().shop);
         if (shop)
         {
-            shop.onClose += () => NewWindowsManager.HideWindow(this, false);
-            NewWindowsManager.HideWindow(this, true);
+            shop.onClose += () => WindowsManager.HideWindow(this, false);
+            WindowsManager.HideWindow(this, true);
         }
     }
     public void OpenGiftWindow()
     {
-        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnSendGift, "挑选一件礼物", "确定要送出这个礼物吗？", 1, 1, cancel: () => NewWindowsManager.HideWindow(this, false));
-        NewWindowsManager.HideWindow(this, true);
+        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnSendGift, "挑选一件礼物", "确定要送出这个礼物吗？", 1, 1, cancel: () => WindowsManager.HideWindow(this, false));
+        WindowsManager.HideWindow(this, true);
     }
     private void OnSendGift(IEnumerable<ItemWithAmount> items)
     {
         if (items != null && items.Count() > 0)
         {
             var isd = items.ElementAt(0);
-            Dialogue dialogue = currentTalker.OnGetGift(isd.source.Model);
+            Dialogue dialogue = currentTalker.OnGetGift(isd.source.Model_old);
             if (dialogue)
             {
                 BackpackManager.Instance.LoseItem(isd.source, isd.amount);
@@ -753,7 +744,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                 StartDialogue(dialogue);
             }
         }
-        NewWindowsManager.HideWindow(this, false);
+        WindowsManager.HideWindow(this, false);
     }
 
     private void ShowButtons(bool gift, bool shop, bool warehouse, bool quest, bool back = true)

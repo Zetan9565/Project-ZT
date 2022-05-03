@@ -1,0 +1,8 @@
+using UnityEngine;
+using ZetanStudio.Item.Module;
+
+[Name("新模块")]
+public class #SCRIPTNAME# : ItemModule
+{
+    public override bool IsValid => true;
+}

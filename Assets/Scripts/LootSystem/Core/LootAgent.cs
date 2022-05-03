@@ -16,7 +16,7 @@ public class LootAgent : Interactive2D
     {
         get
         {
-            return lootItems.Count > 0 && !NewWindowsManager.IsWindowOpen<LootWindow>();
+            return lootItems.Count > 0 && !WindowsManager.IsWindowOpen<LootWindow>();
         }
     }
 
@@ -49,6 +49,6 @@ public class LootAgent : Interactive2D
 
     public override bool DoInteract()
     {
-        return NewWindowsManager.OpenWindowBy<LootWindow>(this);
+        return WindowsManager.OpenWindowBy<LootWindow>(this);
     }
 }

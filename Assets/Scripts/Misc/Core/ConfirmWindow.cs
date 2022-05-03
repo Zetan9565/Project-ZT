@@ -30,12 +30,12 @@ public class ConfirmWindow : Window
     }
     public static ConfirmWindow StartConfirm(string dialog, Action yesAction, Action noAction)
     {
-        return NewWindowsManager.OpenWindow<ConfirmWindow>(dialog, yesAction, noAction);
+        return WindowsManager.OpenWindow<ConfirmWindow>(dialog, yesAction, noAction);
     }
 
     public void Confirm()
     {
-        NewWindowsManager.CloseWindow<ConfirmWindow>();
+        WindowsManager.CloseWindow<ConfirmWindow>();
         onYesClick?.Invoke();
     }
 

@@ -1,9 +1,10 @@
 using UnityEngine;
+using System;
 
 /// <summary>
 /// 任务目标
 /// </summary>
-[System.Serializable]
+[Serializable]
 public abstract class Objective
 {
     [SerializeField]
@@ -45,13 +46,17 @@ public abstract class Objective
     protected int amount = 1;
     public int Amount => amount;
 
+    public virtual bool ShowAmount => true;
+
     [SerializeField]
     protected bool inOrder;
     public bool InOrder => inOrder;
 
     [SerializeField]
-    protected int orderIndex = 1;
-    public int OrderIndex => orderIndex;
+    protected int priority = 1;
+    public int Priority => priority;
+
+    public abstract ObjectiveData CreateData();
 
     public virtual bool IsValid
     {
@@ -65,14 +70,24 @@ public abstract class Objective
     {
         return self != null;
     }
+
+    public sealed class NameAttribute : Attribute
+    {
+        public readonly string name;
+
+        public NameAttribute(string name)
+        {
+            this.name = name;
+        }
+    }
 }
 /// <summary>
 /// 收集类目标
 /// </summary>
-[System.Serializable]
+[Serializable, Name("收集目标")]
 public class CollectObjective : Objective
 {
-    [SerializeField]
+    [SerializeField, ZetanStudio.Item.ItemSelector]
     private ItemBase itemToCollect;
     public ItemBase ItemToCollect => itemToCollect;
 
@@ -90,6 +105,11 @@ public class CollectObjective : Objective
     /// </summary>
     public bool LoseItemAtSbmt => loseItemAtSbmt;
 
+    public override ObjectiveData CreateData()
+    {
+        return new CollectObjectiveData(this);
+    }
+
     public override bool IsValid
     {
         get
@@ -101,7 +121,7 @@ public class CollectObjective : Objective
 /// <summary>
 /// 打怪类目标
 /// </summary>
-[System.Serializable]
+[Serializable, Name("杀敌目标")]
 public class KillObjective : Objective
 {
     [SerializeField]
@@ -137,6 +157,11 @@ public class KillObjective : Objective
     [SerializeField]
     private EnemyGroup group;
     public EnemyGroup Group => group;
+
+    public override ObjectiveData CreateData()
+    {
+        return new KillObjectiveData(this);
+    }
 
     public override bool IsValid
     {
@@ -181,7 +206,7 @@ public enum KillObjectiveType
 /// <summary>
 /// 谈话类目标
 /// </summary>
-[System.Serializable]
+[Serializable, Name("谈话目标")]
 public class TalkObjective : Objective
 {
     [SerializeField]
@@ -204,6 +229,13 @@ public class TalkObjective : Objective
         }
     }
 
+    public override bool ShowAmount => false;
+
+    public override ObjectiveData CreateData()
+    {
+        return new TalkObjectiveData(this);
+    }
+
     public override bool IsValid
     {
         get
@@ -215,7 +247,7 @@ public class TalkObjective : Objective
 /// <summary>
 /// 移动到点类目标
 /// </summary>
-[System.Serializable]
+[Serializable, Name("检查点目标")]
 public class MoveObjective : Objective
 {
     [SerializeField]
@@ -224,6 +256,13 @@ public class MoveObjective : Objective
     [SerializeField]
     private QuestItem itemToUseHere;
     public QuestItem ItemToUseHere => itemToUseHere;
+
+    public override bool ShowAmount => false;
+
+    public override ObjectiveData CreateData()
+    {
+        return new MoveObjectiveData(this);
+    }
 
     public override bool IsValid
     {
@@ -236,7 +275,7 @@ public class MoveObjective : Objective
 /// <summary>
 /// 提交类目标
 /// </summary>
-[System.Serializable]
+[Serializable, Name("道具提交目标")]
 public class SubmitObjective : Objective
 {
     [SerializeField]
@@ -249,7 +288,7 @@ public class SubmitObjective : Objective
         }
     }
 
-    [SerializeField]
+    [SerializeField, ZetanStudio.Item.ItemSelector]
     private ItemBase itemToSubmit;
     public ItemBase ItemToSubmit
     {
@@ -279,6 +318,11 @@ public class SubmitObjective : Objective
         }
     }
 
+    public override ObjectiveData CreateData()
+    {
+        return new SubmitObjectiveData(this);
+    }
+
     public override bool IsValid
     {
         get
@@ -290,7 +334,7 @@ public class SubmitObjective : Objective
 /// <summary>
 /// 触发器目标
 /// </summary>
-[System.Serializable]
+[Serializable, Name("触发器目标")]
 public class TriggerObjective : Objective
 {
     [SerializeField]
@@ -315,6 +359,15 @@ public class TriggerObjective : Objective
         {
             return checkStateAtAcpt;
         }
+    }
+
+    [SerializeField]
+    private bool showAmount;
+    public override bool ShowAmount => showAmount;
+
+    public override ObjectiveData CreateData()
+    {
+        return new TriggerObjectiveData(this);
     }
 
     public override bool IsValid

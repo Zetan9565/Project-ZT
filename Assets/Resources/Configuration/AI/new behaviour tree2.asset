@@ -19,6 +19,8 @@ MonoBehaviour:
   nodes:
   - rid: 4391261938407964698
   - rid: 28978044484190209
+  - rid: 6007092307677413376
+  - rid: 6007092307677413377
   variables:
   - rid: 28978044484190210
   isRuntime: 0
@@ -29,6 +31,7 @@ MonoBehaviour:
       type: {class: FindWithTag, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (1) FindWithTag
+        priority: 0
         isRuntime: 0
         guid: 4250703ab96acfa4ba9ffc62a4bd966d
         _position: {x: 0, y: 144}
@@ -54,9 +57,84 @@ MonoBehaviour:
       type: {class: Entry, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
       data:
         name: (0) Entry
+        priority: 0
         isRuntime: 0
         guid: 6c1785e35fea819499a00357c3158d67
         _position: {x: 0, y: 0}
         _description: 
         start:
           rid: 28978044484190209
+    - rid: 6007092307677413376
+      type: {class: CanSeeObject2D, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: CanSeeObject2D
+        priority: 0
+        isRuntime: 0
+        guid: b668d0af5b85fb6459fd54649b7aba50
+        _position: {x: -91, y: 235}
+        _description: 
+        direction:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: {x: 0, y: 0, z: 0}
+        eyesOffset:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: {x: 0, y: 0, z: 0}
+        fieldOfView:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 90
+        distance:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 10
+        target:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: {fileID: 0}
+        obstacleLayer:
+          serializedVersion: 2
+          m_Bits: 0
+    - rid: 6007092307677413377
+      type: {class: CanSeeObject2D, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        name: CanSeeObject2D (1)
+        priority: 0
+        isRuntime: 0
+        guid: b785e2ca27052d54cbf9ff7ff77a5ecb
+        _position: {x: 125, y: 279}
+        _description: 
+        direction:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: {x: 0, y: 0, z: 0}
+        eyesOffset:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: {x: 0, y: 0, z: 0}
+        fieldOfView:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 90
+        distance:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: 10
+        target:
+          _name: 
+          isGlobal: 0
+          isShared: 0
+          value: {fileID: 0}
+        obstacleLayer:
+          serializedVersion: 2
+          m_Bits: 0

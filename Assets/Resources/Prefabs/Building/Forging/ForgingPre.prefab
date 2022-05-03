@@ -29,6 +29,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4238068858270538968}
   - {fileID: 8346288123337436557}
@@ -48,12 +49,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activated: 1
-  customName: 0
-  _name: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
-  icon: {fileID: 0}
-  hidePanelOnInteract: 0
+  defaultName: "\u53EF\u4EA4\u4E92\u5BF9\u8C61"
+  defaultIcon: {fileID: 0}
   preview: {fileID: 4238068858270538964}
-  building: {fileID: 8346288123337436545}
+  structure: {fileID: 8346288123337436545}
   ignoreLayer:
     serializedVersion: 2
     m_Bits: 256
@@ -125,6 +124,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1393819643250639706}
   m_RootOrder: 0
@@ -225,6 +225,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1393819643250639706}
   m_RootOrder: 1

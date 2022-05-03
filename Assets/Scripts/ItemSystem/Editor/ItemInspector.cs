@@ -170,14 +170,13 @@ public partial class ItemInspector : Editor
                 {
                     if (GUILayout.Button("新建"))
                     {
-                        string folder = EditorUtility.OpenFolderPanel("选择保存文件夹", ZetanEditorUtility.GetDirectoryName(target), "");
+                        string folder = EditorUtility.OpenFolderPanel("选择保存文件夹", ZetanUtility.Editor.GetDirectoryName(target), "");
                         if (!string.IsNullOrEmpty(folder))
                         {
                             try
                             {
                                 Formulation formuInstance = CreateInstance<Formulation>();
                                 AssetDatabase.CreateAsset(formuInstance, AssetDatabase.GenerateUniqueAssetPath("Assets/Resources/Configuration/Formulation/formulation.asset"));
-                                AssetDatabase.SaveAssets();
                                 AssetDatabase.Refresh();
 
                                 formulation.objectReferenceValue = formuInstance;
@@ -244,7 +243,7 @@ public partial class ItemInspector : Editor
                         EditorGUILayout.PropertyField(building, new GUIContent("可学设施"), true);
                         if (building.objectReferenceValue)
                         {
-                            EditorGUILayout.LabelField("设施名称", (building.objectReferenceValue as BuildingInformation).Name);
+                            EditorGUILayout.LabelField("设施名称", (building.objectReferenceValue as StructureInformation).Name);
                         }
                         break;
                     case BookType.Making:

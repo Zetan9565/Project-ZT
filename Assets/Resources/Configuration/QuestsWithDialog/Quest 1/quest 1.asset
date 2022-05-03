@@ -60,7 +60,7 @@ MonoBehaviour:
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
         inOrder: 1
-        orderIndex: 1
+        priority: 1
         killType: 2
         enemy: {fileID: 0}
         race: {fileID: 0}
@@ -75,6 +75,6 @@ MonoBehaviour:
         auxiliaryPos: {fileID: 0}
         amount: 1
         inOrder: 1
-        orderIndex: 2
+        priority: 2
         _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
         dialogue: {fileID: 11400000, guid: 00931f27c4db01e44a9ff7817efe8119, type: 2}

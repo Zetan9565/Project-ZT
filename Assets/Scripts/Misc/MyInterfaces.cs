@@ -37,8 +37,8 @@ public interface IHideable
 {
     bool IsHidden { get; }
     /// <summary>
-    /// 显隐窗口，不应单独使用，显隐窗口请使用<see cref="NewWindowsManager.HideWindow(string, bool, object[])"/>
-    /// 、<see cref="NewWindowsManager.HideWindow{T}(bool, object[])"/>、<see cref="NewWindowsManager.HideWindow(IHideable, bool, object[])"/>
+    /// 显隐窗口，不应单独使用，显隐窗口请使用<see cref="WindowsManager.HideWindow(string, bool, object[])"/>
+    /// 、<see cref="WindowsManager.HideWindow{T}(bool, object[])"/>、<see cref="WindowsManager.HideWindow(IHideable, bool, object[])"/>
     /// </summary>
     /// <param name="hide">是否隐藏</param>
     /// <param name="args">变长参数</param>
@@ -49,11 +49,6 @@ public interface IHideable
         canvas.alpha = hide ? 0 : 1;
         canvas.blocksRaycasts = !hide;
     }
-}
-
-public interface IOpenCloseAbleWindow
-{
-    void OpenCloseWindow();
 }
 
 public interface IFadeAble<T> where T : MonoBehaviour
@@ -76,8 +71,8 @@ public interface IFadeAble<T> where T : MonoBehaviour
             while (time < duration)
             {
                 yield return null;
-                if (time < duration) target.alpha += (alpha - target.alpha) * Time.deltaTime / (duration - time);
-                time += Time.deltaTime;
+                if (time < duration) target.alpha += (alpha - target.alpha) * Time.unscaledDeltaTime / (duration - time);
+                time += Time.unscaledDeltaTime;
             }
             target.alpha = alpha;
             onDone?.Invoke();
@@ -102,8 +97,8 @@ public interface IScaleAble<T> where T : MonoBehaviour
             while (time < duration)
             {
                 yield return null;
-                if (time < duration) target.localScale += (scale - target.localScale) * Time.deltaTime / (duration - time);
-                time += Time.deltaTime;
+                if (time < duration) target.localScale += (scale - target.localScale) * Time.unscaledDeltaTime / (duration - time);
+                time += Time.unscaledDeltaTime;
             }
             target.localScale = scale;
             onDone?.Invoke();

@@ -51,7 +51,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
     private void Refresh()
     {
         results.Clear();
-        objects = ZetanEditorUtility.LoadAssets<T>();
+        objects = ZetanUtility.Editor.LoadAssets<T>();
         foreach (var obj in objects)
         {
             if (!searching)
@@ -94,11 +94,11 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
                     string folder = EditorUtility.OpenFolderPanel("选择移动文件夹", latestFolder, "");
                     if (!string.IsNullOrEmpty(folder))
                     {
-                        if (ZetanEditorUtility.IsValidFolder(folder))
+                        if (ZetanUtility.Editor.IsValidFolder(folder))
                         {
                             try
                             {
-                                AssetDatabase.MoveAsset(AssetDatabase.GetAssetPath(GetResult(objectsList.list[index]).find), $"{ZetanEditorUtility.ConvertToAssetsPath(folder)}/{ZetanEditorUtility.GetFileName(AssetDatabase.GetAssetPath(GetResult(objectsList.list[index]).find))}");
+                                AssetDatabase.MoveAsset(AssetDatabase.GetAssetPath(GetResult(objectsList.list[index]).find), $"{ZetanUtility.Editor.ConvertToAssetsPath(folder)}/{ZetanUtility.Editor.GetFileName(AssetDatabase.GetAssetPath(GetResult(objectsList.list[index]).find))}");
                                 Refresh();
                                 latestFolder = folder;
                             }
@@ -234,7 +234,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
         string folder = EditorUtility.OpenFolderPanel("选择保存文件夹", latestFolder, "");
         if (!string.IsNullOrEmpty(folder))
         {
-            if (ZetanEditorUtility.IsValidFolder(folder))
+            if (ZetanUtility.Editor.IsValidFolder(folder))
             {
                 try
                 {
@@ -271,7 +271,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
     {
         if (element && GetElementName(element).Contains(keyWords))
         {
-            remark = "名称：" + ZetanEditorUtility.TrimContentByKey(GetElementName(element), keyWords, 16);
+            remark = "名称：" + ZetanUtility.Editor.TrimContentByKey(GetElementName(element), keyWords, 16);
             return true;
         }
         else

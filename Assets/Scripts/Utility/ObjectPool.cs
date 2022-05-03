@@ -215,7 +215,10 @@ public class SimplePool<T> where T : Component
     {
         pool.Release(element);
     }
-
+    public void Clear()
+    {
+        pool.Clear();
+    }
     public SimplePool(T model, int capacity = 100, Transform poolRoot = null)
     {
         this.poolRoot = poolRoot;

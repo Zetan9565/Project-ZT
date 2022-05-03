@@ -55,14 +55,6 @@ public class Quest : ScriptableObject
     public Dialogue CompleteDialogue => completeDialogue;
 
     [SerializeField]
-    private int rewardMoney;
-    public int RewardMoney => rewardMoney;
-
-    [SerializeField]
-    private int rewardEXP;
-    public int RewardEXP => rewardEXP;
-
-    [SerializeField]
     private List<ItemInfoBase> rewardItems = new List<ItemInfoBase>();
     public List<ItemInfoBase> RewardItems => rewardItems;
 
@@ -71,7 +63,7 @@ public class Quest : ScriptableObject
     public TalkerInformation NPCToSubmit => _NPCToSubmit;
 
     [SerializeField]
-    private bool cmpltObjctvInOrder = false;
+    private bool cmpltObjctvInOrder;
     public bool CmpltObjctvInOrder => cmpltObjctvInOrder;
 
     [SerializeReference]
@@ -108,8 +100,8 @@ public class Quest : ScriptableObject
         objectives.AddRange(this.objectives);
         objectives.Sort((x, y) =>
         {
-            if (x.OrderIndex > y.OrderIndex) return 1;
-            else if (x.OrderIndex < y.OrderIndex) return -1;
+            if (x.Priority > y.Priority) return 1;
+            else if (x.Priority < y.Priority) return -1;
             else return 0;
         });
         System.Text.StringBuilder sb = new System.Text.StringBuilder();

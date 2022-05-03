@@ -39,7 +39,7 @@ public class ItemSlot : ItemSlotBase, IDragAble,
         if (!DragableManager.Instance.IsDraging)
         {
             rightClickAction?.Invoke(this);
-            NewWindowsManager.CloseWindow<ItemWindow>();
+            WindowsManager.CloseWindow<ItemWindow>();
         }
     }
 
@@ -126,10 +126,10 @@ public class ItemSlot : ItemSlotBase, IDragAble,
 
     private void BeginDrag()
     {
-        if (NewWindowsManager.IsWindowOpen<ItemSelectionWindow>() && IsDark || !dragable)
+        if (WindowsManager.IsWindowOpen<ItemSelectionWindow>() && IsDark || !dragable)
             return;
         DragableManager.Instance.BeginDrag(this, OnEndDrag, icon.rectTransform.rect.width, icon.rectTransform.rect.height);
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
         if (parentScrollRect) parentScrollRect.enabled = false;
         Highlight(true);
     }
@@ -137,7 +137,7 @@ public class ItemSlot : ItemSlotBase, IDragAble,
     {
         if (!DragableManager.Instance.IsDraging) return;
         Highlight(false);
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
     }
     #endregion
 
@@ -168,9 +168,9 @@ public class ItemSlot : ItemSlotBase, IDragAble,
                     if (buttonDatas != null)
                         foreach (var data in buttonDatas)
                         {
-                            data.callback += () => NewWindowsManager.CloseWindow<ItemWindow>();
+                            data.callback += () => WindowsManager.CloseWindow<ItemWindow>();
                         }
-                    NewWindowsManager.OpenWindow<ItemWindow>(this, buttonDatas);
+                    WindowsManager.OpenWindow<ItemWindow>(this, buttonDatas);
                 }
             }
         }

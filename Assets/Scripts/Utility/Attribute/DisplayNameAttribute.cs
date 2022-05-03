@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-[AttributeUsage(AttributeTargets.Field)]
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public class DisplayNameAttribute : PropertyAttribute
 {
     public readonly string name;

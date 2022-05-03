@@ -54,7 +54,7 @@ public class FormulationInspector : Editor
         serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(remark, new GUIContent("备注"));
-        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         listDrawer.DoLayoutDraw();
+        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
     }
 }

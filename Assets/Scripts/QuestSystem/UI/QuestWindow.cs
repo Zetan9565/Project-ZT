@@ -1,30 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class QuestWindow : Window
+public class QuestWindow : Window, IHideable
 {
-    public QuestList questList;
+    [SerializeField]
+    private QuestList questList;
 
-    public CanvasGroup descriptionWindow;
+    [SerializeField]
+    private CanvasGroup descriptionWindow;
 
-    public Text title;
-    //public Image icon;
-    public Text giver;
-    public Text descriptionText;
-    public Text objectiveText;
+    [SerializeField]
+    private Text title;
+    //[SerializeField]
+    //private Image icon;
+    [SerializeField]
+    private Text giver;
+    [SerializeField]
+    private Text descriptionText;
+    [SerializeField]
+    private Text objectiveText;
 
-    public Button abandonButton;
-    public Button traceButton;
-    public Text traceBtnText;
+    [SerializeField]
+    private Button abandonButton;
+    [SerializeField]
+    private Button traceButton;
+    [SerializeField]
+    private Text traceBtnText;
 
-    public Button desCloseButton;
-
-    public Text moneyText;
-
-    public Text EXPText;
+    [SerializeField]
+    private Button desCloseButton;
 
     [SerializeField]
     private TabBar tabBar;
@@ -39,12 +47,16 @@ public class QuestWindow : Window
     private QuestAgent selectedAgent;
     private List<QuestAgentData> toShow = new List<QuestAgentData>();
 
+    public bool IsHidden { get; private set; }
+
     protected override void OnAwake()
     {
         tabBar.Refresh(RefreshByTab);
         questList.Selectable = true;
         questList.SetItemModifier(x =>
         {
+            ///因为questList的Prefab存在自我引用问题(Prefab系统的祖传BUG），需要替换为真正的Prefab而不是自我引用
+            if (x.SubList.Prefab == x) x.SubList.PreplacePrefab(questList.Prefab);
             x.SubList.Selectable = true;
             x.SubList.SetSelectCallback(OnSelect);
         });
@@ -118,20 +130,18 @@ public class QuestWindow : Window
         giver.text = $"[委托人：{selectedQuest.originalQuestHolder.TalkerName}]";
         descriptionText.text = selectedQuest.Model.Description;
         StringBuilder objectives = new StringBuilder();
-        List<ObjectiveData> displayObjectives = selectedQuest.Objectives.FindAll(x => x.Model.Display);
-        int lineCount = displayObjectives.Count - 1;
-        for (int i = 0; i < displayObjectives.Count; i++)
+        var displayObjectives = selectedQuest.Objectives.Where(x => x.Model.Display).ToArray();
+        int lineCount = displayObjectives.Length - 1;
+        for (int i = 0; i < displayObjectives.Length; i++)
         {
             string endLine = i == lineCount ? string.Empty : "\n";
             if (selectedQuest.IsFinished)
                 objectives.AppendFormat("-{0}{1}", displayObjectives[i].Model.DisplayName, endLine);
             else
-                objectives.AppendFormat("-{0}{1}{2}", displayObjectives[i].Model.DisplayName, "[" + displayObjectives[i].CurrentAmount + "/" + displayObjectives[i].Model.Amount + "]", endLine);
+                objectives.AppendFormat("-{0}{1}{2}", displayObjectives[i], displayObjectives[i].IsComplete ? "\t(达成)" : string.Empty, endLine);
         }
         objectiveText.text = objectives.ToString();
         rewardList.Refresh(ItemSlotData.Convert(selectedQuest.Model.RewardItems, maxRewardCount));
-        moneyText.text = selectedQuest.Model.RewardMoney > 0 ? selectedQuest.Model.RewardMoney.ToString() : "无";
-        EXPText.text = selectedQuest.Model.RewardEXP > 0 ? selectedQuest.Model.RewardEXP.ToString() : "无";
 
         ZetanUtility.SetActive(abandonButton.gameObject, !selectedQuest.IsFinished && selectedQuest.Model.Abandonable);
         ZetanUtility.SetActive(traceButton.gameObject, !selectedQuest.IsFinished);
@@ -160,7 +170,7 @@ public class QuestWindow : Window
             descriptionWindow.alpha = 1;
             descriptionWindow.blocksRaycasts = true;
         }
-        NewWindowsManager.CloseWindow<ItemWindow>();
+        WindowsManager.CloseWindow<ItemWindow>();
     }
 
     protected override bool OnOpen(params object[] args)
@@ -239,7 +249,17 @@ public class QuestWindow : Window
     }
     private void OnObjectiveUpdate(params object[] msg)
     {
-        if (IsOpen && msg.Length > 2 && msg[0] is QuestData quest && quest == selectedQuest)
-            RefreshDescription();
+        if (IsOpen && msg.Length > 1 && msg[0] is ObjectiveData objective)
+        {
+            questList.RefreshItemIf(x => x.Data.quests.Contains(objective.parent));
+            if (objective.parent == selectedQuest) RefreshDescription();
+        }
+    }
+
+    public void Hide(bool hide, params object[] args)
+    {
+        if (!IsOpen) return;
+        IHideable.HideHelper(content, hide);
+        IsHidden = hide;
     }
 }

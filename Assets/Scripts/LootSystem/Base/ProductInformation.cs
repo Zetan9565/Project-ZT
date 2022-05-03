@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "product info", menuName = "Zetan Studio/产出表")]
@@ -10,13 +11,7 @@ public class ProductInformation : ScriptableObject
 
     [SerializeField, NonReorderable]
     private List<DropItemInfo> products = new List<DropItemInfo>();
-    public List<DropItemInfo> Products
-    {
-        get
-        {
-            return products;
-        }
-    }
+    public ReadOnlyCollection<DropItemInfo> Products => new ReadOnlyCollection<DropItemInfo>(products);
 
     public bool IsValid => products != null && products.Count > 0;
 

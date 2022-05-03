@@ -46,9 +46,6 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
 #if UNITY_STANDALONE
         canZoom = false;
 #endif
-        isClick = false;
-        clickCount = 0;
-        clickTime = 0;
     }
 
     private void Update()
@@ -83,11 +80,11 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
     private int clickCount;
     private bool isClick;
 
-    private void FixedUpdate()
+    private void LateUpdate()
     {
         if (isClick)
         {
-            clickTime += Time.fixedDeltaTime;
+            clickTime += Time.deltaTime;
             if (clickTime > 0.2f)
             {
                 isClick = false;

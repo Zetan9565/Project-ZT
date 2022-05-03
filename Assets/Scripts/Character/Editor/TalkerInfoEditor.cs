@@ -40,12 +40,12 @@ public class TalkerInfoEditor : ConfigurationEditor<TalkerInformation>
         remark = string.Empty;
         if (element.ID.Contains(keyWords))
         {
-            remark = ZetanEditorUtility.TrimContentByKey(element.ID, keyWords, 16);
+            remark = ZetanUtility.Editor.TrimContentByKey(element.ID, keyWords, 16);
             return true;
         }
         else if (element.Name.Contains(keyWords))
         {
-            remark = ZetanEditorUtility.TrimContentByKey(element.Name, keyWords, 16);
+            remark = ZetanUtility.Editor.TrimContentByKey(element.Name, keyWords, 16);
             return true;
         }
         else if ((keyWords.ToLower() == "{enable}" || keyWords == "{启用}") && element.Enable)

@@ -33,8 +33,8 @@ public class QuestAgent : ListItem<QuestAgent, QuestAgentData>
             {
                 ZetanUtility.SetActive(questContent, true);
                 var quest = base.Data.quests[0];
-                questText.text = quest.IsFinished ? quest.Model.Title : (quest.IsComplete ? $"{quest.Model.Title}(已完成)" :
-                    (quest.InProgress ? $"{quest.Model.Title}(进行中)" : $"{quest.Model.Title}(未接取)"));
+                questText.text = quest.IsFinished ? quest.Model.Title : (quest.IsComplete ? $"[已完成]{quest.Model.Title}" :
+                    (quest.InProgress ? $"[进行中]{quest.Model.Title}" : $"[未接取]{quest.Model.Title}"));
             }
             questList.Clear();
         }

@@ -1,16 +1,16 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(Building2D), true)]
+[CustomEditor(typeof(Structure2D), true)]
 public class BuildingInspector : Editor
 {
-    Building2D building;
+    Structure2D building;
 
     SerializedProperty onDestroy;
 
     protected virtual void OnEnable()
     {
-        building = target as Building2D;
+        building = target as Structure2D;
         onDestroy = serializedObject.FindProperty("onDestroy");
     }
 

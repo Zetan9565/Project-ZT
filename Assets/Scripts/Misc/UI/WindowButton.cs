@@ -4,9 +4,11 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Button))]
 public class WindowButton : MonoBehaviour
 {
+    [TypeDropDown(typeof(Window))]
     public string type;
 
     public bool openClose = true;
+
 
     private void Awake()
     {
@@ -15,13 +17,7 @@ public class WindowButton : MonoBehaviour
 
     private void OpenClose()
     {
-        if (!openClose)
-        {
-            NewWindowsManager.OpenWindow(type);
-        }
-        else
-        {
-            NewWindowsManager.OpenClose(type);
-        }
+        if (!openClose) WindowsManager.OpenWindow(type.Split('.')[^1]);
+        else WindowsManager.OpenClose(type.Split('.')[^1]);
     }
 }

@@ -45,31 +45,31 @@ public class SubStateAttributeDrawer : PropertyDrawer
             switch ((CharacterStates)value)
             {
                 case CharacterStates.Normal:
-                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterNormalStates)))
+                    foreach (var name in ZetanUtility.GetInspectorNames(typeof(CharacterNormalStates)))
                     {
                         names.Add(new GUIContent(name));
                     }
                     break;
                 case CharacterStates.Abnormal:
-                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterAbnormalStates)))
+                    foreach (var name in ZetanUtility.GetInspectorNames(typeof(CharacterAbnormalStates)))
                     {
                         names.Add(new GUIContent(name));
                     }
                     break;
                 case CharacterStates.Gather:
-                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterGatherStates)))
+                    foreach (var name in ZetanUtility.GetInspectorNames(typeof(CharacterGatherStates)))
                     {
                         names.Add(new GUIContent(name));
                     }
                     break;
                 case CharacterStates.Attack:
-                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterAttackStates)))
+                    foreach (var name in ZetanUtility.GetInspectorNames(typeof(CharacterAttackStates)))
                     {
                         names.Add(new GUIContent(name));
                     }
                     break;
                 case CharacterStates.Busy:
-                    foreach (var name in ZetanUtility.GetEnumNames(typeof(CharacterBusyStates)))
+                    foreach (var name in ZetanUtility.GetInspectorNames(typeof(CharacterBusyStates)))
                     {
                         names.Add(new GUIContent(name));
                     }

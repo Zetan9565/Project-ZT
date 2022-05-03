@@ -1,0 +1,34 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <uie:Toolbar style="flex-direction: row;">
+        <uie:ToolbarButton text="刷新" display-tooltip-when-elided="true" name="refresh-button" />
+        <uie:ToolbarButton text="新增" display-tooltip-when-elided="true" name="new-button" style="border-top-width: 1px;" />
+        <uie:ToolbarButton text="删除" display-tooltip-when-elided="true" name="delete-button" style="border-top-width: 1px;" />
+        <ui:DropdownField index="-1" name="search-selector" style="width: 60px; -unity-text-align: middle-left;" />
+        <uie:ToolbarSearchField focusable="true" name="search-input" />
+        <uie:ObjectField allow-scene-objects="false" type="ItemBase, Assembly-CSharp" name="old-item" />
+        <uie:ToolbarButton text="导入并覆盖" display-tooltip-when-elided="true" name="copy-button" />
+        <uie:ToolbarButton text="旧版一键导入" display-tooltip-when-elided="true" name="copy-all-button" />
+    </uie:Toolbar>
+    <SplitView fixed-pane-initial-dimension="250" style="min-width: auto;">
+        <ui:VisualElement name="left-container" style="min-width: 200px;">
+            <TabbedBar style="height: 20px;" />
+            <ui:VisualElement name="header-container" style="border-left-width: 0; border-right-width: 0; border-top-width: 0; border-bottom-width: 0; border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5);">
+                <ui:Label text="道具列表" display-tooltip-when-elided="true" name="list-label" style="font-size: 14px; -unity-text-align: middle-center; background-color: rgb(85, 102, 110); -unity-slice-left: 0; -unity-slice-top: 0; -unity-slice-right: 0; -unity-slice-bottom: 0; border-bottom-width: 1px; border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5); -unity-font-style: normal; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="item-container" style="flex-shrink: 0;">
+                <ui:VisualElement style="flex-direction: row;">
+                    <ui:Label text="当前模板" display-tooltip-when-elided="true" style="-unity-text-align: middle-left; margin-left: 3px;" />
+                    <ui:DropdownField index="-1" choices="System.Collections.Generic.List`1[System.String]" name="template-dropdown" style="flex-grow: 1; border-top-width: 0; border-bottom-width: 0; border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5); border-left-width: 0; border-right-width: 0; -unity-text-align: upper-left;" />
+                </ui:VisualElement>
+                <ui:ListView focusable="true" name="item-list" virtualization-method="DynamicHeight" show-alternating-row-backgrounds="ContentOnly" style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; background-color: rgba(0, 0, 0, 0); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5); margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="template-container">
+                <ui:ListView focusable="true" name="template-list" virtualization-method="DynamicHeight" show-alternating-row-backgrounds="ContentOnly" style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; background-color: rgba(0, 0, 0, 0); padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5); margin-left: 3px; margin-right: 3px; margin-top: 3px; margin-bottom: 3px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="right-container">
+            <ui:ScrollView name="right-panel" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;" />
+        </ui:VisualElement>
+    </SplitView>
+    <ui:ListView focusable="true" name="search-dropdown" virtualization-method="DynamicHeight" show-alternating-row-backgrounds="ContentOnly" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; position: absolute; width: 295px; height: 204px; top: 18px; left: 172px; background-color: rgb(56, 56, 56); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5); border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;" />
+</ui:UXML>
