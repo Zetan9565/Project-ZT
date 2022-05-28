@@ -2,6 +2,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.Item;
 
 public abstract class InventoryWindow : Window, IHideable
 {
@@ -10,7 +11,7 @@ public abstract class InventoryWindow : Window, IHideable
     public GridView<ItemSlotBase, ItemSlotData> Grid => grid;
 
     [SerializeField]
-    protected Dropdown pageSelector;
+    protected ItemTypeDropDown pageSelector;
 
     [SerializeField]
     protected Text money;
@@ -27,6 +28,10 @@ public abstract class InventoryWindow : Window, IHideable
     protected InputField searchInput;
     [SerializeField]
     protected Button searchButton;
+
+    protected List<string> types;
+
+    public bool IsTyping => searchInput ? searchInput.isFocused : false;
 
     public bool IsHidden { get; private set; }
 
@@ -49,7 +54,6 @@ public abstract class InventoryWindow : Window, IHideable
     {
         if (WindowsManager.IsWindowOpen<ItemSelectionWindow>(out var selector) && selector.IsSelectFor(grid as ISlotContainer))
             WindowsManager.CloseWindow<ItemSelectionWindow>();
-        pageSelector.value = 0;
         IsHidden = false;
         return true;
     }
@@ -68,7 +72,8 @@ public abstract class InventoryWindow : Window, IHideable
         RefreshMoney();
         RefreshSpace();
         RefreshWeight();
-        SetPage(currentPage);
+        //SetPage(currentPage);
+        //pageSelector.Value = pageSelector.Value;
     }
 
     protected virtual void ModifiySlot(ItemSlotBase item)
@@ -93,49 +98,18 @@ public abstract class InventoryWindow : Window, IHideable
     }
 
     #region 道具页相关
-    protected int currentPage;
     public void SetPage(int index)
     {
-        currentPage = index;
-        switch (index)
-        {
-            case 1: ShowEquipments(); break;
-            case 2: ShowConsumables(); break;
-            case 3: ShowMaterials(); break;
-            default: ShowAll(); break;
-        }
-    }
-
-    protected void ShowAll()
-    {
-        grid.ForEach(ia => ia.Show());
-    }
-
-    protected void ShowEquipments()
-    {
-        grid.ForEach(ia =>
-        {
-            if (ia.IsEmpty || ia.Item.Model_old.IsEquipment) ia.Show();
-            else ia.Hide();
-        });
-    }
-
-    protected void ShowConsumables()
-    {
-        grid.ForEach(ia =>
-        {
-            if (ia.IsEmpty || ia.Item.Model_old.IsConsumable) ia.Show();
-            else ia.Hide();
-        });
-    }
-
-    protected void ShowMaterials()
-    {
-        grid.ForEach(ia =>
-        {
-            if (ia.IsEmpty || ia.Item.Model_old.IsMaterial) ia.Show();
-            else ia.Hide();
-        });
+        //currentPage = index;
+        pageSelector.Value = index;
+        //if (index == 0)
+        //    grid.ForEach(ia => ia.Show());
+        //else
+        //    grid.ForEach(ia =>
+        //    {
+        //        if (ia.IsEmpty || ia.Item.Model.Type.Name == types[index]) ia.Show();
+        //        else ia.Hide();
+        //    });
     }
     #endregion
 
@@ -191,7 +165,7 @@ public abstract class InventoryWindow : Window, IHideable
     {
         discardButton.SetWindow(this);
         sortButton.onClick.AddListener(Arrange);
-        pageSelector.onValueChanged.AddListener(SetPage);
+        pageSelector.container = grid as IFiltableItemContainer;
         searchButton.onClick.AddListener(Search);
         grid.SetItemModifier(ModifiySlot);
     }
@@ -200,13 +174,13 @@ public abstract class InventoryWindow : Window, IHideable
     {
         if (string.IsNullOrEmpty(searchInput.text))
         {
-            SetPage(currentPage);
+            pageSelector.Value = pageSelector.Value;
             return;
         }
-        grid.ForEach(ia =>
-        {
-            if (!(!ia.IsEmpty && ia.Info.ItemName.Contains(searchInput.text))) ia.Hide();
-        });
+
+        bool itemFilter(ItemSlotBase ia) => !ia.IsEmpty && ia.Item.Name.Contains(searchInput.text);
+        grid.AddItemFilter(itemFilter, true);
+        grid.RemoveItemFilter(itemFilter);
         searchInput.text = string.Empty;
     }
 

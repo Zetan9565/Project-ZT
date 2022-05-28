@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio;
 
 [DisallowMultipleComponent]
 public class QuestAgent : ListItem<QuestAgent, QuestAgentData>
@@ -17,13 +18,13 @@ public class QuestAgent : ListItem<QuestAgent, QuestAgentData>
 
     [SerializeField] private GameObject selected;
 
+
     protected override void RefreshSelected()
     {
         ZetanUtility.SetActive(selected, IsSelected);
         ZetanUtility.SetActive(questList, Data.group && IsSelected);
         if (!IsSelected) questList.DeselectAll();
     }
-
     public override void Refresh()
     {
         if (!Data.group)
@@ -33,8 +34,8 @@ public class QuestAgent : ListItem<QuestAgent, QuestAgentData>
             {
                 ZetanUtility.SetActive(questContent, true);
                 var quest = base.Data.quests[0];
-                questText.text = quest.IsFinished ? quest.Model.Title : (quest.IsComplete ? $"[已完成]{quest.Model.Title}" :
-                    (quest.InProgress ? $"[进行中]{quest.Model.Title}" : $"[未接取]{quest.Model.Title}"));
+                questText.text = quest.IsFinished ? quest.Title : (quest.IsComplete ? $"{LM.Tr(GetType().Name, "[已完成]")}{quest.Title}" :
+                    (quest.InProgress ? quest.Title : $"{LM.Tr(GetType().Name, "[未接取]")}{quest.Title}"));
             }
             questList.Clear();
         }

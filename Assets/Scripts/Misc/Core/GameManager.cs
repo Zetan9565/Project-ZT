@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ZetanStudio.Item;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("Zetan Studio/管理器/游戏管理器")]
@@ -70,7 +71,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     public static Dictionary<string, TalkerInformation> TalkerInfos { get; } = new Dictionary<string, TalkerInformation>();
 
-    public static Dictionary<string, ItemBase> Items { get; } = new Dictionary<string, ItemBase>();
+    public static Dictionary<string, Item> Items { get; } = new Dictionary<string, Item>();
 
     public static void InitGame(params Type[] exceptions)
     {
@@ -86,7 +87,7 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             EnemyInfos.Add(e.ID, e);
 
         Items.Clear();
-        var items = Resources.LoadAll<ItemBase>("Configuration");
+        var items = Resources.LoadAll<Item>("Configuration");
         foreach (var i in items)
             Items.Add(i.ID, i);
 

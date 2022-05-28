@@ -1,8 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using ZetanStudio.Item.Craft;
 
 [CreateAssetMenu(fileName = "formulation", menuName = "Zetan Studio/配方")]
 public class Formulation : ScriptableObject
@@ -12,7 +10,7 @@ public class Formulation : ScriptableObject
     * 材料列表里面的材料分为【单种】和【同类】，【单种】限制一种道具，比如铁块，而为同类时，可以是铁块、铜块等“金属”
     * 当材料中某个同类材料时，就不应该再增加任何该类型下面的单种道具材料，很明显会冲突
     * 同理，当材料列表已经用了某种单种材料，则不应该再增加与材料类型一样的【同类】材料
-    * 材料中，无论是【单种】和【同类】，都不应该再增加相同的配置，例如，已经使用了铁块X3，则不能再新增一个铁块X2的材料配置
+    * 材料中，无论是【单种】和【同类】，都不应该再增加相同的配置，例如，已经使用了[铁块 × m]，则不能再新增一个[铁块 × n]的材料配置
     * **/
     [SerializeField]
     private string remark;//单纯用于备注
@@ -37,12 +35,17 @@ public class Formulation : ScriptableObject
 
     public override string ToString()
     {
+        if (!IsValid) return name;
+        return ToSplitString(", ");
+    }
+    public string ToSplitString(string seperator = "\n")
+    {
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         foreach (var material in materials)
         {
             if (material && material.IsValid)
             {
-                if (material.MakingType == MakingType.SingleItem)
+                if (material.MakingType == CraftType.SingleItem)
                 {
                     sb.Append("[");
                     sb.Append(material.ItemName);
@@ -52,11 +55,11 @@ public class Formulation : ScriptableObject
                 else
                 {
                     sb.Append("<");
-                    sb.Append(ZetanUtility.GetInspectorName(material.MaterialType));
+                    sb.Append(material.MaterialType.Name);
                     sb.Append("> × ");
                     sb.Append(material.Amount);
                 }
-                if (materials.IndexOf(material) != materials.Count - 1) sb.Append("\n");
+                if (materials.IndexOf(material) != materials.Count - 1) sb.Append(seperator);
             }
         }
         return sb.ToString();

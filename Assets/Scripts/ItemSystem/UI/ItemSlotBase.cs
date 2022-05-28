@@ -2,35 +2,34 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Module;
 
 [DisallowMultipleComponent]
 public class ItemSlotBase : GridItem<ItemSlotBase, ItemSlotData>, IPointerClickHandler
 {
-    [SerializeField, DisplayName("图标")]
+    [SerializeField, Label("图标")]
     protected Image icon;
 
-    [SerializeField, DisplayName("数量")]
+    [SerializeField, Label("数量")]
     protected Text amount;
 
-    [SerializeField, DisplayName("品质识别框")]
+    [SerializeField, Label("品质识别框")]
     protected Image qualityEdge;
 
-    [SerializeField, DisplayName("复选框")]
+    [SerializeField, Label("复选框")]
     protected GameObject mark;
+
+    [SerializeField]
+    protected ItemCoolDown coolDown;
 
     public bool IsDark { get; protected set; }
     public bool IsMarked { get; protected set; }
-
-    public ItemInfo Info { get; protected set; }
 
     public ItemData Item => Data ? Data.item : null;
 
     public bool IsEmpty { get { return Data == null || Data.IsEmpty; } }
 
-    public void Init()
-    {
-        Clear();
-    }
     public void Vacate()
     {
         Mark(false);
@@ -38,20 +37,15 @@ public class ItemSlotBase : GridItem<ItemSlotBase, ItemSlotData>, IPointerClickH
         icon.overrideSprite = null;
         amount.text = string.Empty;
         qualityEdge.color = Color.white;
+        ZetanUtility.SetActive(coolDown, false);
     }
-    public void Clear()
+    public override void OnClear()
     {
         Vacate();
-        Info = null;
         Data = null;
-        View = null;
         darkCondition = null;
         markCondition = null;
-    }
-    public void Recycle()
-    {
-        Clear();
-        ObjectPool.Put(gameObject);
+        base.OnClear();
     }
 
     private Predicate<ItemSlotBase> darkCondition;
@@ -99,6 +93,15 @@ public class ItemSlotBase : GridItem<ItemSlotBase, ItemSlotData>, IPointerClickH
     {
         ZetanUtility.SetActive(gameObject, false);
     }
+    public void ShowOrHide(bool show)
+    {
+        ZetanUtility.SetActive(gameObject, show);
+    }
+
+    protected override void OnInit()
+    {
+        Vacate();
+    }
 
     public void Mark(bool mark = true)
     {
@@ -109,12 +112,12 @@ public class ItemSlotBase : GridItem<ItemSlotBase, ItemSlotData>, IPointerClickH
     /// 用于单独展示
     /// </summary>
     /// <param name="item"></param>
-    public virtual void SetItem(ItemBase item, string amountText = null)
+    public virtual void SetItem(Item item, string amountText = null)
     {
         if (!Data) Data = new ItemSlotData(new ItemData(item, false));
         else Data.item = new ItemData(item, false);
         icon.overrideSprite = item.Icon;
-        qualityEdge.color = ItemUtility.QualityToColor(Data.Model.Quality);
+        qualityEdge.color = Data.Model.Quality.Color;
         amount.text = amountText ?? string.Empty;
         Dark(false);
         Mark(false);
@@ -129,29 +132,24 @@ public class ItemSlotBase : GridItem<ItemSlotBase, ItemSlotData>, IPointerClickH
         }
         if (Data.Model.Icon) icon.overrideSprite = Data.Model.Icon;
         amount.text = Data.amount > 0 && Data.Model.StackAble ? Data.amount.ToString() : string.Empty;
-        qualityEdge.color = ItemUtility.QualityToColor(Data.Model.Quality);
+        qualityEdge.color = Data.Model.Quality.Color;
         if (darkCondition != null) Dark(darkCondition(this));
         if (markCondition != null) Mark(markCondition(this));
-    }
-
-    public virtual void UpdateInfo()
-    {
-        if (Info == null || !Info.item || Info.Amount < 1)
-        {
-            Vacate();
-            return;
-        }
-        if (Info.item.Icon) icon.overrideSprite = Info.item.Icon;
-        amount.text = Info.Amount > 0 && Info.item.StackAble ? Info.Amount.ToString() : string.Empty;
+        if (coolDown)
+            if (Item.GetModuleData<CoolDownData>() is CoolDownData cd && !cd.Available)
+                coolDown.Init(Item);
+            else
+                coolDown.Init(null);
     }
 
     public virtual void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            if (!IsEmpty) WindowsManager.OpenWindow<ItemWindow>(this);
-            return;
-        }
+        if (eventData.button == PointerEventData.InputButton.Left) OnClick();
+    }
+
+    protected virtual void OnClick()
+    {
+        if (!IsEmpty) WindowsManager.OpenWindow<ItemWindow>(this);
     }
 }
 public interface ISlotContainer

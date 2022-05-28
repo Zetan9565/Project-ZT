@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ZetanStudio.Item;
 
 [System.Serializable]
 public class TalkerData : CharacterData, IWarehouseKeeper
@@ -65,7 +66,7 @@ public class TalkerData : CharacterData, IWarehouseKeeper
         OnTalkFinishedEvent?.Invoke();
     }
 
-    public Dialogue OnGetGift(ItemBase gift)
+    public Dialogue OnGetGift(Item gift)
     {
         int add = 0;
         if (Info.AffectiveItems.Exists(x => x.Item.ID == gift.ID))

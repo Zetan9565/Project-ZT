@@ -37,7 +37,8 @@ MonoBehaviour:
         item: {fileID: 0}
         amount: 1
       itemCanGet:
-        item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+        item: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
+          type: 2}
         amount: 1
       showOnlyWhenNotHave: 0
       onlyForQuest: 1
@@ -53,10 +54,12 @@ MonoBehaviour:
       goBack: 0
       indexToGoBack: -1
       itemToSubmit:
-        item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+        item: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
+          type: 2}
         amount: 1
       itemCanGet:
-        item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
+        item: {fileID: 2294737969574299077, guid: 11d254d59d262564aa42d1df5009d201,
+          type: 2}
         amount: 1
       showOnlyWhenNotHave: 0
       onlyForQuest: 1

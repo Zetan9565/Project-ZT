@@ -58,10 +58,7 @@ public class AStarManager : SingletonMonoBehaviour<AStarManager>
     [SerializeField]
     private ColliderType castCheckType = ColliderType.Capsule;
 
-    [SerializeField]
-#if UNITY_EDITOR
-    [EnumMemberNames("无", "普通", "附加", "游戏中", "错误")]
-#endif
+    [SerializeField, EnumMemberNames("无", "普通", "附加", "游戏中", "错误")]
     private PathLog pathLog;
     #endregion
 

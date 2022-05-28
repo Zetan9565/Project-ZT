@@ -1,14 +1,15 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ZetanStudio.BehaviourTree.Nodes;
+using Node = ZetanStudio.BehaviourTree.Nodes.Node;
+using Action = ZetanStudio.BehaviourTree.Nodes.Action;
 
-
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Editor
 {
     public sealed class NodeEditor : UnityEditor.Experimental.GraphView.Node
     {
@@ -16,6 +17,7 @@ namespace ZetanStudio.BehaviourTree
         public Port output;
         public Port input;
 
+        private BehaviourTreeEditorSettings settings;
         private readonly Label des;
         private readonly Label abort;
         private readonly Label repeat;
@@ -25,16 +27,17 @@ namespace ZetanStudio.BehaviourTree
         private readonly Action<NodeEditor, Vector2> onSetPosition;
 
         public NodeEditor(Node node, Action<NodeEditor> onSelected, Action<NodeEditor> onUnselected,
-                          Action<NodeEditor, Vector2> onSetPosition) : base(AssetDatabase.GetAssetPath(BehaviourTreeSettings.GetOrCreate().nodeUxml))
+                          Action<NodeEditor, Vector2> onSetPosition, string uiFile, BehaviourTreeEditorSettings settings) : base(uiFile)
         {
             this.node = node;
             this.onSelected = onSelected;
             this.onUnselected = onUnselected;
             this.onSetPosition = onSetPosition;
+            this.settings = settings ? settings : BehaviourTreeEditorSettings.GetOrCreate();
             viewDataKey = node.guid;
             Type type = node.GetType();
             title = type.Name + (node.IsRuntime ? "(R)" : string.Empty);
-            var attr = type.GetCustomAttribute<NodeDescriptionAttribute>();
+            var attr = type.GetCustomAttribute<DescriptionAttribute>();
             if (attr != null) tooltip = attr.description;
             else tooltip = string.Empty;
 
@@ -45,7 +48,9 @@ namespace ZetanStudio.BehaviourTree
 
             abort = this.Q<Label>("abort");
             repeat = this.Q<Label>("repeat");
+            repeat.tooltip = Tr("后台检查中");
             invalid = this.Q<Label>("invalid");
+            invalid.tooltip = Tr("存在错误");
 
             InitInput();
             InitOutput();
@@ -150,16 +155,7 @@ namespace ZetanStudio.BehaviourTree
         }
         public void UpdateInvalid(BehaviourTree tree)
         {
-            if (tree.Reachable(node) && !node.IsValid)
-            {
-                invalid.text = "!";
-                invalid.tooltip = "存在错误";
-            }
-            else
-            {
-                invalid.text = string.Empty;
-                invalid.tooltip = string.Empty;
-            }
+            invalid.style.display = new StyleEnum<DisplayStyle>(tree.Reachable(node) && !node.IsValid ? DisplayStyle.Flex : DisplayStyle.None);
         }
         private void UpdateRecheck()
         {
@@ -177,22 +173,9 @@ namespace ZetanStudio.BehaviourTree
                     else input = node.input;
                 }
 
-                if (rechecking)
-                {
-                    repeat.text = "Recheck";
-                    repeat.tooltip = "后台检查中";
-                }
-                else
-                {
-                    repeat.text = string.Empty;
-                    repeat.tooltip = string.Empty;
-                }
+                repeat.visible = rechecking;
             }
-            else
-            {
-                repeat.text = string.Empty;
-                repeat.tooltip = string.Empty;
-            }
+            else repeat.visible = false;
         }
         public void UpdateAbortType()
         {
@@ -202,15 +185,15 @@ namespace ZetanStudio.BehaviourTree
                 {
                     case AbortType.Self:
                         abort.text = "↓";
-                        abort.tooltip = "中止自我";
+                        abort.tooltip = Tr("中止自我");
                         break;
                     case AbortType.LowerPriority:
                         abort.text = "→";
-                        abort.tooltip = "中止更低优先";
+                        abort.tooltip = Tr("中止更低优先");
                         break;
                     case AbortType.Both:
                         abort.text = "↓→";
-                        abort.tooltip = "中止自我和更低优先";
+                        abort.tooltip = Tr("中止自我和更低优先");
                         break;
                     default:
                         abort.text = string.Empty;
@@ -220,13 +203,18 @@ namespace ZetanStudio.BehaviourTree
             }
         }
 
+        private string Tr(string text)
+        {
+            return Language.Tr(settings.language, text);
+        }
+
         private class NodePort : Port
         {
             public NodePort(Direction portDirection, Capacity portCapacity) : base(Orientation.Vertical, portDirection, portCapacity, typeof(bool))
             {
                 m_EdgeConnector = new EdgeConnector<Edge>(new NodeEdgeConnectorListener());
                 this.AddManipulator(m_EdgeConnector);
-                style.width = 60.0f;
+                style.width = 100f;
             }
 
             public override bool ContainsPoint(Vector2 localPoint)

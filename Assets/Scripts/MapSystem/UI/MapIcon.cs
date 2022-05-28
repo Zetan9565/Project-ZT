@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 [RequireComponent(typeof(RectTransform))]
 public class MapIcon : MonoBehaviour, IPointerClickHandler,
@@ -67,7 +67,7 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
     }
 
     public void Init(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap,
-MapIconType iconType, bool removeAble, string textToDisplay = "")
+        MapIconType iconType, bool removeAble, string textToDisplay = null)
     {
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
         rectTransform.sizeDelta = size;
@@ -81,7 +81,7 @@ MapIconType iconType, bool removeAble, string textToDisplay = "")
     }
 
     public void Init(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap, float rangeSize,
-    MapIconType iconType, bool removeAble, string textToDisplay = "")
+        MapIconType iconType, bool removeAble, string textToDisplay = null)
     {
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
         rectTransform.sizeDelta = size;

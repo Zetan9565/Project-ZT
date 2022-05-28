@@ -9,16 +9,6 @@ public class MiscSettings : SingletonScriptableObject<MiscSettings>
     [field: SerializeField]
     public QuestFlag QuestFlagsPrefab { get; private set; }
 
-    [field: Header("道具颜色"), SerializeField]
-    public List<Color> QualityColors { get; private set; } = new List<Color>()
-    {
-        Color.grey,
-        Color.green,
-        Color.cyan,
-        Color.yellow,
-        Color.magenta,
-    };
-
     [field: Header("关键字颜色"), SerializeField]
     public List<Color> KeywordColors { get; private set; } = new List<Color>()
     {

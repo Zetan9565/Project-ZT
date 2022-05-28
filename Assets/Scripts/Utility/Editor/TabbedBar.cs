@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,9 +21,10 @@ public class TabbedBar : VisualElement
         style.flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row);
     }
 
-    public void Refresh(string[] tabs, Action<int> onSelectionChanged, float? radius = null, Color? selectedColor = null, Color? normalColor = null)
+    public void Refresh(IEnumerable<string> tabNames, Action<int> onSelectionChanged, float? radius = null, Color? selectedColor = null, Color? normalColor = null)
     {
         Clear();
+        var tabs = tabNames.ToArray();
         if (tabs == null || tabs.Length < 1)
         {
             Debug.LogError("至少需要一个页签");

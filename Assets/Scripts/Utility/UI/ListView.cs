@@ -4,11 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 public sealed class ListView : ListView<ListItem, object> { }
 
-public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListItem<TItem, TData>
+public abstract class ListView<TItem, TData> : ListViewBase, IForEach<TItem>, IForEachBreakable<TItem> where TItem : ListItem<TItem, TData>
 {
     public LayoutDirection Direction
     {
@@ -167,6 +167,7 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
     public int Count => items.Count;
 
     protected SimplePool<TItem> cache;
+    protected HashSet<Predicate<TItem>> itemFilters = new HashSet<Predicate<TItem>>();
     protected Action<TItem> itemModifier;
     protected Action<TItem> selectCallback;
     protected Action<TItem> clickCallback;
@@ -180,7 +181,27 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
     public virtual void SetItemModifier(Action<TItem> itemModifier, bool setImmediate = false)
     {
         this.itemModifier = itemModifier;
-        if (setImmediate) ForEach(this.itemModifier);
+        if (setImmediate) DoModifier();
+    }
+    public virtual void AddItemFilter(Predicate<TItem> itemFilter, bool setImmediate = false)
+    {
+        if (itemFilter == null) return;
+        itemFilters.Add(itemFilter);
+        if (setImmediate) DoFilter();
+    }
+    public virtual void RemoveItemFilter(Predicate<TItem> itemFilter, bool setImmediate = false)
+    {
+        itemFilters.Remove(itemFilter);
+        if (setImmediate) DoFilter();
+    }
+    public void DoModifier()
+    {
+        ForEach(itemModifier);
+    }
+    public void DoFilter()
+    {
+        ForEach(x => ZetanUtility.SetActive(x, !itemFilters.Any(f => !f.Invoke(x))));
+        Rebuild();
     }
     /// <summary>
     /// 设置新的<see cref="Datas"/>并刷新
@@ -218,9 +239,17 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
         }
         for (int i = 0; i < datas.Count; i++)
         {
-            ModifyItem(items[i], i);
-            items[i].Refresh(datas[i]);
+            TItem item = items[i];
+            ModifyItem(item, i);
+            item.Refresh(datas[i]);
+            ZetanUtility.SetActive(item, !itemFilters.Any(f => !f.Invoke(item)));
         }
+        Rebuild();
+    }
+
+    public void Rebuild()
+    {
+        if (!layoutGroup) return;
         layoutGroup.enabled = false;
         layoutGroup.enabled = true;
     }
@@ -400,11 +429,7 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
         if (action == null) return;
         items.ForEach(action);
     }
-    /// <summary>
-    /// 带中断的遍历
-    /// </summary>
-    /// <param name="action">返回值表示是否中断的访问器</param>
-    public void ForEachWithBreak(Predicate<TItem> action)
+    public void ForEachBreakable(Predicate<TItem> action)
     {
         foreach (var item in items)
         {
@@ -473,6 +498,16 @@ public abstract class ListView<TItem, TData> : ListViewBase where TItem : ListIt
         if (!selectable) return;
         if (predicate == null) predicate = (i) => false;
         bool find = false;
+        for (int i = 0; i < items.Count; i++)
+        {
+            if (multiSelection) SetSelected(i + 1, predicate(items[i].Data));
+            else if (!find && predicate(items[i].Data))
+            {
+                find = true;
+                SetSelected(i + 1, true);
+            }
+            else SetSelected(i + 1, false);
+        }
         ForEach(item =>
         {
             if (multiSelection) item.IsSelected = predicate(item.Data);

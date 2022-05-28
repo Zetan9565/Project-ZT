@@ -1,15 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ZetanStudio.BehaviourTree;
+using ZetanStudio.BehaviourTree.Nodes;
 
-[NodeDescription("定点巡逻：按给定的导航点定点巡逻")]
+[Group("Movement"), Description("定点巡逻：按给定的导航点定点巡逻")]
 public class Patrol : PathMovement
 {
-    [DisplayName("随机选点")]
+    [Label("随机选点")]
     public bool random;
-    [DisplayName("导航点")]
+    [Label("导航点")]
     public SharedVector3List waypoints = new List<Vector3>();
-    [DisplayName("巡逻间隔(秒)")]
+    [Label("巡逻间隔(秒)")]
     public SharedFloat interval = 1f;
 
     private int waypointIndex;

@@ -1,6 +1,7 @@
 using System;
 using UnityEditor;
 using UnityEngine;
+using ZetanStudio.Item.Craft;
 
 [CustomEditor(typeof(Formulation))]
 public class FormulationInspector : Editor
@@ -41,7 +42,7 @@ public class FormulationInspector : Editor
                 var right = formulation.Materials[j];
                 if (i != j && left.MakingType == right.MakingType)
                 {
-                    if (left.MakingType == MakingType.SingleItem && left.Item == right.Item || left.MakingType == MakingType.SameType && left.MaterialType == right.MaterialType)
+                    if (left.MakingType == CraftType.SingleItem && left.Item == right.Item || left.MakingType == CraftType.SameType && left.MaterialType == right.MaterialType)
                     {
                         EditorGUILayout.HelpBox($"第[{i + 1}]和第[{j + 1}]个材料重复！", MessageType.Error);
                         bre = true;

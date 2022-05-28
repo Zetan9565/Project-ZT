@@ -3,7 +3,7 @@
 namespace ZetanStudio.BehaviourTree
 {
     [System.Serializable]
-    public class SharedGameObject : SharedVariable<GameObject>
+    public sealed class SharedGameObject : SharedVariable<GameObject>
     {
         /// <summary>
         /// 运行过程中赋值请使用<see cref="SharedVariable{T}.Value"/>属性或<see cref="SharedVariable{T}.SetValue(object)"/>方法，

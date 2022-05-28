@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e12fc912ef1af684799c4408334821e5, type: 3}
+  m_Name: craft tool type
+  m_EditorClassIdentifier: 
+  enum:
+  - <Name>k__BackingField: "\u624B\u5DE5"
+    <Methods>k__BackingField: 00000000
+  - <Name>k__BackingField: "\u624B\u5DE5\u53F0"
+    <Methods>k__BackingField: 0000000001000000
+  - <Name>k__BackingField: "\u51B6\u70BC\u7089"
+    <Methods>k__BackingField: 02000000
+  - <Name>k__BackingField: "\u953B\u9020\u53F0"
+    <Methods>k__BackingField: 03000000
+  - <Name>k__BackingField: "\u953B\u51B6\u53F0"
+    <Methods>k__BackingField: 0200000003000000
+  - <Name>k__BackingField: "\u7EBA\u7EC7\u673A"
+    <Methods>k__BackingField: 04000000
+  - <Name>k__BackingField: "\u7F1D\u7EAB\u673A"
+    <Methods>k__BackingField: 05000000
+  - <Name>k__BackingField: "\u7076\u53F0"
+    <Methods>k__BackingField: 06000000
+  - <Name>k__BackingField: "\u5236\u836F\u53F0"
+    <Methods>k__BackingField: 07000000
+  - <Name>k__BackingField: "\u667E\u6652\u53F0"
+    <Methods>k__BackingField: 08000000
+  - <Name>k__BackingField: "\u81FC\u6775"
+    <Methods>k__BackingField: 09000000
+  - <Name>k__BackingField: "\u8FC7\u6EE4\u5668"
+    <Methods>k__BackingField: 0a000000
+  - <Name>k__BackingField: "\u70E4\u7089"
+    <Methods>k__BackingField: 0b000000

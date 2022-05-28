@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 public abstract class GridView<TItem, TData> : ListView<TItem, TData>, IGridView where TItem : GridItem<TItem, TData>
 {

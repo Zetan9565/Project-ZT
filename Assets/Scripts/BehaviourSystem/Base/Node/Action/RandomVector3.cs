@@ -1,21 +1,22 @@
 using System.Collections;
 using UnityEngine;
+using ZetanStudio.BehaviourTree.Nodes;
 
 namespace ZetanStudio.BehaviourTree
 {
     public class RandomVector3 : Action
     {
-        [DisplayName("范围而不是边界")]
+        [Label("范围而不是边界")]
         public bool useRange = true;
-        [DisplayName("范围半径"), HideIf_BT("useRange", false)]
+        [Label("范围半径"), HideIf("useRange", false)]
         public SharedFloat range = 10f;
-        [DisplayName("盲区半径"), HideIf_BT("useRange", false), Tooltip("不会在此范围内取点")]
+        [Label("盲区半径"), HideIf("useRange", false), Tooltip("不会在此范围内取点")]
         public SharedFloat blindRange = 0f;
-        [DisplayName("边界最小值"), HideIf_BT("useRange", true)]
+        [Label("边界最小值"), HideIf("useRange", true)]
         public SharedVector3 boundMin;
-        [DisplayName("边界最大值"), HideIf_BT("useRange", true)]
+        [Label("边界最大值"), HideIf("useRange", true)]
         public SharedVector3 boundMax;
-        [DisplayName("结果寄存器")]
+        [Label("结果寄存器")]
         public SharedVector3 register;
 
         public override bool IsValid => useRange && range != null && range.IsValid && blindRange != null && blindRange.IsValid

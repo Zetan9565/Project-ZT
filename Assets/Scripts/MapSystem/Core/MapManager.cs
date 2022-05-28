@@ -120,7 +120,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         return;
     }
     public MapIcon CreateMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap,
-        MapIconType iconType, bool removeAble, string textToDisplay = "")
+        MapIconType iconType, bool removeAble, string textToDisplay = null)
     {
         if (!UI || !UI.gameObject || !iconSprite) return null;
         MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(iconType)).GetComponent<MapIcon>();
@@ -129,7 +129,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         return icon;
     }
     public MapIcon CreateMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap, float rangeSize,
-        MapIconType iconType, bool removeAble, string textToDisplay = "")
+        MapIconType iconType, bool removeAble, string textToDisplay = null)
     {
         if (!UI || !UI.gameObject || !iconSprite) return null;
         MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(iconType)).GetComponent<MapIcon>();
@@ -138,7 +138,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         return icon;
     }
 
-    public MapIcon CreateDefaultMark(Vector3 worldPosition, bool keepOnMap, bool removeAble, string textToDisplay = "")
+    public MapIcon CreateDefaultMark(Vector3 worldPosition, bool keepOnMap, bool removeAble, string textToDisplay = null)
     {
         return CreateMapIcon(defaultMarkIcon, defaultMarkSize, worldPosition, keepOnMap, MapIconType.Mark, removeAble, textToDisplay);
     }

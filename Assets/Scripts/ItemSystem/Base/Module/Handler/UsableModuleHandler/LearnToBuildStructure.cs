@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
-using ZetanStudio.Item.Module;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.Item.Module
 {
     [CreateAssetMenu(fileName = "learn to build structure", menuName = "Zetan Studio/道具/用途/学习建造设施")]
-    public class LearnToBuildStructure : ItemUsage
+    public sealed class LearnToBuildStructure : ItemUsage
     {
         public override string Name => "学习建造设施";
 

@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Editor
 {
     [InitializeOnLoad]
     public class BehaviourIcon
@@ -24,7 +24,7 @@ namespace ZetanStudio.BehaviourTree
 
         private static Texture2D GetTex()
         {
-            return AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Scripts/BehaviourSystem/Editor/Icon/executor.png");
+            return AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Scripts/BehaviourSystem/Editor/Resources/executor.png");
         }
     }
 }

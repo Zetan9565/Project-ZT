@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using ZetanStudio;
 
 public enum QuestState
 {
@@ -11,6 +12,9 @@ public enum QuestState
 
 public class QuestData
 {
+    public string Title => MiscFuntion.HandlingKeyWords(Tr(Model.Title));
+    public string Description => MiscFuntion.HandlingKeyWords(Tr(Model.Description));
+
     public Quest Model { get; }
 
     private List<ObjectiveData> objectives = new List<ObjectiveData>();
@@ -67,7 +71,7 @@ public class QuestData
             else if (x.Model.Priority < y.Model.Priority) return -1;
             else return 0;
         });
-        if (Model.CmpltObjctvInOrder)
+        if (Model.InOrder)
             for (int i = 1; i < Objectives.Count; i++)
             {
                 if (Objectives[i].Model.Priority >= Objectives[i - 1].Model.Priority)
@@ -117,5 +121,10 @@ public class QuestData
     public static implicit operator bool(QuestData self)
     {
         return self != null;
+    }
+
+    public string Tr(string displayName)
+    {
+        return LM.Tr(GetType().Name, displayName);
     }
 }

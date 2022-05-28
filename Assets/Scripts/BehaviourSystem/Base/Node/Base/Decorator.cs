@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
     /// <summary>
     /// 修饰结点：只有一个子结点的父型结点

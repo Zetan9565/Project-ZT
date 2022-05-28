@@ -1,19 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio;
 
 [DefaultExecutionOrder(-1)]
 public abstract class Window : MonoBehaviour, IFadeAble<Window>
 {
+    public virtual string LKName => GetType().Name;
+
+    [Label("淡入淡出")]
     public bool animated = true;
-    [HideIf("animated", false)]
+    [Label("持续时间"), HideIf("animated", false)]
     public float duration = 0.05f;
 
-    [SerializeField]
+    [SerializeField, Label("窗体")]
     protected CanvasGroup content;
-    [SerializeField]
+    [SerializeField, Label("关闭按钮")]
     protected Button closeButton;
-    public Canvas windowCanvas { get; protected set; }
+    public Canvas WindowCanvas { get; protected set; }
     public virtual bool IsOpen { get; protected set; }
 
 #pragma warning disable IDE1006 // 命名样式
@@ -158,9 +163,9 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
     {
         WindowsManager.Cache(this);
         if (!content.gameObject.GetComponent<GraphicRaycaster>()) content.gameObject.AddComponent<GraphicRaycaster>();
-        windowCanvas = content.GetComponent<Canvas>();
-        windowCanvas.overrideSorting = true;
-        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
+        WindowCanvas = content.GetComponent<Canvas>();
+        WindowCanvas.overrideSorting = true;
+        WindowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         if (closeButton) closeButton.onClick.AddListener(() => Close());
         OnAwake();
     }
@@ -174,11 +179,27 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
     }
     #endregion
 
+    /// <summary>
+    /// 参数格式：([窗口名称: <see cref="string"/>], [窗口状态: <see cref="WindowStates"/>])
+    /// </summary>
     public const string WindowStateChanged = "WindowStateChanged";
+
+    public string Tr(string text)
+    {
+        return LM.Tr(LKName, text);
+    }
+    public string Tr(string text, params object[] args)
+    {
+        return LM.Tr(LKName, text, args);
+    }
+    public IEnumerable<string> TrM(string text, params string[] texts)
+    {
+        return LM.TrM(LKName, text, texts);
+    }
 
     public static bool IsName<T>(string name) where T : Window
     {
-        return typeof(Window).Name == name;
+        return typeof(T).Name == name;
     }
 }
 

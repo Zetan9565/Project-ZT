@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using ZetanExtends.Editor;
+using ZetanStudio.Extension.Editor;
 
 namespace ZetanStudio.Item
 {
@@ -21,10 +21,9 @@ namespace ZetanStudio.Item
         private readonly SerializedProperty StackLimit;
         private readonly SerializedProperty Discardable;
         private readonly string IDPrefix;
-
-        private List<ItemNew> items;
+        private LanguageMap language;
+        private List<Item> items;
         private HashSet<string> ids;
-        private readonly HelpBox helpBox;
         public Action onInspectorChanged;
 
         public ItemBaseInfoBlock(SerializedObject serializedObject, string IDPrefix)
@@ -41,12 +40,9 @@ namespace ZetanStudio.Item
             Weight = serializedObject.FindAutoProperty("Weight");
             StackLimit = serializedObject.FindAutoProperty("StackLimit");
             Discardable = serializedObject.FindAutoProperty("Discardable");
-            text = "基本信息";
+            language = ItemEditorSettings.GetOrCreate().language;
+            text = Language.Tr(language, "基本信息");
             RefreshCache();
-            helpBox = new HelpBox();
-            helpBox.text = "无错误";
-            helpBox.messageType = HelpBoxMessageType.Info;
-            Add(helpBox);
             IMGUIContainer inspector = new IMGUIContainer(() =>
             {
                 if (serializedObject.targetObject)
@@ -67,12 +63,13 @@ namespace ZetanStudio.Item
                                                               Icon.objectReferenceValue as Sprite,
                                                               typeof(Sprite),
                                                               false);
+            string oldID = ID.stringValue;
             if (string.IsNullOrEmpty(ID.stringValue))
             {
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y, rect.width - 110, rect.height), ID);
-                if (GUI.Button(new Rect(rect.x + rect.width - 108, rect.y, 50, rect.height), "生成ID"))
+                if (GUI.Button(new Rect(rect.x + rect.width - 108, rect.y, 50, rect.height), Language.Tr(ItemEditorSettings.GetOrCreate().language, "生成ID")))
                 {
-                    ID.stringValue = ItemNew.Editor.GetAutoID(serializedObject.targetObject as ItemNew, items, IDPrefix);
+                    ID.stringValue = Item.Editor.GetAutoID(serializedObject.targetObject as Item, items, IDPrefix);
                     serializedObject.ApplyModifiedProperties();
                     CheckError();
                     onInspectorChanged?.Invoke();
@@ -111,6 +108,11 @@ namespace ZetanStudio.Item
                 serializedObject.ApplyModifiedProperties();
                 CheckError();
                 onInspectorChanged?.Invoke();
+                if (oldID != ID.stringValue && AssetDatabase.IsSubAsset(serializedObject.targetObject))
+                {
+                    serializedObject.targetObject.name = ID.stringValue;
+                    EditorUtility.SetDirty(serializedObject.targetObject);
+                }
             }
         }
 
@@ -122,40 +124,36 @@ namespace ZetanStudio.Item
             bool invalid = empty || dump;
             if (invalid)
             {
-                text = "基本信息(存在错误)";
-                helpBox.text = empty ? "ID为空！" : "ID重复！";
-                helpBox.messageType = HelpBoxMessageType.Error;
+                text = $"{Language.Tr(language, "基本信息")}({Language.Tr(language, "存在错误")})";
+                this.Q<Toggle>().tooltip = $"{Language.Tr(language, "错误类型")}: {(empty ? Language.Tr(language, "ID为空") : Language.Tr(language, "ID重复"))}";
             }
             else
             {
                 SerializedProperty name = serializedObject.FindAutoProperty("Name");
                 if (string.IsNullOrEmpty(name.stringValue))
                 {
-                    text = "基本信息(可能有误)";
-                    helpBox.text = "道具名为空";
-                    helpBox.messageType = HelpBoxMessageType.Warning;
+                    text = $"{Language.Tr(language, "基本信息")}({Language.Tr(language, "可能有误")})";
+                    this.Q<Toggle>().tooltip = $"{Language.Tr(language, "错误类型")}：{Language.Tr(language, "道具名为空")}";
                 }
                 else
                 {
                     SerializedProperty icon = serializedObject.FindAutoProperty("Icon");
                     if (!icon.objectReferenceValue)
                     {
-                        text = "基本信息(可能有误)";
-                        helpBox.text = "图标为空";
-                        helpBox.messageType = HelpBoxMessageType.Warning;
+                        text = $"{Language.Tr(language, "基本信息")}({Language.Tr(language, "可能有误")})";
+                        this.Q<Toggle>().tooltip = $"{Language.Tr(language, "错误类型")}：{Language.Tr(language, "图标为空")}";
                     }
                     else
                     {
-                        text = "基本信息";
-                        helpBox.text = "无错误";
-                        helpBox.messageType = HelpBoxMessageType.Info;
+                        text = Language.Tr(language, "基本信息");
+                        this.Q<Toggle>().tooltip = null;
                     }
                 }
             }
         }
         public void RefreshCache()
         {
-            if (!ItemEditorSettings.GetOrCreate().useDatabase) items = ZetanUtility.Editor.LoadAssets<ItemNew>();
+            if (!Item.UseDatabase) items = ZetanUtility.Editor.LoadAssets<Item>();
             else items = ItemDatabase.Editor.GetItems();
             ids = items.Where(x => x != serializedObject.targetObject).Select(x => x.ID).ToHashSet();
         }

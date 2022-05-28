@@ -35,7 +35,7 @@ public class GatheringInfoInspector : Editor
         refreshTime = serializedObject.FindProperty("refreshTime");
         lootPrefab = serializedObject.FindProperty("lootPrefab");
         productItems = serializedObject.FindProperty("productItems");
-        dropList = new DropItemListDrawer(serializedObject, productItems, lineHeight, lineHeightSpace);
+        dropList = new DropItemListDrawer(productItems, lineHeight, lineHeightSpace);
 
         gathering = Resources.LoadAll<ResourceInformation>("Configuration");
     }

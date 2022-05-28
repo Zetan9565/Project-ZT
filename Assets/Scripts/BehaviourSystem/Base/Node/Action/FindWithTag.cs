@@ -1,13 +1,13 @@
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
-    [NodeDescription("根据标签查找：使用GameObject.FindGameObjectWithTag查找游戏对象，重复查找时应配合Wait结点进行优化")]
+    [Description("根据标签查找：使用GameObject.FindGameObjectWithTag查找游戏对象，重复查找时应配合Wait结点进行优化")]
     public class FindWithTag : Action
     {
-        [DisplayName("标签"), Tag_BT]
+        [Label("标签"), Tag]
         public SharedString tag = "Player";
-        [DisplayName("结果寄存器")]
+        [Label("结果寄存器")]
         public SharedGameObject register;
 
         public override bool IsValid => tag != null && tag.IsValid && !string.IsNullOrEmpty(tag.Value) && tag.Value != "Untagged" && register != null && register.IsValid;

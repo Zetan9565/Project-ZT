@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
     /// <summary>
     /// 父型结点：有子结点的结点

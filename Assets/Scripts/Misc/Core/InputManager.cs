@@ -13,8 +13,8 @@ public class InputManager : SingletonMonoBehaviour<InputManager>
 
     public InputCustomInfo customInfo;
 
-    public static bool IsTyping => /*BackpackManager.Instance && BackpackManager.Instance.IsInputFocused ||*/
-        WindowsManager.IsWindowOpen<PlantWindow>(out var plantWindow) && plantWindow.IsInputFocused;
+    public static bool IsTyping => WindowsManager.IsWindowOpen<BackpackWindow>(out var backpack) && backpack.IsTyping ||
+        WindowsManager.IsWindowOpen<PlantWindow>(out var plantWindow) && plantWindow.IsTyping;
 
     private void ShowStructure(InputAction.CallbackContext context)
     {

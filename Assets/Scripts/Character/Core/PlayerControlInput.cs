@@ -41,16 +41,23 @@ public class PlayerControlInput : CharacterControlInput
     }
     private void Roll(InputAction.CallbackContext context)
     {
+        if (InputManager.IsTyping) return;
         SetTrigger(CharacterInputNames.Instance.Roll);
     }
 
     private void Dash(InputAction.CallbackContext context)
     {
+        if (InputManager.IsTyping) return;
         SetTrigger(CharacterInputNames.Instance.Dash);
     }
 
     public void GetMovementInput(InputAction.CallbackContext context)
     {
+        if (InputManager.IsTyping)
+        {
+            SetValue(CharacterInputNames.Instance.Move, Vector2.zero);
+            return;
+        }
         if (context.performed)
         {
             var input = context.ReadValue<Vector2>();

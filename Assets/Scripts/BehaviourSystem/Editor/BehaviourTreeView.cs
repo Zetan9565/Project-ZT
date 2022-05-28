@@ -1,14 +1,18 @@
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ZetanStudio.BehaviourTree.Nodes;
+using Node = ZetanStudio.BehaviourTree.Nodes.Node;
+using Action = ZetanStudio.BehaviourTree.Nodes.Action;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Editor
 {
-    public partial class BehaviourTreeView : GraphView
+    public class BehaviourTreeView : GraphView
     {
         public new class UxmlFactory : UxmlFactory<BehaviourTreeView, UxmlTraits> { }
 
@@ -16,24 +20,30 @@ namespace ZetanStudio.BehaviourTree
         public Action<NodeEditor> nodeUnselectedCallback;
         public System.Action undoRecordsChangedCallback;
         public BehaviourTree tree;
+        private readonly string nodeUIFile;
 
         private BehaviourTree treeBef;
         private bool isLocal;
-        private readonly BehaviourTreeSettings settings;
+        private readonly BehaviourTreeEditorSettings settings;
         private readonly RuntimeUndo runtimeUndo = new RuntimeUndo();
 
         public bool CanUndo => runtimeUndo.CanUndo;
-        public string UndoName => runtimeUndo.TopUndoName;
+        public string UndoName => Tr(runtimeUndo.TopUndoName);
         public bool CanRedo => runtimeUndo.CanRedo;
-        public string RedoName => runtimeUndo.TopRedoName;
+        public string RedoName => Tr(runtimeUndo.TopRedoName);
 
-        public void UndoOperation()
+        protected override bool canCopySelection => false;
+        protected override bool canDuplicateSelection => false;
+        protected override bool canPaste => false;
+        protected override bool canCutSelection => false;
+        protected override bool canDeleteSelection
         {
-            runtimeUndo.PerformUndo();
-        }
-        public void RedoOperation()
-        {
-            runtimeUndo.PerformRedo();
+            get
+            {
+                int index = selection.FindIndex(x => x is NodeEditor editor && editor.node is Entry);
+                if (index > 0) RemoveFromSelection(selection[index]);
+                return base.canDeleteSelection;
+            }
         }
 
         public BehaviourTreeView()
@@ -45,13 +55,15 @@ namespace ZetanStudio.BehaviourTree
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
 
-            settings = BehaviourTreeSettings.GetOrCreate();
+            settings = BehaviourTreeEditorSettings.GetOrCreate();
             var styleSheet = settings.treeUss;
             styleSheets.Add(styleSheet);
 
             Undo.undoRedoPerformed += OnUndoRedo;
             runtimeUndo.onRecordsChanged += OnUndoRecordsChanged;
-            runtimeUndo.undoRedoPerformed += OnRuntimeUndoRedo;
+            runtimeUndo.undoRedoPerformed += OnUndoRedo;
+
+            nodeUIFile = AssetDatabase.GetAssetPath(BehaviourTreeEditorSettings.GetOrCreate().nodeUxml);
         }
 
         #region 操作相关
@@ -83,54 +95,76 @@ namespace ZetanStudio.BehaviourTree
             if (evt.target == this)
             {
                 Vector2 nodePosition = this.ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
-                var types = TypeCache.GetTypesDerivedFrom<Action>().OrderBy(x => x.Name);
-                foreach (var type in types)
+                void selectType(Type type) => CreateTreeNode(type, nodePosition);
+
+                int sort(Type left, Type right)
                 {
-                    if (!type.IsAbstract && !type.IsGenericType)
-                        evt.menu.AppendAction($"行为结点(Action)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
+                    if (left == right) return 0;
+                    if (isAction(left))
+                        if (isAction(right)) return sortName(left, right);
+                        else return -1;
+                    else if (isAction(right)) return 1;
+                    else if (isConditional(left))
+                        if (isConditional(right)) return sortName(left, right);
+                        else return -1;
+                    else if (isConditional(right)) return 1;
+                    else if (isComposite(left))
+                        if (isComposite(right)) return sortName(left, right);
+                        else return -1;
+                    else if (isComposite(right)) return 1;
+                    else if (isDecorator(left))
+                        if (isDecorator(right)) return sortName(left, right);
+                        else return -1;
+                    else return 1;
+
+                    int sortName(Type left, Type right)
+                    {
+                        return string.Compare(group(left) + left.Name, group(right) + right.Name);
+                    }
+                }
+                (string, System.Action)[] actions = new (string, System.Action)[]
+                {
+                    ("Action",  () => CreateNewScript(ScriptTemplate.Action)),
+                    ("Conditional", () => CreateNewScript(ScriptTemplate.Conditional)),
+                    ("Composite", () => CreateNewScript(ScriptTemplate.Composite)),
+                    ("Decorator", () => CreateNewScript(ScriptTemplate.Decorator))
+                };
+
+                string group(Type type)
+                {
+                    string group = string.Empty;
+                    if (isAction(type)) group = Tr("行为结点(Action)");
+                    else if (isConditional(type)) group = Tr("条件结点(Conditional)");
+                    else if (isComposite(type)) group = Tr("复合结点(Composite)");
+                    else if (isDecorator(type)) group = Tr("修饰结点(Decorator)");
+                    string subGroup = type.GetCustomAttribute<GroupAttribute>()?.group ?? string.Empty;
+                    group += !string.IsNullOrEmpty(subGroup) ? $"/{subGroup}/" : string.Empty;
+                    return group;
                 }
 
-                types = TypeCache.GetTypesDerivedFrom<Conditional>().OrderBy(x => x.Name);
-                foreach (var type in types)
-                {
-                    if (!type.IsAbstract && !type.IsGenericType)
-                        evt.menu.AppendAction($"条件结点(Conditional)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
-                }
+                var dropdown = new AdvancedDropdown<Type>(TypeCache.GetTypesDerivedFrom<Node>().Where(x => !x.IsAbstract && x != typeof(Entry)), selectType,
+                                                          t => t.Name, group, tooltipGetter: Node.GetNodeDesc, sorter: sort, title: Tr("结点"), addCallbacks: actions);
+                dropdown.Show(evt.mousePosition, 250f);
 
-                types = TypeCache.GetTypesDerivedFrom<Composite>().OrderBy(x => x.Name);
-                foreach (var type in types)
-                {
-                    if (!type.IsAbstract && !type.IsGenericType)
-                        evt.menu.AppendAction($"复合结点(Composite)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
-                }
-
-                types = TypeCache.GetTypesDerivedFrom<Decorator>().OrderBy(x => x.Name);
-                foreach (var type in types)
-                {
-                    if (!type.IsAbstract && !type.IsGenericType)
-                        evt.menu.AppendAction($"修饰结点(Decorator)/{type.Name}", (a) => CreateTreeNode(type, nodePosition));
-                }
-
-                evt.menu.AppendSeparator();
-                evt.menu.AppendAction("新建/Action", (a) => CreateNewScript(ScriptTemplate.Action));
-                evt.menu.AppendAction("新建/Conditional", (a) => CreateNewScript(ScriptTemplate.Conditional));
-                evt.menu.AppendAction("新建/Composite", (a) => CreateNewScript(ScriptTemplate.Composite));
-                evt.menu.AppendAction("新建/Decorator", (a) => CreateNewScript(ScriptTemplate.Decorator));
+                static bool isAction(Type left) => typeof(Action).IsAssignableFrom(left);
+                static bool isConditional(Type type) => typeof(Conditional).IsAssignableFrom(type);
+                static bool isComposite(Type type) => typeof(Composite).IsAssignableFrom(type);
+                static bool isDecorator(Type type) => typeof(Decorator).IsAssignableFrom(type);
             }
             else if (evt.target is NodeEditor editor)
             {
                 if (editor.output != null && editor.output.connected && selection.Count < 2)
-                    evt.menu.AppendAction("选择子结点", (a) => SelectNodeChildren(editor));
+                    evt.menu.AppendAction(Tr("选择子结点"), (a) => SelectNodeChildren(editor));
                 if (editor.node is not Entry)
                 {
-                    evt.menu.AppendAction("删除", (a) => RightClickDeletion());
-                    evt.menu.AppendAction("复制", (a) => CopyNode(editor));
+                    evt.menu.AppendAction(Tr("删除"), (a) => RightClickDeletion());
+                    evt.menu.AppendAction(Tr("复制"), (a) => CopyNode(editor));
                 }
                 if (!editor.node.GetType().IsSealed && selection.Count < 2)
                 {
                     evt.menu.AppendSeparator();
                     var scripts = AssetDatabase.FindAssets($"t:monoscript {editor.node.GetType().Name}");
-                    evt.menu.AppendAction("编辑脚本", (a) =>
+                    evt.menu.AppendAction(Tr("编辑脚本"), (a) =>
                     {
                         foreach (var s in scripts)
                         {
@@ -145,10 +179,11 @@ namespace ZetanStudio.BehaviourTree
             {
                 if (edge.output.node is NodeEditor || edge.input.node is NodeEditor)
                 {
-                    evt.menu.AppendAction("删除", (a) => RightClickDeletion());
+                    evt.menu.AppendAction(Tr("删除"), (a) => RightClickDeletion());
                 }
             }
         }
+
         public void InsertNode(Type type)
         {
             if (!tree) return;
@@ -162,19 +197,20 @@ namespace ZetanStudio.BehaviourTree
         #endregion
 
         #region 事件回调
+        public void UndoOperation()
+        {
+            runtimeUndo.PerformUndo();
+        }
+        public void RedoOperation()
+        {
+            runtimeUndo.PerformRedo();
+        }
+
         private void OnUndoRecordsChanged()
         {
             undoRecordsChangedCallback?.Invoke();
         }
         private void OnUndoRedo()
-        {
-            if (tree)
-            {
-                DrawTreeView(tree);
-                AssetDatabase.SaveAssetIfDirty(tree);
-            }
-        }
-        private void OnRuntimeUndoRedo()
         {
             if (tree) DrawTreeView(tree);
         }
@@ -188,8 +224,8 @@ namespace ZetanStudio.BehaviourTree
                 {
                     if (elem is NodeEditor editor)
                     {
-                        if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "删除结点");
-                        else runtimeUndo.RecordTreeChange(tree, "删除结点");
+                        if (isLocal) Undo.RegisterCompleteObjectUndo(tree, Tr("删除结点"));
+                        else runtimeUndo.RecordTreeChange(tree, Tr("删除结点"));
                         tree.DeleteNode(editor.node);
                         removedNodes.Add(editor);
                     }
@@ -201,8 +237,8 @@ namespace ZetanStudio.BehaviourTree
                         NodeEditor parent = edge.output.node as NodeEditor;
                         NodeEditor child = edge.input.node as NodeEditor;
                         if (!removedNodes.Contains(parent) && !removedNodes.Contains(child))//不是是因删除结点引起的断连才记录
-                            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "断开子结点");
-                            else runtimeUndo.RecordTreeChange(tree, "断开子结点");
+                            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, Tr("断开子结点"));
+                            else runtimeUndo.RecordTreeChange(tree, Tr("断开子结点"));
                         parent.node.RemoveChild(child.node);
                         UpdateValid(parent);
                         UpdateValid(child);
@@ -214,8 +250,8 @@ namespace ZetanStudio.BehaviourTree
             {
                 graphViewChange.edgesToCreate.ForEach(edge =>
                 {
-                    if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "连接子结点");
-                    else runtimeUndo.RecordTreeChange(tree, "连接子结点");
+                    if (isLocal) Undo.RegisterCompleteObjectUndo(tree, Tr("连接子结点"));
+                    else runtimeUndo.RecordTreeChange(tree, Tr("连接子结点"));
                     NodeEditor parent = edge.output.node as NodeEditor;
                     NodeEditor child = edge.input.node as NodeEditor;
                     parent.node.AddChild(child.node);
@@ -223,6 +259,7 @@ namespace ZetanStudio.BehaviourTree
                     UpdateValid(child);
                 });
             }
+
             if (graphViewChange.elementsToRemove != null || graphViewChange.edgesToCreate != null)
                 EditorUtility.SetDirty(tree);
 
@@ -239,23 +276,21 @@ namespace ZetanStudio.BehaviourTree
 
         private void UpdateValid(NodeEditor editor)
         {
-            if (editor.node is ParentNode)
-                editor.UpdateValid(tree);
+            if (editor.node is ParentNode) editor.UpdateValid(tree);
         }
 
         private void OnNodePositionChanged(NodeEditor editor, Vector2 oldPos)
         {
-            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "移动结点");
-            else if (selection.Count > 1) runtimeUndo.RecordMultNodePosition(editor.node, oldPos, "移动多个结点");
-            else runtimeUndo.RecordNodePosition(editor.node, oldPos, "移动结点");
+            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, Tr("移动结点"));
+            else if (selection.Count > 1) runtimeUndo.RecordMultNodePosition(editor.node, oldPos, Tr("移动结点"));
+            else runtimeUndo.RecordNodePosition(editor.node, oldPos, Tr("移动结点"));
         }
         public void OnUpdate()
         {
             nodes.ForEach(n =>
             {
                 NodeEditor editor = n as NodeEditor;
-                if (Application.isPlaying)
-                    editor.UpdateStates();
+                if (Application.isPlaying) editor.UpdateStates();
                 editor.UpdateDesc();
                 editor.UpdateInvalid(tree);
                 editor.UpdateAbortType();
@@ -283,8 +318,7 @@ namespace ZetanStudio.BehaviourTree
             Vocate();
             if (!tree) return;
             isLocal = ZetanUtility.Editor.IsLocalAssets(tree);
-            if (string.IsNullOrEmpty(tree.Entry.guid))
-                tree.Entry.guid = GUID.Generate().ToString();
+            if (string.IsNullOrEmpty(tree.Entry.guid)) tree.Entry.guid = GUID.Generate().ToString();
             tree.Nodes.ForEach(n => CreateNode(n));
             tree.Nodes.ForEach(n => CreateEdges(n));
             tree.Nodes.ForEach(n => { if (n is Composite composite) composite.SortByPosition(); });
@@ -309,14 +343,14 @@ namespace ZetanStudio.BehaviourTree
                 if (!tree.IsRuntime) newNode.Instantiate();
                 tree.InitNode(newNode);
             }
-            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "新增结点");
-            else runtimeUndo.RecordTreeChange(tree, "新增结点");
+            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, Tr("新增结点"));
+            else runtimeUndo.RecordTreeChange(tree, Tr("新增结点"));
             tree.AddNode(newNode);
             return CreateNode(newNode);
         }
         private NodeEditor CreateNode(Node node)
         {
-            NodeEditor editor = new NodeEditor(node, nodeSelectedCallback, nodeUnselectedCallback, OnNodePositionChanged);
+            NodeEditor editor = new NodeEditor(node, nodeSelectedCallback, nodeUnselectedCallback, OnNodePositionChanged, nodeUIFile, settings);
             UpdateValid(editor);
             AddElement(editor);
             return editor;
@@ -329,8 +363,8 @@ namespace ZetanStudio.BehaviourTree
         private void CopyNode(NodeEditor editor)
         {
             Node node = editor.node.Copy();
-            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, "复制结点");
-            else runtimeUndo.RecordTreeChange(tree, "复制结点");
+            if (isLocal) Undo.RegisterCompleteObjectUndo(tree, Tr("复制结点"));
+            else runtimeUndo.RecordTreeChange(tree, Tr("复制结点"));
             BehaviourTree.Traverse(node, n =>
             {
                 CreateNewNode(n, $"({tree.Nodes.Count}) {n.GetType().Name}{(tree.IsRuntime ? "(R)" : string.Empty)}", n._position + new Vector2(30, 30));
@@ -364,7 +398,7 @@ namespace ZetanStudio.BehaviourTree
         private void CreateNewScript(ScriptTemplate template)
         {
             string path = $"{settings.newNodeScriptFolder}/{template.folder}";
-            if (path.EndsWith("/")) path = path.Substring(0, path.Length - 1);
+            if (path.EndsWith("/")) path = path[..^1];
 
             UnityEngine.Object script = AssetDatabase.LoadAssetAtPath(path, typeof(UnityEngine.Object));
             Selection.activeObject = script;
@@ -372,6 +406,11 @@ namespace ZetanStudio.BehaviourTree
 
             string templatePath = AssetDatabase.GetAssetPath(template.templateFile);
             ProjectWindowUtil.CreateScriptAssetFromTemplateFile(templatePath, template.fileName);
+        }
+
+        public string Tr(string text)
+        {
+            return Language.Tr(settings.language, text);
         }
 
         private class RuntimeUndo

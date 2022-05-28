@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Module;
 
 [CreateAssetMenu(fileName = "shop info", menuName = "Zetan Studio/商店信息")]
 public class ShopInformation : ScriptableObject
@@ -9,26 +11,26 @@ public class ShopInformation : ScriptableObject
     public string ShopName => shopName;
 
     [SerializeField, NonReorderable]
-    private List<MerchandiseInfo> commodities = new List<MerchandiseInfo>();
+    private List<GoodsInfo> commodities = new List<GoodsInfo>();
     /// <summary>
     /// 在出售的东西
     /// </summary>
-    public List<MerchandiseInfo> Commodities => commodities;
+    public List<GoodsInfo> Commodities => commodities;
 
     [SerializeField, NonReorderable]
-    private List<MerchandiseInfo> acquisitions = new List<MerchandiseInfo>();
+    private List<GoodsInfo> acquisitions = new List<GoodsInfo>();
     /// <summary>
     /// 在收购的东西
     /// </summary>
-    public List<MerchandiseInfo> Acquisitions => acquisitions;
+    public List<GoodsInfo> Acquisitions => acquisitions;
 }
 
 [System.Serializable]
-public class MerchandiseInfo
+public class GoodsInfo
 {
-    [SerializeField]
-    private ItemBase item;
-    public ItemBase Item => item;
+    [SerializeField, ItemFilter(typeof(SellableModule))]
+    private Item item;
+    public Item Item => item;
 
     [SerializeField]
     private int maxAmount = 1;
@@ -40,7 +42,7 @@ public class MerchandiseInfo
 
     [SerializeField]
     private bool emptyAble;
-    public bool EmptyAble => emptyAble;//Able to sold out Or purchase Enough?
+    public bool EmptyAble => emptyAble;//是否会购满或者售罄
 
     [SerializeField]
     private float refreshTime = 300.0f;//小于0表示永久限购或限售
@@ -54,13 +56,11 @@ public class MerchandiseInfo
     private int maxRefreshAmount = 1;//每次刷新最大补充量
     public int MaxRefreshAmount => maxRefreshAmount;
 
-    public int SellPrice => (int)priceMultiple * item.BuyPrice;
-
-    public int PurchasePrice => (int)priceMultiple * item.SellPrice;
+    public int Price => (int)priceMultiple * item.GetModule<SellableModule>().Price;
 
     public bool IsValid => Item;
 
-    public static implicit operator bool(MerchandiseInfo self)
+    public static implicit operator bool(GoodsInfo self)
     {
         return self != null;
     }

@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
+using ZetanStudio.Item;
 
 public static class MiscFuntion
 {
-    public static string HandlingKeyWords(string input, bool color = false, params Array[] configs)
+    public static string HandlingKeyWords(string input, bool color = false, params IEnumerable<ScriptableObject>[] configs)
     {
         StringBuilder output = new StringBuilder();
         StringBuilder keyWordsGetter = new StringBuilder();
@@ -34,18 +36,18 @@ public static class MiscFuntion
             if (keyWords.StartsWith("[NPC]"))
             {
                 keyWords = keyWords.Replace("[NPC]", string.Empty);
-                TalkerInformation[] talkers = null;
+                IEnumerable<TalkerInformation> talkers = null;
                 if (configs != null)
                 {
                     foreach (var array in configs)
                     {
-                        if (array.GetType().IsArray)
+                        if (typeof(IEnumerable<TalkerInformation>).IsAssignableFrom(array.GetType()))
                             if (array.GetType().GetElementType() == typeof(TalkerInformation))
-                                talkers = array as TalkerInformation[];
+                                talkers = array as IEnumerable<TalkerInformation>;
                     }
                 }
-                if (talkers == null) talkers = Resources.LoadAll<TalkerInformation>("Configuration");
-                var talker = Array.Find(talkers, x => x.ID == keyWords);
+                if (talkers == null) talkers = Application.isPlaying ? GameManager.TalkerInfos.Values : Resources.LoadAll<TalkerInformation>("Configuration");
+                var talker = talkers.FirstOrDefault(x => x.ID == keyWords);
                 if (talker) keyWords = talker.Name;
                 if (MiscSettings.Instance && MiscSettings.Instance.KeywordColors.Count > 0)
                     return color ? ZetanUtility.ColorText(keyWords, MiscSettings.Instance.KeywordColors[0]) : keyWords;
@@ -54,18 +56,17 @@ public static class MiscFuntion
             else if (keyWords.StartsWith("[ITEM]"))
             {
                 keyWords = keyWords.Replace("[ITEM]", string.Empty);
-                ItemBase[] items = null;
+                IEnumerable<Item> items = null;
                 if (configs != null)
                 {
                     foreach (var array in configs)
                     {
-                        if (array.GetType().IsArray)
-                            if (array.GetType().GetElementType() == typeof(ItemBase))
-                                items = array as ItemBase[];
+                        if (typeof(IEnumerable<Item>).IsAssignableFrom(array.GetType()))
+                            items = array as IEnumerable<Item>;
                     }
                 }
-                if (items == null) items = Resources.LoadAll<ItemBase>("Configuration");
-                var item = Array.Find(items, x => x.ID == keyWords);
+                if (items == null) items = Item.GetItems();
+                var item = items.FirstOrDefault(x => x.ID == keyWords);
                 if (item) keyWords = item.Name;
                 if (MiscSettings.Instance && MiscSettings.Instance.KeywordColors.Count > 1)
                     return color ? ZetanUtility.ColorText(keyWords, MiscSettings.Instance.KeywordColors[1]) : keyWords;
@@ -74,18 +75,17 @@ public static class MiscFuntion
             else if (keyWords.StartsWith("[ENMY]"))
             {
                 keyWords = keyWords.Replace("[ENMY]", string.Empty);
-                EnemyInformation[] enemies = null;
+                IEnumerable<EnemyInformation> enemies = null;
                 if (configs != null)
                 {
                     foreach (var array in configs)
                     {
-                        if (array.GetType().IsArray)
-                            if (array.GetType().GetElementType() == typeof(EnemyInformation))
-                                enemies = array as EnemyInformation[];
+                        if (typeof(IEnumerable<EnemyInformation>).IsAssignableFrom(array.GetType()))
+                            enemies = array as IEnumerable<EnemyInformation>;
                     }
                 }
-                if (enemies == null) enemies = Resources.LoadAll<EnemyInformation>("Configuration");
-                var enemy = Array.Find(enemies, x => x.ID == keyWords);
+                if (enemies == null) enemies = Application.isPlaying ? GameManager.EnemyInfos.Values : Resources.LoadAll<EnemyInformation>("Configuration");
+                var enemy = enemies.FirstOrDefault(x => x.ID == keyWords);
                 if (enemy) keyWords = enemy.Name;
                 if (MiscSettings.Instance && MiscSettings.Instance.KeywordColors.Count > 2)
                     return color ? ZetanUtility.ColorText(keyWords, MiscSettings.Instance.KeywordColors[2]) : keyWords;
@@ -258,5 +258,25 @@ public static class MiscFuntion
                 return state != TriggerState.NotExist && (state == TriggerState.Off);
             default: return true;
         }
+    }
+
+    public static string SecondsToSortTime(float seconds, string dayStr = "天", string hourStr = "时", string minuStr = "分", string secStr = "秒")
+    {
+        if (!string.IsNullOrEmpty(dayStr))
+        {
+            const float day = 86400f;
+            if (seconds >= day) return Mathf.CeilToInt(seconds / day) + dayStr;
+        }
+        if (!string.IsNullOrEmpty(hourStr))
+        {
+            const float hour = 3600f;
+            if (seconds >= hour) return Mathf.CeilToInt(seconds / hour) + hourStr;
+        }
+        if (!string.IsNullOrEmpty(minuStr))
+        {
+            const float minute = 60f;
+            if (seconds >= minute) return Mathf.CeilToInt(seconds / minute) + minuStr;
+        }
+        return Mathf.CeilToInt(seconds) + secStr;
     }
 }

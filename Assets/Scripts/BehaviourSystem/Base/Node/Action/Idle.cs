@@ -1,6 +1,6 @@
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
-    [NodeDescription("待机结点：无有效动作，等待被打断")]
+    [Description("待机结点：无有效动作，等待被打断")]
     public class Idle : Action
     {
         public override bool IsValid => true;

@@ -68,5 +68,10 @@ namespace ZetanStudio.Item.Module
         {
             return module is not CommonModule && (module.GetType().IsAssignableFrom(type) || type.IsAssignableFrom(module.GetType()));
         }
+
+        public static implicit operator bool(ItemModule self)
+        {
+            return self != null;
+        }
     }
 }

@@ -31,7 +31,8 @@ MonoBehaviour:
         intValue: 1
         compareType: 0
         relatedQuest: {fileID: 0}
-        relatedItem: {fileID: 11400000, guid: 9bf6e2de6c467ad4db090168944f60bc, type: 2}
+        relatedItem: {fileID: 5948240964464067290, guid: 11d254d59d262564aa42d1df5009d201,
+          type: 2}
         relatedCharInfo: {fileID: 0}
         triggerName: 
       relational: 
@@ -52,6 +53,6 @@ MonoBehaviour:
     upperBound: 30
     dialogue: {fileID: 11400000, guid: 9d3cef39d7a19e944b6a7b2556195be9, type: 2}
   affectiveItems:
-  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+  - item: {fileID: -8659359920512167614, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     intimacyValue: 25
   canMarry: 0

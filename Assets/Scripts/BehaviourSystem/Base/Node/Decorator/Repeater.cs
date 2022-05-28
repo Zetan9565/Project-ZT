@@ -1,14 +1,14 @@
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
     /// <summary>
     /// 重复器：以一定或不限次数反复评估子结点
     /// </summary>
-    [NodeDescription("重复器：以一定或不限次数反复评估子结点")]
+    [Description("重复器：以一定或不限次数反复评估子结点")]
     public class Repeater : Decorator
     {
-        [DisplayName("失败时停止")]
+        [Label("失败时停止")]
         public bool stopOnFailure;
-        [DisplayName("重复次数")]
+        [Label("重复次数")]
         public SharedInt count = 0;
 
         private int times;

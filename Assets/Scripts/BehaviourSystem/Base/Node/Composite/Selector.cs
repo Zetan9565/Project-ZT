@@ -1,9 +1,9 @@
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
     /// <summary>
     /// 选择器：当当前子结点评估成功时，向上反馈评估成功；若所有子结点都失败时，向上反馈评估失败；若当前子结点还在评估，则向上反馈评估正进行
     /// </summary>
-    [NodeDescription("选择器：若当前子结点评估成功，向上反馈评估成功；若所有子结点都失败，向上反馈评估失败；若当前子结点还在评估，则向上反馈评估正进行")]
+    [Description("选择器：若当前子结点评估成功，向上反馈评估成功；若所有子结点都失败，向上反馈评估失败；若当前子结点还在评估，则向上反馈评估正进行")]
     public class Selector : Composite
     {
         protected override NodeStates OnUpdate()

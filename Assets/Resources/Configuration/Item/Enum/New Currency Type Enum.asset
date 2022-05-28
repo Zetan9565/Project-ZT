@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f46166d8ac0d6643ba74138660277a9, type: 3}
   m_Name: New Currency Type Enum
   m_EditorClassIdentifier: 
-  enum:
+  _enum:
   - <Name>k__BackingField: "\u91D1\u5E01"
   - <Name>k__BackingField: "\u7ECF\u9A8C"

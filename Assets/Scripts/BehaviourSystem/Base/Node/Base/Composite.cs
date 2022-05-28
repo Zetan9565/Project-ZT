@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
     /// <summary>
     /// 复合结点：可以有多个子结点的父型结点
@@ -11,7 +11,7 @@ namespace ZetanStudio.BehaviourTree
         [SerializeReference]
         protected List<Node> children = new List<Node>();
 
-        [SerializeField, DisplayName("中止类型")]
+        [SerializeField, Label("中止类型")]
         protected AbortType abortType;
         public AbortType AbortType => abortType;
         public bool AbortSelf => abortType == AbortType.Self || abortType == AbortType.Both;

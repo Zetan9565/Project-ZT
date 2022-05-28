@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   remark: "\u5305\u542B\u4E00\u4E2A\u94C1\u539F\u77F3"
   materials:
-  - item: {fileID: 11400000, guid: eb68c8a7b1bbeb8408eed1d2af6b8ad6, type: 2}
+  - item: {fileID: -464574647126714662, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 1
     makingType: 0
     materialType: 2

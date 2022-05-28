@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73402b0326e54ac4e8faf201b5be2958, type: 3}
+  m_Name: quest language
+  m_EditorClassIdentifier: 
+  items:
+  - <Key>k__BackingField: "\u4EFB\u52A1"
+    <Value>k__BackingField: Quest
+  - <Key>k__BackingField: "\u8FFD\u8E2A"
+    <Value>k__BackingField: Trace
+  - <Key>k__BackingField: "\u53D6\u6D88\u8FFD\u8E2A"
+    <Value>k__BackingField: Untrace
+  - <Key>k__BackingField: "\u5DF2\u6D88\u8017\u7684\u9053\u5177\u4E0D\u4F1A\u9000\u56DE\uFF0C\u786E\u5B9A\u653E\u5F03\u6B64\u4EFB\u52A1\u5417\uFF1F"
+    <Value>k__BackingField: Costed items will not remand, are you sure to abandon
+      this quest?
+  - <Key>k__BackingField: "[\u5DF2\u5B8C\u6210]"
+    <Value>k__BackingField: '[Complete]'
+  - <Key>k__BackingField: "[\u672A\u63A5\u53D6]"
+    <Value>k__BackingField: '[Unaccepcted]'
+  - <Key>k__BackingField: "[\u5B8C\u6210]"
+    <Value>k__BackingField: '[Complete]'
+  - <Key>k__BackingField: "(\u8FBE\u6210)"
+    <Value>k__BackingField: (Complete)

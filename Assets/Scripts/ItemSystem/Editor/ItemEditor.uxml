@@ -1,13 +1,11 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Scripts/ItemSystem/Editor/ItemEditor.uss?fileID=7433441132597879392&amp;guid=150e1486d4e82164ba740b9d7862b769&amp;type=3#ItemEditor" />
     <uie:Toolbar style="flex-direction: row;">
-        <uie:ToolbarButton text="刷新" display-tooltip-when-elided="true" name="refresh-button" />
-        <uie:ToolbarButton text="新增" display-tooltip-when-elided="true" name="new-button" style="border-top-width: 1px;" />
-        <uie:ToolbarButton text="删除" display-tooltip-when-elided="true" name="delete-button" style="border-top-width: 1px;" />
+        <uie:ToolbarButton text="刷新" display-tooltip-when-elided="true" name="refresh-button" style="border-top-width: 1px; border-bottom-width: 1px;" />
+        <uie:ToolbarButton text="新增" display-tooltip-when-elided="true" name="new-button" style="border-top-width: 1px; border-left-width: 0; border-bottom-width: 1px;" />
+        <uie:ToolbarButton text="删除" display-tooltip-when-elided="true" name="delete-button" style="border-top-width: 1px; border-bottom-width: 1px; border-left-width: 0;" />
         <ui:DropdownField index="-1" name="search-selector" style="width: 60px; -unity-text-align: middle-left;" />
         <uie:ToolbarSearchField focusable="true" name="search-input" />
-        <uie:ObjectField allow-scene-objects="false" type="ItemBase, Assembly-CSharp" name="old-item" />
-        <uie:ToolbarButton text="导入并覆盖" display-tooltip-when-elided="true" name="copy-button" />
-        <uie:ToolbarButton text="旧版一键导入" display-tooltip-when-elided="true" name="copy-all-button" />
     </uie:Toolbar>
     <SplitView fixed-pane-initial-dimension="250" style="min-width: auto;">
         <ui:VisualElement name="left-container" style="min-width: 200px;">

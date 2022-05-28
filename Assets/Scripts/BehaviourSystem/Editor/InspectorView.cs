@@ -1,34 +1,32 @@
-using System.Linq;
-using System.Reflection;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using System;
+using ZetanStudio.BehaviourTree.Nodes;
+using Action = ZetanStudio.BehaviourTree.Nodes.Action;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Editor
 {
     public sealed class InspectorView : VisualElement
     {
         public new class UxmlFactory : UxmlFactory<InspectorView, UxmlTraits> { }
 
-        private BehaviourTree tree;
-        private GlobalVariables global;
         public NodeEditor nodeEditor;
         private SerializedObject serializedObject;
         private string searchKey;
+        private BehaviourTreeEditorSettings settings;
 
-        private readonly string[] varType = { "普通", "共享", "全局" };
-
-        public InspectorView() { }
+        public InspectorView()
+        {
+            settings = BehaviourTreeEditorSettings.GetOrCreate();
+        }
 
         public void InspectNode(BehaviourTree tree, NodeEditor node)
         {
             Clear();
             if (serializedObject != null) serializedObject.Dispose();
-            this.tree = tree;
-            if (!tree.IsInstance) global = ZetanUtility.Editor.LoadAsset<GlobalVariables>();
-            else global = BehaviourManager.Instance.GlobalVariables;
             nodeEditor = node;
             if (tree && nodeEditor != null && nodeEditor.node)
             {
@@ -40,27 +38,21 @@ namespace ZetanStudio.BehaviourTree
                     {
                         serializedObject.UpdateIfRequiredOrScript();
                         EditorGUI.BeginChangeCheck();
-                        EditorGUILayout.LabelField($"[结点名称]\t{nodeEditor.node.name}");
-                        EditorGUILayout.LabelField($"[优先级]\t{nodeEditor.node.priority}");
+                        string label = $"[{Tr("结点名称")}]  {nodeEditor.node.name}  [{Tr("优先级")} {nodeEditor.node.priority}]";
+                        EditorGUILayout.LabelField(new GUIContent(label, Tr("信息: ") + label));
                         var nType = nodeEditor.node.GetType();
-                        var fields = new HashSet<string>(nType.GetFields(ZetanUtility.CommonBindingFlags).Select(f => f.Name));
-                        var fieldsMap = new HashSet<string>();
                         using (SerializedProperty property = nodes.GetArrayElementAtIndex(tree.Nodes.IndexOf(nodeEditor.node)))
                         {
+                            using var copy = property;
                             using var end = property.GetEndProperty();
-                            property.Next(true);
-                            while (property.NextVisible(false) && !SerializedProperty.EqualContents(property, end))
+                            bool enter = true;
+                            while (copy.NextVisible(enter) && !SerializedProperty.EqualContents(copy, end))
                             {
-                                string field = property.name;
+                                enter = false;
+                                string field = copy.name;
                                 if (field == "name" || field == "priority" || field == "child" || field == "children" || field == "start" ||
                                 field == "isRuntime" || field == "isShared" || field == "isGlobal") continue;
-                                if (fields.Contains(field))
-                                {
-                                    if (fieldsMap.Contains(field)) break;
-                                    fieldsMap.Add(field);
-                                    var fInfo = nType.GetField(field, ZetanUtility.CommonBindingFlags);
-                                    DrawProperty(property, fInfo);
-                                }
+                                EditorGUILayout.PropertyField(copy, property.hasVisibleChildren);
                             }
                         }
                         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
@@ -74,7 +66,6 @@ namespace ZetanStudio.BehaviourTree
         {
             Clear();
             if (serializedObject != null) serializedObject.Dispose();
-            this.tree = tree;
             if (tree)
             {
                 serializedObject = new SerializedObject(tree);
@@ -84,8 +75,8 @@ namespace ZetanStudio.BehaviourTree
                     {
                         serializedObject.UpdateIfRequiredOrScript();
                         EditorGUI.BeginChangeCheck();
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("_name"), new GUIContent("行为树名称"));
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty("description"), new GUIContent("行为树描述"));
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("_name"), new GUIContent(Tr("行为树名称")));
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty("description"), new GUIContent(Tr("行为树描述")));
                         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
                     }
                 });
@@ -101,11 +92,11 @@ namespace ZetanStudio.BehaviourTree
             {
                 IMGUIContainer container = new IMGUIContainer(() =>
                 {
-                    EditorGUILayout.LabelField("当前选中");
+                    EditorGUILayout.LabelField(Tr("当前选中"));
                     EditorGUILayout.BeginVertical("Box");
                     foreach (var node in nodes)
                     {
-                        EditorGUILayout.LabelField($"[{node.node.name}]", $"({ node.node.GetType().Name})");
+                        EditorGUILayout.LabelField($"[{node.node.name}]", $"({node.node.GetType().Name})");
                     }
                     EditorGUILayout.EndVertical();
                 });
@@ -154,41 +145,24 @@ namespace ZetanStudio.BehaviourTree
             searchKey = string.Empty;
             IMGUIContainer container = new IMGUIContainer(() =>
             {
-                searchKey = EditorGUILayout.TextField(searchKey);
-                //if (GUILayout.Button("搜索", EditorStyles.toolbarSearchField))
-                //{
-                //    string groupGetter(Type type)
-                //    {
-                //        var baseType = type.BaseType;
-                //        System.Text.StringBuilder group = new System.Text.StringBuilder();
-                //        Stack<string> groups = new Stack<string>();
-                //        while (baseType != null && baseType != typeof(Node) && baseType != typeof(ParentNode))
-                //        {
-                //            groups.Push(baseType.Name);
-                //            baseType = baseType.BaseType;
-                //        }
-                //        while (groups.Count > 0)
-                //        {
-                //            group.Append(groups.Pop());
-                //            if (groups.Count > 0) group.Append('/');
-                //        }
-                //        return group.ToString();
-                //    }
-                //    var dropdown = new AdvancedDropdown<Type>("搜索结点", TypeCache.GetTypesDerivedFrom<Node>().Where(t => t != typeof(Entry) && !t.IsAbstract && !t.IsGenericType), t => Debug.Log(t), t => t.Name, groupGetter);
-                //    dropdown.Show(EditorGUILayout.GetControlRect());
-                //}
+                searchKey = EditorGUILayout.TextField(searchKey, EditorStyles.toolbarSearchField);
                 string desc = string.Empty;
                 bool empty = string.IsNullOrEmpty(searchKey);
                 bool showBox = true;
+                string getNodeDesc(Type type)
+                {
+                    return Tr(Node.GetNodeDesc(type));
+                }
+
                 foreach (var node in action)
                 {
-                    desc = GetNodeDesc(node.Key);
+                    desc = getNodeDesc(node.Key);
                     if (Contains(node.Key.Name, desc, searchKey))
                     {
                         if (showBox)
                         {
                             EditorGUILayout.BeginVertical("Box");
-                            showAction = EditorGUILayout.BeginFoldoutHeaderGroup(showAction, "行为结点");
+                            showAction = EditorGUILayout.BeginFoldoutHeaderGroup(showAction, Tr("行为结点"));
                             showBox = false;
                         }
                         if (showAction)
@@ -205,13 +179,13 @@ namespace ZetanStudio.BehaviourTree
                 showBox = true;
                 foreach (var node in conditional)
                 {
-                    desc = GetNodeDesc(node.Key);
+                    desc = getNodeDesc(node.Key);
                     if (Contains(node.Key.Name, desc, searchKey))
                     {
                         if (showBox)
                         {
                             EditorGUILayout.BeginVertical("Box");
-                            showConditional = EditorGUILayout.BeginFoldoutHeaderGroup(showConditional, "条件结点");
+                            showConditional = EditorGUILayout.BeginFoldoutHeaderGroup(showConditional, Tr("条件结点"));
                             showBox = false;
                         }
                         if (showConditional)
@@ -228,13 +202,13 @@ namespace ZetanStudio.BehaviourTree
                 showBox = true;
                 foreach (var node in composite)
                 {
-                    desc = GetNodeDesc(node.Key);
+                    desc = getNodeDesc(node.Key);
                     if (Contains(node.Key.Name, desc, searchKey))
                     {
                         if (showBox)
                         {
                             EditorGUILayout.BeginVertical("Box");
-                            showComposite = EditorGUILayout.BeginFoldoutHeaderGroup(showComposite, "复合结点");
+                            showComposite = EditorGUILayout.BeginFoldoutHeaderGroup(showComposite, Tr("复合结点"));
                             showBox = false;
                         }
                         if (showComposite)
@@ -251,13 +225,13 @@ namespace ZetanStudio.BehaviourTree
                 showBox = true;
                 foreach (var node in decorator)
                 {
-                    desc = GetNodeDesc(node.Key);
+                    desc = getNodeDesc(node.Key);
                     if (Contains(node.Key.Name, desc, searchKey))
                     {
                         if (showBox)
                         {
                             EditorGUILayout.BeginVertical("Box");
-                            showDecorator = EditorGUILayout.BeginFoldoutHeaderGroup(showDecorator, "修饰结点");
+                            showDecorator = EditorGUILayout.BeginFoldoutHeaderGroup(showDecorator, Tr("修饰结点"));
                             showBox = false;
                         }
                         if (showDecorator)
@@ -275,185 +249,13 @@ namespace ZetanStudio.BehaviourTree
                 {
                     return empty || name.ToLower().Contains(key.ToLower()) || desc.ToLower().Contains(key.ToLower());
                 }
-
-                string GetNodeDesc(Type type)
-                {
-                    if (type.IsSubclassOf(typeof(Node)))
-                    {
-                        var descAttr = type.GetCustomAttribute<NodeDescriptionAttribute>();
-                        if (descAttr != null)
-                            return descAttr.description;
-                        else return string.Empty;
-                    }
-                    else return string.Empty;
-                }
             });
             Add(container);
         }
 
-        private void DrawProperty(SerializedProperty property, FieldInfo fieldInfo)
+        private string Tr(string text)
         {
-            if (fieldInfo == null) return;
-            ShouldHide(fieldInfo, out var shouldHide, out var readOnly);
-            if (shouldHide && !readOnly) return;
-            string displayName = property.displayName;
-            DisplayNameAttribute nameAttr = fieldInfo.GetCustomAttribute<DisplayNameAttribute>();
-            if (nameAttr != null) displayName = nameAttr.name;
-            string tooltip = property.tooltip;
-            TooltipAttribute tipAttr = fieldInfo.GetCustomAttribute<TooltipAttribute>();
-            if (tipAttr != null) tooltip = tipAttr.tooltip;
-            EditorGUI.BeginDisabledGroup(readOnly);
-            var type = fieldInfo.FieldType;
-            if (type.IsSubclassOf(typeof(SharedVariable)))
-            {
-                SerializedProperty name = property.FindPropertyRelative("_name");
-                SerializedProperty value = property.FindPropertyRelative("value");
-                //使用HideInInspector标签后仍可Find出来
-                SerializedProperty isShared = property.FindPropertyRelative("isShared");
-                SerializedProperty isGlobal = property.FindPropertyRelative("isGlobal");
-                int typeIndex = isGlobal.boolValue ? 2 : (isShared.boolValue ? 1 : 0);
-                int oldTypeIndex = typeIndex;
-                Rect rect = EditorGUILayout.GetControlRect();
-                //EditorGUI.BeginDisabledGroup(nodeEditor.node.IsInstance);
-                typeIndex = EditorGUI.Popup(new Rect(rect.x + rect.width - 32, rect.y, 32, EditorGUIUtility.singleLineHeight), typeIndex, varType);
-                if (oldTypeIndex != typeIndex)
-                    switch (typeIndex)
-                    {
-                        case 1:
-                            isShared.boolValue = true;
-                            isGlobal.boolValue = false;
-                            break;
-                        case 2:
-                            isShared.boolValue = false;
-                            isGlobal.boolValue = true;
-                            break;
-                        default:
-                            isShared.boolValue = false;
-                            isGlobal.boolValue = false;
-                            break;
-                    }
-                //EditorGUI.EndDisabledGroup();
-                switch (typeIndex)
-                {
-                    case 1:
-                        Rect valueRect = new Rect(rect.x, rect.y, rect.width - 34, EditorGUIUtility.singleLineHeight);
-                        DrawSharedField(valueRect, tree);
-                        break;
-                    case 2:
-                        valueRect = new Rect(rect.x, rect.y, rect.width - 34, EditorGUIUtility.singleLineHeight);
-                        DrawSharedField(valueRect, global);
-                        break;
-                    default:
-                        valueRect = new Rect(rect.x, rect.y, rect.width - 34, EditorGUI.GetPropertyHeight(value, true));
-                        if (type == typeof(SharedString) && fieldInfo.GetCustomAttribute<Tag_BTAttribute>() != null)
-                            value.stringValue = EditorGUI.TagField(valueRect, new GUIContent(displayName, tooltip),
-                                string.IsNullOrEmpty(value.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : value.stringValue);
-                        else EditorGUI.PropertyField(valueRect, value, new GUIContent(displayName, tooltip), true);
-                        EditorGUILayout.Space(EditorGUI.GetPropertyHeight(value, true) - EditorGUIUtility.singleLineHeight);
-                        break;
-                }
-
-                void DrawSharedField(Rect valueRect, ISharedVariableHandler variableHandler)
-                {
-                    var variables = variableHandler.GetVariables(type);
-                    string[] varNames = variables.Select(x => x.name).Prepend("未选择").ToArray();
-                    GUIContent[] contents = new GUIContent[varNames.Length];
-                    for (int i = 0; i < varNames.Length; i++)
-                    {
-                        contents[i] = new GUIContent(varNames[i]);
-                    }
-                    if (ZetanUtility.Editor.TryGetValue(property, out var value))
-                    {
-                        var link = type.GetField("linkedVariable", ZetanUtility.CommonBindingFlags).GetValue(value);
-                        if (link != null) name.stringValue = (link as SharedVariable).name;
-                    }
-                    int nameIndex = Array.IndexOf(varNames, name.stringValue);
-                    if (nameIndex < 0) nameIndex = 0;
-                    nameIndex = EditorGUI.Popup(valueRect, new GUIContent(displayName, tooltip), nameIndex, contents);
-                    string nameStr = string.Empty;
-                    if (nameIndex > 0 && nameIndex <= variables.Count) nameStr = varNames[nameIndex];
-                    //if (!nodeEditor.node.IsInstance) name.stringValue = nameStr;
-                    //else if (nameStr != name.stringValue)
-                    //{
-                    //    var val = variableHandler.GetVariable(varNames[nameIndex]);
-                    //    if (val == null)
-                    //    {
-                    //        val = Activator.CreateInstance(type) as SharedVariable;
-                    //        val.isShared = variableHandler is BehaviourTree;
-                    //        val.isGlobal = variableHandler is GlobalVariables;
-                    //        type.GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(val, nameStr);
-                    //    }
-                    //    ZetanUtility.Editor.TrySetValue(property, val);
-                    //}
-                    if (!nodeEditor.node.IsInstance) name.stringValue = nameStr;
-                    if (!string.IsNullOrEmpty(nameStr))
-                    {
-                        var val = variableHandler.GetVariable(nameStr);
-                        if (val != null && value != null) (value as SharedVariable).Link(val);
-                    }
-                    else (value as SharedVariable).Unlink();
-                }
-            }
-            else if (type == typeof(string))
-            {
-                if (fieldInfo.GetCustomAttribute<Tag_BTAttribute>() != null)
-                    property.stringValue = EditorGUILayout.TagField(new GUIContent(displayName, tooltip),
-                        string.IsNullOrEmpty(property.stringValue) ? UnityEditorInternal.InternalEditorUtility.tags[0] : property.stringValue);
-                else
-                {
-                    NameOfVariableAttribute varNameAttr = fieldInfo.GetCustomAttribute<NameOfVariableAttribute>();
-                    if (varNameAttr != null)
-                    {
-                        var variables = tree.GetVariables(varNameAttr.type);
-                        string[] varNames = variables.Select(x => x.name).Prepend("未选择").ToArray();
-                        GUIContent[] contents = new GUIContent[varNames.Length];
-                        for (int i = 0; i < varNames.Length; i++)
-                        {
-                            contents[i] = new GUIContent(varNames[i]);
-                        }
-                        int nameIndex = Array.IndexOf(varNames, property.stringValue);
-                        if (nameIndex < 0) nameIndex = 0;
-                        nameIndex = EditorGUILayout.Popup(new GUIContent(displayName, tooltip), nameIndex, contents);
-                        string nameStr = string.Empty;
-                        if (nameIndex > 0 && nameIndex <= variables.Count) nameStr = varNames[nameIndex];
-                        property.stringValue = nameStr;
-                    }
-                    else EditorGUILayout.PropertyField(property, true);
-                }
-            }
-            else EditorGUILayout.PropertyField(property, true);
-            EditorGUI.EndDisabledGroup();
-        }
-
-        private void ShouldHide(FieldInfo fieldInfo, out bool should, out bool readOnly)
-        {
-            HideIf_BTAttribute hideAttr = fieldInfo.GetCustomAttribute<HideIf_BTAttribute>();
-            ReadOnlyAttribute roAttr = fieldInfo.GetCustomAttribute<ReadOnlyAttribute>();
-            should = false;
-            readOnly = false;
-            if (hideAttr != null)
-            {
-                readOnly = hideAttr.readOnly;
-                if (ZetanUtility.TryGetMemberValue(hideAttr.path, nodeEditor.node, out var fv, out var mi) && mi != null)
-                    if (typeof(SharedVariable).IsAssignableFrom(fv.GetType()))
-                    {
-                        if (fv is SharedVariable sv)
-                        {
-                            if ((sv.isGlobal || sv.isShared) && !string.IsNullOrEmpty(sv.name))
-                            {
-                                if (sv.isGlobal) sv = global.GetVariable(sv.name);
-                                else if (sv.isShared) sv = tree.GetVariable(sv.name);
-                                if (sv != null && Equals(sv.GetValue(), hideAttr.value)) should = true;
-                            }
-                            else if (!sv.isGlobal && !sv.isShared && Equals(sv.GetValue(), hideAttr.value)) should = true;
-                        }
-                    }
-                    else if (Equals(fv, hideAttr.value)) should = true;
-            }
-            else if (roAttr != null)
-            {
-                readOnly = !roAttr.onlyRuntime || roAttr.onlyRuntime && Application.isPlaying;
-            }
+            return Language.Tr(settings.language, text);
         }
     }
 }

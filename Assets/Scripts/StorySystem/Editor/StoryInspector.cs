@@ -335,6 +335,7 @@ public class StoryInspector : Editor
                         }
                         if (EditorGUI.EndChangeCheck())
                             serializedObject.ApplyModifiedProperties();
+                        GUIUtility.ExitGUI();
                     };
 
                     actionsList.drawHeaderCallback = (rect2) =>
@@ -395,6 +396,7 @@ public class StoryInspector : Editor
             }
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
+            GUIUtility.ExitGUI();
         };
 
         plotList.drawHeaderCallback = (rect) =>

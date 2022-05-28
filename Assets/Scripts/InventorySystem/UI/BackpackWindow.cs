@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.Item.Module;
 
 [DisallowMultipleComponent]
 public class BackpackWindow : InventoryWindow
 {
     [SerializeField]
-    private MakingTool handworkButton;
+    private CraftTool handworkButton;
 
     public override IInventoryHandler Handler => BackpackManager.Instance;
 
@@ -43,7 +44,7 @@ public class BackpackWindow : InventoryWindow
         }
         else if (WindowsManager.IsWindowOpen<ShopWindow>(out var shop))
         {
-            if (slot.Data.Model.SellAble)
+            if (slot.Data.Model.GetModule<SellableModule>() is not null)
                 buttons.Add(new ButtonWithTextData("出售", delegate
                 {
                     shop.PurchaseItem(slot.Item, Handler.GetAmount(slot.Item));
@@ -51,17 +52,15 @@ public class BackpackWindow : InventoryWindow
         }
         else
         {
-            if (slot.Item.Model_old.Usable)
+            if (slot.Item.Model.GetModule<UsableModule>() is UsableModule usable)
             {
-                string btn = "使用";
-                if (slot.Item.Model_old.IsEquipment)
-                    btn = "装备";
+                string btn = usable.UseActionName;
                 buttons.Add(new ButtonWithTextData(btn, delegate
                 {
-                    BackpackManager.Instance.UseItem(slot.Item);
+                    usable.Usage.Handle(slot.Item);
                 }));
             }
-            if (slot.Item.Model_old.DiscardAble)
+            if (slot.Item.Model.Discardable)
                 buttons.Add(new ButtonWithTextData("丢弃", delegate
                 {
                     InventoryUtility.DiscardItem(Handler, slot.Data.item, slot.transform.position);
@@ -97,9 +96,9 @@ public class BackpackWindow : InventoryWindow
         }
         else
         {
-            if (slot.Item.Model_old.Usable)
+            if (slot.Item.Model.GetModule<UsableModule>() is UsableModule usable)
             {
-                BackpackManager.Instance.UseItem(slot.Item);
+                usable.Usage.Handle(slot.Item);
                 slot.Refresh();
             }
         }
@@ -111,7 +110,7 @@ public class BackpackWindow : InventoryWindow
         if (!handworkButton.GetComponent<Button>()) handworkButton.gameObject.AddComponent<Button>();
         handworkButton.GetComponent<Button>().onClick.AddListener(delegate
         {
-            WindowsManager.OpenWindowBy<MakingWindow>(MakingToolInformation.Handwork, Handler);
+            WindowsManager.OpenWindowBy<CraftWindow>(ZetanStudio.Item.Craft.CraftToolInformation.Handwork, Handler);
         });
     }
 }

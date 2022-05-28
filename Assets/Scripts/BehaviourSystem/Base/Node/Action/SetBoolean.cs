@@ -1,19 +1,31 @@
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
-    [NodeDescription("布尔变量赋值结点：设置行为树布尔型共享变量的值")]
+    [Description("布尔变量赋值结点：设置行为树布尔型共享变量的值")]
     public class SetBoolean : Action
     {
-        [DisplayName("变量名称"), NameOfVariable(typeof(SharedBool))]
-        public string varName;
-        [DisplayName("变量值")]
+
+        [Label("全局变量")]
+        public bool global;
+        [Label("变量名称"), HideIf("global", true), NameOfVariable(typeof(SharedBool))]
+        public SharedString varName;
+        [Label("全局变量名称"), HideIf("global", false), NameOfVariable(typeof(SharedBool), true)]
+        public SharedString gvarName;
+        [Label("变量值")]
         public SharedBool value;
 
-        public override bool IsValid => !string.IsNullOrEmpty(varName) && value != null && value.IsValid;
+        public override bool IsValid => (!global && !string.IsNullOrEmpty(varName) || global && !string.IsNullOrEmpty(gvarName)) && (value?.IsValid ?? false);
 
         protected override NodeStates OnUpdate()
         {
-            if (Tree.SetVariable<bool>(varName, value)) return NodeStates.Success;
-            else return NodeStates.Failure;
+            if (global)
+            {
+                GlobalVariables global;
+                if (!Tree.IsInstance) global = ZetanUtility.Editor.LoadAsset<GlobalVariables>();
+                else global = BehaviourManager.Instance.GlobalVariables;
+                global.SetVariable<bool>(gvarName, value);
+            }
+            else if (Tree.SetVariable<bool>(varName, value)) return NodeStates.Success;
+            return NodeStates.Failure;
         }
     }
 }

@@ -24,8 +24,7 @@ public class TimerManager : SingletonMonoBehaviour<TimerManager>
         }
     }
 
-
-    private readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
+    private static readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
     private IEnumerator UpdateRealtime()
     {
         while (true)
@@ -63,7 +62,7 @@ public class TimerManager : SingletonMonoBehaviour<TimerManager>
     /// <param name="time">时间</param>
     /// <param name="ignoreTimeScale">忽略时间缩放</param>
     /// <returns>创建的计时器</returns>
-    public Timer Create(Action<int> callback, int times, float time, bool ignoreTimeScale = false)
+    public Timer Create(Action<int> callback, float time, int times, bool ignoreTimeScale = false)
     {
         if (time < 0 || times == 0) return null;
         Timer timer = new Timer(callback, times, time);
@@ -72,14 +71,29 @@ public class TimerManager : SingletonMonoBehaviour<TimerManager>
     }
 
     /// <summary>
+    /// 创建读数计时器
+    /// </summary>
+    /// <param name="callback">传入计时读数的回调</param>
+    /// <param name="time">时间</param>
+    /// <param name="ignoreTimeScale">忽略时间缩放</param>
+    /// <returns>创建的计时器</returns>
+    public Timer Create(Action<float> callback, float time, bool ignoreTimeScale = false)
+    {
+        if (time < 0) return null;
+        Timer timer = new Timer(callback, time);
+        Insert(timer, ignoreTimeScale);
+        return timer;
+    }
+
+    /// <summary>
     /// 创建通用计时器
     /// </summary>
-    /// <param name="callback">传入计算器的回调</param>
+    /// <param name="callback">传入计时器的回调</param>
     /// <param name="times">执行次数，小于0时循环执行</param>
     /// <param name="time">时间</param>
     /// <param name="ignoreTimeScale">忽略时间缩放</param>
     /// <returns>创建的计算器</returns>
-    public Timer Create(Action<Timer> callback, int times, float time, bool ignoreTimeScale = false)
+    public Timer Create(Action<Timer> callback, float time, int times, bool ignoreTimeScale = false)
     {
         if (time < 0 || times == 0) return null;
         Timer timer = new Timer(callback, times, time);
@@ -92,17 +106,17 @@ public class TimerManager : SingletonMonoBehaviour<TimerManager>
         if (ignoreTimeScale) realTimers.Add(timer);
         else timers.Add(timer);
     }
-
 }
 public class Timer
 {
     public float TargetTime { get; }
     public int TargetInvokeTimes { get; }
-    public float CurrentTime { get; private set; }
+    public float Time { get; private set; }
     public int InvokeTimes { get; private set; }
     public bool IsStop { get; private set; }
 
     private readonly Action callback;
+    private readonly Action<float> callback_time;
     private readonly Action<Timer> callback_transfer;
     private readonly bool loop;
     private readonly Action<int> callback_loop;
@@ -144,29 +158,40 @@ public class Timer
         TargetInvokeTimes = times;
         loop = times != 0;
     }
+    /// <summary>
+    /// 可访问计时读数的计时器
+    /// </summary>
+    /// <param name="callback">回调动作</param>
+    /// <param name="times">回调次数</param>
+    /// <param name="time">回调间隔</param>
+    public Timer(Action<float> callback, float time)
+    {
+        callback_time = callback;
+        TargetTime = time;
+    }
 
     public void Update(float time)
     {
         if (!IsStop)
         {
-            CurrentTime += time;
-            if (CurrentTime >= TargetTime)
+            Time += time;
+            if (Time >= TargetTime)
             {
                 if (loop)
                 {
                     InvokeTimes++;
                     callback_loop?.Invoke(InvokeTimes);
-                    callback_transfer?.Invoke(this);
-                    CurrentTime -= TargetTime;
                     if (TargetInvokeTimes > 0 && InvokeTimes >= TargetInvokeTimes) Stop();
+                    else Time -= TargetTime;
                 }
                 else
                 {
-                    callback?.Invoke();
-                    callback_transfer?.Invoke(this);
                     Stop();
+                    callback?.Invoke();
                 }
             }
+            callback_time?.Invoke(Time);
+            callback_transfer?.Invoke(this);
         }
     }
 

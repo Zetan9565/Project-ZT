@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 public class CheckPointManager : SingletonMonoBehaviour<CheckPointManager>
 {

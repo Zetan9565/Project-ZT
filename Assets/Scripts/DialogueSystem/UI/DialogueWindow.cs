@@ -159,7 +159,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
             {
                 foreach (var quest in cmpltQuest)
                 {
-                    buttonDatas.Add(new ButtonWithTextData($"{quest.Model.Title}(已完成)", delegate
+                    buttonDatas.Add(new ButtonWithTextData($"{quest.Title}(已完成)", delegate
                     {
                         currentQuest = quest;
                         ShowButtons(false, false, false, false);
@@ -238,7 +238,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         buttonDatas.Clear();
         foreach (var quest in cmpltQuests)
         {
-            buttonDatas.Add(new ButtonWithTextData(quest.Model.Title + "(完成)", delegate
+            buttonDatas.Add(new ButtonWithTextData(quest.Title + "(完成)", delegate
             {
                 currentQuest = quest;
                 CurrentType = DialogueType.Quest;
@@ -248,7 +248,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         }
         foreach (var quest in norQuests)
         {
-            buttonDatas.Add(new ButtonWithTextData(quest.Model.Title + (quest.InProgress ? "(进行中)" : string.Empty), delegate
+            buttonDatas.Add(new ButtonWithTextData(quest.Title + (quest.InProgress ? "(进行中)" : string.Empty), delegate
             {
                 currentQuest = quest;
                 CurrentType = DialogueType.Quest;
@@ -338,12 +338,12 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     {
         QuestData qParent = so.parent;
         var amount = BackpackManager.Instance.GetAmount(so.Model.ItemToSubmit);
-        if (qParent.Model.CmpltObjctvInOrder)
+        if (qParent.Model.InOrder)
             foreach (var o in qParent.Objectives)
                 if (o is CollectObjectiveData co && co.Model.LoseItemAtSbmt && o.Model.InOrder && o.IsComplete)
                     if (amount - so.Model.Amount < o.Model.Amount)
                     {
-                        MessageManager.Instance.New($"该物品为目标[{o.Model.DisplayName}]所需");
+                        MessageManager.Instance.New($"该物品为目标[{o.DisplayName}]所需");
                         return false;
                     }
         return BackpackManager.Instance.CanLose(so.Model.ItemToSubmit, so.Model.Amount);
@@ -355,7 +355,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         {
             if (to.AllPrevComplete && !to.AnyNextOngoing)
             {
-                buttonDatas.Add(new ButtonWithTextData(to.parent.Model.Title, delegate
+                buttonDatas.Add(new ButtonWithTextData(to.parent.Title, delegate
                 {
                     currentTalkObj = to;
                     CurrentType = DialogueType.Objective;
@@ -368,7 +368,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         {
             if (so.AllPrevComplete && !so.AnyNextOngoing)
             {
-                buttonDatas.Add(new ButtonWithTextData(so.Model.DisplayName, delegate
+                buttonDatas.Add(new ButtonWithTextData(so.DisplayName, delegate
                 {
                     if (CheckSumbitAble(so))
                     {
@@ -689,9 +689,9 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         if (quest == null) return;
         currentQuest = quest;
         descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[委托人: {1}]\n{2}",
-            currentQuest.Model.Title,
+            currentQuest.Title,
             currentQuest.originalQuestHolder.TalkerName,
-            currentQuest.Model.Description).ToString();
+            currentQuest.Description).ToString();
         rewardList.Refresh(ItemSlotData.Convert(currentQuest.Model.RewardItems, 10));
         descriptionWindow.alpha = 1;
         descriptionWindow.blocksRaycasts = true;
@@ -735,7 +735,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         if (items != null && items.Count() > 0)
         {
             var isd = items.ElementAt(0);
-            Dialogue dialogue = currentTalker.OnGetGift(isd.source.Model_old);
+            Dialogue dialogue = currentTalker.OnGetGift(isd.source.Model);
             if (dialogue)
             {
                 BackpackManager.Instance.LoseItem(isd.source, isd.amount);

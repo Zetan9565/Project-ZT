@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEditorInternal;
 using UnityEngine;
+using ZetanStudio.Extension.Editor;
 
 [CustomEditor(typeof(Quest))]
 public class QuestInspector : Editor
@@ -25,11 +26,11 @@ public class QuestInspector : Editor
     SerializedProperty completeDialogue;
     SerializedProperty rewardItems;
     SerializedProperty _NPCToSubmit;
-    SerializedProperty cmpltObjctvInOrder;
+    SerializedProperty inOrder;
     SerializedProperty objectives;
 
     ConditionGroupDrawer acceptConditionDrawer;
-    ItemAmountListDrawer rewardDrawer;
+    ItemInfoListDrawer rewardDrawer;
     ReorderableList objectiveList;
 
     float lineHeight;
@@ -39,16 +40,10 @@ public class QuestInspector : Editor
 
     Quest[] questCache;
     TalkerInformation[] talkerCache;
-    ItemBase[] itemCache;
 
     TalkerInformation holder;
 
     AnimBool showState;
-
-    ObjectSelectionDrawer<TalkerInformation> npcSelector;
-    ObjectSelectionDrawer<QuestGroup> groupSelector;
-
-    Dictionary<Type, ObjectiveDrawer> objcetiveDrawers = new Dictionary<Type, ObjectiveDrawer>();
 
     private void OnEnable()
     {
@@ -56,7 +51,6 @@ public class QuestInspector : Editor
         quest = target as Quest;
         talkerCache = Resources.LoadAll<TalkerInformation>("Configuration").Where(x => x.Enable).ToArray();
         holder = talkerCache.FirstOrDefault(x => x.QuestsStored.Contains(quest));
-        itemCache = Resources.LoadAll<ItemBase>("Configuration");
 
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 2;
@@ -74,12 +68,10 @@ public class QuestInspector : Editor
         completeDialogue = serializedObject.FindProperty("completeDialogue");
         rewardItems = serializedObject.FindProperty("rewardItems");
         _NPCToSubmit = serializedObject.FindProperty("_NPCToSubmit");
-        cmpltObjctvInOrder = serializedObject.FindProperty("cmpltObjctvInOrder");
+        inOrder = serializedObject.FindProperty("inOrder");
         objectives = serializedObject.FindProperty("objectives");
-        groupSelector = new ObjectSelectionDrawer<QuestGroup>(group, "_name", "", "归属组", "无");
-        npcSelector = new ObjectSelectionDrawer<TalkerInformation>(_NPCToSubmit, "_name", talkerCache, "在此NPC处提交", "接取处NPC");
-        acceptConditionDrawer = new ConditionGroupDrawer(serializedObject, acceptCondition, lineHeight, lineHeightSpace, "接取条件列表");
-        rewardDrawer = new ItemAmountListDrawer(serializedObject, rewardItems, lineHeight, lineHeightSpace, "奖励列表");
+        acceptConditionDrawer = new ConditionGroupDrawer(acceptCondition, lineHeight, lineHeightSpace, "接取条件列表");
+        rewardDrawer = new ItemInfoListDrawer(serializedObject, rewardItems, lineHeight, lineHeightSpace, "奖励列表");
         HandlingObjectiveList();
         showState = new AnimBool(objectives.isExpanded);
         AddAnimaListener(OnAnima);
@@ -134,9 +126,9 @@ public class QuestInspector : Editor
                     EditorGUILayout.PropertyField(timeUnit, new GUIContent(string.Empty));
                     EditorGUILayout.EndHorizontal();
                 }
-                groupSelector.DoLayoutDraw();
-                npcSelector.DoLayoutDraw();
-                if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();//这一步一定要在DoLayoutList()之前做！否则无法修改DoList之前的数据
+                EditorGUILayout.PropertyField(group, new GUIContent("归属组"));
+                EditorGUILayout.PropertyField(_NPCToSubmit, new GUIContent("在此NPC处提交"));
+                if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
                 if (holder)
                 {
                     EditorGUILayout.Space();
@@ -151,6 +143,7 @@ public class QuestInspector : Editor
             case 1:
                 #region case 1 条件
                 acceptConditionDrawer.DoLayoutDraw();
+                if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
                 #endregion
                 break;
             case 2:
@@ -166,10 +159,6 @@ public class QuestInspector : Editor
                 EditorGUILayout.PropertyField(beginDialogue, new GUIContent("开始时的对话"));
                 if (beginDialogue.objectReferenceValue)
                 {
-                    if (GUILayout.Button("编辑"))
-                    {
-                        EditorUtility.OpenPropertyEditor(beginDialogue.objectReferenceValue);
-                    }
                     if (completeDialogue.objectReferenceValue == beginDialogue.objectReferenceValue || beginDialogue.objectReferenceValue == ongoingDialogue.objectReferenceValue)
                         EditorGUILayout.HelpBox("进行时或完成时已使用该对话，游戏中可能会产生逻辑错误。", MessageType.Warning);
                     else
@@ -190,10 +179,6 @@ public class QuestInspector : Editor
                 EditorGUILayout.PropertyField(ongoingDialogue, new GUIContent("进行中的对话"));
                 if (ongoingDialogue.objectReferenceValue)
                 {
-                    if (GUILayout.Button("编辑"))
-                    {
-                        EditorUtility.OpenPropertyEditor(ongoingDialogue.objectReferenceValue);
-                    }
                     if (ongoingDialogue.objectReferenceValue == beginDialogue.objectReferenceValue || completeDialogue.objectReferenceValue == ongoingDialogue.objectReferenceValue)
                         EditorGUILayout.HelpBox("开始时或完成时已使用该对话，游戏中可能会产生逻辑错误。", MessageType.Warning);
                     else
@@ -214,10 +199,6 @@ public class QuestInspector : Editor
                 EditorGUILayout.PropertyField(completeDialogue, new GUIContent("完成时的对话"));
                 if (completeDialogue.objectReferenceValue)
                 {
-                    if (GUILayout.Button("编辑"))
-                    {
-                        EditorUtility.OpenPropertyEditor(completeDialogue.objectReferenceValue);
-                    }
                     if (completeDialogue.objectReferenceValue == beginDialogue.objectReferenceValue || completeDialogue.objectReferenceValue == ongoingDialogue.objectReferenceValue)
                         EditorGUILayout.HelpBox("开始时或进行时已使用该对话，游戏中可能会产生逻辑错误。", MessageType.Warning);
                     else
@@ -241,8 +222,8 @@ public class QuestInspector : Editor
                 break;
             case 4:
                 #region case 4 目标
-                EditorGUILayout.PropertyField(cmpltObjctvInOrder, new GUIContent("按顺序完成目标"));
-                if (quest.CmpltObjctvInOrder)
+                EditorGUILayout.PropertyField(inOrder, new GUIContent("按顺序完成目标"));
+                if (quest.InOrder)
                 {
                     EditorGUILayout.HelpBox("勾选此项，则勾选按顺序的目标按执行顺序从小到大的顺序执行，若相同，则表示可以同时进行；" +
                         "若目标没有勾选按顺序，则表示该目标不受顺序影响。", MessageType.Info);
@@ -277,19 +258,8 @@ public class QuestInspector : Editor
 
         void PreviewDialogue(Dialogue dialogue)
         {
-            string dialoguePreview = string.Empty;
-            for (int i = 0; i < dialogue.Words.Count; i++)
-            {
-                var words = dialogue.Words[i];
-                dialoguePreview += "[" + words.TalkerName + "]说：\n-" + MiscFuntion.HandlingKeyWords(words.Content, false, talkerCache);
-                for (int j = 0; j < words.Options.Count; j++)
-                {
-                    dialoguePreview += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
-                }
-                dialoguePreview += i == dialogue.Words.Count - 1 ? string.Empty : "\n";
-            }
             GUI.enabled = false;
-            EditorGUILayout.TextArea(dialoguePreview);
+            EditorGUILayout.TextArea(Dialogue.PreviewDialogue(dialogue, talkerCache));
             GUI.enabled = true;
         }
     }
@@ -324,7 +294,11 @@ public class QuestInspector : Editor
             {
                 SerializedProperty displayName = objectives.GetArrayElementAtIndex(list.index).FindPropertyRelative("displayName");
                 if (EditorUtility.DisplayDialog("删除", "确定删除目标 [ " + (string.IsNullOrEmpty(displayName.stringValue) ? "空标题" : displayName.stringValue) + " ] 吗？", "确定", "取消"))
+                {
                     ReorderableList.defaultBehaviours.DoRemoveButton(list);
+                    serializedObject.ApplyModifiedProperties();
+                }
+                GUIUtility.ExitGUI();
             },
             onCanRemoveCallback = (list) =>
             {
@@ -358,7 +332,7 @@ public class QuestInspector : Editor
 
         editComplete &= !quest.RewardItems.Exists(x => x.item == null);
 
-        editComplete &= !quest.Objectives.Exists(x => (!quest.CmpltObjctvInOrder || x.Display) && string.IsNullOrEmpty(x.DisplayName) || !x.IsValid);
+        editComplete &= !quest.Objectives.Exists(x => (!quest.InOrder || x.Display) && string.IsNullOrEmpty(x.DisplayName) || !x.IsValid);
 
         return editComplete;
     }

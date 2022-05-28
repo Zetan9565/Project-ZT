@@ -1,9 +1,9 @@
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
     /// <summary>
     /// 序列器：当没有子结点在进行评估时，向上反馈评估成功；若当前子结点评估失败时，向上反馈评估失败；若当前子结点还在评估，则向上反馈评估正进行
     /// </summary>
-    [NodeDescription("序列器：当没有子结点在进行评估时，向上反馈评估成功；若当前子结点评估失败时，向上反馈评估失败；若当前子结点还在评估，则向上反馈评估正进行")]
+    [Description("序列器：当没有子结点在进行评估时，向上反馈评估成功；若当前子结点评估失败时，向上反馈评估失败；若当前子结点还在评估，则向上反馈评估正进行")]
     public class Sequence : Composite
     {
         protected override NodeStates OnUpdate()

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-using ZetanStudio.Item.Module;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.Item.Module
 {
     [CreateAssetMenu(fileName = "learn to make item", menuName = "Zetan Studio/道具/用途/学习制作道具")]
     public sealed class LearnToMakeItem : ItemUsage
@@ -10,8 +9,8 @@ namespace ZetanStudio.Item
 
         protected override bool Use(ItemData item)
         {
-            if (item.GetModule<MakingBlueprintModule>() is not MakingBlueprintModule making) return false;
-            return MakingManager.Instance.Learn(making.Product);
+            if (item.GetModule<CraftBlueprintModule>() is not CraftBlueprintModule making) return false;
+            return CraftManager.Instance.Learn(making.Product);
         }
     }
 }

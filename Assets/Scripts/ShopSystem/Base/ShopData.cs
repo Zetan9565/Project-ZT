@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.Item;
 
 public class ShopData
 {
@@ -20,11 +21,11 @@ public class ShopData
     {
         Vendor = vendor;
         Info = info;
-        foreach (MerchandiseInfo mi in Info.Commodities)
+        foreach (GoodsInfo mi in Info.Commodities)
         {
             Commodities.Add(new GoodsData(this, mi, GoodsType.SellToPlayer));
         }
-        foreach (MerchandiseInfo mi in Info.Acquisitions)
+        foreach (GoodsInfo mi in Info.Acquisitions)
         {
             Acquisitions.Add(new GoodsData(this, mi, GoodsType.BuyFromPlayer));
         }
@@ -55,11 +56,11 @@ public class GoodsData
 {
     public ShopData Shop { get; private set; }
 
-    public MerchandiseInfo Info { get; private set; }
+    public GoodsInfo Info { get; private set; }
 
     public GoodsType Type { get; private set; }
 
-    public ItemBase Item => Info.Item;
+    public Item Item => Info.Item;
 
     public float leftRefreshTime;
 
@@ -97,7 +98,7 @@ public class GoodsData
         }
     }
 
-    public GoodsData(ShopData shop, MerchandiseInfo info, GoodsType type)
+    public GoodsData(ShopData shop, GoodsInfo info, GoodsType type)
     {
         Shop = shop;
         Info = info;

@@ -30,13 +30,13 @@ public sealed class CollectObjectiveDrawer : ObjectiveDrawer
         if (objective.isExpanded)
         {
             lineCount++;//目标数量
-            if (quest.CmpltObjctvInOrder)
+            if (quest.InOrder)
                 lineCount++;// 按顺序
             lineCount += 1;//执行顺序
             lineCount += 1;//可导航
             if (objective.FindPropertyRelative("showMapIcon").boolValue)
                 lineCount++;//辅助位置
-            if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
+            if (objective.FindPropertyRelative("display").boolValue || !quest.InOrder) lineCount++;//标题
             lineCount += 2;//目标道具、接取时检查、提交时失去
         }
         return lineCount * lineHeightSpace;

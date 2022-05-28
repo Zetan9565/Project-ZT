@@ -16,7 +16,7 @@ namespace ZetanStudio.Character
 
         private void OnEnable()
         {
-            if (ZetanUtility.TryGetMemberValue("attributeTypes", target, out var value, out _))
+            if (ZetanUtility.TryGetValue("attributeTypes", target, out var value, out _))
                 dict = value as Dictionary<string, RoleAttributeValueType>;
             names = serializedObject.FindProperty("names");
             types = serializedObject.FindProperty("types");
@@ -61,6 +61,8 @@ namespace ZetanStudio.Character
                             types.DeleteArrayElementAtIndex(list.index);
                         }
                     }
+                    serializedObject.ApplyModifiedProperties();
+                    GUIUtility.ExitGUI();
                 },
                 onCanRemoveCallback = (list) =>
                 {

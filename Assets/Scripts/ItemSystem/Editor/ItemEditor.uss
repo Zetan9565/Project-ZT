@@ -1,0 +1,20 @@
+#item-container {
+}
+
+#template-container {
+}
+
+.item #item-container {
+    display: flex;
+}
+
+.template #item-container {
+    display: none;
+}
+
+.item #template-container {
+    display: none;
+}
+
+.template #template-container {
+}

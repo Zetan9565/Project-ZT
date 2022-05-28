@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 [DefaultExecutionOrder(-1), RequireComponent(typeof(ToggleGroup))]
 public class TabBar : MonoBehaviour
@@ -13,12 +13,17 @@ public class TabBar : MonoBehaviour
     private RectTransform barTransform;
 
     private ToggleGroup group;
-    private List<Toggle> toggles = new List<Toggle>();
+    private readonly List<Toggle> toggles = new List<Toggle>();
     private SimplePool<Toggle> pool;
 
     private Action<int> onSwitch;
 
-    public int TabIndex { get; private set; } = 1;
+    private int tabIndex = 1;
+    public int TabIndex
+    {
+        get => tabIndex;
+        set => SetIndex(value);
+    }
 
     private void Awake()
     {
@@ -46,8 +51,8 @@ public class TabBar : MonoBehaviour
         if (index < 0 || index > toggles.Count) return;
         if (toggles[index].isOn)
         {
-            TabIndex = index + 1;
-            onSwitch?.Invoke(TabIndex);
+            tabIndex = index + 1;
+            onSwitch?.Invoke(tabIndex);
         }
     }
 

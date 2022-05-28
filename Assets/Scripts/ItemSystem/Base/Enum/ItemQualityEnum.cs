@@ -8,7 +8,7 @@ namespace ZetanStudio.Item
     {
         public ItemQualityEnum()
         {
-            @enum = new ItemQuality[]
+            _enum = new ItemQuality[]
             {
                 new ItemQuality("凡品", Color.grey, 0),
                 new ItemQuality("精品", new Color(0, 0.85f, 0, 1), 1),
@@ -18,15 +18,10 @@ namespace ZetanStudio.Item
             };
         }
 
-        public static string QualityToName(int quality)
+        public static Color IndexToColor(int quality)
         {
-            if (quality < 0 || quality > Instance.@enum.Length) return string.Empty;
-            else return Instance.@enum[quality].Name;
-        }
-        public static Color QualityToColor(int quality)
-        {
-            if (quality < 0 || quality > Instance.@enum.Length) return default;
-            else return Instance.@enum[quality].Color;
+            if (quality < 0 || quality > Instance._enum.Length) return default;
+            else return Instance._enum[quality].Color;
         }
     }
 

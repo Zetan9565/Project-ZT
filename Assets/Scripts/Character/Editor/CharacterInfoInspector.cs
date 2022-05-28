@@ -14,7 +14,6 @@ public partial class CharacterInfoInspector : Editor
     SerializedProperty backpack;
     SerializedProperty SMParams;
     SerializedProperty attribute;
-    RoleAttributeGroupDrawer attrDrawer;
 
     float lineHeight;
     float lineHeightSpace;
@@ -32,7 +31,6 @@ public partial class CharacterInfoInspector : Editor
         _name = serializedObject.FindProperty("_name");
         SMParams = serializedObject.FindProperty("_SMParams");
         attribute = serializedObject.FindProperty("attribute");
-        attrDrawer = new RoleAttributeGroupDrawer(serializedObject, attribute, lineHeight, lineHeightSpace);
 
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 2;
@@ -91,11 +89,9 @@ public partial class CharacterInfoInspector : Editor
                 serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(SMParams, new GUIContent("状态机参数"));
+                EditorGUILayout.PropertyField(attribute, new GUIContent("属性"));
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
-                serializedObject.UpdateIfRequiredOrScript();
-                attrDrawer.DoLayoutDraw();
-                serializedObject.ApplyModifiedProperties();
             }
         }
         else

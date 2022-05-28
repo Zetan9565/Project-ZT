@@ -9,6 +9,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 726ad393f9ff2904c91a72ba7ccc225b, type: 3}
+  m_Script: {fileID: 11500000, guid: d8f12d76196041d4285fab00bb6a8926, type: 3}
   m_Name: New Making Method Enum
   m_EditorClassIdentifier: 
+  _enum:
+  - <Name>k__BackingField: "\u624B\u5DE5"
+  - <Name>k__BackingField: "\u7CBE\u624B\u5DE5"
+  - <Name>k__BackingField: "\u51B6\u70BC"
+  - <Name>k__BackingField: "\u953B\u9020"
+  - <Name>k__BackingField: "\u7EBA\u7EC7"
+  - <Name>k__BackingField: "\u7F1D\u7EAB"
+  - <Name>k__BackingField: "\u70F9\u996A"
+  - <Name>k__BackingField: "\u5236\u836F"
+  - <Name>k__BackingField: "\u667E\u6652"
+  - <Name>k__BackingField: "\u7814\u78E8"
+  - <Name>k__BackingField: "\u8FC7\u6EE4"
+  - <Name>k__BackingField: "\u70D8\u70E4"

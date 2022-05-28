@@ -20,4 +20,9 @@ public class EnemyGroup : ScriptableObject
     {
         return enemies.Exists(x => x.ID == ID);
     }
+
+    public override string ToString()
+    {
+        return !string.IsNullOrEmpty(_name) ? _name : base.ToString();
+    }
 }

@@ -9,7 +9,7 @@ namespace ZetanStudio.Item.Module
         private int type;
         public CurrencyType Type => CurrencyTypeEnum.Instance[type];
 
-        [field: SerializeField, DisplayName("面额")]
+        [field: SerializeField, Label("面额")]
         public int ValueEach { get; private set; }
 
         public override bool IsValid => ValueEach > 0 && type > -1;

@@ -1,0 +1,1155 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8659359920512167614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: MATR001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: MATR001
+  <Name>k__BackingField: "\u94C1\u5757"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 07da2380c0d9e914abc592225a88a9e8,
+    type: 3}
+  <Description>k__BackingField: "\u53EF\u7528\u4E8E\u5236\u4F5C\u94C1\u5668\u3002"
+  type: 4
+  quality: 0
+  <Weight>k__BackingField: 1
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502835
+  - rid: 3760287328976502836
+  - rid: 3760287328976502837
+  - rid: 3760287328976502838
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502835
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 50
+    - rid: 3760287328976502836
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502837
+      type: {class: CraftableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        craftMethod: 0
+        canMakeByTry: 0
+        <Formulation>k__BackingField: {fileID: 11400000, guid: b80b5e19edff58a4886d209e02e5dc0a,
+          type: 2}
+        <Yields>k__BackingField:
+        - <Amount>k__BackingField: 1
+          <Rate>k__BackingField: 0.5
+        - <Amount>k__BackingField: 1
+          <Rate>k__BackingField: 0.5
+    - rid: 3760287328976502838
+      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 0
+--- !u!114 &-6049188909635569283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: CURR001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: CURR001
+  <Name>k__BackingField: "\u91D1\u5E01"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 06fda7a937b34e84a943612d88029328,
+    type: 3}
+  <Description>k__BackingField: "\u5168\u5927\u9646\u6D41\u901A\u7684\u901A\u7528\u8D27\u5E01\u3002"
+  type: 9
+  quality: 0
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502826
+  - rid: 3760287328976502827
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502826
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502827
+      type: {class: CurrencyModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 0
+        <ValueEach>k__BackingField: 1
+--- !u!114 &-5233882508366076852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: IBOX001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: IBOX001
+  <Name>k__BackingField: "\u56FE\u7EB8\u7BB1\u5B50"
+  <Icon>k__BackingField: {fileID: 21300000, guid: fd7a4f97e0beced4999a4791b794b75d,
+    type: 3}
+  <Description>k__BackingField: "\u88C5\u6709\u4E00\u4E9B\u56FE\u7EB8\u548C\u5176\u5B83\u9053\u5177\u7684\u7BB1\u5B50\u3002"
+  type: 6
+  quality: 1
+  <Weight>k__BackingField: 10
+  <StackLimit>k__BackingField: 5
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502819
+  - rid: 3760287328976502820
+  - rid: 3760287328976502821
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502819
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: 2a63a73cb482a444493a661d65c4a24d,
+          type: 2}
+    - rid: 3760287328976502820
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502821
+      type: {class: ProductModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        product:
+        - item: {fileID: 482611824490326475}
+          minAmount: 1
+          maxAmount: 1
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: 908422382591890328}
+          minAmount: 1
+          maxAmount: 1
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: 4357461156977807482}
+          minAmount: 1
+          maxAmount: 1
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: -3066210933015211660}
+          minAmount: 1
+          maxAmount: 1
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: 8516276107217364782}
+          minAmount: 1
+          maxAmount: 1
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: 8379702117396951434}
+          minAmount: 5
+          maxAmount: 5
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: -840957672837638854}
+          minAmount: 1
+          maxAmount: 1
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: 3050720151478596481}
+          minAmount: 1
+          maxAmount: 1
+          dropRate: 100
+          onlyDropForQuest: 1
+          bindedQuest: {fileID: 0}
+        <ProductInfo>k__BackingField: {fileID: 0}
+--- !u!114 &-4938875555958233210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: MATR005
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: MATR005
+  <Name>k__BackingField: "\u8304\u5B50"
+  <Icon>k__BackingField: {fileID: 2559505510574410273, guid: 9eb4318a95588c54ab79ca3639396e41,
+    type: 3}
+  <Description>k__BackingField: "\u5E38\u89C1\u7684\u519C\u4F5C\u7269\u679C\u5B9E\u3002"
+  type: 4
+  quality: 1
+  <Weight>k__BackingField: 0.5
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502848
+  - rid: 3760287328976502849
+  - rid: 3760287328976502850
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502848
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 100
+    - rid: 3760287328976502849
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502850
+      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 12
+--- !u!114 &-3066210933015211660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: BOOK004
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: BOOK004
+  <Name>k__BackingField: "\u953B\u9020\u53F0\u5236\u4F5C\u6307\u5357"
+  <Icon>k__BackingField: {fileID: 21300000, guid: fe2f1500bcba49b4b833b547eec8be6d,
+    type: 3}
+  <Description>k__BackingField: "\u8BB0\u8F7D\u7740\u953B\u9020\u53F0\u7684\u505A\u6CD5\u7684\u6307\u5357\u4E66\u3002"
+  type: 7
+  quality: 4
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502815
+  - rid: 3760287328976502817
+  - rid: 3760287328976502818
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502815
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u5B66\u4E60"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: 98b15d06112e6d44bb834dd2ece915d8,
+          type: 2}
+    - rid: 3760287328976502817
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502818
+      type: {class: StructureBlueprintModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Structure>k__BackingField: {fileID: 11400000, guid: cf2c91d5cd286ec4e9e007678f95ae73,
+          type: 2}
+--- !u!114 &-2055064270847519081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: WEPN001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: WEPN001
+  <Name>k__BackingField: "\u7834\u65E7\u7684\u5251"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 49f8e0d174d37854594023815c03e047,
+    type: 3}
+  <Description>k__BackingField: "\u7834\u7684\u4E00\u5339\u7684\u5251\u72B6\u7269\u3002"
+  type: 1
+  quality: 0
+  <Weight>k__BackingField: 1
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502866
+  - rid: 3760287328976502867
+  - rid: 3760287328976502868
+  - rid: 3760287328976502869
+  - rid: 3760287328976502870
+  - rid: 3760287328976502871
+  - rid: 3760287328976502872
+  - rid: 3760287328976502873
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502866
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u88C5\u5907"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 0}
+    - rid: 3760287328976502867
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 15
+    - rid: 3760287328976502868
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502869
+      type: {class: AttributeModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Attributes>k__BackingField:
+          attributes: []
+    - rid: 3760287328976502870
+      type: {class: EquipableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 0
+    - rid: 3760287328976502871
+      type: {class: GemSlotModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <SlotCount>k__BackingField: 1
+    - rid: 3760287328976502872
+      type: {class: DurabilityModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Durability>k__BackingField: 100
+    - rid: 3760287328976502873
+      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 1
+--- !u!114 &-1243070531903100264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: ARMR001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: ARMR001
+  <Name>k__BackingField: "\u94C1\u7247\u7532"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 9dadbe075381e114eaf16c43fe52f891,
+    type: 3}
+  <Description>k__BackingField: "\u7528\u94C1\u7247\u4E32\u6210\u7684\u62A4\u7532\u3002"
+  type: 1
+  quality: 0
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502792
+  - rid: 3760287328976502793
+  - rid: 3760287328976502794
+  - rid: 3760287328976502795
+  - rid: 3760287328976502796
+  - rid: 3760287328976502797
+  - rid: 3760287328976502798
+  - rid: 3760287328976502799
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502792
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u88C5\u5907"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 0}
+    - rid: 3760287328976502793
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 0
+    - rid: 3760287328976502794
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502795
+      type: {class: CraftableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        craftMethod: 0
+        canMakeByTry: 0
+        <Formulation>k__BackingField: {fileID: 11400000, guid: 6448c4074893df14e9781f75b7dde63c,
+          type: 2}
+        <Yields>k__BackingField:
+        - <Amount>k__BackingField: 1
+          <Rate>k__BackingField: 0.5
+        - <Amount>k__BackingField: 1
+          <Rate>k__BackingField: 0.5
+    - rid: 3760287328976502796
+      type: {class: AttributeModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Attributes>k__BackingField:
+          attributes: []
+    - rid: 3760287328976502797
+      type: {class: EquipableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 3
+    - rid: 3760287328976502798
+      type: {class: GemSlotModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <SlotCount>k__BackingField: 1
+    - rid: 3760287328976502799
+      type: {class: DurabilityModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Durability>k__BackingField: 100
+--- !u!114 &-840957672837638854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: QSTI002
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: QSTI002
+  <Name>k__BackingField: "\u590D\u4F4D\u89E6\u53D1\u5668"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 92042bc197ea09b4597415b7a9e4d8c7,
+    type: 3}
+  <Description>k__BackingField: "\u7528\u4E8E\u6D4B\u8BD5\u89E6\u53D1\u5668\u3002\u6548\u679C\uFF1A5\u79D2\u540E\u9690\u85CF\u90A3\u68F5\u8349\u3002"
+  type: 6
+  quality: 0
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 0
+  modules:
+  - rid: 3760287328976502858
+  - rid: 3760287328976502859
+  - rid: 3760287328976502860
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502858
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: 3eb00b7cc0113074ba3d0a78f1c5ef9b,
+          type: 2}
+    - rid: 3760287328976502859
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502860
+      type: {class: TriggerModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Name>k__BackingField: qwe
+        <State>k__BackingField: 0
+--- !u!114 &-640045277695066356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: MATR004
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: MATR004
+  <Name>k__BackingField: "\u9EBB"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 608fc6a057c396d43b24a636e27409cb,
+    type: 3}
+  <Description>k__BackingField: "\u968F\u5904\u53EF\u89C1\u7684\u7EC7\u5E03\u7528\u690D\u7269\u3002"
+  type: 4
+  quality: 0
+  <Weight>k__BackingField: 0.01
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502845
+  - rid: 3760287328976502846
+  - rid: 3760287328976502847
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502845
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 10
+    - rid: 3760287328976502846
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502847
+      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 2
+--- !u!114 &-464574647126714662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: MATR002
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: MATR002
+  <Name>k__BackingField: "\u94C1\u539F\u77F3"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 01daa057130937548b53fda05cb59512,
+    type: 3}
+  <Description>k__BackingField: "\u53EF\u4EE5\u51B6\u70BC\u6210\u94C1\u91D1\u5C5E\u3002"
+  type: 4
+  quality: 0
+  <Weight>k__BackingField: 0.1
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502839
+  - rid: 3760287328976502840
+  - rid: 3760287328976502841
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502839
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 30
+    - rid: 3760287328976502840
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502841
+      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 482739498110eb446856e9f3ee4392f4, type: 3}
+  m_Name: Item Database
+  m_EditorClassIdentifier: 
+  items:
+  - {fileID: -1243070531903100264}
+  - {fileID: 7075965631898388350}
+  - {fileID: 482611824490326475}
+  - {fileID: 4357461156977807482}
+  - {fileID: 908422382591890328}
+  - {fileID: -3066210933015211660}
+  - {fileID: -5233882508366076852}
+  - {fileID: 8516276107217364782}
+  - {fileID: -6049188909635569283}
+  - {fileID: 4876839640930190242}
+  - {fileID: 4844343371124758356}
+  - {fileID: -8659359920512167614}
+  - {fileID: -464574647126714662}
+  - {fileID: 3394695891120366239}
+  - {fileID: -640045277695066356}
+  - {fileID: -4938875555958233210}
+  - {fileID: 8379702117396951434}
+  - {fileID: 3050720151478596481}
+  - {fileID: -840957672837638854}
+  - {fileID: 5948240964464067290}
+  - {fileID: -2055064270847519081}
+  - {fileID: 2294737969574299077}
+--- !u!114 &482611824490326475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: BOOK001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: BOOK001
+  <Name>k__BackingField: "\u4ED3\u5E93\u8BBE\u8BA1\u56FE\u7EB8"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 6f360e21e16247442a84447fba24df77,
+    type: 3}
+  <Description>k__BackingField: "\u8BB0\u8F7D\u7740\u4ED3\u5E93\u5236\u9020\u65B9\u6CD5\u7684\u56FE\u7EB8\u3002"
+  type: 7
+  quality: 4
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502804
+  - rid: 3760287328976502805
+  - rid: 3760287328976502806
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502804
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u5B66\u4E60"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: 98b15d06112e6d44bb834dd2ece915d8,
+          type: 2}
+    - rid: 3760287328976502805
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502806
+      type: {class: StructureBlueprintModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Structure>k__BackingField: {fileID: 11400000, guid: 7874646e9bc32c04ea7ec82e1ae6fd42,
+          type: 2}
+--- !u!114 &908422382591890328
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: BOOK003
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: BOOK003
+  <Name>k__BackingField: "\u5C0F\u578B\u519C\u7530\u5F00\u57A6\u6307\u5357"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 5b4f1e91572a225498ac4e51833f266d,
+    type: 3}
+  <Description>k__BackingField: "\u53EF\u5B66\u4F1A\u5F00\u57A63X3\u7684\u519C\u7530\u3002"
+  type: 7
+  quality: 4
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502811
+  - rid: 3760287328976502813
+  - rid: 3760287328976502814
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502811
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u5B66\u4E60"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: 98b15d06112e6d44bb834dd2ece915d8,
+          type: 2}
+    - rid: 3760287328976502813
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502814
+      type: {class: StructureBlueprintModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Structure>k__BackingField: {fileID: 11400000, guid: 54c49f45a64d5544da52ce6edd865f27,
+          type: 2}
+--- !u!114 &2294737969574299077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: WEPN002
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: WEPN002
+  <Name>k__BackingField: "\u7834\u65E7\u7684\u5200"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 7179d36b12968664484b8a4eddc7b2eb,
+    type: 3}
+  <Description>k__BackingField: "\u7834\u7684\u4E00\u5339\u7684\u5200\u72B6\u7269\u3002"
+  type: 1
+  quality: 0
+  <Weight>k__BackingField: 1.5
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502874
+  - rid: 3760287328976502875
+  - rid: 3760287328976502876
+  - rid: 3760287328976502877
+  - rid: 3760287328976502878
+  - rid: 3760287328976502879
+  - rid: 3760287328976502880
+  - rid: 3760287328976502881
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502874
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u88C5\u5907"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 0}
+    - rid: 3760287328976502875
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 15
+    - rid: 3760287328976502876
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502877
+      type: {class: AttributeModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Attributes>k__BackingField:
+          attributes: []
+    - rid: 3760287328976502878
+      type: {class: EquipableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 0
+    - rid: 3760287328976502879
+      type: {class: GemSlotModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <SlotCount>k__BackingField: 1
+    - rid: 3760287328976502880
+      type: {class: DurabilityModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Durability>k__BackingField: 100
+    - rid: 3760287328976502881
+      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 1
+--- !u!114 &3050720151478596481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: QSTI001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: QSTI001
+  <Name>k__BackingField: "\u7F6E\u4F4D\u89E6\u53D1\u5668"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 92042bc197ea09b4597415b7a9e4d8c7,
+    type: 3}
+  <Description>k__BackingField: "\u7528\u4E8E\u6D4B\u8BD5\u89E6\u53D1\u5668\u3002\u6548\u679C\uFF1A\u9690\u85CF\u540E\u663E\u793A\u90A3\u68F5\u8349\u3002"
+  type: 6
+  quality: 0
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 0
+  modules:
+  - rid: 3760287328976502855
+  - rid: 3760287328976502856
+  - rid: 3760287328976502857
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502855
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: 3eb00b7cc0113074ba3d0a78f1c5ef9b,
+          type: 2}
+    - rid: 3760287328976502856
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502857
+      type: {class: TriggerModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Name>k__BackingField: qwe
+        <State>k__BackingField: 1
+--- !u!114 &3394695891120366239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: MATR003
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: MATR003
+  <Name>k__BackingField: "\u6B62\u8840\u8349"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 608fc6a057c396d43b24a636e27409cb,
+    type: 3}
+  <Description>k__BackingField: "\u968F\u5904\u53EF\u89C1\u7684\u6B62\u8840\u7528\u8349\u672C\u690D\u7269\u3002"
+  type: 4
+  quality: 0
+  <Weight>k__BackingField: 0.01
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502842
+  - rid: 3760287328976502843
+  - rid: 3760287328976502844
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502842
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 15
+    - rid: 3760287328976502843
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502844
+      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 4
+--- !u!114 &4357461156977807482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: BOOK002
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: BOOK002
+  <Name>k__BackingField: "\u6B62\u8840\u6563\u5236\u4F5C\u6307\u5357"
+  <Icon>k__BackingField: {fileID: 21300000, guid: fe2f1500bcba49b4b833b547eec8be6d,
+    type: 3}
+  <Description>k__BackingField: "\u8BB0\u8F7D\u7740\u6B62\u8840\u6563\u7684\u505A\u6CD5\u7684\u6307\u5357\u4E66\u3002"
+  type: 7
+  quality: 4
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502807
+  - rid: 3760287328976502809
+  - rid: 3760287328976502810
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502807
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u5B66\u4E60"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: f9168edb840ff4447bca55af0ef1ad35,
+          type: 2}
+    - rid: 3760287328976502809
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502810
+      type: {class: CraftBlueprintModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Product>k__BackingField: {fileID: 8379702117396951434}
+--- !u!114 &4844343371124758356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: GEMS001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: GEMS001
+  <Name>k__BackingField: "\u666E\u901A\u7684\u5B9D\u77F3"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 07da2380c0d9e914abc592225a88a9e8,
+    type: 3}
+  <Description>k__BackingField: "\u770B\u8D77\u6765\u5F88\u666E\u901A\u7684\u5B9D\u77F3"
+  type: 3
+  quality: 0
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502831
+  - rid: 3760287328976502832
+  - rid: 3760287328976502833
+  - rid: 3760287328976502834
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502831
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u9576\u5D4C"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 0}
+    - rid: 3760287328976502832
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 50
+    - rid: 3760287328976502833
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502834
+      type: {class: AttributeModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Attributes>k__BackingField:
+          attributes: []
+--- !u!114 &4876839640930190242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: CURR002
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: CURR002
+  <Name>k__BackingField: "\u7ECF\u9A8C"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 92042bc197ea09b4597415b7a9e4d8c7,
+    type: 3}
+  <Description>k__BackingField: "\u5192\u9669\u83B7\u5F97\u7684\u9605\u5386\uFF0C\u7528\u4E8E\u89D2\u8272\u5347\u7EA7\u3002"
+  type: 9
+  quality: 0
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502829
+  - rid: 3760287328976502830
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502829
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502830
+      type: {class: CurrencyModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 1
+        <ValueEach>k__BackingField: 1
+--- !u!114 &5948240964464067290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: SEED001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: SEED001
+  <Name>k__BackingField: "\u79CD\u5B50"
+  <Icon>k__BackingField: {fileID: 21300000, guid: d7e626b430cfda24ea47c259db76dade,
+    type: 3}
+  <Description>k__BackingField: "\u6D4B\u8BD5\u7528\u79CD\u5B50\uFF0C\u53EF\u79CD\u51FA\u6D4B\u8BD5\u7528\u4F5C\u7269\u3002"
+  type: 5
+  quality: 0
+  <Weight>k__BackingField: 0
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502862
+  - rid: 3760287328976502863
+  - rid: 3760287328976502864
+  - rid: 3760287328976502865
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502862
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 15
+    - rid: 3760287328976502863
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502864
+      type: {class: SeedModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Crop>k__BackingField: {fileID: 11400000, guid: 74fe5b9417d08164195908a81e191983,
+          type: 2}
+    - rid: 3760287328976502865
+      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        type: 12
+--- !u!114 &7075965631898388350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: IBAG001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: IBAG001
+  <Name>k__BackingField: "\u80CC\u5305\u6269\u5C55\u888B"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 8017c4427112abc429542a5c1d314bae,
+    type: 3}
+  <Description>k__BackingField: "\u53EF\u4EE5\u6269\u5F20\u5C11\u91CF\u80CC\u5305\u5BB9\u91CF\u3002"
+  type: 6
+  quality: 3
+  <Weight>k__BackingField: 1
+  <StackLimit>k__BackingField: 1
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502800
+  - rid: 3760287328976502801
+  - rid: 3760287328976502802
+  - rid: 3760287328976502803
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502800
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: 17c940e8a0591d2458d523ed3378f68a,
+          type: 2}
+    - rid: 3760287328976502801
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502802
+      type: {class: CraftableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        craftMethod: 0
+        canMakeByTry: 0
+        <Formulation>k__BackingField: {fileID: 11400000, guid: 59fb2a9bbc1a53745ba9e6c093547699,
+          type: 2}
+        <Yields>k__BackingField:
+        - <Amount>k__BackingField: 1
+          <Rate>k__BackingField: 0.5
+        - <Amount>k__BackingField: 1
+          <Rate>k__BackingField: 0.5
+    - rid: 3760287328976502803
+      type: {class: SpaceExpandModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Space>k__BackingField: 1
+--- !u!114 &8379702117396951434
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: MADC001
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: MADC001
+  <Name>k__BackingField: "\u6B62\u8840\u6563"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 57cf38a2906932342a13fe8463771650,
+    type: 3}
+  <Description>k__BackingField: "\u6548\u679C\u8F83\u5DEE\u7684\u6B62\u8840\u7528\u836F\u3002"
+  type: 2
+  quality: 1
+  <Weight>k__BackingField: 0.03
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502851
+  - rid: 3760287328976502852
+  - rid: 3760287328976502853
+  - rid: 3760287328976502854
+  - rid: 3760287345180934144
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502851
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: 57caecc5459c49b4e9d218a63ea6bd15,
+          type: 2}
+    - rid: 3760287328976502852
+      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 100
+    - rid: 3760287328976502853
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502854
+      type: {class: CraftableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        craftMethod: 0
+        canMakeByTry: 1
+        <Formulation>k__BackingField: {fileID: 11400000, guid: 8f067eea454364f40b9fbb18e805cfa1,
+          type: 2}
+        <Yields>k__BackingField:
+        - <Amount>k__BackingField: 1
+          <Rate>k__BackingField: 0.5
+        - <Amount>k__BackingField: 1
+          <Rate>k__BackingField: 0.5
+    - rid: 3760287345180934144
+      type: {class: CoolDownModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <Time>k__BackingField: 3
+        <Message>k__BackingField: "\u51B7\u5374\u4E2D"
+        <Cooler>k__BackingField: {fileID: 11400000, guid: 160f7b267f889ed45905336b17b7c0ab,
+          type: 2}
+--- !u!114 &8516276107217364782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: IBOX002
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: IBOX002
+  <Name>k__BackingField: "\u6750\u6599\u7BB1\u5B50"
+  <Icon>k__BackingField: {fileID: 21300000, guid: fd7a4f97e0beced4999a4791b794b75d,
+    type: 3}
+  <Description>k__BackingField: "\u88C5\u6709\u4E00\u4E9B\u5236\u4F5C\u6750\u6599\u7684\u7BB1\u5B50\u3002"
+  type: 6
+  quality: 0
+  <Weight>k__BackingField: 10
+  <StackLimit>k__BackingField: 5
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502822
+  - rid: 3760287328976502823
+  - rid: 3760287328976502824
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502822
+      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: 2a63a73cb482a444493a661d65c4a24d,
+          type: 2}
+    - rid: 3760287328976502823
+      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502824
+      type: {class: ProductModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      data:
+        product:
+        - item: {fileID: 3394695891120366239}
+          minAmount: 5
+          maxAmount: 5
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: -8659359920512167614}
+          minAmount: 10
+          maxAmount: 10
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: -464574647126714662}
+          minAmount: 5
+          maxAmount: 5
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: -640045277695066356}
+          minAmount: 5
+          maxAmount: 5
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        - item: {fileID: 5948240964464067290}
+          minAmount: 1
+          maxAmount: 1
+          dropRate: 100
+          onlyDropForQuest: 0
+          bindedQuest: {fileID: 0}
+        <ProductInfo>k__BackingField: {fileID: 0}

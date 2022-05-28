@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CustomEditor(typeof(Window), true)]
-public partial class WindowInspector : Editor
+public class WindowInspector : Editor
 {
     protected Window window;
     protected SerializedProperty animated;
@@ -53,12 +53,11 @@ public partial class WindowInspector : Editor
             }
         }
         EditorGUILayout.EndHorizontal();
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.PropertyField(animated, new GUIContent("淡入淡出"));
-        EditorGUILayout.PropertyField(duration, new GUIContent("持续时间"));
-        EditorGUILayout.EndHorizontal();
-        EditorGUILayout.PropertyField(content, new GUIContent("窗体"));
-        EditorGUILayout.PropertyField(closeButton, new GUIContent("关闭按钮"));
+        Rect rect = EditorGUILayout.GetControlRect();
+        EditorGUI.PropertyField(new Rect(rect.x, rect.y, rect.width / 2 - 1, rect.height), animated);
+        if (animated.boolValue) EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2 + 1, rect.y, rect.width - 1, rect.height), duration);
+        EditorGUILayout.PropertyField(content);
+        EditorGUILayout.PropertyField(closeButton);
         InspectOther();
         if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
     }

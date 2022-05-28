@@ -24,7 +24,7 @@ MonoBehaviour:
   materials: []
   addendas:
   - {fileID: 11400000, guid: 680c87fc4bac568408e7d30b74f2d305, type: 2}
-  autoBuild: 1
+  autoBuild: 0
   stages:
   - materials: []
     graph: {fileID: 0}

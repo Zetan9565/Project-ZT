@@ -35,15 +35,15 @@ MonoBehaviour:
   ongoingDialogue: {fileID: 11400000, guid: 9a228683692d7504f96d6a13ae0aaf89, type: 2}
   completeDialogue: {fileID: 11400000, guid: e6ac29e35c65fda4a9cc0756740de01f, type: 2}
   rewardItems:
-  - item: {fileID: 11400000, guid: 6c7872e2f8dbf2948bc18ceed18c26ad, type: 2}
+  - item: {fileID: 4876839640930190242, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 1000
-  - item: {fileID: 11400000, guid: e7d15132e142bc34ab9b56e50a6f4539, type: 2}
+  - item: {fileID: -6049188909635569283, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 300
   _NPCToSubmit: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-  cmpltObjctvInOrder: 1
+  inOrder: 1
   objectives:
-  - rid: 0
   - rid: 1
+  - rid: 0
   - rid: 2
   references:
     version: 2
@@ -59,7 +59,7 @@ MonoBehaviour:
         amount: 1
         inOrder: 1
         priority: 1
-        itemToCollect: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75,
+        itemToCollect: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
           type: 2}
         checkBagAtStart: 1
         loseItemAtSbmt: 0
@@ -73,8 +73,8 @@ MonoBehaviour:
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
         inOrder: 1
-        priority: 2
-        itemToCollect: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17,
+        priority: 0
+        itemToCollect: {fileID: 2294737969574299077, guid: 11d254d59d262564aa42d1df5009d201,
           type: 2}
         checkBagAtStart: 1
         loseItemAtSbmt: 0
@@ -90,6 +90,7 @@ MonoBehaviour:
         inOrder: 1
         priority: 2
         _NPCToSubmit: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-        itemToSubmit: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+        itemToSubmit: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
+          type: 2}
         wordsWhenSubmit: "\u8FD9\u662F\u4EC0\u4E48\u4E1C\u897F\uFF0C\u54EA\u6765\u7684\uFF1F"
         talkerType: 0

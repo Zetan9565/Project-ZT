@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.Item.Module;
 
 public class StructureManageWindow : InteractionWindow<Interactive2D>, IHideable
 {
@@ -131,14 +132,14 @@ public class StructureManageWindow : InteractionWindow<Interactive2D>, IHideable
     private void SetMaterials()
     {
         ZetanUtility.SetActive(morePanel, false);
-        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnPutMaterials, "预留材料", selectCondition: (slot) => { return slot && slot.Item && slot.Item.Model_old.MaterialType != MaterialType.None; });
+        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnPutMaterials, "预留材料", selectCondition: (slot) => { return slot && slot.Item && slot.Item.GetModule<MaterialModule>() is not null; });
     }
     private void OnPutMaterials(IEnumerable<ItemWithAmount> materials)
     {
-        List<ItemInfoBase> materialsConvert = new List<ItemInfoBase>();
+        List<ItemInfo> materialsConvert = new List<ItemInfo>();
         foreach (var isd in materials)
         {
-            materialsConvert.Add(new ItemInfoBase(isd.source.Model_old, isd.amount));
+            materialsConvert.Add(new ItemInfo(isd.source.Model, isd.amount));
         }
         CurrentPreview.PutMaterials(materialsConvert);
     }

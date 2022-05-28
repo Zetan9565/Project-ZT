@@ -1,7 +1,7 @@
 ﻿namespace ZetanStudio.BehaviourTree
 {
     [System.Serializable]
-    public class SharedFloat : SharedVariable<float>
+    public sealed class SharedFloat : SharedVariable<float>
     {
         /// <summary>
         /// 运行过程中赋值请使用<see cref="SharedVariable{T}.Value"/>属性或<see cref="SharedVariable{T}.SetValue(object)"/>方法，

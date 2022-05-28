@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.Events;
-using ZetanExtends;
 
 [DisallowMultipleComponent]
 public class Structure2D : Interactive2D

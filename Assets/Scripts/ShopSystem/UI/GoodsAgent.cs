@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 public class GoodsAgent : GridItem<GoodsAgent, GoodsData>, IPointerClickHandler
 {
-    [SerializeField, DisplayName("名称")]
+    [SerializeField, Label("名称")]
     private Text nameText;
 
-    [SerializeField, DisplayName("价格")]
+    [SerializeField, Label("价格")]
     private Text priceText;
 
-    [SerializeField, DisplayName("数量")]
+    [SerializeField, Label("数量")]
     private Text amountText;
 
     [SerializeField]
@@ -73,8 +73,8 @@ public class GoodsAgent : GridItem<GoodsAgent, GoodsData>, IPointerClickHandler
     {
         if (Data == null || !Data.Item) return;
         nameText.text = Data.Item.Name;
-        if (Data.Type == GoodsType.SellToPlayer) priceText.text = Data.Info.SellPrice.ToString("F0") + "文";
-        else priceText.text = Data.Info.PurchasePrice.ToString("F0") + "文";
+        if (Data.Type == GoodsType.SellToPlayer) priceText.text = Data.Info.Price.ToString("F0") + "文";
+        else priceText.text = Data.Info.Price.ToString("F0") + "文";
         if (Data.Info.EmptyAble)
         {
             if (Data.Type == GoodsType.BuyFromPlayer) amountText.text = Data.IsEmpty ? "暂无需求" : Data.LeftAmount + "/" + Data.Info.MaxAmount;

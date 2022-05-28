@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.Item;
 
 [System.Serializable]
 public class Condition
@@ -16,13 +17,13 @@ public class Condition
     private ValueCompareType compareType;
     public ValueCompareType CompareType => compareType;
 
-    [SerializeField]
+    [SerializeField, ObjectSelector("title")]
     private Quest relatedQuest;
     public Quest RelatedQuest => relatedQuest;
 
     [SerializeField]
-    private ItemBase relatedItem;
-    public ItemBase RelatedItem => relatedItem;
+    private Item relatedItem;
+    public Item RelatedItem => relatedItem;
 
     [SerializeField]
     private CharacterInformation relatedCharInfo;

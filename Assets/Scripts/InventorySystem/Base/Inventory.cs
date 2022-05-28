@@ -3,48 +3,28 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
+using ZetanStudio.Item;
 
 public class Inventory
 {
     private readonly List<ItemSlotData> slots = new List<ItemSlotData>();
-    private ReadOnlyCollection<ItemSlotData> readOnlySlots;
     private readonly HashSet<ItemSlotData> slotsMap = new HashSet<ItemSlotData>();
     private readonly Dictionary<string, List<ItemSlotData>> keyedSlots = new Dictionary<string, List<ItemSlotData>>();
     private readonly Dictionary<string, ItemWithAmount> items = new Dictionary<string, ItemWithAmount>();
-    private ReadOnlyDictionary<string, ItemWithAmount> readOnlyItems;
     private readonly Dictionary<string, ItemData> hiddenItems = new Dictionary<string, ItemData>();
-    private ReadOnlyDictionary<string, ItemData> readOnlyHiddenItems;
 
-    public ReadOnlyCollection<ItemSlotData> Slots
-    {
-        get
-        {
-            if (readOnlySlots == null) readOnlySlots = slots.AsReadOnly();
-            return readOnlySlots;
-        }
-    }
-    public ReadOnlyDictionary<string, ItemWithAmount> Items
-    {
-        get
-        {
-            if (readOnlyItems == null) readOnlyItems = new ReadOnlyDictionary<string, ItemWithAmount>(items);
-            return readOnlyItems;
-        }
-    }
-    public ReadOnlyDictionary<string, ItemData> HiddenItems
-    {
-        get
-        {
-            if (readOnlyHiddenItems == null) readOnlyHiddenItems = new ReadOnlyDictionary<string, ItemData>(hiddenItems);
-            return readOnlyHiddenItems;
-        }
-    }
+    public ReadOnlyCollection<ItemSlotData> Slots => slots.AsReadOnly();
+
+    public ReadOnlyDictionary<string, ItemWithAmount> Items => new ReadOnlyDictionary<string, ItemWithAmount>(items);
+
+    public ReadOnlyDictionary<string, ItemData> HiddenItems => new ReadOnlyDictionary<string, ItemData>(hiddenItems);
 
     public float WeightLimit { get; private set; }
     public int SpaceLimit { get; private set; }
     public float WeightCost { get; private set; }
     public int SpaceCost { get; private set; }
     public long Money { get; private set; }
+    public int Space => SpaceLimit - SpaceCost;
 
     /// <summary>
     /// 金币更新事件，格式：([发生变化的库存：<see cref="Inventory"/>], [旧的金币数量：<see cref="long"/>])
@@ -141,7 +121,7 @@ public class Inventory
         }
         return amount > 0;
     }
-    public bool TryGetData(ItemBase model, out ItemData result, out int amount)
+    public bool TryGetData(Item model, out ItemData result, out int amount)
     {
         result = null;
         amount = 0;
@@ -166,9 +146,9 @@ public class Inventory
         results = items.Values.Where(x => x.source.ModelID == id).ToList();
         return results.Count > 0;
     }
-    public bool TryGetDatas(ItemBase model, out List<ItemWithAmount> results)
+    public bool TryGetDatas(Item model, out List<ItemWithAmount> results)
     {
-        results = items.Values.Where(x => x.source.Model_old == model).ToList();
+        results = items.Values.Where(x => x.source.Model == model).ToList();
         return results.Count > 0;
     }
     public bool TryGetDatas(Predicate<ItemData> predicate, out List<ItemWithAmount> results)
@@ -183,10 +163,10 @@ public class Inventory
         if (find != null) return find.Sum(x => x.amount);
         else return 0;
     }
-    public int GetAmount(ItemBase model)
+    public int GetAmount(Item model)
     {
         if (!model) return 0;
-        var find = items.Values.Where(x => x.source.Model_old == model);
+        var find = items.Values.Where(x => x.source.Model == model);
         if (find != null) return find.Sum(x => x.amount);
         else return 0;
     }
@@ -201,6 +181,10 @@ public class Inventory
     {
         return items.Values.Where(x => predicate(x.source)).Sum(x => x.amount);
     }
+    public bool ContainsItem(ItemData item)
+    {
+        return items.ContainsKey(item.ID);
+    }
     #endregion
 
     #region 道具获取相关
@@ -211,7 +195,7 @@ public class Inventory
     /// <param name="amount">数量</param>
     /// <param name="simulLoseItems">同时失去的道具</param>
     /// <returns>实际获取数量</returns>
-    public int PeekGet(ItemBase model, int amount, params ItemWithAmount[] simulLoseItems)
+    public int PeekGet(Item model, int amount, params ItemWithAmount[] simulLoseItems)
     {
         if (!model || amount <= 0) return 0;
         return PeekGet(model.CreateData(false), amount, simulLoseItems);
@@ -227,29 +211,33 @@ public class Inventory
             {
                 if (sli.IsValid)
                 {
-                    if (!PeekLose(sli.source, sli.amount, out _))
-                        return 0;
-                    vacatedWeight += sli.source.Model_old.Weight * sli.amount;
-                    vacatedSpace += Mathf.FloorToInt(sli.amount * 1.0f / sli.source.Model_old.StackNum);
+                    if (!PeekLose(sli.source, sli.amount, out _)) return 0;
+                    vacatedWeight += sli.source.Model.Weight * sli.amount;
+                    if (sli.source.Model.InfiniteStack) vacatedSpace += sli.amount >= GetAmount(sli.source) ? 1 : 0;
+                    else vacatedSpace += Mathf.FloorToInt(sli.amount * 1.0f / sli.source.Model.StackLimit);
                 }
             }
         if (!ignoreSpace)
         {
             if (keyedSlots.TryGetValue(item.ModelID, out var find))
             {
-                int left = 0;
-                foreach (var slot in find)
+                if (item.Model.InfiniteStack) finalGet = amount;
+                else
                 {
-                    left += item.Model_old.StackNum - slot.amount;
+                    int left = 0;
+                    foreach (var slot in find)
+                    {
+                        left += item.Model.StackLimit - slot.amount;
+                    }
+                    if (left < amount && Mathf.CeilToInt((amount - left) * 1.0f / item.Model.StackLimit) > Space + vacatedSpace)
+                        finalGet = (Space + vacatedSpace) * item.Model.StackLimit + left;
                 }
-                if (left < amount && Mathf.CeilToInt((amount - left) * 1.0f / item.Model_old.StackNum) > SpaceLimit - SpaceCost + vacatedSpace)
-                    finalGet = (SpaceLimit - SpaceCost + vacatedSpace) * item.Model_old.StackNum + left;
             }
-            else if (Mathf.CeilToInt(amount * 1.0f / item.Model_old.StackNum) > SpaceLimit - SpaceCost + vacatedSpace)
-                finalGet = (SpaceLimit - SpaceCost + vacatedSpace) * item.Model_old.StackNum;
+            else if (item.Model.InfiniteStack || Mathf.CeilToInt(amount * 1.0f / item.Model.StackLimit) > Space + vacatedSpace)
+                finalGet = (Space + vacatedSpace) * item.Model.StackLimit;
         }
-        if (!ignoreWeight && finalGet * item.Model_old.Weight > WeightLimit - WeightCost + vacatedWeight)
-            finalGet = Mathf.FloorToInt(WeightLimit - WeightCost + vacatedWeight / item.Model_old.Weight);
+        if (!ignoreWeight && finalGet * item.Model.Weight > WeightLimit - WeightCost + vacatedWeight)
+            finalGet = Mathf.FloorToInt(WeightLimit - WeightCost + vacatedWeight / item.Model.Weight);
         return customGetAmountChecker != null ? customGetAmountChecker(item, finalGet) : finalGet;
     }
     /// <summary>
@@ -260,7 +248,7 @@ public class Inventory
     /// <param name="errorType">错误类型</param>
     /// <param name="simulLoseItems">同时失去的道具</param>
     /// <returns>是否可以获取</returns>
-    public bool PeekGet(ItemBase model, int amount, out InventoryError errorType, params ItemWithAmount[] simulLoseItems)
+    public bool PeekGet(Item model, int amount, out InventoryError errorType, params ItemWithAmount[] simulLoseItems)
     {
         if (!model || amount <= 0)
         {
@@ -271,12 +259,13 @@ public class Inventory
     }
     public bool PeekGet(ItemData item, int amount, out InventoryError errorType, params ItemWithAmount[] simulLoseItems)
     {
-        if (!item || !item.Model_old || amount <= 0)
+        if (!item || !item.Model || amount <= 0)
         {
             errorType = InventoryError.Invalid;
             return false;
         }
 
+        errorType = InventoryError.None;
         float vacatedWeight = 0;
         int vacatedSpace = 0;
         if (simulLoseItems != null)
@@ -297,11 +286,12 @@ public class Inventory
                         }
                         return false;
                     }
-                    vacatedWeight += sli.source.Model_old.Weight * sli.amount;
-                    vacatedSpace += Mathf.FloorToInt(sli.amount * 1.0f / sli.source.Model_old.StackNum);
+                    vacatedWeight += sli.source.Model.Weight * sli.amount;
+                    if (sli.source.Model.InfiniteStack) vacatedSpace += sli.amount >= GetAmount(sli.source) ? 1 : 0;
+                    else vacatedSpace += Mathf.FloorToInt(sli.amount * 1.0f / sli.source.Model.StackLimit);
                 }
             }
-        if (!ignoreWeight && amount * item.Model_old.Weight > WeightLimit - WeightCost + vacatedWeight)
+        if (!ignoreWeight && amount * item.Model.Weight > WeightLimit - WeightCost + vacatedWeight)
         {
             errorType = InventoryError.Overload;
             return false;
@@ -309,18 +299,19 @@ public class Inventory
         else if (!ignoreSpace)
             if (keyedSlots.TryGetValue(item.ModelID, out var find))
             {
+                if (item.Model.InfiniteStack) return true;
                 int left = 0;
                 foreach (var slot in find)
                 {
-                    left += item.Model_old.StackNum - slot.amount;
+                    left += item.Model.StackLimit - slot.amount;
                 }
-                if (left < amount && Mathf.CeilToInt((amount - left) * 1.0f / item.Model_old.StackNum) > SpaceLimit - SpaceCost + vacatedSpace)
+                if (left < amount && Mathf.CeilToInt((amount - left) * 1.0f / item.Model.StackLimit) > Space + vacatedSpace)
                 {
                     errorType = InventoryError.OverSpace;
                     return false;
                 }
             }
-            else if (Mathf.CeilToInt(amount * 1.0f / item.Model_old.StackNum) > SpaceLimit - SpaceCost + vacatedSpace)
+            else if (item.Model.InfiniteStack && Space + vacatedSpace < 1 || !item.Model.InfiniteStack && Mathf.CeilToInt(amount * 1.0f / item.Model.StackLimit) > Space + vacatedSpace)
             {
                 errorType = InventoryError.OverSpace;
                 return false;
@@ -330,10 +321,9 @@ public class Inventory
             errorType = InventoryError.Custom;
             return false;
         }
-        errorType = InventoryError.None;
         return true;
     }
-    public bool PeekGet(IEnumerable<ItemInfoBase> infos, out InventoryError errorType, params ItemWithAmount[] simulLoseItems)
+    public bool PeekGet(IEnumerable<ItemInfo> infos, out InventoryError errorType, params ItemWithAmount[] simulLoseItems)
     {
         if (infos == null)
         {
@@ -369,13 +359,14 @@ public class Inventory
                         }
                         return false;
                     }
-                    vacatedWeight += sli.source.Model_old.Weight * sli.amount;
-                    vacatedSpace += Mathf.FloorToInt(sli.amount * 1.0f / sli.source.Model_old.StackNum);
+                    vacatedWeight += sli.source.Model.Weight * sli.amount;
+                    if (sli.source.Model.InfiniteStack) vacatedSpace += sli.amount >= GetAmount(sli.source) ? 1 : 0;
+                    else vacatedSpace += Mathf.FloorToInt(sli.amount * 1.0f / sli.source.Model.StackLimit);
                 }
             }
         foreach (var item in items)
         {
-            ItemBase model = item.source.Model_old;
+            Item model = item.source.Model;
             int amount = item.amount;
             float needWeight = amount * model.Weight;
             if (!ignoreWeight)
@@ -389,22 +380,26 @@ public class Inventory
             }
             if (!ignoreSpace)
             {
-                int needSpace = Mathf.CeilToInt(amount * 1.0f / model.StackNum);
+                int needSpace = model.InfiniteStack ? 1 : Mathf.CeilToInt(amount * 1.0f / model.StackLimit);
                 if (keyedSlots.TryGetValue(model.ID, out var find))
                 {
-                    int left = 0;
-                    foreach (var slot in find)
+                    if (model.InfiniteStack) needSpace = 0;
+                    else
                     {
-                        left += model.StackNum - slot.amount;
-                    }
-                    needSpace = Mathf.CeilToInt((amount - left) * 1.0f / model.StackNum);
-                    if (left < amount && needSpace > SpaceLimit - SpaceCost + vacatedSpace)
-                    {
-                        errorType = InventoryError.OverSpace;
-                        return false;
+                        int left = 0;
+                        foreach (var slot in find)
+                        {
+                            left += model.StackLimit - slot.amount;
+                        }
+                        needSpace = Mathf.CeilToInt((amount - left) * 1.0f / model.StackLimit);
+                        if (left < amount && needSpace > Space + vacatedSpace)
+                        {
+                            errorType = InventoryError.OverSpace;
+                            return false;
+                        }
                     }
                 }
-                else if (needSpace > SpaceLimit - SpaceCost + vacatedSpace)
+                else if (needSpace > Space + vacatedSpace)
                 {
                     errorType = InventoryError.OverSpace;
                     return false;
@@ -427,7 +422,7 @@ public class Inventory
     /// <param name="model">道具原型</param>
     /// <param name="amount">数量</param>
     /// <param name="simulLoseItems">同时失去的道具</param>
-    public void Get(ItemBase model, int amount, params ItemWithAmount[] simulLoseItems)
+    public void Get(Item model, int amount, params ItemWithAmount[] simulLoseItems)
     {
         if (customGetAction != null && customGetAction(new ItemData(model, false), amount)) return;
 
@@ -465,15 +460,23 @@ public class Inventory
             if (amount <= 0 || collection == null) return;
             if (model.StackAble && item == null) item = model.CreateData();//如果物品可叠加但没有在背包中找到，则这个是新物品
             ItemSlotData temp;
-            for (int i = 0; i < amount / model.StackNum; i++)
+            if (model.InfiniteStack)
             {
-                temp = PutIntoEmptySlot(model.StackAble ? item : model.CreateData(), model.StackNum);
+                temp = PutIntoEmptySlot(item, amount);
                 if (temp) collection.Add(temp);
             }
-            if (model.StackAble)
+            else
             {
-                temp = PutIntoEmptySlot(item, amount % model.StackNum);
-                if (temp) collection.Add(temp);
+                for (int i = 0; i < amount / model.StackLimit; i++)
+                {
+                    temp = PutIntoEmptySlot(model.StackAble ? item : model.CreateData(), model.StackLimit);
+                    if (temp) collection.Add(temp);
+                }
+                if (model.StackAble)
+                {
+                    temp = PutIntoEmptySlot(item, amount % model.StackLimit);
+                    if (temp) collection.Add(temp);
+                }
             }
         }
     }
@@ -487,8 +490,8 @@ public class Inventory
     {
         if (customGetAction != null && customGetAction(item, amount)) return;
 
-        if (item.Model_old.StackAble || !item.IsInstance) Get(item.Model_old, amount, simulLoseItems);
-        else if (!item.Model_old.StackAble && amount == 1)
+        if (item.Model.StackAble || !item.IsInstance) Get(item.Model, amount, simulLoseItems);
+        else if (!item.Model.StackAble && amount == 1)
         {
             int oldAmount = 0;
             if (simulLoseItems != null && simulLoseItems.Length > 0) Lose(simulLoseItems);
@@ -498,7 +501,7 @@ public class Inventory
                 find.Add(PutIntoEmptySlot(item, 1));
             }
             else keyedSlots.Add(item.ModelID, new List<ItemSlotData>() { PutIntoEmptySlot(item, 1) });
-            OnItemAmountChanged?.Invoke(item.Model_old, oldAmount, oldAmount + amount);
+            OnItemAmountChanged?.Invoke(item.Model, oldAmount, oldAmount + amount);
         }
     }
     /// <summary>
@@ -506,7 +509,7 @@ public class Inventory
     /// </summary>
     /// <param name="infos">道具列表</param>
     /// <param name="simulLoseItems">同时失去的道具</param>
-    public void Get(IEnumerable<ItemInfoBase> infos, params ItemWithAmount[] simulLoseItems)
+    public void Get(IEnumerable<ItemInfo> infos, params ItemWithAmount[] simulLoseItems)
     {
         if (infos == null) return;
         if (simulLoseItems != null && simulLoseItems.Length > 0) Lose(simulLoseItems);
@@ -534,27 +537,40 @@ public class Inventory
     #region 道具失去相关
     public bool PeekLose(string id, int amount, out InventoryError errorType, params ItemWithAmount[] simulGetItems)
     {
-        if (string.IsNullOrEmpty(id) || amount < 1)
+        if (string.IsNullOrEmpty(id) && amount < 0)
         {
             errorType = InventoryError.Invalid;
             return false;
         }
         if (TryGetData(id, out var data, out var have))
         {
-            if (!ignoreLock && data.isLocked)
+            if (amount == 0)
+            {
+                if (have > 0)
+                {
+                    errorType = InventoryError.None;
+                    return true;
+                }
+                else
+                {
+                    errorType = InventoryError.Lack;
+                    return false;
+                }
+            }
+            else if (!ignoreLock && data.IsLocked)
             {
                 errorType = InventoryError.Locked;
                 return false;
             }
             if (simulGetItems != null)
             {
-                SimulateLose(data.Model_old, amount);
+                SimulateLose(data.Model, amount);
                 if (!PeekGet(simulGetItems, out errorType))
                 {
-                    UnsimlulateLose(data.Model_old, amount);
+                    UnsimlulateLose(data.Model, amount);
                     return false;
                 }
-                UnsimlulateLose(data.Model_old, amount);
+                UnsimlulateLose(data.Model, amount);
             }
             errorType = have >= amount ? InventoryError.None : InventoryError.Lack;
             if (have < amount) return false;
@@ -571,7 +587,7 @@ public class Inventory
             return false;
         }
     }
-    public bool PeekLose(ItemBase model, int amount, out InventoryError errorType, params ItemWithAmount[] simulGetItems)
+    public bool PeekLose(Item model, int amount, out InventoryError errorType, params ItemWithAmount[] simulGetItems)
     {
         if (!model)
         {
@@ -582,18 +598,29 @@ public class Inventory
     }
     public bool PeekLose(ItemData item, int amount, out InventoryError errorType, params ItemWithAmount[] simulGetItems)
     {
-        if (item && amount > 0)
-            if (!ignoreLock && item.isLocked)
+        if (item && amount > -1)
+            if (amount == 0)
+            {
+                if (ContainsItem(item))
+                {
+                    errorType = InventoryError.None;
+                    return true;
+                }
+                else
+                {
+                    errorType = InventoryError.Lack;
+                    return false;
+                }
+            }
+            else if (!ignoreLock && item.IsLocked)
             {
                 errorType = InventoryError.Locked;
                 return false;
             }
-            else if (!item.IsInstance)
-                return PeekLose(item.Model_old, amount, out errorType, simulGetItems);
+            else if (!item.IsInstance) return PeekLose(item.Model, amount, out errorType, simulGetItems);
             else if (items.ContainsKey(item.ID))
             {
-                if (item.Model_old.StackAble)
-                    return PeekLose(item.ModelID, amount, out errorType, simulGetItems);
+                if (item.Model.StackAble) return PeekLose(item.ModelID, amount, out errorType, simulGetItems);
                 errorType = InventoryError.None;
                 return true;
             }
@@ -611,13 +638,13 @@ public class Inventory
         {
             foreach (var item in items)
             {
-                SimulateLose(item.source.Model_old, item.amount);
+                SimulateLose(item.source.Model, item.amount);
             }
             if (!PeekGet(simulGetItems, out errorType))
             {
                 foreach (var item in items)
                 {
-                    UnsimlulateLose(item.source.Model_old, item.amount);
+                    UnsimlulateLose(item.source.Model, item.amount);
                 }
                 if (errorType == InventoryError.Overload)
                     errorType = InventoryError.PartialOverload;
@@ -625,7 +652,7 @@ public class Inventory
             }
             foreach (var item in items)
             {
-                UnsimlulateLose(item.source.Model_old, item.amount);
+                UnsimlulateLose(item.source.Model, item.amount);
             }
         }
         foreach (var item in items)
@@ -661,6 +688,7 @@ public class Inventory
     /// <param name="simulGetItems">同时获得的道具</param>
     public void Lose(string id, int amount, params ItemWithAmount[] simulGetItems)
     {
+        if (string.IsNullOrEmpty(id) || amount < 1) return;
         if (keyedSlots.TryGetValue(id, out var find) && find.Count > 0)
         {
             ItemData data = find[0].item;
@@ -677,10 +705,10 @@ public class Inventory
                     if (slot.IsEmpty) find.Remove(slot);
                 }
                 SpaceCost -= oldCount - find.Count;
-                if (!ignoreWeight) WeightCost -= data.Model_old.Weight * amount;
+                if (!ignoreWeight) WeightCost -= data.Model.Weight * amount;
                 if (find.Count < 1) items.Remove(data.ID);
                 else items[data.ID].amount -= amount;
-                OnItemAmountChanged?.Invoke(data.Model_old, oldAmount, oldAmount - amount);
+                OnItemAmountChanged?.Invoke(data.Model, oldAmount, oldAmount - amount);
                 if (simulGetItems != null && simulGetItems.Length > 0) Get(simulGetItems);
             }
         }
@@ -691,7 +719,7 @@ public class Inventory
     /// <param name="model">原型</param>
     /// <param name="amount">数量</param>
     /// <param name="simulGetItems">同时获得的道具</param>
-    public void Lose(ItemBase model, int amount, params ItemWithAmount[] simulGetItems)
+    public void Lose(Item model, int amount, params ItemWithAmount[] simulGetItems)
     {
         if (!model) return;
         Lose(model.ID, amount, simulGetItems);
@@ -707,8 +735,8 @@ public class Inventory
         if (customLoseAction != null && customLoseAction(item, amount)) return;
 
         if (!item || amount < 1) return;
-        if (item.Model_old.StackAble || !item.IsInstance) Lose(item.ModelID, amount, simulGetItems);
-        else if (!item.Model_old.StackAble && keyedSlots.TryGetValue(item.ModelID, out var find) && amount == 1)
+        if (item.Model.StackAble || !item.IsInstance) Lose(item.ModelID, amount, simulGetItems);
+        else if (!item.Model.StackAble && keyedSlots.TryGetValue(item.ModelID, out var find) && amount == 1)
         {
             int oldAmount = find.Count;
             for (int i = 0; i < find.Count; i++)
@@ -719,13 +747,13 @@ public class Inventory
                     slot.TakeAll();
                     find.RemoveAt(i);
                     SpaceCost--;
-                    if (!ignoreWeight) WeightCost -= item.Model_old.Weight;
+                    if (!ignoreWeight) WeightCost -= item.Model.Weight;
                     i--;
                 }
             }
             if (simulGetItems != null && simulGetItems.Length > 0) Get(simulGetItems);
             items.Remove(item.ID);
-            OnItemAmountChanged?.Invoke(item.Model_old, oldAmount, oldAmount - amount);
+            OnItemAmountChanged?.Invoke(item.Model, oldAmount, oldAmount - amount);
         }
     }
     /// <summary>
@@ -747,7 +775,7 @@ public class Inventory
     #region 其它
     public bool HideItem(ItemData item)
     {
-        if (!item || item.Model_old.StackAble) return false;
+        if (!item || item.Model.StackAble) return false;
         foreach (var slot in slots)
         {
             if (slot.item == item)
@@ -761,39 +789,55 @@ public class Inventory
         {
             items.Remove(item.ID);
             hiddenItems.Add(item.ID, item);
-            OnItemAmountChanged(item.Model_old, iwa.amount, 0);
+            OnItemAmountChanged(item.Model, iwa.amount, 0);
             return true;
         }
         else return false;
     }
     public bool UnhideItem(ItemData item)
     {
-        if (!item || item.Model_old.StackAble) return false;
+        if (!item || item.Model.StackAble) return false;
         if (hiddenItems.TryGetValue(item.ID, out var find) && find == item)
         {
             hiddenItems.Remove(item.ID);
             if (!ignoreSpace && SpaceCost + 1 > SpaceLimit) return false;
             PutIntoEmptySlot(item, 1);
-            OnItemAmountChanged(item.Model_old, 0, 1);
+            OnItemAmountChanged(item.Model, 0, 1);
             return true;
         }
         else return false;
     }
     public bool SwapHiddenItem(ItemData unhide, ItemData hide)
     {
-        if (!unhide || !hide || hide.Model_old.StackAble) return false;
+        if (!unhide || !hide || hide.Model.StackAble) return false;
         return HideItem(hide) && UnhideItem(unhide);
     }
 
-    private void SimulateLose(ItemBase model, int amount)
+    private void SimulateLose(Item model, int amount)
     {
         if (!ignoreWeight) WeightCost -= model.Weight * amount;
-        if (!ignoreSpace) SpaceCost -= Mathf.FloorToInt(amount * 1.0f / model.StackNum);
+        if (!ignoreSpace)
+        {
+            if (model.InfiniteStack)
+            {
+                int have = GetAmount(model);
+                SpaceCost -= have > amount ? 0 : 1;
+            }
+            else SpaceCost -= Mathf.FloorToInt(amount * 1.0f / model.StackLimit);
+        }
     }
-    private void UnsimlulateLose(ItemBase model, int amount)
+    private void UnsimlulateLose(Item model, int amount)
     {
         if (!ignoreWeight) WeightCost += model.Weight * amount;
-        if (!ignoreSpace) SpaceCost += Mathf.FloorToInt(amount * 1.0f / model.StackNum);
+        if (!ignoreSpace)
+        {
+            if (model.InfiniteStack)
+            {
+                int have = GetAmount(model);
+                SpaceCost += have > amount ? 0 : 1;
+            }
+            else SpaceCost += Mathf.FloorToInt(amount * 1.0f / model.StackLimit);
+        }
     }
     private void OnSlotSwap(ItemSlotData origin, ItemSlotData target)
     {
@@ -915,7 +959,7 @@ public class Inventory
     public delegate void InventoryMoneyListener(Inventory inventory, long oldMoney);
     public delegate void InventorySpaceListener(Inventory inventory, int oldSpaceLimit);
     public delegate void InventoryWeightListener(Inventory inventory, float oldWeightLimit);
-    public delegate void ItemAmountListener(ItemBase item, int oldAmount, int newAmount);
+    public delegate void ItemAmountListener(Item item, int oldAmount, int newAmount);
     public delegate void ItemSlotStateListener(ItemSlotData slot);
 }
 
@@ -949,13 +993,13 @@ public static class InventoryUtility
     /// <param name="data">道具信息</param>
     public static void DiscardItem(IInventoryHandler handler, ItemData data, Vector3? amountPosition = null)
     {
-        if (data == null || !data.Model_old) return;
+        if (data == null || !data.Model) return;
         if (!handler.ContainsItem(data))
         {
             MessageManager.Instance.New($"该物品已不在{handler.Name}中");
             return;
         }
-        if (!data.Model_old.DiscardAble)
+        if (!data.Model.Discardable)
         {
             MessageManager.Instance.New("该物品不可丢弃");
             return;
@@ -963,7 +1007,7 @@ public static class InventoryUtility
         int amount = handler.GetAmount(data);
         if (amount < 2 && amount > 0)
         {
-            ConfirmWindow.StartConfirm($"确定丢弃1个 [{ItemUtility.GetColorName(data.Model_old)}] 吗？",
+            ConfirmWindow.StartConfirm($"确定丢弃1个 [{data.Model.ColorName}] 吗？",
                 delegate
                 {
                     if (handler.LoseItem(data, 1))
@@ -972,7 +1016,7 @@ public static class InventoryUtility
         }
         else AmountWindow.StartInput(delegate (long amount)
         {
-            ConfirmWindow.StartConfirm($"确定丢弃{amount}个 [{ItemUtility.GetColorName(data.Model_old)}] 吗？",
+            ConfirmWindow.StartConfirm($"确定丢弃{amount}个 [{data.Model.ColorName}] 吗？",
                 delegate
                 {
                     if (handler.LoseItem(data, (int)amount))

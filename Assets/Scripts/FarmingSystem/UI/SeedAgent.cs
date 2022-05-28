@@ -1,7 +1,9 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Module;
 
-public class SeedAgent : ListItem<SeedAgent, SeedItem>,
+public class SeedAgent : ListItem<SeedAgent, Item>,
     IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public Text nameText;
@@ -28,7 +30,7 @@ public class SeedAgent : ListItem<SeedAgent, SeedItem>,
 
     public void TryBuild()
     {
-        window.CreatPreview(Data.Crop);
+        window.CreatPreview(Data.GetModule<SeedModule>().Crop);
     }
 
     public void OnBeginDrag(PointerEventData eventData)

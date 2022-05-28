@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using ZetanStudio.Item;
+
 public class ItemSlotData
 {
     public static ItemSlotData Empty = new ItemSlotData();
@@ -8,11 +10,11 @@ public class ItemSlotData
 
     public string ModelID => item ? item.ModelID : string.Empty;
 
-    public ItemBase Model => item ? item.Model_old : null;
+    public Item Model => item ? item.Model : null;
 
     public bool IsEmpty => item == null;
 
-    public bool IsFull => item && item.Model_old.StackNum <= amount;
+    public bool IsFull => item && item.Model.StackLimit <= amount;
 
     public ItemData item;
 
@@ -59,7 +61,7 @@ public class ItemSlotData
     public int Put(int amount = 1)
     {
         if (!item) return 0;
-        int left = item.Model_old.StackNum - this.amount;
+        int left = item.Model.InfiniteStack ? amount : item.Model.StackLimit - this.amount;
         if (left >= amount)
         {
             this.amount += amount;
@@ -122,7 +124,7 @@ public class ItemSlotData
         return self != null;
     }
 
-    public static List<ItemSlotData> Convert(IEnumerable<ItemInfoBase> infos, int? fixedSlotCount = null)
+    public static List<ItemSlotData> Convert(IEnumerable<ItemInfo> infos, int? fixedSlotCount = null)
     {
         List<ItemSlotData> slots = new List<ItemSlotData>();
         foreach (var info in infos)
@@ -148,7 +150,7 @@ public class ItemSlotData
         foreach (var item in items)
         {
             if (!fixedSlotCount.HasValue || slots.Count < fixedSlotCount)
-                if (item.source.Model_old.StackAble)
+                if (item.source.Model.StackAble)
                     slots.Add(new ItemSlotData(item.source, item.amount));
                 else for (int i = 0; i < item.amount; i++)
                     {

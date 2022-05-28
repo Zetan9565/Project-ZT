@@ -2,10 +2,10 @@ using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Editor
 {
     [CustomEditor(typeof(BehaviourExecutor), true)]
-    public class BehaviourExecutorInspector : Editor
+    public class BehaviourExecutorInspector : UnityEditor.Editor
     {
         SerializedProperty behaviour;
 
@@ -19,7 +19,6 @@ namespace ZetanStudio.BehaviourTree
 
         AnimBool showList;
         AnimBool showPreset;
-        ObjectSelectionDrawer<BehaviourTree> treeDrawer;
         SharedVariableListDrawer variableList;
         SharedVariablePresetListDrawer presetVariableList;
         SerializedObject serializedTree;
@@ -35,18 +34,17 @@ namespace ZetanStudio.BehaviourTree
             resetOnRestart = serializedObject.FindProperty("resetOnRestart");
             gizmos = serializedObject.FindProperty("gizmos");
             presetVariables = serializedObject.FindProperty("presetVariables");
-            treeDrawer = new ObjectSelectionDrawer<BehaviourTree>(behaviour, string.Empty, string.Empty, "行为树");
             InitTree();
         }
 
         private void InitTree()
         {
             if (!behaviour.objectReferenceValue) return;
+            serializedTree?.Dispose();
             serializedTree = new SerializedObject(behaviour.objectReferenceValue);
             serializedVariables = serializedTree.FindProperty("variables");
-            variableList = new SharedVariableListDrawer(serializedTree, serializedVariables, true);
-            presetVariableList = new SharedVariablePresetListDrawer(serializedObject, presetVariables,
-                                                                    serializedTree.targetObject as ISharedVariableHandler,
+            variableList = new SharedVariableListDrawer(serializedVariables, true);
+            presetVariableList = new SharedVariablePresetListDrawer(presetVariables, serializedTree.targetObject as ISharedVariableHandler,
                                                                     (target as BehaviourExecutor).GetPresetVariableTypeAtIndex);
             showList = new AnimBool(serializedVariables.isExpanded);
             showList.valueChanged.AddListener(() => { Repaint(); if (serializedVariables != null) serializedVariables.isExpanded = showList.target; });
@@ -72,13 +70,14 @@ namespace ZetanStudio.BehaviourTree
             {
                 bool shouldDisable = Application.isPlaying && !PrefabUtility.IsPartOfAnyPrefab(target);
                 EditorGUI.BeginDisabledGroup(shouldDisable);
-                if (shouldDisable) EditorGUILayout.PropertyField(behaviour, new GUIContent("行为树"));
-                else treeDrawer.DoLayoutDraw();
+                if (shouldDisable) EditorGUILayout.ObjectField(behaviour, new GUIContent("行为树"));
+                else EditorGUILayout.PropertyField(behaviour, new GUIContent("行为树"));
                 EditorGUI.EndDisabledGroup();
             }
             if (behaviour.objectReferenceValue != hasTreeBef) InitTree();
             if (behaviour.objectReferenceValue)
             {
+                if (serializedTree == null) InitTree();
                 if (GUILayout.Button("编辑")) BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor);
                 serializedTree.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
@@ -95,7 +94,7 @@ namespace ZetanStudio.BehaviourTree
                     {
                         behaviour.objectReferenceValue = tree;
                         InitTree();
-                        treeDrawer = new ObjectSelectionDrawer<BehaviourTree>(behaviour, string.Empty, string.Empty, "行为树");
+                        EditorGUILayout.PropertyField(behaviour, new GUIContent("行为树"));
                         EditorApplication.delayCall += delegate { BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor); };
                     }
                 }

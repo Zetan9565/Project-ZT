@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
     public class SelectVector3 : Action
     {
-        [DisplayName("随机选取")]
+        [Label("随机选取")]
         public SharedBool random;
-        [DisplayName("结果池")]
+        [Label("结果池")]
         public SharedVector3List list = new List<Vector3>();
-        [DisplayName("结果寄存器")]
+        [Label("结果寄存器")]
         public SharedVector3 rigester;
 
         private int currentIndex;

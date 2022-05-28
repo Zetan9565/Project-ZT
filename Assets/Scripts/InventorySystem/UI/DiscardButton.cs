@@ -55,7 +55,7 @@ public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     {
         static bool canSelect(ItemSlotBase slot)
         {
-            return slot && slot.Item && slot.Item.Model_old.DiscardAble;
+            return slot && slot.Item && slot.Item.Model.Discardable;
         }
         void discardItems(IEnumerable<ItemWithAmount> items)
         {

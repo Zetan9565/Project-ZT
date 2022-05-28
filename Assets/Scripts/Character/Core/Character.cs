@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 public abstract class Character : MonoBehaviour
 {

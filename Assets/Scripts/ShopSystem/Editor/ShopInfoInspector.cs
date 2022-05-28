@@ -1,6 +1,8 @@
-using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
+using UnityEngine;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Module;
 
 [CustomEditor(typeof(ShopInformation))]
 public class ShopInfoInspector : Editor
@@ -131,7 +133,7 @@ public class ShopInfoInspector : Editor
         {
             serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
-            shop.Commodities.Add(new MerchandiseInfo());
+            shop.Commodities.Add(new GoodsInfo());
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };
@@ -144,6 +146,7 @@ public class ShopInfoInspector : Editor
                 shop.Commodities.RemoveAt(list.index);
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
+            GUIUtility.ExitGUI();
         };
 
         commodityList.drawHeaderCallback = (rect) =>
@@ -180,7 +183,7 @@ public class ShopInfoInspector : Editor
             EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, lineHeight),
                 item, new GUIContent(string.Empty));
             int lineCount = 1;
-            if (acquisition.isExpanded && item.objectReferenceValue && (item.objectReferenceValue as ItemBase).SellAble)
+            if (acquisition.isExpanded && item.objectReferenceValue && (item.objectReferenceValue as Item).GetModule<SellableModule>())
             {
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
                     priceMultiple, new GUIContent("价格倍数"));
@@ -208,7 +211,7 @@ public class ShopInfoInspector : Editor
                     lineCount++;
                 }
             }
-            else if (item.objectReferenceValue && !(item.objectReferenceValue as ItemBase).SellAble)
+            else if (item.objectReferenceValue && !(item.objectReferenceValue as Item).GetModule<SellableModule>())
                 EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "该物品不可出售！");
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         };
@@ -219,7 +222,7 @@ public class ShopInfoInspector : Editor
             SerializedProperty acquisition = acquisitions.GetArrayElementAtIndex(index);
             SerializedProperty item = acquisition.FindPropertyRelative("item");
             SerializedProperty emptyAble = acquisition.FindPropertyRelative("emptyAble");
-            if (acquisition.isExpanded && item.objectReferenceValue && (item.objectReferenceValue as ItemBase).SellAble)
+            if (acquisition.isExpanded && item.objectReferenceValue && (item.objectReferenceValue as Item).GetModule<SellableModule>())
             {
                 lineCount += 2;//倍数、会购满
                 if (emptyAble.boolValue)
@@ -227,7 +230,7 @@ public class ShopInfoInspector : Editor
                     lineCount += 4;//最大需求、需求时间、最少需求、最多需求
                 }
             }
-            else if (item.objectReferenceValue && !(item.objectReferenceValue as ItemBase).SellAble) lineCount++;
+            else if (item.objectReferenceValue && !(item.objectReferenceValue as Item).GetModule<SellableModule>()) lineCount++;
             return lineCount * lineHeightSpace;
         };
 
@@ -235,7 +238,7 @@ public class ShopInfoInspector : Editor
         {
             serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
-            shop.Acquisitions.Add(new MerchandiseInfo());
+            shop.Acquisitions.Add(new GoodsInfo());
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
         };
@@ -248,6 +251,7 @@ public class ShopInfoInspector : Editor
                 shop.Acquisitions.RemoveAt(list.index);
             if (EditorGUI.EndChangeCheck())
                 serializedObject.ApplyModifiedProperties();
+            GUIUtility.ExitGUI();
         };
 
         acquisitionList.drawHeaderCallback = (rect) =>

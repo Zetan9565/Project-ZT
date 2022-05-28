@@ -1,11 +1,10 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "structure info", menuName = "Zetan Studio/建筑物信息")]
+[CreateAssetMenu(fileName = "structure info", menuName = "Zetan Studio/设施信息")]
 public class StructureInformation : ScriptableObject
 {
-    [SerializeField]
+    [SerializeField, ID]
     private string _ID;
     public string ID => _ID;
 
@@ -63,7 +62,7 @@ public class StructureInformation : ScriptableObject
     private List<StructureStage> stages = new List<StructureStage>() { new StructureStage() };
     public List<StructureStage> Stages => stages;
 
-    [SerializeField]
+    [SerializeField, Label("配方")]
     private Formulation formulation;
 }
 

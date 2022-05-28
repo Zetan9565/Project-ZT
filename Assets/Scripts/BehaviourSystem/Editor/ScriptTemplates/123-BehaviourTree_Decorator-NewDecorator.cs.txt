@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using ZetanStudio.BehaviourTree;
+using ZetanStudio.BehaviourTree.Nodes;
 
 [NodeDescription("此处是结点悬浮描述")]
 public class #SCRIPTNAME# : Decorator

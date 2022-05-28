@@ -27,18 +27,18 @@ MonoBehaviour:
   ongoingDialogue: {fileID: 11400000, guid: 3dd42e42c554ed947a725a4b4ca24641, type: 2}
   completeDialogue: {fileID: 11400000, guid: 4590ede6f624ae34883291bfd21fa8a5, type: 2}
   rewardItems:
-  - item: {fileID: 11400000, guid: 6c7872e2f8dbf2948bc18ceed18c26ad, type: 2}
+  - item: {fileID: 4876839640930190242, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 1000
-  - item: {fileID: 11400000, guid: e7d15132e142bc34ab9b56e50a6f4539, type: 2}
+  - item: {fileID: -6049188909635569283, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 300
-  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+  - item: {fileID: -464574647126714662, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 3
-  - item: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17, type: 2}
+  - item: {fileID: -8659359920512167614, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 3
   _NPCToSubmit: {fileID: 0}
-  cmpltObjctvInOrder: 1
+  inOrder: 1
   objectives:
-  - rid: 0
+  - rid: 3760287504804872192
   - rid: 1
   - rid: 2
   - rid: 3
@@ -46,19 +46,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 0
-      type: {class: TalkObjective, ns: , asm: Assembly-CSharp}
-      data:
-        displayName: "\u8BE2\u95EE\u739B\u4E3D\u4E9A"
-        display: 1
-        canNavigate: 1
-        showMapIcon: 1
-        auxiliaryPos: {fileID: 0}
-        amount: 1
-        inOrder: 1
-        priority: 1
-        _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-        dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491, type: 2}
     - rid: 1
       type: {class: MoveObjective, ns: , asm: Assembly-CSharp}
       data:
@@ -68,8 +55,9 @@ MonoBehaviour:
         showMapIcon: 1
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
+        showAmount: 0
         inOrder: 1
-        priority: 2
+        priority: 1
         itemToUseHere: {fileID: 0}
     - rid: 2
       type: {class: KillObjective, ns: , asm: Assembly-CSharp}
@@ -80,8 +68,9 @@ MonoBehaviour:
         showMapIcon: 1
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 5
+        showAmount: 0
         inOrder: 1
-        priority: 3
+        priority: 2
         killType: 2
         enemy: {fileID: 0}
         race: {fileID: 11400000, guid: 150e8a581f32093459fd9b32c975e6f7, type: 2}
@@ -95,9 +84,10 @@ MonoBehaviour:
         showMapIcon: 1
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
+        showAmount: 0
         inOrder: 1
         priority: 3
-        itemToCollect: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75,
+        itemToCollect: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
           type: 2}
         checkBagAtStart: 1
         loseItemAtSbmt: 1
@@ -110,9 +100,24 @@ MonoBehaviour:
         showMapIcon: 1
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
+        showAmount: 0
         inOrder: 1
         priority: 3
-        itemToCollect: {fileID: 11400000, guid: d6614f9dacd23294290467b07e7a3a17,
+        itemToCollect: {fileID: 2294737969574299077, guid: 11d254d59d262564aa42d1df5009d201,
           type: 2}
         checkBagAtStart: 1
         loseItemAtSbmt: 1
+    - rid: 3760287504804872192
+      type: {class: TalkObjective, ns: , asm: Assembly-CSharp}
+      data:
+        displayName: "\u8BE2\u95EE{[NPC]NPC001}"
+        display: 1
+        canNavigate: 1
+        showMapIcon: 1
+        auxiliaryPos: {fileID: 0}
+        amount: 1
+        showAmount: 0
+        inOrder: 1
+        priority: 0
+        _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
+        dialogue: {fileID: 11400000, guid: aa424ce543cf4e249a2dd7e60be59491, type: 2}

@@ -1,10 +1,10 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Editor
 {
     [CustomEditor(typeof(BehaviourTree))]
-    public class BehaviourTreeInspector : Editor
+    public class BehaviourTreeInspector : UnityEditor.Editor
     {
         SerializedProperty _name;
         SerializedProperty description;
@@ -17,7 +17,7 @@ namespace ZetanStudio.BehaviourTree
             _name = serializedObject.FindProperty("_name");
             description = serializedObject.FindProperty("description");
             variables = serializedObject.FindProperty("variables");
-            variableList = new SharedVariableListDrawer(serializedObject, variables, true);
+            variableList = new SharedVariableListDrawer(variables, true);
         }
 
         protected override void OnHeaderGUI()

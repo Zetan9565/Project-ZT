@@ -1,13 +1,13 @@
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
-    [NodeDescription("概率成功结点：以一定的概率向上反馈评估成功")]
+    [Description("概率成功结点：以一定的概率向上反馈评估成功")]
     public class RandomProbability : Conditional
     {
-        [DisplayName("成功率")]
+        [Label("成功率")]
         public SharedFloat successProbability = 0.5f;
-        [DisplayName("自定义种子")]
+        [Label("自定义种子")]
         public SharedBool useSeed;
-        [DisplayName("随机种子"), HideIf_BT("useSeed", false)]
+        [Label("随机种子"), HideIf("useSeed", false)]
         public SharedInt seed;
 
         private System.Random random;

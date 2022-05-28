@@ -13,13 +13,13 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 {
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("存档文件名")]
+    [Label("存档文件名")]
 #endif
     private string dataName = "SaveData.zdat";
 
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("16或32字符密钥")]
+    [Label("16或32字符密钥")]
 #endif
     private string encryptKey = "zetangamedatezetangamdatezetanga";
 

@@ -1,24 +1,37 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using System.Linq;
 using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
 
-[CustomEditor(typeof(SingletonMonoBehaviour<>), true)]
+[CustomEditor(typeof(SingletonMonoBehaviour), true)]
 public class SingletonMonoBehaviourInspector : Editor
 {
+    [InitializeOnLoadMethod]
+    private static void AddListener()
+    {
+        EditorApplication.hierarchyChanged -= OnHierarchyChanged;
+        EditorApplication.hierarchyChanged += OnHierarchyChanged;
+    }
+
+    private static void OnHierarchyChanged()
+    {
+        var g = FindObjectsOfType<SingletonMonoBehaviour>().GroupBy(x => x.GetType()).FirstOrDefault(g => g.Count() > 1);
+        if (g != null) Debug.LogError(string.Format("存在多个激活的{0}，请确保只激活一个", g.Key.Name));
+    }
+
     public override void OnInspectorGUI()
     {
-        if (!CheckValid(out string text))
-            EditorGUILayout.HelpBox(text, MessageType.Error);
+        if (!CheckValid(out string text)) EditorGUILayout.HelpBox(text, MessageType.Error);
         else base.OnInspectorGUI();
     }
 
     protected bool CheckValid(out string text)
     {
         var monos = FindObjectsOfType(target.GetType());
-        if (monos.Length > 1)
+        if (monos.Count(x => (x as MonoBehaviour).isActiveAndEnabled) > 1)
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder("场景中存在多个<");
-            sb.Append(target.GetType()); sb.Append(">，请移除其中一个！\n");
+            System.Text.StringBuilder sb = new System.Text.StringBuilder("存在多个激活的<");
+            sb.Append(target.GetType().Name); sb.Append(">，请移除或失活其它\n");
             for (int i = 0; i < monos.Length; i++)
             {
                 sb.Append("位置"); sb.Append(i + 1); sb.Append(": ");

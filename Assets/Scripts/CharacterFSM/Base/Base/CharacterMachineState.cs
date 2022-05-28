@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 public abstract class CharacterMachineState
 {

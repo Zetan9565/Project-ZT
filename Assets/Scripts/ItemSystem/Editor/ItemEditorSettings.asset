@@ -18,4 +18,4 @@ MonoBehaviour:
   minWindowSize: {x: 800, y: 600}
   scriptTemplate: {fileID: 4900000, guid: 310e4e14495f7cf478d6609839010633, type: 3}
   newScriptFolder: Assets/Scripts/ItemSystem/Base/Module
-  useDatabase: 0
+  language: {fileID: 11400000, guid: 861bdeac01ad8fd45a861de0e850ef36, type: 2}

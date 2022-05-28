@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
     [Serializable]
     /// <summary>
@@ -23,10 +23,23 @@ namespace ZetanStudio.BehaviourTree
         public abstract bool IsValid { get; }
 
         #region 运行时属性
+        private NodeStates state;
         /// <summary>
         /// 结点当前评估状态
         /// </summary>
-        public NodeStates State { get; protected set; }
+        public NodeStates State
+        {
+            get => state;
+            protected set
+            {
+                if (state != value)
+                {
+                    var stateBef = state;
+                    state = value;
+                    OnStateChanged?.Invoke(this, stateBef);
+                }
+            }
+        }
 
         protected bool isStarted;
         public bool IsStarted => isStarted;
@@ -58,6 +71,7 @@ namespace ZetanStudio.BehaviourTree
         public bool IsRuntime => isRuntime;
 
         public event Action<Node> OnEvaluated;
+        public event Action<Node, NodeStates> OnStateChanged;
         #endregion
 
         #region 运行时方法
@@ -75,9 +89,10 @@ namespace ZetanStudio.BehaviourTree
             Tree = tree;
             foreach (var field in GetType().GetFields(ZetanUtility.CommonBindingFlags).Where(field => field.FieldType.IsSubclassOf(typeof(SharedVariable))))
             {
-                var hideAttr = field.GetCustomAttribute<HideIf_BTAttribute>();
-                if (hideAttr != null && ZetanUtility.TryGetMemberValue(hideAttr.path, this, out var value, out _) && Equals(value, hideAttr.value))
-                    continue;
+                ICheckValueAttribute attr = field.GetCustomAttribute<HideIfAttribute>();
+                if (attr != null && ICheckValueAttribute.Check(this, attr)) continue;
+                attr = field.GetCustomAttribute<ShowIfAttribute>();
+                if (attr != null && !ICheckValueAttribute.Check(this, attr)) continue;
                 SharedVariable variable = field.GetValue(this) as SharedVariable;
                 //if (variable.isShared) field.SetValue(this, this.owner.GetVariable(variable.name));
                 //else if (variable.isGlobal) field.SetValue(this, BehaviourManager.Instance.GetVariable(variable.name));
@@ -217,7 +232,7 @@ namespace ZetanStudio.BehaviourTree
             {
                 isStarted = false;
                 State = NodeStates.Failure;
-                if(this is ParentNode parent) parent.GetChildren().ForEach(n => n.Abort());
+                if (this is ParentNode parent) parent.GetChildren().ForEach(n => n.Abort());
                 OnEnd();
             }
         }
@@ -229,7 +244,7 @@ namespace ZetanStudio.BehaviourTree
             bool running = State == NodeStates.Running;
             isStarted = false;
             State = NodeStates.Inactive;
-            if(this is ParentNode parent) parent.GetChildren().ForEach(n => n.Inactivate());
+            if (this is ParentNode parent) parent.GetChildren().ForEach(n => n.Inactivate());
             if (running) OnEnd();
         }
         #endregion
@@ -379,7 +394,7 @@ namespace ZetanStudio.BehaviourTree
         /// <summary>
         /// 用于在编辑器中备注结点，不应在游戏逻辑中使用
         /// </summary>
-        [TextArea(1, 3), DisplayName("结点描述")] public string _description;
+        [TextArea(1, 3), Label("结点描述")] public string _description;
 
         /// <summary>
         /// 用于在编辑器中连接子结点，不应在游戏逻辑中使用
@@ -424,6 +439,17 @@ namespace ZetanStudio.BehaviourTree
         public virtual Node Copy()
         {
             return MemberwiseClone() as Node;
+        }
+
+        public static string GetNodeDesc(Type type)
+        {
+            if (type.IsSubclassOf(typeof(Node)))
+            {
+                var descAttr = type.GetCustomAttribute<DescriptionAttribute>();
+                if (descAttr != null) return descAttr.description;
+                else return string.Empty;
+            }
+            else return string.Empty;
         }
 #endif
         #endregion

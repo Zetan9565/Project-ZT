@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "dialogue", menuName = "Zetan Studio/剧情/对话")]
@@ -30,28 +29,26 @@ public class Dialogue : ScriptableObject
     private List<DialogueWords> words = new List<DialogueWords>();
     public List<DialogueWords> Words => words;
 
-    public static string GetAutoID(int length = 6)
+    public string Preview()
     {
-        string newID = string.Empty;
-        var len = Mathf.Pow(10, length);
-        Dialogue[] all = Resources.LoadAll<Dialogue>("Configuration");
-        for (int i = 1; i < len; i++)
-        {
-            newID = "DIALG" + i.ToString().PadLeft(length, '0');
-            if (!Array.Exists(all, x => x.ID == newID))
-                break;
-        }
-        return newID;
+        return PreviewDialogue(this);
     }
 
-    public static bool IsIDDuplicate(Dialogue dialogue, Dialogue[] all = null)
+    public static string PreviewDialogue(Dialogue dialogue, params IEnumerable<ScriptableObject>[] caches)
     {
-        if (all == null) all = Resources.LoadAll<Dialogue>("Configuration");
-
-        Dialogue find = Array.Find(all, x => x.ID == dialogue.ID);
-        if (!find) return false;//若没有找到，则ID可用
-        //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
-        return find != dialogue || (find == dialogue && Array.FindAll(all, x => x.ID == dialogue.ID).Length > 1);
+        if (!dialogue) return null;
+        string dialoguePreview = string.Empty;
+        for (int i = 0; i < dialogue.Words.Count; i++)
+        {
+            var words = dialogue.Words[i];
+            dialoguePreview += "[" + words.TalkerName + "]说：\n-" + MiscFuntion.HandlingKeyWords(words.Content, false, caches);
+            for (int j = 0; j < words.Options.Count; j++)
+            {
+                dialoguePreview += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
+            }
+            dialoguePreview += i == dialogue.Words.Count - 1 ? string.Empty : "\n";
+        }
+        return dialoguePreview;
     }
 
     public static string GetFirstWords(Dialogue dialogue)
@@ -62,6 +59,32 @@ public class Dialogue : ScriptableObject
         }
         return string.Empty;
     }
+
+#if UNITY_EDITOR
+    public static class Editor
+    {
+        public static string GetAutoID(Dialogue[] all, int length = 6)
+        {
+            string newID = string.Empty;
+            var len = Mathf.Pow(10, length);
+            for (int i = 1; i < len; i++)
+            {
+                newID = "DIALG" + i.ToString().PadLeft(length, '0');
+                if (!Array.Exists(all, x => x.ID == newID))
+                    break;
+            }
+            return newID;
+        }
+
+        public static bool IsIDDuplicate(Dialogue dialogue, Dialogue[] all)
+        {
+            Dialogue find = Array.Find(all, x => x.ID == dialogue.ID);
+            if (!find) return false;//若没有找到，则ID可用
+                                    //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
+            return find != dialogue || (find == dialogue && Array.FindAll(all, x => x.ID == dialogue.ID).Length > 1);
+        }
+    }
+#endif
 }
 [Serializable]
 public class DialogueWords
@@ -220,12 +243,12 @@ public class WordsOption
     public int IndexToGoBack => indexToGoBack;
 
     [SerializeField]
-    private ItemInfoBase itemToSubmit;
-    public ItemInfoBase ItemToSubmit => itemToSubmit;
+    private ItemInfo itemToSubmit;
+    public ItemInfo ItemToSubmit => itemToSubmit;
 
     [SerializeField]
-    private ItemInfoBase itemCanGet;
-    public ItemInfoBase ItemCanGet => itemCanGet;
+    private ItemInfo itemCanGet;
+    public ItemInfo ItemCanGet => itemCanGet;
     [SerializeField]
     private bool showOnlyWhenNotHave;
     public bool ShowOnlyWhenNotHave => showOnlyWhenNotHave;

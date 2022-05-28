@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Module;
 
 public class ItemInfoDisplayer : MonoBehaviour
 {
@@ -57,7 +59,7 @@ public class ItemInfoDisplayer : MonoBehaviour
 
     public void ShowItemInfo(ItemData item, bool isContrast = false)
     {
-        if (!item || !item.Model_old)
+        if (!item || !item.Model)
         {
             Hide(true);
             return;
@@ -65,24 +67,24 @@ public class ItemInfoDisplayer : MonoBehaviour
         if (this.item == item) return;
         Clear();
         this.item = item;
-        icon.overrideSprite = item.Model_old.Icon;
+        icon.overrideSprite = item.Model.Icon;
         ZetanUtility.SetActive(contrastMark, isContrast);
         nameText.text = item.Name;
-        nameText.color = ItemUtility.QualityToColor(item.Model_old.Quality);
-        typeText.text = ItemBase.GetItemTypeString(item.Model_old.ItemType);
-        priceText.text = item.Model_old.SellAble ? item.Model_old.SellPrice + GameManager.CoinName : "不可出售";
-        weightText.text = item.Model_old.Weight.ToString("F2") + "WL";
-        if (item.Model_old.IsEquipment)
+        nameText.color = item.Model.Quality.Color;
+        typeText.text = item.Model.Type.Name;
+        priceText.text = item.Model.GetModule<SellableModule>() is SellableModule sellAble ? sellAble.Price + GameManager.CoinName : "不可出售";
+        weightText.text = item.Model.Weight.ToString("F2");
+        if (item.Model.GetModule<AttributeModule>() is AttributeModule attribute)
         {
             PushTitle("属性：");
-            foreach (RoleAttribute attr in (item.Model_old as EquipmentItem).Attribute.Attributes)
+            foreach (RoleAttribute attr in attribute.Attributes.Attributes)
             {
                 PushAttribute(attr);
             }
         }
         PushTitle("描述：");
-        PushContent(item.Model_old.Description);
-        ZetanUtility.SetActive(durability, item.Model_old.IsEquipment);
+        PushContent(item.Model.Description);
+        ZetanUtility.SetActive(durability, item.GetModule<DurabilityModule>());
 #if true
         ZetanUtility.SetActive(debugIDText, true);
         debugIDText.text = item.ID;
@@ -119,7 +121,7 @@ public class ItemInfoDisplayer : MonoBehaviour
         elementsCount++;
     }
 
-    private void PushGem(GemItem gem)
+    private void PushGem(Item gem)
     {
         elementsCount++;
     }
@@ -193,7 +195,7 @@ public class ItemInfoDisplayer : MonoBehaviour
     {
         if (item)
         {
-            AmountWindow.StartInput(a => { if (item) BackpackManager.Instance.GetItem(item.Model_old, (int)a); }, 999, position: icon.transform.position);
+            AmountWindow.StartInput(a => { if (item) BackpackManager.Instance.GetItem(item.Model, (int)a); }, 999, position: icon.transform.position);
         }
     }
 #endif

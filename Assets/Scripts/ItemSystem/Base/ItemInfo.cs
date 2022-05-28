@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Craft;
+using ZetanStudio.Item.Module;
 using Random = UnityEngine.Random;
 
 #region 道具信息相关
 [Serializable]
-public class ItemInfoBase
+public class ItemInfo
 {
     public string ItemID
     {
@@ -26,8 +29,8 @@ public class ItemInfoBase
         }
     }
 
-    [SerializeField, ZetanStudio.Item.ItemSelector]
-    public ItemBase item;
+    [SerializeField]
+    public Item item;
 
     [SerializeField]
     protected int amount;
@@ -47,49 +50,25 @@ public class ItemInfoBase
 
     public bool IsValid => item;
 
-    public ItemInfoBase()
+    public ItemInfo()
     {
         amount = 1;
     }
 
-    public ItemInfoBase(ItemBase item, int amount = 1)
+    public ItemInfo(Item item, int amount = 1)
     {
         this.item = item;
         this.amount = amount;
     }
 
-    public static ItemInfoBase[] Convert(IEnumerable<ItemWithAmount> items)
+    public static ItemInfo[] Convert(IEnumerable<ItemWithAmount> items)
     {
-        List<ItemInfoBase> results = new List<ItemInfoBase>();
+        List<ItemInfo> results = new List<ItemInfo>();
         foreach (var item in items)
         {
-            if (item.IsValid) results.Add(new ItemInfoBase(item.source.Model_old, item.amount));
+            if (item.IsValid) results.Add(new ItemInfo(item.source.Model, item.amount));
         }
         return results.ToArray();
-    }
-
-    public static implicit operator bool(ItemInfoBase self)
-    {
-        return self != null;
-    }
-}
-
-[Serializable]
-public class ItemInfo : ItemInfoBase //在这个类进行拓展，如强化、词缀、附魔
-{
-    public ItemInfo(ItemBase item, int amount = 1) : base(item, amount) { }
-
-    [HideInInspector]
-    public int indexInGrid;
-
-    public new bool IsValid => item && Amount >= 1;
-
-    public ItemInfo Cloned
-    {
-        get
-        {
-            return MemberwiseClone() as ItemInfo;
-        }
     }
 
     public static implicit operator bool(ItemInfo self)
@@ -120,8 +99,8 @@ public class DropItemInfo
     }
 
     [SerializeField]
-    private ItemBase item;
-    public ItemBase Item
+    private Item item;
+    public Item Item
     {
         get
         {
@@ -133,8 +112,6 @@ public class DropItemInfo
             item = value;
         }
     }
-    [SerializeField]
-    private ZetanStudio.Item.ItemNew itemNew;
 
     [SerializeField]
     private int minAmount = 1;
@@ -182,7 +159,7 @@ public class DropItemInfo
         }
     }
 
-    [SerializeField]
+    [SerializeField, ObjectSelector("title", displayNone: true)]
     private Quest bindedQuest;
     public Quest BindedQuest
     {
@@ -197,7 +174,7 @@ public class DropItemInfo
     public static List<ItemWithAmount> Drop(IEnumerable<DropItemInfo> DropItems)
     {
         List<ItemWithAmount> lootItems = new List<ItemWithAmount>();
-        Dictionary<string, ItemWithAmount> map = new Dictionary<string, ItemWithAmount>(); 
+        Dictionary<string, ItemWithAmount> map = new Dictionary<string, ItemWithAmount>();
         foreach (DropItemInfo di in DropItems)
             if (ZetanUtility.Probability(di.DropRate))
                 if (!di.OnlyDropForQuest || QuestManager.Instance.HasOngoingQuest(di.BindedQuest.ID))
@@ -248,27 +225,27 @@ public class MaterialInfo
         }
     }
 
-    [SerializeField]
-    private ItemBase item;
-    public ItemBase Item => item;
+    [SerializeField, ItemFilter(typeof(MaterialModule))]
+    private Item item;
+    public Item Item => item;
 
     [SerializeField]
     private int amount = 1;
     public int Amount => amount;
 
     [SerializeField]
-    private MakingType makingType;
-    public MakingType MakingType => makingType;
+    private CraftType makingType;
+    public CraftType MakingType => makingType;
 
-    [SerializeField]
-    private MaterialType materialType;
-    public MaterialType MaterialType => materialType;
+    [SerializeField, Enum(typeof(MaterialType))]
+    private int materialType;
+    public MaterialType MaterialType => MaterialTypeEnum.Instance[materialType];
 
     public bool IsValid
     {
         get
         {
-            return (makingType == MakingType.SingleItem && item || makingType == MakingType.SameType && materialType != MaterialType.None) && amount > 0;
+            return (makingType == CraftType.SingleItem && item || makingType == CraftType.SameType && materialType > -1) && amount > 0;
         }
     }
 
@@ -279,16 +256,16 @@ public class MaterialInfo
             while (materialEnum.MoveNext())
             {
                 var material = materialEnum.Current;
-                if (material.MakingType == MakingType.SingleItem)
+                if (material.MakingType == CraftType.SingleItem)
                 {
                     var find = otherMaterials.FirstOrDefault(x => x.Item == material.Item);
                     if (!find || find.Amount != material.Amount) return false;
                 }
             }
-        foreach (MaterialType type in Enum.GetValues(typeof(MaterialType)))
+        foreach (var type in MaterialTypeEnum.Instance.Enum)
         {
-            int amout1 = itemMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == type).Select(x => x.Amount).Sum();
-            int amout2 = otherMaterials.Where(x => x.MakingType == MakingType.SameType && x.MaterialType == type).Select(x => x.Amount).Sum();
+            int amout1 = itemMaterials.Where(x => x.MakingType == CraftType.SameType && x.MaterialType == type).Select(x => x.Amount).Sum();
+            int amout2 = otherMaterials.Where(x => x.MakingType == CraftType.SameType && x.MaterialType == type).Select(x => x.Amount).Sum();
             if (amout1 != amout2) return false;
         }
         return true;
@@ -300,14 +277,14 @@ public class MaterialInfo
     /// <param name="itemMaterials">目标材料</param>
     /// <param name="givenMaterials">所给材料</param>
     /// <returns>是否匹配</returns>
-    public static bool CheckMaterialsMatch(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<ItemInfoBase> givenMaterials)
+    public static bool CheckMaterialsMatch(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<ItemInfo> givenMaterials)
     {
         if (itemMaterials == null || itemMaterials.Count() < 1 || givenMaterials == null || givenMaterials.Count() < 1 || itemMaterials.Count() != givenMaterials.Count()) return false;
         using (var materialEnum = itemMaterials.GetEnumerator())
             while (materialEnum.MoveNext())
             {
                 var material = materialEnum.Current;
-                if (material.MakingType == MakingType.SingleItem)
+                if (material.MakingType == CraftType.SingleItem)
                 {
                     var find = givenMaterials.FirstOrDefault(x => x.ItemID == material.ItemID);
                     if (!find) return false;//所提供的材料中没有这种材料
@@ -315,7 +292,7 @@ public class MaterialInfo
                 }
                 else
                 {
-                    int amount = givenMaterials.Where(x => x.item.MaterialType == material.MaterialType).Select(x => x.Amount).Sum();
+                    int amount = givenMaterials.Where(x => MaterialModule.Compare(x.item, material.MaterialType)).Select(x => x.Amount).Sum();
                     if (amount != material.Amount) return false;//提供的材料数量不符
                 }
             }
@@ -334,8 +311,8 @@ public class MaterialInfo
 public class AffectiveItemInfo
 {
     [SerializeField]
-    private ItemBase item;
-    public ItemBase Item
+    private Item item;
+    public Item Item
     {
         get
         {

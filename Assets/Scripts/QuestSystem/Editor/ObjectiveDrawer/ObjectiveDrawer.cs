@@ -2,13 +2,15 @@
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using ZetanStudio.Item;
+using ZetanStudio.Extension.Editor;
 
 [CustomPropertyDrawer(typeof(Objective), true)]
 public class ObjectiveDrawer : PropertyDrawer
 {
     public Quest[] questCache;
     public TalkerInformation[] talkerCache;
-    public ItemBase[] itemCache;
+    public Item[] itemCache;
     public Dialogue[] dialogueCache;
     protected float lineHeight;
     protected float lineHeightSpace;
@@ -19,7 +21,7 @@ public class ObjectiveDrawer : PropertyDrawer
         lineHeightSpace = lineHeight + 2;
         questCache = Resources.LoadAll<Quest>("Configuration");
         talkerCache = Resources.LoadAll<TalkerInformation>("Configuration").Where(x => x.Enable).ToArray();
-        itemCache = Resources.LoadAll<ItemBase>("Configuration");
+        itemCache = Resources.LoadAll<Item>("Configuration");
     }
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -42,44 +44,48 @@ public class ObjectiveDrawer : PropertyDrawer
 
     public void DrawObjectiveItem(SerializedProperty objective, Rect position)
     {
-        int.TryParse(objective.propertyPath.Split('[', ']')[^2], out int index);
-        SerializedProperty cmpltObjctvInOrder = objective.serializedObject.FindProperty("cmpltObjctvInOrder");
+        SerializedProperty questInOrder = objective.serializedObject.FindProperty("inOrder");
         SerializedProperty objectives = objective.serializedObject.FindProperty("objectives");
         SerializedProperty display = objective.FindPropertyRelative("display");
         SerializedProperty displayName = objective.FindPropertyRelative("displayName");
         SerializedProperty amount = objective.FindPropertyRelative("amount");
+        SerializedProperty showAmount = objective.FindPropertyRelative("showAmount");
         SerializedProperty inOrder = objective.FindPropertyRelative("inOrder");
         SerializedProperty priority = objective.FindPropertyRelative("priority");
+        int index = objective.GetArrayIndex();
+        int left = 0;
+        if (index > 0 && objectives.GetArrayElementAtIndex(index - 1) is SerializedProperty prev)
+            left = prev.FindPropertyRelative("priority").intValue;
+        priority.intValue = Mathf.Clamp(priority.intValue, left, index);
         string typePrefix = GetTypePrefix();
+        string title = typePrefix;
         if (display.boolValue)
-        {
-            if (!string.IsNullOrEmpty(displayName.stringValue))
-                EditorGUI.PropertyField(new Rect(position.x + 8, position.y, position.width * 0.8f, lineHeight), objective, new GUIContent(typePrefix + displayName.stringValue));
-            else EditorGUI.PropertyField(new Rect(position.x + 8, position.y, position.width * 0.8f, lineHeight), objective, new GUIContent(typePrefix + "(空标题)"));
-        }
-        else EditorGUI.PropertyField(new Rect(position.x + 8, position.y, position.width * 0.8f, lineHeight), objective, new GUIContent(typePrefix + "(被隐藏的目标)"));
+            if (string.IsNullOrEmpty(displayName.stringValue)) title += "(空标题)";
+            else title += displayName.stringValue;
+        else title += "(被隐藏的目标)";
+        EditorGUI.BeginProperty(new Rect(position.x + 8, position.y, position.width * 0.8f, lineHeight), GUIContent.none, objective);
+        objective.isExpanded = EditorGUI.Foldout(new Rect(position.x + 8, position.y, position.width * 0.8f, lineHeight), objective.isExpanded, title, true);
+        EditorGUI.EndProperty();
         EditorGUI.LabelField(new Rect(position.x + position.width - 20, position.y, 0, lineHeight), $"优先级：{priority.intValue}", ZetanUtility.Editor.Style.middleRight);
-        if (cmpltObjctvInOrder.boolValue) display.boolValue = EditorGUI.Toggle(new Rect(position.x + position.width - 15, position.y, 10, lineHeight), display.boolValue);
+        if (questInOrder.boolValue) display.boolValue = EditorGUI.Toggle(new Rect(position.x + position.width - 15, position.y, 10, lineHeight), display.boolValue);
         int lineCount = 1;
         if (objective.isExpanded)
         {
-            if (display.boolValue || !cmpltObjctvInOrder.boolValue)
+            if (display.boolValue || !questInOrder.boolValue)
             {
                 EditorGUI.PropertyField(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), displayName, new GUIContent("标题"));
                 lineCount++;
             }
-            EditorGUI.PropertyField(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), amount, new GUIContent("目标数量"));
+            EditorGUI.PropertyField(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width - 17, lineHeight), amount, new GUIContent("目标数量"));
+            showAmount.boolValue = EditorGUI.Toggle(new Rect(position.x + position.width - 15, position.y + lineHeightSpace * lineCount, 10, lineHeight), showAmount.boolValue);
             if (amount.intValue < 1) amount.intValue = 1;
             lineCount++;
-            if (cmpltObjctvInOrder.boolValue)
+            if (questInOrder.boolValue)
             {
                 EditorGUI.PropertyField(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), inOrder, new GUIContent("按顺序"));
                 lineCount++;
             }
-            int left = 1;
-            if (index > 1 && objectives.GetArrayElementAtIndex(index - 1) is SerializedProperty prev)
-                left = prev.FindPropertyRelative("priority").intValue;
-            priority.intValue = EditorGUI.IntSlider(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), "优先级", priority.intValue, left, index + 1);
+            priority.intValue = EditorGUI.IntSlider(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), "优先级", priority.intValue, left, index);
             lineCount++;
             DrawAdditionalProperty(objective, position, ref lineCount);
         }
@@ -108,13 +114,13 @@ public class ObjectiveDrawer : PropertyDrawer
         if (objective.isExpanded)
         {
             lineCount++;//目标数量
-            if (quest.CmpltObjctvInOrder)
+            if (quest.InOrder)
                 lineCount++;// 按顺序
             lineCount += 1;//执行顺序
             lineCount += 1;//可导航
             if (objective.FindPropertyRelative("showMapIcon").boolValue)
                 lineCount++;//辅助位置
-            if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
+            if (objective.FindPropertyRelative("display").boolValue || !quest.InOrder) lineCount++;//标题
         }
         return lineCount * lineHeightSpace;
     }

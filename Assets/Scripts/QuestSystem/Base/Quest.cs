@@ -14,8 +14,6 @@ public class Quest : ScriptableObject
     private string title = "未定名任务";
     public string Title => title;
 
-    public new string name => title;
-
     [SerializeField, TextArea(5, 5)]
     private string description;
     public string Description => description;
@@ -55,21 +53,20 @@ public class Quest : ScriptableObject
     public Dialogue CompleteDialogue => completeDialogue;
 
     [SerializeField]
-    private List<ItemInfoBase> rewardItems = new List<ItemInfoBase>();
-    public List<ItemInfoBase> RewardItems => rewardItems;
+    private List<ItemInfo> rewardItems = new List<ItemInfo>();
+    public List<ItemInfo> RewardItems => rewardItems;
 
-    [SerializeField]
+    [SerializeField, ObjectSelector(nameNull: "接取处NPC", displayNone: true)]
     private TalkerInformation _NPCToSubmit;
     public TalkerInformation NPCToSubmit => _NPCToSubmit;
 
     [SerializeField]
-    private bool cmpltObjctvInOrder;
-    public bool CmpltObjctvInOrder => cmpltObjctvInOrder;
+    private bool inOrder = true;
+    public bool InOrder => inOrder;
 
     [SerializeReference]
     private List<Objective> objectives = new List<Objective>();
     public List<Objective> Objectives => objectives;
-
 
     public static string GetAutoID(int length = 3)
     {

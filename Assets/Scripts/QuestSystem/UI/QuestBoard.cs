@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class QuestBoard : SingletonMonoBehaviour<QuestBoard>, IPointerClickHandler
+public class QuestBoard : SingletonWindow<QuestBoard>, IPointerClickHandler
 {
-    [SerializeField, DisplayName("标题文字")]
+    [SerializeField, Label("标题文字")]
     private Text titleText;
 
-    [SerializeField, DisplayName("目标文字")]
+    [SerializeField, Label("目标文字")]
     private Text objectiveText;
 
     public QuestData Quest { get; private set; }
@@ -36,6 +34,15 @@ public class QuestBoard : SingletonMonoBehaviour<QuestBoard>, IPointerClickHandl
         ZetanUtility.SetActive(gameObject, false);
     }
 
+    protected override bool OnOpen(params object[] args)
+    {
+        return false;
+    }
+    protected override bool OnClose(params object[] args)
+    {
+        return false;
+    }
+
     public void Refresh()
     {
         if (!Quest || Quest.IsFinished)
@@ -44,7 +51,7 @@ public class QuestBoard : SingletonMonoBehaviour<QuestBoard>, IPointerClickHandl
             return;
         }
         ZetanUtility.SetActive(gameObject, true);
-        titleText.text = $"{(Quest.IsComplete ? "[完成]" : string.Empty)}{Quest.Model.Title}";
+        titleText.text = $"{(Quest.IsComplete ? $"{Tr("[完成]")}" : string.Empty)}{Quest.Title}";
         StringBuilder objectives = new StringBuilder();
         if (Quest.IsComplete) objectiveText.text = string.Empty;
         else
@@ -64,11 +71,16 @@ public class QuestBoard : SingletonMonoBehaviour<QuestBoard>, IPointerClickHandl
         objectiveText.text = objectives.ToString();
     }
 
-    private void Start()
+    protected override void OnStart()
+    {
+        base.OnStart();
+        Defocus();
+    }
+
+    protected override void RegisterNotify()
     {
         NotifyCenter.AddListener(QuestManager.QuestStateChanged, OnQuestStateChanged, this);
         NotifyCenter.AddListener(QuestManager.ObjectiveUpdate, OnObjectiveUpdate, this);
-        Defocus();
     }
 
     private void OnQuestStateChanged(object[] msg)
@@ -78,11 +90,6 @@ public class QuestBoard : SingletonMonoBehaviour<QuestBoard>, IPointerClickHandl
                 FocusOnQuest(quest);
             else if (!quest.InProgress && ipBef)//任务已提交或放弃
                 Defocus();
-    }
-
-    private void OnDestroy()
-    {
-        NotifyCenter.RemoveListener(this);
     }
 
     private void OnObjectiveUpdate(object[] msg)

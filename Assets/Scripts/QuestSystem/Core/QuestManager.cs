@@ -1,15 +1,20 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio;
+using ZetanStudio.Item;
+using System.Collections.ObjectModel;
 
 [DisallowMultipleComponent]
-public class QuestManager : SingletonMonoBehaviour<QuestManager>
+public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
 {
     private readonly Dictionary<ObjectiveData, List<MapIcon>> questIcons = new Dictionary<ObjectiveData, List<MapIcon>>();
 
     private readonly List<QuestData> questsInProgress = new List<QuestData>();
+    public ReadOnlyCollection<QuestData> QuestInProgress => questsInProgress.AsReadOnly();
 
     private readonly List<QuestData> questsFinished = new List<QuestData>();//分开存储完成任务可减少不必要的检索开销
+    public ReadOnlyCollection<QuestData> QuestFinished => questsFinished.AsReadOnly();
 
     #region 任务处理相关
     /// <summary>
@@ -20,17 +25,17 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
     {
         if (!quest || !IsQuestValid(quest.Model))
         {
-            MessageManager.Instance.New("无效任务");
+            MessageManager.Instance.New(Tr("无效任务"));
             return false;
         }
         if (!MiscFuntion.CheckCondition(quest.Model.AcceptCondition) && !SaveManager.Instance.IsLoading)
         {
-            MessageManager.Instance.New("未满足任务接取条件");
+            MessageManager.Instance.New(Tr("未满足任务接取条件"));
             return false;
         }
         if (HasOngoingQuest(quest))
         {
-            MessageManager.Instance.New("已经在执行");
+            MessageManager.Instance.New(Tr("已经在执行"));
             return false;
         }
         ObjectiveData currentObjective = quest.Objectives[0];
@@ -98,7 +103,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
         questsInProgress.Add(quest);
         if (quest.Model.NPCToSubmit)
             DialogueManager.Instance.Talkers[quest.Model.NPCToSubmit.ID].TransferQuestToThis(quest);
-        if (!SaveManager.Instance.IsLoading) MessageManager.Instance.New($"接取了任务 [{quest.Model.Title}]");
+        if (!SaveManager.Instance.IsLoading) MessageManager.Instance.New(Tr("接取了任务{0}", quest.Title));
         quest.latestHandleDays = TimeManager.Instance.Days;
         CreateObjectiveMapIcon(quest.Objectives[0]);
         NotifyCenter.PostNotify(QuestStateChanged, quest, false);
@@ -128,7 +133,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
                     if (questsReqThisItem.Contains(quest) && questsReqThisItem.Count > 1)
                     //需要道具的任务群包含该任务且数量多于一个，说明有其他任务对该任务需提交的道具存在依赖
                     {
-                        MessageManager.Instance.New("提交失败！其他任务对该任务需提交的物品存在依赖");
+                        MessageManager.Instance.New(Tr("暂时无法提交，其他任务对此任务需提交的物品存在依赖"));
                         return false;
                     }
                 }
@@ -196,7 +201,7 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
             if (!SaveManager.Instance.IsLoading)
             {
                 BackpackManager.Instance.GetItem(quest.Model.RewardItems);
-                MessageManager.Instance.New($"提交了任务 [{quest.Model.Title}]");
+                MessageManager.Instance.New(Tr("提交了任务{0}", quest.Title));
             }
             quest.latestHandleDays = TimeManager.Instance.Days;
             NotifyCenter.PostNotify(QuestStateChanged, quest, true);
@@ -211,13 +216,13 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
     /// <param name="quest">要放弃的任务</param>
     public bool AbandonQuest(QuestData quest)
     {
-        if (!quest.Model.Abandonable) ConfirmWindow.StartConfirm("该任务无法放弃。");
+        if (!quest.Model.Abandonable) ConfirmWindow.StartConfirm(Tr("该任务无法放弃。"));
         else if (HasOngoingQuest(quest) && quest && quest.Model.Abandonable)
         {
             if (HasQuestNeedAsCondition(quest.Model, out var findQuest))
             {
                 //MessageManager.Instance.New($"由于任务[{bindQuest.Title}]正在进行，无法放弃该任务。");
-                ConfirmWindow.StartConfirm($"由于任务[{findQuest.Model.Title}]正在进行，无法放弃该任务。");
+                ConfirmWindow.StartConfirm(Tr("由于任务[{0}]正在进行，无法放弃该任务。", findQuest.Title));
             }
             else
             {
@@ -293,73 +298,8 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
                 return true;
             }
         }
-        MessageManager.Instance.New("该任务未在进行");
+        MessageManager.Instance.New(Tr("该任务未在进行"));
         return false;
-    }
-
-    public void TraceQuest(QuestData quest)
-    {
-        //if (!quest || !IsQuestValid(quest.Info) || !AStarManager.Instance || !PlayerManager.Instance.Controller.Unit) return;
-        //if (quest.IsComplete && DialogueManager.Instance.Talkers.TryGetValue(quest.currentQuestHolder.TalkerID, out var talkerFound))
-        //{
-        //    PlayerManager.Instance.Controller.Unit.IsFollowingTarget = false;
-        //    PlayerManager.Instance.Controller.Unit.ShowPath(true);
-        //    PlayerManager.Instance.Controller.Unit.SetDestination(talkerFound.currentPosition, false);
-        //}
-        //else if (quest.ObjectiveInstances.Count > 0)
-        //    using (var objectiveEnum = quest.ObjectiveInstances.GetEnumerator())
-        //    {
-        //        Vector3 destination = default;
-        //        ObjectiveData currentObj = null;
-        //        List<ObjectiveData> parallelObj = new List<ObjectiveData>();
-        //        while (objectiveEnum.MoveNext())
-        //        {
-        //            currentObj = objectiveEnum.Current;
-        //            if (!currentObj.IsComplete)
-        //            {
-        //                if (currentObj.Parallel && currentObj.AllPrevObjCmplt)
-        //                {
-        //                    if (!(currentObj is CollectObjectiveData))
-        //                        parallelObj.Add(currentObj);
-        //                }
-        //                else break;
-        //            }
-        //        }
-        //        if (parallelObj.Count > 0)
-        //        {
-        //            int index = Random.Range(0, parallelObj.Count);//如果目标可以同时进行，则随机选一个
-        //            currentObj = parallelObj[index];
-        //        }
-        //        if (!currentObj.Info.CanNavigate) return;
-        //        if (currentObj is TalkObjectiveData to)
-        //        {
-        //            if (DialogueManager.Instance.Talkers.TryGetValue(to.Info.NPCToTalk.ID, out talkerFound))
-        //            {
-        //                destination = talkerFound.currentPosition;
-        //                SetDestination();
-        //            }
-        //        }
-        //        else if (currentObj is SubmitObjectiveData so)
-        //        {
-        //            if (DialogueManager.Instance.Talkers.TryGetValue(so.Info.NPCToSubmit.ID, out talkerFound))
-        //            {
-        //                destination = talkerFound.currentPosition;
-        //                SetDestination();
-        //            }
-        //        }
-        //        else if (!(currentObj is TriggerObjectiveData) && currentObj.Info.AuxiliaryPos && currentObj.Info.AuxiliaryPos.Positions.Length > 0)
-        //        {
-        //            destination = currentObj.Info.AuxiliaryPos.Positions[Random.Range(0, currentObj.Info.AuxiliaryPos.Positions.Length)];
-        //            SetDestination();
-        //        }
-
-        //        void SetDestination()
-        //        {
-        //            PlayerManager.Instance.Controller.Unit.IsFollowingTarget = false;
-        //            PlayerManager.Instance.Controller.Unit.ShowPath(true);
-        //            PlayerManager.Instance.Controller.Unit.SetDestination(destination, false);
-        //        }
-        //    }
     }
 
     private void OnObjectiveStateChange(ObjectiveData objective, bool befCmplt)
@@ -368,10 +308,10 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
         {
             if (objective.CurrentAmount > 0)
             {
-                string message = objective.Model.DisplayName + (objective.IsComplete ? "(完成)" : $"[{objective.AmountString}]");
+                string message = objective.DisplayName + (objective.IsComplete ? $"({Tr("完成")}" : $"[{objective.AmountString}]");
                 MessageManager.Instance.New(message);
             }
-            if (objective.parent.IsComplete) MessageManager.Instance.New($"[任务]{objective.parent.Model.Title}(已完成)");
+            if (objective.parent.IsComplete) MessageManager.Instance.New($"[{Tr("任务")}]{objective.parent.Title}({Tr("已完成")})");
         }
         if (!befCmplt && objective.IsComplete)
         {
@@ -450,9 +390,9 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
         void CreateIcon(Vector3 destination)
         {
             var icon = MiscSettings.Instance.QuestIcon ? (objective is KillObjectiveData ?
-                MapManager.Instance.CreateMapIcon(MiscSettings.Instance.QuestIcon, new Vector2(48, 48), destination, true, 144f, MapIconType.Objective, false, objective.Model.DisplayName) :
-                MapManager.Instance.CreateMapIcon(MiscSettings.Instance.QuestIcon, new Vector2(48, 48), destination, true, MapIconType.Objective, false, objective.Model.DisplayName)) :
-                MapManager.Instance.CreateDefaultMark(destination, true, false, objective.Model.DisplayName);
+                MapManager.Instance.CreateMapIcon(MiscSettings.Instance.QuestIcon, new Vector2(48, 48), destination, true, 144f, MapIconType.Objective, false, objective.DisplayName) :
+                MapManager.Instance.CreateMapIcon(MiscSettings.Instance.QuestIcon, new Vector2(48, 48), destination, true, MapIconType.Objective, false, objective.DisplayName)) :
+                MapManager.Instance.CreateDefaultMark(destination, true, false, objective.DisplayName);
             if (icon)
             {
                 if (questIcons.TryGetValue(objective, out var iconsExist))
@@ -550,15 +490,15 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
     /// <param name="item">要判定的道具ID</param>
     /// <param name="leftAmount">要判定的数量</param>
     /// <returns>是否需要该道具</returns>
-    public bool HasQuestRequiredItem(ItemBase item, int leftAmount)
+    public bool HasQuestRequiredItem(Item item, int leftAmount)
     {
         return FindQuestsRequiredItem(item, leftAmount).Count() > 0;
     }
-    private IEnumerable<QuestData> FindQuestsRequiredItem(ItemBase item, int leftAmount)
+    private IEnumerable<QuestData> FindQuestsRequiredItem(Item item, int leftAmount)
     {
         return questsInProgress.FindAll(quest =>
         {
-            if (quest.Model.CmpltObjctvInOrder)
+            if (quest.Model.InOrder)
             {
                 foreach (ObjectiveData o in quest.Objectives)
                 {
@@ -653,15 +593,6 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
         return quest;
     }
 
-    public List<QuestData> GetInProgressQuests()
-    {
-        return questsInProgress.ConvertAll(x => x);//复制一份，以免误操作
-    }
-    public List<QuestData> GetFinishedQuests()
-    {
-        return questsFinished.ConvertAll(x => x);
-    }
-
     public void OnTriggerChange(params object[] args)
     {
         //TODO 处理触发器改变时
@@ -682,5 +613,16 @@ public class QuestManager : SingletonMonoBehaviour<QuestManager>
     /// 目标更新消息，格式：([发生变化的目标：<see cref="ObjectiveData"/>]，[目标之前的完成状态：<see cref="bool"/>])
     /// </summary>
     public const string ObjectiveUpdate = "ObjectiveUpdate";
+    #endregion
+
+    #region 语言相关
+    public string Tr(string text)
+    {
+        return LM.Tr(GetType().Name, text);
+    }
+    public string Tr(string text, params object[] args)
+    {
+        return LM.Tr(GetType().Name, text, args);
+    }
     #endregion
 }

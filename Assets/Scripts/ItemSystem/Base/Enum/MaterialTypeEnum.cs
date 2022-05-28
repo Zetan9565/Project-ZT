@@ -7,7 +7,7 @@ namespace ZetanStudio.Item
     {
         public MaterialTypeEnum()
         {
-            @enum = new MaterialType[]
+            _enum = new MaterialType[]
             {
                 new MaterialType("矿石"),
                 new MaterialType("金属"),

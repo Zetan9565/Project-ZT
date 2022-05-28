@@ -28,15 +28,13 @@ public partial class CharacterInfoInspector
         serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(race, new GUIContent("种族"));
-        if (race.objectReferenceValue)
-            EditorGUILayout.LabelField("种族名称", (race.objectReferenceValue as EnemyRace).Name);
         EditorGUILayout.PropertyField(SMParams, new GUIContent("状态机参数"));
         EditorGUILayout.PropertyField(dropItems, new GUIContent("掉落道具"));
         if (dropItems.objectReferenceValue)
         {
             EditorGUILayout.PropertyField(lootPrefab, new GUIContent("掉落道具预制件"));
         }
-        attrDrawer.DoLayoutDraw();
+        EditorGUILayout.PropertyField(attribute, new GUIContent("属性"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
     }

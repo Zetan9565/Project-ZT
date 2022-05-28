@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 [RequireComponent(typeof(ScrollRect))]
 public abstract class ScrollListView<TItem, TData> : ListView<TItem, TData>, IScrollList where TItem : ListItem<TItem, TData>
@@ -110,6 +110,7 @@ public interface IScrollList
                 height = height <= offset ? height : offset > 0 ? offset : 0;
                 scollList.ScrollRect.content.anchoredPosition = new Vector2(scollList.ScrollRect.content.anchoredPosition.x, height);
                 scollList.ScrollRect.StopMovement();
+                //ZetanUtility.Log(height, scollList.Items[index - 1].GetRectTransform().anchoredPosition.y);
                 break;
         }
     }

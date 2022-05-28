@@ -7,7 +7,7 @@ public class PlayerController2D : CharacterController2D
 {
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("寻路代理")]
+    [Label("寻路代理")]
 #endif
     private AStarUnit unit;
     public AStarUnit Unit

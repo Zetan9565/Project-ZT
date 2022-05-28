@@ -9,7 +9,7 @@ public class ProductInformation : ScriptableObject
     [SerializeField]
     private string remark;
 
-    [SerializeField, NonReorderable]
+    [SerializeField]
     private List<DropItemInfo> products = new List<DropItemInfo>();
     public ReadOnlyCollection<DropItemInfo> Products => new ReadOnlyCollection<DropItemInfo>(products);
 

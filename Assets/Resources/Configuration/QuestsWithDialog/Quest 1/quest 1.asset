@@ -33,17 +33,15 @@ MonoBehaviour:
   beginDialogue: {fileID: 11400000, guid: 860a800ebd1f57e409389453a7b350e1, type: 2}
   ongoingDialogue: {fileID: 11400000, guid: c9bd66b12bc670d48895c486a701c376, type: 2}
   completeDialogue: {fileID: 11400000, guid: 216422843cfd8d041970f69c4cccd4b4, type: 2}
-  rewardMoney: 50
-  rewardEXP: 0
   rewardItems:
-  - item: {fileID: 11400000, guid: 6c7872e2f8dbf2948bc18ceed18c26ad, type: 2}
+  - item: {fileID: 4876839640930190242, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 1000
-  - item: {fileID: 11400000, guid: e7d15132e142bc34ab9b56e50a6f4539, type: 2}
+  - item: {fileID: -6049188909635569283, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 300
-  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+  - item: {fileID: -8659359920512167614, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 2
   _NPCToSubmit: {fileID: 0}
-  cmpltObjctvInOrder: 1
+  inOrder: 1
   objectives:
   - rid: 0
   - rid: 1
@@ -59,8 +57,9 @@ MonoBehaviour:
         showMapIcon: 1
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
+        showAmount: 1
         inOrder: 1
-        priority: 1
+        priority: 0
         killType: 2
         enemy: {fileID: 0}
         race: {fileID: 0}
@@ -74,7 +73,8 @@ MonoBehaviour:
         showMapIcon: 1
         auxiliaryPos: {fileID: 0}
         amount: 1
+        showAmount: 0
         inOrder: 1
-        priority: 2
+        priority: 1
         _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
         dialogue: {fileID: 11400000, guid: 00931f27c4db01e44a9ff7817efe8119, type: 2}

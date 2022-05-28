@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ZetanStudio.Item.Craft;
+using ZetanStudio.Item.Module;
 
 public class StructureData : SceneObjectData<Structure2D>
 {
@@ -10,7 +12,7 @@ public class StructureData : SceneObjectData<Structure2D>
 
     public WarehouseData materialsKeeper;
 
-    public List<ItemInfoBase> materialsStored = new List<ItemInfoBase>();
+    public List<ItemInfo> materialsStored = new List<ItemInfo>();
 
     public override string Name
     {
@@ -70,11 +72,11 @@ public class StructureData : SceneObjectData<Structure2D>
         foreach (var material in targetMaterials)
         {
             if (targetMaterials == null || materialsStored == null || materialsStored.Count < 1) return false;
-            if (material.MakingType == MakingType.SingleItem)
+            if (material.MakingType == CraftType.SingleItem)
             {
                 if (material.Item.StackAble)
                 {
-                    ItemInfoBase find = materialsStored.Find(x => x.ItemID == material.ItemID);
+                    ItemInfo find = materialsStored.Find(x => x.ItemID == material.ItemID);
                     if (!find) return false;//所提供的材料中没有这种材料
                     if (find.Amount < material.Amount) return false;//若材料数量不足，则无法制作
                 }
@@ -85,7 +87,7 @@ public class StructureData : SceneObjectData<Structure2D>
             }
             else
             {
-                var finds = materialsStored.Where(x => x.item.MaterialType == material.MaterialType);//找到种类相同的道具
+                var finds = materialsStored.Where(x => MaterialModule.Compare(x.item, material.MaterialType));//找到种类相同的道具
                 if (finds.Count() > 0)
                 {
                     if (finds.Select(x => x.Amount).Sum() < material.Amount) return false;//若材料总数不足，则无法制作
@@ -100,11 +102,11 @@ public class StructureData : SceneObjectData<Structure2D>
     {
         foreach (var material in targetMaterials)
         {
-            if (material.MakingType == MakingType.SingleItem)
+            if (material.MakingType == CraftType.SingleItem)
             {
                 if (material.Item.StackAble)
                 {
-                    ItemInfoBase find = materialsStored.Find(x => x.ItemID == material.ItemID);
+                    ItemInfo find = materialsStored.Find(x => x.ItemID == material.ItemID);
                     if (find) find.Amount -= material.Amount;
                 }
                 else
@@ -122,7 +124,7 @@ public class StructureData : SceneObjectData<Structure2D>
             }
             else
             {
-                var finds = materialsStored.Where(x => x.item.MaterialType == material.MaterialType);//找到种类相同的道具
+                var finds = materialsStored.Where(x => MaterialModule.Compare(x.item, material.MaterialType));//找到种类相同的道具
                 if (finds.Count() > 0)
                 {
 
@@ -186,20 +188,20 @@ public class StructureData : SceneObjectData<Structure2D>
         }
     }
 
-    public void PutMaterials(IEnumerable<ItemInfoBase> materials)
+    public void PutMaterials(IEnumerable<ItemInfo> materials)
     {
         if (IsBuilt) return;
         foreach (var material in materials)
         {
             if (material.item.StackAble)
             {
-                ItemInfoBase find = materialsStored.Find(x => x.ItemID == material.ItemID);
+                ItemInfo find = materialsStored.Find(x => x.ItemID == material.ItemID);
                 if (find) find.Amount += material.Amount;
-                else materialsStored.Add(new ItemInfoBase(material.item, material.Amount));
+                else materialsStored.Add(new ItemInfo(material.item, material.Amount));
             }
             else
             {
-                materialsStored.Add(new ItemInfoBase(material.item));
+                materialsStored.Add(new ItemInfo(material.item));
             }
         }
         if (Info.AutoBuild && !IsBuilding)
@@ -214,12 +216,12 @@ public class StructureData : SceneObjectData<Structure2D>
         List<string> info = new List<string>();
         using (var materialEnum = materials.GetEnumerator())
             while (materialEnum.MoveNext())
-                if (materialEnum.Current.MakingType == MakingType.SingleItem)
+                if (materialEnum.Current.MakingType == CraftType.SingleItem)
                 {
                     int amount = 0;
                     if (materialEnum.Current.Item.StackAble)
                     {
-                        ItemInfoBase find = materialsStored.Find(x => x.ItemID == materialEnum.Current.ItemID);
+                        ItemInfo find = materialsStored.Find(x => x.ItemID == materialEnum.Current.ItemID);
                         if (find) amount = find.Amount;
                     }
                     else
@@ -230,7 +232,7 @@ public class StructureData : SceneObjectData<Structure2D>
                 }
                 else
                 {
-                    var finds = materialsStored.FindAll(x => x.item.MaterialType == materialEnum.Current.MaterialType);
+                    var finds = materialsStored.FindAll(x => MaterialModule.Compare(x.item, materialEnum.Current.MaterialType));
                     int amount = 0;
                     foreach (var item in finds)
                         amount += item.Amount;

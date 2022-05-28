@@ -187,7 +187,7 @@ public class StructurePreview2D : Interactive2D
         if (Data) Data.PauseConstruct();
     }
 
-    public void PutMaterials(IEnumerable<ItemInfoBase> materials)
+    public void PutMaterials(IEnumerable<ItemInfo> materials)
     {
         if (Data) Data.PutMaterials(materials);
     }

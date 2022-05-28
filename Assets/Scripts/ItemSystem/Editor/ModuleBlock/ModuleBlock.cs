@@ -11,37 +11,53 @@ namespace ZetanStudio.Item.Editor
         protected readonly SerializedObject serializedObject;
         protected readonly SerializedProperty property;
         protected bool shouldCheckError;
+        protected bool errorBef;
 
         public ModuleBlock(SerializedProperty property, ItemModule module)
         {
             serializedObject = property.serializedObject;
-            shouldCheckError = property.serializedObject.targetObject is ItemNew;
+            shouldCheckError = property.serializedObject.targetObject is Item;
             this.property = property;
             userData = module;
             value = property.isExpanded;
-            this.Q<Toggle>().RegisterValueChangedCallback(new EventCallback<ChangeEvent<bool>>(evt => property.isExpanded = evt.newValue));
+            this.Q<Toggle>().RegisterValueChangedCallback(evt => property.isExpanded = evt.newValue);
             if (property.hasVisibleChildren)
             {
                 IMGUIContainer inspector = new IMGUIContainer(() =>
                 {
                     if (serializedObject.targetObject)
                     {
+                        if (errorBef != HasError())
+                        {
+                            errorBef = !errorBef;
+                            RefreshTitle();
+                        }
                         EditorGUI.BeginChangeCheck();
                         serializedObject.UpdateIfRequiredOrScript();
                         OnInspectorGUI();
-                        if (EditorGUI.EndChangeCheck())
-                        {
-                            serializedObject.ApplyModifiedProperties();
-                            CheckError();
-                        }
+                        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
                     }
                 });
                 inspector.style.flexGrow = 1;
                 Add(inspector);
             }
-            else Add(new Label("(无可用参数)"));
-            CheckError();
+            else
+            {
+                this.Q<Toggle>().Q("unity-checkmark").visible = false;
+                contentContainer.style.paddingBottom = default;
+            }
+            errorBef = HasError();
+            RefreshTitle();
         }
+
+        private void RefreshTitle()
+        {
+            text = ItemModule.GetName(userData.GetType());
+            this.Q<Toggle>().tooltip = null;
+            if (errorBef) text += "(存在错误)";
+            MarkDirtyRepaint();
+        }
+
         public void AddManipulator(IManipulator manipulator)
         {
             this.Q<Toggle>().AddManipulator(manipulator);
@@ -57,13 +73,9 @@ namespace ZetanStudio.Item.Editor
                 enter = false;
             }
         }
-        protected virtual void CheckError()
+        protected virtual bool HasError()
         {
-            if (userData is ItemModule module)
-            {
-                text = module.GetName();
-                if (shouldCheckError && !module.IsValid) text += "(存在错误)";
-            }
+            return userData is ItemModule module && shouldCheckError && !module.IsValid;
         }
 
         public static ModuleBlock Create(SerializedProperty property, ItemModule module)
@@ -81,7 +93,7 @@ namespace ZetanStudio.Item.Editor
         }
 
         [AttributeUsage(AttributeTargets.Class)]
-        protected class CustomMuduleDrawerAttribute : Attribute
+        protected sealed class CustomMuduleDrawerAttribute : Attribute
         {
             public readonly Type type;
             public readonly bool useForChildren;

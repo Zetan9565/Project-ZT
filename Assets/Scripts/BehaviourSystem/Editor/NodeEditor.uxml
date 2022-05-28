@@ -1,11 +1,11 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
-    <Style src="NodeEditor.uss" />
+    <Style src="project://database/Assets/Scripts/BehaviourSystem/Editor/NodeEditor.uss?fileID=7433441132597879392&amp;guid=68d4ab09be1391a49a4806c70bba102a&amp;type=3#NodeEditor" />
     <ui:VisualElement name="node-state" style="flex-wrap: nowrap;" />
     <ui:VisualElement name="node-border">
         <ui:VisualElement name="contents">
             <ui:VisualElement name="top">
-                <ui:VisualElement name="input" />
-                <ui:VisualElement name="divider" class="vertical" />
+                <ui:VisualElement name="input" style="margin-top: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; -unity-slice-bottom: 0;" />
+                <ui:VisualElement name="divider" class="vertical" style="display: flex;" />
                 <ui:VisualElement name="title" style="flex-wrap: nowrap; flex-direction: column; max-width: 140px;">
                     <ui:Label name="title-label" text="Node" class="unity-text-element unity-label" style="font-size: 13px; white-space: normal; border-left-width: 0; border-right-width: 0; border-top-width: 0; border-bottom-width: 0; -unity-font-style: bold; -unity-slice-left: 0; -unity-slice-top: 0; -unity-slice-right: 0; -unity-slice-bottom: 0; flex-wrap: nowrap; flex-direction: column; max-width: initial; width: auto;" />
                     <ui:VisualElement name="title-button-container">
@@ -15,13 +15,13 @@
                     </ui:VisualElement>
                     <ui:Label display-tooltip-when-elided="true" name="description" style="-unity-font-style: normal; -unity-text-align: upper-left; padding-left: 4px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; color: rgb(128, 128, 128);" />
                 </ui:VisualElement>
-                <ui:VisualElement name="divider" class="horizontal" />
+                <ui:VisualElement name="divider" class="horizontal" style="display: flex;" />
                 <ui:VisualElement name="output" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement name="selection-border" picking-mode="Ignore" />
     <ui:Label display-tooltip-when-elided="true" name="abort" style="-unity-text-align: middle-left; position: absolute; visibility: visible; display: flex; overflow: visible; padding-left: 8px; padding-right: 5px; padding-top: 6px; padding-bottom: 5px; font-size: 14px; -unity-font-style: normal;" />
-    <ui:Label display-tooltip-when-elided="true" name="repeat" style="-unity-text-align: middle-left; position: absolute; visibility: visible; display: flex; overflow: visible; padding-left: 8px; padding-right: 5px; padding-top: 10px; padding-bottom: 5px; font-size: 10px; -unity-font-style: normal;" />
-    <ui:Label display-tooltip-when-elided="true" name="invalid" style="-unity-text-align: middle-left; position: absolute; visibility: visible; display: flex; overflow: visible; padding-left: 8px; padding-right: 5px; padding-top: 7px; padding-bottom: 5px; font-size: 14px; -unity-font-style: bold; flex-shrink: 0; flex-grow: 0; left: auto; right: 3px; color: rgba(219, 34, 34, 255);" />
+    <ui:Label display-tooltip-when-elided="true" name="repeat" text="↻" style="-unity-text-align: middle-left; position: absolute; visibility: visible; display: flex; overflow: visible; padding-left: 8px; padding-right: 5px; padding-top: 8px; padding-bottom: 5px; font-size: 14px; -unity-font-style: normal;" />
+    <ui:Label display-tooltip-when-elided="true" name="invalid" text="!" style="-unity-text-align: middle-left; position: absolute; visibility: visible; display: flex; overflow: visible; padding-left: 8px; padding-right: 5px; padding-top: 7px; padding-bottom: 5px; font-size: 14px; -unity-font-style: bold; flex-shrink: 0; flex-grow: 0; left: auto; right: 3px; color: rgb(219, 34, 34);" />
 </ui:UXML>

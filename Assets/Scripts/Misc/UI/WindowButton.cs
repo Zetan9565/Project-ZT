@@ -4,7 +4,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Button))]
 public class WindowButton : MonoBehaviour
 {
-    [TypeDropDown(typeof(Window))]
+    [TypeSelector(typeof(Window))]
     public string type;
 
     public bool openClose = true;

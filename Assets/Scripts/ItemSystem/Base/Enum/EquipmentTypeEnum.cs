@@ -7,7 +7,7 @@ namespace ZetanStudio.Item
     {
         public EquipmentTypeEnum()
         {
-            @enum = new EquipmentType[]
+            _enum = new EquipmentType[]
             {
                 new EquipmentType("主武器", 0),
                 new EquipmentType("副武器", 1),

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 //using System.Reflection;
 using UnityEngine;
+using ZetanStudio.BehaviourTree.Nodes;
 
 namespace ZetanStudio.BehaviourTree
 {
@@ -12,7 +13,7 @@ namespace ZetanStudio.BehaviourTree
         /// <summary>
         /// 行为树名称，不同于name，后者是行为树的资源文件名称
         /// </summary>
-        public string Name => _name;
+        public string Name => string.IsNullOrEmpty(_name) ? "(未命名)" : _name;
 
         [SerializeField, TextArea]
         private string description;
@@ -148,6 +149,11 @@ namespace ZetanStudio.BehaviourTree
 
         public BehaviourTree GetInstance()
         {
+            if (!Application.isPlaying)
+            {
+                Debug.LogError("尝试在编辑模式实例化行为树：" + Name);
+                return null;
+            }
             BehaviourTree tree;
             if (isRuntime) tree = this;
             else tree = Instantiate(this);

@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Module;
 
 public class ShopWindow : Window
 {
@@ -49,7 +51,7 @@ public class ShopWindow : Window
     {
         if (MShop == null || goods == null || !goods.Info.IsValid) return;
         if (!MShop.Commodities.Contains(goods)) return;
-        long maxAmount = goods.Info.EmptyAble ? goods.LeftAmount : (goods.Info.SellPrice > 0 ? BackpackManager.Instance.Inventory.Money / goods.Info.SellPrice : 999);
+        long maxAmount = goods.Info.EmptyAble ? goods.LeftAmount : (goods.Info.Price > 0 ? BackpackManager.Instance.Inventory.Money / goods.Info.Price : 999);
         if (goods.LeftAmount == 1 && goods.Info.EmptyAble)
         {
             ConfirmWindow.StartConfirm(string.Format("确定购买1个 [{0}] 吗？", goods.Item.Name), delegate
@@ -86,9 +88,9 @@ public class ShopWindow : Window
             else MessageManager.Instance.New("该商品暂时缺货");
             return false;
         }
-        if (!BackpackManager.Instance.CanLoseMoney(amount * data.Info.SellPrice))
+        if (!BackpackManager.Instance.CanLoseMoney(amount * data.Info.Price))
             return false;
-        BackpackManager.Instance.LoseMoney(amount * data.Info.SellPrice);
+        BackpackManager.Instance.LoseMoney(amount * data.Info.Price);
         BackpackManager.Instance.GetItem(data.Item, amount);
         if (data.Info.EmptyAble) data.LeftAmount -= amount;
         goodsList.RefreshItemIf(x => x.Data == data);
@@ -154,9 +156,9 @@ public class ShopWindow : Window
             else MessageManager.Instance.New($"无{data.Item.Name}收购需求");
             return false;
         }
-        ItemBase item = items[0].source.Model_old;
+        Item item = items[0].source.Model;
         if (!BackpackManager.Instance.CanLose(items[0].source, amount)) return false;
-        BackpackManager.Instance.GetMoney(amount * data.Info.PurchasePrice);
+        BackpackManager.Instance.GetMoney(amount * data.Info.Price);
         BackpackManager.Instance.LoseItem(items[0].source, amount);
         if (data.Info.EmptyAble)
         {
@@ -173,23 +175,23 @@ public class ShopWindow : Window
     /// <param name="force">强制购入</param>
     public void PurchaseItem(ItemData item, int have, bool force = false)
     {
-        if (MShop == null || item == null || !item.Model_old)
+        if (MShop == null || item == null || !item.Model)
         {
             Debug.Log(item);
             return;
         }
-        if (!item.Model_old.SellAble)
+        if (item.Model.GetModule<SellableModule>() is not SellableModule sellAble)
         {
             MessageManager.Instance.New("这种物品不可出售");
             return;
         }
-        if (item is EquipmentData eqm)
-            if (eqm.gems.Count > 0)
+        if (item.GetModuleData<EquipmentData>() is EquipmentData equipment)
+            if (equipment.gems.Count > 0)
             {
                 MessageManager.Instance.New("镶嵌宝石的物品不可出售");
                 return;
             }
-        GoodsData find = MShop.Acquisitions.Find(x => x.Item == item.Model_old);
+        GoodsData find = MShop.Acquisitions.Find(x => x.Item == item.Model);
         if (find != null && !force)//采购品列表里有该道具，说明对该道具有特殊购价
         {
             PurchaseItem(find);
@@ -197,45 +199,45 @@ public class ShopWindow : Window
         }
         if (have == 1)
         {
-            ConfirmWindow.StartConfirm(string.Format("确定出售1个 [{0}] 吗？", item.Model_old.Name), delegate
+            ConfirmWindow.StartConfirm(string.Format("确定出售1个 [{0}] 吗？", item.Model.Name), delegate
             {
                 if (OnPurchase(item, have))
-                    MessageManager.Instance.New(string.Format("出售了1个 [{0}]", item.Model_old.Name));
+                    MessageManager.Instance.New(string.Format("出售了1个 [{0}]", item.Model.Name));
             });
         }
         else
         {
             AmountWindow.StartInput(delegate (long amount)
             {
-                ConfirmWindow.StartConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, item.Model_old.Name), delegate
+                ConfirmWindow.StartConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, item.Model.Name), delegate
                 {
                     if (OnPurchase(item, have, (int)amount))
-                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, item.Model_old.Name));
+                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, item.Model.Name));
                 });
             }, have, "出售数量", ZetanUtility.ScreenCenter, Vector2.zero);
         }
     }
     bool OnPurchase(ItemData item, int have, int amount = 1)
     {
-        if (MShop == null || item == null || !item.Model_old || amount < 1)
+        if (MShop == null || item == null || !item.Model || amount < 1)
             return false;
-        if (!item.Model_old.SellAble)
+        if (item.Model.GetModule<SellableModule>() is not SellableModule sellAble)
         {
             MessageManager.Instance.New("这种物品不可出售");
             return false;
         }
         if (have < 1)
         {
-            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{item.Model_old.Name}");
+            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{item.Model.Name}");
             return false;
         }
         if (amount > have)
         {
-            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有这么多的{item.Model_old.Name}");
+            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有这么多的{item.Model.Name}");
             return false;
         }
         if (!BackpackManager.Instance.CanLose(item, amount)) return false;
-        BackpackManager.Instance.GetMoney(amount * item.Model_old.SellPrice);
+        BackpackManager.Instance.GetMoney(amount * sellAble.Price);
         BackpackManager.Instance.LoseItem(item, amount);
         return true;
     }

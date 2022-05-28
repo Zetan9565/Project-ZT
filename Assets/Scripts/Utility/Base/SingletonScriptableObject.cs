@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 
-public abstract class SingletonScriptableObject<T> : ScriptableObject where T : SingletonScriptableObject<T>
+public abstract class SingletonScriptableObject : ScriptableObject { }
+
+public abstract class SingletonScriptableObject<T> : SingletonScriptableObject where T : SingletonScriptableObject<T>
 {
     protected static T instance;
     public static T Instance
@@ -38,5 +40,4 @@ public abstract class SingletonScriptableObject<T> : ScriptableObject where T : 
         return instance;
     }
 #endif
-
 }

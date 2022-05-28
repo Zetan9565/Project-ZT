@@ -1,6 +1,7 @@
 using ZetanStudio.BehaviourTree;
+using ZetanStudio.BehaviourTree.Nodes;
 
-[NodeDescription("角色翻滚一次")]
+[Group("Movement"), Description("角色翻滚一次")]
 public class Roll : Action
 {
     public override bool IsValid => true;

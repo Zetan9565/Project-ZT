@@ -1,20 +1,21 @@
 using UnityEngine;
 using ZetanStudio.BehaviourTree;
+using ZetanStudio.BehaviourTree.Nodes;
 
-[NodeDescription("随机巡逻：在给定的范围内随机巡逻")]
+[Group("Movement"), Description("随机巡逻：在给定的范围内随机巡逻")]
 public class RandomPatrol : PathMovement
 {
-    [DisplayName("范围而不是边界")]
+    [Label("范围而不是边界")]
     public bool useRange = true;
-    [DisplayName("范围半径"), HideIf_BT("useRange", false)]
+    [Label("范围半径"), HideIf("useRange", false)]
     public SharedFloat range = 10f;
-    [DisplayName("盲区半径"), HideIf_BT("useRange", false), Tooltip("不会在此范围内取点")]
+    [Label("盲区半径"), HideIf("useRange", false), Tooltip("不会在此范围内取点")]
     public SharedFloat blindRange = 0f;
-    [DisplayName("边界右上角"), HideIf_BT("useRange", true)]
+    [Label("边界右上角"), HideIf("useRange", true)]
     public SharedVector3 boundMin;
-    [DisplayName("边界左下角"), HideIf_BT("useRange", true)]
+    [Label("边界左下角"), HideIf("useRange", true)]
     public SharedVector3 boundMax;
-    [DisplayName("巡逻间隔")]
+    [Label("巡逻间隔")]
     public SharedFloat interval = 1f;
 
     private float waypointReachedTime = -1;

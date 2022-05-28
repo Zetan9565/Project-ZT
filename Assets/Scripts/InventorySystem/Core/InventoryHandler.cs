@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Craft;
+using ZetanStudio.Item.Module;
 
 public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
 {
@@ -25,7 +28,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
     {
         return Inventory.GetAmount(id);
     }
-    public int GetAmount(ItemBase model)
+    public int GetAmount(Item model)
     {
         return Inventory.GetAmount(model);
     }
@@ -34,7 +37,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         return Inventory.GetAmount(item);
     }
 
-    public bool GetItem(ItemBase item, int amount, params ItemWithAmount[] simulLoseItems)
+    public bool GetItem(Item item, int amount, params ItemWithAmount[] simulLoseItems)
     {
         if (!Inventory) return false;
 
@@ -48,12 +51,12 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         if (!Inventory) return false;
 
         if (!data) return false;
-        if (!CanGet(data.Model_old, amount, simulLoseItems))
+        if (!CanGet(data.Model, amount, simulLoseItems))
             return false;
         Inventory.Get(data, amount, simulLoseItems);
         return true;
     }
-    public bool GetItem(IEnumerable<ItemInfoBase> infos, params ItemWithAmount[] simulLoseItems)
+    public bool GetItem(IEnumerable<ItemInfo> infos, params ItemWithAmount[] simulLoseItems)
     {
         if (!Inventory) return false;
 
@@ -81,7 +84,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         Inventory.Lose(id, amount, simulGetItems);
         return true;
     }
-    public bool LoseItem(ItemBase model, int amount, params ItemWithAmount[] simulGetItems)
+    public bool LoseItem(Item model, int amount, params ItemWithAmount[] simulGetItems)
     {
         if (!Inventory) return false;
 
@@ -121,7 +124,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         }
         return true;
     }
-    public bool CanLose(ItemBase model, int amount, params ItemWithAmount[] simulGetItems)
+    public bool CanLose(Item model, int amount, params ItemWithAmount[] simulGetItems)
     {
         if (!Inventory) return false;
 
@@ -155,7 +158,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         return true;
     }
 
-    public bool CanGet(ItemBase item, int amount, params ItemWithAmount[] simulLoseItems)
+    public bool CanGet(Item item, int amount, params ItemWithAmount[] simulLoseItems)
     {
         if (!Inventory) return false;
 
@@ -177,7 +180,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         }
         return true;
     }
-    public bool CanGet(IEnumerable<ItemInfoBase> infos, params ItemWithAmount[] simulLoseItems)
+    public bool CanGet(IEnumerable<ItemInfo> infos, params ItemWithAmount[] simulLoseItems)
     {
         if (!Inventory) return false;
 
@@ -204,7 +207,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
     {
         return Inventory?.GetAmount(id) > 0;
     }
-    public bool HasItem(ItemBase item)
+    public bool HasItem(Item item)
     {
         return Inventory?.GetAmount(item) > 0;
     }
@@ -220,7 +223,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
 
         return Inventory.TryGetData(id, out item, out amount);
     }
-    public bool GetItemData(ItemBase model, out ItemData item, out int amount)
+    public bool GetItemData(Item model, out ItemData item, out int amount)
     {
         if (!Inventory)
         {
@@ -241,7 +244,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
 
         return Inventory.TryGetDatas(id, out results);
     }
-    public bool GetItemDatas(ItemBase model, out List<ItemWithAmount> results)
+    public bool GetItemDatas(Item model, out List<ItemWithAmount> results)
     {
         if (!Inventory)
         {
@@ -281,7 +284,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
 
     public bool ContainsItem(ItemData item)
     {
-        return Inventory?.Items.ContainsKey(item.ID) ?? false;
+        return Inventory?.ContainsItem(item) ?? false;
     }
 
     protected virtual void SayError(InventoryError error)
@@ -323,34 +326,34 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         var materialEnum = materials.GetEnumerator();
         while (materialEnum.MoveNext())
         {
-            if (materialEnum.Current.MakingType == MakingType.SingleItem)
+            if (materialEnum.Current.MakingType == CraftType.SingleItem)
             {
                 if (GetAmount(materialEnum.Current.Item) < materialEnum.Current.Amount) return false;
             }
             else
             {
 
-                int amount = Inventory.GetAmount(x => x.Model_old.MaterialType == materialEnum.Current.MaterialType);
+                int amount = Inventory.GetAmount(x => MaterialModule.Compare(x.Model, materialEnum.Current.MaterialType));
                 if (amount < materialEnum.Current.Amount) return false;
             }
         }
         return true;
     }
-    public bool IsMaterialsEnough(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfoBase> givenMaterials)
+    public bool IsMaterialsEnough(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfo> givenMaterials)
     {
         if (!Inventory || targetMaterials == null || targetMaterials.Count() < 1 || givenMaterials == null || givenMaterials.Count() < 1 || targetMaterials.Count() != givenMaterials.Count()) return false;
         foreach (var material in targetMaterials)
         {
-            if (material.MakingType == MakingType.SingleItem)
+            if (material.MakingType == CraftType.SingleItem)
             {
-                ItemInfoBase find = givenMaterials.FirstOrDefault(x => x.ItemID == material.ItemID);
+                ItemInfo find = givenMaterials.FirstOrDefault(x => x.ItemID == material.ItemID);
                 if (!find) return false;//所提供的材料中没有这种材料
                 if (find.Amount != material.Amount) return false;//若材料数量不符合，则无法制作
                 else if (GetAmount(find.ItemID) < material.Amount) return false;//背包中材料数量不足
             }
             else
             {
-                var finds = givenMaterials.Where(x => x.item.MaterialType == material.MaterialType);//找到种类相同的道具
+                var finds = givenMaterials.Where(x => MaterialModule.Compare(x.item, material.MaterialType));//找到种类相同的道具
                 if (finds.Count() > 0)
                 {
                     if (finds.Select(x => x.Amount).Sum() != material.Amount) return false;//若材料总数不符合，则无法制作
@@ -379,7 +382,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         var materialEnum = targetMaterials.GetEnumerator();
         while (materialEnum.MoveNext())
         {
-            if (materialEnum.Current.MakingType == MakingType.SingleItem)
+            if (materialEnum.Current.MakingType == CraftType.SingleItem)
             {
                 if (materialEnum.Current.Item.StackAble)
                 {
@@ -421,7 +424,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
             }
             else
             {
-                Inventory.TryGetDatas(x => x.Model_old.MaterialType == materialEnum.Current.MaterialType, out var finds);
+                Inventory.TryGetDatas(x => MaterialModule.Compare(x.Model, materialEnum.Current.MaterialType), out var finds);
                 if (finds.Count > 0)
                 {
                     int need = materialEnum.Current.Amount;
@@ -431,7 +434,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
                         int leftAmount = find.amount;
                         if (itemsToken.Contains(find.source.ID))
                         {
-                            if (!find.source.Model_old.StackAble) continue;//不可叠加且选取过了，则跳过选取
+                            if (!find.source.Model.StackAble) continue;//不可叠加且选取过了，则跳过选取
                             else
                             {
                                 ItemWithAmount find2 = items.Find(x => x.source == find);
@@ -459,7 +462,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         {
             if (itemsToken.Contains(item.ID))
             {
-                if (item.Model_old.StackAble)
+                if (item.Model.StackAble)
                 {
                     var find = items.Find(x => x.source == item);
                     find.amount += amount;
@@ -479,17 +482,17 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         if (!Inventory) return info;
         using (var materialEnum = materials.GetEnumerator())
             while (materialEnum.MoveNext())
-                if (materialEnum.Current.MakingType == MakingType.SingleItem)
+                if (materialEnum.Current.MakingType == CraftType.SingleItem)
                     info.Add(string.Format("{0}\t[{1}/{2}]", materialEnum.Current.ItemName, GetAmount(materialEnum.Current.Item), materialEnum.Current.Amount));
                 else
                 {
-                    Inventory.TryGetDatas(x => x.Model_old.MaterialType == materialEnum.Current.MaterialType, out var finds);
+                    Inventory.TryGetDatas(x => MaterialModule.Compare(x.Model, materialEnum.Current.MaterialType), out var finds);
                     int amount = 0;
                     foreach (var item in finds)
                     {
                         amount += item.amount;
                     }
-                    info.Add(string.Format("{0}\t[{1}/{2}]", MaterialItem.GetMaterialTypeString(materialEnum.Current.MaterialType), amount, materialEnum.Current.Amount));
+                    info.Add(string.Format("{0}\t[{1}/{2}]", materialEnum.Current.MaterialType.Name, amount, materialEnum.Current.Amount));
                 }
         return info;
     }
@@ -502,11 +505,11 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
         using (var materialEnum = materials.GetEnumerator())
             while (materialEnum.MoveNext())
             {
-                if (materialEnum.Current.MakingType == MakingType.SingleItem)
+                if (materialEnum.Current.MakingType == CraftType.SingleItem)
                     amounts.Add(GetAmount(materialEnum.Current.Item) / materialEnum.Current.Amount);
                 else
                 {
-                    Inventory.TryGetDatas(x => x.Model_old.MaterialType == materialEnum.Current.MaterialType, out var finds);
+                    Inventory.TryGetDatas(x => MaterialModule.Compare(x.Model, materialEnum.Current.MaterialType), out var finds);
                     int amount = 0;
                     foreach (var item in finds)
                     {
@@ -517,22 +520,22 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
             }
         return amounts.Min();
     }
-    public int GetAmountCanMake(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfoBase> givenMaterials)
+    public int GetAmountCanMake(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfo> givenMaterials)
     {
         if (!Inventory || givenMaterials == null || givenMaterials.Count() < 1 || targetMaterials == null || targetMaterials.Count() < 1 || targetMaterials.Count() != givenMaterials.Count()) return 0;
         List<int> amounts = new List<int>();
         foreach (var material in targetMaterials)
         {
-            if (material.MakingType == MakingType.SingleItem)
+            if (material.MakingType == CraftType.SingleItem)
             {
-                ItemInfoBase find = givenMaterials.FirstOrDefault(x => x.ItemID == material.ItemID);
+                ItemInfo find = givenMaterials.FirstOrDefault(x => x.ItemID == material.ItemID);
                 if (!find) return 0;//所提供的材料中没有这种材料
                 if (find.Amount != material.Amount) return 0;//若材料数量不符合，则无法制作
                 amounts.Add(GetAmount(find.ItemID) / material.Amount);
             }
             else
             {
-                var finds = givenMaterials.Where(x => x.item.MaterialType == material.MaterialType);//找到种类相同的道具
+                var finds = givenMaterials.Where(x => MaterialModule.Compare(x.item, material.MaterialType));//找到种类相同的道具
                 if (finds.Count() > 0)
                 {
                     if (finds.Select(x => x.Amount).Sum() != material.Amount) return 0;//若材料总数不符合，则无法制作
@@ -585,7 +588,7 @@ public abstract class InventoryHandler : MonoBehaviour, IInventoryHandler
     {
         if (inventory == Inventory) NotifyCenter.PostNotify(InventoryMoneyChangedMsgKey, inventory, oldWeightLimit);
     }
-    protected virtual void OnItemAmountChanged(ItemBase model, int oldAmount, int newAmount)
+    protected virtual void OnItemAmountChanged(Item model, int oldAmount, int newAmount)
     {
         NotifyCenter.PostNotify(ItemAmountChangedMsgKey, model, oldAmount, newAmount);
     }
@@ -634,36 +637,36 @@ public interface IInventoryHandler : IInventoryHolder
     public string SlotStateChangedMsgKey { get; }
 
     public int GetAmount(string id);
-    public int GetAmount(ItemBase model);
+    public int GetAmount(Item model);
     public int GetAmount(ItemData item);
 
-    public bool GetItem(ItemBase item, int amount, params ItemWithAmount[] simulLoseItems);
+    public bool GetItem(Item item, int amount, params ItemWithAmount[] simulLoseItems);
     public bool GetItem(ItemData data, int amount, params ItemWithAmount[] simulLoseItems);
-    public bool GetItem(IEnumerable<ItemInfoBase> infos, params ItemWithAmount[] simulLoseItems);
+    public bool GetItem(IEnumerable<ItemInfo> infos, params ItemWithAmount[] simulLoseItems);
     public bool GetItem(IEnumerable<ItemWithAmount> items, params ItemWithAmount[] simulLoseItems);
 
     public bool LoseItem(string id, int amount, params ItemWithAmount[] simulGetItems);
-    public bool LoseItem(ItemBase model, int amount, params ItemWithAmount[] simulGetItems);
+    public bool LoseItem(Item model, int amount, params ItemWithAmount[] simulGetItems);
     public bool LoseItem(ItemData data, int amount, params ItemWithAmount[] simulGetItems);
     public bool LoseItem(IEnumerable<ItemWithAmount> items, params ItemWithAmount[] simulGetItems);
 
     public bool CanLose(string id, int amount, params ItemWithAmount[] simulGetItems);
-    public bool CanLose(ItemBase model, int amount, params ItemWithAmount[] simulGetItems);
+    public bool CanLose(Item model, int amount, params ItemWithAmount[] simulGetItems);
     public bool CanLose(ItemData data, int amount, params ItemWithAmount[] simulGetItems);
     public bool CanLose(IEnumerable<ItemWithAmount> items, params ItemWithAmount[] simulGetItems);
 
-    public bool CanGet(ItemBase item, int amount, params ItemWithAmount[] simulLoseItems);
+    public bool CanGet(Item item, int amount, params ItemWithAmount[] simulLoseItems);
     public bool CanGet(ItemData item, int amount, params ItemWithAmount[] simulLoseItems);
-    public bool CanGet(IEnumerable<ItemInfoBase> infos, params ItemWithAmount[] simulLoseItems);
+    public bool CanGet(IEnumerable<ItemInfo> infos, params ItemWithAmount[] simulLoseItems);
     public bool CanGet(IEnumerable<ItemWithAmount> items, params ItemWithAmount[] simulLoseItems);
 
     public bool HasItemWithID(string id);
-    public bool HasItem(ItemBase item);
+    public bool HasItem(Item item);
 
     public bool GetItemData(string id, out ItemData item, out int amount);
-    public bool GetItemData(ItemBase model, out ItemData item, out int amount);
+    public bool GetItemData(Item model, out ItemData item, out int amount);
     public bool GetItemDatas(string id, out List<ItemWithAmount> results);
-    public bool GetItemDatas(ItemBase model, out List<ItemWithAmount> results);
+    public bool GetItemDatas(Item model, out List<ItemWithAmount> results);
 
     public void GetMoney(long money);
     public bool CanLoseMoney(long money);
@@ -673,10 +676,10 @@ public interface IInventoryHandler : IInventoryHolder
 
     #region 材料相关
     public bool IsMaterialsEnough(IEnumerable<MaterialInfo> materials);
-    public bool IsMaterialsEnough(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfoBase> givenMaterials);
+    public bool IsMaterialsEnough(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfo> givenMaterials);
     public List<ItemWithAmount> GetMaterialsFromInventory(IEnumerable<MaterialInfo> targetMaterials);
     public List<string> GetMaterialsInfoString(IEnumerable<MaterialInfo> materials);
     public int GetAmountCanMake(IEnumerable<MaterialInfo> materials);
-    public int GetAmountCanMake(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfoBase> givenMaterials);
+    public int GetAmountCanMake(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfo> givenMaterials);
     #endregion
 }

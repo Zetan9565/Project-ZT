@@ -1,109 +1,20 @@
 using System;
-using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Craft;
+using ZetanStudio.Item.Module;
 
-public class RoleAttributeGroupDrawer
+public class ItemInfoListDrawer
 {
-    private readonly SerializedObject owner;
-
     public ReorderableList List { get; }
 
-    public RoleAttributeGroupDrawer(SerializedObject owner, SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "属性列表")
+    public ItemInfoListDrawer(SerializedObject owner, SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "道具数量列表")
     {
-        this.owner = owner;
-        SerializedProperty attrs = property.FindPropertyRelative("attributes");
-        if (attrs != null)
-        {
-            List = new ReorderableList(owner, attrs, true, true, true, true)
-            {
-                drawElementCallback = (rect, index, isActive, isFocused) =>
-                {
-                    owner.UpdateIfRequiredOrScript();
-                    EditorGUI.BeginChangeCheck();
-                    SerializedProperty attr = attrs.GetArrayElementAtIndex(index);
-                    SerializedProperty type = attr.FindPropertyRelative("type");
-                    SerializedProperty value = attr.FindPropertyRelative(TypeToPropertyName(type.enumValueIndex));
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y, rect.width / 2, lineHeight), type, new GUIContent(string.Empty));
-                    EditorGUI.PropertyField(new Rect(rect.x + rect.width * 2 / 3, rect.y, rect.width / 3, lineHeight), value, new GUIContent(string.Empty));
-                    if (EditorGUI.EndChangeCheck())
-                        owner.ApplyModifiedProperties();
-                },
-
-                elementHeightCallback = (index) =>
-                {
-                    return lineHeightSpace;
-                },
-
-                drawHeaderCallback = (rect) =>
-                {
-                    EditorGUI.LabelField(rect, listTitle);
-                },
-
-                drawNoneElementCallback = (rect) =>
-                {
-                    EditorGUI.LabelField(rect, "空列表");
-                }
-            };
-        }
-    }
-
-    public void DoLayoutDraw()
-    {
-        owner?.UpdateIfRequiredOrScript();
-        List?.DoLayoutList();
-        owner?.ApplyModifiedProperties();
-    }
-
-    public void DoDraw(Rect rect)
-    {
-        owner?.UpdateIfRequiredOrScript();
-        List?.DoList(rect);
-        owner?.ApplyModifiedProperties();
-    }
-
-    public float GetDrawHeight()
-    {
-        if (List == null) return 0;
-        return List.GetHeight();
-    }
-
-    private string TypeToPropertyName(int type)
-    {
-        switch ((RoleAttributeType)type)
-        {
-            case RoleAttributeType.HP:
-            case RoleAttributeType.MP:
-            case RoleAttributeType.SP:
-            case RoleAttributeType.CutATK:
-            case RoleAttributeType.PunATK:
-            case RoleAttributeType.BluATK:
-            case RoleAttributeType.DEF:
-                return "intValue";
-            case RoleAttributeType.Hit:
-            case RoleAttributeType.Crit:
-            case RoleAttributeType.ATKSpeed:
-            case RoleAttributeType.MoveSpeed:
-                return "floatValue";
-            case RoleAttributeType.TestBool:
-                return "boolValue";
-            default:
-                return "intValue";
-        }
-    }
-}
-
-public class ItemAmountListDrawer
-{
-    private readonly SerializedObject owner;
-
-    public ReorderableList List { get; }
-
-    public ItemAmountListDrawer(SerializedObject owner, SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "道具数量列表")
-    {
-        this.owner = owner;
         List = new ReorderableList(owner, property, true, true, true, true)
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
@@ -112,7 +23,7 @@ public class ItemAmountListDrawer
                 SerializedProperty item = itemInfo.FindPropertyRelative("item");
                 SerializedProperty amount = itemInfo.FindPropertyRelative("amount");
                 if (item.objectReferenceValue != null)
-                    EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), $"[{index}] {(item.objectReferenceValue as ItemBase).Name}");
+                    EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), $"[{index}] {(item.objectReferenceValue as Item).Name}");
                 else
                     EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), $"[{index}] (空)");
                 EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
@@ -130,7 +41,11 @@ public class ItemAmountListDrawer
             onRemoveCallback = (list) =>
             {
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
+                {
                     ReorderableList.defaultBehaviours.DoRemoveButton(list);
+                    property.serializedObject.ApplyModifiedProperties();
+                }
+                GUIUtility.ExitGUI();
             },
 
             onCanRemoveCallback = (list) =>
@@ -160,16 +75,12 @@ public class ItemAmountListDrawer
 
     public void DoLayoutDraw()
     {
-        owner?.UpdateIfRequiredOrScript();
         List?.DoLayoutList();
-        owner?.ApplyModifiedProperties();
     }
 
     public void DoDraw(Rect rect)
     {
-        owner?.UpdateIfRequiredOrScript();
         List?.DoList(rect);
-        owner?.ApplyModifiedProperties();
     }
 
     public float GetDrawHeight()
@@ -181,13 +92,10 @@ public class ItemAmountListDrawer
 
 public class MaterialListDrawer
 {
-    private readonly SerializedObject owner;
-
     public ReorderableList List { get; }
 
     public MaterialListDrawer(SerializedObject owner, SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "材料列表")
     {
-        this.owner = owner;
         List = new ReorderableList(owner, property, true, true, true, true)
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
@@ -199,15 +107,15 @@ public class MaterialListDrawer
                 SerializedProperty amount = material.FindPropertyRelative("amount");
 
                 string headLabel = $"[{index}] (空)";
-                if (item.objectReferenceValue && (MakingType)makingType.enumValueIndex == MakingType.SingleItem)
-                    headLabel = $"[{index}] {(item.objectReferenceValue as ItemBase).Name}";
-                else if ((MakingType)makingType.enumValueIndex == MakingType.SameType)
+                if (item.objectReferenceValue && (CraftType)makingType.enumValueIndex == CraftType.SingleItem)
+                    headLabel = $"[{index}] {(item.objectReferenceValue as Item).Name}";
+                else if ((CraftType)makingType.enumValueIndex == CraftType.SameType)
                 {
-                    headLabel = $"[{index}] {ZetanUtility.GetInspectorName((MaterialType)materialType.enumValueIndex)}";
+                    headLabel = $"[{index}] {MaterialTypeEnum.Instance[materialType.intValue]}";
                 }
                 EditorGUI.LabelField(new Rect(rect.x, rect.y, rect.width, lineHeight), headLabel);
                 EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight), makingType, new GUIContent(string.Empty));
-                if (makingType.enumValueIndex == (int)MakingType.SameType)
+                if (makingType.enumValueIndex == (int)CraftType.SameType)
                 {
                     var typeBef = materialType.enumValueIndex;
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), materialType, new GUIContent("所需种类"));
@@ -220,10 +128,10 @@ public class MaterialListDrawer
                                 SerializedProperty eMaterialType = element.FindPropertyRelative("materialType");
                                 SerializedProperty eMakingType = element.FindPropertyRelative("makingType");
                                 SerializedProperty eItem = element.FindPropertyRelative("item");
-                                if (eMakingType.enumValueIndex == (int)MakingType.SingleItem)
+                                if (eMakingType.enumValueIndex == (int)CraftType.SingleItem)
                                 {
-                                    if (eItem.objectReferenceValue is ItemBase ei)
-                                        if (ei.MaterialType == (MaterialType)materialType.enumValueIndex)
+                                    if (eItem.objectReferenceValue is Item ei)
+                                        if (MaterialModule.Compare(ei, MaterialTypeEnum.Instance[materialType.intValue]))
                                         {
                                             EditorUtility.DisplayDialog("错误", $"与第 {i + 1} 个材料的道具类型冲突", "确定");
                                             materialType.enumValueIndex = typeBef;
@@ -231,7 +139,7 @@ public class MaterialListDrawer
                                 }
                                 else
                                 {
-                                    if ((MaterialType)materialType.enumValueIndex != MaterialType.None && eMaterialType.enumValueIndex == materialType.enumValueIndex)
+                                    if (eMaterialType.intValue == materialType.intValue)
                                     {
                                         EditorUtility.DisplayDialog("错误", $"第 {i + 1} 个材料已使用该类型", "确定");
                                         materialType.enumValueIndex = typeBef;
@@ -244,7 +152,7 @@ public class MaterialListDrawer
                 {
                     var itemBef = item.objectReferenceValue;
                     EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight), item, new GUIContent("所需材料"));
-                    if (itemBef != item.objectReferenceValue && item.objectReferenceValue is ItemBase itemNow)
+                    if (itemBef != item.objectReferenceValue && item.objectReferenceValue is Item itemNow)
                         for (int i = 0; i < property.arraySize; i++)
                         {
                             if (i != index)
@@ -252,10 +160,10 @@ public class MaterialListDrawer
                                 SerializedProperty element = property.GetArrayElementAtIndex(i);
                                 SerializedProperty eMaterialType = element.FindPropertyRelative("materialType");
                                 SerializedProperty eMakingType = element.FindPropertyRelative("makingType");
-                                if (eMakingType.enumValueIndex == (int)MakingType.SameType)
-                                    if (itemNow.MaterialType == (MaterialType)eMaterialType.enumValueIndex)
+                                if (eMakingType.enumValueIndex == (int)CraftType.SameType)
+                                    if (MaterialModule.Compare(itemNow, MaterialTypeEnum.Instance[eMaterialType.enumValueIndex]))
                                     {
-                                        EditorUtility.DisplayDialog("错误", $"第 {i + 1} 个材料的类型 [{ZetanUtility.GetInspectorName((MaterialType)eMaterialType.enumValueIndex)}] 已包括这个道具", "确定");
+                                        EditorUtility.DisplayDialog("错误", $"第 {i + 1} 个材料的类型 [{MaterialTypeEnum.IndexToName(eMaterialType.intValue)}] 已包括这个道具", "确定");
                                         item.objectReferenceValue = itemBef;
                                     }
                             }
@@ -277,9 +185,9 @@ public class MaterialListDrawer
                 SerializedProperty material = property.GetArrayElementAtIndex(property.arraySize - 1);
                 list.Select(property.arraySize - 1);
                 SerializedProperty materialType = material.FindPropertyRelative("materialType");
-                materialType.enumValueIndex = (int)MaterialType.None;
+                materialType.intValue = 0;
                 SerializedProperty makingType = material.FindPropertyRelative("makingType");
-                makingType.enumValueIndex = (int)MakingType.SingleItem;
+                makingType.enumValueIndex = (int)CraftType.SingleItem;
                 SerializedProperty item = material.FindPropertyRelative("item");
                 item.objectReferenceValue = null;
                 SerializedProperty amount = material.FindPropertyRelative("amount");
@@ -289,7 +197,11 @@ public class MaterialListDrawer
             onRemoveCallback = (list) =>
             {
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个道具吗？", "确定", "取消"))
+                {
                     ReorderableList.defaultBehaviours.DoRemoveButton(list);
+                    property.serializedObject.ApplyModifiedProperties();
+                }
+                GUIUtility.ExitGUI();
             },
 
             onCanRemoveCallback = (list) =>
@@ -304,7 +216,7 @@ public class MaterialListDrawer
                 for (int i = 0; i < property.arraySize; i++)
                 {
                     material = property.GetArrayElementAtIndex(i);
-                    if (material.FindPropertyRelative("makingType").enumValueIndex == (int)MakingType.SingleItem && !material.FindPropertyRelative("item").objectReferenceValue)
+                    if (material.FindPropertyRelative("makingType").enumValueIndex == (int)CraftType.SingleItem && !material.FindPropertyRelative("item").objectReferenceValue)
                         notCmpltCount++;
                 }
                 EditorGUI.LabelField(rect, listTitle, notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
@@ -319,16 +231,12 @@ public class MaterialListDrawer
 
     public void DoLayoutDraw()
     {
-        owner?.UpdateIfRequiredOrScript();
         List?.DoLayoutList();
-        owner?.ApplyModifiedProperties();
     }
 
     public void DoDraw(Rect rect)
     {
-        owner?.UpdateIfRequiredOrScript();
         List?.DoList(rect);
-        owner?.ApplyModifiedProperties();
     }
 
     public float GetDrawHeight()
@@ -340,40 +248,37 @@ public class MaterialListDrawer
 
 public class DropItemListDrawer
 {
-    private readonly SerializedObject owner;
-
     public ReorderableList List { get; }
 
-    public DropItemListDrawer(SerializedObject owner, SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "产出列表")
+    public DropItemListDrawer(SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "产出列表", IEnumerable<Item> items = null)
     {
-        this.owner = owner;
-        List = new ReorderableList(owner, property, true, true, true, true)
+        items ??= Item.UseDatabase ? ItemDatabase.Editor.GetItems() : ZetanUtility.Editor.LoadAssets<Item>();
+        List = new ReorderableList(property.serializedObject, property, true, true, true, true)
         {
-            drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+            drawElementCallback = (Rect position, int index, bool isActive, bool isFocused) =>
             {
                 SerializedProperty itemInfo = property.GetArrayElementAtIndex(index);
                 SerializedProperty item = itemInfo.FindPropertyRelative("item");
                 if (item.objectReferenceValue != null)
-                    EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent($"[{index}] {(item.objectReferenceValue as ItemBase).Name}"));
+                    EditorGUI.PropertyField(new Rect(position.x + 8f, position.y, position.width / 2f, lineHeight), itemInfo, new GUIContent($"[{index}] {(item.objectReferenceValue as Item).Name}"));
                 else
-                    EditorGUI.PropertyField(new Rect(rect.x + 8f, rect.y, rect.width / 2f, lineHeight), itemInfo, new GUIContent($"[{index}] (空)"));
+                    EditorGUI.PropertyField(new Rect(position.x + 8f, position.y, position.width / 2f, lineHeight), itemInfo, new GUIContent($"[{index}] (空)"));
                 SerializedProperty minAmount = itemInfo.FindPropertyRelative("minAmount");
                 SerializedProperty maxAmount = itemInfo.FindPropertyRelative("maxAmount");
                 SerializedProperty dropRate = itemInfo.FindPropertyRelative("dropRate");
                 SerializedProperty onlyDropForQuest = itemInfo.FindPropertyRelative("onlyDropForQuest");
                 SerializedProperty binedQuest = itemInfo.FindPropertyRelative("bindedQuest");
-                EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2f, rect.y, rect.width / 2f, lineHeight),
-                    item, new GUIContent(string.Empty));
+                ItemSelectorDrawer.Draw(new Rect(position.x + position.width / 2f, position.y, position.width / 2f, lineHeight), item, new GUIContent(string.Empty), items);
                 if (itemInfo.isExpanded)
                 {
                     int lineCount = 1;
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
+                    EditorGUI.PropertyField(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight),
                         dropRate, new GUIContent("产出概率百分比"));
                     if (dropRate.floatValue < 0) dropRate.floatValue = 0.0f;
                     lineCount++;
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                    EditorGUI.PropertyField(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width / 2 - 1, lineHeight),
                         minAmount, new GUIContent("最少产出"));
-                    EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                    EditorGUI.PropertyField(new Rect(position.x + position.width / 2 + 1, position.y + lineHeightSpace * lineCount, position.width / 2 - 1, lineHeight),
                         maxAmount, new GUIContent("最多产出"));
                     if (minAmount.intValue < 1) minAmount.intValue = 1;
                     if (minAmount.intValue > maxAmount.intValue)
@@ -383,18 +288,12 @@ public class DropItemListDrawer
                         minAmount.intValue = minAmount.intValue - maxAmount.intValue;
                     }
                     lineCount++;
-                    EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                    EditorGUI.PropertyField(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width / 2 - 1, lineHeight),
                         onlyDropForQuest, new GUIContent("只在进行任务时产出"));
                     if (onlyDropForQuest.boolValue)
                     {
-                        EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2, rect.y + lineHeightSpace * lineCount, rect.width / 2, lineHeight),
+                        EditorGUI.PropertyField(new Rect(position.x + position.width / 2 + 1, position.y + lineHeightSpace * lineCount, position.width / 2 - 1, lineHeight),
                             binedQuest, new GUIContent(string.Empty));
-                        if (binedQuest.objectReferenceValue)
-                        {
-                            lineCount++;
-                            EditorGUI.LabelField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), "任务名称",
-                                (binedQuest.objectReferenceValue as Quest).Title);
-                        }
                     }
                 }
             },
@@ -407,11 +306,6 @@ public class DropItemListDrawer
                 if (dropItem.isExpanded)
                 {
                     lineCount += 3;//数量、百分比、只在
-                    if (dropItem.FindPropertyRelative("onlyDropForQuest").boolValue)
-                    {
-                        if (dropItem.FindPropertyRelative("bindedQuest").objectReferenceValue)
-                            lineCount++;//任务标题
-                    }
                 }
                 return lineCount * lineHeightSpace;
             },
@@ -424,7 +318,11 @@ public class DropItemListDrawer
             onRemoveCallback = (list) =>
             {
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个产出吗？", "确定", "取消"))
+                {
                     ReorderableList.defaultBehaviours.DoRemoveButton(list);
+                    property.serializedObject.ApplyModifiedProperties();
+                }
+                GUIUtility.ExitGUI();
             },
 
             drawHeaderCallback = (rect) =>
@@ -466,29 +364,25 @@ public class DropItemListDrawer
 
 public class ConditionGroupDrawer
 {
-    private readonly SerializedObject owner;
     private readonly SerializedProperty property;
+    private readonly List<TalkerInformation> talkers;
+    private readonly List<Quest> quests;
 
     private readonly float lineHeightSpace;
 
-    private readonly Dictionary<int, ObjectSelectionDrawer<TalkerInformation>> npcSelectors;
-
     public ReorderableList List { get; }
 
-    public ConditionGroupDrawer(SerializedObject owner, SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "条件列表")
+    public ConditionGroupDrawer(SerializedProperty property, float lineHeight, float lineHeightSpace, string listTitle = "条件列表")
     {
-        this.owner = owner;
         this.property = property;
         this.lineHeightSpace = lineHeightSpace;
         SerializedProperty conditions = property.FindPropertyRelative("conditions");
-        npcSelectors = new Dictionary<int, ObjectSelectionDrawer<TalkerInformation>>();
-        var talkers = Resources.LoadAll<TalkerInformation>("").Where(x => x.Enable).ToArray();
-        var quests = Resources.LoadAll<Quest>("").Where(x => x != (owner.targetObject as Quest)).ToArray();
+        talkers = ZetanUtility.Editor.LoadAssets<TalkerInformation>("").FindAll(x => x.Enable);
+        quests = ZetanUtility.Editor.LoadAssets<Quest>("").FindAll(x => x != property.serializedObject.targetObject);
         List = new ReorderableList(property.serializedObject, conditions, true, true, true, true)
         {
             drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
             {
-                owner.UpdateIfRequiredOrScript();
                 SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
                 SerializedProperty type = condition.FindPropertyRelative("type");
                 ConditionType conditionType = (ConditionType)type.enumValueIndex;
@@ -503,14 +397,13 @@ public class ConditionGroupDrawer
                         case ConditionType.AcceptQuest:
                             SerializedProperty day = condition.FindPropertyRelative("intValue");
                             SerializedProperty relatedQuest = condition.FindPropertyRelative("relatedQuest");
-                            new ObjectSelectionDrawer<Quest>(relatedQuest, "title", quests, "对应任务").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight));
-                            if (relatedQuest.objectReferenceValue == owner.targetObject as Quest) relatedQuest.objectReferenceValue = null;
+                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), relatedQuest, new GUIContent("对应任务"));
+                            if (relatedQuest.objectReferenceValue == property.serializedObject.targetObject as Quest) relatedQuest.objectReferenceValue = null;
                             day.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "后第几天", day.intValue, 0, 30);
                             break;
                         case ConditionType.HasItem:
                             SerializedProperty relatedItem = condition.FindPropertyRelative("relatedItem");
-                            new ObjectSelectionDrawer<ItemBase>(relatedItem, "_name", i => ZetanUtility.GetInspectorName(i.ItemType), "",
-                                    "对应道具").DoDraw(new Rect(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight)));
+                            EditorGUI.PropertyField(new Rect(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight)), relatedItem, new GUIContent("需在此处使用的道具"));
                             break;
                         case ConditionType.Level:
                             SerializedProperty level = condition.FindPropertyRelative("intValue");
@@ -529,12 +422,7 @@ public class ConditionGroupDrawer
                             SerializedProperty npc = condition.FindPropertyRelative("relatedCharInfo");
                             SerializedProperty intimacy = condition.FindPropertyRelative("intValue");
                             compareType = condition.FindPropertyRelative("compareType");
-                            if (!npcSelectors.TryGetValue(index, out var selector))
-                            {
-                                selector = new ObjectSelectionDrawer<TalkerInformation>(npc, "_name", talkers, "条件对象");
-                                npcSelectors.Add(index, selector);
-                            }
-                            selector.DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                            ObjectSelectorDrawer.Draw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), npc, new GUIContent("条件对象"), talkers, "_name");
                             lineCount++;
                             EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), npc, new GUIContent("对象引用"), false);
                             lineCount++;
@@ -545,8 +433,6 @@ public class ConditionGroupDrawer
                             break;
                         default: break;
                     }
-                if (EditorGUI.EndChangeCheck())
-                    owner.ApplyModifiedProperties();
             },
 
             elementHeightCallback = (int index) =>
@@ -575,16 +461,12 @@ public class ConditionGroupDrawer
 
             onRemoveCallback = (list) =>
             {
-                owner.UpdateIfRequiredOrScript();
-                EditorGUI.BeginChangeCheck();
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个条件吗？", "确定", "取消"))
                 {
                     list.Deselect(list.index);
                     conditions.DeleteArrayElementAtIndex(list.index);
-                    npcSelectors.Clear();
                 }
-                if (EditorGUI.EndChangeCheck())
-                    owner.ApplyModifiedProperties();
+                GUIUtility.ExitGUI();
             },
 
             onCanRemoveCallback = (list) =>
@@ -633,32 +515,22 @@ public class ConditionGroupDrawer
     {
         if (List != null && List.count > 0)
         {
-            owner?.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             var re = property.FindPropertyRelative("relational");
             EditorGUILayout.PropertyField(re, new GUIContent("(?)条件关系表达式", re.tooltip));
-            if (EditorGUI.EndChangeCheck())
-                owner?.ApplyModifiedProperties();
         }
-        owner?.UpdateIfRequiredOrScript();
         List?.DoLayoutList();
-        owner?.ApplyModifiedProperties();
     }
 
     public void DoDraw(Rect rect)
     {
         if (List != null && List.count > 0)
         {
-            owner?.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             var re = property.FindPropertyRelative("relational");
-            EditorGUILayout.PropertyField(re, new GUIContent("(?)条件关系表达式", re.tooltip));
-            if (EditorGUI.EndChangeCheck())
-                owner?.ApplyModifiedProperties();
+            EditorGUI.PropertyField(rect, re, new GUIContent("(?)条件关系表达式", re.tooltip));
         }
-        owner?.UpdateIfRequiredOrScript();
         List?.DoList(List != null && List.count > 0 ? new Rect(rect.x, rect.y + lineHeightSpace, rect.width, rect.height) : rect);
-        owner?.ApplyModifiedProperties();
     }
 
     public float GetDrawHeight()
@@ -755,10 +627,9 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
         int index = Array.IndexOf(objects, property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
         Rect rect = EditorGUILayout.GetControlRect();
-        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 25f, rect.height), label, index, objectNames);
+        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width, rect.height), label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
-        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 23f, rect.y, 23f, rect.height), property, new GUIContent(string.Empty));
         return index;
     }
 
@@ -766,10 +637,9 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
     {
         int index = Array.FindIndex(objects, x => x == property.objectReferenceValue) + 1;
         index = index < 0 ? 0 : index;
-        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width - 25f, rect.height), label, index, objectNames);
+        index = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width, rect.height), label, index, objectNames);
         if (index < 1 || index > objects.Length) property.objectReferenceValue = null;
         else property.objectReferenceValue = objects[index - 1];
-        EditorGUI.PropertyField(new Rect(rect.x + rect.width - 23f, rect.y, 23f, rect.height), property, new GUIContent(string.Empty));
         return index;
     }
 
@@ -795,7 +665,7 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
             if (groupPicker == null)
             {
                 ungrouped++;
-                return $"[{ungrouped}] { name}";
+                return $"[{ungrouped}] {name}";
             }
             string group = groupPicker(obj);
             if (string.IsNullOrEmpty(group))
@@ -815,5 +685,465 @@ public class ObjectSelectionDrawer<T> where T : UnityEngine.Object
                 return $"{group}/[{index}] {name}";
             }
         }
+    }
+}
+
+public class PaginatedReorderableList : IDisposable
+{
+    private IList list;
+    private Type eType;
+    private SerializedProperty property;
+    private SerializedObject serializedObject;
+
+    public string title;
+    private IList resultList;
+    private ReorderableList orderList;
+    private bool m_Draggable;
+    private bool m_DisplayAdd;
+    private bool m_DisplayRemove;
+
+    private bool m_DisplaySearch;
+    private bool searching;
+    private string keyWords;
+    private int pageBef;
+
+    private readonly float lineHeight;
+    private readonly float lineHeightSpace;
+    private const float headerHeight = 20.0f;
+    private const float headerHeightSearch = 45.0f;
+
+    private IList pagedList;
+    private int IndexOffset => (Page - 1) * m_PageSize;
+    private int page = 1;
+    private int Page { get => page; set => page = value < 1 ? 1 : value; }
+    private int maxPage = 1;
+    private int MaxPage { get => maxPage; set => maxPage = value < 1 ? 1 : value; }
+    private int m_PageSize = 10;
+
+    private Action<Rect, PaginatedReorderableList> m_OnAddDropdownCallback;
+    private Action<Rect> m_DrawFooterCallback;
+
+    private bool enableBef;
+
+#pragma warning disable IDE1006 // 命名样式
+    public Action<Rect, int, bool, bool> drawElementCallback { get; set; }
+    public Func<int, float> elementHeightCallback { get; set; }
+    public Action<PaginatedReorderableList> onAddCallback { get; set; }
+    public Action<PaginatedReorderableList> onRemoveCallback { get; set; }
+    public Func<PaginatedReorderableList, bool> onCanAddCallback { get; set; }
+    public Func<PaginatedReorderableList, bool> onCanRemoveCallback { get; set; }
+    public Func<string, SerializedProperty, bool> searchFilter { get; set; }
+    public Action<Rect> drawHeaderCallback { get; set; }
+    public Action<Rect> drawFooterCallback
+    {
+        get => m_DrawFooterCallback;
+        set
+        {
+            if (value != m_DrawFooterCallback)
+            {
+                m_DrawFooterCallback = value;
+                if (value != null)
+                    orderList.drawFooterCallback = (rect) =>
+                    {
+                        m_DrawFooterCallback(rect);
+                    };
+            }
+            else if (value == null) orderList.drawFooterCallback = null;
+        }
+    }
+    public Action<Rect, PaginatedReorderableList> onAddDropdownCallback
+    {
+        get => m_OnAddDropdownCallback;
+        set
+        {
+            if (value != m_OnAddDropdownCallback)
+            {
+                m_OnAddDropdownCallback = value;
+                if (value != null)
+                    orderList.onAddDropdownCallback = (rect, list) =>
+                    {
+                        m_OnAddDropdownCallback(rect, this);
+                    };
+            }
+            else if (value == null) orderList.onAddDropdownCallback = null;
+        }
+    }
+
+    public int index { get => ToRealIndex(orderList.index); set => Select(value); }
+
+    public int count
+    {
+        get
+        {
+            if (property != null)
+            {
+                if (property.minArraySize > serializedObject.maxArraySizeForMultiEditing && serializedObject.isEditingMultipleObjects)
+                {
+                    return 0;
+                }
+
+                return property.minArraySize;
+            }
+
+            return list.Count;
+        }
+    }
+    public IEnumerable<int> selectedIndices => orderList.selectedIndices.Select(x => ToRealIndex(x));
+    public bool multiSelect { get => orderList.multiSelect; set => orderList.multiSelect = value; }
+    public bool draggable { get => m_Draggable; set => orderList.draggable = m_Draggable = value; }
+    public bool displayAdd { get => m_DisplayAdd; set => orderList.displayAdd = m_DisplayAdd = value; }
+    public bool displayRemove { get => m_DisplayRemove; set => orderList.displayRemove = m_DisplayRemove = value; }
+    public bool displaySearch
+    {
+        get => m_DisplaySearch;
+        set
+        {
+            if (value != m_DisplaySearch)
+            {
+                m_DisplaySearch = value;
+                Refresh();
+            }
+        }
+    }
+    public int pageSize
+    {
+        get => m_PageSize;
+        set
+        {
+            if (value > 0 && value != m_PageSize)
+            {
+                m_PageSize = value;
+                Refresh();
+            }
+        }
+    }
+    public SerializedProperty serializedProperty
+    {
+        get => property;
+        set
+        {
+            if (!SerializedProperty.EqualContents(value, property))
+                InitList(value, m_PageSize);
+        }
+    }
+#pragma warning restore IDE1006 // 命名样式
+
+    private int ToRealIndex(int index)
+    {
+        if (index < 0 || index > pagedList.Count - 1) return -1;
+        return list.IndexOf(pagedList[index]);
+    }
+    private int ToLocalIndex(int index)
+    {
+        if (index < 0 || index > list.Count - 1) return -1;
+        return pagedList.IndexOf(list[index]);
+    }
+    public void Select(int index)
+    {
+        TurnPageToIndex(index);
+        orderList.Select(ToLocalIndex(index));
+    }
+    public void SelectRange(int indexFrom, int indexTo)
+    {
+        TurnPageToIndex(indexFrom);
+        orderList.SelectRange(ToLocalIndex(indexFrom), ToLocalIndex(indexTo));
+    }
+    private void TurnPageToIndex(int index)
+    {
+        if (index < -1 || index > list.Count - 1) return;
+        var oldPage = page;
+        while (index < (page - 1) * pageSize && page > 1)
+        {
+            Page--;
+        }
+        while (index > page * pageSize - 1 && page < maxPage)
+        {
+            Page++;
+        }
+        if (oldPage != page) Refresh();
+    }
+
+    public void Deselect(int index) => orderList.Deselect(ToLocalIndex(index));
+    public void ClearSelection() => orderList.ClearSelection();
+    public bool IsSelected(int index) => orderList.IsSelected(ToLocalIndex(index));
+
+    public PaginatedReorderableList(string title, SerializedProperty property, int pageSize = 10, bool displaySearch = true, bool draggable = true, bool displayAddButton = true, bool displayRemoveButton = true)
+    {
+        lineHeight = EditorGUIUtility.singleLineHeight;
+        lineHeightSpace = lineHeight + 2;
+        Undo.undoRedoPerformed += Refresh;
+        m_Draggable = draggable;
+        m_DisplayAdd = displayAddButton;
+        m_DisplayRemove = displayRemoveButton;
+        m_DisplaySearch = displaySearch;
+        this.title = title;
+        InitList(property, pageSize);
+    }
+    public PaginatedReorderableList(SerializedProperty property, int pageSize = 10, bool displaySearch = true, bool draggable = true, bool displayAddButton = true, bool displayRemoveButton = true)
+        : this(null, property, pageSize, displaySearch, draggable, displayAddButton, displayRemoveButton) { }
+
+    ~PaginatedReorderableList()
+    {
+        Undo.undoRedoPerformed -= Refresh;
+    }
+
+    private void InitList(SerializedProperty property, int pageSize)
+    {
+        if (!ZetanUtility.Editor.TryGetValue(property, out var value, out var field))
+            throw new ArgumentException($"路径 {property.propertyPath} 不存在");
+
+        var type = field.FieldType;
+        if (!typeof(IList).IsAssignableFrom(type))
+            throw new ArgumentException($"路径 {property.propertyPath} 不是数组或列表");
+
+        this.property = property;
+        serializedObject = property.serializedObject;
+        if (value is null)
+        {
+            value = Activator.CreateInstance(type);
+            ZetanUtility.Editor.TrySetValue(property, value);
+            serializedObject.UpdateIfRequiredOrScript();
+        }
+        list = value as IList;
+        eType = type.GetGenericArguments()[0];
+        resultList = ZetanUtility.CreateListInstance(eType);
+        pagedList = ZetanUtility.CreateListInstance(eType);
+        Page = 1;
+        m_PageSize = pageSize > 0 ? pageSize : 10;
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        try
+        {
+            serializedObject.UpdateIfRequiredOrScript();
+            resultList.Clear();
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (string.IsNullOrEmpty(keyWords) || searchFilter != null && searchFilter(keyWords, property.GetArrayElementAtIndex(i).Copy()) || searchFilter == null && property.GetArrayElementAtIndex(i).displayName.Contains(keyWords))
+                    resultList.Add(list[i]);
+            }
+            MaxPage = Mathf.CeilToInt(resultList.Count * 1.0f / m_PageSize);
+            while (IndexOffset > resultList.Count && Page > 1)
+            {
+                Page--;
+            }
+            RefreshList();
+        }
+        catch { }
+    }
+
+    private void Search()
+    {
+        searching = true;
+        pageBef = Page;
+        Refresh();
+    }
+
+    private void RefreshList()
+    {
+        pagedList.Clear();
+        for (int i = IndexOffset; i < Page * m_PageSize && i < resultList.Count; i++)
+        {
+            pagedList.Add(resultList[i]);
+        }
+        orderList = new ReorderableList(pagedList, eType, m_Draggable, true, m_DisplayAdd, m_DisplayRemove)
+        {
+            drawElementCallback = (rect, index, isActive, isFocused) =>
+            {
+                if (drawElementCallback != null) drawElementCallback(rect, index, isActive, isFocused);
+                else
+                {
+                    SerializedProperty element = property.GetArrayElementAtIndex(ToRealIndex(index));
+                    ReorderableList.defaultBehaviours.DrawElement(new Rect(rect.x + 8f, rect.y, rect.width - 8f, rect.height), element, null, orderList.IsSelected(index), isFocused, draggable, true);
+                }
+            },
+            elementHeightCallback = (index) =>
+            {
+                if (index < 0 || index >= pagedList.Count) return 0;
+                if (elementHeightCallback != null) return elementHeightCallback(ToRealIndex(index));
+                SerializedProperty element = property.GetArrayElementAtIndex(ToRealIndex(index));
+                return EditorGUI.GetPropertyHeight(element);
+            },
+            onAddCallback = (list) =>
+            {
+                int oldSize = property.arraySize;
+                int index = ToRealIndex(list.index);
+                if (onAddCallback != null) onAddCallback(this);
+                else
+                {
+                    serializedObject.UpdateIfRequiredOrScript();
+                    if (property.arraySize < 1) property.InsertArrayElementAtIndex(0);
+                    else property.InsertArrayElementAtIndex(index);
+                    serializedObject.ApplyModifiedProperties();
+                }
+                Refresh();
+                Select(index + 1);
+            },
+            onRemoveCallback = (list) =>
+            {
+                if (onRemoveCallback != null) onRemoveCallback(this);
+                else
+                {
+                    serializedObject.UpdateIfRequiredOrScript();
+                    property.DeleteArrayElementAtIndex(ToRealIndex(list.index));
+                    serializedObject.ApplyModifiedProperties();
+                }
+                Refresh();
+            },
+            onCanRemoveCallback = (list) =>
+            {
+                return (onCanRemoveCallback == null || onCanRemoveCallback(this))
+                       && (property.minArraySize <= serializedObject.maxArraySizeForMultiEditing
+                       || !serializedObject.isEditingMultipleObjects);
+            },
+            headerHeight = m_DisplaySearch ? headerHeightSearch : headerHeight,
+            drawHeaderCallback = (rect) =>
+            {
+                float inputWidth = GUI.skin.label.CalcSize(new GUIContent($"{MaxPage}")).x + 4;
+                float pageWidth = GUI.skin.label.CalcSize(new GUIContent($"{MaxPage}")).x;
+                float fixedWidth = GUI.skin.horizontalScrollbarLeftButton.fixedWidth;
+                float rightOffset = rect.width - fixedWidth + 5;
+                float pageOffset = rightOffset - pageWidth - 1;
+                float inputOffset = pageOffset - inputWidth - 1;
+                float leftOffset = inputOffset - fixedWidth - 1;
+                float sizeWidth = GUI.skin.label.CalcSize(new GUIContent($"{pageSize}")).x + 4;
+                float sizeOffset = leftOffset - sizeWidth - 1;
+                float totalWidth = GUI.skin.label.CalcSize(new GUIContent($"{L10n.Tr("Total")}: {list.Count}")).x;
+                float totalOffset = sizeOffset - totalWidth - 3;
+                if (drawHeaderCallback != null) drawHeaderCallback(new Rect(rect.x, rect.y, totalOffset, lineHeight));
+                else EditorGUI.LabelField(new Rect(rect.x, rect.y, totalOffset, lineHeight), new GUIContent(string.IsNullOrEmpty(title) ? property.displayName : title, property.tooltip), EditorStyles.boldLabel);
+                enableBef = GUI.enabled;
+                GUI.enabled = true;
+                GUIStyle style = new GUIStyle(EditorStyles.numberField)
+                {
+                    alignment = TextAnchor.MiddleCenter
+                };
+                var newSize = EditorGUI.IntField(new Rect(rect.x + sizeOffset, rect.y + 1, sizeWidth, lineHeight - 2), m_PageSize, style);
+                if (newSize < 1) newSize = 1;
+                if (newSize != m_PageSize)
+                {
+                    m_PageSize = newSize;
+                    Refresh();
+                }
+                EditorGUI.BeginDisabledGroup(Page <= 1);
+                if (GUI.Button(new Rect(rect.x + leftOffset, rect.y + 2, fixedWidth, lineHeight), string.Empty, GUI.skin.horizontalScrollbarLeftButton))
+                    if (Page > 1)
+                    {
+                        GUI.FocusControl(null);
+                        Page--;
+                        Refresh();
+                    }
+                EditorGUI.EndDisabledGroup();
+                var newPage = EditorGUI.IntField(new Rect(rect.x + inputOffset, rect.y + 1, inputWidth, lineHeight - 2), Page, style);
+                if (newPage < 1) newPage = 1;
+                if (newPage > MaxPage) newPage = MaxPage;
+                if (newPage != Page)
+                {
+                    Page = newPage;
+                    Refresh();
+                }
+                style = ZetanUtility.Editor.Style.middleRight;
+                EditorGUI.LabelField(new Rect(rect.x + totalOffset, rect.y, totalWidth, lineHeight - 2), $"{L10n.Tr("Total")}: {list.Count}", style);
+                EditorGUI.LabelField(new Rect(rect.x + pageOffset, rect.y, pageWidth, lineHeight - 2), $"{MaxPage}", style);
+                EditorGUI.BeginDisabledGroup(Page >= MaxPage);
+                if (GUI.Button(new Rect(rect.x + rightOffset, rect.y + 2, fixedWidth, lineHeight), string.Empty, GUI.skin.horizontalScrollbarRightButton))
+                    if (Page * m_PageSize <= resultList.Count)
+                    {
+                        GUI.FocusControl(null);
+                        Page++;
+                        Refresh();
+                    }
+                EditorGUI.EndDisabledGroup();
+                if (m_DisplaySearch)
+                {
+                    var headerRect = new Rect(rect);
+                    headerRect.xMin -= 6f;
+                    headerRect.xMax += 6f;
+                    headerRect.height += 2f;
+                    headerRect.height -= 20f;
+                    headerRect.y -= 1f;
+                    headerRect.y += 20f;
+                    GUI.Box(headerRect, string.Empty);
+                    GUI.SetNextControlName("keyWords");
+                    string oldKeyWords = keyWords;
+                    keyWords = EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace + 2.5f, rect.width - 52, lineHeight), keyWords, EditorStyles.toolbarSearchField);
+                    if (string.IsNullOrEmpty(keyWords)) searching = false;
+                    if (!string.IsNullOrEmpty(oldKeyWords) && string.IsNullOrEmpty(keyWords))
+                    {
+                        searching = false;
+                        Page = pageBef;
+                        Refresh();
+                    }
+                    if (!searching)
+                    {
+                        EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(keyWords));
+                        if (GUI.Button(new Rect(rect.x + rect.width - 50, rect.y + lineHeightSpace + 2f, 50, lineHeight), L10n.Tr("Search")))
+                        {
+                            GUI.FocusControl(null);
+                            Search();
+                        }
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    else if (GUI.Button(new Rect(rect.x + rect.width - 50, rect.y + lineHeightSpace + 2f, 50, lineHeight), L10n.Tr("Clear")))
+                    {
+                        GUI.FocusControl(null);
+                        keyWords = string.Empty;
+                        searching = false;
+                        Page = pageBef;
+                        Refresh();
+                    }
+                }
+                GUI.enabled = enableBef;
+            },
+            drawFooterCallback = drawFooterCallback == null ? null : (rect) =>
+            {
+                if (drawFooterCallback != null) drawFooterCallback(rect);
+                else ReorderableList.defaultBehaviours.DrawFooter(rect, orderList);
+            },
+            onAddDropdownCallback = onAddDropdownCallback == null ? null : (rect, list) =>
+            {
+                m_OnAddDropdownCallback(rect, this);
+            },
+            onReorderCallbackWithDetails = (list, oldIndex, newIndex) =>
+            {
+                (oldIndex, newIndex) = (ToRealIndex(newIndex), ToRealIndex(oldIndex));
+                serializedObject.UpdateIfRequiredOrScript();
+                SerializedProperty element1 = property.GetArrayElementAtIndex(oldIndex);
+                SerializedProperty element2 = property.GetArrayElementAtIndex(newIndex);
+                (element2.isExpanded, element1.isExpanded) = (element1.isExpanded, element2.isExpanded);
+                property.MoveArrayElement(oldIndex, newIndex);
+                serializedObject.ApplyModifiedProperties();
+                Refresh();
+            },
+        };
+    }
+
+    public void DoLayoutList()
+    {
+        if (serializedObject.isEditingMultipleObjects)
+        {
+            EditorGUILayout.PropertyField(property, true);
+            return;
+        }
+        orderList.DoLayoutList();
+        orderList.draggable = !searching;
+    }
+
+    public void DoList(Rect rect)
+    {
+        if (serializedObject.isEditingMultipleObjects)
+        {
+            EditorGUI.PropertyField(rect, property, true);
+            return;
+        }
+        orderList?.DoList(rect);
+        orderList.draggable = !searching;
+    }
+
+    public void Dispose()
+    {
+        Undo.undoRedoPerformed -= Refresh;
     }
 }

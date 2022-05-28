@@ -5,31 +5,31 @@ public class InputCustomInfo : ScriptableObject
 {
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("任务窗口按钮")]
+    [Label("任务窗口按钮")]
 #endif
     private KeyCode questWindowButton = KeyCode.O;
 
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("交互按钮")]
+    [Label("交互按钮")]
 #endif
     private KeyCode interactiveButton = KeyCode.R;
 
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("背包按钮")]
+    [Label("背包按钮")]
 #endif
     private KeyCode backpackButton = KeyCode.I;
 
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("建筑按钮")]
+    [Label("建筑按钮")]
 #endif
     private KeyCode buildingButton = KeyCode.B;
 
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("沿路行进按钮")]
+    [Label("沿路行进按钮")]
 #endif
     private KeyCode traceButton = KeyCode.T;
 

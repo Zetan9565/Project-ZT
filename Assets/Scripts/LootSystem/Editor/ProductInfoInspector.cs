@@ -12,7 +12,7 @@ public class ProductInfoInspector : Editor
     {
         remark = serializedObject.FindProperty("remark");
         products = serializedObject.FindProperty("products");
-        listDrawer = new DropItemListDrawer(serializedObject, products, EditorGUIUtility.singleLineHeight, EditorGUIUtility.singleLineHeight + 2);
+        listDrawer = new DropItemListDrawer(products, EditorGUIUtility.singleLineHeight, EditorGUIUtility.singleLineHeight + 2);
     }
 
     public override void OnInspectorGUI()

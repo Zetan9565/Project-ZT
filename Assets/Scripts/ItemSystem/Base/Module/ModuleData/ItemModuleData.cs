@@ -8,18 +8,23 @@ namespace ZetanStudio.Item.Module
         public ItemData Item { get; protected set; }
 
         public abstract ItemModule GetModule();
+
+        public static implicit operator bool(ItemModuleData self)
+        {
+            return self != null;
+        }
     }
 
     public abstract class ItemModuleData<T> : ItemModuleData where T : ItemModule
     {
-        public T Model { get; protected set; }
+        public T Module { get; protected set; }
 
-        public sealed override ItemModule GetModule() => Model;
+        public sealed override ItemModule GetModule() => Module;
 
         protected ItemModuleData(ItemData item, T model)
         {
             Item = item;
-            Model = model;
+            Module = model;
         }
     }
 }

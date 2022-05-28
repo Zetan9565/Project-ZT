@@ -11,43 +11,56 @@ namespace ZetanStudio.Item
     public sealed class ItemDatabase : SingletonScriptableObject<ItemDatabase>
     {
         [SerializeField]
-        private List<ItemNew> items = new List<ItemNew>();
+        private List<Item> items = new List<Item>();
 
-        public static Dictionary<string, ItemNew> ToDictionary()
+        public static Dictionary<string, Item> ToDictionary()
         {
             if (Instance) return Instance.items.ToDictionary(x => x.ID);
             else return null;
         }
 
+        public static List<Item> GetItems()
+        {
+            return new List<Item>(GetOrCreate().items);
+        }
+
 #if UNITY_EDITOR
         public static class Editor
         {
-            public static List<ItemNew> GetItems()
+            public static List<Item> GetItems()
             {
-                return new List<ItemNew>(GetOrCreate().items);
+                return ItemDatabase.GetItems();
             }
-            public static ItemNew MakeItem(ItemTemplate template)
+            public static List<Item> GetItems(ItemTemplate template)
+            {
+                List<Item> results = new List<Item>();
+                foreach (var item in GetOrCreate().items)
+                {
+                    if (Item.Editor.MatchTemplate(item, template))
+                        results.Add(item);
+                }
+                return results;
+            }
+            public static Item MakeItem(ItemTemplate template)
             {
                 var instance = GetOrCreate();
-                ItemNew item = CreateInstance<ItemNew>();
-                ItemNew.Editor.ApplyTemplate(item, template);
-                ItemNew.Editor.SetAutoID(item, instance.items, template ? template.IDPrefix : null);
+                Item item = CreateInstance<Item>();
+                Item.Editor.ApplyTemplate(item, template);
+                Item.Editor.SetAutoID(item, instance.items, template ? template.IDPrefix : null);
+                item.name = item.ID;
+                ZetanUtility.Editor.SaveChange(item);
                 instance.items.Add(item);
-                EditorUtility.SetDirty(item);
-                AssetDatabase.SaveAssetIfDirty(item);
-                item.name = "item";
                 AssetDatabase.AddObjectToAsset(item, instance);
-                EditorUtility.SetDirty(instance);
-                AssetDatabase.SaveAssetIfDirty(instance);
+                ZetanUtility.Editor.SaveChange(instance);
                 return item;
             }
-            public static bool DeleteItem(ItemNew item)
+            public static bool DeleteItem(Item item)
             {
                 if (!item || !instance) return false;
                 if (!Instance.items.Remove(item)) return false;
                 AssetDatabase.RemoveObjectFromAsset(item);
-                EditorUtility.SetDirty(instance);
-                AssetDatabase.SaveAssetIfDirty(instance);
+                ZetanUtility.Editor.SaveChange(instance);
+                DestroyImmediate(item);
                 return true;
             }
         }

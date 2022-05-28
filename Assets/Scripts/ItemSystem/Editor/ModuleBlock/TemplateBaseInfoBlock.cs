@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine.UIElements;
-using ZetanExtends.Editor;
+using ZetanStudio.Extension.Editor;
 
 namespace ZetanStudio.Item
 {

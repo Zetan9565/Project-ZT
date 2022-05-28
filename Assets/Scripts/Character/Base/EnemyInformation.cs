@@ -7,7 +7,7 @@ public class EnemyInformation : CharacterInformation
     private EnemyRace race;
     public EnemyRace Race => race;
 
-    [SerializeField, NonReorderable]
+    [SerializeField, ObjectSelector(memberAsTooltip: "GetDropInfoString", displayAdd: true)]
     private ProductInformation dropItems;
     public ProductInformation DropItems
     {

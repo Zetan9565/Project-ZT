@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.Item;
 
 public class WarehouseWindow : InventoryWindow
 {
@@ -23,7 +24,7 @@ public class WarehouseWindow : InventoryWindow
                 if (slot.Data.amount > 1)
                     buttons.Add(new ButtonWithTextData("全部取出", () => TakeOutItem(slot.Item, true)));
                 break;
-            case OpenType.Making:
+            case OpenType.Craft:
                 if (WindowsManager.IsWindowOpen<ItemSelectionWindow>(out var selecter))
                 {
                     if (!slot.IsDark)
@@ -66,7 +67,7 @@ public class WarehouseWindow : InventoryWindow
                     break;
                 }
                 else return false;
-            case OpenType.Making:
+            case OpenType.Craft:
                 break;
             case OpenType.Preview:
                 break;
@@ -98,21 +99,21 @@ public class WarehouseWindow : InventoryWindow
         int have = Handler.GetAmount(item);
         if (!all)
             if (have == 1 && OnTakeOut(item, 1, 1) > 0)
-                MessageManager.Instance.New($"取出了1个 [{ItemUtility.GetColorName(item.Model_old)}");
+                MessageManager.Instance.New($"取出了1个 [{item.Model.ColorName}");
             else
             {
                 AmountWindow.StartInput(delegate (long amount)
                 {
                     int take = OnTakeOut(item, (int)amount, have);
                     if (take > 0)
-                        MessageManager.Instance.New($"取出了{take}个 [{ItemUtility.GetColorName(item.Model_old)}]");
+                        MessageManager.Instance.New($"取出了{take}个 [{item.Model.ColorName}]");
                 }, have, "取出数量", ZetanUtility.ScreenCenter, Vector2.zero);
             }
         else
         {
             int take = OnTakeOut(item, have, have);
             if (take > 0)
-                MessageManager.Instance.New($"取出了{have + take}个 [{ItemUtility.GetColorName(item.Model_old)}]");
+                MessageManager.Instance.New($"取出了{have + take}个 [{item.Model.ColorName}]");
         }
     }
 
@@ -137,7 +138,7 @@ public class WarehouseWindow : InventoryWindow
         if (!all)
         {
             if (have == 1 && OnStore(item, 1) > 0)
-                MessageManager.Instance.New($"存入了1个 [{ItemUtility.GetColorName(item.Model_old)}]");
+                MessageManager.Instance.New($"存入了1个 [{item.Model.ColorName}]");
             else
             {
                 int maxGet = Handler.Inventory.PeekGet(item, have);
@@ -145,7 +146,7 @@ public class WarehouseWindow : InventoryWindow
                 {
                     int store = OnStore(item, (int)amount);
                     if (store > 0)
-                        MessageManager.Instance.New($"存入了{store}个 [{ItemUtility.GetColorName(item.Model_old)}]");
+                        MessageManager.Instance.New($"存入了{store}个 [{item.Model.ColorName}]");
                 }, have > maxGet ? maxGet : have, "存入数量", ZetanUtility.ScreenCenter, Vector2.zero);
             }
         }
@@ -154,7 +155,7 @@ public class WarehouseWindow : InventoryWindow
             int amountBef = Handler.GetAmount(item);
             int store = OnStore(item, have);
             if (store > 0)
-                MessageManager.Instance.New($"存入了{store}个 [{ItemUtility.GetColorName(item.Model_old)}]");
+                MessageManager.Instance.New($"存入了{store}个 [{item.Model.ColorName}]");
         }
     }
 
@@ -187,7 +188,7 @@ public class WarehouseWindow : InventoryWindow
             case OpenType.Store:
                 TakeOutItem(slot.Item, true);
                 break;
-            case OpenType.Making:
+            case OpenType.Craft:
                 break;
             case OpenType.Preview:
                 break;
@@ -205,7 +206,7 @@ public class WarehouseWindow : InventoryWindow
     public enum OpenType
     {
         Store,
-        Making,
+        Craft,
         Preview
     }
 }

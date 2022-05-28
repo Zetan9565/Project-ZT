@@ -10,5 +10,11 @@ namespace ZetanStudio.Item.Module
         public MaterialType Type => MaterialTypeEnum.Instance[type];
 
         public override bool IsValid => type >= 0;
+
+        public static bool Compare(Item item, MaterialType materialType)
+        {
+            if (!item) return false;
+            return item.GetModule<MaterialModule>() is MaterialModule material && material.Type == materialType;
+        }
     }
 }

@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
-using ZetanStudio.Item.Module;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.Item.Module
 {
     [CreateAssetMenu(fileName = "set trigger", menuName = "Zetan Studio/道具/用途/设置触发器")]
-    public class SetTrigger : ItemUsage
+    public sealed class SetTrigger : ItemUsage
     {
         public override string Name => "设置触发器";
 

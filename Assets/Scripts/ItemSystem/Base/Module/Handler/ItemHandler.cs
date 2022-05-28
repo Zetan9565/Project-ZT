@@ -4,18 +4,13 @@ namespace ZetanStudio.Item
 {
     public abstract class ItemHandler : ScriptableObject
     {
-        protected bool IsInstance { get; private set; }
+        public abstract string Name { get; }
 
-        public ItemHandler GetInstance()
-        {
-            var instance = Instantiate(this);
-            instance.IsInstance = true;
-            return instance;
-        }
+        protected virtual ItemHandler Instance => this;
 
         public bool Handle(ItemData item)
         {
-            return IsInstance && DoHandle(item);
+            return Instance.DoHandle(item);
         }
 
         protected abstract bool DoHandle(ItemData item);

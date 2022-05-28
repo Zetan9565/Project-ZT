@@ -7,7 +7,7 @@ namespace ZetanStudio.Item
     {
         public CurrencyTypeEnum()
         {
-            @enum = new CurrencyType[]
+            _enum = new CurrencyType[]
             {
                 new CurrencyType("金币"),
                 new CurrencyType("经验"),

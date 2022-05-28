@@ -31,10 +31,10 @@ public sealed class TriggerObjectiveDrawer : ObjectiveDrawer
         if (objective.isExpanded)
         {
             lineCount++;//目标数量
-            if (quest.CmpltObjctvInOrder)
+            if (quest.InOrder)
                 lineCount++;// 按顺序
             lineCount += 1;//执行顺序
-            if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
+            if (objective.FindPropertyRelative("display").boolValue || !quest.InOrder) lineCount++;//标题
             lineCount += 3;//触发器、状态、检查
         }
         return lineCount * lineHeightSpace;

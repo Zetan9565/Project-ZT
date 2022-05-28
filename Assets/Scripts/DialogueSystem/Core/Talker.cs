@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-using ZetanExtends;
+using ZetanStudio.Extension;
+using ZetanStudio.Item;
 
 [DisallowMultipleComponent]
 public class Talker : Character, IInteractive
@@ -80,7 +81,7 @@ public class Talker : Character, IInteractive
         GetData<TalkerData>()?.OnTalkFinished();
     }
 
-    public Dialogue OnGetGift(ItemBase gift)
+    public Dialogue OnGetGift(Item gift)
     {
         return GetData<TalkerData>()?.OnGetGift(gift);
     }

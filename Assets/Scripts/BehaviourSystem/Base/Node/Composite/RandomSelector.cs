@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
-    [NodeDescription("随机选择器：按随机顺序逐个评估子结点，若当前子结点评估成功，则向上反馈评估成功；若所有子结点都评估失败向上反馈评估失败；若当前子结点还在评估，则向上反馈评估正进行")]
+    [Description("随机选择器：按随机顺序逐个评估子结点，若当前子结点评估成功，则向上反馈评估成功；若所有子结点都评估失败向上反馈评估失败；若当前子结点还在评估，则向上反馈评估正进行")]
     public class RandomSelector : Composite
     {
         private readonly List<int> childIndexList = new List<int>();

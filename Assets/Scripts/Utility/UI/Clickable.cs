@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RectTransform))]
 public class Clickable : MonoBehaviour,
@@ -59,7 +59,7 @@ public class Clickable : MonoBehaviour,
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (isEnabled)
+        if (isEnabled && isActiveAndEnabled)
             if (eventData.button == PointerEventData.InputButton.Left)
             {
 #if UNITY_STANDALONE
@@ -93,7 +93,7 @@ public class Clickable : MonoBehaviour,
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (isEnabled && eventData.button == PointerEventData.InputButton.Left)
+        if (isEnabled && isActiveAndEnabled && eventData.button == PointerEventData.InputButton.Left)
         {
             if (pressCoroutine != null) StopCoroutine(pressCoroutine);
             pressCoroutine = StartCoroutine(Press());

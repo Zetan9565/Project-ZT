@@ -5,11 +5,11 @@ using UnityEngine.Pool;
 
 public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
 {
-    [SerializeField, DisplayName("池子")]
+    [SerializeField, Label("池子")]
     private Transform poolRoot;//用于放置失效对象
-    [SerializeField, DisplayName("容量")]
+    [SerializeField, Label("容量")]
     private int capacity = 500;
-    [SerializeField, DisplayName("清理周期(秒)")]
+    [SerializeField, Label("清理周期(秒)")]
     private float cleanDelayTime = 600.0f;//池子东西放多放久了臭，要按时排掉
     private bool cleanning;
 

@@ -171,13 +171,15 @@ public partial class CharacterInfoInspector
                             {
                                 EditorGUILayout.LabelField("商品列表", new GUIStyle { fontStyle = FontStyle.Bold });
                                 for (int i = 0; i < talker.Shop.Commodities.Count; i++)
-                                    EditorGUILayout.LabelField("商品 " + (i + 1), talker.Shop.Commodities[i].Item.Name);
+                                    if (talker.Shop.Commodities[i].IsValid)
+                                        EditorGUILayout.LabelField("商品 " + (i + 1), talker.Shop.Commodities[i].Item.Name);
                             }
                             if (talker.Shop.Acquisitions.Count > 0)
                             {
                                 EditorGUILayout.LabelField("收购品列表", new GUIStyle { fontStyle = FontStyle.Bold });
                                 for (int i = 0; i < talker.Shop.Acquisitions.Count; i++)
-                                    EditorGUILayout.LabelField("收购品 " + (i + 1), talker.Shop.Acquisitions[i].Item.Name);
+                                    if (talker.Shop.Acquisitions[i].IsValid)
+                                        EditorGUILayout.LabelField("收购品 " + (i + 1), talker.Shop.Acquisitions[i].Item.Name);
                             }
                             EditorGUILayout.EndVertical();
                         }
@@ -287,7 +289,7 @@ public partial class CharacterInfoInspector
                 {
                     if (!conditionDrawers.TryGetValue(talker.ConditionDialogues[index], out var drawer))
                     {
-                        drawer = new ConditionGroupDrawer(conditionDialogue.serializedObject, condition, lineHeight, lineHeightSpace);
+                        drawer = new ConditionGroupDrawer(condition, lineHeight, lineHeightSpace);
                         conditionDrawers.Add(talker.ConditionDialogues[index], drawer);
                     }
                     serializedObject.UpdateIfRequiredOrScript();
@@ -323,6 +325,7 @@ public partial class CharacterInfoInspector
                 }
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
+                GUIUtility.ExitGUI();
             },
 
             onCanRemoveCallback = (list) =>
@@ -332,9 +335,7 @@ public partial class CharacterInfoInspector
 
             drawHeaderCallback = (rect) =>
             {
-                int notCmpltCount = talker.ConditionDialogues.FindAll(x => !x.Dialogue ||
-                x.Condition.Conditions.Exists(x => (x.Type == ConditionType.AcceptQuest || x.Type == ConditionType.CompleteQuest) && !x.RelatedQuest ||
-                x.Type == ConditionType.HasItem && !x.RelatedItem || (x.Type == ConditionType.TriggerSet || x.Type == ConditionType.TriggerReset) && string.IsNullOrEmpty(x.TriggerName))).Count;
+                int notCmpltCount = talker.ConditionDialogues.FindAll(x => !x.Dialogue || x.Condition.Conditions.Exists(y => !y.IsValid)).Count;
                 EditorGUI.LabelField(rect, "条件对话列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
             },
 
@@ -407,6 +408,7 @@ public partial class CharacterInfoInspector
                     giftDialogues.DeleteArrayElementAtIndex(list.index);
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
+                GUIUtility.ExitGUI();
             },
 
             onCanRemoveCallback = (list) =>
@@ -463,6 +465,7 @@ public partial class CharacterInfoInspector
                     affectiveItems.DeleteArrayElementAtIndex(list.index);
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
+                GUIUtility.ExitGUI();
             },
 
             onCanRemoveCallback = (list) =>
@@ -564,6 +567,7 @@ public partial class CharacterInfoInspector
                     talker.QuestsStored.RemoveAt(list.index);
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
+                GUIUtility.ExitGUI();
             },
 
             onCanRemoveCallback = (list) =>

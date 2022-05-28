@@ -18,11 +18,11 @@ MonoBehaviour:
   gatherTime: 5
   refreshTime: 0
   productItems:
-  - item: {fileID: 11400000, guid: eb9016750083a934c92149060e411f75, type: 2}
+  - item: {fileID: -4938875555958233210, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     minAmount: 1
     maxAmount: 1
     dropRate: 100
     onlyDropForQuest: 0
     bindedQuest: {fileID: 0}
-  lootPrefab: {fileID: 4971178635026308412, guid: 7786fb215e3056c4e93993db12bea13e,
+  lootPrefab: {fileID: 4971178635026308411, guid: 7786fb215e3056c4e93993db12bea13e,
     type: 3}

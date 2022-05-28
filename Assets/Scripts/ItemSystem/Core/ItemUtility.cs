@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.Item;
 
 public static class ItemUtility
 {
@@ -8,18 +9,12 @@ public static class ItemUtility
         //TODO 获取可以比较的道具信息
         if (data)
         {
-            if (data.Model_old is WeaponItem weapon)
-                if (weapon.IsPrimary && PlayerManager.Instance.PlayerInfo.primaryWeapon.item)
-                    return new ItemData[] { new ItemData(PlayerManager.Instance.PlayerInfo.primaryWeapon.item, false) };
-                else if (PlayerManager.Instance.PlayerInfo.secondaryWeapon.item) return new ItemData[] { new ItemData(PlayerManager.Instance.PlayerInfo.secondaryWeapon.item, false) };
+            //if (data.Model_old is WeaponItem weapon)
+            //    if (weapon.IsPrimary && PlayerManager.Instance.PlayerInfo.primaryWeapon.item_old)
+            //        return new ItemData[] { new ItemData(PlayerManager.Instance.PlayerInfo.primaryWeapon.item_old, false) };
+            //    else if (PlayerManager.Instance.PlayerInfo.secondaryWeapon.item_old) return new ItemData[] { new ItemData(PlayerManager.Instance.PlayerInfo.secondaryWeapon.item_old, false) };
         }
         return null;
-    }
-    public static string GetColorName(ItemBase item)
-    {
-        if (MiscSettings.Instance && item.Quality > 0)
-            return ZetanUtility.ColorText(item.Name, QualityToColor(item.Quality));
-        else return item.Name;
     }
 
     /// <summary>
@@ -27,7 +22,7 @@ public static class ItemUtility
     /// </summary>
     /// <param name="id">道具ID</param>
     /// <returns>获得的道具</returns>
-    public static ItemBase GetItemByID(string id)
+    public static Item GetItemByID(string id)
     {
         GameManager.Items.TryGetValue(id, out var item);
         return item;
@@ -37,79 +32,6 @@ public static class ItemUtility
         var item = GetItemByID(id);
         if (!item) return null;
         else return item.Name;
-    }
-    public static Color QualityToColor(ItemQuality quality)
-    {
-        if (MiscSettings.Instance && quality >= 0 && MiscSettings.Instance.QualityColors != null && (int)quality < MiscSettings.Instance.QualityColors.Count)
-            return MiscSettings.Instance.QualityColors[(int)quality];
-        else return Color.clear;
-    }
-}
-public static class ItemUsage
-{
-    public static void UseItem(ItemData itemInfo)
-    {
-        if (!itemInfo.Model_old.Usable)
-        {
-            MessageManager.Instance.New("该物品不可使用");
-            return;
-        }
-        if (itemInfo.Model_old.IsBox) UseBox(itemInfo);
-        else if (itemInfo.Model_old.IsEquipment) UseEuipment(itemInfo);
-        else if (itemInfo.Model_old.IsBook) UseBook(itemInfo);
-        else if (itemInfo.Model_old.IsBag) UseBag(itemInfo);
-        else if (itemInfo.Model_old.IsForQuest) UseQuest(itemInfo);
-    }
-
-    public static void UseBox(ItemData item)
-    {
-        BoxItem box = item.Model_old as BoxItem;
-        BackpackManager.Instance.LoseItem(item, 1, box.GetItems());
-    }
-
-    public static void UseEuipment(ItemData MItemInfo)
-    {
-        //Equip(MItemInfo);
-    }
-
-    public static void UseBook(ItemData item)
-    {
-        BookItem book = item.Model_old as BookItem;
-        switch (book.BookType)
-        {
-            case BookType.Building:
-                if (BackpackManager.Instance.CanLose(item, 1) && StructureManager.Instance.Learn(book.BuildingToLearn))
-                {
-                    BackpackManager.Instance.LoseItem(item, 1);
-                }
-                break;
-            case BookType.Making:
-                if (BackpackManager.Instance.CanLose(item, 1) && MakingManager.Instance.Learn(book.ItemToLearn))
-                {
-                    BackpackManager.Instance.LoseItem(item, 1);
-                }
-                break;
-            case BookType.Skill:
-            default: break;
-        }
-    }
-
-    public static void UseBag(ItemData item)
-    {
-        BagItem bag = item.Model_old as BagItem;
-        if (BackpackManager.Instance.CanLose(item, 1))
-        {
-            if (BackpackManager.Instance.ExpandSpace(bag.ExpandSize))
-                BackpackManager.Instance.LoseItem(item, 1);
-        }
-    }
-
-    public static void UseQuest(ItemData item)
-    {
-        if (!BackpackManager.Instance.CanLose(item, 1)) return;
-        QuestItem quest = item.Model_old as QuestItem;
-        TriggerManager.Instance.SetTrigger(quest.TriggerName, quest.StateToSet);
-        BackpackManager.Instance.LoseItem(item, 1);
     }
 }
 
@@ -131,101 +53,7 @@ public sealed class SlotComparer : IComparer<ItemSlotData>
                 return -1;
             else return 0;
         }
-        else if (x.Model.ItemType == y.Model.ItemType)
-        {
-
-            if (x.Model.Quality < y.Model.Quality)
-                return 1;
-            else if (x.Model.Quality > y.Model.Quality)
-                return -1;
-            else return string.Compare(x.ModelID, y.ModelID);
-        }
-        else
-        {
-            if (x.Model.ItemType == ItemType.Weapon) return -1;
-            else if (y.Model.ItemType == ItemType.Weapon) return 1;
-            else if (x.Model.ItemType == ItemType.Armor) return -1;
-            else if (y.Model.ItemType == ItemType.Armor) return 1;
-            else if (x.Model.ItemType == ItemType.Jewelry) return -1;
-            else if (y.Model.ItemType == ItemType.Jewelry) return 1;
-            else if (x.Model.ItemType == ItemType.Tool) return -1;
-            else if (y.Model.ItemType == ItemType.Tool) return 1;
-            else if (x.Model.ItemType == ItemType.Cuisine) return -1;
-            else if (y.Model.ItemType == ItemType.Cuisine) return 1;
-            else if (x.Model.ItemType == ItemType.Medicine) return -1;
-            else if (y.Model.ItemType == ItemType.Medicine) return 1;
-            else if (x.Model.ItemType == ItemType.Elixir) return -1;
-            else if (y.Model.ItemType == ItemType.Elixir) return 1;
-            else if (x.Model.ItemType == ItemType.Box) return -1;
-            else if (y.Model.ItemType == ItemType.Box) return 1;
-            else if (x.Model.ItemType == ItemType.Book) return -1;
-            else if (y.Model.ItemType == ItemType.Book) return 1;
-            else if (x.Model.ItemType == ItemType.Valuables) return -1;
-            else if (y.Model.ItemType == ItemType.Valuables) return 1;
-            else if (x.Model.ItemType == ItemType.Quest) return -1;
-            else if (y.Model.ItemType == ItemType.Quest) return 1;
-            else if (x.Model.ItemType == ItemType.Material) return -1;
-            else if (y.Model.ItemType == ItemType.Material) return 1;
-            else if (x.Model.ItemType == ItemType.Seed) return -1;
-            else if (y.Model.ItemType == ItemType.Seed) return 1;
-            else if (x.Model.ItemType == ItemType.Bag) return -1;
-            else if (y.Model.ItemType == ItemType.Bag) return 1;
-            else if (x.Model.ItemType == ItemType.Other) return -1;
-            else if (y.Model.ItemType == ItemType.Other) return 1;
-            else return 0;
-        }
-    }
-}
-
-public sealed class ItemComparer : IComparer<ItemBase>
-{
-    public static ItemComparer Default => new ItemComparer();
-
-    public int Compare(ItemBase x, ItemBase y)
-    {
-        if (x.ItemType == y.ItemType)
-        {
-
-            if (x.Quality < y.Quality)
-                return 1;
-            else if (x.Quality > y.Quality)
-                return -1;
-            else return string.Compare(x.ID, y.ID);
-        }
-        else
-        {
-            if (x.ItemType == ItemType.Weapon) return -1;
-            else if (y.ItemType == ItemType.Weapon) return 1;
-            else if (x.ItemType == ItemType.Armor) return -1;
-            else if (y.ItemType == ItemType.Armor) return 1;
-            else if (x.ItemType == ItemType.Jewelry) return -1;
-            else if (y.ItemType == ItemType.Jewelry) return 1;
-            else if (x.ItemType == ItemType.Tool) return -1;
-            else if (y.ItemType == ItemType.Tool) return 1;
-            else if (x.ItemType == ItemType.Cuisine) return -1;
-            else if (y.ItemType == ItemType.Cuisine) return 1;
-            else if (x.ItemType == ItemType.Medicine) return -1;
-            else if (y.ItemType == ItemType.Medicine) return 1;
-            else if (x.ItemType == ItemType.Elixir) return -1;
-            else if (y.ItemType == ItemType.Elixir) return 1;
-            else if (x.ItemType == ItemType.Box) return -1;
-            else if (y.ItemType == ItemType.Box) return 1;
-            else if (x.ItemType == ItemType.Book) return -1;
-            else if (y.ItemType == ItemType.Book) return 1;
-            else if (x.ItemType == ItemType.Valuables) return -1;
-            else if (y.ItemType == ItemType.Valuables) return 1;
-            else if (x.ItemType == ItemType.Quest) return -1;
-            else if (y.ItemType == ItemType.Quest) return 1;
-            else if (x.ItemType == ItemType.Material) return -1;
-            else if (y.ItemType == ItemType.Material) return 1;
-            else if (x.ItemType == ItemType.Seed) return -1;
-            else if (y.ItemType == ItemType.Seed) return 1;
-            else if (x.ItemType == ItemType.Bag) return -1;
-            else if (y.ItemType == ItemType.Bag) return 1;
-            else if (x.ItemType == ItemType.Other) return -1;
-            else if (y.ItemType == ItemType.Other) return 1;
-            else return 0;
-        }
+        else return Item.Comparer.Default.Compare(x.Model, y.Model);
     }
 }
 
@@ -234,7 +62,7 @@ public class ItemWithAmount
     public readonly ItemData source;
     public int amount;
 
-    public bool IsValid => source && amount > 0 && source.Model_old;
+    public bool IsValid => source && amount > 0 && source.Model;
 
     public ItemWithAmount(ItemData source, int amount)
     {
@@ -242,15 +70,15 @@ public class ItemWithAmount
         this.amount = amount;
     }
 
-    public ItemWithAmount(ItemBase item, int amount)
+    public ItemWithAmount(Item item, int amount)
     {
         source = new ItemData(item, false);
         this.amount = amount;
     }
 
-    public ItemWithAmount(ItemInfoBase info) : this(info.item, info.Amount) { }
+    public ItemWithAmount(ItemInfo info) : this(info.item, info.Amount) { }
 
-    public static ItemWithAmount[] Convert(IEnumerable<ItemInfoBase> infos)
+    public static ItemWithAmount[] Convert(IEnumerable<ItemInfo> infos)
     {
         List<ItemWithAmount> results = new List<ItemWithAmount>();
         foreach (var info in infos)
@@ -265,7 +93,7 @@ public class ItemWithAmount
         return self != null;
     }
 
-    public static explicit operator ItemWithAmount(ItemInfoBase info)
+    public static explicit operator ItemWithAmount(ItemInfo info)
     {
         return new ItemWithAmount(info);
     }

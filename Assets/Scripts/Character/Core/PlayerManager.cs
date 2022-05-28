@@ -102,7 +102,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
                 if (!busyUI.Contains(msg[0]) && Player.GetMainState(out var state) && state == CharacterStates.Normal)
                 {
                     busyUI.Add(msg[0]);
-                    Player.SetMachineAndCharacterState<PlayerMakingState>(CharacterStates.Busy, CharacterBusyStates.UI);
+                    Player.SetMachineAndCharacterState<PlayerCraftingState>(CharacterStates.Busy, CharacterBusyStates.UI);
                 }
             }
             else if (busyUI.Remove(msg[0]) && busyUI.Count < 1 && Player.GetState(out var state, out var sub) && state == CharacterStates.Busy && (CharacterBusyStates)sub == CharacterBusyStates.UI)

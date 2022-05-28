@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   remark: 
   products:
-  - item: {fileID: 11400000, guid: b45e6b87830936f48b2fa33426a51f75, type: 2}
+  - item: {fileID: 2294737969574299077, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     minAmount: 1
     maxAmount: 1
     dropRate: 75

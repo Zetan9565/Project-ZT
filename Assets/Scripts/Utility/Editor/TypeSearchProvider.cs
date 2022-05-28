@@ -99,7 +99,7 @@ public class TypeSearchProvider : ScriptableObject, ISearchWindowProvider
         if (newScriptMaker != null)
         {
             treeEntries.Add(new SearchTreeGroupEntry(new GUIContent("新建"), 1));
-            treeEntries.Add(new SearchTreeEntry(new GUIContent($"新建脚本")) { level = 2, userData = (Action)delegate { NewScript(); } });
+            treeEntries.Add(new SearchTreeEntry(new GUIContent($"新建脚本") { image = EditorGUIUtility.FindTexture("CreateAddNew") }) { level = 2, userData = (Action)delegate { NewScript(); } });
         }
         return treeEntries;
     }

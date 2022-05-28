@@ -98,7 +98,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
                         {
                             try
                             {
-                                AssetDatabase.MoveAsset(AssetDatabase.GetAssetPath(GetResult(objectsList.list[index]).find), $"{ZetanUtility.Editor.ConvertToAssetsPath(folder)}/{ZetanUtility.Editor.GetFileName(AssetDatabase.GetAssetPath(GetResult(objectsList.list[index]).find))}");
+                                AssetDatabase.MoveAsset(AssetDatabase.GetAssetPath(GetResult(objectsList.list[index]).find), $"{ZetanUtility.Editor.ConvertToAssetsPath(folder)}/{ZetanUtility.GetFileName(AssetDatabase.GetAssetPath(GetResult(objectsList.list[index]).find))}");
                                 Refresh();
                                 latestFolder = folder;
                             }
@@ -187,8 +187,7 @@ public abstract class ConfigurationEditor<T> : EditorWindow where T : Scriptable
                     searching = false;
                     Refresh();
                 }
-                GUIStyle style = new GUIStyle() { alignment = TextAnchor.MiddleRight };
-                style.normal.textColor = GUI.contentColor;
+                GUIStyle style = ZetanUtility.Editor.Style.middleRight;
                 EditorGUI.LabelField(new Rect(rect.x + rect.width - 150, rect.y, 30, lineHeight), $"{page}/{maxPage}", style);
                 if (GUI.Button(new Rect(rect.x + rect.width - 120, rect.y, 60, lineHeight), "上一页"))
                     if (page > 1)

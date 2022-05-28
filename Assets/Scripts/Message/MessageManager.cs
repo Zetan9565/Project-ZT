@@ -7,12 +7,12 @@ public class MessageManager : SingletonMonoBehaviour<MessageManager>
 {
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("消息根")]
+    [Label("消息根")]
 #endif
     private UnityEngine.UI.VerticalLayoutGroup messageRoot;
     [SerializeField]
 #if UNITY_EDITOR
-    [DisplayName("消息预制件")]
+    [Label("消息预制件")]
 #endif
     private GameObject messagePrefab;
 

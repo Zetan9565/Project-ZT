@@ -22,33 +22,35 @@ namespace ZetanStudio.Item.Editor
         private Label listLabel;
         private UnityEngine.UIElements.ListView itemList;
         private UnityEngine.UIElements.ListView templateList;
-        private VisualElement itemContainer;
-        private VisualElement templateContainer;
         private ScrollView rightPanel;
         private TabbedBar funcTab;
-        private ItemNew selectedItem;
-        private IEnumerable<ItemNew> selectedItems;
+        private Item selectedItem;
+        private IEnumerable<Item> selectedItems;
         private SerializedObject serializedItem;
         private ItemTemplate selectedTemplate;
         private IEnumerable<ItemTemplate> selectedTemplates;
         private SerializedObject serializedTemplate;
         private ItemTemplate currentTemplate;
-        private List<ItemNew> items;
+        private List<Item> items;
         private List<ItemTemplate> templates;
         private List<string> templateNames;
         private Button deleteButton;
-        private ObjectField oldItem;
         private UnityEngine.UIElements.ListView searchDropdown;
         private DropdownField searchSelector;
         private SearchKeyType keyType;
+        private List<string> itemSearchType;
+        private List<string> templateSearchType;
 
         private bool useDatabase;
 
         private enum SearchKeyType
         {
+            SearchAll,
             SearchName,
             SearchID,
+            SearchType,
             SearchDescription,
+            SearchModule,
         }
 
         #region 静态方法
@@ -56,21 +58,24 @@ namespace ZetanStudio.Item.Editor
         public static void CreateWindow()
         {
             ItemEditor wnd = GetWindow<ItemEditor>();
-            wnd.minSize = ItemEditorSettings.GetOrCreate().minWindowSize;
-            wnd.titleContent = new GUIContent("道具编辑器");
+            ItemEditorSettings settings = ItemEditorSettings.GetOrCreate();
+            wnd.minSize = settings.minWindowSize;
+            wnd.titleContent = new GUIContent(Language.Tr(settings.language, "道具编辑器"));
         }
-        public static void CreateWindow(ItemNew item)
+        public static void CreateWindow(Item item)
         {
             ItemEditor wnd = GetWindow<ItemEditor>();
-            wnd.minSize = ItemEditorSettings.GetOrCreate().minWindowSize;
-            wnd.titleContent = new GUIContent("道具编辑器");
+            ItemEditorSettings settings = ItemEditorSettings.GetOrCreate();
+            wnd.minSize = settings.minWindowSize;
+            wnd.titleContent = new GUIContent(Language.Tr(settings.language, "道具编辑器"));
             EditorApplication.delayCall += () => wnd.itemList.SetSelection(wnd.items.IndexOf(item));
         }
         public static void CreateWindow(ItemTemplate template)
         {
             ItemEditor wnd = GetWindow<ItemEditor>();
-            wnd.minSize = ItemEditorSettings.GetOrCreate().minWindowSize;
-            wnd.titleContent = new GUIContent("道具编辑器");
+            ItemEditorSettings settings = ItemEditorSettings.GetOrCreate();
+            wnd.minSize = settings.minWindowSize;
+            wnd.titleContent = new GUIContent(Language.Tr(settings.language, "道具编辑器"));
             EditorApplication.delayCall += () =>
             {
                 wnd.funcTab.SetSelected(2);
@@ -83,12 +88,21 @@ namespace ZetanStudio.Item.Editor
                 }
             };
         }
+        public static Item OpenAndCreateItem()
+        {
+            ItemEditor wnd = GetWindow<ItemEditor>();
+            ItemEditorSettings settings = ItemEditorSettings.GetOrCreate();
+            wnd.minSize = settings.minWindowSize;
+            wnd.titleContent = new GUIContent(Language.Tr(settings.language, "道具编辑器"));
+            wnd.NewItem();
+            return wnd.selectedItem;
+        }
         [OnOpenAsset]
 #pragma warning disable IDE0060 // 删除未使用的参数
         public static bool OnOpenAsset(int instanceID, int line)
 #pragma warning restore IDE0060 // 删除未使用的参数
         {
-            if (EditorUtility.InstanceIDToObject(instanceID) is ItemNew item)
+            if (EditorUtility.InstanceIDToObject(instanceID) is Item item)
             {
                 CreateWindow(item);
                 return true;
@@ -103,7 +117,9 @@ namespace ZetanStudio.Item.Editor
             try
             {
                 settings = settings ? settings : ItemEditorSettings.GetOrCreate();
-                useDatabase = settings.useDatabase;
+                useDatabase = Item.UseDatabase;
+                itemSearchType = new List<string>(Language.TrM(settings.language, "全部", "名称", "ID", "类型", "描述", "模块"));
+                templateSearchType = new List<string>(Language.TrM(settings.language, "全部", "名称", "前缀", "类型", "描述", "模块"));
 
                 VisualElement root = rootVisualElement;
 
@@ -133,7 +149,7 @@ namespace ZetanStudio.Item.Editor
                 });
 
                 funcTab = root.Q<TabbedBar>();
-                funcTab.Refresh(new string[] { "道具", "模板" }, OnFuncTab);
+                funcTab.Refresh(new string[] { Tr("道具"), Tr("模板") }, OnFuncTab);
                 funcTab.onRightClick = OnRightFuncTab;
 
                 Button refresh = root.Q<Button>("refresh-button");
@@ -144,14 +160,8 @@ namespace ZetanStudio.Item.Editor
                 deleteButton.clicked += OnDeleteClick;
                 RefreshDeleteButton();
 
-                oldItem = root.Q<ObjectField>("old-item");
-                oldItem.objectType = typeof(ItemBase);
-                Button oldButton = root.Q<ToolbarButton>("copy-button");
-                oldButton.clicked += OnCopyClick;
-                oldButton = root.Q<ToolbarButton>("copy-all-button");
-                oldButton.clicked += OnCopyAllClick;
-
                 listLabel = root.Q<Label>("list-label");
+                listLabel.AddToClassList("list-label");
 
                 templateSelector = root.Q<DropdownField>("template-dropdown");
                 templateSelector.RegisterValueChangedCallback(OnTemplateSelected);
@@ -164,20 +174,20 @@ namespace ZetanStudio.Item.Editor
                     var label = new Label();
                     label.AddManipulator(new ContextualMenuManipulator(evt =>
                     {
-                        if (label.userData is ItemNew item)
+                        if (label.userData is Item item)
                         {
-                            evt.menu.AppendAction("定位", a => EditorGUIUtility.PingObject(item));
-                            evt.menu.AppendAction("删除", a => DeleteItem(item));
+                            evt.menu.AppendAction(Tr("定位"), a => EditorGUIUtility.PingObject(item));
+                            evt.menu.AppendAction(Tr("删除"), a => DeleteItem(item));
                         }
                     }));
                     return label;
                 };
                 itemList.bindItem = (e, i) =>
                 {
-                    (e as Label).text = !string.IsNullOrEmpty(items[i].Name) ? items[i].Name : "(未命名道具)";
+                    (e as Label).text = !string.IsNullOrEmpty(items[i].Name) ? items[i].Name : $"({(Tr("未命名道具"))})";
                     e.userData = items[i];
                 };
-                itemList.onSelectionChange += (os) => OnListItemSelected(os.Select(x => x as ItemNew));
+                itemList.onSelectionChange += (os) => OnListItemSelected(os.Select(x => x as Item));
                 RefreshItems();
 
                 templateList = root.Q<UnityEngine.UIElements.ListView>("template-list");
@@ -189,25 +199,57 @@ namespace ZetanStudio.Item.Editor
                     {
                         if (label.userData is ItemTemplate template)
                         {
-                            evt.menu.AppendAction("定位", a => EditorGUIUtility.PingObject(template));
-                            evt.menu.AppendAction("删除", a => DeleteTemplate(template));
+                            evt.menu.AppendAction(Tr("定位"), a => EditorGUIUtility.PingObject(template));
+                            evt.menu.AppendAction(Tr("删除"), a => DeleteTemplate(template));
                         }
                     }));
                     return label;
                 };
                 templateList.bindItem = (e, i) =>
                 {
-                    (e as Label).text = !string.IsNullOrEmpty(templates[i].Name) ? templates[i].Name : "(未命名模板)";
+                    (e as Label).text = !string.IsNullOrEmpty(templates[i].Name) ? templates[i].Name : $"({Tr("未命名模板")})";
                     e.userData = templates[i];
                 };
                 templateList.onSelectionChange += (os) => OnListTemplateSelected(os.Select(x => x as ItemTemplate));
                 RefreshTemplates();
 
                 rightPanel = root.Q<ScrollView>("right-panel");
-                itemContainer = root.Q("item-container");
-                templateContainer = root.Q("template-container");
+                rightPanel.parent.RegisterCallback<DragEnterEvent>(evt =>
+                {
+                    if (funcTab.SelectedIndex == 1 && selectedItem || funcTab.SelectedIndex == 2 && selectedTemplate)
+                        if (evt.target is not IMGUIContainer && DragAndDrop.objectReferences.All(x => x is MonoScript script && typeof(ItemModule).IsAssignableFrom(script.GetClass())))
+                            DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+                });
+                rightPanel.parent.RegisterCallback<DragUpdatedEvent>(evt =>
+                {
+                    if (funcTab.SelectedIndex == 1 && selectedItem || funcTab.SelectedIndex == 2 && selectedTemplate)
+                        if (evt.target is not IMGUIContainer && DragAndDrop.objectReferences.All(x => x is MonoScript script && typeof(ItemModule).IsAssignableFrom(script.GetClass())))
+                            DragAndDrop.visualMode = DragAndDropVisualMode.Link;
+                });
+                rightPanel.parent.RegisterCallback<DragPerformEvent>(evt =>
+                {
+                    if (funcTab.SelectedIndex == 1 && selectedItem || funcTab.SelectedIndex == 2 && selectedTemplate)
+                        if (evt.target is not IMGUIContainer && DragAndDrop.objectReferences.All(x => x is MonoScript script && typeof(ItemModule).IsAssignableFrom(script.GetClass())))
+                            foreach (var obj in DragAndDrop.objectReferences)
+                            {
+                                if (obj is MonoScript script)
+                                {
+                                    var target = evt.target as VisualElement;
+                                    if (target.parent is not Toggle toggle || toggle.parent is not ModuleBlock block)
+                                        AddModule(script.GetClass());
+                                    else if (funcTab.SelectedIndex == 1 && selectedItem)
+                                        AddModule(script.GetClass(), selectedItem.Modules.IndexOf(block.userData as ItemModule));
+                                    else if (funcTab.SelectedIndex == 2 && selectedTemplate)
+                                        AddModule(script.GetClass(), selectedTemplate.Modules.IndexOf(block.userData as ItemModule));
+                                }
+                            }
+                });
+                rightPanel.parent.RegisterCallback<DragLeaveEvent>(evt =>
+                {
+                    DragAndDrop.visualMode = DragAndDropVisualMode.None;
+                });
 
-                Undo.undoRedoPerformed += RefreshModules;
+                Undo.undoRedoPerformed += RefreshInspector;
 
                 funcTab.SetSelected(1);
 
@@ -223,9 +265,9 @@ namespace ZetanStudio.Item.Editor
         }
         private void OnFocus()
         {
-            if (settings && useDatabase != settings.useDatabase)
+            if (settings && useDatabase != Item.UseDatabase)
             {
-                useDatabase = settings.useDatabase;
+                useDatabase = Item.UseDatabase;
                 if (funcTab != null)
                     switch (funcTab.SelectedIndex)
                     {
@@ -259,217 +301,271 @@ namespace ZetanStudio.Item.Editor
         }
         private void OnDestroy()
         {
-            Undo.undoRedoPerformed -= RefreshModules;
+            Undo.undoRedoPerformed -= RefreshInspector;
             if (selectedItem) Undo.ClearUndo(selectedItem);
             if (selectedTemplate) Undo.ClearUndo(selectedTemplate);
             AssetDatabase.SaveAssets();
+        }
+
+        private void RefreshInspector()
+        {
+            switch (funcTab.SelectedIndex)
+            {
+                case 1:
+                    itemList.RefreshItems();
+                    itemList.SetSelection(items.IndexOf(selectedItem));
+                    break;
+                case 2:
+                    templateList.RefreshItems();
+                    templateList.SetSelection(templates.IndexOf(selectedTemplate));
+                    break;
+            }
         }
         #endregion
 
         #region 搜索相关
         private void DoSearchDropdown(string keyword = null)
         {
-            searchDropdown.style.display = new StyleEnum<DisplayStyle>(string.IsNullOrEmpty(keyword) ? DisplayStyle.None : DisplayStyle.Flex);
-            if (!string.IsNullOrEmpty(keyword))
+            IList itemsSource = new List<object>();
+            Action<VisualElement, int> bindItem = (e, i) => { };
+            bool empty = string.IsNullOrEmpty(keyword);
+            searchDropdown.style.display = new StyleEnum<DisplayStyle>(empty ? DisplayStyle.None : DisplayStyle.Flex);
+            if (!empty)
             {
+                List<string> contents = new List<string>();
                 switch (funcTab.SelectedIndex)
                 {
                     case 1:
+                        bool searchItemID(Item item, out string content)
+                        {
+                            content = null;
+                            bool result = item.ID.Contains(keyword);
+                            if (result) content = $"{item.Name}\n({Tr("ID")}: {ZetanUtility.Editor.HighlightContentByKey(item.ID, keyword, item.ID.Length)})";
+                            return result;
+                        }
+                        bool searchItemName(Item item, out string content)
+                        {
+                            content = null;
+                            bool result = item.Name.Contains(keyword);
+                            if (result) content = $"{ZetanUtility.Editor.HighlightContentByKey(item.Name, keyword, item.Name.Length)}";
+                            return result;
+                        }
+                        bool searchItemType(Item item, out string content)
+                        {
+                            content = null;
+                            bool result = item.Type.Name.Contains(keyword);
+                            if (result) content = $"{item.Name}\n({Tr("类型")}: {ZetanUtility.Editor.HighlightContentByKey(item.Type.Name, keyword, item.Type.Name.Length)})";
+                            return result;
+                        }
+                        bool searchItemDesc(Item item, out string content)
+                        {
+                            content = null;
+                            bool result = item.Description.Contains(keyword);
+                            if (result) content = $"{item.Name}\n({Tr("描述")}: {ZetanUtility.Editor.HighlightContentByKey(item.Description, keyword, 30)})";
+                            return result;
+                        }
+                        bool searchItemMod(Item item, out string content)
+                        {
+                            content = null;
+                            bool result = item.Modules.Any(x => x.GetName().Contains(keyword));
+                            if (result)
+                            {
+                                content = item.Modules.FirstOrDefault(x => x.GetName().Contains(keyword)).GetName();
+                                content = $"{item.Name}\n({Tr("模块")}: {ZetanUtility.Editor.HighlightContentByKey(content, keyword, content.Length)})";
+                            }
+                            return result;
+                        }
+
                         switch (keyType)
                         {
-                            case SearchKeyType.SearchID:
-                                var results = items.FindAll(x => x.ID.Contains(keyword));
-                                searchDropdown.itemsSource = results;
-                                searchDropdown.bindItem = (e, i) =>
+                            case SearchKeyType.SearchAll:
+                                foreach (var item in items)
                                 {
-                                    (e as Label).text = $"{results[i].Name}\n(ID: {ZetanUtility.Editor.HighlightContentByKey(results[i].ID, keyword, results[i].ID.Length)})";
-                                };
-                                searchDropdown.RefreshItems();
+                                    if (searchItemID(item, out var content) || searchItemName(item, out content) || searchItemType(item, out content)
+                                        || searchItemDesc(item, out content) || searchItemMod(item, out content))
+                                    {
+                                        itemsSource.Add(item);
+                                        contents.Add(content);
+                                    }
+                                }
+                                break;
+                            case SearchKeyType.SearchID:
+                                foreach (var item in items)
+                                {
+                                    if (searchItemID(item, out var content))
+                                    {
+                                        itemsSource.Add(item);
+                                        contents.Add(content);
+                                    }
+                                }
                                 break;
                             case SearchKeyType.SearchName:
-                                results = items.FindAll(x => x.Name.Contains(keyword));
-                                searchDropdown.itemsSource = results;
-                                searchDropdown.bindItem = (e, i) =>
+                                foreach (var item in items)
                                 {
-                                    (e as Label).text = ZetanUtility.Editor.HighlightContentByKey(results[i].Name, keyword, results[i].Name.Length);
-                                };
-                                searchDropdown.RefreshItems();
+                                    if (searchItemName(item, out var content))
+                                    {
+                                        itemsSource.Add(item);
+                                        contents.Add(content);
+                                    }
+                                }
+                                break;
+                            case SearchKeyType.SearchType:
+                                foreach (var item in items)
+                                {
+                                    if (searchItemType(item, out var content))
+                                    {
+                                        itemsSource.Add(item);
+                                        contents.Add(content);
+                                    }
+                                }
                                 break;
                             case SearchKeyType.SearchDescription:
-                                results = items.FindAll(x => x.Description.Contains(keyword));
-                                searchDropdown.itemsSource = results;
-                                searchDropdown.bindItem = (e, i) =>
+                                foreach (var item in items)
                                 {
-                                    (e as Label).text = $"{results[i].Name}\n(描述: {ZetanUtility.Editor.HighlightContentByKey(results[i].Description, keyword, 30)})";
-                                };
-                                searchDropdown.RefreshItems();
+                                    if (searchItemDesc(item, out var content))
+                                    {
+                                        itemsSource.Add(item);
+                                        contents.Add(content);
+                                    }
+                                }
+                                break;
+                            case SearchKeyType.SearchModule:
+                                foreach (var item in items)
+                                {
+                                    if (searchItemMod(item, out var content))
+                                    {
+                                        itemsSource.Add(item);
+                                        contents.Add(content);
+                                    }
+                                }
                                 break;
                         }
                         break;
                     case 2:
+                        bool searchTempID(ItemTemplate template, out string content)
+                        {
+                            content = null;
+                            bool result = template.IDPrefix.Contains(keyword);
+                            if (result) content = $"{template.Name}\n({Tr("ID前缀")}: {ZetanUtility.Editor.HighlightContentByKey(template.IDPrefix, keyword, template.IDPrefix.Length)})";
+                            return result;
+                        }
+                        bool searchTempName(ItemTemplate template, out string content)
+                        {
+                            content = null;
+                            bool result = template.Name.Contains(keyword);
+                            if (result) content = $"{ZetanUtility.Editor.HighlightContentByKey(template.Name, keyword, template.Name.Length)}";
+                            return result;
+                        }
+                        bool searchTempType(ItemTemplate template, out string content)
+                        {
+                            content = null;
+                            var type = ItemTypeEnum.Instance[template.Type];
+                            bool result = type.Name.Contains(keyword);
+                            if (result) content = $"{template.Name}\n({Tr("默认类型")}: {ZetanUtility.Editor.HighlightContentByKey(type.Name, keyword, type.Name.Length)})";
+                            return result;
+                        }
+                        bool searchTempDesc(ItemTemplate template, out string content)
+                        {
+                            content = null;
+                            bool result = template.Description.Contains(keyword);
+                            if (result) content = $"{template.Name}\n({Tr("默认描述")}: {ZetanUtility.Editor.HighlightContentByKey(template.Description, keyword, 30)})";
+                            return result;
+                        }
+                        bool searchTempMod(ItemTemplate template, out string content)
+                        {
+                            content = null;
+                            bool result = template.Modules.Any(x => x.GetName().Contains(keyword));
+                            if (result)
+                            {
+                                content = template.Modules.FirstOrDefault(x => x.GetName().Contains(keyword)).GetName();
+                                content = $"{template.Name}\n({Tr("模块")}: {ZetanUtility.Editor.HighlightContentByKey(content, keyword, content.Length)})";
+                            }
+                            return result;
+                        }
+
                         switch (keyType)
                         {
-                            case SearchKeyType.SearchID:
-                                var results = templates.FindAll(x => x.IDPrefix.Contains(keyword));
-                                searchDropdown.itemsSource = results;
-                                searchDropdown.bindItem = (e, i) =>
+                            case SearchKeyType.SearchAll:
+                                foreach (var template in templates)
                                 {
-                                    (e as Label).text = $"{results[i].Name}\n(ID前缀: {ZetanUtility.Editor.HighlightContentByKey(results[i].IDPrefix, keyword, results[i].IDPrefix.Length)})";
-                                };
-                                searchDropdown.RefreshItems();
+                                    if (searchTempID(template, out var content) || searchTempName(template, out content) || searchTempType(template, out content)
+                                        || searchTempDesc(template, out content) || searchTempMod(template, out content))
+                                    {
+                                        itemsSource.Add(template);
+                                        contents.Add(content);
+                                    }
+                                }
+                                break;
+                            case SearchKeyType.SearchID:
+                                foreach (var template in templates)
+                                {
+                                    if (searchTempID(template, out var content))
+                                    {
+                                        itemsSource.Add(template);
+                                        contents.Add(content);
+                                    }
+                                }
                                 break;
                             case SearchKeyType.SearchName:
-                                results = templates.FindAll(x => x.Name.Contains(keyword));
-                                searchDropdown.itemsSource = results;
-                                searchDropdown.bindItem = (e, i) =>
+                                foreach (var template in templates)
                                 {
-                                    (e as Label).text = ZetanUtility.Editor.HighlightContentByKey(results[i].Name, keyword, results[i].Name.Length);
-                                };
-                                searchDropdown.RefreshItems();
+                                    if (searchTempName(template, out var content))
+                                    {
+                                        itemsSource.Add(template);
+                                        contents.Add(content);
+                                    }
+                                }
+                                break;
+                            case SearchKeyType.SearchType:
+                                foreach (var template in templates)
+                                {
+                                    if (searchTempType(template, out var content))
+                                    {
+                                        itemsSource.Add(template);
+                                        contents.Add(content);
+                                    }
+                                }
+                                break;
+                            case SearchKeyType.SearchDescription:
+                                foreach (var template in templates)
+                                {
+                                    if (searchTempDesc(template, out var content))
+                                    {
+                                        itemsSource.Add(template);
+                                        contents.Add(content);
+                                    }
+                                }
+                                break;
+                            case SearchKeyType.SearchModule:
+                                foreach (var template in templates)
+                                {
+                                    if (searchTempMod(template, out var content))
+                                    {
+                                        itemsSource.Add(template);
+                                        contents.Add(content);
+                                    }
+                                }
                                 break;
                         }
                         break;
                 }
+                bindItem = (e, i) =>
+                {
+                    (e as Label).text = contents[i];
+                };
             }
+            searchDropdown.itemsSource = itemsSource;
+            searchDropdown.bindItem = bindItem;
+            searchDropdown.RefreshItems();
         }
         private void OnSearchListSelected(IEnumerable<object> os)
         {
-            if (os.FirstOrDefault() is ItemNew item)
+            if (os.FirstOrDefault() is Item item)
                 SelectListItem(items.IndexOf(item));
             else if (os.FirstOrDefault() is ItemTemplate template)
                 SelectListTemplate(templates.IndexOf(template));
             searchDropdown.SetSelectionWithoutNotify(null);
             searchField.value = null;
-        }
-        #endregion
-
-        #region 旧版导入相关
-        private void OnCopyClick()
-        {
-            if (funcTab.SelectedIndex == 1 && selectedItem)
-            {
-                ItemNew.Editor.CopyFromOld(selectedItem, oldItem.value as ItemBase);
-                oldItem.value = null;
-                RefreshModules();
-            }
-        }
-        private void OnCopyAllClick()
-        {
-            foreach (var old in Resources.LoadAll<ItemBase>(""))
-            {
-                ItemNew item = CreateInstance<ItemNew>();
-                ItemNew.Editor.CopyFromOld(item, old);
-                AssetDatabase.CreateAsset(item, AssetDatabase.GenerateUniqueAssetPath($"Assets/Resources/Configuration/Item/{ObjectNames.NicifyVariableName(old.GetType().Name)}.asset"));
-            }
-            AssetDatabase.SaveAssets();
-            itemList.ClearSelection();
-            RefreshItems();
-        }
-        #endregion
-
-        #region 删除相关
-        private void OnDeleteClick()
-        {
-            switch (funcTab.SelectedIndex)
-            {
-                case 1:
-                    if (selectedItems != null)
-                    {
-                        if (!settings.useDatabase)
-                        {
-                            if (EditorUtility.DisplayDialog("删除选中道具", $"确定将选中道具放入回收站吗？", "确定", "取消"))
-                            {
-                                List<string> failedPaths = new List<string>();
-                                AssetDatabase.MoveAssetsToTrash(selectedItems.Select(x => AssetDatabase.GetAssetPath(x)).ToArray(), failedPaths);
-                            }
-                        }
-                        else if (EditorUtility.DisplayDialog("删除选中道具", $"确定将选中道具从数据库中删除吗？此操作将不可逆！", "确定", "取消"))
-                        {
-                            bool success = false;
-                            foreach (var item in selectedItems)
-                            {
-                                if (ItemDatabase.Editor.DeleteItem(item))
-                                {
-                                    items.Remove(item);
-                                    success = true;
-                                }
-                            }
-                            if (success)
-                            {
-                                itemList.ClearSelection();
-                                itemList.RefreshItems();
-                                rightPanel.Clear();
-                            }
-                        }
-                    }
-                    break;
-                case 2:
-                    if (selectedTemplates != null)
-                    {
-                        if (EditorUtility.DisplayDialog("删除选中模板", $"确定将选中模板放入回收站吗？", "确定", "取消"))
-                        {
-                            bool success = false;
-                            foreach (var template in selectedTemplates)
-                            {
-                                if (AssetDatabase.MoveAssetToTrash(AssetDatabase.GetAssetPath(template)))
-                                {
-                                    templates.Remove(template);
-                                    success = true;
-                                }
-                            }
-                            if (success)
-                            {
-                                templateList.ClearSelection();
-                                templateList.RefreshItems();
-                                rightPanel.Clear();
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-        private void RefreshDeleteButton()
-        {
-            switch (funcTab.SelectedIndex)
-            {
-                case 1: deleteButton.SetEnabled(selectedItems != null && selectedItems.Count() > 0); break;
-                case 2: deleteButton.SetEnabled(selectedTemplates != null && selectedTemplates.Count() > 0); break;
-                default: deleteButton.SetEnabled(false); break;
-            }
-        }
-        private void DeleteItem(ItemNew item)
-        {
-            if (!settings.useDatabase)
-            {
-                if (EditorUtility.DisplayDialog("删除选中道具", $"确定将道具 [{item.Name}(ID: {item.ID})] 放入回收站吗？", "确定", "取消"))
-                {
-                    if (!AssetDatabase.MoveAssetToTrash(AssetDatabase.GetAssetPath(item))) return;
-                }
-                else return;
-            }
-            else if (EditorUtility.DisplayDialog("删除选中道具", $"确定将道具 [{item.Name}(ID: {item.ID})] 从数据库中删除吗？此操作将不可逆！", "确定", "取消"))
-            {
-                if (ItemDatabase.Editor.DeleteItem(item))
-                {
-                    items.Remove(item);
-                    itemList.ClearSelection();
-                    itemList.RefreshItems();
-                    rightPanel.Clear();
-                }
-            }
-        }
-        private void DeleteTemplate(ItemTemplate template)
-        {
-            if (EditorUtility.DisplayDialog("删除选中模板", $"确定将模板 [{template.Name}] 放入回收站吗？", "确定", "取消"))
-            {
-                if (AssetDatabase.MoveAssetToTrash(AssetDatabase.GetAssetPath(template)))
-                {
-                    templates.Remove(template);
-                    templateList.ClearSelection();
-                    templateList.RefreshItems();
-                    rightPanel.Clear();
-                }
-            }
         }
         #endregion
 
@@ -479,7 +575,7 @@ namespace ZetanStudio.Item.Editor
             itemList.SetSelection(index);
             itemList.ScrollToItem(index);
         }
-        private void OnListItemSelected(IEnumerable<ItemNew> items)
+        private void OnListItemSelected(IEnumerable<Item> items)
         {
             rightPanel.Clear();
             selectedItems = items;
@@ -507,14 +603,8 @@ namespace ZetanStudio.Item.Editor
         }
         private void RefreshItems()
         {
-            if (!settings.useDatabase)
-                items = ZetanUtility.Editor.LoadAssets<ItemNew>().FindAll(x => !AssetDatabase.IsSubAsset(x) && ItemNew.Editor.MatchTemplate(x, currentTemplate));
-            else
-            {
-                if (!currentTemplate) items = ItemDatabase.Editor.GetItems();
-                else items = ItemDatabase.Editor.GetItems().FindAll(x => ItemNew.Editor.MatchTemplate(x, currentTemplate));
-            }
-            items.Sort(ItemNew.ItemComparer.Default.Compare);
+            items = Item.Editor.GetItems(currentTemplate);
+            items.Sort(Item.Comparer.Default.Compare);
             if (itemList != null)
             {
                 itemList.itemsSource = items;
@@ -549,9 +639,9 @@ namespace ZetanStudio.Item.Editor
         #endregion
 
         #region 模块相关
-        private void OnSelectType(Type type)
+        private void AddModule(Type type, int index = -1)
         {
-            if (!typeof(ItemModule).IsAssignableFrom(type) || !selectedItem && !selectedTemplate) return;
+            if (type == null || type.IsAbstract || !typeof(ItemModule).IsAssignableFrom(type) || !selectedItem && !selectedTemplate) return;
             SerializedObject serializedObject = null;
             IList<ItemModule> modules = null;
             string undoName = null;
@@ -562,64 +652,74 @@ namespace ZetanStudio.Item.Editor
                 case 1:
                     serializedObject = serializedItem;
                     modules = selectedItem.Modules;
-                    undoName = $"添加模块至道具{selectedItem.Name}";
-                    addModule = () => ItemNew.Editor.AddModule(selectedItem, type);
+                    undoName = $"{Tr("添加模块至道具")} {selectedItem.Name}";
+                    addModule = () => Item.Editor.AddModule(selectedItem, type, index);
                     scriptableObject = selectedItem;
                     break;
                 case 2:
                     serializedObject = serializedTemplate;
                     modules = selectedTemplate.Modules;
-                    undoName = $"添加模块至模板{selectedTemplate.Name}";
-                    addModule = () => ItemTemplate.Editor.AddModule(selectedTemplate, type);
+                    undoName = $"{Tr("添加模块至模板")} {selectedTemplate.Name}";
+                    addModule = () => ItemTemplate.Editor.AddModule(selectedTemplate, type, index);
                     scriptableObject = selectedTemplate;
                     break;
             }
             if (!CommonModule.IsCommon(type) && modules.Any(x => ItemModule.Duplicate(x, type)))
-                EditorUtility.DisplayDialog("无法添加", $"已经存在 [{ItemModule.GetName(type)}] 模块，每种模块只能添加一个。", "确定");
+                EditorUtility.DisplayDialog(Tr("无法添加"), Tr("已经存在 [{0}] 模块，每种模块只能添加一个。", ItemModule.GetName(type)), Tr("确定"));
             else if (serializedObject != null)
             {
                 Undo.RegisterCompleteObjectUndo(scriptableObject, undoName);
-                if (addModule() != null)
+                if (addModule() is ItemModule module)
                 {
                     RefreshModules();
-                    this.StartCoroutine(scollToEnd());
+                    //this.StartCoroutine(scollToEnd());
+                    rightPanel.contentContainer.RegisterCallback<GeometryChangedEvent>(scollToEnd);
 
-                    IEnumerator scollToEnd()
+                    void scollToEnd(GeometryChangedEvent evt)
                     {
-                        yield return new WaitForEndOfFrame();
-                        rightPanel.verticalScroller.value = rightPanel.verticalScroller.highValue;
+                        //yield return new WaitForEndOfFrame();
+                        ModuleBlock block = rightPanel.Query<ModuleBlock>().Where(x => x.userData == module);
+                        rightPanel.ScrollTo(block);
+                        rightPanel.contentContainer.UnregisterCallback<GeometryChangedEvent>(scollToEnd);
                     }
                 }
             }
         }
-        private void MakeAddModuleButton(IEnumerable<ItemModule> modules)
+        private void MakeAddModuleButton(IEnumerable<ItemModule> existModules)
         {
-            VisualElement space = new VisualElement();
-            space.style.height = 7;
-            rightPanel.Add(space);
-            var types = TypeCache.GetTypesDerivedFrom<ItemModule>().Where(x => !x.IsAbstract && (typeof(CommonModule).IsAssignableFrom(x) || !modules.Any(y => y.GetType() == x)));
-            Button button = new Button() { text = "添加模块" };
+            VisualElement buttonArea = new VisualElement();
+            buttonArea.style.paddingTop = 7;
+            buttonArea.style.paddingBottom = 7;
+            rightPanel.Add(buttonArea);
+            var types = TypeCache.GetTypesDerivedFrom<ItemModule>().Where(x => !x.IsAbstract && (typeof(CommonModule).IsAssignableFrom(x) || !existModules.Any(y => y.GetType() == x)));
+            Button button = new Button() { text = Tr("添加模块") };
             button.clicked += () =>
             {
-                //var dropdown = new AdvancedDropdown<Type>("可用模块", types, OnSelectType, ItemModule.GetName, iconGetter: t => EditorGUIUtility.FindTexture("cs Script Icon"));
-                //dropdown.Show(button.layout);
-                TypeSearchProvider.OpenWindow<ItemModule>(new UnityEditor.Experimental.GraphView.SearchWindowContext(Event.current.mousePosition), OnSelectType, types, "可用模块", ItemModule.GetName, t => null, newScriptMaker: getScriptTemplate);
+                var dropdown = new AdvancedDropdown<Type>(types, t => AddModule(t), ItemModule.GetName,
+                                                          iconGetter: t => EditorGUIUtility.FindTexture("cs Script Icon"),
+                                                          title: Tr("可用模块"), addCallbacks: (Tr("模块"), newScript));
+                dropdown.Show(dropdownRect());
 
-                void getScriptTemplate(out string fileName, out string path, out TextAsset template)
+                Rect dropdownRect()
                 {
-                    fileName = "NewModule.cs";
-                    path = settings.newScriptFolder;
-                    template = settings.scriptTemplate;
+                    var rect = buttonArea.LocalToWorld(button.layout);
+                    rect.y += rightPanel.contentContainer.transform.position.y;
+                    return rect;
+                }
+
+                void newScript()
+                {
+                    ZetanUtility.Editor.Script.CreateNewScript("NewModule.cs", settings.newScriptFolder, settings.scriptTemplate);
                 }
             };
             button.style.width = 230;
             button.style.height = 25;
             button.style.alignSelf = new StyleEnum<Align>(Align.Center);
-            rightPanel.Add(button);
+            buttonArea.Add(button);
         }
         private void RefreshModules()
         {
-            if (!selectedItem && !selectedTemplate) return;
+            if (funcTab.SelectedIndex == 1 && !selectedItem || funcTab.SelectedIndex == 2 && !selectedTemplate) return;
             for (int i = 0; i < rightPanel.childCount; i++)
             {
                 if (rightPanel[i] is ModuleBlock)
@@ -648,7 +748,7 @@ namespace ZetanStudio.Item.Editor
                 for (int i = 0; i < modulesProp.arraySize; i++)
                 {
                     SerializedProperty property = modulesProp.GetArrayElementAtIndex(i);
-                    rightPanel.Insert(rightPanel.childCount - 2, MakeModuleBlock(property, modules[i]));
+                    rightPanel.Insert(rightPanel.childCount - 1, MakeModuleBlock(property, modules[i]));
                 }
             }
         }
@@ -666,12 +766,12 @@ namespace ZetanStudio.Item.Editor
                 if (Modules != null)
                 {
                     int index = Modules.IndexOf(module);
-                    evt.menu.AppendAction("移除", a => DeleteModule(module));
-                    if (index > 0) evt.menu.AppendAction("上移", a => MoveModuleUp(module));
-                    if (index < Modules.Count - 1) evt.menu.AppendAction("下移", a => MoveModuleDown(module));
+                    evt.menu.AppendAction(Tr("移除"), a => DeleteModule(module));
+                    if (index > 0) evt.menu.AppendAction(Tr("上移"), a => MoveModuleUp(module));
+                    if (index < Modules.Count - 1) evt.menu.AppendAction(Tr("下移"), a => MoveModuleDown(module));
                     evt.menu.AppendSeparator();
-                    evt.menu.AppendAction("编辑脚本", a => EditScript(module));
-                    evt.menu.AppendAction("编辑Editor脚本", a => EditScript(block));
+                    evt.menu.AppendAction(Tr("编辑脚本"), a => EditScript(module));
+                    evt.menu.AppendAction(Tr("编辑Editor脚本"), a => EditScript(block));
                 }
             }));
             return block;
@@ -749,11 +849,11 @@ namespace ZetanStudio.Item.Editor
             switch (funcTab.SelectedIndex)
             {
                 case 1:
-                    Undo.RegisterCompleteObjectUndo(selectedItem, $"从道具{selectedItem.Name}删除模块");
-                    if (ItemNew.Editor.RemoveModule(selectedItem, module)) RefreshModules();
+                    Undo.RegisterCompleteObjectUndo(selectedItem, Tr("从道具{0}删除模块", selectedItem.Name));
+                    if (Item.Editor.RemoveModule(selectedItem, module)) RefreshModules();
                     break;
                 case 2:
-                    Undo.RegisterCompleteObjectUndo(selectedTemplate, $"从模板{selectedTemplate.Name}删除模块");
+                    Undo.RegisterCompleteObjectUndo(selectedTemplate, Tr("从模板{0}删除模块", selectedTemplate.Name));
                     if (ItemTemplate.Editor.RemoveModule(selectedTemplate, module)) RefreshModules();
                     break;
             }
@@ -804,9 +904,22 @@ namespace ZetanStudio.Item.Editor
         }
         private void RefreshTemplateSelector()
         {
-            templates = ZetanUtility.Editor.LoadAssets<ItemTemplate>();
+            var templates = ZetanUtility.Editor.LoadAssets<ItemTemplate>();
             templateNames = new List<string>() { "不指定模板" };
-            templateNames.AddRange(templates.Select(x => x.Name));
+            HashSet<string> existNames = new HashSet<string>();
+            foreach (var template in templates)
+            {
+                string name = template.Name;
+                int num = 1;
+                string uniueName = name;
+                while (existNames.Contains(uniueName))
+                {
+                    uniueName = $"{name} ({L10n.Tr("Repeat")} {num})";
+                    num++;
+                }
+                existNames.Add(uniueName);
+                templateNames.Add(uniueName);
+            }
             if (templateSelector != null)
             {
                 templateSelector.choices = templateNames;
@@ -821,35 +934,38 @@ namespace ZetanStudio.Item.Editor
             switch (index)
             {
                 case 1:
-                    if (itemContainer != null) itemContainer.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
-                    if (templateContainer != null) templateContainer.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
+                    rootVisualElement.RemoveFromClassList("template");
+                    rootVisualElement.AddToClassList("item");
                     if (listLabel != null)
                     {
-                        listLabel.text = "道具列表";
+                        listLabel.text = Tr("道具列表");
                         listLabel.style.backgroundColor = new StyleColor(new Color(0.33f, 0.43f, 0.34f, 1));
                     }
-                    RefreshItems();
-                    searchSelector.choices = new List<string>() { "名称", "ID", "描述" };
-                    searchSelector.value = "名称";
+                    rightPanel.Clear();
+                    RefreshInspector();
+                    searchSelector.choices = itemSearchType;
+                    searchSelector.value = Tr("名称");
                     break;
                 case 2:
-                    if (itemContainer != null) itemContainer.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
-                    if (templateContainer != null) templateContainer.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
+                    rootVisualElement.RemoveFromClassList("item");
+                    rootVisualElement.AddToClassList("template");
                     if (listLabel != null)
                     {
-                        listLabel.text = "模板列表";
+                        listLabel.text = Tr("模板列表");
                         listLabel.style.backgroundColor = new StyleColor(new Color(0.33f, 0.40f, 0.43f, 1));
                     }
-                    RefreshTemplates();
-                    searchSelector.choices = new List<string>() { "名称", "前缀" };
-                    searchSelector.value = "名称";
+                    rightPanel.Clear();
+                    RefreshInspector();
+                    searchSelector.choices = templateSearchType;
+                    searchSelector.value = Tr("名称");
                     break;
             }
         }
+
         public void OnRightFuncTab(int index, ContextualMenuPopulateEvent evt)
         {
             if (index == funcTab.SelectedIndex)
-                evt.menu.AppendAction("刷新", a =>
+                evt.menu.AppendAction(Tr("刷新"), a =>
                 {
                     Refresh();
                 });
@@ -875,14 +991,14 @@ namespace ZetanStudio.Item.Editor
         }
         private void NewItem()
         {
-            ItemNew item;
-            if (!settings.useDatabase)
+            Item item;
+            if (!Item.UseDatabase)
             {
-                item = ZetanUtility.Editor.SaveFilePanel(CreateInstance<ItemNew>);
+                item = ZetanUtility.Editor.SaveFilePanel(CreateInstance<Item>, folder: Item.assetsFolder, root: "Resources");
                 if (item)
                 {
-                    ItemNew.Editor.ApplyTemplate(item, currentTemplate);
-                    ItemNew.Editor.SetAutoID(item, ZetanUtility.Editor.LoadAssets<ItemNew>(), currentTemplate ? currentTemplate.IDPrefix : null);
+                    Item.Editor.ApplyTemplate(item, currentTemplate);
+                    Item.Editor.SetAutoID(item, ZetanUtility.Editor.LoadAssets<Item>(), currentTemplate ? currentTemplate.IDPrefix : null);
                     ZetanUtility.Editor.SaveChange(item);
                 }
             }
@@ -891,6 +1007,7 @@ namespace ZetanStudio.Item.Editor
             {
                 items.Add(item);
                 RefreshItems();
+                selectedItem = item;
 
                 this.StartCoroutine(scrollTo());
 
@@ -907,10 +1024,136 @@ namespace ZetanStudio.Item.Editor
             if (template)
             {
                 templates.Add(template);
-                RefreshItems();
-                SelectListTemplate(templates.IndexOf(template));
+                RefreshTemplates();
+                RefreshTemplateSelector();
+
+                this.StartCoroutine(scrollTo());
+
+                IEnumerator scrollTo()
+                {
+                    yield return new WaitForEndOfFrame();
+                    SelectListTemplate(templates.IndexOf(template));
+                }
             }
         }
         #endregion
+
+        #region 删除相关
+        private void OnDeleteClick()
+        {
+            switch (funcTab.SelectedIndex)
+            {
+                case 1:
+                    if (selectedItems != null)
+                    {
+                        if (!Item.UseDatabase)
+                        {
+                            if (EditorUtility.DisplayDialog(Tr("删除选中道具"), Tr("确定将选中道具放入回收站吗？"), Tr("确定"), Tr("取消")))
+                            {
+                                List<string> failedPaths = new List<string>();
+                                AssetDatabase.MoveAssetsToTrash(selectedItems.Select(x => AssetDatabase.GetAssetPath(x)).ToArray(), failedPaths);
+                            }
+                        }
+                        else if (EditorUtility.DisplayDialog(Tr("删除选中道具"), Tr("确定将选中道具从数据库中删除吗？此操作将不可逆！"), Tr("确定"), Tr("取消")))
+                        {
+                            bool success = false;
+                            var selectedItems = new List<Item>(this.selectedItems);
+                            foreach (var item in selectedItems)
+                            {
+                                if (ItemDatabase.Editor.DeleteItem(item))
+                                {
+                                    items.Remove(item);
+                                    success = true;
+                                }
+                            }
+                            if (success)
+                            {
+                                itemList.ClearSelection();
+                                itemList.RefreshItems();
+                                rightPanel.Clear();
+                            }
+                        }
+                    }
+                    break;
+                case 2:
+                    if (selectedTemplates != null)
+                    {
+                        if (EditorUtility.DisplayDialog(Tr("删除选中模板"), Tr("确定将选中模板放入回收站吗？"), Tr("确定"), Tr("取消")))
+                        {
+                            bool success = false;
+                            var selectedTemplates = new List<ItemTemplate>(this.selectedTemplates);
+                            foreach (var template in selectedTemplates)
+                            {
+                                if (AssetDatabase.MoveAssetToTrash(AssetDatabase.GetAssetPath(template)))
+                                {
+                                    templates.Remove(template);
+                                    success = true;
+                                }
+                            }
+                            if (success)
+                            {
+                                templateList.ClearSelection();
+                                templateList.RefreshItems();
+                                RefreshTemplateSelector();
+                                rightPanel.Clear();
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+        private void RefreshDeleteButton()
+        {
+            switch (funcTab.SelectedIndex)
+            {
+                case 1: deleteButton.SetEnabled(selectedItems != null && selectedItems.Count() > 0); break;
+                case 2: deleteButton.SetEnabled(selectedTemplates != null && selectedTemplates.Count() > 0); break;
+                default: deleteButton.SetEnabled(false); break;
+            }
+        }
+        private void DeleteItem(Item item)
+        {
+            if (!Item.UseDatabase)
+            {
+                if (EditorUtility.DisplayDialog(Tr("删除选中道具"), Tr("确定将道具 [{0}(ID: {1})] 放入回收站吗?", item.Name, item.ID), Tr("确定"), Tr("取消")))
+                {
+                    if (!AssetDatabase.MoveAssetToTrash(AssetDatabase.GetAssetPath(item))) return;
+                }
+                else return;
+            }
+            else if (EditorUtility.DisplayDialog(Tr("删除选中道具"), Tr("确定将道具 [{0}(ID: {1})] 从数据库中删除吗? 此操作将不可逆!", item.Name, item.ID), Tr("确定"), Tr("取消")))
+            {
+                if (ItemDatabase.Editor.DeleteItem(item))
+                {
+                    items.Remove(item);
+                    itemList.ClearSelection();
+                    itemList.RefreshItems();
+                    rightPanel.Clear();
+                }
+            }
+        }
+        private void DeleteTemplate(ItemTemplate template)
+        {
+            if (EditorUtility.DisplayDialog(Tr("删除选中模板"), Tr("确定将模板 [{0}] 放入回收站吗?", template.Name), Tr("确定"), Tr("取消")))
+            {
+                if (AssetDatabase.MoveAssetToTrash(AssetDatabase.GetAssetPath(template)))
+                {
+                    templates.Remove(template);
+                    templateList.ClearSelection();
+                    templateList.RefreshItems();
+                    rightPanel.Clear();
+                }
+            }
+        }
+        #endregion
+
+        private string Tr(string text, params object[] args)
+        {
+            return Language.Tr(settings.language, text, args);
+        }
+        private string Tr(string text)
+        {
+            return Language.Tr(settings.language, text);
+        }
     }
 }

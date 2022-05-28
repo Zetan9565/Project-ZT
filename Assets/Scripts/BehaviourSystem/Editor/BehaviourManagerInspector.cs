@@ -1,11 +1,12 @@
+using System.Linq;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Editor
 {
     [CustomEditor(typeof(BehaviourManager))]
-    public sealed class BehaviourManagerInspector : Editor
+    public sealed class BehaviourManagerInspector : UnityEditor.Editor
     {
         SerializedProperty globalVariables;
         SerializedProperty presetVariables;
@@ -18,12 +19,15 @@ namespace ZetanStudio.BehaviourTree
 
         AnimBool showGlobal;
         AnimBool showPreset;
+        BehaviourTreeEditorSettings settings;
 
         private void OnEnable()
         {
+            settings = BehaviourTreeEditorSettings.GetOrCreate();
+
             globalVariables = serializedObject.FindProperty("globalVariables");
             presetVariables = serializedObject.FindProperty("presetVariables");
-            globalDrawer = new ObjectSelectionDrawer<GlobalVariables>(globalVariables, string.Empty, string.Empty, "全局变量");
+            globalDrawer = new ObjectSelectionDrawer<GlobalVariables>(globalVariables, string.Empty, string.Empty, Tr("全局变量"));
             InitGlobal();
         }
 
@@ -32,9 +36,8 @@ namespace ZetanStudio.BehaviourTree
             if (!globalVariables.objectReferenceValue) return;
             serializedGlobal = new SerializedObject(globalVariables.objectReferenceValue);
             serializedVariables = serializedGlobal.FindProperty("variables");
-            variableList = new SharedVariableListDrawer(serializedGlobal, serializedVariables, false);
-            presetVariableList = new SharedVariablePresetListDrawer(serializedObject, presetVariables,
-                                                                    serializedGlobal.targetObject as ISharedVariableHandler,
+            variableList = new SharedVariableListDrawer(serializedVariables, false);
+            presetVariableList = new SharedVariablePresetListDrawer(presetVariables, serializedGlobal.targetObject as ISharedVariableHandler,
                                                                     (target as BehaviourManager).GetPresetVariableTypeAtIndex);
             showGlobal = new AnimBool(serializedVariables.isExpanded);
             showGlobal.valueChanged.AddListener(() => { Repaint(); if (serializedVariables != null) serializedVariables.isExpanded = showGlobal.target; });
@@ -44,9 +47,9 @@ namespace ZetanStudio.BehaviourTree
 
         public override void OnInspectorGUI()
         {
-            if (FindObjectsOfType<BehaviourManager>().Length > 1)
+            if (FindObjectsOfType<BehaviourManager>().Count(x => x.isActiveAndEnabled) > 1)
             {
-                EditorGUILayout.HelpBox("存在多个激活的BehaviourManager，请删除或失活其它", MessageType.Error);
+                EditorGUILayout.HelpBox(Language.Tr(settings.language, "存在多个激活的{0}，请移除或失活其它", typeof(BehaviourManager).Name), MessageType.Error);
                 return;
             }
             serializedObject.UpdateIfRequiredOrScript();
@@ -54,10 +57,10 @@ namespace ZetanStudio.BehaviourTree
             bool shouldDisable = Application.isPlaying && !PrefabUtility.IsPartOfAnyPrefab(target);
             EditorGUI.BeginDisabledGroup(shouldDisable);
             var globalBef = globalVariables.objectReferenceValue;
-            if (shouldDisable) EditorGUILayout.PropertyField(globalVariables, new GUIContent("全局变量"));
+            if (shouldDisable) EditorGUILayout.PropertyField(globalVariables, new GUIContent(Tr("全局变量")));
             else globalDrawer.DoLayoutDraw();
             if (!globalVariables.objectReferenceValue && ZetanUtility.Editor.LoadAsset<GlobalVariables>() == null)
-                if (GUILayout.Button("新建"))
+                if (GUILayout.Button(Tr("新建")))
                     globalVariables.objectReferenceValue = ZetanUtility.Editor.SaveFilePanel(CreateInstance<GlobalVariables>, "global variables");
             EditorGUI.EndDisabledGroup();
             if (globalVariables.objectReferenceValue != globalBef) InitGlobal();
@@ -66,19 +69,24 @@ namespace ZetanStudio.BehaviourTree
             {
                 serializedObject.UpdateIfRequiredOrScript();
 
-                showGlobal.target = EditorGUILayout.Foldout(serializedVariables.isExpanded, "全局变量列表", true); ;
+                showGlobal.target = EditorGUILayout.Foldout(serializedVariables.isExpanded, Tr("全局变量列表"), true); ;
                 if (EditorGUILayout.BeginFadeGroup(showGlobal.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
                 if (!Application.isPlaying && !ZetanUtility.IsPrefab((target as BehaviourManager).gameObject))
                 {
-                    showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, "变量预设列表", true);
+                    showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, Tr("变量预设列表"), true);
                     if (EditorGUILayout.BeginFadeGroup(showPreset.faded))
                         presetVariableList.DoLayoutList();
                     EditorGUILayout.EndFadeGroup();
                 }
                 serializedObject.ApplyModifiedProperties();
             }
+        }
+
+        private string Tr(string text)
+        {
+            return Language.Tr(settings.language, text);
         }
     }
 }

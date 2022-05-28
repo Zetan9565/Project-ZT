@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ZetanStudio.BehaviourTree
 {
-    [DefaultExecutionOrder(-1)]
+    [DefaultExecutionOrder(-1), DisallowMultipleComponent]
     public class BehaviourManager : SingletonMonoBehaviour<BehaviourManager>
     {
         public List<BehaviourExecutor> Executors { get; } = new List<BehaviourExecutor>();
@@ -69,12 +69,6 @@ namespace ZetanStudio.BehaviourTree
         {
             if (index < 0 || index > presetVariables.Count) return null;
             else return presetVariables[index].GetType();
-        }
-
-        private void OnValidate()
-        {
-            if (FindObjectsOfType<BehaviourManager>().Length > 1)
-                Debug.LogError("存在多个激活的BehaviourManager，请删除或失活其它");
         }
 #endif
     }

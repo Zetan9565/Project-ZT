@@ -236,6 +236,7 @@ public class CropInfoInspector : Editor
                 if (EditorUtility.DisplayDialog("删除", "确定删除这个阶段吗？", "确定", "取消"))
                     serializedObject.FindProperty("stages").DeleteArrayElementAtIndex(list.index);
                 if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+                GUIUtility.ExitGUI();
             }
         };
 

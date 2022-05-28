@@ -19,7 +19,7 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
                     Instance.startSortingOrder = value;
                     for (int i = 0; i < Instance.windows.Count; i++)
                     {
-                        Instance.windows[i].windowCanvas.sortingOrder = i + Instance.startSortingOrder;
+                        Instance.windows[i].WindowCanvas.sortingOrder = i + Instance.startSortingOrder;
                     }
                 }
             }
@@ -489,7 +489,7 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     {
         if (!Instance || !window) return;
         Remove(window);
-        window.windowCanvas.sortingOrder = Instance.windows.Count + Instance.startSortingOrder;
+        window.WindowCanvas.sortingOrder = Instance.windows.Count + Instance.startSortingOrder;
         Instance.windows.Add(window);
     }
     private static Window Pop()
@@ -533,7 +533,7 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
         if (window is IHideable hideable) Instance.windowHideState.Remove(hideable);
         for (int i = 0; i < Instance.windows.Count; i++)
         {
-            Instance.windows[i].windowCanvas.sortingOrder = i + Instance.startSortingOrder;
+            Instance.windows[i].WindowCanvas.sortingOrder = i + Instance.startSortingOrder;
         }
     }
     #endregion

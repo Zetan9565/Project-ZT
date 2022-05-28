@@ -1,16 +1,17 @@
 using UnityEngine;
 using ZetanStudio.BehaviourTree;
+using ZetanStudio.BehaviourTree.Nodes;
 
-[NodeDescription("寻路至目标结点：沿着找到的路径移动至目标点")]
+[Group("Movement"), Description("寻路至目标结点：沿着找到的路径移动至目标点")]
 public class Seek : PathMovement
 {
-    [DisplayName("目标点")]
+    [Label("目标点")]
     public SharedVector3 point;
-    [DisplayName("目标")]
+    [Label("目标")]
     public SharedGameObject target;
-    [DisplayName("半径")]
+    [Label("半径")]
     public SharedFloat radius = 1;
-    [DisplayName("寻路频率")]
+    [Label("寻路频率")]
     public SharedFloat repathRate = 0.5f;
 
     private float pathTime;

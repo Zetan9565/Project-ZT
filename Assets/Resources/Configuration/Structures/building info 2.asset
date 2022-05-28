@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: building info 2
   m_EditorClassIdentifier: 
   _ID: TOOL001
+  icon: {fileID: 0}
   _name: "\u6D4B\u8BD5\u7528\u953B\u9020\u7089"
   description: "\u7528\u4E8E\u953B\u51B6\u91D1\u5C5E\u7684\u5DE5\u4F5C\u5957\u4EF6\u3002"
   manageable: 1
@@ -21,7 +22,7 @@ MonoBehaviour:
   prefab: {fileID: 6884571979959223206, guid: 01b0ef269f99d564b83e50d3f6ef7753, type: 3}
   preview: {fileID: 1393819643250639705, guid: 207d44e6b9b40da48af7186e4c4f3c32, type: 3}
   materials:
-  - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
+  - item: {fileID: -8659359920512167614, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 5
     makingType: 0
     materialType: 0

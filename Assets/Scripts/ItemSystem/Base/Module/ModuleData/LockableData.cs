@@ -6,7 +6,7 @@ namespace ZetanStudio.Item
     {
         public bool isLocked;
 
-        public LockableData(ItemData item, LockableModule model) : base(item, model)
+        public LockableData(ItemData item, LockableModule module) : base(item, module)
         {
         }
     }

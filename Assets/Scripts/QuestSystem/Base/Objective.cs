@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using ZetanStudio.Item;
 
 /// <summary>
 /// 任务目标
@@ -46,7 +47,9 @@ public abstract class Objective
     protected int amount = 1;
     public int Amount => amount;
 
-    public virtual bool ShowAmount => true;
+    [SerializeField]
+    protected bool showAmount = true;
+    public bool ShowAmount => showAmount;
 
     [SerializeField]
     protected bool inOrder;
@@ -87,9 +90,9 @@ public abstract class Objective
 [Serializable, Name("收集目标")]
 public class CollectObjective : Objective
 {
-    [SerializeField, ZetanStudio.Item.ItemSelector]
-    private ItemBase itemToCollect;
-    public ItemBase ItemToCollect => itemToCollect;
+    [SerializeField]
+    private Item itemToCollect;
+    public Item ItemToCollect => itemToCollect;
 
     [SerializeField]
     private bool checkBagAtStart = true;
@@ -134,7 +137,7 @@ public class KillObjective : Objective
         }
     }
 
-    [SerializeField]
+    [SerializeField, ObjectSelector(memberAsGroup: "race")]
     private EnemyInformation enemy;
     public EnemyInformation Enemy
     {
@@ -229,7 +232,10 @@ public class TalkObjective : Objective
         }
     }
 
-    public override bool ShowAmount => false;
+    public TalkObjective()
+    {
+        showAmount = false;
+    }
 
     public override ObjectiveData CreateData()
     {
@@ -254,10 +260,13 @@ public class MoveObjective : Objective
     public new CheckPointInformation AuxiliaryPos => auxiliaryPos as CheckPointInformation;
 
     [SerializeField]
-    private QuestItem itemToUseHere;
-    public QuestItem ItemToUseHere => itemToUseHere;
+    private Item itemToUseHere;
+    public Item ItemToUseHere => itemToUseHere;
 
-    public override bool ShowAmount => false;
+    public MoveObjective()
+    {
+        showAmount = false;
+    }
 
     public override ObjectiveData CreateData()
     {
@@ -288,9 +297,9 @@ public class SubmitObjective : Objective
         }
     }
 
-    [SerializeField, ZetanStudio.Item.ItemSelector]
-    private ItemBase itemToSubmit;
-    public ItemBase ItemToSubmit
+    [SerializeField]
+    private Item itemToSubmit;
+    public Item ItemToSubmit
     {
         get
         {
@@ -360,10 +369,6 @@ public class TriggerObjective : Objective
             return checkStateAtAcpt;
         }
     }
-
-    [SerializeField]
-    private bool showAmount;
-    public override bool ShowAmount => showAmount;
 
     public override ObjectiveData CreateData()
     {

@@ -10,7 +10,7 @@ namespace ZetanStudio.Item.Module
         private DropItemInfo[] product = { };
         public ReadOnlyCollection<DropItemInfo> Product => ProductInfo ? ProductInfo.Products : new ReadOnlyCollection<DropItemInfo>(product);
 
-        [field: SerializeField]
+        [field: SerializeField, Label("公共产出表")]
         public ProductInformation ProductInfo { get; protected set; }
 
         public override bool IsValid => ProductInfo && ProductInfo.IsValid || product.Length > 0 && !System.Array.Exists(product, x => !x.IsValid);

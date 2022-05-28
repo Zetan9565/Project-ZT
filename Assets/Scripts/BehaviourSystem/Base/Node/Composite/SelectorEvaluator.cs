@@ -1,6 +1,6 @@
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
-    [NodeDescription("评估选择器：每次都重头开始评估子结点，若当前子结点还在进行评估，则向上反馈评估正进行；若评估成功，则向上反馈评估成功；若评估失败，则转至下一个子结点")]
+    [Description("评估选择器：每次都重头开始评估子结点，若当前子结点还在进行评估，则向上反馈评估正进行；若评估成功，则向上反馈评估成功；若评估失败，则转至下一个子结点")]
     public class SelectorEvaluator : Composite
     {
         protected override NodeStates OnUpdate()

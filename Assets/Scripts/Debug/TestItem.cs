@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
+using ZetanStudio.Item;
 
 public class TestItem : MonoBehaviour
 {
-    [ZetanStudio.Item.ItemSelector]
-    public ItemBase item;
+    public Item item;
 
     public void OnClick()
     {

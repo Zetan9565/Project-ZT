@@ -47,9 +47,10 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 28978044484190301
-      type: {class: SelectorEvaluator, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: SelectorEvaluator, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (18) SelectorEvaluator
+        priority: 5
         isRuntime: 0
         guid: d1f518eaabf2abd4fbf2cdfbf41fad45
         _position: {x: 220.0001, y: 376.0001}
@@ -60,9 +61,10 @@ MonoBehaviour:
         - rid: 4391261938407964691
         abortType: 0
     - rid: 4391261938407964672
-      type: {class: Entry, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Entry, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (0) Entry
+        priority: 0
         isRuntime: 0
         guid: f65fdbc95c0d1d346a469d2c3ec23d24
         _position: {x: 0, y: 0}
@@ -70,9 +72,10 @@ MonoBehaviour:
         start:
           rid: 4391261938407964673
     - rid: 4391261938407964673
-      type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Sequence, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (1) Sequence
+        priority: 1
         isRuntime: 0
         guid: 583d4022f8998184ebce9f7e09a0d3ab
         _position: {x: -0.000015258789, y: 112.96803}
@@ -82,9 +85,10 @@ MonoBehaviour:
         - rid: 4391261938407964676
         abortType: 0
     - rid: 4391261938407964674
-      type: {class: UntilSuccess, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: UntilSuccess, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (2) UntilSuccess
+        priority: 2
         isRuntime: 0
         guid: ae2f09b021bfef44097955441340e6fa
         _position: {x: -204, y: 244.8694}
@@ -92,9 +96,10 @@ MonoBehaviour:
         child:
           rid: 4391261938407964675
     - rid: 4391261938407964675
-      type: {class: FindWithTag, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: FindWithTag, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (3) FindWithTag
+        priority: 3
         isRuntime: 0
         guid: 0df8f2abe4f0e27449e8fad0106c514e
         _position: {x: -204, y: 375.86945}
@@ -103,16 +108,21 @@ MonoBehaviour:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: Player
         register:
           _name: sharedGameObject_1
           isGlobal: 0
           isShared: 1
+          linkedSVName: 
+          linkedGVName: 
           value: {fileID: 0}
     - rid: 4391261938407964676
-      type: {class: Repeater, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Repeater, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (4) Repeater
+        priority: 4
         isRuntime: 0
         guid: 9ae8d1a82b119e04e99a67c383dca9d2
         _position: {x: 219.99998, y: 245.00006}
@@ -124,11 +134,14 @@ MonoBehaviour:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: 0
     - rid: 4391261938407964678
-      type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Sequence, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (6) Sequence
+        priority: 6
         isRuntime: 0
         guid: 87ce4e5d8f7ef7e4c93142b963637c83
         _position: {x: -304.99997, y: 509.86945}
@@ -139,9 +152,10 @@ MonoBehaviour:
         - rid: 4391261938407964683
         abortType: 1
     - rid: 4391261938407964679
-      type: {class: WithinDistance2D, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: WithinDistance2D, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (7) WithinDistance2D
+        priority: 7
         isRuntime: 0
         guid: 0aecf50637c76a64487558c9044554b2
         _position: {x: -455, y: 642.86945}
@@ -150,22 +164,30 @@ MonoBehaviour:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: 5
         usePoint: 0
         point:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: {x: 0, y: 0, z: 0}
         target:
           _name: sharedGameObject_1
           isGlobal: 0
           isShared: 1
+          linkedSVName: 
+          linkedGVName: 
           value: {fileID: 0}
         lineOfSight:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: 1
         obstacleLayer:
           serializedVersion: 2
@@ -174,11 +196,14 @@ MonoBehaviour:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: {x: 0, y: 0, z: 0}
     - rid: 4391261938407964680
       type: {class: Seek, ns: , asm: Assembly-CSharp}
       data:
         name: (8) Seek
+        priority: 8
         isRuntime: 0
         guid: 578a7bc5fb1cb2e47beeea29b00c1438
         _position: {x: -304.99997, y: 642.86945}
@@ -187,48 +212,62 @@ MonoBehaviour:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: 1
         pickNextWaypointDist:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: 1
         point:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: {x: 0, y: 0, z: 0}
         target:
           _name: sharedGameObject_1
           isGlobal: 0
           isShared: 1
+          linkedSVName: 
+          linkedGVName: 
           value: {fileID: 0}
         radius:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: 1
         repathRate:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: 0.5
     - rid: 4391261938407964683
-      type: {class: RandomSelector, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: RandomSelector, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (9) RandomSelector
+        priority: 9
         isRuntime: 0
         guid: cd57891622a671f40b58c5a31e909fc3
-        _position: {x: -155.00006, y: 642.86945}
+        _position: {x: -155.00005, y: 643}
         _description: 
         children:
         - rid: 4391261938407964684
         - rid: 4391261938407964685
         abortType: 0
     - rid: 4391261938407964684
-      type: {class: Log, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Log, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (10) Log
+        priority: 10
         isRuntime: 0
         guid: 155d253993d6a7343b78e8e362bafd0d
         _position: {x: -230, y: 774}
@@ -238,11 +277,14 @@ MonoBehaviour:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: "\u4F7F\u7528\u6280\u80FD1"
     - rid: 4391261938407964685
-      type: {class: Log, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Log, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (11) Log
+        priority: 11
         isRuntime: 0
         guid: 026d444b31c20ef4084cbdc373df5315
         _position: {x: -80, y: 774}
@@ -252,35 +294,40 @@ MonoBehaviour:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: "\u4F7F\u7528\u6280\u80FD2"
     - rid: 4391261938407964686
-      type: {class: Selector, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Selector, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (12) Selector
+        priority: 12
         isRuntime: 0
         guid: 01925e17f7067df40920e688c2876979
-        _position: {x: 220, y: 509.86945}
+        _position: {x: 220, y: 510}
         _description: 
         children:
         - rid: 4391261938407964687
         - rid: 4391261938407964690
         abortType: 0
     - rid: 4391261938407964687
-      type: {class: Sequence, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Sequence, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (13) Sequence
+        priority: 13
         isRuntime: 0
         guid: 0e13ff2131d31984bbcd76015e12987a
-        _position: {x: 145.00002, y: 642.86945}
+        _position: {x: 145, y: 643}
         _description: 
         children:
         - rid: 4391261938407964688
         - rid: 4391261938407964697
         abortType: 0
     - rid: 4391261938407964688
-      type: {class: Inverter, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Inverter, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (14) Inverter
+        priority: 14
         isRuntime: 0
         guid: 7e7a1d0014fd81345a5648e0a63b2e95
         _position: {x: 70, y: 774}
@@ -291,6 +338,7 @@ MonoBehaviour:
       type: {class: CheckCharacterState, ns: , asm: Assembly-CSharp}
       data:
         name: (15) CheckCharacterState
+        priority: 15
         isRuntime: 0
         guid: 4fdcc4532c44a5649862ae37d9e3d2b7
         _position: {x: 70, y: 883}
@@ -302,6 +350,7 @@ MonoBehaviour:
       type: {class: Patrol, ns: , asm: Assembly-CSharp}
       data:
         name: (16) Patrol
+        priority: 17
         isRuntime: 0
         guid: a720605408a3e2747bba809fbabd2974
         _position: {x: 295, y: 642.86945}
@@ -310,17 +359,23 @@ MonoBehaviour:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: 1
         pickNextWaypointDist:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: 1
         random: 0
         waypoints:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value:
           - {x: 0.5, y: 0.5, z: 0}
           - {x: 0.5, y: -5.5, z: 0}
@@ -330,11 +385,14 @@ MonoBehaviour:
           _name: 
           isGlobal: 0
           isShared: 0
+          linkedSVName: 
+          linkedGVName: 
           value: 1
     - rid: 4391261938407964691
-      type: {class: Idle, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Idle, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (17) Idle
+        priority: 18
         isRuntime: 0
         guid: bf52921ea63e82247870e9ce4d625a8d
         _position: {x: 444.99997, y: 509.86945}
@@ -345,6 +403,8 @@ MonoBehaviour:
         _name: sharedGameObject_1
         isGlobal: 0
         isShared: 1
+        linkedSVName: 
+        linkedGVName: 
         value: {fileID: 0}
     - rid: 4391261938407964693
       type: {class: SharedString, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
@@ -352,6 +412,8 @@ MonoBehaviour:
         _name: sharedString_2
         isGlobal: 0
         isShared: 1
+        linkedSVName: 
+        linkedGVName: 
         value: 12345
     - rid: 4391261938407964694
       type: {class: SharedTransform, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
@@ -359,6 +421,8 @@ MonoBehaviour:
         _name: sharedTransform_3
         isGlobal: 0
         isShared: 1
+        linkedSVName: 
+        linkedGVName: 
         value: {fileID: 0}
     - rid: 4391261938407964695
       type: {class: SharedVector3, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
@@ -366,6 +430,8 @@ MonoBehaviour:
         _name: sharedVector3_4
         isGlobal: 0
         isShared: 1
+        linkedSVName: 
+        linkedGVName: 
         value: {x: 0, y: 0, z: 0}
     - rid: 4391261938407964696
       type: {class: SharedBool, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
@@ -373,11 +439,14 @@ MonoBehaviour:
         _name: sharedBool_5
         isGlobal: 0
         isShared: 1
+        linkedSVName: 
+        linkedGVName: 
         value: 0
     - rid: 4391261938407964697
-      type: {class: Idle, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Idle, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (18) Idle
+        priority: 16
         isRuntime: 0
         guid: e5f0208c8d4226e4bb65b3f756605242
         _position: {x: 220, y: 774}

@@ -18,7 +18,7 @@ public class TalkerInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        if (talker.GetData())
+        if (Application.isPlaying && talker.GetData())
         {
             EditorGUILayout.BeginVertical("Box");
             EditorGUILayout.LabelField("NPC识别码：" + talker.TalkerID);

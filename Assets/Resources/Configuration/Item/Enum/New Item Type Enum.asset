@@ -12,34 +12,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d9ed75715eab254d883b4e2571522db, type: 3}
   m_Name: New Item Type Enum
   m_EditorClassIdentifier: 
-  enum:
+  _enum:
   - <Name>k__BackingField: "\u4E00\u822C"
     <Priority>k__BackingField: 999
     <Icon>k__BackingField: {fileID: 0}
+    <ShowOnUI>k__BackingField: 1
   - <Name>k__BackingField: "\u88C5\u5907"
     <Priority>k__BackingField: 1
     <Icon>k__BackingField: {fileID: 0}
+    <ShowOnUI>k__BackingField: 1
   - <Name>k__BackingField: "\u6D88\u8017\u54C1"
     <Priority>k__BackingField: 2
     <Icon>k__BackingField: {fileID: 0}
+    <ShowOnUI>k__BackingField: 1
   - <Name>k__BackingField: "\u9576\u5D4C"
     <Priority>k__BackingField: 3
     <Icon>k__BackingField: {fileID: 0}
+    <ShowOnUI>k__BackingField: 1
   - <Name>k__BackingField: "\u6750\u6599"
     <Priority>k__BackingField: 4
     <Icon>k__BackingField: {fileID: 0}
+    <ShowOnUI>k__BackingField: 1
   - <Name>k__BackingField: "\u653E\u7F6E"
     <Priority>k__BackingField: 5
     <Icon>k__BackingField: {fileID: 0}
+    <ShowOnUI>k__BackingField: 1
   - <Name>k__BackingField: "\u7279\u6B8A"
     <Priority>k__BackingField: 6
     <Icon>k__BackingField: {fileID: 0}
+    <ShowOnUI>k__BackingField: 1
   - <Name>k__BackingField: "\u6587\u4EF6"
     <Priority>k__BackingField: 7
     <Icon>k__BackingField: {fileID: 0}
+    <ShowOnUI>k__BackingField: 1
   - <Name>k__BackingField: "\u8D38\u6613\u54C1"
     <Priority>k__BackingField: 8
     <Icon>k__BackingField: {fileID: 0}
+    <ShowOnUI>k__BackingField: 1
   - <Name>k__BackingField: "\u8D27\u5E01"
     <Priority>k__BackingField: -1
     <Icon>k__BackingField: {fileID: 0}
+    <ShowOnUI>k__BackingField: 0

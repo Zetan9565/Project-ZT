@@ -7,9 +7,9 @@ namespace ZetanStudio.Item
         public int currentDurability;
         public int maxDurability;
 
-        public DurabilityData(ItemData item, DurabilityModule model) : base(item, model)
+        public DurabilityData(ItemData item, DurabilityModule module) : base(item, module)
         {
-            maxDurability = model.Durability;
+            maxDurability = module.Durability;
         }
     }
 }

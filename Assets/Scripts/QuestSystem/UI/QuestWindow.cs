@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -93,7 +92,7 @@ public class QuestWindow : Window, IHideable
     public void AbandonSelectedQuest()
     {
         if (!selectedQuest) return;
-        ConfirmWindow.StartConfirm("已消耗的道具不会退回，确定放弃此任务吗？", delegate
+        ConfirmWindow.StartConfirm(Tr("已消耗的道具不会退回，确定放弃此任务吗？"), delegate
         {
             if (QuestManager.Instance.AbandonQuest(selectedQuest))
             {
@@ -113,10 +112,10 @@ public class QuestWindow : Window, IHideable
         switch (index)
         {
             case 1:
-                toShow = Convert(QuestManager.Instance.GetInProgressQuests());
+                toShow = Convert(QuestManager.Instance.QuestInProgress);
                 break;
             case 2:
-                toShow = Convert(QuestManager.Instance.GetFinishedQuests());
+                toShow = Convert(QuestManager.Instance.QuestFinished);
                 break;
         }
         RefreshList();
@@ -126,9 +125,9 @@ public class QuestWindow : Window, IHideable
 
     public void RefreshDescription()
     {
-        title.text = selectedQuest.Model.Title;
-        giver.text = $"[委托人：{selectedQuest.originalQuestHolder.TalkerName}]";
-        descriptionText.text = selectedQuest.Model.Description;
+        title.text = selectedQuest.Title;
+        giver.text = $"[{Tr("委托人")}：{selectedQuest.originalQuestHolder.TalkerName}]";
+        descriptionText.text = selectedQuest.Description;
         StringBuilder objectives = new StringBuilder();
         var displayObjectives = selectedQuest.Objectives.Where(x => x.Model.Display).ToArray();
         int lineCount = displayObjectives.Length - 1;
@@ -136,9 +135,9 @@ public class QuestWindow : Window, IHideable
         {
             string endLine = i == lineCount ? string.Empty : "\n";
             if (selectedQuest.IsFinished)
-                objectives.AppendFormat("-{0}{1}", displayObjectives[i].Model.DisplayName, endLine);
+                objectives.AppendFormat("-{0}{1}", displayObjectives[i].DisplayName, endLine);
             else
-                objectives.AppendFormat("-{0}{1}{2}", displayObjectives[i], displayObjectives[i].IsComplete ? "\t(达成)" : string.Empty, endLine);
+                objectives.AppendFormat("-{0}{1}{2}", displayObjectives[i], displayObjectives[i].IsComplete ? $"\t{Tr("(达成)")}" : string.Empty, endLine);
         }
         objectiveText.text = objectives.ToString();
         rewardList.Refresh(ItemSlotData.Convert(selectedQuest.Model.RewardItems, maxRewardCount));
@@ -150,8 +149,8 @@ public class QuestWindow : Window, IHideable
 
     private void RefreshTraceText()
     {
-        if (QuestBoard.Instance.Quest == selectedQuest) traceBtnText.text = "取消追踪";
-        else traceBtnText.text = "追踪";
+        if (QuestBoard.Instance.Quest == selectedQuest) traceBtnText.text = Tr("取消追踪");
+        else traceBtnText.text = Tr("追踪");
     }
 
     private void ShowOrHideDescription(bool show)
@@ -190,7 +189,7 @@ public class QuestWindow : Window, IHideable
                 }
                 return false;
             }
-            questList.ForEachWithBreak(acceeser);
+            questList.ForEachBreakable(acceeser);
         }
         return true;
     }
@@ -207,7 +206,7 @@ public class QuestWindow : Window, IHideable
         questList.Refresh(toShow);
     }
 
-    private static List<QuestAgentData> Convert(List<QuestData> origin)
+    private static List<QuestAgentData> Convert(IList<QuestData> origin)
     {
         List<QuestAgentData> results = new List<QuestAgentData>();
         Dictionary<QuestGroup, QuestAgentData> questMap = new Dictionary<QuestGroup, QuestAgentData>();

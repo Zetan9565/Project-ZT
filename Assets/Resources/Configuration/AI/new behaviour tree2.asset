@@ -28,7 +28,7 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 28978044484190209
-      type: {class: FindWithTag, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: FindWithTag, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (1) FindWithTag
         priority: 0
@@ -54,7 +54,7 @@ MonoBehaviour:
         isShared: 1
         value: {fileID: 0}
     - rid: 4391261938407964698
-      type: {class: Entry, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: Entry, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: (0) Entry
         priority: 0
@@ -65,7 +65,7 @@ MonoBehaviour:
         start:
           rid: 28978044484190209
     - rid: 6007092307677413376
-      type: {class: CanSeeObject2D, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: CanSeeObject2D, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: CanSeeObject2D
         priority: 0
@@ -102,7 +102,7 @@ MonoBehaviour:
           serializedVersion: 2
           m_Bits: 0
     - rid: 6007092307677413377
-      type: {class: CanSeeObject2D, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
+      type: {class: CanSeeObject2D, ns: ZetanStudio.BehaviourTree.Nodes, asm: Assembly-CSharp}
       data:
         name: CanSeeObject2D (1)
         priority: 0

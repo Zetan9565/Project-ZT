@@ -1,12 +1,13 @@
 using UnityEngine;
-using ZetanExtends;
 using ZetanStudio.BehaviourTree;
+using ZetanStudio.BehaviourTree.Nodes;
+using ZetanStudio.Extension;
 
 public abstract class PathMovement : Action
 {
-    [DisplayName("停止距离")]
+    [Label("停止距离")]
     public SharedFloat arriveDistance = 1;
-    [DisplayName("选点距离")]
+    [Label("选点距离")]
     public SharedFloat pickNextWaypointDist = 1;
 
     protected PathAgent pathAgent;

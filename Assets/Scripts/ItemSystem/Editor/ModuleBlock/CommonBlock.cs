@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using ZetanExtends.Editor;
+using ZetanStudio.Extension.Editor;
 using ZetanStudio.Item.Module;
 
 namespace ZetanStudio.Item.Editor
@@ -9,27 +9,24 @@ namespace ZetanStudio.Item.Editor
     [CustomMuduleDrawer(typeof(CommonModule), true)]
     public class CommonBlock : ModuleBlock
     {
-        private readonly ItemNew item;
+        private readonly Item item;
         private readonly ItemTemplate template;
         private readonly SerializedProperty Name;
         private readonly SerializedProperty Parameter;
-        private bool errorBef = false;
 
         public CommonBlock(SerializedProperty property, ItemModule module) : base(property, module)
         {
-            text = module.GetName();
             Name = property.FindAutoPropertyRelative("Name");
             Parameter = property.FindAutoPropertyRelative("Parameter");
-            item = property.serializedObject.targetObject as ItemNew;
+            item = property.serializedObject.targetObject as Item;
             template = property.serializedObject.targetObject as ItemTemplate;
-            errorBef = !(!module.IsValid || Duplicate());
         }
 
         protected override void OnInspectorGUI()
         {
             EditorGUILayout.PropertyField(Name, new GUIContent($"名称{(string.IsNullOrEmpty(Name.stringValue) ? "(名称为空)" : (Duplicate() ? "(名称重复)" : string.Empty))}"));
             EditorGUILayout.PropertyField(Parameter);
-            CheckError();
+            errorBef = !HasError();
         }
         private bool Duplicate()
         {
@@ -39,17 +36,9 @@ namespace ZetanStudio.Item.Editor
 
             bool check(ItemModule other) => CommonModule.Duplicate(userData as CommonModule, other as CommonModule);
         }
-        protected override void CheckError()
+        protected override bool HasError()
         {
-            if (userData is ItemModule module)
-            {
-                if (errorBef != (!module.IsValid || Duplicate()))
-                {
-                    text = module.GetName();
-                    if (!errorBef) text += "(存在错误)";
-                    errorBef = !errorBef;
-                }
-            }
+            return userData is ItemModule module && !module.IsValid || Duplicate();
         }
     }
 }

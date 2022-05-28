@@ -5,11 +5,11 @@ using UnityEngine.UIElements;
 
 public class QuestEditorSettings : ScriptableObject
 {
-    [DisplayName("编辑器UXML")]
+    [Label("编辑器UXML")]
     public VisualTreeAsset treeUxml;
-    [DisplayName("编辑器USS")]
+    [Label("编辑器USS")]
     public StyleSheet treeUss;
-    [DisplayName("编辑器最小尺寸")]
+    [Label("编辑器最小尺寸")]
     public Vector2 minWindowSize = new Vector2(800, 600);
 
     private static QuestEditorSettings Find()

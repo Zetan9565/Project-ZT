@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace ZetanStudio.Item
 {
@@ -7,7 +9,7 @@ namespace ZetanStudio.Item
     {
         public ItemTypeEnum()
         {
-            @enum = new ItemType[]
+            _enum = new ItemType[]
             {
                 new ItemType("一般", 999),
                 new ItemType("装备", 1),
@@ -21,6 +23,11 @@ namespace ZetanStudio.Item
                 new ItemType("货币", -1),
             };
         }
+
+        public IEnumerable<string> GetUINames()
+        {
+            return _enum.Where(x => x.ShowOnUI).OrderBy(x => x.Priority).Select(x => x.Name);
+        }
     }
 
     [System.Serializable]
@@ -31,6 +38,9 @@ namespace ZetanStudio.Item
 
         [field: SerializeField, SpriteSelector]
         public Sprite Icon { get; private set; }
+
+        [field: SerializeField]
+        public bool ShowOnUI { get; private set; } = true;
 
         public ItemType() : this("一般", 999) { }
 

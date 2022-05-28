@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using ZetanStudio.Item;
 
 [Serializable]
 public class SaveData
@@ -18,7 +19,7 @@ public class SaveData
 
     public BackpackSaveData backpackData = new BackpackSaveData();
 
-    public List<string> makingDatas = new List<string>();
+    public List<string> craftDatas = new List<string>();
 
     public StructureSystemSaveData structureSystemData = new StructureSystemSaveData();
 
@@ -112,7 +113,7 @@ public class ItemSaveData
     {
         itemID = itemInfo.ItemID;
         amount = itemInfo.Amount;
-        indexInGrid = itemInfo.indexInGrid;
+        //indexInGrid = itemInfo.indexInGrid;
     }
 }
 [Serializable]
@@ -142,7 +143,7 @@ public class InventoryItemSaveData
     {
         ID = data.ID;
         this.amount = amount;
-        isLocked = data.isLocked;
+        isLocked = data.IsLocked;
         this.slots.AddRange(slots.ConvertAll(x => new SlotSaveData(x)));
         warehouseID = warehouse != null ? warehouse.EntityID : string.Empty;
         structureID = structure != null ? structure.EntityID : string.Empty;

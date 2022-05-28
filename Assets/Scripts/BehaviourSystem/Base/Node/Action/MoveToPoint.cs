@@ -1,11 +1,13 @@
 using UnityEngine;
 using ZetanStudio.BehaviourTree;
+using ZetanStudio.BehaviourTree.Nodes;
 
+[Group("Movement")]
 public class MoveToPoint : Action
 {
-    [DisplayName("目标点")]
+    [Label("目标点")]
     public SharedVector3 point = Vector3.zero;
-    [DisplayName("停止距离")]
+    [Label("停止距离")]
     public SharedFloat stopDistance = 1.0f;
 
     private CharacterControlInput controller;

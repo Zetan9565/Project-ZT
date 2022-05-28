@@ -1,9 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Module;
 
 public class PlantWindow : Window, IHideable
 {
@@ -34,7 +34,7 @@ public class PlantWindow : Window, IHideable
 
     private CropInformation currentInfo;
 
-    public bool IsInputFocused => searchInput.isFocused;
+    public bool IsTyping => searchInput.isFocused;
 
     private CropPreview preview;
 
@@ -63,7 +63,7 @@ public class PlantWindow : Window, IHideable
     private void OnSeeSelected(SeedAgent element)
     {
         if (element.IsSelected) ShowDescription(element.Data);
-        else if (element.Data && element.Data.Crop == currentInfo)
+        else if (element.Data && element.Data.GetModule<SeedModule>().Crop == currentInfo)
             HideDescription();
     }
 
@@ -203,8 +203,8 @@ public class PlantWindow : Window, IHideable
         if (args.Length < 1) return false;
         CurrentField = args[0] as Field;
         if (!CurrentField) return false;
-        BackpackManager.Instance.Inventory.TryGetDatas(x => x.Model_old is SeedItem, out var seeds);
-        seedList.Refresh(seeds.Select(x => x.source.Model_old as SeedItem));
+        BackpackManager.Instance.Inventory.TryGetDatas(x => x.Model.GetModule<SeedModule>() is not null, out var seeds);
+        seedList.Refresh(seeds.Select(x => x.source.Model));
         HideDescription();
         pageSelector.SetValueWithoutNotify(0);
         SetPage(0);
@@ -219,28 +219,28 @@ public class PlantWindow : Window, IHideable
         return true;
     }
 
-    public void ShowDescription(SeedItem seed)
+    public void ShowDescription(Item seed)
     {
         if (!seed)
         {
             HideDescription();
             return;
         }
-
+        var Crop = seed.GetModule<SeedModule>().Crop;
         descriptionWindow.alpha = 1;
-        nameText.text = seed.Crop.Name;
+        nameText.text = Crop.Name;
         int amount = BackpackManager.Instance.GetAmount(seed);
         icon.SetItem(seed, amount > 0 ? amount.ToString() : null);
         StringBuilder str = new StringBuilder("占用田地空间：");
-        str.Append(seed.Crop.Size);
+        str.Append(Crop.Size);
         str.Append("\n");
-        str.Append(CropInformation.CropSeasonString(seed.Crop.PlantSeason));
+        str.Append(CropInformation.CropSeasonString(Crop.PlantSeason));
         str.Append("\n");
         str.Append("生长阶段：");
         str.Append("\n");
-        for (int i = 0; i < seed.Crop.Stages.Count; i++)
+        for (int i = 0; i < Crop.Stages.Count; i++)
         {
-            CropStage stage = seed.Crop.Stages[i];
+            CropStage stage = Crop.Stages[i];
             str.Append(ZetanUtility.ColorText(CropStage.CropStageName(stage.Stage), Color.yellow));
             str.Append("持续");
             str.Append(ZetanUtility.ColorText(stage.LastingDays.ToString(), Color.green));
@@ -258,7 +258,7 @@ public class PlantWindow : Window, IHideable
                     str.Append("，可无限收割");
                 }
             }
-            if (i != seed.Crop.Stages.Count - 1) str.Append("\n");
+            if (i != Crop.Stages.Count - 1) str.Append("\n");
         }
         description.text = str.ToString();
     }

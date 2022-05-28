@@ -7,23 +7,19 @@ namespace ZetanStudio.Item
 {
     public class ItemEditorSettings : ScriptableObject
     {
-        [DisplayName("编辑器UXML")]
         public VisualTreeAsset treeUxml;
-        [DisplayName("编辑器USS")]
         public StyleSheet treeUss;
-        [DisplayName("编辑器最小尺寸")]
         public Vector2 minWindowSize = new Vector2(800, 600);
-        [DisplayName("模块脚本模板")]
+        [ObjectSelector(typeof(TextAsset), extension: ".cs.txt")]
         public TextAsset scriptTemplate;
-        [DisplayName("新模块脚本默认路径")]
+        [Folder]
         public string newScriptFolder = "Assets/Scripts/ItemSystem/Base/Module";
-        [DisplayName("使用数据库"), Tooltip("若否，则为每个道具新建一个'*.asset'文件")]
-        public bool useDatabase = false;
+        public LanguageMap language;
 
         private static ItemEditorSettings Find()
         {
             var settings = ZetanUtility.Editor.LoadAssets<ItemEditorSettings>();
-            if (settings.Count > 1) Debug.LogWarning("找到多个道具编辑器配置，将使用第一个");
+            if (settings.Count > 1) Debug.LogWarning(Language.Tr(settings[0].language, "找到多个道具编辑器配置，将使用第一个"));
             if (settings.Count > 0) return settings[0];
             return null;
         }
@@ -34,7 +30,7 @@ namespace ZetanStudio.Item
             if (settings == null)
             {
                 settings = CreateInstance<ItemEditorSettings>();
-                AssetDatabase.CreateAsset(settings, AssetDatabase.GenerateUniqueAssetPath("Assets/Scripts/ItemSystem/Editor/ItemEditorSettings.asset"));
+                AssetDatabase.CreateAsset(settings, AssetDatabase.GenerateUniqueAssetPath("Assets/Scripts/ItemSystem/Editor/item editor settings.asset"));
             }
             return settings;
         }
@@ -43,14 +39,17 @@ namespace ZetanStudio.Item
             [SettingsProvider]
             public static SettingsProvider CreateZSIESettingsProvider()
             {
+                var settings = GetOrCreate();
                 var provider = new SettingsProvider("Project/Zetan Studio/ZSIESettingsUIElementsSettings", SettingsScope.Project)
                 {
-                    label = "道具编辑器",
+                    label = Language.Tr(settings ? settings.language : null, "道具编辑器"),
                     activateHandler = (searchContext, rootElement) =>
                     {
-                        SerializedObject serializedObject = new SerializedObject(GetOrCreate());
+                        SerializedObject serializedObject = new SerializedObject(settings);
 
-                        Label title = new Label() { text = "道具编辑器设置" };
+                        Label title = new Label() { text = Language.Tr(settings ? settings.language : null, "道具编辑器设置") };
+                        title.style.paddingLeft = 10f;
+                        title.style.fontSize = 19f;
                         title.AddToClassList("title");
                         rootElement.Add(title);
 

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 public delegate void DialogueListner();
 public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, ISaveLoad

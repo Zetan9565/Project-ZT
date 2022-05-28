@@ -17,7 +17,7 @@
 
     private void OnWindowStateChanged(params object[] msg)
     {
-        if (msg.Length > 0 && msg[0] is string name && Window.IsName<DialogueWindow>(name))
+        if (msg.Length > 0 && msg[0] is string name && Window.IsName<DialogueWindow>(name) && msg[0] is WindowStates states && states == WindowStates.Closed)
         {
             Debug.Log("end talking");
             Character.SetMachineState<CharacterIdleState>();

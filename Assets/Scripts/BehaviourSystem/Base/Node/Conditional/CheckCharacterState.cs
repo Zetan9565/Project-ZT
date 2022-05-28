@@ -1,13 +1,14 @@
 using ZetanStudio.BehaviourTree;
+using ZetanStudio.BehaviourTree.Nodes;
 
-[NodeDescription("检查角色状态：检查角色的主状态是否是指定状态，可选检查子状态")]
+[Description("检查角色状态：检查角色的主状态是否是指定状态，可选检查子状态")]
 public class CheckCharacterState : Conditional
 {
-    [DisplayName("状态")]
+    [Label("状态")]
     public CharacterStates mainState;
-    [DisplayName("检查子状态")]
+    [Label("检查子状态")]
     public bool checkSubState;
-    [DisplayName("子状态"), HideIf_BT("checkSubState", false), SubState("mainState")]
+    [Label("子状态"), HideIf("checkSubState", false), SubState("mainState")]
     public int subState;
 
     private Character character;

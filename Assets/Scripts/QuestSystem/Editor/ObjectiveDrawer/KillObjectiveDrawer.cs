@@ -16,15 +16,15 @@ public sealed class KillObjectiveDrawer : ObjectiveDrawer
         switch (killType.enumValueIndex)
         {
             case (int)KillObjectiveType.Specific:
-                new ObjectSelectionDrawer<EnemyInformation>(enemy, "_name", e => e.Race ? e.Race.Name : string.Empty, "Assets/Resources/Configuration", "目标敌人").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), enemy, new GUIContent("目标敌人"));
                 lineCount++;
                 break;
             case (int)KillObjectiveType.Race:
-                new ObjectSelectionDrawer<EnemyRace>(race, "_name", "Assets/Resources/Configuration", "目标种族").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), race, new GUIContent("目标种族"));
                 lineCount++;
                 break;
             case (int)KillObjectiveType.Group:
-                new ObjectSelectionDrawer<EnemyGroup>(group, "_name", "Assets/Resources/Configuration", "目标组合").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+                EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), group, new GUIContent("目标组合"));
                 lineCount++;
                 break;
             default: break;
@@ -38,13 +38,13 @@ public sealed class KillObjectiveDrawer : ObjectiveDrawer
         if (objective.isExpanded)
         {
             lineCount++;//目标数量
-            if (quest.CmpltObjctvInOrder)
+            if (quest.InOrder)
                 lineCount++;// 按顺序
             lineCount += 1;//执行顺序
             lineCount += 1;//可导航
             if (objective.FindPropertyRelative("showMapIcon").boolValue)
                 lineCount++;//辅助位置
-            if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
+            if (objective.FindPropertyRelative("display").boolValue || !quest.InOrder) lineCount++;//标题
             lineCount += 1;//目标类型
             switch (objective.FindPropertyRelative("killType").enumValueIndex)
             {

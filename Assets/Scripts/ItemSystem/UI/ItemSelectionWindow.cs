@@ -2,7 +2,8 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanExtends;
+using ZetanStudio.Item;
+using ZetanStudio.Extension;
 
 [DisallowMultipleComponent]
 public class ItemSelectionWindow : Window

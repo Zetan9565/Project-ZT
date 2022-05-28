@@ -2,6 +2,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.Item;
 
 [DisallowMultipleComponent]
 public class ItemWindow : Window
@@ -46,7 +47,7 @@ public class ItemWindow : Window
     {
         if (contrast != null)
         {
-            contrast = contrast.Where(x => x && x.Model_old).ToArray();
+            contrast = contrast.Where(x => x && x.Model).ToArray();
             MakeWindows(contrast.Length + 1);
         }
         else MakeWindows(1);

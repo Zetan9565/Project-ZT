@@ -1,9 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using System.Linq;
-using System;
-using System.Collections.Generic;
+using ZetanStudio.Item;
 
 [CustomEditor(typeof(Dialogue))]
 public class DialogueInspector : Editor
@@ -22,16 +23,17 @@ public class DialogueInspector : Editor
     float lineHeight;
     float lineHeightSpace;
 
-    TalkerInformation[] npcs;
+    Dialogue[] dialogueCache;
+    TalkerInformation[] talkerCache;
     string[] npcNames;
-    ObjectSelectionDrawer<TalkerInformation> npcSelector;
 
     private void OnEnable()
     {
         wordsOptionsLists = new Dictionary<DialogueWords, ReorderableList>();
         wordsEventsLists = new Dictionary<DialogueWords, ReorderableList>();
-        npcs = Resources.LoadAll<TalkerInformation>("Configuration");
-        npcNames = npcs.Select(x => x.Name).ToArray();//Linq分离出NPC名字
+        dialogueCache = ZetanUtility.Editor.LoadAssets<Dialogue>().ToArray();
+        talkerCache = ZetanUtility.Editor.LoadAssets<TalkerInformation>().ToArray();
+        npcNames = talkerCache.Select(x => x.Name).ToArray();//Linq分离出NPC名字
 
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + EditorGUIUtility.standardVerticalSpacing;
@@ -44,7 +46,6 @@ public class DialogueInspector : Editor
         useCurrentTalkerInfo = serializedObject.FindProperty("useCurrentTalkerInfo");
         unifiedNPC = serializedObject.FindProperty("unifiedNPC");
         dialogWords = serializedObject.FindProperty("words");
-        npcSelector = new ObjectSelectionDrawer<TalkerInformation>(unifiedNPC, "_name", "Assets/Resources/Configuration", "指定的NPC");
         HandlingWordsList();
     }
 
@@ -59,13 +60,13 @@ public class DialogueInspector : Editor
         serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_ID, new GUIContent("识别码"));
-        if (string.IsNullOrEmpty(_ID.stringValue) || Dialogue.IsIDDuplicate(dialogue))
+        if (string.IsNullOrEmpty(_ID.stringValue) || Dialogue.Editor.IsIDDuplicate(dialogue, dialogueCache))
         {
-            if (!string.IsNullOrEmpty(_ID.stringValue) && Dialogue.IsIDDuplicate(dialogue)) EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
+            if (!string.IsNullOrEmpty(_ID.stringValue) && Dialogue.Editor.IsIDDuplicate(dialogue, dialogueCache)) EditorGUILayout.HelpBox("此识别码已存在！", MessageType.Error);
             else EditorGUILayout.HelpBox("识别码为空！", MessageType.Error);
             if (GUILayout.Button("自动生成识别码"))
             {
-                _ID.stringValue = Dialogue.GetAutoID();
+                _ID.stringValue = Dialogue.Editor.GetAutoID(dialogueCache);
                 EditorGUI.FocusTextInControl(null);
             }
         }
@@ -87,7 +88,7 @@ public class DialogueInspector : Editor
         {
             serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
-            npcSelector.DoLayoutDraw();
+            EditorGUILayout.PropertyField(unifiedNPC, new GUIContent("指定的NPC"));
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
         }
         serializedObject.UpdateIfRequiredOrScript();
@@ -158,7 +159,7 @@ public class DialogueInspector : Editor
                 if (!useUnifiedNPC.boolValue)
                 {
                     talkerType.enumValueIndex = 0;
-                    if (oIndex <= npcs.Length) talkerInfo.objectReferenceValue = npcs[oIndex - 1];
+                    if (oIndex <= talkerCache.Length) talkerInfo.objectReferenceValue = talkerCache[oIndex - 1];
                     else talkerInfo.objectReferenceValue = null;
                 }
                 else talkerType.enumValueIndex = 2;
@@ -178,11 +179,9 @@ public class DialogueInspector : Editor
                 {
                     GUI.FocusControl(null);
                     GenericMenu menu = new GenericMenu();
-                    for (int i = 0; i < npcs.Length; i++)
-                        menu.AddItem(new GUIContent($"人名/{NPCInformation.GetSexString(npcs[i].Sex)}/{npcs[i].Name}"), false, OnSelectNpc, i);
-                    var items = Resources.LoadAll<ItemBase>("Configuration");
-                    for (int i = 0; i < items.Length; i++)
-                        menu.AddItem(new GUIContent($"道具/{ItemBase.GetItemTypeString(items[i].ItemType)}/{items[i].Name}"), false, OnSelectItem, i);
+                    for (int i = 0; i < talkerCache.Length; i++)
+                        menu.AddItem(new GUIContent($"人名/{NPCInformation.GetSexString(talkerCache[i].Sex)}/{talkerCache[i].Name}"), false, OnSelectNpc, i);
+                    menu.AddItem(new GUIContent("道具"), false, OnSelectItem);
                     var enemies = Resources.LoadAll<EnemyInformation>("Configuration");
                     for (int i = 0; i < enemies.Length; i++)
                         menu.AddItem(new GUIContent(string.Format("敌人/{0}{1}", enemies[i].Race ? enemies[i].Race.Name + "/" : string.Empty, enemies[i].Name)),
@@ -193,15 +192,16 @@ public class DialogueInspector : Editor
                     void OnSelectNpc(object i)
                     {
                         int ni = (int)i;
-                        content.stringValue += $"{{[NPC]{npcs[ni].ID}}}";
+                        content.stringValue += $"{{[NPC]{talkerCache[ni].ID}}}";
                         serializedObject.ApplyModifiedProperties();
                     }
 
-                    void OnSelectItem(object i)
+                    void OnSelectItem()
                     {
-                        int ii = (int)i;
-                        content.stringValue += $"{{[ITEM]{items[ii].ID}}}";
-                        serializedObject.ApplyModifiedProperties();
+                        var dropdown = new AdvancedDropdown<Item>(ZetanUtility.Editor.LoadAssets<Item>(), selectCallback: i => { content.stringValue += $"{{[ITEM]{i.ID}}}"; serializedObject.ApplyModifiedProperties(); },
+                                                                  nameGetter: i => i.Name, title: "插入道具",
+                                                                  groupGetter: i => i.Type.Name, iconGetter: i => i.Icon.texture);
+                        dropdown.Show(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width / 2f, lineHeight));
                     }
 
                     void OnSelectEnemy(object i)
@@ -527,6 +527,7 @@ public class DialogueInspector : Editor
                                 options.DeleteArrayElementAtIndex(_list.index);
                             if (EditorGUI.EndChangeCheck())
                                 options.serializedObject.ApplyModifiedProperties();
+                            GUIUtility.ExitGUI();
                         };
 
                         optionsList.drawHeaderCallback = (_rect) =>
@@ -581,7 +582,7 @@ public class DialogueInspector : Editor
                                     break;
                                 case WordsEventType.GetAmity:
                                 case WordsEventType.LoseAmity:
-                                    new ObjectSelectionDrawer<TalkerInformation>(toWhom, "_name", npcs).DoDraw(new Rect(_rect.x, _rect.y + lineHeightSpace, _rect.width / 2, lineHeight));
+                                    new ObjectSelectionDrawer<TalkerInformation>(toWhom, "_name", talkerCache).DoDraw(new Rect(_rect.x, _rect.y + lineHeightSpace, _rect.width / 2, lineHeight));
                                     EditorGUI.LabelField(new Rect(_rect.x + 2 + _rect.width / 2, _rect.y + lineHeightSpace, 40, lineHeight), "好感值");
                                     EditorGUI.PropertyField(new Rect(_rect.x + 42 + _rect.width / 2, _rect.y + lineHeightSpace, _rect.width / 2 - 42, lineHeight),
                                         favorabilityValue, new GUIContent(string.Empty));
@@ -604,6 +605,7 @@ public class DialogueInspector : Editor
                             if (EditorUtility.DisplayDialog("删除", "确定删除这个事件吗？", "确定", "取消"))
                                 events.DeleteArrayElementAtIndex(_list.index);
                             if (EditorGUI.EndChangeCheck()) events.serializedObject.ApplyModifiedProperties();
+                            GUIUtility.ExitGUI();
                         };
 
                         eventsList.onAddCallback = (_list) =>
@@ -705,6 +707,7 @@ public class DialogueInspector : Editor
                 }
             }
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
+            GUIUtility.ExitGUI();
         };
 
         wordsList.onCanRemoveCallback = (list) =>
@@ -727,6 +730,6 @@ public class DialogueInspector : Editor
 
     int GetNPCIndex(TalkerInformation npc)
     {
-        return Array.IndexOf(npcs, npc);
+        return Array.IndexOf(talkerCache, npc);
     }
 }

@@ -10,5 +10,10 @@ namespace ZetanStudio.Item.Module
         public EquipmentType Type => EquipmentTypeEnum.Instance[type];
 
         public override bool IsValid => type >= 0;
+
+        public override ItemModuleData CreateData(ItemData item)
+        {
+            return new EquipmentData(item, this);
+        }
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ZetanStudio.BehaviourTree
 {
-    public class SharedGameObjectList : SharedVariable<List<GameObject>>
+    public sealed class SharedGameObjectList : SharedVariable<List<GameObject>>
     {
         /// <summary>
         /// 运行过程中赋值请使用<see cref="SharedVariable{T}.Value"/>属性或<see cref="SharedVariable{T}.SetValue(object)"/>方法，

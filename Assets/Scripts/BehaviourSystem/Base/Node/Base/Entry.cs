@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
     /// <summary>
     /// 开始结点：每棵<see cref="BehaviourTree"/>的根结点，应该有且只能有一个
     /// </summary>
-    [NodeDescription("开始结点：每棵行为树的根结点，应该有且只能有一个")]
+    [Description("开始结点：每棵行为树的根结点，应该有且只能有一个")]
     public sealed class Entry : ParentNode
     {
         [SerializeReference]

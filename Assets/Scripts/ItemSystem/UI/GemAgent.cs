@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Module;
 
 public class GemAgent : MonoBehaviour
 {
-    private GemItem gemstone;
+    private Item gemstone;
 
     [SerializeField]
     private Image icon;
@@ -14,13 +16,13 @@ public class GemAgent : MonoBehaviour
     [SerializeField]
     private Text effectText;
 
-    public void Init(GemItem gem)
+    public void Init(Item gem)
     {
         if (gem) return;
         gemstone = gem;
         icon.overrideSprite = gemstone.Icon;
         nameText.text = gemstone.Name;
-        effectText.text = gemstone.Powerup.ToString();
+        //effectText.text = gemstone.Powerup.ToString();
     }
 
     public void Clear()

@@ -1,26 +1,25 @@
 using Pathfinding;
-using System.ComponentModel;
 using UnityEngine;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 [RequireComponent(typeof(Seeker))]
 public class PathAgent : MonoBehaviour
 {
-    [DisplayName("停止距离")]
+    [Label("停止距离")]
     public float stoppingDistance = 1;
-    [DisplayName("选点距离")]
+    [Label("选点距离")]
     public float pickNextWaypointDist = 1;
-    [DisplayName("自动重寻")]
+    [Label("自动重寻")]
     public bool autoRepath = true;
-    [DisplayName("寻路间隔")]
+    [Label("寻路间隔")]
     public float repathRate = 0.5f;
 
 #if UNITY_EDITOR
-    [SerializeField, DisplayName("显示Seeker")]
+    [SerializeField, Label("显示Seeker")]
     private bool showSeeker;
-    [SerializeField, DisplayName("路径Gizmos")]
+    [SerializeField, Label("路径Gizmos")]
     private bool gizmosPath;
-    [SerializeField, DisplayName("细节Gizmos")]
+    [SerializeField, Label("细节Gizmos")]
     private bool gizmosDetail;
 #endif
 

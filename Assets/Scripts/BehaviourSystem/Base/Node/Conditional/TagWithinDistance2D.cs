@@ -1,24 +1,24 @@
 using System.Linq;
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
-    [NodeDescription("带标签的距离判断：判断参照物离带标签的目标是否在指定距离内")]
+    [Description("带标签的距离判断：判断参照物离带标签的目标是否在指定距离内")]
     public class TagWithinDistance2D : Conditional
     {
-        [DisplayName("距离")]
+        [Label("距离")]
         public SharedFloat distance;
-        [DisplayName("标签"), Tag_BT]
+        [Label("标签"), Tag]
         public SharedString tag;
-        [DisplayName("可视检测层")]
+        [Label("可视检测层")]
         public LayerMask sightLayer = 1 << 2;
-        [DisplayName("检查视线")]
+        [Label("检查视线")]
         public SharedBool lineOfSight;
-        [DisplayName("障碍检测曾"), HideIf_BT("lineOfSight", false)]
+        [Label("障碍检测曾"), HideIf("lineOfSight", false)]
         public LayerMask obstacleLayer;
-        [DisplayName("眼睛位置偏移"), HideIf_BT("lineOfSight", false)]
+        [Label("眼睛位置偏移"), HideIf("lineOfSight", false)]
         public SharedVector3 eyesOffset;
-        [DisplayName("寄存器")]
+        [Label("寄存器")]
         public SharedGameObject register;
 
         public override bool IsValid => distance != null && tag != null && distance.IsValid && tag.IsValid;

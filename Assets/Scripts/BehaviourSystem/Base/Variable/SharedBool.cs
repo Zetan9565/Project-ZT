@@ -1,7 +1,7 @@
 ﻿namespace ZetanStudio.BehaviourTree
 {
     [System.Serializable]
-    public class SharedBool : SharedVariable<bool>
+    public sealed class SharedBool : SharedVariable<bool>
     {
         /// <summary>
         /// 运行过程中赋值请使用<see cref="SharedVariable{T}.Value"/>属性或<see cref="SharedVariable{T}.SetValue(object)"/>方法，

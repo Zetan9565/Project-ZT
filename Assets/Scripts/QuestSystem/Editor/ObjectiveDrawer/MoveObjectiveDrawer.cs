@@ -1,9 +1,19 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Module;
 
 [CustomPropertyDrawer(typeof(MoveObjective))]
 public sealed class MoveObjectiveDrawer : ObjectiveDrawer
 {
+    private readonly IEnumerable<CheckPointInformation> pointsCache;
+
+    public MoveObjectiveDrawer()
+    {
+        pointsCache = ZetanUtility.Editor.LoadAssets<CheckPointInformation>();
+    }
+
     protected override void DrawAdditionalProperty(SerializedProperty objective, Rect rect, ref int lineCount)
     {
         SerializedProperty canNavigate = objective.FindPropertyRelative("canNavigate");
@@ -15,13 +25,12 @@ public sealed class MoveObjectiveDrawer : ObjectiveDrawer
         {
             EditorGUI.PropertyField(new Rect(rect.x + rect.width * 0.5f, rect.y + lineHeightSpace * (lineCount - 1), rect.width * 0.5f, lineHeight),
                canNavigate, new GUIContent("可导航"));
-            auxiliaryPos.objectReferenceValue = EditorGUI.ObjectField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight),
-                "检查点", auxiliaryPos.objectReferenceValue, typeof(CheckPointInformation), false);
-            lineCount++;
         }
+        ObjectSelectorDrawer.Draw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), auxiliaryPos, new GUIContent("检查点"), pointsCache);
+        lineCount++;
         SerializedProperty itemToUseHere = objective.FindPropertyRelative("itemToUseHere");
-        new ObjectSelectionDrawer<ItemBase>(itemToUseHere, "_name", i => ZetanUtility.GetInspectorName(i.ItemType), itemCache,
-                                            "需在此处使用的道具").DoDraw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight));
+        ItemSelectorDrawer.Draw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), itemToUseHere, new GUIContent("需在此处使用的道具"),
+            ArrayUtility.FindAll(itemCache, x => x.GetModule<TriggerModule>()));
         lineCount++;
     }
     public override float GetObejctiveItemDrawHeight(SerializedProperty objective)
@@ -32,13 +41,12 @@ public sealed class MoveObjectiveDrawer : ObjectiveDrawer
         if (objective.isExpanded)
         {
             lineCount++;//目标数量
-            if (quest.CmpltObjctvInOrder)
+            if (quest.InOrder)
                 lineCount++;// 按顺序
             lineCount += 1;//执行顺序
             lineCount += 1;//可导航
-            if (objective.FindPropertyRelative("showMapIcon").boolValue)
-                lineCount++;//辅助位置
-            if (objective.FindPropertyRelative("display").boolValue || !quest.CmpltObjctvInOrder) lineCount++;//标题
+            lineCount++;//辅助位置
+            if (objective.FindPropertyRelative("display").boolValue || !quest.InOrder) lineCount++;//标题
             lineCount++;//道具
         }
         return lineCount * lineHeightSpace;

@@ -1,8 +1,12 @@
 using System;
-using ZetanExtends;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using ZetanStudio.Extension;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Craft;
+using ZetanStudio.Item.Module;
 
 public class ConfigurationFinding : EditorWindow
 {
@@ -19,7 +23,7 @@ public class ConfigurationFinding : EditorWindow
     private int barIndex;
     private SeekType type;
 
-    private List<SearchResult> results = new List<SearchResult>();
+    private readonly List<SearchResult> results = new List<SearchResult>();
 
     [MenuItem("Zetan Studio/工具/查找配置")]
     public static void CreateWindow()
@@ -148,11 +152,11 @@ public class ConfigurationFinding : EditorWindow
                 canSeek = !string.IsNullOrEmpty(strKeys[0]);
                 break;
             case ItemKeyType.Type:
-                intKeys[0] = (int)(ItemType)EditorGUILayout.EnumPopup("道具类型", (ItemType)intKeys[0]);
+                intKeys[0] = EditorGUILayout.Popup("道具类型", intKeys[0], ItemTypeEnum.Instance.GetNames().ToArray());
                 canSeek = true;
                 break;
             case ItemKeyType.AsMater:
-                intKeys[0] = (int)(MaterialType)EditorGUILayout.EnumPopup("材料类型", (MaterialType)intKeys[0]);
+                intKeys[0] = EditorGUILayout.Popup(new GUIContent("材料类型"), intKeys[0], MaterialTypeEnum.Instance.GetNames().ToArray());
                 canSeek = true;
                 break;
             case ItemKeyType.Formu:
@@ -160,11 +164,11 @@ public class ConfigurationFinding : EditorWindow
                 canSeek = objKeys[0];
                 break;
             case ItemKeyType.Mater:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("包含道具"), objKeys[0], typeof(ItemBase), false);
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("包含道具"), objKeys[0], typeof(Item), false);
                 canSeek = objKeys[0];
                 break;
             case ItemKeyType.MatType:
-                intKeys[0] = (int)(MaterialType)EditorGUILayout.EnumPopup("包含类型", (MaterialType)intKeys[0]);
+                intKeys[0] = EditorGUILayout.Popup(new GUIContent("包含类型"), intKeys[0], MaterialTypeEnum.Instance.GetNames().ToArray());
                 canSeek = true;
                 break;
             default:
@@ -174,7 +178,7 @@ public class ConfigurationFinding : EditorWindow
     }
     private void SeekItem()
     {
-        var items = Resources.LoadAll<ItemBase>("Configuration");
+        var items = Resources.LoadAll<Item>("Configuration");
         foreach (var item in items)
         {
             bool take = false;
@@ -208,30 +212,30 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case ItemKeyType.Type:
-                    if (item.ItemType == (ItemType)intKeys[0])
+                    if (item.Type == ItemTypeEnum.Instance[intKeys[0]])
                     {
                         take = true;
                         remark = $"[名称：{item.Name}]是此类型";
                     }
                     break;
                 case ItemKeyType.AsMater:
-                    if (item.MaterialType == (MaterialType)intKeys[0])
+                    if (item.GetModule<MaterialModule>().Type == MaterialTypeEnum.Instance[intKeys[0]])
                     {
                         take = true;
                         remark = $"[名称：{item.Name}]是此材料类型";
                     }
                     break;
                 case ItemKeyType.Formu:
-                    if (item.Formulation == objKeys[0])
+                    if (item.GetModule<CraftableModule>() is CraftableModule makable && makable.Formulation == objKeys[0])
                     {
                         take = true;
                         remark = $"[名称：{item.Name}]使用该配方";
                     }
                     break;
                 case ItemKeyType.Mater:
-                    if (item.Formulation)
+                    if (item.GetModule<CraftableModule>() is CraftableModule makable2 && makable2.Formulation)
                     {
-                        int index = item.Formulation.Materials.FindIndex(x => x.MakingType == MakingType.SingleItem && x.Item == objKeys[0]);
+                        int index = makable2.Formulation.Materials.FindIndex(x => x.MakingType == CraftType.SingleItem && x.Item == objKeys[0]);
                         if (index >= 0)
                         {
                             take = true;
@@ -240,9 +244,9 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case ItemKeyType.MatType:
-                    if (item.Formulation)
+                    if (item.GetModule<CraftableModule>() is CraftableModule makable3 && makable3.Formulation)
                     {
-                        int index = item.Formulation.Materials.FindIndex(x => x.MakingType == MakingType.SameType && x.MaterialType == (MaterialType)intKeys[0]);
+                        int index = makable3.Formulation.Materials.FindIndex(x => x.MakingType == CraftType.SameType && x.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]);
                         if (index >= 0)
                         {
                             take = true;
@@ -299,11 +303,11 @@ public class ConfigurationFinding : EditorWindow
                 canSeek = !string.IsNullOrEmpty(strKeys[0]);
                 break;
             case QuestKeyType.Reward:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("包含道具"), objKeys[0], typeof(ItemBase), false);
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("包含道具"), objKeys[0], typeof(Item), false);
                 canSeek = objKeys[0];
                 break;
             case QuestKeyType.ObjItem:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("关联道具"), objKeys[0], typeof(ItemBase), false);
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("关联道具"), objKeys[0], typeof(Item), false);
                 canSeek = objKeys[0];
                 break;
             case QuestKeyType.ObjTalker:
@@ -647,11 +651,11 @@ public class ConfigurationFinding : EditorWindow
                 canSeek = !string.IsNullOrEmpty(strKeys[0]);
                 break;
             case FormulationKeyType.Mater:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("包含道具"), objKeys[0], typeof(ItemBase), false);
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("包含道具"), objKeys[0], typeof(Item), false);
                 canSeek = objKeys[0];
                 break;
             case FormulationKeyType.MatType:
-                intKeys[0] = (int)(MaterialType)EditorGUILayout.EnumPopup("包含类型", (MaterialType)intKeys[0]);
+                intKeys[0] = EditorGUILayout.Popup(new GUIContent("包含类型"), intKeys[0], MaterialTypeEnum.Instance.GetNames().ToArray());
                 canSeek = true;
                 break;
             default:
@@ -678,7 +682,7 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case FormulationKeyType.Mater:
-                    int index = formulation.Materials.FindIndex(x => x.MakingType == MakingType.SingleItem && x.Item == objKeys[0]);
+                    int index = formulation.Materials.FindIndex(x => x.MakingType == CraftType.SingleItem && x.Item == objKeys[0]);
                     if (index >= 0)
                     {
                         take = true;
@@ -686,7 +690,7 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case FormulationKeyType.MatType:
-                    index = formulation.Materials.FindIndex(x => x.MakingType == MakingType.SameType && x.MaterialType == (MaterialType)intKeys[0]);
+                    index = formulation.Materials.FindIndex(x => x.MakingType == CraftType.SameType && x.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]);
                     if (index >= 0)
                     {
                         take = true;
@@ -702,8 +706,8 @@ public class ConfigurationFinding : EditorWindow
     #endregion
 
     #region 建筑查找
-    private BuildingKeyType buildingType;
-    private enum BuildingKeyType
+    private StructureKeyType structureType;
+    private enum StructureKeyType
     {
         [InspectorName("ID前缀")]
         ID,
@@ -724,18 +728,18 @@ public class ConfigurationFinding : EditorWindow
     }
     private void BuildingView()
     {
-        var oldType = buildingType;
-        buildingType = (BuildingKeyType)EditorGUILayout.EnumPopup(new GUIContent("查找内容"), buildingType);
-        if (needInit || oldType != buildingType)
+        var oldType = structureType;
+        structureType = (StructureKeyType)EditorGUILayout.EnumPopup(new GUIContent("查找内容"), structureType);
+        if (needInit || oldType != structureType)
         {
             strKeys = new string[] { string.Empty };
             intKeys = new int[1] { 0 };
-            switch (buildingType)
+            switch (structureType)
             {
-                case BuildingKeyType.Prefab:
+                case StructureKeyType.Prefab:
                     objKeys = new Structure2D[1];
                     break;
-                case BuildingKeyType.Preview:
+                case StructureKeyType.Preview:
                     objKeys = new StructurePreview2D[1];
                     break;
                 default:
@@ -744,32 +748,32 @@ public class ConfigurationFinding : EditorWindow
             }
             results.Clear();
         }
-        switch (buildingType)
+        switch (structureType)
         {
-            case BuildingKeyType.ID:
-            case BuildingKeyType.Name:
-            case BuildingKeyType.Desc:
+            case StructureKeyType.ID:
+            case StructureKeyType.Name:
+            case StructureKeyType.Desc:
                 type = (SeekType)EditorGUILayout.EnumPopup(new GUIContent("查找方式"), type);
                 strKeys[0] = EditorGUILayout.TextField(new GUIContent("关键字"), strKeys[0]);
                 canSeek = !string.IsNullOrEmpty(strKeys[0]);
                 break;
-            case BuildingKeyType.Formu:
+            case StructureKeyType.Formu:
                 objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("关联配方"), objKeys[0], typeof(Formulation), false);
                 canSeek = objKeys[0];
                 break;
-            case BuildingKeyType.Mater:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("包含道具"), objKeys[0], typeof(ItemBase), false);
+            case StructureKeyType.Mater:
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("包含道具"), objKeys[0], typeof(Item), false);
                 canSeek = objKeys[0];
                 break;
-            case BuildingKeyType.MatType:
-                intKeys[0] = (int)(MaterialType)EditorGUILayout.EnumPopup("包含类型", (MaterialType)intKeys[0]);
+            case StructureKeyType.MatType:
+                intKeys[0] = EditorGUILayout.Popup(new GUIContent("包含类型"), intKeys[0], MaterialTypeEnum.Instance.GetNames().ToArray());
                 canSeek = true;
                 break;
-            case BuildingKeyType.Prefab:
+            case StructureKeyType.Prefab:
                 objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("预制件"), objKeys[0], typeof(Structure2D), false);
                 canSeek = objKeys[0];
                 break;
-            case BuildingKeyType.Preview:
+            case StructureKeyType.Preview:
                 objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("预制件"), objKeys[0], typeof(StructurePreview2D), false);
                 canSeek = objKeys[0];
                 break;
@@ -785,30 +789,30 @@ public class ConfigurationFinding : EditorWindow
         {
             bool take = false;
             string remark = string.Empty;
-            switch (buildingType)
+            switch (structureType)
             {
-                case BuildingKeyType.ID:
+                case StructureKeyType.ID:
                     if (CompareString(building.ID, strKeys[0]))
                     {
                         take = true;
                         remark = $"识别码前缀：{building.ID}";
                     }
                     break;
-                case BuildingKeyType.Name:
+                case StructureKeyType.Name:
                     if (CompareString(building.Name, strKeys[0]))
                     {
                         take = true;
                         remark = $"名称：{building.Name}";
                     }
                     break;
-                case BuildingKeyType.Desc:
+                case StructureKeyType.Desc:
                     if (CompareString(building.Description, strKeys[0]))
                     {
                         take = true;
                         remark = $"描述：{TrimContentByKey(building.Description, strKeys[0], 16)}";
                     }
                     break;
-                case BuildingKeyType.Formu:
+                case StructureKeyType.Formu:
                     int index = building.Stages.FindIndex(x => x.Formulation == objKeys[0]);
                     if (index >= 0)
                     {
@@ -816,30 +820,30 @@ public class ConfigurationFinding : EditorWindow
                         remark = $"第[{index + 1}]个阶段使用该配方";
                     }
                     break;
-                case BuildingKeyType.Mater:
-                    index = building.Stages.FindIndex(x => x.Formulation && x.Formulation.Materials.Exists(y => y.MakingType == MakingType.SingleItem && y.Item == objKeys[0]));
+                case StructureKeyType.Mater:
+                    index = building.Stages.FindIndex(x => x.Formulation && x.Formulation.Materials.Exists(y => y.MakingType == CraftType.SingleItem && y.Item == objKeys[0]));
                     if (index >= 0)
                     {
                         take = true;
-                        remark = $"第[{index + 1}]个阶段的第[{building.Stages[index].Formulation.Materials.FindIndex(x => x.MakingType == MakingType.SingleItem && x.Item == objKeys[0]) + 1}]个材料是该道具";
+                        remark = $"第[{index + 1}]个阶段的第[{building.Stages[index].Formulation.Materials.FindIndex(x => x.MakingType == CraftType.SingleItem && x.Item == objKeys[0]) + 1}]个材料是该道具";
                     }
                     break;
-                case BuildingKeyType.MatType:
-                    index = building.Stages.FindIndex(x => x.Formulation && x.Formulation.Materials.Exists(y => y.MakingType == MakingType.SameType && y.MaterialType == (MaterialType)intKeys[0]));
+                case StructureKeyType.MatType:
+                    index = building.Stages.FindIndex(x => x.Formulation && x.Formulation.Materials.Exists(y => y.MakingType == CraftType.SameType && y.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]));
                     if (index >= 0)
                     {
                         take = true;
-                        remark = $"第[{index + 1}]个阶段的第[{building.Stages[index].Formulation.Materials.FindIndex(x => x.MakingType == MakingType.SameType && x.MaterialType == (MaterialType)intKeys[0]) + 1}]个材料是该类型";
+                        remark = $"第[{index + 1}]个阶段的第[{building.Stages[index].Formulation.Materials.FindIndex(x => x.MakingType == CraftType.SameType && x.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]) + 1}]个材料是该类型";
                     }
                     break;
-                case BuildingKeyType.Prefab:
+                case StructureKeyType.Prefab:
                     if (building.Prefab == objKeys[0])
                     {
                         take = true;
                         remark = "使用该预制件";
                     }
                     break;
-                case BuildingKeyType.Preview:
+                case StructureKeyType.Preview:
                     if (building.Preview == objKeys[0])
                     {
                         take = true;
@@ -881,7 +885,7 @@ public class ConfigurationFinding : EditorWindow
                 canSeek = !string.IsNullOrEmpty(strKeys[0]);
                 break;
             case ProductKeyType.Item:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("包含道具"), objKeys[0], typeof(ItemBase), false);
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("包含道具"), objKeys[0], typeof(Item), false);
                 canSeek = objKeys[0];
                 break;
             default:

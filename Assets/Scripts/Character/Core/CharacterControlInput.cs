@@ -47,6 +47,18 @@ public class CharacterControlInput : MonoBehaviour
             }
         }
     }
+    public T ReadValue<T>(string name)
+    {
+        try
+        {
+            if (values.TryGetValue(name, out var find)) return (T)(dynamic)find;
+            return default;
+        }
+        catch
+        {
+            return default;
+        }
+    }
 
     private void Awake()
     {

@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using ZetanStudio.Item;
+using ZetanStudio.Item.Module;
 
 public class BackpackManager : SingletonInventoryHandler<BackpackManager>
 {
@@ -15,29 +17,29 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
 
     private bool CheckQuest(ItemData data, int amount)
     {
-        if (QuestManager.Instance.HasQuestRequiredItem(data.Model_old, Inventory.GetAmount(data.ModelID) - amount))
+        if (QuestManager.Instance.HasQuestRequiredItem(data.Model, Inventory.GetAmount(data.ModelID) - amount))
         {
-            MessageManager.Instance.New($"部分[{ItemUtility.GetColorName(data.Model_old)}]已被任务锁定");
+            MessageManager.Instance.New($"部分[{data.Model.ColorName}]已被任务锁定");
             return false;
         }
         return true;
     }
     private bool TryGetCurrency(ItemData data, int amount)
     {
-        if (data.Model_old is CurrencyItem currency)
-            switch (currency.CurrencyType)
+        if (data.Model.GetModule<CurrencyModule>() is CurrencyModule currency)
+            switch (currency.Type.Name)
             {
-                case CurrencyType.Money:
+                case "金币":
                     GetMoney(currency.ValueEach * amount);
                     Debug.Log("获得钱");
                     return true;
-                case CurrencyType.EXP:
+                case "经验":
                     //TODO 获得经验
                     Debug.Log("获得经验");
                     return true;
-                case CurrencyType.SkillPoint:
+                case "技能经验":
                     break;
-                case CurrencyType.SkillEXP:
+                case "技能点":
                     break;
                 default:
                     break;
@@ -104,73 +106,5 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
     public override string InventoryWeightChangedMsgKey => BackpackWeightChanged;
     public override string ItemAmountChangedMsgKey => BackpackItemAmountChanged;
     public override string SlotStateChangedMsgKey => BackpackSlotStateChanged;
-    #endregion
-
-    #region 道具使用相关
-    public void UseItem(ItemData item)
-    {
-        if (!item.Model_old.Usable)
-        {
-            MessageManager.Instance.New("该物品不可使用");
-            return;
-        }
-        bool used = false;
-        if (item.Model_old.IsBox) used = UseBox(item);
-        else if (item.Model_old.IsEquipment) used = UseEuipment(item);
-        else if (item.Model_old.IsBook) used = UseBook(item);
-        else if (item.Model_old.IsBag) used = UseBag(item);
-        else if (item.Model_old.IsForQuest) used = UseQuest(item);
-        if (used) NotifyCenter.PostNotify(BackpackUseItem, item);
-    }
-
-    public bool UseBox(ItemData item)
-    {
-        BoxItem box = item.Model_old as BoxItem;
-        return LoseItem(item, 1, box.GetItems());
-    }
-
-    public bool UseEuipment(ItemData MItemInfo)
-    {
-        //Equip(MItemInfo);
-        return false;
-    }
-
-    public bool UseBook(ItemData item)
-    {
-        BookItem book = item.Model_old as BookItem;
-        switch (book.BookType)
-        {
-            case BookType.Building:
-                if (CheckQuest(item, 1) && StructureManager.Instance.Learn(book.BuildingToLearn))
-                    return LoseItem(item, 1);
-                break;
-            case BookType.Making:
-                if (CheckQuest(item, 1) && MakingManager.Instance.Learn(book.ItemToLearn))
-                    return LoseItem(item, 1);
-                break;
-            case BookType.Skill:
-            default: break;
-        }
-        return false;
-    }
-
-    public bool UseBag(ItemData item)
-    {
-        BagItem bag = item.Model_old as BagItem;
-        if (CheckQuest(item, 1))
-        {
-            if (ExpandSpace(bag.ExpandSize))
-                return LoseItem(item, 1);
-        }
-        return false;
-    }
-
-    public bool UseQuest(ItemData item)
-    {
-        if (!CheckQuest(item, 1)) return false;
-        QuestItem quest = item.Model_old as QuestItem;
-        TriggerManager.Instance.SetTrigger(quest.TriggerName, quest.StateToSet);
-        return LoseItem(item, 1);
-    }
     #endregion
 }

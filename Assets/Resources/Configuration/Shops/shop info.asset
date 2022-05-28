@@ -14,28 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shopName: "\u6D4B\u8BD5\u7528\u5546\u5E97"
   commodities:
-  - item: {fileID: 11400000, guid: bd4452dc99e9afc4d818dd914aa1b72f, type: 2}
+  - item: {fileID: 5948240964464067290, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     maxAmount: 1
     priceMultiple: 1
     emptyAble: 0
-    leftRefreshTime: 0
     refreshTime: 300
     minRefreshAmount: 1
     maxRefreshAmount: 1
-  - item: {fileID: 11400000, guid: 3be704b7f65170443ad9de4ad93ede92, type: 2}
+  - item: {fileID: 8516276107217364782, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     maxAmount: 1
     priceMultiple: 1
     emptyAble: 0
-    leftRefreshTime: 0
     refreshTime: 300
     minRefreshAmount: 1
     maxRefreshAmount: 1
   acquisitions:
-  - item: {fileID: 11400000, guid: ffae71d37dfe36c4ba20005e0392d109, type: 2}
+  - item: {fileID: -4938875555958233210, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     maxAmount: 1
-    priceMultiple: 1
-    emptyAble: 1
-    leftRefreshTime: 0
+    priceMultiple: 0.75
+    emptyAble: 0
     refreshTime: 300
     minRefreshAmount: 0
     maxRefreshAmount: 1

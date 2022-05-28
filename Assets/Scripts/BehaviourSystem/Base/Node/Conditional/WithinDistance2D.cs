@@ -1,23 +1,23 @@
 using UnityEngine;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Nodes
 {
-    [NodeDescription("距离判断：判断参照物离目标是否在指定距离内")]
+    [Description("距离判断：判断参照物离目标是否在指定距离内")]
     public class WithinDistance2D : Conditional
     {
-        [DisplayName("距离")]
-        public SharedFloat distance;
-        [DisplayName("使用点")]
+        [Label("距离")]
+        public SharedFloat distance = 5.0f;
+        [Label("使用点")]
         public bool usePoint;
-        [DisplayName("目标点"), HideIf_BT("usePoint", false)]
+        [Label("目标点"), HideIf("usePoint", false)]
         public SharedVector3 point;
-        [DisplayName("目标对象"), HideIf_BT("usePoint", true)]
+        [Label("目标对象"), HideIf("usePoint", true)]
         public SharedGameObject target;
-        [DisplayName("检查视线")]
+        [Label("检查视线")]
         public SharedBool lineOfSight;
-        [DisplayName("障碍检测层"), HideIf_BT("lineOfSight", false)]
+        [Label("障碍检测层"), HideIf("lineOfSight", false)]
         public LayerMask obstacleLayer;
-        [DisplayName("眼睛位置偏移"), HideIf_BT("lineOfSight", false)]
+        [Label("眼睛位置偏移"), HideIf("lineOfSight", false)]
         public SharedVector3 eyesOffset;
 
         public override bool IsValid => distance != null && (usePoint && point != null && point.IsValid || !usePoint && target != null && target.IsValid)

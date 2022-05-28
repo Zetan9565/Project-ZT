@@ -1,6 +1,10 @@
+using ZetanStudio.Item;
+
 public abstract class ObjectiveData
 {
     public Objective Model { get; }
+
+    public string DisplayName => MiscFuntion.HandlingKeyWords(parent.Tr(Model.DisplayName));
 
     public T GetInfo<T>() where T : Objective
     {
@@ -34,7 +38,7 @@ public abstract class ObjectiveData
         }
     }
 
-    public string AmountString => $"{CurrentAmount}/{Model.Amount}";
+    public string AmountString => Model.ShowAmount ? $"{CurrentAmount}/{Model.Amount}" : string.Empty;
 
     public bool IsComplete
     {
@@ -126,18 +130,15 @@ public abstract class ObjectiveData
 
     public override string ToString()
     {
-        return $"{Model.DisplayName}{(Model.ShowAmount ? $" [{currentAmount}/{Model.Amount}]" : string.Empty)}";
+        return $"{DisplayName}{(Model.ShowAmount ? $" [{currentAmount}/{Model.Amount}]" : string.Empty)}";
     }
 }
 
 public abstract class ObjectiveData<T> : ObjectiveData where T : Objective
 {
-    public new T Model { get; }
+    public new T Model => base.Model as T;
 
-    protected ObjectiveData(T objective) : base(objective)
-    {
-        Model = objective;
-    }
+    protected ObjectiveData(T objective) : base(objective) { }
 }
 
 public class CollectObjectiveData : ObjectiveData<CollectObjective>
@@ -146,7 +147,7 @@ public class CollectObjectiveData : ObjectiveData<CollectObjective>
 
     public int amountWhenStart;
 
-    public void UpdateCollectAmount(ItemBase model, int oldAmount, int newAmount)
+    public void UpdateCollectAmount(Item model, int oldAmount, int newAmount)
     {
         if (IsComplete) return;
         if (model == Model.ItemToCollect)
@@ -154,13 +155,13 @@ public class CollectObjectiveData : ObjectiveData<CollectObjective>
             if (oldAmount < newAmount)//获得道具
             {
                 if (!Model.InOrder || AllPrevComplete) CurrentAmount = newAmount - (!Model.CheckBagAtStart ? amountWhenStart : 0);
-                else UnityEngine.Debug.LogWarning($"任务 [{parent.Model.Title}] 的目标 [{Model.DisplayName}] 发生置数错误");
+                else UnityEngine.Debug.LogWarning($"任务 [{parent.Model.ID}] 的目标 [{Model.DisplayName}] 发生置数错误");
             }
             else if (Model.LoseItemAtSbmt)//失去道具，且在提交任务时要上交此目标收集的道具
             {
                 if (AllPrevComplete && !AnyNextOngoing)//前置目标都完成且没有后置目标在进行时，才允许更新
                     CurrentAmount = newAmount;
-                else UnityEngine.Debug.LogWarning($"任务 [{parent.Model.Title}] 的目标 [{Model.DisplayName}] 发生置数错误");
+                else UnityEngine.Debug.LogWarning($"任务 [{parent.Model.ID}] 的目标 [{Model.DisplayName}] 发生置数错误");
             }
         }
     }

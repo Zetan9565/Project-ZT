@@ -1,9 +1,9 @@
 using UnityEditor;
 
-namespace ZetanStudio.BehaviourTree
+namespace ZetanStudio.BehaviourTree.Editor
 {
     [CustomEditor(typeof(GlobalVariables))]
-    public class GlobalVariablesInspector : Editor
+    public class GlobalVariablesInspector : UnityEditor.Editor
     {
         SerializedProperty variables;
         SharedVariableListDrawer variableList;
@@ -11,7 +11,7 @@ namespace ZetanStudio.BehaviourTree
         private void OnEnable()
         {
             variables = serializedObject.FindProperty("variables");
-            variableList = new SharedVariableListDrawer(serializedObject, variables, false);
+            variableList = new SharedVariableListDrawer(variables, false);
         }
 
         public override void OnInspectorGUI()

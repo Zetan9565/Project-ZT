@@ -1,5 +1,5 @@
 using UnityEngine;
-using ZetanExtends;
+using ZetanStudio.Extension;
 
 [AddComponentMenu("Zetan Studio/2D刚体运动控制")]
 [RequireComponent(typeof(Rigidbody2D))]
