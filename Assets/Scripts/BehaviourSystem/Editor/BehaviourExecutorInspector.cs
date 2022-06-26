@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ZetanStudio.BehaviourTree.Editor
 {
-    [CustomEditor(typeof(BehaviourExecutor), true)]
+    [CustomEditor(typeof(BehaviourTreeExecutor), true)]
     public class BehaviourExecutorInspector : UnityEditor.Editor
     {
         SerializedProperty behaviour;
@@ -45,7 +45,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             serializedVariables = serializedTree.FindProperty("variables");
             variableList = new SharedVariableListDrawer(serializedVariables, true);
             presetVariableList = new SharedVariablePresetListDrawer(presetVariables, serializedTree.targetObject as ISharedVariableHandler,
-                                                                    (target as BehaviourExecutor).GetPresetVariableTypeAtIndex);
+                                                                    (target as BehaviourTreeExecutor).GetPresetVariableTypeAtIndex);
             showList = new AnimBool(serializedVariables.isExpanded);
             showList.valueChanged.AddListener(() => { Repaint(); if (serializedVariables != null) serializedVariables.isExpanded = showList.target; });
             showPreset = new AnimBool(presetVariables.isExpanded);
@@ -54,7 +54,7 @@ namespace ZetanStudio.BehaviourTree.Editor
 
         public override void OnInspectorGUI()
         {
-            if (target is RuntimeBehaviourExecutor exe)
+            if (target is ScenedBehaviourTreeExecutor exe)
             {
                 if (PrefabUtility.IsPartOfAnyPrefab(exe))
                 {
@@ -66,7 +66,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             var hasTreeBef = behaviour.objectReferenceValue;
-            if (target is not RuntimeBehaviourExecutor)
+            if (target is not ScenedBehaviourTreeExecutor)
             {
                 bool shouldDisable = Application.isPlaying && !PrefabUtility.IsPartOfAnyPrefab(target);
                 EditorGUI.BeginDisabledGroup(shouldDisable);
@@ -78,7 +78,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             if (behaviour.objectReferenceValue)
             {
                 if (serializedTree == null) InitTree();
-                if (GUILayout.Button("编辑")) BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor);
+                if (GUILayout.Button("编辑")) BehaviourTreeEditor.CreateWindow(target as BehaviourTreeExecutor);
                 serializedTree.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(serializedTree.FindProperty("_name"));
@@ -95,12 +95,12 @@ namespace ZetanStudio.BehaviourTree.Editor
                         behaviour.objectReferenceValue = tree;
                         InitTree();
                         EditorGUILayout.PropertyField(behaviour, new GUIContent("行为树"));
-                        EditorApplication.delayCall += delegate { BehaviourTreeEditor.CreateWindow(target as BehaviourExecutor); };
+                        EditorApplication.delayCall += delegate { BehaviourTreeEditor.CreateWindow(target as BehaviourTreeExecutor); };
                     }
                 }
             }
             EditorGUILayout.PropertyField(frequency, new GUIContent("执行频率"));
-            if (frequency.enumValueIndex == (int)BehaviourExecutor.Frequency.FixedTime)
+            if (frequency.enumValueIndex == (int)BehaviourTreeExecutor.Frequency.FixedTime)
                 EditorGUILayout.PropertyField(interval, new GUIContent("间隔(秒)"));
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(startOnStart, new GUIContent("开始时执行"));
@@ -118,7 +118,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 if (EditorGUILayout.BeginFadeGroup(showList.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
-                if (target is not RuntimeBehaviourExecutor && !Application.isPlaying && !ZetanUtility.IsPrefab((target as BehaviourExecutor).gameObject))
+                if (target is not ScenedBehaviourTreeExecutor && !Application.isPlaying && !ZetanUtility.IsPrefab((target as BehaviourTreeExecutor).gameObject))
                 {
 
                     showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, "变量预设列表", true);

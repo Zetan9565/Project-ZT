@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using ZetanStudio.Item.Craft;
+using ZetanStudio.ItemSystem;
 
 [CreateAssetMenu(fileName = "formulation", menuName = "Zetan Studio/配方")]
 public class Formulation : ScriptableObject
@@ -45,7 +45,7 @@ public class Formulation : ScriptableObject
         {
             if (material && material.IsValid)
             {
-                if (material.MakingType == CraftType.SingleItem)
+                if (material.CostType == MaterialCostType.SingleItem)
                 {
                     sb.Append("[");
                     sb.Append(material.ItemName);

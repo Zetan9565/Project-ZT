@@ -5,6 +5,7 @@ using UnityEditor.Callbacks;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ZetanStudio.Editor;
 using ZetanStudio.Extension;
 
 namespace ZetanStudio.BehaviourTree.Editor
@@ -16,8 +17,8 @@ namespace ZetanStudio.BehaviourTree.Editor
         private BehaviourTree tree;
         private Label inspectorLabel;
         private InspectorView inspectorView;
-        private TabbedBar inspectorTaber;
-        private TabbedBar variableTaber;
+        private ZetanStudio.Editor.TabbedBar inspectorTaber;
+        private ZetanStudio.Editor.TabbedBar variableTaber;
         private IMGUIContainer variables;
         private ToolbarMenu assetsMenu;
         private ToolbarMenu exeMenu;
@@ -40,18 +41,18 @@ namespace ZetanStudio.BehaviourTree.Editor
         #endregion
 
         #region 静态回调
-        [MenuItem("Zetan Studio/行为树编辑器")]
+        [MenuItem("Window/Zetan Studio/行为树编辑器")]
         public static void CreateWindow()
         {
-            BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>(Language.Tr(BehaviourTreeEditorSettings.GetOrCreate().language, "行为树编辑器"));
+            BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>(L.Tr(BehaviourTreeEditorSettings.GetOrCreate().language, "行为树编辑器"));
             wnd.minSize = BehaviourTreeEditorSettings.GetOrCreate().minWindowSize;
         }
-        public static void CreateWindow(BehaviourExecutor executor)
+        public static void CreateWindow(BehaviourTreeExecutor executor)
         {
             if (!executor) return;
             bool isOpen = HasOpenInstances<BehaviourTreeEditor>();
             EditorGUIUtility.PingObject(executor);
-            BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>(Language.Tr(BehaviourTreeEditorSettings.GetOrCreate().language, "行为树编辑器"));
+            BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>(L.Tr(BehaviourTreeEditorSettings.GetOrCreate().language, "行为树编辑器"));
             wnd.minSize = BehaviourTreeEditorSettings.GetOrCreate().minWindowSize;
             Selection.activeGameObject = executor.gameObject;
             if (isOpen) wnd.ChangeTreeBySelection(executor);
@@ -61,7 +62,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             if (!tree) return;
             bool isOpen = HasOpenInstances<BehaviourTreeEditor>();
             Selection.activeObject = tree;
-            BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>(Language.Tr(BehaviourTreeEditorSettings.GetOrCreate().language, "行为树编辑器"));
+            BehaviourTreeEditor wnd = GetWindow<BehaviourTreeEditor>(L.Tr(BehaviourTreeEditorSettings.GetOrCreate().language, "行为树编辑器"));
             wnd.minSize = BehaviourTreeEditorSettings.GetOrCreate().minWindowSize;
             if (isOpen) wnd.ChangeTreeBySelection();
         }
@@ -119,7 +120,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         private GlobalVariables GetGlobal()
         {
             GlobalVariables global;
-            if (Application.isPlaying && (!tree || tree.IsInstance)) global = BehaviourManager.Instance.GlobalVariables;
+            if (Application.isPlaying && (!tree || tree.IsInstance)) global = BehaviourTreeManager.Instance.GlobalVariables;
             else global = ZetanUtility.Editor.LoadAsset<GlobalVariables>();
             return global;
         }
@@ -133,7 +134,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             {
                 assetsMenu.menu.RemoveItemAt(i);
             }
-            if (!Application.isPlaying && tree && tree.IsRuntime) assetsMenu.menu.InsertAction(1, Tr("保存到本地"), (a) => { SaveToLocal("new behaviour tree"); });
+            if (!Application.isPlaying && tree && tree.ScenceOnly) assetsMenu.menu.InsertAction(1, Tr("保存到本地"), (a) => { SaveToLocal("new behaviour tree"); });
             if (behaviourTrees.Count > 0) assetsMenu.menu.AppendSeparator();
             int counter = 1;
             behaviourTrees.ForEach(tree =>
@@ -152,7 +153,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 }
             });
             counter = 1;
-            foreach (var exe in FindObjectsOfType<BehaviourExecutor>(true))
+            foreach (var exe in FindObjectsOfType<BehaviourTreeExecutor>(true))
                 if (exe.Behaviour)
                 {
                     assetsMenu.menu.AppendAction($"{Tr("场景")}/[{counter}] {exe.gameObject.name} ({exe.gameObject.GetPath().Replace("/", "\u2215")})", (a) =>
@@ -170,10 +171,10 @@ namespace ZetanStudio.BehaviourTree.Editor
         {
             if (tree && latestGo)
             {
-                BehaviourExecutor[] exes = latestGo.GetComponents<BehaviourExecutor>();
+                BehaviourTreeExecutor[] exes = latestGo.GetComponents<BehaviourTreeExecutor>();
                 if (!Array.Exists(exes, e => e.Behaviour == tree))
                 {
-                    if (tree.IsRuntime)
+                    if (tree.ScenceOnly)
                     {
                         tree = null;
                         treeView.Vocate();
@@ -189,13 +190,13 @@ namespace ZetanStudio.BehaviourTree.Editor
         private void UpdateTreeDropdown()
         {
             if (exeMenu != null)
-                if (tree && latestGo && Array.Exists(latestGo.GetComponents<BehaviourExecutor>(), e => e.Behaviour == tree))
+                if (tree && latestGo && Array.Exists(latestGo.GetComponents<BehaviourTreeExecutor>(), e => e.Behaviour == tree))
                 {
                     for (int i = exeMenu.menu.MenuItems().Count - 1; i >= 0; i--)
                     {
                         exeMenu.menu.RemoveItemAt(i);
                     }
-                    BehaviourExecutor[] executors = latestGo.GetComponents<BehaviourExecutor>();
+                    BehaviourTreeExecutor[] executors = latestGo.GetComponents<BehaviourTreeExecutor>();
                     for (int i = 0; i < executors.Length; i++)
                     {
                         var exe = executors[i];
@@ -217,7 +218,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 {
                     if (latestGo)
                     {
-                        foreach (var exe in latestGo.GetComponents<BehaviourExecutor>())
+                        foreach (var exe in latestGo.GetComponents<BehaviourTreeExecutor>())
                         {
                             if (exe.Behaviour == tree)
                             {
@@ -226,7 +227,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                             }
                         }
                     }
-                    if (!tree.IsRuntime) treeName.text = $"{Tr("行为树视图")}\t{Tr("当前")}：{tree.Name} ({AssetDatabase.GetAssetPath(tree)})";
+                    if (!tree.ScenceOnly) treeName.text = $"{Tr("行为树视图")}\t{Tr("当前")}：{tree.Name} ({AssetDatabase.GetAssetPath(tree)})";
                 }
             }
         }
@@ -283,7 +284,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             switch (state)
             {
                 case PlayModeStateChange.EnteredEditMode:
-                    if (goBefPlay) ChangeTreeBySelection(goBefPlay.GetComponent<BehaviourExecutor>());
+                    if (goBefPlay) ChangeTreeBySelection(goBefPlay.GetComponent<BehaviourTreeExecutor>());
                     else ChangeTreeBySelection();
                     UpdateUndoVisible();
                     break;
@@ -307,7 +308,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 {
                     if (Selection.activeGameObject)
                     {
-                        BehaviourExecutor exe = Selection.activeGameObject.GetComponent<BehaviourExecutor>();
+                        BehaviourTreeExecutor exe = Selection.activeGameObject.GetComponent<BehaviourTreeExecutor>();
                         if (exe)
                         {
                             tree = exe.Behaviour;
@@ -319,7 +320,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 SelectTree(tree);
             };
         }
-        private void ChangeTreeBySelection(BehaviourExecutor exe)
+        private void ChangeTreeBySelection(BehaviourTreeExecutor exe)
         {
             EditorApplication.delayCall += () =>
             {
@@ -397,8 +398,8 @@ namespace ZetanStudio.BehaviourTree.Editor
                 treeView.nodeUnselectedCallback = OnNodeUnselected;
                 treeView.undoRecordsChangedCallback = UpdateUndoEnable;
 
-                inspectorTaber = root.Q<TabbedBar>("inspector-tab");
-                inspectorTaber.Refresh(Language.TrM(settings.language, "检查器", "快速插入"), OnInspectorTab, 4);
+                inspectorTaber = root.Q<ZetanStudio.Editor.TabbedBar>("inspector-tab");
+                inspectorTaber.Refresh(L.TrM(settings.language, "检查器", "快速插入"), OnInspectorTab, 4);
                 inspectorLabel = root.Q<Label>("inspector-label");
                 showInspector = true;
                 inspectorView = root.Q<InspectorView>();
@@ -414,9 +415,9 @@ namespace ZetanStudio.BehaviourTree.Editor
                 treeName = root.Q<Label>("tree-name");
 
                 root.Q<Label>("variable-title").text = Tr("变量");
-                variableTaber = root.Q<TabbedBar>("variable-tab");
-                variableTaber.Refresh(Language.TrM(settings.language, "共享变量", "全局变量").ToArray(), OnVariableTab, 4);
-                serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourManager.Instance ? BehaviourManager.Instance.GlobalVariables : ZetanUtility.Editor.LoadAsset<GlobalVariables>());
+                variableTaber = root.Q<ZetanStudio.Editor.TabbedBar>("variable-tab");
+                variableTaber.Refresh(L.TrM(settings.language, "共享变量", "全局变量").ToArray(), OnVariableTab, 4);
+                serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourTreeManager.Instance ? BehaviourTreeManager.Instance.GlobalVariables : ZetanUtility.Editor.LoadAsset<GlobalVariables>());
 
                 undo = root.Q<ToolbarButton>("undo");
                 undo.clicked += OnUndoClick;
@@ -548,7 +549,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         private void SaveToLocal(string assetName)
         {
             if (!tree || Application.isPlaying) return;
-            if (!tree.IsRuntime)
+            if (!tree.ScenceOnly)
             {
                 EditorUtility.DisplayDialog(Tr("保存失败"), Tr("无需保存，已经是本地行为树"), Tr("确定"));
                 return;
@@ -562,11 +563,11 @@ namespace ZetanStudio.BehaviourTree.Editor
 
         private string Tr(string text, params object[] args)
         {
-            return Language.Tr(settings.language, text, args);
+            return L.Tr(settings.language, text, args);
         }
         private string Tr(string text)
         {
-            return Language.Tr(settings.language, text);
+            return L.Tr(settings.language, text);
         }
     }
 }

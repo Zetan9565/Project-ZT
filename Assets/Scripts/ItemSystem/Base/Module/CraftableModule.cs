@@ -1,60 +1,35 @@
-﻿using UnityEngine;
-using ZetanStudio.Item.Craft;
+﻿using System.Linq;
+using System.Collections.ObjectModel;
+using UnityEngine;
+using ZetanStudio.ItemSystem.Craft;
+using ZetanStudio.Math;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [Name("可制作")]
     public class CraftableModule : ItemModule
     {
-        [SerializeField, Label("制作方法"), Enum(typeof(CraftMethod))]
+        [SerializeField, Enum(typeof(CraftMethod))]
         private int craftMethod;
         public CraftMethod CraftMethod => CraftMethodEnum.Instance[craftMethod];
 
-        [SerializeField, Label("可自学")]
+        [SerializeField]
         private bool canMakeByTry;
-        public bool CanMakeByTry => canMakeByTry && Formulation && !Formulation.Materials.TrueForAll(x => x.MakingType == CraftType.SingleItem);
+        public bool CanMakeByTry => canMakeByTry && formulation && formulation.Materials.TrueForAll(x => x.CostType == MaterialCostType.SingleItem);
 
-        [field: SerializeField, Label("配方"), ObjectSelector("ToString")]
-        public Formulation Formulation { get; protected set; }
+        [SerializeField, ObjectSelector("ToString", displayNone: true, displayAdd: true)]
+        private Formulation formulation;
 
-        [field: SerializeField]
-        public CraftYield[] Yields { get; protected set; } = new CraftYield[]
-        {
-            new CraftYield(1,1)
-        };
+        [SerializeField]
+        private MaterialInfo[] materials = { };
 
-        public int RandomAmount()
-        {
-            float random = Random.Range(0, 1f);
-            foreach (var yield in Yields)
-            {
-                if (random <= yield.Rate)
-                    return yield.Amount;
-            }
-            return 1;
-        }
+        public ReadOnlyCollection<MaterialInfo> Materials => new ReadOnlyCollection<MaterialInfo>(formulation && materials.Length < 1 ? formulation.Materials : materials);
 
-        public override bool IsValid => Formulation && Formulation.IsValid;
-    }
+        [field: SerializeField, DistributedValueRange(1, 1)]
+        public DistributedIntValue Yield { get; protected set; } = new DistributedIntValue();
 
-    [System.Serializable]
-    public sealed class CraftYield
-    {
-        [field: SerializeField, Min(1)]
-        public int Amount { get; private set; }
+        public int RandomAmount() => Yield.RandomValue();
 
-        [field: SerializeField]
-        public float Rate { get; private set; }
-
-        public CraftYield()
-        {
-
-        }
-
-        public CraftYield(int amount, float rate)
-        {
-            Amount = amount;
-            Rate = rate;
-        }
+        public override bool IsValid => (materials.Length < 1 && formulation && formulation.IsValid || materials.Length > 0 && materials.All(x => x.IsValid)) && Yield.IsValid;
     }
 }

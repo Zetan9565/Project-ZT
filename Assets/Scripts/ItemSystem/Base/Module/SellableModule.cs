@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [Name("出售")]
     public class SellableModule : ItemModule

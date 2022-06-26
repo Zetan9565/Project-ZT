@@ -1,6 +1,6 @@
 using UnityEngine;
 using System;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 
 /// <summary>
 /// 任务目标

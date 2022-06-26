@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
 
 [CreateAssetMenu(fileName = "shop info", menuName = "Zetan Studio/商店信息")]
 public class ShopInformation : ScriptableObject

@@ -170,7 +170,6 @@ public class QuestInspector : Editor
                             EditorGUILayout.HelpBox("已有任务使用该对话，游戏中可能会产生逻辑错误。\n配置路径：\n" + AssetDatabase.GetAssetPath(find), MessageType.Warning);
                         }
                     }
-                    PreviewDialogue(beginDialogue.objectReferenceValue as Dialogue);
                 }
                 else
                 {
@@ -190,7 +189,6 @@ public class QuestInspector : Editor
                             EditorGUILayout.HelpBox("已有任务使用该对话，游戏中可能会产生逻辑错误。\n配置路径：\n" + AssetDatabase.GetAssetPath(find), MessageType.Warning);
                         }
                     }
-                    PreviewDialogue(ongoingDialogue.objectReferenceValue as Dialogue);
                 }
                 else
                 {
@@ -210,7 +208,6 @@ public class QuestInspector : Editor
                             EditorGUILayout.HelpBox("已有任务使用该对话，游戏中可能会产生逻辑错误。\n配置路径：\n" + AssetDatabase.GetAssetPath(find), MessageType.Warning);
                         }
                     }
-                    PreviewDialogue(completeDialogue.objectReferenceValue as Dialogue);
                 }
                 else
                 {
@@ -254,13 +251,6 @@ public class QuestInspector : Editor
                     EditorUtility.OpenPropertyEditor(dialogInstance);
                 }
             }
-        }
-
-        void PreviewDialogue(Dialogue dialogue)
-        {
-            GUI.enabled = false;
-            EditorGUILayout.TextArea(Dialogue.PreviewDialogue(dialogue, talkerCache));
-            GUI.enabled = true;
         }
     }
 
@@ -330,7 +320,7 @@ public class QuestInspector : Editor
 
         editComplete &= quest.BeginDialogue && quest.OngoingDialogue && quest.CompleteDialogue;
 
-        editComplete &= !quest.RewardItems.Exists(x => x.item == null);
+        editComplete &= !quest.RewardItems.Exists(x => x.Item == null);
 
         editComplete &= !quest.Objectives.Exists(x => (!quest.InOrder || x.Display) && string.IsNullOrEmpty(x.DisplayName) || !x.IsValid);
 

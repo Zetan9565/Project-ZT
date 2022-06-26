@@ -1,59 +1,35 @@
 ﻿using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
 using ZetanStudio.Extension.Editor;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem.Module;
 
-namespace ZetanStudio.Item.Editor
+namespace ZetanStudio.ItemSystem.Editor
 {
     [CustomMuduleDrawer(typeof(CraftableModule))]
     public class CraftableBlock : ModuleBlock
     {
-        SerializedProperty craftMethod;
-        SerializedProperty canMakeByTry;
-        SerializedProperty formulation;
-        SerializedProperty yields;
-        ReorderableList list;
+        private readonly SerializedProperty craftMethod;
+        private readonly SerializedProperty canMakeByTry;
+        private readonly SerializedProperty formulation;
+        private readonly SerializedProperty yield;
+        private readonly SerializedProperty materials;
 
         public CraftableBlock(SerializedProperty property, ItemModule module) : base(property, module)
         {
             craftMethod = property.FindPropertyRelative("craftMethod");
             canMakeByTry = property.FindPropertyRelative("canMakeByTry");
-            formulation = property.FindAutoPropertyRelative("Formulation");
-            yields = property.FindAutoPropertyRelative("Yields");
-            list = new ReorderableList(property.serializedObject, yields)
-            {
-                drawElementCallback = (rect, index, isActive, isFocused) =>
-                {
-                    SerializedProperty element = yields.GetArrayElementAtIndex(index);
-                    SerializedProperty yield = element.FindAutoPropertyRelative("Amount");
-                    SerializedProperty rate = element.FindAutoPropertyRelative("Rate");
-                    EditorGUI.LabelField(new Rect(rect.x, rect.y, 50, EditorGUIUtility.singleLineHeight), "产量");
-                    yield.intValue = EditorGUI.IntField(new Rect(rect.x + 52, rect.y, 100, EditorGUIUtility.singleLineHeight), yield.intValue);
-                    if (yield.intValue < 1) yield.intValue = 1;
-                    EditorGUI.LabelField(new Rect(rect.x + 154, rect.y, 50, EditorGUIUtility.singleLineHeight), "概率");
-                    rate.floatValue = EditorGUI.Slider(new Rect(rect.x + 206, rect.y, rect.width - 206, EditorGUIUtility.singleLineHeight), rate.floatValue, 0, 1);
-                },
-                elementHeightCallback = (index) =>
-                {
-                    return EditorGUIUtility.singleLineHeight;
-                },
-                onCanRemoveCallback = (list) =>
-                {
-                    return yields.arraySize > 1 && list.IsSelected(list.index);
-                },
-                headerHeight = 0,
-            };
+            formulation = property.FindPropertyRelative("formulation");
+            materials = property.FindPropertyRelative("materials");
+            yield = property.FindAutoPropertyRelative("Yield");
         }
 
         protected override void OnInspectorGUI()
         {
-            EditorGUILayout.PropertyField(craftMethod);
-            EditorGUILayout.PropertyField(canMakeByTry);
-            EditorGUILayout.PropertyField(formulation);
-            if (yields.isExpanded = EditorGUILayout.BeginFoldoutHeaderGroup(yields.isExpanded, "产量表"))
-                if (yields.isExpanded) list?.DoLayoutList();
-            EditorGUILayout.EndFoldoutHeaderGroup();
+            EditorGUILayout.PropertyField(craftMethod, new GUIContent(Tr("制作方法")));
+            EditorGUILayout.PropertyField(canMakeByTry, new GUIContent(Tr("可自学")));
+            if (materials.arraySize < 1) EditorGUILayout.PropertyField(formulation, new GUIContent(Tr("公共配方")));
+            if (!formulation.objectReferenceValue) EditorGUILayout.PropertyField(materials, new GUIContent(Tr("材料表")));
+            EditorGUILayout.PropertyField(yield, new GUIContent(Tr("产量")));
         }
     }
 }

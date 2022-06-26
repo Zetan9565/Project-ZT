@@ -20,7 +20,9 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
     [HideInInspector]
     public MapIconType iconType;
 
+#pragma warning disable IDE0044 // Ìí¼ÓÖ»¶ÁÐÞÊÎ·û
     private bool forceHided;
+#pragma warning restore IDE0044 // Ìí¼ÓÖ»¶ÁÐÞÊÎ·û
     public bool ForceHided => holder ? holder.forceHided : forceHided;
 
     private bool removeAble;
@@ -170,7 +172,7 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
     {
 #if UNITY_STANDALONE
         if (holder) holder.OnMouseEnter?.Invoke();
-        if(!string.IsNullOrEmpty(textToDisplay)) TipsManager.Instance.ShowText(transform.position, textToDisplay);
+        if(!string.IsNullOrEmpty(textToDisplay)) FloatTipsPanel.ShowText(transform.position, textToDisplay);
 #endif
     }
 
@@ -181,7 +183,7 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
 #endif
 #if UNITY_STANDALONE
         if (holder) holder.OnMouseExit?.Invoke();
-        if(!string.IsNullOrEmpty(textToDisplay)) TipsManager.Instance.Hide();
+        if(!string.IsNullOrEmpty(textToDisplay)) WindowsManager.CloseWindow<FloatTipsPanel>();
 #endif
     }
 
@@ -201,7 +203,6 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
 #if UNITY_ANDROID
     readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
     Coroutine pressCoroutine;
-    internal object worldPosition;
 
     IEnumerator Press()
     {

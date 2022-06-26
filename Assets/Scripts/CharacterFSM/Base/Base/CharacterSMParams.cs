@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "char sm params", menuName = "Zetan Studio/角色/角色状态机参数")]
+[CreateAssetMenu(fileName = "char sm params", menuName = "Zetan Studio/角色/状态机/角色状态机参数")]
 public class CharacterSMParams : ScriptableObject
 {
     [SerializeField, Label("行走速度")]
@@ -9,8 +9,8 @@ public class CharacterSMParams : ScriptableObject
     public float WalkSpeed => walkSpeed;
 
     [SerializeField, Label("闪现距离")]
-    private float dashDistance = 5;
-    public float DashDistance => dashDistance;
+    private float flashDistance = 5;
+    public float FlashDistance => flashDistance;
 
     [SerializeField, Label("翻滚速度曲线")]
     private AnimationCurve rollSpeedCurve = new AnimationCurve(new Keyframe(0, 30), new Keyframe(1, 0));

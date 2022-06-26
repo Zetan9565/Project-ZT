@@ -35,25 +35,27 @@ public class CoolDown : MonoBehaviour
         while (Active)
         {
             float time = GetTime();
-            mask.fillAmount = time / GetTotal();
-            text.text = time > 0 ? MiscFuntion.SecondsToSortTime(time) : string.Empty;
+            float total = GetTotal();
+            mask.fillAmount = 1 - time / total;
+            text.text = total - time > 0 ? MiscFuntion.SecondsToSortTime(total - time) : string.Empty;
             yield return null;
         }
-        Stop();
+        Disable();
     }
 
-    public void Restart()
+    public void Enable()
     {
         active = true;
         ZetanUtility.SetActive(this, true);
         if (coroutine != null) StopCoroutine(coroutine);
-        coroutine= StartCoroutine(OnUpdate());
+        coroutine = StartCoroutine(OnUpdate());
     }
-    public void Stop()
+    public void Disable()
     {
         active = false;
         mask.fillAmount = 0;
         text.text = string.Empty;
         ZetanUtility.SetActive(this, false);
+        if (coroutine != null) StopCoroutine(coroutine);
     }
 }

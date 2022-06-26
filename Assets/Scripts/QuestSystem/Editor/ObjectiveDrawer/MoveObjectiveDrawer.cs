@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem.Editor;
+using ZetanStudio.ItemSystem.Module;
 
 [CustomPropertyDrawer(typeof(MoveObjective))]
 public sealed class MoveObjectiveDrawer : ObjectiveDrawer
@@ -30,7 +30,7 @@ public sealed class MoveObjectiveDrawer : ObjectiveDrawer
         lineCount++;
         SerializedProperty itemToUseHere = objective.FindPropertyRelative("itemToUseHere");
         ItemSelectorDrawer.Draw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), itemToUseHere, new GUIContent("需在此处使用的道具"),
-            ArrayUtility.FindAll(itemCache, x => x.GetModule<TriggerModule>()));
+           () => ArrayUtility.FindAll(itemCache, x => x.GetModule<TriggerModule>()));
         lineCount++;
     }
     public override float GetObejctiveItemDrawHeight(SerializedProperty objective)

@@ -83,7 +83,7 @@ public class PlayerInformation : CharacterInformation
     {
         get
         {
-            return primaryWeapon != null && primaryWeapon.item;
+            return primaryWeapon != null && primaryWeapon.Item;
         }
     }
 
@@ -91,7 +91,7 @@ public class PlayerInformation : CharacterInformation
     {
         get
         {
-            return secondaryWeapon != null && secondaryWeapon.item;
+            return secondaryWeapon != null && secondaryWeapon.Item;
         }
     }
 

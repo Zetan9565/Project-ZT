@@ -6,12 +6,12 @@ public class PlayerControlInput : CharacterControlInput
 {
     protected override void OnAwake()
     {
-        InputManager.Control.Player.Movement.performed += GetMovementInput;
-        InputManager.Control.Player.Movement.canceled += GetMovementInput;
-        InputManager.Control.Player.Dash.started += Dash;
-        InputManager.Control.Player.Roll.started += Roll;
-        InputManager.Control.Player.Action_1.started += Attack;
-        InputManager.Control.Player.Action_1.canceled += Attack;
+        Input.Control.Player.Movement.performed += GetMovementInput;
+        Input.Control.Player.Movement.canceled += GetMovementInput;
+        Input.Control.Player.Flash.started += Flash;
+        Input.Control.Player.Roll.started += Roll;
+        Input.Control.Player.Action_1.started += Attack;
+        Input.Control.Player.Action_1.canceled += Attack;
     }
     private float atkHoldTime;
     private Coroutine atkHoldCouroutine;
@@ -41,19 +41,19 @@ public class PlayerControlInput : CharacterControlInput
     }
     private void Roll(InputAction.CallbackContext context)
     {
-        if (InputManager.IsTyping) return;
+        if (Input.IsTyping) return;
         SetTrigger(CharacterInputNames.Instance.Roll);
     }
 
-    private void Dash(InputAction.CallbackContext context)
+    private void Flash(InputAction.CallbackContext context)
     {
-        if (InputManager.IsTyping) return;
-        SetTrigger(CharacterInputNames.Instance.Dash);
+        if (Input.IsTyping) return;
+        SetTrigger(CharacterInputNames.Instance.Flash);
     }
 
     public void GetMovementInput(InputAction.CallbackContext context)
     {
-        if (InputManager.IsTyping)
+        if (Input.IsTyping)
         {
             SetValue(CharacterInputNames.Instance.Move, Vector2.zero);
             return;

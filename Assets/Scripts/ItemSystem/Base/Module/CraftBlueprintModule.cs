@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [Name("制作图纸"), Require(typeof(UsableModule))]
     public class CraftBlueprintModule : ItemModule

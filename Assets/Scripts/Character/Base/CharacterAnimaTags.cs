@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "char anima tags", menuName = "Zetan Studio/角色系统/角色动画标签")]
+[CreateAssetMenu(fileName = "char anima tags", menuName = "Zetan Studio/角色/状态机/角色动画标签")]
 public class CharacterAnimaTags : SingletonScriptableObject<CharacterAnimaTags>
 {
     [SerializeField]
@@ -13,8 +13,8 @@ public class CharacterAnimaTags : SingletonScriptableObject<CharacterAnimaTags>
     public static string Move => Instance.move;
 
     [SerializeField]
-    private string dash = "Dash";
-    public static string Dash => Instance.dash;
+    private string flash = "Flash";
+    public static string Flash => Instance.flash;
 
     [SerializeField]
     private string roll = "Roll";

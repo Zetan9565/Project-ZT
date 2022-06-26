@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
-using ZetanStudio.Item.Module;
-
-namespace ZetanStudio.Item.Module
+﻿namespace ZetanStudio.ItemSystem.Module
 {
     public abstract class ItemCooler : ItemHandler
     {
@@ -18,7 +14,7 @@ namespace ZetanStudio.Item.Module
 
         protected sealed override bool DoHandle(ItemData item)
         {
-            return item.GetModule<CoolDownModule>() is not null && StartCoolDown(item);
+            return item.GetModule<CoolDownModule>() && StartCoolDown(item);
         }
 
         private bool StartCoolDown(ItemData item)
@@ -32,5 +28,17 @@ namespace ZetanStudio.Item.Module
             return (Instance as ItemCooler).DoGetTime(item);
         }
         protected abstract float DoGetTime(ItemData item);
+
+        public void SetTime(ItemData item, float time)
+        {
+            (Instance as ItemCooler).DoSetTime(item, time);
+        }
+        protected abstract void DoSetTime(ItemData item, float time);
+
+        public bool HasCooled(ItemData item)
+        {
+            return (Instance as ItemCooler).DoHasCooled(item);
+        }
+        protected abstract bool DoHasCooled(ItemData item);
     }
 }

@@ -1,28 +1,30 @@
 ﻿public abstract class Transition
 {
-    public readonly string name;
 
-    public Transition(string name)
+}
+public class StringTransition : Transition
+{
+    public readonly string value;
+
+    public StringTransition(string value)
     {
-        this.name = name;
+        this.value = value;
     }
 }
 public class BoolTransition : Transition
 {
     public readonly bool value;
 
-    public BoolTransition(string name, bool value) : base(name)
+    public BoolTransition(bool value)
     {
         this.value = value;
     }
-
-    public static readonly BoolTransition relive = new BoolTransition("relive", true);
 }
 public class IntTransition : Transition
 {
     public readonly int value;
 
-    public IntTransition(string name, int value) : base(name)
+    public IntTransition(int value)
     {
         this.value = value;
     }
@@ -31,15 +33,16 @@ public class FloatTransition : Transition
 {
     public readonly float value;
 
-    public FloatTransition(string name, float value) : base(name)
-    {        this.value = value;
+    public FloatTransition(float value)
+    {
+        this.value = value;
     }
 }
 public class ObjectTransition : Transition
 {
     public readonly object value;
 
-    public ObjectTransition(string name, object value) : base(name)
+    public ObjectTransition(object value)
     {
         this.value = value;
     }

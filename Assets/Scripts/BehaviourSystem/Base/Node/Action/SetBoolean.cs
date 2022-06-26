@@ -21,7 +21,7 @@ namespace ZetanStudio.BehaviourTree.Nodes
             {
                 GlobalVariables global;
                 if (!Tree.IsInstance) global = ZetanUtility.Editor.LoadAsset<GlobalVariables>();
-                else global = BehaviourManager.Instance.GlobalVariables;
+                else global = BehaviourTreeManager.Instance.GlobalVariables;
                 global.SetVariable<bool>(gvarName, value);
             }
             else if (Tree.SetVariable<bool>(varName, value)) return NodeStates.Success;

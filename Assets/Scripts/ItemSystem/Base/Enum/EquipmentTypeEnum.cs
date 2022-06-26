@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     [CreateAssetMenu(fileName = "equipment type", menuName = "Zetan Studio/道具/枚举/装备类型")]
     public sealed class EquipmentTypeEnum : ScriptableObjectEnum<EquipmentTypeEnum, EquipmentType>

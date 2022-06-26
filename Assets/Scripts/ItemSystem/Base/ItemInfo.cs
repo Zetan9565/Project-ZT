@@ -1,21 +1,29 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Craft;
-using ZetanStudio.Item.Module;
-using Random = UnityEngine.Random;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
+using ZetanStudio.Math;
 
 #region 道具信息相关
+public interface IItemInfo
+{
+    public string ItemID { get; }
+    public string ItemName { get; }
+    public Item Item { get; }
+    public int Amount { get; }
+    public bool IsValid { get; }
+}
 [Serializable]
-public class ItemInfo
+public class ItemInfo : IItemInfo
 {
     public string ItemID
     {
         get
         {
-            if (item) return item.ID;
+            if (Item) return Item.ID;
             else return string.Empty;
         }
     }
@@ -24,13 +32,13 @@ public class ItemInfo
     {
         get
         {
-            if (item) return item.Name;
+            if (Item) return Item.Name;
             else return "(无效道具)";
         }
     }
 
     [SerializeField]
-    public Item item;
+    private Item item;
 
     [SerializeField]
     protected int amount;
@@ -48,7 +56,9 @@ public class ItemInfo
         }
     }
 
-    public bool IsValid => item;
+    public bool IsValid => Item;
+
+    public Item Item { get => item; set => item = value; }
 
     public ItemInfo()
     {
@@ -57,11 +67,11 @@ public class ItemInfo
 
     public ItemInfo(Item item, int amount = 1)
     {
-        this.item = item;
+        this.Item = item;
         this.amount = amount;
     }
 
-    public static ItemInfo[] Convert(IEnumerable<ItemWithAmount> items)
+    public static ItemInfo[] Convert(IEnumerable<CountedItem> items)
     {
         List<ItemInfo> results = new List<ItemInfo>();
         foreach (var item in items)
@@ -69,6 +79,24 @@ public class ItemInfo
             if (item.IsValid) results.Add(new ItemInfo(item.source.Model, item.amount));
         }
         return results.ToArray();
+    }
+
+    public static string GetItemInfoString(IList<ItemInfo> infos)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < infos.Count; i++)
+        {
+            var ii = infos[i];
+            if (ii.IsValid)
+            {
+                sb.Append('[');
+                sb.Append(ii.Item.ColorName);
+                sb.Append("] ");
+                sb.Append(ii.Amount);
+            }
+            if (i != infos.Count - 1) sb.Append("\n");
+        }
+        return sb.ToString();
     }
 
     public static implicit operator bool(ItemInfo self)
@@ -84,7 +112,7 @@ public class DropItemInfo
     {
         get
         {
-            if (Item) return Item.ID;
+            if (item) return item.ID;
             else return string.Empty;
         }
     }
@@ -93,7 +121,7 @@ public class DropItemInfo
     {
         get
         {
-            if (Item) return Item.Name;
+            if (item) return item.Name;
             else return string.Empty;
         }
     }
@@ -106,52 +134,30 @@ public class DropItemInfo
         {
             return item;
         }
-
-        set
-        {
-            item = value;
-        }
     }
 
-    [SerializeField]
-    private int minAmount = 1;
     public int MinAmount
     {
         get
         {
-            return minAmount;
-        }
-
-        set
-        {
-            if (value < 0) minAmount = 0;
-            else minAmount = value;
+            return Amount.Range.x;
         }
     }
 
-    [SerializeField]
-    private int maxAmount = 1;
     public int MaxAmount
     {
         get
         {
-            return maxAmount;
-        }
-
-        set
-        {
-            if (value < 0) maxAmount = 0;
-            else maxAmount = value;
+            return Amount.Range.y;
         }
     }
 
     [SerializeField]
-    private float dropRate = 100.0f;
-    public float DropRate => dropRate;
+    private DistributedIntValue Amount = new DistributedIntValue();
 
-    [SerializeField]
-    private bool onlyDropForQuest;
-    public bool OnlyDropForQuest
+    [SerializeField, ObjectSelector("title", displayNone: true)]
+    private Quest onlyDropForQuest;
+    public Quest OnlyDropForQuest
     {
         get
         {
@@ -159,43 +165,57 @@ public class DropItemInfo
         }
     }
 
-    [SerializeField, ObjectSelector("title", displayNone: true)]
-    private Quest bindedQuest;
-    public Quest BindedQuest
-    {
-        get
-        {
-            return bindedQuest;
-        }
-    }
+    public bool IsValid => item && Amount.IsValid;
 
-    public bool IsValid => item && MinAmount >= 1;
+    public bool Definite => MinAmount > 0 && Amount.Distribution.keys.Length > 1 && Amount.Distribution.keys.All(x => x.value >= 1);
 
-    public static List<ItemWithAmount> Drop(IEnumerable<DropItemInfo> DropItems)
+    public static List<CountedItem> Drop(IEnumerable<DropItemInfo> DropItems)
     {
-        List<ItemWithAmount> lootItems = new List<ItemWithAmount>();
-        Dictionary<string, ItemWithAmount> map = new Dictionary<string, ItemWithAmount>();
+        List<CountedItem> lootItems = new List<CountedItem>();
+        Dictionary<string, CountedItem> map = new Dictionary<string, CountedItem>();
         foreach (DropItemInfo di in DropItems)
-            if (ZetanUtility.Probability(di.DropRate))
-                if (!di.OnlyDropForQuest || QuestManager.Instance.HasOngoingQuest(di.BindedQuest.ID))
+            if (!di.OnlyDropForQuest || QuestManager.HasOngoingQuest(di.OnlyDropForQuest.ID))
+            {
+                if (di.item.StackAble)
                 {
-                    if (di.item.StackAble)
-                    {
-                        if (map.TryGetValue(di.ItemID, out var find))
-                            find.amount += Random.Range(di.MinAmount, di.MaxAmount + 1);
-                        else
-                        {
-                            var iaw = new ItemWithAmount(di.item.CreateData(), Random.Range(di.MinAmount, di.MaxAmount + 1));
-                            map.Add(di.ItemID, iaw);
-                            lootItems.Add(iaw);
-                        }
-                    }
+                    if (map.TryGetValue(di.ItemID, out var find))
+                        find.amount += di.Amount.RandomValue();
                     else
                     {
-                        lootItems.Add(new ItemWithAmount(di.item.CreateData(), Random.Range(di.MinAmount, di.MaxAmount + 1)));
+                        var iwa = new CountedItem(ItemFactory.MakeItem(di.item), di.Amount.RandomValue());
+                        map.Add(di.ItemID, iwa);
+                        lootItems.Add(iwa);
                     }
                 }
+                else
+                {
+                    lootItems.Add(new CountedItem(ItemFactory.MakeItem(di.item), di.Amount.RandomValue()));
+                }
+            }
         return lootItems;
+    }
+
+    public static string GetDropInfoString(IList<DropItemInfo> products)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < products.Count; i++)
+        {
+            var di = products[i];
+            if (di.IsValid)
+            {
+                sb.Append('[');
+                sb.Append(di.item.ColorName);
+                sb.Append("] ");
+                sb.Append(di.MinAmount);
+                if (di.MinAmount != di.MaxAmount)
+                {
+                    sb.Append("~");
+                    sb.Append(di.MaxAmount);
+                }
+            }
+            if (i != products.Count - 1) sb.Append("\n");
+        }
+        return sb.ToString();
     }
 
     public static implicit operator bool(DropItemInfo self)
@@ -203,9 +223,19 @@ public class DropItemInfo
         return self != null;
     }
 }
+namespace ZetanStudio.ItemSystem
+{
+    public enum MaterialCostType
+    {
+        [InspectorName("单种道具")]
+        SingleItem,//单种道具
 
+        [InspectorName("同类道具")]
+        SameType//同类道具
+    }
+}
 [Serializable]
-public class MaterialInfo
+public class MaterialInfo : IItemInfo
 {
     public string ItemID
     {
@@ -229,23 +259,23 @@ public class MaterialInfo
     private Item item;
     public Item Item => item;
 
-    [SerializeField]
+    [SerializeField, Min(1)]
     private int amount = 1;
     public int Amount => amount;
 
     [SerializeField]
-    private CraftType makingType;
-    public CraftType MakingType => makingType;
+    private MaterialCostType costType;
+    public MaterialCostType CostType => costType;
 
     [SerializeField, Enum(typeof(MaterialType))]
     private int materialType;
     public MaterialType MaterialType => MaterialTypeEnum.Instance[materialType];
 
-    public bool IsValid
+    public virtual bool IsValid
     {
         get
         {
-            return (makingType == CraftType.SingleItem && item || makingType == CraftType.SameType && materialType > -1) && amount > 0;
+            return (costType == MaterialCostType.SingleItem && item || costType == MaterialCostType.SameType && materialType > -1) && amount > 0;
         }
     }
 
@@ -256,7 +286,7 @@ public class MaterialInfo
             while (materialEnum.MoveNext())
             {
                 var material = materialEnum.Current;
-                if (material.MakingType == CraftType.SingleItem)
+                if (material.CostType == MaterialCostType.SingleItem)
                 {
                     var find = otherMaterials.FirstOrDefault(x => x.Item == material.Item);
                     if (!find || find.Amount != material.Amount) return false;
@@ -264,15 +294,15 @@ public class MaterialInfo
             }
         foreach (var type in MaterialTypeEnum.Instance.Enum)
         {
-            int amout1 = itemMaterials.Where(x => x.MakingType == CraftType.SameType && x.MaterialType == type).Select(x => x.Amount).Sum();
-            int amout2 = otherMaterials.Where(x => x.MakingType == CraftType.SameType && x.MaterialType == type).Select(x => x.Amount).Sum();
+            int amout1 = itemMaterials.Where(x => x.CostType == MaterialCostType.SameType && x.MaterialType == type).Select(x => x.Amount).Sum();
+            int amout2 = otherMaterials.Where(x => x.CostType == MaterialCostType.SameType && x.MaterialType == type).Select(x => x.Amount).Sum();
             if (amout1 != amout2) return false;
         }
         return true;
     }
 
     /// <summary>
-    /// 检查所给材料是否与指定材料匹配，用于“尝试制作”玩法
+    /// 检查所给材料是否与指定材料匹配，用于“放入材料”玩法
     /// </summary>
     /// <param name="itemMaterials">目标材料</param>
     /// <param name="givenMaterials">所给材料</param>
@@ -284,7 +314,7 @@ public class MaterialInfo
             while (materialEnum.MoveNext())
             {
                 var material = materialEnum.Current;
-                if (material.MakingType == CraftType.SingleItem)
+                if (material.CostType == MaterialCostType.SingleItem)
                 {
                     var find = givenMaterials.FirstOrDefault(x => x.ItemID == material.ItemID);
                     if (!find) return false;//所提供的材料中没有这种材料
@@ -292,7 +322,7 @@ public class MaterialInfo
                 }
                 else
                 {
-                    int amount = givenMaterials.Where(x => MaterialModule.Compare(x.item, material.MaterialType)).Select(x => x.Amount).Sum();
+                    int amount = givenMaterials.Where(x => MaterialModule.SameType(material.MaterialType, x.Item)).Select(x => x.Amount).Sum();
                     if (amount != material.Amount) return false;//提供的材料数量不符
                 }
             }

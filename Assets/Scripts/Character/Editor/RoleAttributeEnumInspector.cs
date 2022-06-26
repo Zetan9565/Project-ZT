@@ -5,19 +5,19 @@ using UnityEngine;
 
 namespace ZetanStudio.Character
 {
-    [CustomEditor(typeof(RoleAttributeEnum))]
-    public class RoleAttributeEnumInspector : Editor
+    //[CustomEditor(typeof(RoleAttributeEnum))]
+    public class RoleAttributeEnumInspector : UnityEditor.Editor
     {
         SerializedProperty names;
         SerializedProperty types;
 
         ReorderableList list;
-        Dictionary<string, RoleAttributeValueType> dict;
+        Dictionary<string, RoleValueType> dict;
 
         private void OnEnable()
         {
             if (ZetanUtility.TryGetValue("attributeTypes", target, out var value, out _))
-                dict = value as Dictionary<string, RoleAttributeValueType>;
+                dict = value as Dictionary<string, RoleValueType>;
             names = serializedObject.FindProperty("names");
             types = serializedObject.FindProperty("types");
             list = new ReorderableList(serializedObject, names, false, true, true, true)
@@ -48,7 +48,7 @@ namespace ZetanStudio.Character
                     names.arraySize++;
                     names.GetArrayElementAtIndex(names.arraySize - 1).stringValue = name;
                     types.arraySize++;
-                    types.GetArrayElementAtIndex(types.arraySize - 1).enumValueIndex = (int)RoleAttributeValueType.Integer;
+                    types.GetArrayElementAtIndex(types.arraySize - 1).enumValueIndex = (int)RoleValueType.Integer;
                     list.Select(names.arraySize - 1);
                 },
                 onRemoveCallback = (list) =>

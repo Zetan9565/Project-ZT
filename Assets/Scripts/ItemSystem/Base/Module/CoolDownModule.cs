@@ -1,24 +1,54 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [Name("冷却"), Require(typeof(UsableModule))]
-    public sealed class CoolDownModule : ItemModule
+    public sealed class CoolDownModule : ItemModule, IItemWindowModifier
     {
-        [field: SerializeField, Min(0.01f)]
-        public float Time { get; private set; } = 1;
+        [field: SerializeField, Label("冷却器")]
+        public ItemCooler Cooler { get; private set; }
+
+        [SerializeField, HideIf("typeof(Cooler)", typeof(GroupCoolDown)), Min(1)]
+        private float time = 1;
+        public float Time => Cooler is GroupCoolDown cool ? cool.Time : time;
 
         [field: SerializeField]
         public string Message { get; private set; } = "冷却中";
-
-        [field: SerializeField, Label("冷却器")]
-        public ItemCooler Cooler { get; private set; }
 
         public override bool IsValid => Time > 0 && Cooler;
 
         public override ItemModuleData CreateData(ItemData item)
         {
             return new CoolDownData(item, this);
+        }
+
+        public void ModifyItemWindow(ItemInfoDisplayer displayer)
+        {
+            displayer.AddTitledContent($"-{LM.Tr(typeof(Item).Name, "冷却时间")}: ", LM.Tr(typeof(Item).Name, "{0}秒", MiscFuntion.SecondsToSortTime(Time)));
+        }
+    }
+
+    public class CoolDownData : ItemModuleData<CoolDownModule>
+    {
+        public float NormalizeTime => Mathf.Clamp01(Time / Module.Time);
+
+        public bool Available => Module.Cooler.HasCooled(Item);
+
+        public float Time => Module.Cooler.GetTime(Item);
+
+        public CoolDownData(ItemData item, CoolDownModule module) : base(item, module)
+        {
+        }
+
+        public override SaveDataItem GetSaveData()
+        {
+            var data = new SaveDataItem();
+            data.floatData["time"] = Time;
+            return data;
+        }
+        public override void LoadSaveData(SaveDataItem data)
+        {
+            Module.Cooler.SetTime(Item, data.floatData["time"]);
         }
     }
 }

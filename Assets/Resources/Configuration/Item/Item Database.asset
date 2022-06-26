@@ -27,31 +27,65 @@ MonoBehaviour:
   - rid: 3760287328976502836
   - rid: 3760287328976502837
   - rid: 3760287328976502838
+  - rid: 3157144674434285578
+  - rid: 3157144674434285579
   references:
     version: 2
     RefIds:
+    - rid: 3157144674434285578
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: cb8db1410c429df46940f3a399564411,
+          type: 2}
+    - rid: 3157144674434285579
+      type: {class: EnhConsumableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        <WindowType>k__BackingField: ZetanStudio.ItemSystem.UI.EnhancementWindow
     - rid: 3760287328976502835
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Price>k__BackingField: 50
     - rid: 3760287328976502836
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502837
-      type: {class: CraftableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: CraftableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         craftMethod: 0
         canMakeByTry: 0
-        <Formulation>k__BackingField: {fileID: 11400000, guid: b80b5e19edff58a4886d209e02e5dc0a,
-          type: 2}
-        <Yields>k__BackingField:
-        - <Amount>k__BackingField: 1
-          <Rate>k__BackingField: 0.5
-        - <Amount>k__BackingField: 1
-          <Rate>k__BackingField: 0.5
+        formulation: {fileID: 11400000, guid: b80b5e19edff58a4886d209e02e5dc0a, type: 2}
+        materials: []
+        <Yield>k__BackingField:
+          <Range>k__BackingField: {x: 1, y: 1}
+          <Distribution>k__BackingField:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
     - rid: 3760287328976502838
-      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: MaterialModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
-        type: 0
+        type: 1
 --- !u!114 &-6049188909635569283
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -75,15 +109,12 @@ MonoBehaviour:
   <StackLimit>k__BackingField: 999
   <Discardable>k__BackingField: 1
   modules:
-  - rid: 3760287328976502826
   - rid: 3760287328976502827
   references:
     version: 2
     RefIds:
-    - rid: 3760287328976502826
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502827
-      type: {class: CurrencyModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: CurrencyModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 0
         <ValueEach>k__BackingField: 1
@@ -117,66 +148,242 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502819
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
-        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <UseActionName>k__BackingField: "\u6253\u5F00"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 11400000, guid: 2a63a73cb482a444493a661d65c4a24d,
           type: 2}
     - rid: 3760287328976502820
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502821
-      type: {class: ProductModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: ProductModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         product:
         - item: {fileID: 482611824490326475}
-          minAmount: 1
-          maxAmount: 1
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 1, y: 1}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         - item: {fileID: 908422382591890328}
-          minAmount: 1
-          maxAmount: 1
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 1, y: 1}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         - item: {fileID: 4357461156977807482}
-          minAmount: 1
-          maxAmount: 1
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 1, y: 1}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         - item: {fileID: -3066210933015211660}
-          minAmount: 1
-          maxAmount: 1
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 1, y: 1}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         - item: {fileID: 8516276107217364782}
-          minAmount: 1
-          maxAmount: 1
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 1, y: 1}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
+        - item: {fileID: 8750688440104248342}
+          Amount:
+            <Range>k__BackingField: {x: 5, y: 5}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         - item: {fileID: 8379702117396951434}
-          minAmount: 5
-          maxAmount: 5
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 5, y: 5}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         - item: {fileID: -840957672837638854}
-          minAmount: 1
-          maxAmount: 1
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
-        - item: {fileID: 3050720151478596481}
-          minAmount: 1
-          maxAmount: 1
-          dropRate: 100
-          onlyDropForQuest: 1
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 1, y: 1}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         <ProductInfo>k__BackingField: {fileID: 0}
 --- !u!114 &-4938875555958233210
 MonoBehaviour:
@@ -208,13 +415,13 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502848
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Price>k__BackingField: 100
     - rid: 3760287328976502849
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502850
-      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: MaterialModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 12
 --- !u!114 &-3066210933015211660
@@ -247,16 +454,16 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502815
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u5B66\u4E60"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 11400000, guid: 98b15d06112e6d44bb834dd2ece915d8,
           type: 2}
     - rid: 3760287328976502817
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502818
-      type: {class: StructureBlueprintModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: StructureBlueprintModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Structure>k__BackingField: {fileID: 11400000, guid: cf2c91d5cd286ec4e9e007678f95ae73,
           type: 2}
@@ -291,40 +498,166 @@ MonoBehaviour:
   - rid: 3760287328976502871
   - rid: 3760287328976502872
   - rid: 3760287328976502873
+  - rid: 3157144628245561351
+  - rid: 3157144727027449857
   references:
     version: 2
     RefIds:
+    - rid: 3157144628245561351
+      type: {class: AffixModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        affixInfo: {fileID: 0}
+        affix:
+          <UpperLimit>k__BackingField: 4
+          affixCountRange: {x: 1, y: 1}
+          affixCountDistrib:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          affixIndexDistrib:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          affixes:
+          - type: 1
+            floatRange: {x: 0.07, y: 0.1}
+            intRange: {x: 10, y: 0}
+            valueDistrib:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+            trueProbility: 0
+    - rid: 3157144727027449857
+      type: {class: EnhancementModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        enhancementInfo: {fileID: 0}
+        enhancement:
+          increments:
+          - attributes:
+            - type: 7
+              intValue: 2
+              floatValue: 0
+              boolValue: 0
+            - type: 8
+              intValue: 3
+              floatValue: 0
+              boolValue: 0
+        <Method>k__BackingField: 1
+        <Failure>k__BackingField: 0
+        costs: []
+        materials:
+        - materials:
+          - <SuccessRate>k__BackingField: 1
+            materials:
+            - item: {fileID: -8659359920512167614}
+              amount: 1
+              costType: 0
+              materialType: 0
+            - item: {fileID: -464574647126714662}
+              amount: 1
+              costType: 0
+              materialType: 0
+        expTypes: 
+        experienceTable: []
     - rid: 3760287328976502866
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u88C5\u5907"
-        <Cost>k__BackingField: 1
-        <Usage>k__BackingField: {fileID: 0}
+        <Cost>k__BackingField: 0
+        <Usage>k__BackingField: {fileID: 11400000, guid: 0c0089e3071b3264e925b4b04361bab4,
+          type: 2}
     - rid: 3760287328976502867
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Price>k__BackingField: 15
     - rid: 3760287328976502868
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502869
-      type: {class: AttributeModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: AttributeModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
-        <Attributes>k__BackingField:
-          attributes: []
+        attributes:
+        - type: 7
+          intValue: 10
+          floatValue: 0
+          boolValue: 0
+        - type: 8
+          intValue: 15
+          floatValue: 0
+          boolValue: 0
     - rid: 3760287328976502870
-      type: {class: EquipableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: EquipableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 0
     - rid: 3760287328976502871
-      type: {class: GemSlotModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: GemSlotModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <SlotCount>k__BackingField: 1
     - rid: 3760287328976502872
-      type: {class: DurabilityModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: DurabilityModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Durability>k__BackingField: 100
     - rid: 3760287328976502873
-      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: MaterialModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 1
 --- !u!114 &-1243070531903100264
@@ -346,7 +679,7 @@ MonoBehaviour:
   <Description>k__BackingField: "\u7528\u94C1\u7247\u4E32\u6210\u7684\u62A4\u7532\u3002"
   type: 1
   quality: 0
-  <Weight>k__BackingField: 0
+  <Weight>k__BackingField: 2
   <StackLimit>k__BackingField: 1
   <Discardable>k__BackingField: 1
   modules:
@@ -362,44 +695,77 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502792
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u88C5\u5907"
-        <Cost>k__BackingField: 1
-        <Usage>k__BackingField: {fileID: 0}
-    - rid: 3760287328976502793
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
-      data:
-        <Price>k__BackingField: 0
-    - rid: 3760287328976502794
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
-    - rid: 3760287328976502795
-      type: {class: CraftableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
-      data:
-        craftMethod: 0
-        canMakeByTry: 0
-        <Formulation>k__BackingField: {fileID: 11400000, guid: 6448c4074893df14e9781f75b7dde63c,
+        <Cost>k__BackingField: 0
+        <Usage>k__BackingField: {fileID: 11400000, guid: 0c0089e3071b3264e925b4b04361bab4,
           type: 2}
-        <Yields>k__BackingField:
-        - <Amount>k__BackingField: 1
-          <Rate>k__BackingField: 0.5
-        - <Amount>k__BackingField: 1
-          <Rate>k__BackingField: 0.5
-    - rid: 3760287328976502796
-      type: {class: AttributeModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502793
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
-        <Attributes>k__BackingField:
-          attributes: []
+        <Price>k__BackingField: 1
+    - rid: 3760287328976502794
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502795
+      type: {class: CraftableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        craftMethod: 3
+        canMakeByTry: 1
+        formulation: {fileID: 11400000, guid: 6448c4074893df14e9781f75b7dde63c, type: 2}
+        materials: []
+        <Yield>k__BackingField:
+          <Range>k__BackingField: {x: 1, y: 1}
+          <Distribution>k__BackingField:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+    - rid: 3760287328976502796
+      type: {class: AttributeModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        attributes:
+        - type: 11
+          intValue: 10
+          floatValue: 0
+          boolValue: 0
+        - type: 12
+          intValue: 10
+          floatValue: 0
+          boolValue: 0
+        - type: 13
+          intValue: 10
+          floatValue: 0
+          boolValue: 0
     - rid: 3760287328976502797
-      type: {class: EquipableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: EquipableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 3
     - rid: 3760287328976502798
-      type: {class: GemSlotModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: GemSlotModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <SlotCount>k__BackingField: 1
     - rid: 3760287328976502799
-      type: {class: DurabilityModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: DurabilityModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Durability>k__BackingField: 100
 --- !u!114 &-840957672837638854
@@ -432,16 +798,16 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502858
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u4F7F\u7528"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 11400000, guid: 3eb00b7cc0113074ba3d0a78f1c5ef9b,
           type: 2}
     - rid: 3760287328976502859
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502860
-      type: {class: TriggerModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: TriggerModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Name>k__BackingField: qwe
         <State>k__BackingField: 0
@@ -475,13 +841,13 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502845
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Price>k__BackingField: 10
     - rid: 3760287328976502846
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502847
-      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: MaterialModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 2
 --- !u!114 &-464574647126714662
@@ -510,17 +876,30 @@ MonoBehaviour:
   - rid: 3760287328976502839
   - rid: 3760287328976502840
   - rid: 3760287328976502841
+  - rid: 3157144628245561354
+  - rid: 3157144674434285577
   references:
     version: 2
     RefIds:
+    - rid: 3157144628245561354
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: cb8db1410c429df46940f3a399564411,
+          type: 2}
+    - rid: 3157144674434285577
+      type: {class: EnhConsumableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        <WindowType>k__BackingField: ZetanStudio.ItemSystem.UI.EnhancementWindow
     - rid: 3760287328976502839
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Price>k__BackingField: 30
     - rid: 3760287328976502840
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502841
-      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: MaterialModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 0
 --- !u!114 &11400000
@@ -536,28 +915,29 @@ MonoBehaviour:
   m_Name: Item Database
   m_EditorClassIdentifier: 
   items:
-  - {fileID: -1243070531903100264}
-  - {fileID: 7075965631898388350}
-  - {fileID: 482611824490326475}
-  - {fileID: 4357461156977807482}
-  - {fileID: 908422382591890328}
-  - {fileID: -3066210933015211660}
-  - {fileID: -5233882508366076852}
-  - {fileID: 8516276107217364782}
-  - {fileID: -6049188909635569283}
   - {fileID: 4876839640930190242}
-  - {fileID: 4844343371124758356}
-  - {fileID: -8659359920512167614}
-  - {fileID: -464574647126714662}
-  - {fileID: 3394695891120366239}
-  - {fileID: -640045277695066356}
-  - {fileID: -4938875555958233210}
-  - {fileID: 8379702117396951434}
-  - {fileID: 3050720151478596481}
-  - {fileID: -840957672837638854}
-  - {fileID: 5948240964464067290}
-  - {fileID: -2055064270847519081}
+  - {fileID: -6049188909635569283}
   - {fileID: 2294737969574299077}
+  - {fileID: -2055064270847519081}
+  - {fileID: -1243070531903100264}
+  - {fileID: 8379702117396951434}
+  - {fileID: 8750688440104248342}
+  - {fileID: 4844343371124758356}
+  - {fileID: -4938875555958233210}
+  - {fileID: 7681939668972769866}
+  - {fileID: -464574647126714662}
+  - {fileID: -8659359920512167614}
+  - {fileID: -640045277695066356}
+  - {fileID: 5948240964464067290}
+  - {fileID: 7075965631898388350}
+  - {fileID: -5233882508366076852}
+  - {fileID: -840957672837638854}
+  - {fileID: 8516276107217364782}
+  - {fileID: 3050720151478596481}
+  - {fileID: 482611824490326475}
+  - {fileID: 908422382591890328}
+  - {fileID: 4357461156977807482}
+  - {fileID: -3066210933015211660}
 --- !u!114 &482611824490326475
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -588,16 +968,16 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502804
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u5B66\u4E60"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 11400000, guid: 98b15d06112e6d44bb834dd2ece915d8,
           type: 2}
     - rid: 3760287328976502805
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502806
-      type: {class: StructureBlueprintModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: StructureBlueprintModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Structure>k__BackingField: {fileID: 11400000, guid: 7874646e9bc32c04ea7ec82e1ae6fd42,
           type: 2}
@@ -631,16 +1011,16 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502811
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u5B66\u4E60"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 11400000, guid: 98b15d06112e6d44bb834dd2ece915d8,
           type: 2}
     - rid: 3760287328976502813
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502814
-      type: {class: StructureBlueprintModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: StructureBlueprintModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Structure>k__BackingField: {fileID: 11400000, guid: 54c49f45a64d5544da52ce6edd865f27,
           type: 2}
@@ -675,40 +1055,332 @@ MonoBehaviour:
   - rid: 3760287328976502879
   - rid: 3760287328976502880
   - rid: 3760287328976502881
+  - rid: 3157144483361980416
+  - rid: 3157144608619364362
+  - rid: 3157144608619364363
   references:
     version: 2
     RefIds:
+    - rid: 3157144483361980416
+      type: {class: AffixModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        affixInfo: {fileID: 0}
+        affix:
+          <UpperLimit>k__BackingField: 4
+          affixCountRange: {x: 1, y: 1}
+          affixCountDistrib:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          affixIndexDistrib:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          affixes:
+          - type: 1
+            floatRange: {x: 0.07, y: 0.1}
+            intRange: {x: 10, y: 0}
+            valueDistrib:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+            trueProbility: 0
+    - rid: 3157144608619364362
+      type: {class: EnhancementModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        enhancementInfo: {fileID: 0}
+        enhancement:
+          increments:
+          - attributes:
+            - type: 7
+              intValue: 3
+              floatValue: 0
+              boolValue: 0
+            - type: 8
+              intValue: 2
+              floatValue: 0
+              boolValue: 0
+        <Method>k__BackingField: 0
+        <Failure>k__BackingField: 0
+        costs:
+        - materials:
+          - <SuccessRate>k__BackingField: 0.75
+            <Item>k__BackingField: {fileID: -464574647126714662}
+            <Amount>k__BackingField: 5
+          - <SuccessRate>k__BackingField: 1
+            <Item>k__BackingField: {fileID: -8659359920512167614}
+            <Amount>k__BackingField: 1
+        materials: []
+        expTypes: 00000000
+        experienceTable:
+        - <Experience>k__BackingField: 1
+          <SuccessRate>k__BackingField: 1
+    - rid: 3157144608619364363
+      type: {class: AffixEnhancementModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        enhancementInfo: {fileID: 0}
+        enhancement:
+          affixCountRange: {x: 1, y: 1}
+          affixCountDistrib:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          affixIndexDistrib:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          affixes:
+          - type: 14
+            floatRange: {x: 0.03, y: 0.05}
+            intRange: {x: 0, y: 0}
+            valueDistrib:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 34
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 34
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 0
+            trueProbility: 0
+          - type: 15
+            floatRange: {x: 0.07, y: 0.1}
+            intRange: {x: 0, y: 0}
+            valueDistrib:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 34
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 34
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 0
+            trueProbility: 0
+          - type: 1
+            floatRange: {x: 0.07, y: 0.1}
+            intRange: {x: 0, y: 0}
+            valueDistrib:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 34
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 34
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 0
+            trueProbility: 0
+          - type: 6
+            floatRange: {x: 0.07, y: 0.1}
+            intRange: {x: 0, y: 0}
+            valueDistrib:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 34
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 34
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 0
+            trueProbility: 0
     - rid: 3760287328976502874
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u88C5\u5907"
-        <Cost>k__BackingField: 1
-        <Usage>k__BackingField: {fileID: 0}
+        <Cost>k__BackingField: 0
+        <Usage>k__BackingField: {fileID: 11400000, guid: 0c0089e3071b3264e925b4b04361bab4,
+          type: 2}
     - rid: 3760287328976502875
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Price>k__BackingField: 15
     - rid: 3760287328976502876
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502877
-      type: {class: AttributeModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: AttributeModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
-        <Attributes>k__BackingField:
-          attributes: []
+        attributes:
+        - type: 7
+          intValue: 15
+          floatValue: 0
+          boolValue: 0
+        - type: 8
+          intValue: 10
+          floatValue: 0
+          boolValue: 0
     - rid: 3760287328976502878
-      type: {class: EquipableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: EquipableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 0
     - rid: 3760287328976502879
-      type: {class: GemSlotModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: GemSlotModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <SlotCount>k__BackingField: 1
     - rid: 3760287328976502880
-      type: {class: DurabilityModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: DurabilityModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Durability>k__BackingField: 100
     - rid: 3760287328976502881
-      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: MaterialModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 1
 --- !u!114 &3050720151478596481
@@ -741,58 +1413,19 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502855
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u4F7F\u7528"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 11400000, guid: 3eb00b7cc0113074ba3d0a78f1c5ef9b,
           type: 2}
     - rid: 3760287328976502856
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502857
-      type: {class: TriggerModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: TriggerModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Name>k__BackingField: qwe
         <State>k__BackingField: 1
---- !u!114 &3394695891120366239
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
-  m_Name: MATR003
-  m_EditorClassIdentifier: 
-  <ID>k__BackingField: MATR003
-  <Name>k__BackingField: "\u6B62\u8840\u8349"
-  <Icon>k__BackingField: {fileID: 21300000, guid: 608fc6a057c396d43b24a636e27409cb,
-    type: 3}
-  <Description>k__BackingField: "\u968F\u5904\u53EF\u89C1\u7684\u6B62\u8840\u7528\u8349\u672C\u690D\u7269\u3002"
-  type: 4
-  quality: 0
-  <Weight>k__BackingField: 0.01
-  <StackLimit>k__BackingField: 999
-  <Discardable>k__BackingField: 1
-  modules:
-  - rid: 3760287328976502842
-  - rid: 3760287328976502843
-  - rid: 3760287328976502844
-  references:
-    version: 2
-    RefIds:
-    - rid: 3760287328976502842
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
-      data:
-        <Price>k__BackingField: 15
-    - rid: 3760287328976502843
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
-    - rid: 3760287328976502844
-      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
-      data:
-        type: 4
 --- !u!114 &4357461156977807482
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -823,16 +1456,16 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502807
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u5B66\u4E60"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 11400000, guid: f9168edb840ff4447bca55af0ef1ad35,
           type: 2}
     - rid: 3760287328976502809
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502810
-      type: {class: CraftBlueprintModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: CraftBlueprintModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Product>k__BackingField: {fileID: 8379702117396951434}
 --- !u!114 &4844343371124758356
@@ -862,26 +1495,32 @@ MonoBehaviour:
   - rid: 3760287328976502832
   - rid: 3760287328976502833
   - rid: 3760287328976502834
+  - rid: 3760287537202200576
   references:
     version: 2
     RefIds:
     - rid: 3760287328976502831
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u9576\u5D4C"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 0}
     - rid: 3760287328976502832
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Price>k__BackingField: 50
     - rid: 3760287328976502833
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502834
-      type: {class: AttributeModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: AttributeModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
-        <Attributes>k__BackingField:
-          attributes: []
+        attributes:
+        - type: 0
+          intValue: 100
+          floatValue: 0
+          boolValue: 0
+    - rid: 3760287537202200576
+      type: {class: GemModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
 --- !u!114 &4876839640930190242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -905,15 +1544,12 @@ MonoBehaviour:
   <StackLimit>k__BackingField: 999
   <Discardable>k__BackingField: 1
   modules:
-  - rid: 3760287328976502829
   - rid: 3760287328976502830
   references:
     version: 2
     RefIds:
-    - rid: 3760287328976502829
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502830
-      type: {class: CurrencyModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: CurrencyModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 1
         <ValueEach>k__BackingField: 1
@@ -948,18 +1584,18 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502862
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Price>k__BackingField: 15
     - rid: 3760287328976502863
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502864
-      type: {class: SeedModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SeedModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Crop>k__BackingField: {fileID: 11400000, guid: 74fe5b9417d08164195908a81e191983,
           type: 2}
     - rid: 3760287328976502865
-      type: {class: MaterialModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: MaterialModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         type: 12
 --- !u!114 &7075965631898388350
@@ -993,30 +1629,87 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502800
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u4F7F\u7528"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 11400000, guid: 17c940e8a0591d2458d523ed3378f68a,
           type: 2}
     - rid: 3760287328976502801
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502802
-      type: {class: CraftableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: CraftableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         craftMethod: 0
-        canMakeByTry: 0
-        <Formulation>k__BackingField: {fileID: 11400000, guid: 59fb2a9bbc1a53745ba9e6c093547699,
-          type: 2}
-        <Yields>k__BackingField:
-        - <Amount>k__BackingField: 1
-          <Rate>k__BackingField: 0.5
-        - <Amount>k__BackingField: 1
-          <Rate>k__BackingField: 0.5
+        canMakeByTry: 1
+        formulation: {fileID: 11400000, guid: 59fb2a9bbc1a53745ba9e6c093547699, type: 2}
+        materials: []
+        <Yield>k__BackingField:
+          <Range>k__BackingField: {x: 1, y: 1}
+          <Distribution>k__BackingField:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
     - rid: 3760287328976502803
-      type: {class: SpaceExpandModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SpaceExpandModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
-        <Space>k__BackingField: 1
+        <Space>k__BackingField: 4
+--- !u!114 &7681939668972769866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: MATR003
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: MATR003
+  <Name>k__BackingField: "\u6B62\u8840\u8349"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 608fc6a057c396d43b24a636e27409cb,
+    type: 3}
+  <Description>k__BackingField: "\u6700\u5E38\u89C1\u7684\u836F\u8349"
+  type: 4
+  quality: 0
+  <Weight>k__BackingField: 0.01
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287546799816704
+  - rid: 3760287546799816707
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287546799816704
+      type: {class: MaterialModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        type: 4
+    - rid: 3760287546799816707
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 15
 --- !u!114 &8379702117396951434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1027,15 +1720,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
-  m_Name: MADC001
+  m_Name: MADC002
   m_EditorClassIdentifier: 
-  <ID>k__BackingField: MADC001
-  <Name>k__BackingField: "\u6B62\u8840\u6563"
+  <ID>k__BackingField: MADC002
+  <Name>k__BackingField: "\u9AD8\u7EA7\u6B62\u8840\u6563"
   <Icon>k__BackingField: {fileID: 21300000, guid: 57cf38a2906932342a13fe8463771650,
     type: 3}
   <Description>k__BackingField: "\u6548\u679C\u8F83\u5DEE\u7684\u6B62\u8840\u7528\u836F\u3002"
   type: 2
-  quality: 1
+  quality: 2
   <Weight>k__BackingField: 0.03
   <StackLimit>k__BackingField: 999
   <Discardable>k__BackingField: 1
@@ -1049,37 +1742,58 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502851
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <UseActionName>k__BackingField: "\u4F7F\u7528"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 11400000, guid: 57caecc5459c49b4e9d218a63ea6bd15,
           type: 2}
     - rid: 3760287328976502852
-      type: {class: SellableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         <Price>k__BackingField: 100
     - rid: 3760287328976502853
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502854
-      type: {class: CraftableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: CraftableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         craftMethod: 0
         canMakeByTry: 1
-        <Formulation>k__BackingField: {fileID: 11400000, guid: 8f067eea454364f40b9fbb18e805cfa1,
-          type: 2}
-        <Yields>k__BackingField:
-        - <Amount>k__BackingField: 1
-          <Rate>k__BackingField: 0.5
-        - <Amount>k__BackingField: 1
-          <Rate>k__BackingField: 0.5
+        formulation: {fileID: 11400000, guid: 8f067eea454364f40b9fbb18e805cfa1, type: 2}
+        materials: []
+        <Yield>k__BackingField:
+          <Range>k__BackingField: {x: 1, y: 1}
+          <Distribution>k__BackingField:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
     - rid: 3760287345180934144
-      type: {class: CoolDownModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: CoolDownModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
-        <Time>k__BackingField: 3
-        <Message>k__BackingField: "\u51B7\u5374\u4E2D"
-        <Cooler>k__BackingField: {fileID: 11400000, guid: 160f7b267f889ed45905336b17b7c0ab,
+        <Cooler>k__BackingField: {fileID: 11400000, guid: 6132e4c50edf5c94fa5a9bb98d5f019b,
           type: 2}
+        time: 1
+        <Message>k__BackingField: "\u51B7\u5374\u4E2D"
 --- !u!114 &8516276107217364782
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1110,46 +1824,240 @@ MonoBehaviour:
     version: 2
     RefIds:
     - rid: 3760287328976502822
-      type: {class: UsableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
-        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <UseActionName>k__BackingField: "\u6253\u5F00"
         <Cost>k__BackingField: 1
         <Usage>k__BackingField: {fileID: 11400000, guid: 2a63a73cb482a444493a661d65c4a24d,
           type: 2}
     - rid: 3760287328976502823
-      type: {class: LockableModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
     - rid: 3760287328976502824
-      type: {class: ProductModule, ns: ZetanStudio.Item.Module, asm: Assembly-CSharp}
+      type: {class: ProductModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
       data:
         product:
-        - item: {fileID: 3394695891120366239}
-          minAmount: 5
-          maxAmount: 5
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+        - item: {fileID: 7681939668972769866}
+          Amount:
+            <Range>k__BackingField: {x: 5, y: 5}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         - item: {fileID: -8659359920512167614}
-          minAmount: 10
-          maxAmount: 10
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 10, y: 10}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         - item: {fileID: -464574647126714662}
-          minAmount: 5
-          maxAmount: 5
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 5, y: 5}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         - item: {fileID: -640045277695066356}
-          minAmount: 5
-          maxAmount: 5
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 5, y: 5}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         - item: {fileID: 5948240964464067290}
-          minAmount: 1
-          maxAmount: 1
-          dropRate: 100
-          onlyDropForQuest: 0
-          bindedQuest: {fileID: 0}
+          Amount:
+            <Range>k__BackingField: {x: 1, y: 1}
+            <Distribution>k__BackingField:
+              serializedVersion: 2
+              m_Curve:
+              - serializedVersion: 3
+                time: 0
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              - serializedVersion: 3
+                time: 1
+                value: 1
+                inSlope: 0
+                outSlope: 0
+                tangentMode: 0
+                weightedMode: 0
+                inWeight: 0
+                outWeight: 0
+              m_PreInfinity: 2
+              m_PostInfinity: 2
+              m_RotationOrder: 4
+          onlyDropForQuest: {fileID: 0}
         <ProductInfo>k__BackingField: {fileID: 0}
+--- !u!114 &8750688440104248342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f39c2967a89f549b848f78f1e390b3, type: 3}
+  m_Name: MADC001(Clone)
+  m_EditorClassIdentifier: 
+  <ID>k__BackingField: MADC001
+  <Name>k__BackingField: "\u6B62\u8840\u6563"
+  <Icon>k__BackingField: {fileID: 21300000, guid: 57cf38a2906932342a13fe8463771650,
+    type: 3}
+  <Description>k__BackingField: "\u6548\u679C\u8F83\u5DEE\u7684\u6B62\u8840\u7528\u836F\u3002"
+  type: 2
+  quality: 1
+  <Weight>k__BackingField: 0.03
+  <StackLimit>k__BackingField: 999
+  <Discardable>k__BackingField: 1
+  modules:
+  - rid: 3760287328976502851
+  - rid: 3760287328976502852
+  - rid: 3760287328976502853
+  - rid: 3760287328976502854
+  - rid: 3760287345180934144
+  references:
+    version: 2
+    RefIds:
+    - rid: 3760287328976502851
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 11400000, guid: 57caecc5459c49b4e9d218a63ea6bd15,
+          type: 2}
+    - rid: 3760287328976502852
+      type: {class: SellableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        <Price>k__BackingField: 100
+    - rid: 3760287328976502853
+      type: {class: LockableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+    - rid: 3760287328976502854
+      type: {class: CraftableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        craftMethod: 0
+        canMakeByTry: 1
+        formulation: {fileID: 11400000, guid: 8f067eea454364f40b9fbb18e805cfa1, type: 2}
+        materials: []
+        <Yield>k__BackingField:
+          <Range>k__BackingField: {x: 1, y: 1}
+          <Distribution>k__BackingField:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            - serializedVersion: 3
+              time: 1
+              value: 1
+              inSlope: 0
+              outSlope: 0
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+    - rid: 3760287345180934144
+      type: {class: CoolDownModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        <Cooler>k__BackingField: {fileID: 11400000, guid: 6132e4c50edf5c94fa5a9bb98d5f019b,
+          type: 2}
+        time: 1
+        <Message>k__BackingField: "\u51B7\u5374\u4E2D"

@@ -1,4 +1,4 @@
-﻿namespace ZetanStudio.Item.Module
+﻿namespace ZetanStudio.ItemSystem.Module
 {
     [Name("字符串参数")]
     public class StringParameterModule : CommonModule<string>

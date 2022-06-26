@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [Name("种子")]
     public sealed class SeedModule : ItemModule

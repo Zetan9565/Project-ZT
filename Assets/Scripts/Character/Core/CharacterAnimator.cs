@@ -86,18 +86,18 @@ public class CharacterAnimator : MonoBehaviour
     public void PlayRollAnima(Vector2 direction)
     {
         ResetAttackAnima();
-        ResetTrigger(CharacterAnimaParams.Dash);
+        ResetTrigger(CharacterAnimaParams.Flash);
         SetTrigger(CharacterAnimaParams.Roll);
         if (flip)
             if (direction.x < 0) transform.localScale = new Vector3(-1, 1, 1);
             else if (direction.x > 0) transform.localScale = new Vector3(1, 1, 1);
     }
 
-    public void PlayDashAnima(Vector2 direction)
+    public void PlayFlashAnima(Vector2 direction)
     {
         ResetAttackAnima();
         ResetTrigger(CharacterAnimaParams.Roll);
-        SetTrigger(CharacterAnimaParams.Dash);
+        SetTrigger(CharacterAnimaParams.Flash);
         if (flip)
             if (direction.x < 0) transform.localScale = new Vector3(-1, 1, 1);
             else if (direction.x > 0) transform.localScale = new Vector3(1, 1, 1);
@@ -107,7 +107,7 @@ public class CharacterAnimator : MonoBehaviour
     {
         ResetAttackAnima();
         ResetTrigger(CharacterAnimaParams.Roll);
-        ResetTrigger(CharacterAnimaParams.Dash);
+        ResetTrigger(CharacterAnimaParams.Flash);
         SetFloat(CharacterAnimaParams.HurtDirX, direction.x);
         SetFloat(CharacterAnimaParams.HurtDirY, direction.y);
         SetTrigger(CharacterAnimaParams.GetHurt);
@@ -122,7 +122,7 @@ public class CharacterAnimator : MonoBehaviour
     {
         ResetAttackAnima();
         ResetTrigger(CharacterAnimaParams.Roll);
-        ResetTrigger(CharacterAnimaParams.Dash);
+        ResetTrigger(CharacterAnimaParams.Flash);
         SetTrigger(CharacterAnimaParams.Attack);
     }
     public void ResetAttackAnima()

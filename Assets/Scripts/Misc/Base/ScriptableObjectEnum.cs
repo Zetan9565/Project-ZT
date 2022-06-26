@@ -118,13 +118,13 @@ public abstract class ScriptableObjectEnumItem
         return base.Equals(obj);
     }
 
-    public override int GetHashCode()
-    {
-        return Name.GetHashCode();
-    }
-
     public override string ToString()
     {
         return string.IsNullOrEmpty(Name) ? base.ToString() : Name;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name);
     }
 }

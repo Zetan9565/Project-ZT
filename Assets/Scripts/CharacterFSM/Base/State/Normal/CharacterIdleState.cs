@@ -23,9 +23,9 @@ public class CharacterIdleState : CharacterNormalState
             {
                 Machine.SetCurrentState<CharacterRollState>();
             }
-            else if (control.ReadTrigger(CharacterInputNames.Instance.Dash))
+            else if (control.ReadTrigger(CharacterInputNames.Instance.Flash))
             {
-                Machine.SetCurrentState<CharacterDashState>();
+                Machine.SetCurrentState<CharacterFlashState>();
             }
             else if (control.ReadValue(CharacterInputNames.Instance.Move, out Vector2 move) && (move.x != 0 || move.y != 0))
             {

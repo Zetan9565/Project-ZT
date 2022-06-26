@@ -4,10 +4,16 @@ using UnityEngine.Events;
 
 public sealed class ListItem : ListItem<ListItem, object>
 {
+    public ListItemEvent onAwake = new ListItemEvent();
     public ListItemEvent onInit = new ListItemEvent();
     public ListItemEvent onRefresh = new ListItemEvent();
     public ListItemEvent onRefreshSelected = new ListItemEvent();
     public ListItemEvent onClear = new ListItemEvent();
+
+    protected override void OnAwake()
+    {
+        onAwake?.Invoke(this);
+    }
 
     protected override void OnInit()
     {
@@ -25,9 +31,9 @@ public sealed class ListItem : ListItem<ListItem, object>
         onRefreshSelected?.Invoke(this);
     }
 
-    public override void OnClear()
+    public override void Clear()
     {
-        base.OnClear();
+        base.Clear();
         onClear?.Invoke(this);
     }
 
@@ -47,18 +53,11 @@ public abstract class ListItem<TSelf, TData> : MonoBehaviour where TSelf : ListI
     /// </summary>
     public abstract void Refresh();
 
-    /// <summary>
-    /// 数据下标，从0开始
-    /// </summary>
     public int Index { get; protected set; }
-    /// <summary>
-    /// 在列表中的位置，从1开始
-    /// </summary>
-    public int Position { get; protected set; }
 
     protected bool isSelected;
     /// <summary>
-    /// 是否选中，通过此属性设置选中状态不受<see cref="ListView{TItem, TData}.Selectable"/>的限制，但不会触发<see cref="ListView{TItem, TData}.selectCallback"/>，只会触发<see cref="RefreshSelected"/>
+    /// 是否选中，通过此属性设置选中状态不受<see cref="ListView{TItem, TData}.Selectable"/>的限制，但不会触发<see cref="ListView{TItem, TData}"/>的选中回调，只会触发<see cref="RefreshSelected"/>
     /// </summary>
     public bool IsSelected
     {
@@ -79,7 +78,7 @@ public abstract class ListItem<TSelf, TData> : MonoBehaviour where TSelf : ListI
     /// <param name="selected"></param>
     public void SetSelected(bool selected = true)
     {
-        View.SetSelected(Position, selected);
+        View.SetSelected(Index, selected);
     }
 
     /// <summary>
@@ -108,7 +107,6 @@ public abstract class ListItem<TSelf, TData> : MonoBehaviour where TSelf : ListI
     protected void SetIndex(int index)
     {
         Index = index;
-        Position = index + 1;
     }
 
     private void Awake()
@@ -131,5 +129,5 @@ public abstract class ListItem<TSelf, TData> : MonoBehaviour where TSelf : ListI
     /// <summary>
     /// 由<see cref="ListView{TItem, TData}"/>调用，默认将<see cref="Data"/>置空，并清除选择状态
     /// </summary>
-    public virtual void OnClear() { Data = default; isSelected = false; }
+    public virtual void Clear() { Data = default; isSelected = false; RefreshSelected(); }
 }

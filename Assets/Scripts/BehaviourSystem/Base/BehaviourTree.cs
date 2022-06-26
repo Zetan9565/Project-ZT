@@ -41,14 +41,14 @@ namespace ZetanStudio.BehaviourTree
         public bool IsInstance { get; private set; }
 
         [SerializeField]
-        private bool isRuntime;//要暴露给Unity，要不然每运行一次就会被重置
-        public bool IsRuntime => isRuntime;
+        private bool scenceOnly;//要暴露给Unity，要不然每运行一次就会被重置
+        public bool ScenceOnly => scenceOnly;
 
         public int ExecutionTimes { get; private set; }
 
         public NodeStates ExecutionState { get; private set; }
 
-        public BehaviourExecutor Executor { get; private set; }
+        public BehaviourTreeExecutor Executor { get; private set; }
 
         private readonly SortedSet<Composite> evaluatedComposites = new SortedSet<Composite>(Node.Comparer.Default);
         #endregion
@@ -155,7 +155,7 @@ namespace ZetanStudio.BehaviourTree
                 return null;
             }
             BehaviourTree tree;
-            if (isRuntime) tree = this;
+            if (scenceOnly) tree = this;
             else tree = Instantiate(this);
             //Traverse(tree.entry, n => n.Instantiate());
             tree.nodes.ForEach(n => n.Instantiate());
@@ -163,7 +163,7 @@ namespace ZetanStudio.BehaviourTree
             return tree;
         }
 
-        public void Init(BehaviourExecutor executor)
+        public void Init(BehaviourTreeExecutor executor)
         {
             if (!IsInstance)
             {
@@ -497,7 +497,7 @@ namespace ZetanStudio.BehaviourTree
         {
             if (nodes.Contains(newNode)) return;
             nodes.Add(newNode);
-            if (!IsInstance && !IsRuntime)
+            if (!IsInstance && !ScenceOnly)
             {
                 UnityEditor.EditorUtility.SetDirty(this);
                 UnityEditor.AssetDatabase.SaveAssetIfDirty(this);
@@ -512,7 +512,7 @@ namespace ZetanStudio.BehaviourTree
         public void DeleteNode(Node node)
         {
             nodes.Remove(node);
-            if (!IsInstance && !IsRuntime)
+            if (!IsInstance && !ScenceOnly)
             {
                 UnityEditor.EditorUtility.SetDirty(this);
                 UnityEditor.AssetDatabase.SaveAssetIfDirty(this);
@@ -527,24 +527,24 @@ namespace ZetanStudio.BehaviourTree
         /// <summary>
         /// 用于在编辑器中获取运行时行为树，不应在游戏逻辑中使用
         /// </summary>
-        /// <returns>运行时行为树</returns>
-        public static BehaviourTree GetRuntimeTree()
+        /// <returns>场景型行为树</returns>
+        public static BehaviourTree GetSceneOnlyTree()
         {
             BehaviourTree tree = CreateInstance<BehaviourTree>();
             tree.entry.ConvertToRuntime();
-            tree.isRuntime = true;
+            tree.scenceOnly = true;
             return tree;
         }
         /// <summary>
-        /// 用于在编辑器将运行时行为树本地化时做准备，不应在游戏逻辑中使用
+        /// 用于在编辑器将场景型行为树本地化时做准备，不应在游戏逻辑中使用
         /// </summary>
-        /// <param name="runtimeTree">运行时行为树</param>
+        /// <param name="scenedTree">场景型行为树</param>
         /// <returns>准备好本地化的行为树</returns>
-        public static BehaviourTree PrepareLocalization(BehaviourTree runtimeTree)
+        public static BehaviourTree PrepareLocalization(BehaviourTree scenedTree)
         {
-            if (runtimeTree.IsInstance || !runtimeTree.isRuntime) return null;
-            BehaviourTree localTree = Instantiate(runtimeTree);
-            localTree.isRuntime = false;
+            if (scenedTree.IsInstance || !scenedTree.scenceOnly) return null;
+            BehaviourTree localTree = Instantiate(scenedTree);
+            localTree.scenceOnly = false;
             localTree.nodes.ForEach(x => x.PrepareLocalization());
             return localTree;
         }

@@ -16,5 +16,5 @@ MonoBehaviour:
   materials:
   - item: {fileID: -464574647126714662, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 1
-    makingType: 0
+    costType: 0
     materialType: 2

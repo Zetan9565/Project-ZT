@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
 
     [Name("背包空间扩张"), Require(typeof(UsableModule))]

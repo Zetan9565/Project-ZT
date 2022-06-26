@@ -15,7 +15,7 @@ public class GoodsAgent : GridItem<GoodsAgent, GoodsData>, IPointerClickHandler
     private Text amountText;
 
     [SerializeField]
-    private ItemSlot itemIcon;
+    private ItemSlotEx itemIcon;
 
     private ShopWindow window;
 
@@ -31,7 +31,7 @@ public class GoodsAgent : GridItem<GoodsAgent, GoodsData>, IPointerClickHandler
         this.window = window;
     }
 
-    private ButtonWithTextData[] GetHandleButtons(ItemSlot slot)
+    private ButtonWithTextData[] GetHandleButtons(ItemSlotEx slot)
     {
         if (!slot || slot.IsEmpty) return null;
 
@@ -49,7 +49,7 @@ public class GoodsAgent : GridItem<GoodsAgent, GoodsData>, IPointerClickHandler
         return buttons.ToArray();
     }
 
-    public override void OnClear()
+    public override void Clear()
     {
         Data = null;
         nameText.text = string.Empty;

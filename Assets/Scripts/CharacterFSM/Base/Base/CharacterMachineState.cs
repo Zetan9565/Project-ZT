@@ -8,6 +8,8 @@ public abstract class CharacterMachineState
     protected Character Character => Machine?.Character;
     protected float EnterTime { get; private set; }
 
+    protected bool IsGrouded => true;
+
     protected CharacterControlInput control;
     protected CharacterAnimator animator;
     protected Rigidbody2DMotion motion;
@@ -83,6 +85,15 @@ public abstract class CharacterMachineState
     {
         if (Machine == null || !Machine.Character) return;
         Machine.Character.StopAllCoroutines();
+    }
+
+    protected static bool IsState<T>(System.Type type)
+    {
+        return typeof(T).IsAssignableFrom(type);
+    }
+    protected static bool IsState<TTarget, T>()
+    {
+        return typeof(TTarget).IsAssignableFrom(typeof(T));
     }
 
     protected static class Debug

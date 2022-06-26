@@ -19,6 +19,6 @@ public class MultiPropertyDrawer : PropertyDrawer
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        return base.GetPropertyHeight(property, label) * 2;
+        return EditorGUIUtility.singleLineHeight * 2 + EditorGUIUtility.standardVerticalSpacing;
     }
 }

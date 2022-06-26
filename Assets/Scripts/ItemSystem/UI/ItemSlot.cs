@@ -1,232 +1,212 @@
-using System;
-using System.Collections;
+﻿using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
+using ZetanStudio.ItemSystem.UI;
 
 [DisallowMultipleComponent]
-public class ItemSlot : ItemSlotBase, IDragAble,
-    IPointerDownHandler, IPointerUpHandler,
-    IPointerEnterHandler, IPointerExitHandler
+public class ItemSlot : GridItem<ItemSlot, ItemSlotData>, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    public Sprite DragAbleIcon => icon.overrideSprite;
+    [SerializeField, Label("图标")]
+    protected Image icon;
 
-    [HideInInspector]
-    public int indexInGrid;
+    [SerializeField, Label("数量")]
+    protected Text amount;
 
-    private ScrollRect parentScrollRect;
+    [SerializeField, Label("强化等级")]
+    protected Text enhLevel;
 
-    private Action<ItemSlot> rightClickAction;
-    private Func<ItemSlot, ButtonWithTextData[]> buttonGetter;
-    private bool dragable;
-    private Action<GameObject, ItemSlot> dragPutAction;
+    [SerializeField, Label("品质识别框")]
+    protected Image qualityEdge;
 
-    #region 操作相关
-    public void SetCallbacks(Func<ItemSlot, ButtonWithTextData[]> buttonGetter, Action<ItemSlot> rightClickAction = null, Action<GameObject, ItemSlot> dragPutAction = null)
+    [SerializeField, Label("复选框")]
+    protected GameObject mark;
+
+    [SerializeField]
+    protected ItemCoolDown coolDown;
+
+    public bool IsDark { get; protected set; }
+    public bool IsMarked { get; protected set; }
+
+    public ItemData Item => Data ? Data.item : null;
+
+    public bool IsEmpty { get { return Data == null || Data.IsEmpty; } }
+
+    public void Vacate()
     {
-        this.buttonGetter = buttonGetter;
-        this.rightClickAction = rightClickAction;
-        this.dragPutAction = dragPutAction;
-        dragable = dragPutAction != null;
+        Mark(false);
+        Dark(false);
+        icon.overrideSprite = null;
+        amount.text = string.Empty;
+        enhLevel.text = string.Empty;
+        qualityEdge.color = Color.white;
+        if (coolDown) coolDown.Init(null);
     }
-    public void SetScrollRect(ScrollRect scrollRect)
+    public override void Clear()
     {
-        parentScrollRect = scrollRect;
+        Vacate();
+        Data = null;
+        darkCondition = null;
+        markCondition = null;
+        base.Clear();
     }
 
-    public void OnRightClick()
+    private Predicate<ItemSlot> darkCondition;
+    public void SetDarkCondition(Predicate<ItemSlot> darkCondition, bool immediate = false)
     {
-        if (!DragableManager.Instance.IsDraging)
-        {
-            rightClickAction?.Invoke(this);
-            WindowsManager.CloseWindow<ItemWindow>();
-        }
+        this.darkCondition = darkCondition;
+        if (immediate)
+            if (darkCondition != null) Dark(darkCondition(this));
+            else Dark(false);
+    }
+    private Predicate<ItemSlot> markCondition;
+    public void SetMarkCondition(Predicate<ItemSlot> markCondition, bool immediate = false)
+    {
+        this.markCondition = markCondition;
+        if (immediate)
+            if (markCondition != null) Mark(markCondition(this));
+            else Mark(false);
     }
 
-#if UNITY_ANDROID
-    private float clickTime;
-    private int clickCount;
-    private bool isClick;
-
-    private void FixedUpdate()
+    public void Dark(bool dark = true)
     {
-        if (isClick)
-        {
-            clickTime += Time.fixedDeltaTime;
-            if (clickTime > 0.2f)
+        icon.color = !IsEmpty && dark ? Color.grey : Color.white;
+        IsDark = dark;
+    }
+
+    public void Highlight(bool highlight = true)
+    {
+        if (highlight)
+            if (IsDark)
             {
-                isClick = false;
-                clickCount = 0;
-                clickTime = 0;
-            }
-        }
-    }
-
-    readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
-    Coroutine pressCoroutine;
-    float touchTime = 0;
-    IEnumerator Press()
-    {
-        touchTime = 0;
-        while (true)
-        {
-            touchTime += Time.fixedDeltaTime;
-            if (touchTime >= 0.5f)
-            {
-                OnLongPress();
-                yield break;
-            }
-            yield return WaitForFixedUpdate;
-        }
-    }
-
-    /// <summary>
-    /// 安卓长按时所作所为
-    /// </summary>
-    public void OnLongPress()
-    {
-        if (!IsEmpty)
-        {
-            BeginDrag();
-            isClick = false;
-            clickCount = 0;
-            clickTime = 0;
-        }
-    }
-#endif
-
-    /// <summary>
-    /// 交换单元格内容
-    /// </summary>
-    /// <param name="target"></param>
-    public void Swap(ItemSlot target)
-    {
-        if (target != this)
-        {
-            if (target.IsEmpty)
-            {
-                Data.Swap(target.Data);
-                target.Refresh();
-                target.Mark(mark.activeSelf);
+                icon.color = (Color.yellow + Color.grey) / 2;
             }
             else
             {
-                bool targetMark = target.mark.activeSelf;
-
-                Data.Swap(target.Data);
-                target.Refresh();
-                target.Mark(mark.activeSelf);
-
-                Refresh();
-                Mark(targetMark);
+                icon.color = Color.yellow;
             }
-        }
-        FinishDrag();
+        else Dark(IsDark);
     }
 
-    private void BeginDrag()
+    public void Show()
     {
-        if (WindowsManager.IsWindowOpen<ItemSelectionWindow>() && IsDark || !dragable)
+        ZetanUtility.SetActive(gameObject, true);
+    }
+    public void Hide()
+    {
+        ZetanUtility.SetActive(gameObject, false);
+    }
+    public void ShowOrHide(bool show)
+    {
+        ZetanUtility.SetActive(gameObject, show);
+    }
+
+    protected override void OnInit()
+    {
+        Vacate();
+    }
+
+    public void Mark(bool mark = true)
+    {
+        if (this.mark) ZetanUtility.SetActive(this.mark, !IsEmpty && mark);
+    }
+
+    /// <summary>
+    /// 用于单独展示
+    /// </summary>
+    /// <param name="model"></param>
+    public virtual void SetItem(Item model, string amountText = null)
+    {
+        if (!model)
+        {
+            Vacate();
             return;
-        DragableManager.Instance.BeginDrag(this, OnEndDrag, icon.rectTransform.rect.width, icon.rectTransform.rect.height);
-        WindowsManager.CloseWindow<ItemWindow>();
-        if (parentScrollRect) parentScrollRect.enabled = false;
-        Highlight(true);
+        }
+        if (!Data) Data = new ItemSlotData(ItemData.Empty(model));
+        else Data.item = ItemData.Empty(model);
+        icon.overrideSprite = model.Icon;
+        qualityEdge.color = model.Quality.Color;
+        amount.text = amountText ?? string.Empty;
+        RefreshEnhLevel();
+        Dark(false);
+        Mark(false);
     }
-    public void FinishDrag()
+    /// <summary>
+    /// 用于单独展示
+    /// </summary>
+    /// <param name="item"></param>
+    public virtual void SetItem(ItemData item, string amountText = null)
     {
-        if (!DragableManager.Instance.IsDraging) return;
-        Highlight(false);
-        WindowsManager.CloseWindow<ItemWindow>();
+        if (!item)
+        {
+            Vacate();
+            return;
+        }
+        if (!Data) Data = new ItemSlotData(item);
+        else Data.item = item;
+        icon.overrideSprite = item.Icon;
+        qualityEdge.color = item.Quality.Color;
+        amount.text = amountText ?? string.Empty;
+        RefreshEnhLevel();
+        Dark(false);
+        Mark(false);
     }
-    #endregion
 
-    #region 事件相关
-    public override void OnPointerClick(PointerEventData eventData)
+    public override void Refresh()
     {
-#if UNITY_STANDALONE
-        if (eventData.button == PointerEventData.InputButton.Left && !IsEmpty)
-            BeginDrag();
-        else if (eventData.button == PointerEventData.InputButton.Right && !IsEmpty) OnRightClick();
-#elif UNITY_ANDROID
+        if (Data == null || Data.IsEmpty)
+        {
+            Vacate();
+            return;
+        }
+        if (Data.Model.Icon) icon.overrideSprite = Data.Model.Icon;
+        amount.text = Data.amount > 0 && Data.Model.StackAble ? Data.amount.ToString() : string.Empty;
+        RefreshEnhLevel();
+        qualityEdge.color = Data.Model.Quality.Color;
+        if (darkCondition != null) Dark(darkCondition(this));
+        if (markCondition != null) Mark(markCondition(this));
+        if (coolDown)
+            if (Item.GetModuleData<CoolDownData>())
+                coolDown.Init(Item);
+            else
+                coolDown.Init(null);
+    }
+
+    private void RefreshEnhLevel()
+    {
+        enhLevel.text = Item.TryGetModuleData<EnhancementData>(out var enhancement) && enhancement.level > 0 ? (!enhancement.IsMax ? $"+{enhancement.level}" : "MAX") : string.Empty;
+    }
+
+    public virtual void OnPointerClick(PointerEventData eventData)
+    {
+#if UNITY_ANDROID
         if (eventData.button == PointerEventData.InputButton.Left)
-        {
-            if (clickCount < 1) isClick = true;
-            if (clickTime <= 0.2f) clickCount++;
-            if (!IsEmpty)
-            {
-                if (clickCount > 1)
-                {
-                    OnRightClick();
-                    isClick = false;
-                    clickCount = 0;
-                    clickTime = 0;
-                }
-                else if (clickCount == 1 && touchTime < 0.5f)
-                {
-                    ButtonWithTextData[] buttonDatas = buttonGetter?.Invoke(this);
-                    if (buttonDatas != null)
-                        foreach (var data in buttonDatas)
-                        {
-                            data.callback += () => WindowsManager.CloseWindow<ItemWindow>();
-                        }
-                    WindowsManager.OpenWindow<ItemWindow>(this, buttonDatas);
-                }
-            }
-        }
+            if (!IsEmpty) WindowsManager.OpenWindow<ItemWindow>(this);
 #endif
     }
 
-    public void OnPointerDown(PointerEventData eventData)//用于安卓拖拽
-    {
-#if UNITY_ANDROID
-        if (!IsEmpty && eventData.button == PointerEventData.InputButton.Left)
-        {
-            if (pressCoroutine != null) StopCoroutine(pressCoroutine);
-            pressCoroutine = StartCoroutine(Press());
-        }
-#endif
-    }
-
-    public void OnPointerUp(PointerEventData eventData)//用于安卓拖拽
-    {
-#if UNITY_ANDROID
-        if (pressCoroutine != null) StopCoroutine(pressCoroutine);
-#endif
-    }
-
-    public void OnPointerEnter(PointerEventData eventData)//用于PC悬停
+    public virtual void OnPointerEnter(PointerEventData eventData)//用于PC悬停
     {
 #if UNITY_STANDALONE
-        NewWindowsManager.OpenWindow<ItemWindow>(this);
-        if (!DragableManager.Instance.IsDraging)
-            Select();
+        if (!IsEmpty) WindowsManager.OpenWindow<ItemWindow>(this);
+        if (!DragableManager.Instance.IsDraging) Highlight(true);
 #endif
     }
 
-    public void OnPointerExit(PointerEventData eventData)//用于安卓拖拽、PC悬停
+    public virtual void OnPointerExit(PointerEventData eventData)//用于安卓拖拽、PC悬停
     {
 #if UNITY_STANDALONE
-        NewWindowsManager.CloseWindow<ItemWindow>();
-        if (!DragableManager.Instance.IsDraging)
-        {
-            DeSelect();
-        }
-#elif UNITY_ANDROID
-        if (pressCoroutine != null) StopCoroutine(pressCoroutine);
+        if (!IsEmpty) WindowsManager.CloseWindow<ItemWindow>();
+        if (!DragableManager.Instance.IsDraging) Highlight(false);
 #endif
     }
 
-    public void OnEndDrag(PointerEventData eventData)//用于安卓拖拽
-    {
-        if (parentScrollRect) parentScrollRect.enabled = true;//修复ScrollRect冲突
-#if UNITY_ANDROID
-        if (!IsEmpty && dragable && eventData.button == PointerEventData.InputButton.Left && DragableManager.Instance.IsDraging && eventData.pointerCurrentRaycast.gameObject)
-        {
-            dragPutAction?.Invoke(eventData.pointerCurrentRaycast.gameObject, this);
-        }
-#endif
-        FinishDrag();
-    }
-    #endregion
+}
+public interface ISlotContainer
+{
+    void MarkIf(Predicate<ItemSlot> slot);
+    void DarkIf(Predicate<ItemSlot> slot);
+    bool Contains(ItemSlot slot);
 }

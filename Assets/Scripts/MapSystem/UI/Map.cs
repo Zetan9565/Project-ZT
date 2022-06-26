@@ -33,7 +33,9 @@ public class Map : MonoBehaviour, IDragHandler, IPointerClickHandler, IPointerEn
 #endif
     }
 
+#pragma warning disable IDE0044 // Ìí¼ÓÖ»¶ÁÐÞÊÎ·û
     bool canZoom;
+#pragma warning restore IDE0044 // Ìí¼ÓÖ»¶ÁÐÞÊÎ·û
     public void OnPointerEnter(PointerEventData eventData)
     {
 #if UNITY_STANDALONE

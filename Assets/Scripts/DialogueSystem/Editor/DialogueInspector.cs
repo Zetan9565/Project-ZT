@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 
 [CustomEditor(typeof(Dialogue))]
 public class DialogueInspector : Editor
@@ -332,7 +332,7 @@ public class DialogueInspector : Editor
                                                 EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                                     itemToSubmit.FindPropertyRelative("item"), new GUIContent("需提交的道具"));
                                                 _lineCount++;
-                                                if (this.dialogue.Words[index].Options[_index].ItemToSubmit.item)
+                                                if (this.dialogue.Words[index].Options[_index].ItemToSubmit.Item)
                                                 {
                                                     EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                                         "道具名称", this.dialogue.Words[index].Options[_index].ItemToSubmit.ItemName);
@@ -347,7 +347,7 @@ public class DialogueInspector : Editor
                                             EditorGUI.PropertyField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                                 itemCanGet.FindPropertyRelative("item"), new GUIContent("可获得的道具"));
                                             _lineCount++;
-                                            if (this.dialogue.Words[index].Options[_index].ItemCanGet.item)
+                                            if (this.dialogue.Words[index].Options[_index].ItemCanGet.Item)
                                             {
                                                 EditorGUI.LabelField(new Rect(_rect.x, _rect.y + lineHeightSpace * _lineCount, _rect.width, lineHeight),
                                                     "道具名称", this.dialogue.Words[index].Options[_index].ItemCanGet.ItemName);
@@ -457,11 +457,11 @@ public class DialogueInspector : Editor
                                                 if (optionType.intValue == (int)WordsOptionType.SubmitAndGet)
                                                 {
                                                     _lineCount++;//需提交
-                                                    if (this.dialogue.Words[index].Options[_index].ItemToSubmit.item)
+                                                    if (this.dialogue.Words[index].Options[_index].ItemToSubmit.Item)
                                                         _lineCount += 2;//道具名称、数量
                                                 }
                                                 _lineCount++;//可获得
-                                                if (this.dialogue.Words[index].Options[_index].ItemCanGet.item)
+                                                if (this.dialogue.Words[index].Options[_index].ItemCanGet.Item)
                                                     _lineCount += 2;//道具名称、可获得数量
                                                 if (optionType.intValue == (int)WordsOptionType.OnlyGet)
                                                     _lineCount++; //只在未持有

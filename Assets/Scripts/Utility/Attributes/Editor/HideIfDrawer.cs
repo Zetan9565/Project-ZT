@@ -23,7 +23,7 @@ public class HideIfDrawer : EnhancedAttributeDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         HideIfAttribute hideAttr = (HideIfAttribute)attribute;
-        this.TryGetOnwerValue(property, out var owner);
+        this.TryGetOwnerValue(property, out var owner);
         shouldHide = ICheckValueAttribute.Check(owner, hideAttr);
         if (!shouldHide || hideAttr.readOnly) return base.GetPropertyHeight(property, label);
         return -EditorGUIUtility.standardVerticalSpacing;

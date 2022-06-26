@@ -2,8 +2,8 @@
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
 
 public class PlantWindow : Window, IHideable
 {
@@ -18,7 +18,7 @@ public class PlantWindow : Window, IHideable
     [SerializeField]
     private Text nameText;
     [SerializeField]
-    private ItemSlotBase icon;
+    private ItemSlot icon;
     [SerializeField]
     private Text description;
 
@@ -62,9 +62,8 @@ public class PlantWindow : Window, IHideable
 
     private void OnSeeSelected(SeedAgent element)
     {
-        if (element.IsSelected) ShowDescription(element.Data);
-        else if (element.Data && element.Data.GetModule<SeedModule>().Crop == currentInfo)
-            HideDescription();
+        if (element) ShowDescription(element.Data);
+        else HideDescription();
     }
 
     public void CreatPreview(CropInformation info)
@@ -88,7 +87,7 @@ public class PlantWindow : Window, IHideable
     {
         Vector3 position;
         if (ZetanUtility.IsMouseInsideScreen)
-            position = Camera.main.ScreenToWorldPoint(InputManager.mousePosition);
+            position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         else
             position = preview.transform.position;
 
@@ -203,7 +202,7 @@ public class PlantWindow : Window, IHideable
         if (args.Length < 1) return false;
         CurrentField = args[0] as Field;
         if (!CurrentField) return false;
-        BackpackManager.Instance.Inventory.TryGetDatas(x => x.Model.GetModule<SeedModule>() is not null, out var seeds);
+        BackpackManager.Instance.Inventory.TryGetDatas(x => x.Model.GetModule<SeedModule>(), out var seeds);
         seedList.Refresh(seeds.Select(x => x.source.Model));
         HideDescription();
         pageSelector.SetValueWithoutNotify(0);

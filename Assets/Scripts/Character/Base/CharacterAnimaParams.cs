@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "char anima param names", menuName = "Zetan Studio/角色系统/角色动画参数名称")]
+[CreateAssetMenu(fileName = "char anima param names", menuName = "Zetan Studio/角色/状态机/角色动画参数名称")]
 public class CharacterAnimaParams : SingletonScriptableObject<CharacterAnimaParams>
 {
     [SerializeField]
@@ -13,8 +13,8 @@ public class CharacterAnimaParams : SingletonScriptableObject<CharacterAnimaPara
     public static string DirectionY => Instance.directionY;
 
     [SerializeField]
-    private string dash = "dash";
-    public static string Dash => Instance.dash;
+    private string flash = "flash";
+    public static string Flash => Instance.flash;
 
     [SerializeField]
     private string roll = "roll";

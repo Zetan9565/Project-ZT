@@ -2,8 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("Zetan Studio/管理器/游戏管理器")]
@@ -46,15 +47,14 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
             dontDestroyOnLoadOnce = true;
             StartCoroutine(InitDelay());
         }
-        else
-        {
-            DestroyImmediate(gameObject);
-        }
+        else DestroyImmediate(gameObject);
     }
 
     private void OnApplicationQuit()
     {
         IsExiting = true;
+        QuitAttribute.QuitAll();
+        QuitMethodAttribute.QuitAll();
     }
 
     private IEnumerator InitDelay()
@@ -71,8 +71,6 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 
     public static Dictionary<string, TalkerInformation> TalkerInfos { get; } = new Dictionary<string, TalkerInformation>();
 
-    public static Dictionary<string, Item> Items { get; } = new Dictionary<string, Item>();
-
     public static void InitGame(params Type[] exceptions)
     {
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -84,32 +82,155 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         EnemyInfos.Clear();
         var enemies = Resources.LoadAll<EnemyInformation>("Configuration");
         foreach (var e in enemies)
-            EnemyInfos.Add(e.ID, e);
-
-        Items.Clear();
-        var items = Resources.LoadAll<Item>("Configuration");
-        foreach (var i in items)
-            Items.Add(i.ID, i);
+            EnemyInfos[e.ID] = e;
 
         TalkerInfos.Clear();
         var talkers = Resources.LoadAll<TalkerInformation>("Configuration");
         foreach (var t in talkers)
-            TalkerInfos.Add(t.ID, t);
+            TalkerInfos[t.ID] = t;
 
         if (exceptions == null || !exceptions.Contains(typeof(TriggerHolder)))
             foreach (var tholder in FindObjectsOfType<TriggerHolder>())
                 tholder.Init();
         PlayerManager.Instance.Init();
-        DialogueManager.Instance.Init();
         if (!UIManager.Instance || !UIManager.Instance.gameObject) Instantiate(Instance.UIPrefab);
         UIManager.Instance.Init();
-        FieldManager.Instance.Init();
-        QuestManager.Instance.Init();
+        FieldManager.Init();
+        //QuestManager.Init();
         MessageManager.Instance.Init();
         MapManager.Instance.Init();
         MapManager.Instance.SetPlayer(PlayerManager.Instance.PlayerTransform);
         MapManager.Instance.RemakeCamera();
-        GatherManager.Instance.Init();
-        WindowsManager.Clear();
+        //GatherManager.Init();
+        //WindowsManager.Init();
+        InitAttribute.InitAll();
+        InitMethodAttribute.InitAll();
+    }
+}
+
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class InitAttribute : Attribute
+{
+    public readonly string method;
+    public readonly int priority;
+
+    public InitAttribute(string method, int priority = 0)
+    {
+        this.method = method;
+        this.priority = priority;
+    }
+
+    public static void InitAll()
+    {
+        var types = new List<Type>(ZetanUtility.GetTypesWithAttribute<InitAttribute>());
+        types.Sort((x, y) =>
+        {
+            var attrx = x.GetCustomAttribute<InitAttribute>();
+            var attry = y.GetCustomAttribute<InitAttribute>();
+            if (attrx.priority < attry.priority)
+                return -1;
+            else if (attrx.priority > attry.priority)
+                return 1;
+            return 0;
+        });
+        foreach (var type in types)
+        {
+            try
+            {
+                type.GetMethod(type.GetCustomAttribute<InitAttribute>().method, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).Invoke(null, null);
+            }
+            catch { }
+        }
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method)]
+public class InitMethodAttribute : Attribute
+{
+    public readonly int priority;
+
+    public InitMethodAttribute(int priority = 0)
+    {
+        this.priority = priority;
+    }
+
+    public static void InitAll()
+    {
+        var methods = new List<MethodInfo>(ZetanUtility.GetMethodsWithAttribute<InitMethodAttribute>());
+        methods.Sort((x, y) =>
+        {
+            var attrx = x.GetCustomAttribute<InitMethodAttribute>();
+            var attry = y.GetCustomAttribute<InitMethodAttribute>();
+            if (attrx.priority < attry.priority)
+                return -1;
+            else if (attrx.priority > attry.priority)
+                return 1;
+            return 0;
+        });
+        foreach (var method in methods)
+        {
+            try
+            {
+                method.Invoke(null, null);
+            }
+            catch { }
+        }
+    }
+}
+
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class QuitAttribute : Attribute
+{
+    public readonly string method;
+
+    public QuitAttribute(string method)
+    {
+        this.method = method;
+    }
+
+    public static void QuitAll()
+    {
+        foreach (var type in ZetanUtility.GetTypesWithAttribute<QuitAttribute>())
+        {
+            try
+            {
+                type.GetMethod(type.GetCustomAttribute<InitAttribute>().method, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public).Invoke(null, null);
+            }
+            catch { }
+        }
+    }
+}
+
+[AttributeUsage(AttributeTargets.Method)]
+public class QuitMethodAttribute : Attribute
+{
+    public readonly int priority;
+
+    public QuitMethodAttribute(int priority = 0)
+    {
+        this.priority = priority;
+    }
+
+    public static void QuitAll()
+    {
+        var methods = new List<MethodInfo>(ZetanUtility.GetMethodsWithAttribute<QuitMethodAttribute>());
+        methods.Sort((x, y) =>
+        {
+            var attrx = x.GetCustomAttribute<QuitMethodAttribute>();
+            var attry = y.GetCustomAttribute<QuitMethodAttribute>();
+            if (attrx.priority < attry.priority)
+                return -1;
+            else if (attrx.priority > attry.priority)
+                return 1;
+            return 0;
+        });
+        foreach (var method in methods)
+        {
+            try
+            {
+                method.Invoke(null, null);
+            }
+            catch { }
+        }
     }
 }

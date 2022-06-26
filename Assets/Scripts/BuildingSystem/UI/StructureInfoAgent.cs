@@ -52,7 +52,7 @@ public class StructureInfoAgent : ListItem<StructureInfoAgent, StructureInformat
         if(eventData.button == PointerEventData.InputButton.Right)
             TryBuild();
         else if(eventData.button == PointerEventData.InputButton.Left)
-            window.ShowBuiltList(Info);
+            window.ShowBuiltList(Data);
 #elif UNITY_ANDROID
         if (touchTime < 0.5f && window)
         {
@@ -118,7 +118,7 @@ public class StructureInfoAgent : ListItem<StructureInfoAgent, StructureInformat
     public void OnPointerEnter(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
-        window.ShowDescription(Info);
+        window.ShowDescription(Data);
 #endif
     }
 

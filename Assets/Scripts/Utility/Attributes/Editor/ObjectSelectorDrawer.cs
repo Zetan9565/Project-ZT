@@ -10,7 +10,7 @@ using UnityEngine;
 public class ObjectSelectorDrawer : PropertyDrawer
 {
     private IEnumerable<Object> objects;
-    private readonly static string[] candidateNames = { "_name", "Name", "_Name" };
+    private readonly static string[] candidateNames = { "Name", "_Name", "_name" };
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
@@ -36,11 +36,9 @@ public class ObjectSelectorDrawer : PropertyDrawer
                             string memberAsTooltip = null, string nameNull = null, string title = null,
                             bool displayNone = false, bool displayAdd = false)
     {
-        var menu = type.GetCustomAttribute<CreateAssetMenuAttribute>();
-        var nameNew = menu?.menuName?.Split('/')?[^1] ?? type.Name;
         Draw(type, () => GetDropdown(property, memberAsName, memberAsGroup, memberAsTooltip, objects,
-                               string.IsNullOrEmpty(title) ? label.text : title, displayNone, displayAdd, type, menu,
-                               nameNew), position, property, label, memberAsName, memberAsTooltip, nameNull);
+                               string.IsNullOrEmpty(title) ? label.text : title, displayNone, displayAdd, type),
+                               position, property, label, memberAsName, memberAsTooltip, nameNull);
     }
     public static void Draw<T>(Rect position, SerializedProperty property, GUIContent label, IEnumerable<T> objects,
                                string memberAsName = null, string memberAsGroup = null, string memberAsTooltip = null,
@@ -48,28 +46,41 @@ public class ObjectSelectorDrawer : PropertyDrawer
                                bool displayAdd = false) where T : Object
     {
         var type = typeof(T);
-        var menu = type.GetCustomAttribute<CreateAssetMenuAttribute>();
-        var nameNew = menu?.menuName?.Split('/')?[^1] ?? type.Name;
         Draw(type, () => GetDropdown(property, memberAsName, memberAsGroup, memberAsTooltip, objects,
-                               string.IsNullOrEmpty(title) ? label.text : title, displayNone, displayAdd, type, menu,
-                               nameNew), position, property, label, memberAsName, memberAsTooltip, nameNull);
+                               string.IsNullOrEmpty(title) ? label.text : title, displayNone, displayAdd, type),
+                               position, property, label, memberAsName, memberAsTooltip, nameNull);
     }
 
     private static AdvancedDropdown GetDropdown<T>(SerializedProperty property, string memberAsName,
                                                    string memberAsGroup, string memberAsTooltip, IEnumerable<T> objects,
-                                                   string title, bool displayNone, bool displayAdd, System.Type type,
-                                                   CreateAssetMenuAttribute menu, string nameNew) where T : Object
+                                                   string title, bool displayNone, bool displayAdd, System.Type type) where T : Object
     {
+        bool showAdd = displayAdd && typeof(ScriptableObject).IsAssignableFrom(type)
+                       && (type.GetCustomAttribute<CreateAssetMenuAttribute>() != null || TypeCache.GetTypesDerivedFrom(type).Any(x => x.GetCustomAttribute<CreateAssetMenuAttribute>() != null));
         var dropdown = new AdvancedDropdown<T>(objects, i => { property.objectReferenceValue = i; property.serializedObject.ApplyModifiedProperties(); },
                                                i => GetName(memberAsName, i), i => GetGroup(memberAsGroup, i), ZetanUtility.Editor.GetIconForObject,
                                                i => GetTooltip(memberAsName, memberAsTooltip, i), title: title,
-                                               addCallbacks: displayAdd && !type.IsAbstract && typeof(ScriptableObject).IsAssignableFrom(type) ? (nameNew, addCallback) : default);
+                                               addCallbacks: showAdd ? addCallback() : default);
         dropdown.displayNone = displayNone;
         return dropdown;
 
-        void addCallback()
+        (string, System.Action)[] addCallback()
         {
-            AddCallback(property, type, menu?.fileName ?? $"new {Regex.Replace(type.Name, "([a-z])([A-Z])", "$1 $2").ToLower()}");
+            List<(string, System.Action)> callbacks = new List<(string, System.Action)>();
+            {
+                var menu = type.GetCustomAttribute<CreateAssetMenuAttribute>();
+                if (!type.IsAbstract && menu != null)
+                    callbacks.Add((menu.menuName?.Split('/')?[^1] ?? type.Name, () => AddCallback(property, type, menu?.fileName ?? $"new {Regex.Replace(type.Name, "([a-z])([A-Z])", "$1 $2").ToLower()}")));
+            }
+            foreach (var t in TypeCache.GetTypesDerivedFrom(type))
+            {
+                var tt = t;
+                var m = tt.GetCustomAttribute<CreateAssetMenuAttribute>();
+                if (m == null) continue;
+                var n = m?.menuName?.Split('/')?[^1] ?? tt.Name;
+                callbacks.Add((n, () => AddCallback(property, tt, m?.fileName ?? $"new {Regex.Replace(t.Name, "([a-z])([A-Z])", "$1 $2").ToLower()}")));
+            }
+            return callbacks.ToArray();
         }
     }
     private static void Draw(System.Type type, System.Func<AdvancedDropdown> getDropdown, Rect position, SerializedProperty property, GUIContent label, string memberAsName, string memberAsTooltip, string nameNull)
@@ -162,17 +173,17 @@ public class ObjectSelectorDrawer : PropertyDrawer
         {
             if (obj.GetType().GetField(memberAsName, ZetanUtility.CommonBindingFlags) is FieldInfo field)
             {
-                name = field.GetValue(obj).ToString();
+                name = field.GetValue(obj)?.ToString();
                 break;
             }
             else if (obj.GetType().GetProperty(memberAsName, ZetanUtility.CommonBindingFlags) is PropertyInfo property)
             {
-                name = property.GetValue(obj).ToString();
+                name = property.GetValue(obj)?.ToString();
                 break;
             }
             else if (obj.GetType().GetMethod(memberAsName, ZetanUtility.CommonBindingFlags) is MethodInfo method && method.ReturnType == typeof(string) && method.GetParameters().Where(x => !x.IsOptional).Count() < 1)
             {
-                name = method.Invoke(obj, null).ToString();
+                name = method.Invoke(obj, null)?.ToString();
                 break;
             }
             if (i < candidateNames.Length) memberAsName = candidateNames[i];

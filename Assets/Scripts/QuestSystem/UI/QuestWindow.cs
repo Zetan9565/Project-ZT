@@ -3,6 +3,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.ItemSystem.UI;
+using ZetanStudio.UI;
 
 public class QuestWindow : Window, IHideable
 {
@@ -34,7 +36,7 @@ public class QuestWindow : Window, IHideable
     private Button desCloseButton;
 
     [SerializeField]
-    private TabBar tabBar;
+    private TabbedBar tabBar;
 
     [SerializeField]
     private ItemGrid rewardList;
@@ -57,9 +59,9 @@ public class QuestWindow : Window, IHideable
             ///因为questList的Prefab存在自我引用问题(Prefab系统的祖传BUG），需要替换为真正的Prefab而不是自我引用
             if (x.SubList.Prefab == x) x.SubList.PreplacePrefab(questList.Prefab);
             x.SubList.Selectable = true;
-            x.SubList.SetSelectCallback(OnSelect);
+            x.SubList.SetSelectCallback(OnSelectQuest);
         });
-        questList.SetSelectCallback(OnSelect);
+        questList.SetSelectCallback(OnSelectQuest);
         abandonButton.onClick.AddListener(AbandonSelectedQuest);
         traceButton.onClick.AddListener(TraceSelectedQuest);
         desCloseButton.onClick.AddListener(() =>
@@ -69,21 +71,18 @@ public class QuestWindow : Window, IHideable
         ShowOrHideDescription(false);
     }
 
-    private void OnSelect(QuestAgent element)
+    private void OnSelectQuest(QuestAgent element)
     {
-        if (!element.Data.group && element.Data.quests.Count > 0)
+        if (element && element.Data.quests.Count > 0)
         {
-            if (element.IsSelected)
+            if (!element.Data.group)
             {
                 selectedAgent = element;
                 selectedQuest = element.Data.quests[0];
                 ShowOrHideDescription(true);
             }
-            else if (element.Data.quests[0] == selectedQuest)
-            {
-                ShowOrHideDescription(false);
-            }
         }
+        else ShowOrHideDescription(false);
     }
 
     /// <summary>
@@ -94,7 +93,7 @@ public class QuestWindow : Window, IHideable
         if (!selectedQuest) return;
         ConfirmWindow.StartConfirm(Tr("已消耗的道具不会退回，确定放弃此任务吗？"), delegate
         {
-            if (QuestManager.Instance.AbandonQuest(selectedQuest))
+            if (QuestManager.AbandonQuest(selectedQuest))
             {
                 ShowOrHideDescription(false);
             }
@@ -112,10 +111,10 @@ public class QuestWindow : Window, IHideable
         switch (index)
         {
             case 1:
-                toShow = Convert(QuestManager.Instance.QuestInProgress);
+                toShow = Convert(QuestManager.QuestInProgress);
                 break;
             case 2:
-                toShow = Convert(QuestManager.Instance.QuestFinished);
+                toShow = Convert(QuestManager.QuestFinished);
                 break;
         }
         RefreshList();
@@ -137,7 +136,7 @@ public class QuestWindow : Window, IHideable
             if (selectedQuest.IsFinished)
                 objectives.AppendFormat("-{0}{1}", displayObjectives[i].DisplayName, endLine);
             else
-                objectives.AppendFormat("-{0}{1}{2}", displayObjectives[i], displayObjectives[i].IsComplete ? $"\t{Tr("(达成)")}" : string.Empty, endLine);
+                objectives.AppendFormat("-{0}{1}{2}", displayObjectives[i], displayObjectives[i].IsComplete ? $" {Tr("(达成)")}" : string.Empty, endLine);
         }
         objectiveText.text = objectives.ToString();
         rewardList.Refresh(ItemSlotData.Convert(selectedQuest.Model.RewardItems, maxRewardCount));
@@ -180,16 +179,16 @@ public class QuestWindow : Window, IHideable
         {
             bool acceeser(QuestAgent agent)
             {
-                int position = agent.SubList.FindPosition(x => x == qb.Quest);
-                if (position > 0)
+                int index = agent.SubList.FindIndex(x => x.Data.quests.Contains(qb.Quest));
+                if (index > -1)
                 {
-                    questList.SetSelected(agent.Position, true);
-                    agent.SubList.SetSelected(position, true);
+                    agent.SetSelected();
+                    agent.SubList.SetSelected(index, true);
                     return true;
                 }
                 return false;
             }
-            questList.ForEachBreakable(acceeser);
+            questList.ForEach(acceeser);
         }
         return true;
     }
@@ -197,7 +196,7 @@ public class QuestWindow : Window, IHideable
     protected override bool OnClose(params object[] args)
     {
         toShow = null;
-        questList.DeselectAll();
+        questList.ClearSelection();
         return true;
     }
 
@@ -243,7 +242,7 @@ public class QuestWindow : Window, IHideable
     {
         if (IsOpen && msg.Length > 0 && msg[0] is QuestData)
         {
-            RefreshByTab(tabBar.TabIndex);
+            RefreshByTab(tabBar.SelectedIndex);
         }
     }
     private void OnObjectiveUpdate(params object[] msg)

@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using ZetanStudio.Item.Craft;
+using ZetanStudio.ItemSystem.Craft;
 
 [DisallowMultipleComponent]
 public class CraftTool : Structure2D

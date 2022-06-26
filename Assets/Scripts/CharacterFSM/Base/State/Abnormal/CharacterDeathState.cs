@@ -14,7 +14,7 @@
     {
         var type = typeof(T);
         if (type == GetType()) return true;
-        else if (typeof(CharacterNormalState).IsAssignableFrom(type) && transition is BoolTransition b && b.name == "relive" && b.value) return true;
+        else if (typeof(CharacterNormalState).IsAssignableFrom(type) && transition is StringTransition s && s.value == "relive") return true;
         return false;
     }
 }

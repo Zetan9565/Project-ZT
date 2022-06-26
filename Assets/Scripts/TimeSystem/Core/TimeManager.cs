@@ -370,7 +370,7 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     {
         OnTimePassed?.Invoke(realSecond);
         timeStamp += realSecond;
-        timeline =  Mathf.Repeat((float)timeStamp * multiples / HourToSeconds, 24);
+        timeline = Mathf.Repeat((float)timeStamp * multiples / HourToSeconds, 24);
         CheckDayChange();
         UpdateTime();
         SetDirty();
@@ -386,14 +386,23 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
         }
     }
 
-    public void SaveData(SaveData data)
+    [SaveMethod]
+    public static void SaveData(SaveData saveData)
     {
-        data.totalTime = TimeStamp;
+        if (!Instance) return;
+        var total = new SaveDataItem();
+        total.stringList.Add(Instance.timeStamp.ToString());
+        saveData.data["totalTime"] = total;
     }
-    public void LoadData(SaveData data)
+    [LoadMethod]
+    public static void LoadData(SaveData saveData)
     {
-        timeStamp = data.totalTime;
-        SetTime(data.totalTime);
+        if (!Instance) return;
+        if (saveData.data.TryGetValue("totalTime", out var total) && total.stringList.Count > 0 && decimal.TryParse(total.stringList[0], out var timeStamp))
+        {
+            Instance.timeStamp = timeStamp;
+            Instance.SetTime(timeStamp);
+        }
     }
 
     public int GetDaysSince(decimal timeStamp)

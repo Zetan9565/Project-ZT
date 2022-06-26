@@ -12,7 +12,7 @@ public class EnumDrawer : PropertyDrawer
             var attr = (EnumAttribute)attribute;
             foreach (var type in TypeCache.GetTypesDerivedFrom<ScriptableObjectEnum>())
             {
-                if (!type.IsAbstract && !type.IsGenericTypeDefinition)
+                if (!type.IsAbstract && !type.IsGenericType)
                 {
                     var generics = type.BaseType.GetGenericArguments();
                     if (attr.type == generics[1])

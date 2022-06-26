@@ -97,7 +97,7 @@ namespace ZetanStudio.BehaviourTree.Nodes
                 //if (variable.isShared) field.SetValue(this, this.owner.GetVariable(variable.name));
                 //else if (variable.isGlobal) field.SetValue(this, BehaviourManager.Instance.GetVariable(variable.name));
                 if (variable.isShared) variable.Link(Tree.GetVariable(variable.name));
-                else if (variable.isGlobal) variable.Link(BehaviourManager.Instance.GetVariable(variable.name));
+                else if (variable.isGlobal) variable.Link(BehaviourTreeManager.Instance.GetVariable(variable.name));
             }
             Shortcut = new NodeShortcut(Tree.Executor);
             OnAwake();
@@ -465,7 +465,7 @@ namespace ZetanStudio.BehaviourTree.Nodes
         public Rigidbody rigidbody;
         public Rigidbody2D rigidbody2D;
 
-        public NodeShortcut(BehaviourExecutor executor)
+        public NodeShortcut(BehaviourTreeExecutor executor)
         {
             gameObject = executor.gameObject;
             transform = executor.transform;

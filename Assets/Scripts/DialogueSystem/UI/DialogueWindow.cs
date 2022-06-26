@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.ItemSystem.UI;
+using ZetanStudio.UI;
 
 public class DialogueWindow : InteractionWindow<Talker>, IHideable
 {
@@ -10,10 +13,6 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     private Text nameText;
     [SerializeField]
     private Text wordsText;
-    [SerializeField]
-    private float textLineHeight = 22.35832f;
-    [SerializeField]
-    private int lineAmount = 5;
 
     [SerializeField]
     private Transform buttonArea;
@@ -27,15 +26,25 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     private Button shopButton;
     [SerializeField]
     private Button questButton;
+    [SerializeField]
+    private Button nextButton;
+    [SerializeField]
+    private Text nextBtnText;
+    [SerializeField]
+    private Button rejectButton;
+    [SerializeField]
+    private Text rejectBtnText;
 
     [SerializeField]
+    private GameObject optionArea;
+    [SerializeField]
+    private GameObject optionTitleArea;
+    [SerializeField]
+    private Text optionTitle;
+    [SerializeField]
+    private TabbedBar optionTab;
+    [SerializeField]
     private ButtonWithTextList optionList;
-    [SerializeField]
-    private Button pageUpButton;
-    [SerializeField]
-    private Button pageDownButton;
-    [SerializeField]
-    private Text pageText;
 
     [SerializeField]
     private CanvasGroup descriptionWindow;
@@ -68,33 +77,9 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     private readonly Stack<DialogueWordsData> wordsToSay = new Stack<DialogueWordsData>();
     private readonly Stack<WordsOptionData> choiceOptionSaid = new Stack<WordsOptionData>();
 
-    #region 选项相关
-    private readonly List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
-    public int OptionsCount => optionList.Count;
-    public ButtonWithText FirstOption
-    {
-        get
-        {
-            if (optionList.Count < 1) return null;
-            return optionList[0];
-        }
-    }
+    private Action next;
 
-    private int maxPage = 1;
-    private int page = 1;
-    public int Page
-    {
-        get
-        {
-            return page;
-        }
-        private set
-        {
-            if (value > 1) page = value;
-            else page = 1;
-        }
-    }
-    #endregion
+    private readonly List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
 
     #region 任务相关
     private QuestData currentQuest;
@@ -122,7 +107,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
 
     public void StartDialogue(Dialogue dialogue)
     {
-        dialogueToSay.Push(DialogueManager.Instance.GetOrCreateDialogueData(dialogue));
+        dialogueToSay.Push(DialogueManager.GetOrCreateDialogueData(dialogue));
         wordsToSay.Clear();
         DoSay();
     }
@@ -137,78 +122,49 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     private void DoSay()
     {
         ZetanUtility.SetActive(wordsText.gameObject, true);
-        SetPageArea(false, false, false);
         SayNextWords();
     }
     #endregion
 
     #region 处理对话选项
-    private void HandlingOptions()
+    private void SetNextClick(string text, Action action)
     {
-        buttonDatas.Clear();
+        nextBtnText.text = text;
+        ZetanUtility.SetActive(nextButton, true);
+        nextButton.onClick.RemoveAllListeners();
+        nextButton.onClick.AddListener(() => action?.Invoke());
+        next = action;
+    }
+    private void SetRejectClick(string text, Action action)
+    {
+        rejectBtnText.text = text;
+        ZetanUtility.SetActive(rejectButton, true);
+        rejectButton.onClick.RemoveAllListeners();
+        rejectButton.onClick.AddListener(() => action?.Invoke());
+    }
+    private void HandlingButtons()
+    {
         if (dialogueToSay.Count > 0 || wordsToSay.Count > 0 && (!currentWords.model.NeedToChusCorrectOption || currentWords.IsDone))
-        {
-            buttonDatas.Add(new ButtonWithTextData("继续", delegate { SayNextWords(); }));
-        }
-
-        if (!currentOption && !currentQuest)
-        {
-            var cmpltQuest = currentTalker.QuestInstances.Where(x => x.InProgress && x.IsComplete);
-
-            if (cmpltQuest != null && cmpltQuest.Count() > 0)
-            {
-                foreach (var quest in cmpltQuest)
-                {
-                    buttonDatas.Add(new ButtonWithTextData($"{quest.Title}(已完成)", delegate
-                    {
-                        currentQuest = quest;
-                        ShowButtons(false, false, false, false);
-                        StartDialogue(quest.Model.CompleteDialogue);
-                    }));
-                }
-            }
-        }
+            SetNextClick("继续", SayNextWords);
         if (wordsToSay.Count < 1)//最后一句
         {
             //完成剧情用对话时，结束对话
             if (currentWords && currentWords.parent && currentWords.parent.model.StoryDialogue && currentWords.IsDone)
             {
-                buttonDatas.Add(new ButtonWithTextData("结束", delegate
+                SetNextClick("结束", delegate
                 {
                     OnFinishDialogueEvent?.Invoke();
                     Close();
-                }));
-                RefreshOptionUI();
-                return;
+                });
             }
-            if (CurrentType == DialogueType.Gift)
-            {
-                buttonDatas.Add(new ButtonWithTextData("返回", delegate { GoBackDefault(); }));
-            }
-            else
-            {
-                if (currentQuest)//这是由任务引发的对话
-                {
-                    HandlingLast_Quest();
-                }
-                else if (currentSubmitObj)//这是由提交目标引发的对话
-                {
-                    HandlingLast_SumbitObj();
-                }
-                else if (currentTalkObj)//这是由对话目标引发的对话
-                {
-                    HandlingLast_TalkObj();
-                }
-                else if (currentTalker)//普通对话
-                {
-                    HandlingLast_Normal();
-                }
-            }
-            OnFinishDialogueEvent?.Invoke();
+            else if (CurrentType == DialogueType.Gift) SetNextClick("返回", GoBackDefault);
         }
+    }
+    private void HandlingOptions()
+    {
         if (currentWords)
         {
-            foreach (var option in currentWords.optionDatas)
+            foreach (var option in currentWords.OptionDatas)
             {
                 if (!option.isDone || option.model.OptionType != WordsOptionType.Choice)
                 {
@@ -222,9 +178,18 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                 }
             }
         }
-        RefreshOptionUI();
+        RefreshOptions();
     }
-    private void HandlingQuestOptions()
+
+    private void RefreshOptions(string title = null)
+    {
+        title ??= Tr("互动");
+        optionTitle.text = title;
+        optionList.Refresh(buttonDatas);
+        ZetanUtility.SetActive(optionArea, optionList.Count > 0);
+    }
+
+    private void RefreshQuestOptions()
     {
         var cmpltQuests = new List<QuestData>();
         var norQuests = new List<QuestData>();
@@ -238,7 +203,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         buttonDatas.Clear();
         foreach (var quest in cmpltQuests)
         {
-            buttonDatas.Add(new ButtonWithTextData(quest.Title + "(完成)", delegate
+            buttonDatas.Add(new ButtonWithTextData(quest.Title + "(已完成)", delegate
             {
                 currentQuest = quest;
                 CurrentType = DialogueType.Quest;
@@ -256,39 +221,90 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                 StartDialogue(quest.InProgress ? quest.Model.OngoingDialogue : quest.Model.BeginDialogue);
             }));
         }
-        RefreshOptionUI();
+        RefreshOptions(Tr("任务"));
     }
+    private void HandlingLastWords()
+    {
+        if (!currentOption && !currentQuest && (!currentWords || currentWords.OptionDatas.Count < 1))
+        {
+            var cmpltQuest = currentTalker.QuestInstances.Where(x => x.InProgress && x.IsComplete);
 
+            if (cmpltQuest != null && cmpltQuest.Count() > 0)
+            {
+                foreach (var quest in cmpltQuest)
+                {
+                    buttonDatas.Add(new ButtonWithTextData($"{quest.Title}(已完成)", delegate
+                    {
+                        currentQuest = quest;
+                        ShowButtons(false, false, false, false);
+                        StartDialogue(quest.Model.CompleteDialogue);
+                    }));
+                }
+                RefreshOptions("任务");
+            }
+        }
+        if (CurrentType != DialogueType.Gift)
+        {
+            if (currentQuest)//这是由任务引发的对话
+            {
+                HandlingLast_Quest();
+            }
+            else if (currentSubmitObj)//这是由提交目标引发的对话
+            {
+                HandlingLast_SumbitObj();
+            }
+            else if (currentTalkObj)//这是由对话目标引发的对话
+            {
+                HandlingLast_TalkObj();
+            }
+            else if (currentTalker)//普通对话
+            {
+                HandlingLast_Normal();
+            }
+        }
+        OnFinishDialogueEvent?.Invoke();
+    }
     private void HandlingLast_Quest()
     {
         if (!currentQuest.InProgress || currentQuest.IsComplete) ShowQuestDescription(currentQuest);
         if (!currentQuest.IsComplete && !currentQuest.InProgress)
         {
-            buttonDatas.Add(new ButtonWithTextData("接受", delegate
+            SetNextClick("接受", delegate
             {
-                if (QuestManager.Instance.AcceptQuest(currentQuest))
+                if (QuestManager.AcceptQuest(currentQuest))
                 {
                     CurrentType = DialogueType.Normal;
                     ShowTalkerQuest();
                 }
-            }));
+            });
         }
         else if (currentQuest.IsComplete && currentQuest.InProgress)
         {
-            buttonDatas.Add(new ButtonWithTextData("完成", delegate
+            SetNextClick("完成", delegate
             {
-                if (QuestManager.Instance.CompleteQuest(currentQuest))
+                if (QuestManager.CompleteQuest(currentQuest))
                 {
                     CurrentType = DialogueType.Normal;
                     ShowTalkerQuest();
                 }
-            }));
+            });
         }
-        buttonDatas.Add(new ButtonWithTextData(currentQuest.InProgress ? "返回" : "拒绝", delegate
+        if (!currentQuest.IsComplete && currentQuest.InProgress)
         {
-            CurrentType = DialogueType.Normal;
-            ShowTalkerQuest();
-        }));
+            SetNextClick("返回", delegate
+            {
+                CurrentType = DialogueType.Normal;
+                ShowTalkerQuest();
+            });
+        }
+        else
+        {
+            SetRejectClick(currentQuest.InProgress ? "返回" : "拒绝", delegate
+            {
+                CurrentType = DialogueType.Normal;
+                ShowTalkerQuest();
+            });
+        }
     }
     private void HandlingLast_TalkObj()
     {
@@ -300,12 +316,12 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
             //该目标是任务的最后一个目标，则可以直接提交任务
             if (qParent.currentQuestHolder == currentTalker.GetData<TalkerData>() && qParent.IsComplete && qParent.Objectives.IndexOf(currentTalkObj) == qParent.Objectives.Count - 1)
             {
-                buttonDatas.Add(new ButtonWithTextData("继续", delegate
+                SetNextClick("继续", delegate
                 {
                     currentQuest = qParent;
                     CurrentType = DialogueType.Quest;
                     StartDialogue(qParent.Model.CompleteDialogue);
-                }));
+                });
             }
         }
         currentTalkObj = null;//重置管理器的对话目标以防出错
@@ -315,7 +331,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         //双重确认，以防出错
         if (CheckSumbitAble(currentSubmitObj))
         {
-            BackpackManager.Instance.LoseItem(currentSubmitObj.Model.ItemToSubmit, currentSubmitObj.Model.Amount);
+            BackpackManager.Instance.Lose(currentSubmitObj.Model.ItemToSubmit, currentSubmitObj.Model.Amount);
             currentSubmitObj.UpdateSubmitState(currentSubmitObj.Model.Amount);
         }
         if (currentSubmitObj.IsComplete)
@@ -324,12 +340,12 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
             //若该目标是任务的最后一个目标，则可以直接提交任务
             if (qParent.currentQuestHolder == currentTalker.GetData<TalkerData>() && qParent.IsComplete && qParent.Objectives.IndexOf(currentSubmitObj) == qParent.Objectives.Count - 1)
             {
-                buttonDatas.Add(new ButtonWithTextData("继续", delegate
+                SetNextClick("继续", delegate
                 {
                     currentQuest = qParent;
                     CurrentType = DialogueType.Quest;
                     StartDialogue(qParent.Model.CompleteDialogue);
-                }));
+                });
             }
         }
         currentSubmitObj = null;//重置管理器的提交目标以防出错
@@ -382,84 +398,6 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         }
         currentTalker.OnTalkFinished();
     }
-
-    private void RefreshOptionUI()
-    {
-        //把第一页以外的选项隐藏
-        List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
-        for (int i = 0; i < lineAmount - (int)(wordsText.preferredHeight / textLineHeight) && i < this.buttonDatas.Count; i++)
-        {
-            buttonDatas.Add(this.buttonDatas[i]);
-        }
-        optionList.Refresh(buttonDatas);
-        CheckPages();
-    }
-    private void ClearOptions()
-    {
-        optionList.Clear();
-        CheckPages();
-    }
-
-    public static float CalculateLineHeight(Text text)
-    {
-        var extents = text.cachedTextGenerator.rectExtents.size * 0.5f;
-        var setting = text.GetGenerationSettings(extents);
-        var lineHeight = text.cachedTextGeneratorForLayout.GetPreferredHeight("A", setting);
-        return lineHeight * text.lineSpacing / setting.scaleFactor;
-    }
-
-    public void OptionPageUp()
-    {
-        if (Page <= 1 || !IsOpen || IsHidden) return;
-        int leftLineCount = lineAmount - (int)(wordsText.preferredHeight / textLineHeight);
-        if (Page > 0)
-        {
-            Page--;
-            List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
-            for (int i = 0; i < leftLineCount && i + Page < this.buttonDatas.Count; i++)
-            {
-                buttonDatas.Add(this.buttonDatas[i + Page]);
-            }
-            optionList.Refresh(buttonDatas);
-        }
-        if (Page <= 1 && maxPage > 1) SetPageArea(false, true, true);
-        else if (Page > 1 && maxPage > 1) SetPageArea(true, true, true);
-        pageText.text = Page.ToString() + "/" + maxPage.ToString();
-    }
-    public void OptionPageDown()
-    {
-        if (Page >= maxPage || !IsOpen || IsHidden) return;
-        int leftLineCount = lineAmount - (int)(wordsText.preferredHeight / textLineHeight);
-        if (Page < Mathf.CeilToInt(buttonDatas.Count * 1.0f / (leftLineCount * 1.0f)))
-        {
-            Page++;
-            List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
-            for (int i = 0; i < leftLineCount && i + Page < this.buttonDatas.Count; i++)
-            {
-                buttonDatas.Add(this.buttonDatas[i + Page]);
-            }
-            optionList.Refresh(buttonDatas);
-        }
-        if (Page >= maxPage && maxPage > 1) SetPageArea(true, false, true);
-        else if (Page < maxPage && maxPage > 1) SetPageArea(true, true, true);
-        pageText.text = Page.ToString() + "/" + maxPage.ToString();
-    }
-    private void CheckPages()
-    {
-        maxPage = Mathf.CeilToInt(buttonDatas.Count * 1.0f / ((lineAmount - (int)(wordsText.preferredHeight / textLineHeight)) * 1.0f));
-        if (maxPage > 1)
-        {
-            SetPageArea(false, true, true);
-            pageText.text = Page.ToString() + "/" + maxPage.ToString();
-        }
-        else SetPageArea(false, false, false);
-    }
-    private void SetPageArea(bool activeUp, bool activeDown, bool activeText)
-    {
-        ZetanUtility.SetActive(pageUpButton.gameObject, activeUp);
-        ZetanUtility.SetActive(pageDownButton.gameObject, activeDown);
-        ZetanUtility.SetActive(pageText.gameObject, activeText);
-    }
     #endregion
 
     #region 处理每句话
@@ -491,6 +429,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     }
     private void HandlingWords()
     {
+        ClearButtons();
         if (wordsToSay.Count < 1)
         {
             if (currentOption)//选项引发的对话最后一句
@@ -499,11 +438,13 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                     choiceOptionSaid.Pop();
                 var currentOption = this.currentOption;
                 this.currentOption = null;
+                if (currentOption.model.OptionType == WordsOptionType.SubmitAndGet || currentOption.model.OptionType == WordsOptionType.OnlyGet)
+                    SetNextClick("返回", GoBackDefault);
                 if (currentOption.model.OptionType != WordsOptionType.Choice || currentOption.model.OptionType == WordsOptionType.Choice && currentOption.model.DeleteWhenCmplt)
                     currentOption.isDone = true;
                 if (currentOption.model.OptionType == WordsOptionType.Choice && currentOption.parent.model.IsCorrectOption(currentOption.model))//选择型选项的最后一句
                 {
-                    foreach (var option in currentOption.parent.optionDatas.Where(x => x.model.OptionType == WordsOptionType.Choice))
+                    foreach (var option in currentOption.parent.OptionDatas.Where(x => x.model.OptionType == WordsOptionType.Choice))
                     {
                         option.isDone = true;
                     }
@@ -512,26 +453,34 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                         var preOption = choiceOptionSaid.Pop();
                         preOption.isDone = true;
                         if (choiceOptionSaid.Count < 1)
-                            foreach (var option in preOption.parent.optionDatas.Where(x => x.model.OptionType == WordsOptionType.Choice))
+                            foreach (var option in preOption.parent.OptionDatas.Where(x => x.model.OptionType == WordsOptionType.Choice))
                             {
                                 option.isDone = true;
                             }
                     }
                 }
                 else if (currentOption.model.GoBack || currentOption.parent.parent.model.StoryDialogue)
-                {
                     DoDialogue(currentOption.parent.parent.model, currentOption.indexToGoBack);
-                }
             }
+            HandlingLastWords();
             if (currentWords.IsDone)//整句话完成了才触发事件
                 ExecuteEvents(currentWords.model);
         }
+        HandlingButtons();
         HandlingOptions();
+    }
+
+    private void ClearButtons()
+    {
+        buttonDatas.Clear();
+        ZetanUtility.SetActive(nextButton, false);
+        ZetanUtility.SetActive(rejectButton, false);
+        next = null;
     }
 
     private void DoDialogue(Dialogue dialogue, int startIndex = 0)
     {
-        var findDialog = DialogueManager.Instance.GetOrCreateDialogueData(dialogue);
+        var findDialog = DialogueManager.GetOrCreateDialogueData(dialogue);
         if (startIndex < 0) startIndex = 0;
         wordsToSay.Clear();
         for (int i = findDialog.wordsDatas.Count - 1; i >= startIndex; i--)
@@ -550,8 +499,8 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         {
             if (option.model.IsValid)
             {
-                if (BackpackManager.Instance.CanLose(option.model.ItemToSubmit.item, option.model.ItemToSubmit.Amount, (ItemWithAmount)option.model.ItemCanGet))
-                    BackpackManager.Instance.LoseItem(option.model.ItemToSubmit.item, option.model.ItemToSubmit.Amount, (ItemWithAmount)option.model.ItemCanGet);
+                if (BackpackManager.Instance.CanLose(option.model.ItemToSubmit.Item, option.model.ItemToSubmit.Amount, (CountedItem)option.model.ItemCanGet))
+                    BackpackManager.Instance.Lose(option.model.ItemToSubmit.Item, option.model.ItemToSubmit.Amount, (CountedItem)option.model.ItemCanGet);
                 else
                 {
                     currentOption = null;
@@ -564,12 +513,12 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         {
             if (option.model.IsValid)
             {
-                if (!BackpackManager.Instance.CanGet(option.model.ItemCanGet.item, option.model.ItemCanGet.Amount))
+                if (!BackpackManager.Instance.CanGet(option.model.ItemCanGet.Item, option.model.ItemCanGet.Amount))
                 {
                     currentOption = null;
                     return;
                 }
-                else BackpackManager.Instance.GetItem(option.model.ItemCanGet.item, option.model.ItemCanGet.Amount);
+                else BackpackManager.Instance.Get(option.model.ItemCanGet.Item, option.model.ItemCanGet.Amount);
             }
             else MessageManager.Instance.New("无效的选项");
         }
@@ -620,11 +569,6 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     public static bool TalkWith(Talker talker)
     {
         if (!talker) return false;
-        if (GatherManager.Instance.IsGathering)
-        {
-            MessageManager.Instance.New("请先等待采集完成");
-            return false;
-        }
         if (PlayerManager.Instance.CheckIsNormalWithAlert())
         {
             WindowsManager.OpenWindow<DialogueWindow>(talker);
@@ -672,7 +616,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         currentTalkObj = null;
         currentSubmitObj = null;
         choiceOptionSaid.Clear();
-        ClearOptions();
+        optionList.Clear();
         HideQuestDescription();
     }
 
@@ -730,7 +674,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnSendGift, "挑选一件礼物", "确定要送出这个礼物吗？", 1, 1, cancel: () => WindowsManager.HideWindow(this, false));
         WindowsManager.HideWindow(this, true);
     }
-    private void OnSendGift(IEnumerable<ItemWithAmount> items)
+    private void OnSendGift(IEnumerable<CountedItem> items)
     {
         if (items != null && items.Count() > 0)
         {
@@ -738,7 +682,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
             Dialogue dialogue = currentTalker.OnGetGift(isd.source.Model);
             if (dialogue)
             {
-                BackpackManager.Instance.LoseItem(isd.source, isd.amount);
+                BackpackManager.Instance.Lose(isd.source, isd.amount);
                 CurrentType = DialogueType.Gift;
                 ShowButtons(false, false, false, false);
                 StartDialogue(dialogue);
@@ -771,9 +715,6 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         shopButton.onClick.AddListener(OpenTalkerShop);
         backButton.onClick.AddListener(GoBackDefault);
         questButton.onClick.AddListener(ShowTalkerQuest);
-        pageUpButton.onClick.AddListener(OptionPageUp);
-        pageDownButton.onClick.AddListener(OptionPageDown);
-        //textLineHeight = CalculateLineHeight(wordsText);
     }
 
     public void SendTalkerGifts()
@@ -792,7 +733,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         if (currentTalker.QuestInstances.Where(x => !x.IsFinished).Count() > 0)
         {
             Skip();
-            HandlingQuestOptions();
+            RefreshQuestOptions();
         }
     }
 
@@ -815,7 +756,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         currentTalkObj = null;
         currentWords = null;
         choiceOptionSaid.Clear();
-        ClearOptions();
+        optionList.Clear();
         HideQuestDescription();
         StartTalking(currentTalker);
     }
@@ -827,7 +768,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
             switch (we.EventType)
             {
                 case WordsEventType.Trigger:
-                    TriggerManager.Instance.SetTrigger(we.WordsTrigrName, we.TriggerActType == TriggerActionType.Set);
+                    TriggerManager.SetTrigger(we.WordsTrigrName, we.TriggerActType == TriggerActionType.Set);
                     break;
                 case WordsEventType.GetAmity:
                     //TODO 增加好感
@@ -839,6 +780,12 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                     break;
             }
         }
+    }
+
+    public void Next()
+    {
+        if (next != null) next.Invoke();
+        else if (optionList.Count > 0) optionList.Items.First().OnClick();
     }
     #endregion
 }

@@ -11,7 +11,7 @@ public class CharacterController2D : MonoBehaviour
     public LayerMask raycastLayer = 0;
     public float distanceOffset = 0.5f;
     public float moveSpeed = 7;
-    public float dashForce = 5;
+    public float flashForce = 5;
     public Vector2 defaultDirection = Vector2.right;
 
     private Vector2 latestDirection;
@@ -29,7 +29,7 @@ public class CharacterController2D : MonoBehaviour
 
     public virtual bool Roll(Vector2? input = null)
     {
-        if (Animator.CurrentState.IsTag(CharacterAnimaTags.Roll) || Animator.CurrentState.IsTag(CharacterAnimaTags.Dash)) return false;
+        if (Animator.CurrentState.IsTag(CharacterAnimaTags.Roll) || Animator.CurrentState.IsTag(CharacterAnimaTags.Flash)) return false;
         if (Character.GetMainState(out var state))
         {
             if (state == CharacterStates.Normal || state == CharacterStates.Attack)
@@ -44,16 +44,16 @@ public class CharacterController2D : MonoBehaviour
         return false;
     }
 
-    public virtual bool Dash(Vector2? input = null)
+    public virtual bool Flash(Vector2? input = null)
     {
-        if (Animator.CurrentState.IsTag(CharacterAnimaTags.Roll) || Animator.CurrentState.IsTag(CharacterAnimaTags.Dash)) return false;
+        if (Animator.CurrentState.IsTag(CharacterAnimaTags.Roll) || Animator.CurrentState.IsTag(CharacterAnimaTags.Flash)) return false;
         if (Character.GetMainState(out var state))
         {
             if (state == CharacterStates.Normal)
             {
                 if (input != null) this.input = input.Value.normalized;
-                Character.SetState(CharacterStates.Busy, CharacterBusyStates.Dash);
-                Animator.PlayDashAnima(this.input);
+                Character.SetState(CharacterStates.Busy, CharacterBusyStates.Flash);
+                Animator.PlayFlashAnima(this.input);
                 if (this.input.x != 0 || this.input.y != 0) latestDirection = this.input;
                 return true;
             }
@@ -95,11 +95,11 @@ public class CharacterController2D : MonoBehaviour
                 case CharacterStates.Busy:
                     switch ((CharacterBusyStates)sub)
                     {
-                        case CharacterBusyStates.Dash:
+                        case CharacterBusyStates.Flash:
                             if (!mRigidbody)
                             {
                                 Character.SetState(CharacterStates.Normal, CharacterNormalStates.Idle);
-                                MoveTransform(dashForce * latestDirection, latestDirection, moveSpeed * dashForce);
+                                MoveTransform(flashForce * latestDirection, latestDirection, moveSpeed * flashForce);
                             }
                             break;
                         case CharacterBusyStates.Roll:
@@ -146,8 +146,8 @@ public class CharacterController2D : MonoBehaviour
                     case CharacterStates.Busy:
                         switch ((CharacterBusyStates)sub)
                         {
-                            case CharacterBusyStates.Dash:
-                                Vector2 addtive = dashForce * latestDirection;
+                            case CharacterBusyStates.Flash:
+                                Vector2 addtive = flashForce * latestDirection;
                                 if (mRigidbody.collisionDetectionMode == CollisionDetectionMode2D.Discrete)
                                 {
                                     var hit = Physics2D.Raycast(mRigidbody.position, latestDirection, addtive.magnitude, raycastLayer);

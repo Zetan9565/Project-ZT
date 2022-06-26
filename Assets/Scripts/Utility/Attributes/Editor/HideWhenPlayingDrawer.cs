@@ -1,28 +1,19 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using ZetanStudio.Extension.Editor;
 
 [CustomPropertyDrawer(typeof(HideWhenPlayingAttribute))]
-public class HideWhenPlayingDrawer : PropertyDrawer
+public class HideWhenPlayingDrawer : EnhancedAttributeDrawer
 {
-    private PropertyDrawer custom;
-    private bool shouldCheckCustom = true;
+    private bool shouldHide;
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         HideWhenPlayingAttribute hideAttr = (HideWhenPlayingAttribute)attribute;
-        bool hide = ShouldHide(hideAttr);
-        if (!hide || hide && hideAttr.readOnly)
+        if (!shouldHide || hideAttr.readOnly)
         {
             label = EditorGUI.BeginProperty(position, label, property);
-            EditorGUI.BeginDisabledGroup(hide && hideAttr.readOnly);
-            if (shouldCheckCustom)
-            {
-                custom = this.GetCustomDrawer();
-                shouldCheckCustom = false;
-            }
-            if (custom != null) custom.OnGUI(position, property, label);
-            else EditorGUI.PropertyField(position, property, label, true);
+            EditorGUI.BeginDisabledGroup(shouldHide && hideAttr.readOnly);
+            PropertyField(position, property, label);
             EditorGUI.EndDisabledGroup();
             EditorGUI.EndProperty();
         }
@@ -31,20 +22,9 @@ public class HideWhenPlayingDrawer : PropertyDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         HideWhenPlayingAttribute hideAttr = (HideWhenPlayingAttribute)attribute;
-        bool hide = ShouldHide(hideAttr);
-
-        if (hideAttr.readOnly || !hide)
-        {
-            return custom?.GetPropertyHeight(property, label) ?? EditorGUI.GetPropertyHeight(property, label, true);
-        }
-        else
-        {
-            return -EditorGUIUtility.standardVerticalSpacing;
-        }
-    }
-
-    private bool ShouldHide(HideWhenPlayingAttribute hideAttr)
-    {
-        return Application.isPlaying ? !hideAttr.reverse : hideAttr.reverse;
+        if (property.serializedObject.targetObject is Component component && AssetDatabase.Contains(component.gameObject)) shouldHide = false;
+        else shouldHide = (Application.isPlaying ? !hideAttr.reverse : hideAttr.reverse);
+        if (!shouldHide || hideAttr.readOnly) return base.GetPropertyHeight(property, label);
+        return -EditorGUIUtility.standardVerticalSpacing;
     }
 }

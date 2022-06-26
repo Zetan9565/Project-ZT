@@ -24,8 +24,8 @@ public interface ICheckValueAttribute
             if (type) p = p.Replace("typeof(", "").Replace(")", "");
             if (ZetanUtility.TryGetValue(p, declarant, out var value, out _))
             {
-                if (type) return value.GetType().IsAssignableFrom(v as Type);
-                else if (Equals(value, v)) return true;
+                if (type) return value != null && value.GetType().IsAssignableFrom(v as Type);
+                else if (Equals(value, v) || value == null && v == null) return true;
                 else return false;
             }
             else
@@ -108,17 +108,21 @@ public interface ICheckValueAttribute
                             values.Push(check(attr.Paths[index], attr.Values[index]));
                         else
                         {
-                            Debug.Log("return 1");
+                            //Debug.Log("return 1");
                             return true;
                         }
                     }
-                    else if (values.Count > 1)
+                    else if (values.Count > 0)
                     {
-                        if (item == "|") values.Push(values.Pop() | values.Pop());
-                        else if (item == "!") values.Push(!values.Pop());
-                        else if (item == "&") values.Push(values.Pop() & values.Pop());
+                        if (item == "!") values.Push(!values.Pop());
+                        else if (values.Count > 1)
+                        {
+                            bool right = values.Pop();
+                            bool left = values.Pop();
+                            if (item == "|") values.Push(left | right);
+                            else if (item == "&") values.Push(left & right);
+                        }
                     }
-                    else if (item == "!") values.Push(!values.Pop());
                 }
                 if (values.Count == 1)
                 {

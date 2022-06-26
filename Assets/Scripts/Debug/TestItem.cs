@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 
 public class TestItem : MonoBehaviour
 {
@@ -7,6 +7,6 @@ public class TestItem : MonoBehaviour
 
     public void OnClick()
     {
-        BackpackManager.Instance.GetItem(item, 1);
+        BackpackManager.Instance.Get(item, 1);
     }
 }

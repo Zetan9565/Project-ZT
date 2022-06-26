@@ -326,7 +326,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         private NodeEditor CreateTreeNode(Type type, Vector2 position)
         {
             if (type.IsSubclassOf(typeof(Node)))
-                if (tree.IsRuntime) return CreateNewNode(Node.GetRuntimeNode(type), $"{ObjectNames.GetUniqueName(tree.Nodes.Select(x => x.name).ToArray(), type.Name)}(R)", position);
+                if (tree.ScenceOnly) return CreateNewNode(Node.GetRuntimeNode(type), $"{ObjectNames.GetUniqueName(tree.Nodes.Select(x => x.name).ToArray(), type.Name)}(R)", position);
                 else return CreateNewNode(Activator.CreateInstance(type) as Node, $"{ObjectNames.GetUniqueName(tree.Nodes.Select(x => x.name).ToArray(), type.Name)}", position);
             else return null;
         }
@@ -340,7 +340,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             newNode.guid = GUID.Generate().ToString();
             if (tree.IsInstance)
             {
-                if (!tree.IsRuntime) newNode.Instantiate();
+                if (!tree.ScenceOnly) newNode.Instantiate();
                 tree.InitNode(newNode);
             }
             if (isLocal) Undo.RegisterCompleteObjectUndo(tree, Tr("新增结点"));
@@ -367,7 +367,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             else runtimeUndo.RecordTreeChange(tree, Tr("复制结点"));
             BehaviourTree.Traverse(node, n =>
             {
-                CreateNewNode(n, $"({tree.Nodes.Count}) {n.GetType().Name}{(tree.IsRuntime ? "(R)" : string.Empty)}", n._position + new Vector2(30, 30));
+                CreateNewNode(n, $"({tree.Nodes.Count}) {n.GetType().Name}{(tree.ScenceOnly ? "(R)" : string.Empty)}", n._position + new Vector2(30, 30));
             });
             DrawTreeView(tree);
         }
@@ -410,7 +410,7 @@ namespace ZetanStudio.BehaviourTree.Editor
 
         public string Tr(string text)
         {
-            return Language.Tr(settings.language, text);
+            return L.Tr(settings.language, text);
         }
 
         private class RuntimeUndo

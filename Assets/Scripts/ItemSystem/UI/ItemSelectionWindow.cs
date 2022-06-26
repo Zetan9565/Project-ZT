@@ -2,8 +2,9 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 using ZetanStudio.Extension;
+using ZetanStudio.ItemSystem.UI;
 
 [DisallowMultipleComponent]
 public class ItemSelectionWindow : Window
@@ -11,7 +12,7 @@ public class ItemSelectionWindow : Window
     public Text windowTitle;
     public GameObject tips;
 
-    public ItemSlot itemCellPrefab;
+    public ItemSlotEx itemCellPrefab;
     public RectTransform itemCellsParent;
 
     public ScrollRect gridScrollRect;
@@ -21,11 +22,11 @@ public class ItemSelectionWindow : Window
     public Button clearButton;
 
     public ISlotContainer SourceContainer { get; private set; }
-    public IInventoryHandler SourceHandler { get; private set; }
+    public InventoryHandler SourceHandler { get; private set; }
 
     private bool confirm;
 
-    private SimplePool<ItemSlot> caches;
+    private SimplePool<ItemSlotEx> caches;
 
     protected override void OnAwake()
     {
@@ -33,28 +34,28 @@ public class ItemSelectionWindow : Window
         clearButton.onClick.AddListener(Clear);
         var pool = itemCellsParent.FindOrCreate("Caches");
         ZetanUtility.SetActive(pool, false);
-        caches = new SimplePool<ItemSlot>(itemCellPrefab, poolRoot: pool);
+        caches = new SimplePool<ItemSlotEx>(itemCellPrefab, poolRoot: pool);
     }
 
     public bool IsSelecting { get; private set; }
 
     public GameObject PlacementArea => placementArea;
 
-    private readonly Dictionary<string, ItemSlot> copySlots = new Dictionary<string, ItemSlot>();
+    private readonly Dictionary<string, ItemSlotEx> copySlots = new Dictionary<string, ItemSlotEx>();
     private readonly HashSet<ItemData> selectedItems = new HashSet<ItemData>();
 
     public ItemSelectionType SelectionType { get; private set; }
 
     private int typeLimit;
     private int amountLimit;
-    private Predicate<ItemSlotBase> canSelect;
-    private Action<List<ItemWithAmount>> onConfirm;
+    private Predicate<ItemSlot> canSelect;
+    private Action<List<CountedItem>> onConfirm;
     private Action onCancel;
 
     private string dialog;
 
-    public static ItemSelectionWindow StartSelection(ItemSelectionType selectionType, ISlotContainer container, IInventoryHandler handler, Action<List<ItemWithAmount>> confirm, string title = null, string confirmDialog = null,
-        int? typeLimit = null, int? amountLimit = null, Predicate<ItemSlotBase> selectCondition = null, Action cancel = null)
+    public static ItemSelectionWindow StartSelection(ItemSelectionType selectionType, ISlotContainer container, InventoryHandler handler, Action<List<CountedItem>> confirm, string title = null, string confirmDialog = null,
+        int? typeLimit = null, int? amountLimit = null, Predicate<ItemSlot> selectCondition = null, Action cancel = null)
     {
         return WindowsManager.OpenWindow<ItemSelectionWindow>(selectionType, container, handler, confirm, title, confirmDialog, typeLimit ?? default, amountLimit ?? default, selectCondition, cancel);
     }
@@ -66,10 +67,10 @@ public class ItemSelectionWindow : Window
             MessageManager.Instance.New("未选择任何物品");
             return;
         }
-        List<ItemWithAmount> items = new List<ItemWithAmount>();
+        List<CountedItem> items = new List<CountedItem>();
         foreach (var kvp in copySlots)
         {
-            items.Add(new ItemWithAmount(kvp.Value.Item, kvp.Value.Data.amount));
+            items.Add(new CountedItem(kvp.Value.Item, kvp.Value.Data.amount));
         }
         confirm = true;
         if (string.IsNullOrEmpty(dialog))
@@ -97,7 +98,7 @@ public class ItemSelectionWindow : Window
         WindowsManager.CloseWindow<ItemWindow>();
     }
 
-    public void Place(ItemSlot source)
+    public void Place(ItemSlotEx source)
     {
         if (!source || source.IsEmpty || source.Data.IsEmpty) return;
         var slot = source.Data;
@@ -155,7 +156,7 @@ public class ItemSelectionWindow : Window
 
         void MakeSlot(ItemData data, int amount)
         {
-            ItemSlot copy = caches.Get(itemCellsParent);
+            ItemSlotEx copy = caches.Get(itemCellsParent);
             copy.SetScrollRect(gridScrollRect);
             copy.SetCallbacks(GetHandleButtons, (s) => TakeOut(s, true), OnSlotEndDrag);
             copySlots.Add(data.ID, copy);
@@ -166,7 +167,7 @@ public class ItemSelectionWindow : Window
         }
     }
 
-    private ButtonWithTextData[] GetHandleButtons(ItemSlot slot)
+    private ButtonWithTextData[] GetHandleButtons(ItemSlotEx slot)
     {
         if (!slot || slot.IsEmpty) return null;
 
@@ -184,22 +185,22 @@ public class ItemSelectionWindow : Window
         return buttons.ToArray();
     }
 
-    public bool ContainsSlot(ItemSlot slot)
+    public bool ContainsSlot(ItemSlotEx slot)
     {
         if (!slot || slot.IsEmpty) return false;
         return copySlots.ContainsKey(slot.Item.ID);
     }
 
-    private void OnSlotEndDrag(GameObject gameObject, ItemSlot slot)
+    private void OnSlotEndDrag(GameObject gameObject, ItemSlotEx slot)
     {
-        ItemSlot target = gameObject.GetComponentInParent<ItemSlot>();
+        ItemSlotEx target = gameObject.GetComponentInParent<ItemSlotEx>();
         if (target && target != slot && !ContainsSlot(target))
         {
             TakeOut(slot);
         }
     }
 
-    private void TakeOut(ItemSlot copy, bool all = false)
+    private void TakeOut(ItemSlotEx copy, bool all = false)
     {
         if (!copy.IsEmpty)
         {
@@ -221,7 +222,7 @@ public class ItemSelectionWindow : Window
             }
         }
 
-        void RemoveSlot(ItemSlot copy)
+        void RemoveSlot(ItemSlotEx copy)
         {
             copySlots.Remove(copy.Item.ID);
             caches.Put(copy);
@@ -243,8 +244,8 @@ public class ItemSelectionWindow : Window
         if (args != null && args.Length > 8)
         {
             WindowsManager.CloseWindow<ItemWindow>();
-            var par = (selectionType: (ItemSelectionType)args[0], container: (ISlotContainer)args[1], handler: (IInventoryHandler)args[2], confirm: args[3] as Action<List<ItemWithAmount>>,
-                title: args[4] as string, confirmDialog: args[5] as string, typeLimit: (int)args[6], amountLimit: (int)args[7], selectCondition: args[8] as Predicate<ItemSlotBase>, cancel: args[9] as Action);
+            var par = (selectionType: (ItemSelectionType)args[0], container: (ISlotContainer)args[1], handler: (InventoryHandler)args[2], confirm: args[3] as Action<List<CountedItem>>,
+                title: args[4] as string, confirmDialog: args[5] as string, typeLimit: (int)args[6], amountLimit: (int)args[7], selectCondition: args[8] as Predicate<ItemSlot>, cancel: args[9] as Action);
             SelectionType = par.selectionType;
             SourceContainer = par.container;
             SourceHandler = par.handler;
@@ -285,13 +286,10 @@ public class ItemSelectionWindow : Window
         if (!confirm) onCancel?.Invoke();
         onCancel = null;
         WindowsManager.CloseWindow<ItemWindow>();
+        UnregisterNotify();
         return true;
     }
 
-    protected override void OnStart()
-    {
-        //屏蔽基类方法，事件注册见机行事
-    }
     protected override void RegisterNotify()
     {
         NotifyCenter.RemoveListener(this);

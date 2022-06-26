@@ -9,12 +9,15 @@ using UnityEditor.Callbacks;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using ZetanStudio.Item.Module;
 
-namespace ZetanStudio.Item.Editor
+namespace ZetanStudio.ItemSystem.Editor
 {
+    using Module;
+    using ZetanStudio.Editor;
+
     public sealed class ItemEditor : EditorWindow
     {
+        #region 声明
         private ItemEditorSettings settings;
 
         private ToolbarSearchField searchField;
@@ -35,39 +38,33 @@ namespace ZetanStudio.Item.Editor
         private List<ItemTemplate> templates;
         private List<string> templateNames;
         private Button deleteButton;
+        private Button cloneButton;
         private UnityEngine.UIElements.ListView searchDropdown;
         private DropdownField searchSelector;
         private SearchKeyType keyType;
         private List<string> itemSearchType;
         private List<string> templateSearchType;
+        [SerializeReference]
+        private ItemModule copiedModule;
 
         private bool useDatabase;
-
-        private enum SearchKeyType
-        {
-            SearchAll,
-            SearchName,
-            SearchID,
-            SearchType,
-            SearchDescription,
-            SearchModule,
-        }
+        #endregion
 
         #region 静态方法
-        [MenuItem("Zetan Studio/道具编辑器")]
+        [MenuItem("Window/Zetan Studio/道具编辑器")]
         public static void CreateWindow()
         {
             ItemEditor wnd = GetWindow<ItemEditor>();
             ItemEditorSettings settings = ItemEditorSettings.GetOrCreate();
             wnd.minSize = settings.minWindowSize;
-            wnd.titleContent = new GUIContent(Language.Tr(settings.language, "道具编辑器"));
+            wnd.titleContent = new GUIContent(L.Tr(settings.language, "道具编辑器"));
         }
         public static void CreateWindow(Item item)
         {
             ItemEditor wnd = GetWindow<ItemEditor>();
             ItemEditorSettings settings = ItemEditorSettings.GetOrCreate();
             wnd.minSize = settings.minWindowSize;
-            wnd.titleContent = new GUIContent(Language.Tr(settings.language, "道具编辑器"));
+            wnd.titleContent = new GUIContent(L.Tr(settings.language, "道具编辑器"));
             EditorApplication.delayCall += () => wnd.itemList.SetSelection(wnd.items.IndexOf(item));
         }
         public static void CreateWindow(ItemTemplate template)
@@ -75,7 +72,7 @@ namespace ZetanStudio.Item.Editor
             ItemEditor wnd = GetWindow<ItemEditor>();
             ItemEditorSettings settings = ItemEditorSettings.GetOrCreate();
             wnd.minSize = settings.minWindowSize;
-            wnd.titleContent = new GUIContent(Language.Tr(settings.language, "道具编辑器"));
+            wnd.titleContent = new GUIContent(L.Tr(settings.language, "道具编辑器"));
             EditorApplication.delayCall += () =>
             {
                 wnd.funcTab.SetSelected(2);
@@ -88,19 +85,19 @@ namespace ZetanStudio.Item.Editor
                 }
             };
         }
-        public static Item OpenAndCreateItem()
+        public static Item OpenAndCreateItem(ItemFilterAttribute itemFilter)
         {
             ItemEditor wnd = GetWindow<ItemEditor>();
             ItemEditorSettings settings = ItemEditorSettings.GetOrCreate();
             wnd.minSize = settings.minWindowSize;
-            wnd.titleContent = new GUIContent(Language.Tr(settings.language, "道具编辑器"));
-            wnd.NewItem();
+            wnd.titleContent = new GUIContent(L.Tr(settings.language, "道具编辑器"));
+            if (itemFilter != null) wnd.NewItem(itemFilter);
+            else wnd.NewItem();
             return wnd.selectedItem;
         }
         [OnOpenAsset]
 #pragma warning disable IDE0060 // 删除未使用的参数
         public static bool OnOpenAsset(int instanceID, int line)
-#pragma warning restore IDE0060 // 删除未使用的参数
         {
             if (EditorUtility.InstanceIDToObject(instanceID) is Item item)
             {
@@ -108,6 +105,22 @@ namespace ZetanStudio.Item.Editor
                 return true;
             }
             return false;
+        }
+#pragma warning restore IDE0060 // 删除未使用的参数
+
+        [InitializeOnLoadMethod]
+        private static void ClearInvalid()
+        {
+            //foreach (var item in Item.Editor.GetItems())
+            //{
+            //    if (Item.Editor.ClearInvalidModule(item))
+            //        Debug.LogWarning(Localization.Tr(ItemEditorSettings.GetOrCreate().language, "道具 [{0}] 存在失效模块，已自动移除。", item.Name));
+            //}
+            //foreach (var template in ZetanUtility.Editor.LoadAssets<ItemTemplate>())
+            //{
+            //    if (ItemTemplate.Editor.ClearInvalidModule(template))
+            //        Debug.LogWarning(Localization.Tr(ItemEditorSettings.GetOrCreate().language, "模板 [{0}] 存在失效模块，已自动移除。", template.Name));
+            //}
         }
         #endregion
 
@@ -118,8 +131,8 @@ namespace ZetanStudio.Item.Editor
             {
                 settings = settings ? settings : ItemEditorSettings.GetOrCreate();
                 useDatabase = Item.UseDatabase;
-                itemSearchType = new List<string>(Language.TrM(settings.language, "全部", "名称", "ID", "类型", "描述", "模块"));
-                templateSearchType = new List<string>(Language.TrM(settings.language, "全部", "名称", "前缀", "类型", "描述", "模块"));
+                itemSearchType = new List<string>(L.TrM(settings.language, "全部", "名称", "ID", "类型", "描述", "模块"));
+                templateSearchType = new List<string>(L.TrM(settings.language, "全部", "名称", "前缀", "类型", "描述", "模块"));
 
                 VisualElement root = rootVisualElement;
 
@@ -159,6 +172,9 @@ namespace ZetanStudio.Item.Editor
                 deleteButton = root.Q<Button>("delete-button");
                 deleteButton.clicked += OnDeleteClick;
                 RefreshDeleteButton();
+                cloneButton = root.Q<Button>("clone-button");
+                cloneButton.clicked += OnCloneClick;
+                RefreshCloneButton();
 
                 listLabel = root.Q<Label>("list-label");
                 listLabel.AddToClassList("list-label");
@@ -305,21 +321,6 @@ namespace ZetanStudio.Item.Editor
             if (selectedItem) Undo.ClearUndo(selectedItem);
             if (selectedTemplate) Undo.ClearUndo(selectedTemplate);
             AssetDatabase.SaveAssets();
-        }
-
-        private void RefreshInspector()
-        {
-            switch (funcTab.SelectedIndex)
-            {
-                case 1:
-                    itemList.RefreshItems();
-                    itemList.SetSelection(items.IndexOf(selectedItem));
-                    break;
-                case 2:
-                    templateList.RefreshItems();
-                    templateList.SetSelection(templates.IndexOf(selectedTemplate));
-                    break;
-            }
         }
         #endregion
 
@@ -582,9 +583,9 @@ namespace ZetanStudio.Item.Editor
             if (items != null && items.Count() == 1)
             {
                 var item = items.FirstOrDefault();
+                //if (Item.Editor.ClearInvalidModule(item)) Debug.LogWarning(Tr("道具 [{0}] 存在失效模块，已自动移除。", item.Name));
                 selectedItem = item;
                 serializedItem = item ? new SerializedObject(item) : null;
-                RefreshDeleteButton();
                 if (!item) return;
                 templateList.ClearSelection();
                 ItemBaseInfoBlock baseInfo = new ItemBaseInfoBlock(new SerializedObject(item), currentTemplate ? currentTemplate.IDPrefix : null)
@@ -600,6 +601,8 @@ namespace ZetanStudio.Item.Editor
                 selectedItem = null;
                 serializedItem = null;
             }
+            RefreshDeleteButton();
+            RefreshCloneButton();
         }
         private void RefreshItems()
         {
@@ -611,6 +614,7 @@ namespace ZetanStudio.Item.Editor
                 itemList.RefreshItems();
             }
             RefreshDeleteButton();
+            RefreshCloneButton();
         }
         private void OnTemplateSelected(ChangeEvent<string> s)
         {
@@ -639,9 +643,9 @@ namespace ZetanStudio.Item.Editor
         #endregion
 
         #region 模块相关
-        private void AddModule(Type type, int index = -1)
+        private ItemModule AddModule(Type type, int index = -1)
         {
-            if (type == null || type.IsAbstract || !typeof(ItemModule).IsAssignableFrom(type) || !selectedItem && !selectedTemplate) return;
+            if (type == null || type.IsAbstract || !typeof(ItemModule).IsAssignableFrom(type) || !selectedItem && !selectedTemplate) return null;
             SerializedObject serializedObject = null;
             IList<ItemModule> modules = null;
             string undoName = null;
@@ -664,26 +668,27 @@ namespace ZetanStudio.Item.Editor
                     scriptableObject = selectedTemplate;
                     break;
             }
-            if (!CommonModule.IsCommon(type) && modules.Any(x => ItemModule.Duplicate(x, type)))
-                EditorUtility.DisplayDialog(Tr("无法添加"), Tr("已经存在 [{0}] 模块，每种模块只能添加一个。", ItemModule.GetName(type)), Tr("确定"));
+            Type duplicate = null;
+            if (!CommonModule.IsCommon(type) && modules.Any(x => ItemModule.Duplicate(x, type, out duplicate)))
+                EditorUtility.DisplayDialog(Tr("无法添加"), Tr("已经存在 [{0}] 模块，此类模块只能添加一个。", ItemModule.GetName(duplicate)), Tr("确定"));
             else if (serializedObject != null)
             {
                 Undo.RegisterCompleteObjectUndo(scriptableObject, undoName);
                 if (addModule() is ItemModule module)
                 {
                     RefreshModules();
-                    //this.StartCoroutine(scollToEnd());
                     rightPanel.contentContainer.RegisterCallback<GeometryChangedEvent>(scollToEnd);
+                    return module;
 
                     void scollToEnd(GeometryChangedEvent evt)
                     {
-                        //yield return new WaitForEndOfFrame();
                         ModuleBlock block = rightPanel.Query<ModuleBlock>().Where(x => x.userData == module);
                         rightPanel.ScrollTo(block);
                         rightPanel.contentContainer.UnregisterCallback<GeometryChangedEvent>(scollToEnd);
                     }
                 }
             }
+            return null;
         }
         private void MakeAddModuleButton(IEnumerable<ItemModule> existModules)
         {
@@ -691,7 +696,7 @@ namespace ZetanStudio.Item.Editor
             buttonArea.style.paddingTop = 7;
             buttonArea.style.paddingBottom = 7;
             rightPanel.Add(buttonArea);
-            var types = TypeCache.GetTypesDerivedFrom<ItemModule>().Where(x => !x.IsAbstract && (typeof(CommonModule).IsAssignableFrom(x) || !existModules.Any(y => y.GetType() == x)));
+            var types = TypeCache.GetTypesDerivedFrom<ItemModule>().Where(x => !x.IsAbstract && (typeof(CommonModule).IsAssignableFrom(x) || !existModules.Any(y => ItemModule.Duplicate(y, x, out _))));
             Button button = new Button() { text = Tr("添加模块") };
             button.clicked += () =>
             {
@@ -717,7 +722,7 @@ namespace ZetanStudio.Item.Editor
             button.style.alignSelf = new StyleEnum<Align>(Align.Center);
             buttonArea.Add(button);
         }
-        private void RefreshModules()
+        public void RefreshModules()
         {
             if (funcTab.SelectedIndex == 1 && !selectedItem || funcTab.SelectedIndex == 2 && !selectedTemplate) return;
             for (int i = 0; i < rightPanel.childCount; i++)
@@ -748,34 +753,93 @@ namespace ZetanStudio.Item.Editor
                 for (int i = 0; i < modulesProp.arraySize; i++)
                 {
                     SerializedProperty property = modulesProp.GetArrayElementAtIndex(i);
-                    rightPanel.Insert(rightPanel.childCount - 1, MakeModuleBlock(property, modules[i]));
+                    rightPanel.Insert(rightPanel.childCount - 1, MakeModuleBlock(property, modules[i], i));
                 }
             }
         }
-        private ModuleBlock MakeModuleBlock(SerializedProperty property, ItemModule module)
+        private ModuleBlock MakeModuleBlock(SerializedProperty property, ItemModule module, int index)
         {
             ModuleBlock block = ModuleBlock.Create(property, module);
             block.AddManipulator(new ContextualMenuManipulator(evt =>
             {
-                IList<ItemModule> Modules = null;
+                IList<ItemModule> modules = null;
                 switch (funcTab.SelectedIndex)
                 {
-                    case 1: if (selectedItem) Modules = selectedItem.Modules; break;
-                    case 2: if (selectedTemplate) Modules = selectedTemplate.Modules; break;
+                    case 1: if (selectedItem) modules = selectedItem.Modules; break;
+                    case 2: if (selectedTemplate) modules = selectedTemplate.Modules; break;
                 }
-                if (Modules != null)
+                if (modules != null)
                 {
-                    int index = Modules.IndexOf(module);
-                    evt.menu.AppendAction(Tr("移除"), a => DeleteModule(module));
-                    if (index > 0) evt.menu.AppendAction(Tr("上移"), a => MoveModuleUp(module));
-                    if (index < Modules.Count - 1) evt.menu.AppendAction(Tr("下移"), a => MoveModuleDown(module));
-                    evt.menu.AppendSeparator();
-                    evt.menu.AppendAction(Tr("编辑脚本"), a => EditScript(module));
-                    evt.menu.AppendAction(Tr("编辑Editor脚本"), a => EditScript(block));
+                    if (module)
+                    {
+                        int index = modules.IndexOf(module);
+                        evt.menu.AppendAction(Tr("重置"), a => ResetModule(module));
+                        evt.menu.AppendSeparator();
+                        evt.menu.AppendAction(Tr("移除模块"), a => DeleteModule(module));
+                        evt.menu.AppendAction(Tr("向上移动"), a => MoveModuleUp(module), index > 0 ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled);
+                        evt.menu.AppendAction(Tr("向下移动"), a => MoveModuleDown(module), index < modules.Count - 1 ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled);
+                        evt.menu.AppendAction(Tr("复制模块"), a => CopyModule(module));
+                        evt.menu.AppendAction(Tr("粘贴为新模块"), a => PasteModule(modules.IndexOf(module)), canPaste() ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled);
+                        evt.menu.AppendAction(Tr("粘贴模块值"), a => PasteModule(module), CanPaste(module) ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled);
+                        evt.menu.AppendSeparator();
+                        evt.menu.AppendAction(Tr("编辑脚本"), a => EditScript(module));
+                        evt.menu.AppendAction(Tr("编辑Editor脚本"), a => EditScript(block));
+
+                        bool canPaste()
+                        {
+                            if (copiedModule == null) return false;
+                            var type = copiedModule.GetType();
+                            return CommonModule.IsCommon(type) || !modules.Any(x => ItemModule.Duplicate(x, type, out _));
+                        }
+                    }
+                    else
+                    {
+                        switch (funcTab.SelectedIndex)
+                        {
+                            case 1:
+                                evt.menu.AppendAction(Tr("移除"), a => serializedItem?.FindProperty("modules")?.DeleteArrayElementAtIndex(index));
+                                break;
+                            case 2:
+                                evt.menu.AppendAction(Tr("移除"), a => serializedTemplate?.FindProperty("modules")?.DeleteArrayElementAtIndex(index));
+                                break;
+                        }
+                    }
                 }
             }));
             return block;
         }
+        private void ResetModule(ItemModule module)
+        {
+            UnityEngine.Object obj = funcTab.SelectedIndex == 1 ? selectedItem : selectedTemplate;
+            if (obj)
+            {
+                Undo.RegisterCompleteObjectUndo(obj, Tr("重置{0}的{1}模块", obj.name, module.GetName()));
+                EditorUtility.CopySerializedManagedFieldsOnly(Activator.CreateInstance(module.GetType()), module);
+            }
+        }
+        private void PasteModule(ItemModule destModule)
+        {
+            UnityEngine.Object obj = funcTab.SelectedIndex == 1 ? selectedItem : selectedTemplate;
+            if (obj && CanPaste(destModule))
+            {
+                Undo.RegisterCompleteObjectUndo(obj, Tr("在{0}上粘贴模块值", obj.name));
+                EditorUtility.CopySerializedManagedFieldsOnly(copiedModule, destModule);
+            }
+        }
+        private void PasteModule(int index)
+        {
+            if (AddModule(copiedModule.GetType(), index) is ItemModule module)
+                EditorUtility.CopySerializedManagedFieldsOnly(copiedModule, module);
+        }
+        private void CopyModule(ItemModule module)
+        {
+            copiedModule = module.Copy();
+        }
+        private bool CanPaste(ItemModule module)
+        {
+            return copiedModule && copiedModule.GetType().IsAssignableFrom(module.GetType());
+        }
+
         private void MoveModuleUp(ItemModule module)
         {
             int index = -1;
@@ -839,7 +903,7 @@ namespace ZetanStudio.Item.Editor
             foreach (var exist in modules)
             {
                 Type type = exist.GetType();
-                var attr = type.GetCustomAttribute<ItemModule.RequireAttribute>();
+                var attr = type.GetCustomAttribute<ItemModule.RequireAttribute>(true);
                 if (attr != null && attr.modules.Contains(module.GetType()))
                 {
                     EditorUtility.DisplayDialog("无法移除", $"因为 [{ItemModule.GetName(type)}] 模块依赖于此模块，暂时无法移除。", "确定");
@@ -873,9 +937,9 @@ namespace ZetanStudio.Item.Editor
             if (templates != null && templates.Count() == 1)
             {
                 var template = templates.FirstOrDefault();
+                if (ItemTemplate.Editor.ClearInvalidModule(template)) Debug.LogWarning(Tr("模板 [{0}] 存在失效模块，已自动移除。", template.Name));
                 selectedTemplate = template;
                 serializedTemplate = template ? new SerializedObject(template) : null;
-                RefreshDeleteButton();
                 if (!template) return;
                 itemList.ClearSelection();
                 TemplateBaseInfoBlock baseInfo = new TemplateBaseInfoBlock(serializedTemplate)
@@ -891,6 +955,8 @@ namespace ZetanStudio.Item.Editor
                 selectedTemplate = null;
                 serializedTemplate = null;
             }
+            RefreshDeleteButton();
+            RefreshCloneButton();
         }
         private void RefreshTemplates()
         {
@@ -901,6 +967,7 @@ namespace ZetanStudio.Item.Editor
                 templateList.RefreshItems();
             }
             RefreshDeleteButton();
+            RefreshCloneButton();
         }
         private void RefreshTemplateSelector()
         {
@@ -923,7 +990,7 @@ namespace ZetanStudio.Item.Editor
             if (templateSelector != null)
             {
                 templateSelector.choices = templateNames;
-                templateSelector.value = templateNames[0];
+                templateSelector.value = currentTemplate ? currentTemplate.Name : templateNames[0];
             }
         }
         #endregion
@@ -960,8 +1027,9 @@ namespace ZetanStudio.Item.Editor
                     searchSelector.value = Tr("名称");
                     break;
             }
+            RefreshDeleteButton();
+            RefreshCloneButton();
         }
-
         public void OnRightFuncTab(int index, ContextualMenuPopulateEvent evt)
         {
             if (index == funcTab.SelectedIndex)
@@ -978,9 +1046,59 @@ namespace ZetanStudio.Item.Editor
                 case 2: RefreshTemplates(); break;
             }
         }
+        private void RefreshInspector()
+        {
+            switch (funcTab.SelectedIndex)
+            {
+                case 1:
+                    itemList.RefreshItems();
+                    itemList.SetSelection(items.IndexOf(selectedItem));
+                    break;
+                case 2:
+                    templateList.RefreshItems();
+                    templateList.SetSelection(templates.IndexOf(selectedTemplate));
+                    break;
+            }
+        }
         #endregion
 
         #region 新建相关
+        private void OnCloneClick()
+        {
+            switch (funcTab.SelectedIndex)
+            {
+                case 1: CloneItem(); break;
+            }
+        }
+        private void CloneItem()
+        {
+            if (!selectedItem) return;
+            Item item;
+            if (!Item.UseDatabase) item = ZetanUtility.Editor.SaveFilePanel(() => Instantiate(selectedItem), folder: Item.assetsFolder, root: "Resources");
+            else item = ItemDatabase.Editor.CloneItem(selectedItem);
+            if (item)
+            {
+                RefreshItems();
+                selectedItem = item;
+
+                itemList.RegisterCallback<GeometryChangedEvent>(scollToEnd);
+
+                void scollToEnd(GeometryChangedEvent evt)
+                {
+                    SelectListItem(items.IndexOf(item));
+                    itemList.UnregisterCallback<GeometryChangedEvent>(scollToEnd);
+                }
+            }
+        }
+        private void RefreshCloneButton()
+        {
+            switch (funcTab.SelectedIndex)
+            {
+                case 1: cloneButton.SetEnabled(selectedItem); break;
+                case 2: cloneButton.SetEnabled(selectedTemplate); break;
+                default: cloneButton.SetEnabled(false); break;
+            }
+        }
         private void OnNewClick()
         {
             switch (funcTab.SelectedIndex)
@@ -1005,16 +1123,44 @@ namespace ZetanStudio.Item.Editor
             else item = ItemDatabase.Editor.MakeItem(currentTemplate);
             if (item)
             {
-                items.Add(item);
                 RefreshItems();
                 selectedItem = item;
 
-                this.StartCoroutine(scrollTo());
+                itemList.RegisterCallback<GeometryChangedEvent>(scollToEnd);
 
-                IEnumerator scrollTo()
+                void scollToEnd(GeometryChangedEvent evt)
                 {
-                    yield return new WaitForEndOfFrame();
                     SelectListItem(items.IndexOf(item));
+                    itemList.UnregisterCallback<GeometryChangedEvent>(scollToEnd);
+                }
+            }
+        }
+        private void NewItem(ItemFilterAttribute itemFilter)
+        {
+            Item item;
+            if (!Item.UseDatabase)
+            {
+                item = ZetanUtility.Editor.SaveFilePanel(CreateInstance<Item>, folder: Item.assetsFolder, root: "Resources");
+                if (item)
+                {
+                    Item.Editor.ApplyFilter(item, itemFilter);
+                    if (string.IsNullOrEmpty(item.ID))
+                        Item.Editor.SetAutoID(item, ZetanUtility.Editor.LoadAssets<Item>(), currentTemplate ? currentTemplate.IDPrefix : null);
+                    ZetanUtility.Editor.SaveChange(item);
+                }
+            }
+            else item = ItemDatabase.Editor.MakeItem(itemFilter);
+            if (item)
+            {
+                RefreshItems();
+                selectedItem = item;
+
+                itemList.RegisterCallback<GeometryChangedEvent>(scollToEnd);
+
+                void scollToEnd(GeometryChangedEvent evt)
+                {
+                    SelectListItem(items.IndexOf(item));
+                    itemList.UnregisterCallback<GeometryChangedEvent>(scollToEnd);
                 }
             }
         }
@@ -1027,13 +1173,21 @@ namespace ZetanStudio.Item.Editor
                 RefreshTemplates();
                 RefreshTemplateSelector();
 
-                this.StartCoroutine(scrollTo());
+                templateList.RegisterCallback<GeometryChangedEvent>(scollToEnd);
 
-                IEnumerator scrollTo()
+                void scollToEnd(GeometryChangedEvent evt)
                 {
-                    yield return new WaitForEndOfFrame();
                     SelectListTemplate(templates.IndexOf(template));
+                    templateList.UnregisterCallback<GeometryChangedEvent>(scollToEnd);
                 }
+
+                //this.StartCoroutine(scrollTo());
+
+                //IEnumerator scrollTo()
+                //{
+                //    yield return new WaitForEndOfFrame();
+                //    SelectListTemplate(templates.IndexOf(template));
+                //}
             }
         }
         #endregion
@@ -1116,10 +1270,7 @@ namespace ZetanStudio.Item.Editor
             if (!Item.UseDatabase)
             {
                 if (EditorUtility.DisplayDialog(Tr("删除选中道具"), Tr("确定将道具 [{0}(ID: {1})] 放入回收站吗?", item.Name, item.ID), Tr("确定"), Tr("取消")))
-                {
-                    if (!AssetDatabase.MoveAssetToTrash(AssetDatabase.GetAssetPath(item))) return;
-                }
-                else return;
+                    AssetDatabase.MoveAssetToTrash(AssetDatabase.GetAssetPath(item));
             }
             else if (EditorUtility.DisplayDialog(Tr("删除选中道具"), Tr("确定将道具 [{0}(ID: {1})] 从数据库中删除吗? 此操作将不可逆!", item.Name, item.ID), Tr("确定"), Tr("取消")))
             {
@@ -1149,11 +1300,21 @@ namespace ZetanStudio.Item.Editor
 
         private string Tr(string text, params object[] args)
         {
-            return Language.Tr(settings.language, text, args);
+            return L.Tr(settings.language, text, args);
         }
         private string Tr(string text)
         {
-            return Language.Tr(settings.language, text);
+            return L.Tr(settings.language, text);
+        }
+
+        private enum SearchKeyType
+        {
+            SearchAll,
+            SearchName,
+            SearchID,
+            SearchType,
+            SearchDescription,
+            SearchModule,
         }
     }
 }

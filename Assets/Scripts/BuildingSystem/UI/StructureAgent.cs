@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using ZetanStudio.StructureSystem;
 
 public class StructureAgent : ListItem<StructureAgent, StructureData>, IPointerClickHandler
 {
@@ -25,9 +26,9 @@ public class StructureAgent : ListItem<StructureAgent, StructureData>, IPointerC
         this.window = window;
     }
 
-    public override void OnClear()
+    public override void Clear()
     {
-        base.OnClear();
+        base.Clear();
         if (Data) Data.structureAgent = null;
         Data = null;
         window = null;
@@ -59,7 +60,7 @@ public class StructureAgent : ListItem<StructureAgent, StructureData>, IPointerC
 
     public void AskDestroy()
     {
-        if (Data) StructureManager.Instance.DestroyStructure(Data);
+        if (Data) StructureManager.DestroyStructure(Data);
     }
 
     public override void Refresh()

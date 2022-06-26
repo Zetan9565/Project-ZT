@@ -25,7 +25,7 @@ namespace ZetanStudio.BehaviourTree
                 {
                     if (!global)
                         if (!tree.IsInstance) global = ZetanUtility.Editor.LoadAsset<GlobalVariables>();
-                        else global = BehaviourManager.Instance.GlobalVariables;
+                        else global = BehaviourTreeManager.Instance.GlobalVariables;
                 }
                 SerializedProperty isShared = property.FindPropertyRelative("isShared");
                 SerializedProperty isGlobal = property.FindPropertyRelative("isGlobal");

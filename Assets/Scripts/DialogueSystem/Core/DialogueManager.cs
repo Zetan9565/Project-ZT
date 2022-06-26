@@ -1,22 +1,22 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using ZetanStudio.Extension;
 
 public delegate void DialogueListner();
-public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, ISaveLoad
+public static class DialogueManager
 {
-    private Transform talkerRoot;
+    private static Transform talkerRoot;
 
-    private readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
+    private static readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
 
-    public Dictionary<string, TalkerData> Talkers { get; } = new Dictionary<string, TalkerData>();
-    private readonly Dictionary<string, List<TalkerData>> scenedTalkers = new Dictionary<string, List<TalkerData>>();
+    public static Dictionary<string, TalkerData> Talkers { get; } = new Dictionary<string, TalkerData>();
+    private readonly static Dictionary<string, List<TalkerData>> scenedTalkers = new Dictionary<string, List<TalkerData>>();
 
-    public void Init()
+    [InitMethod(-1)]
+    public static void Init()
     {
-        if (!talkerRoot)
+        if (!talkerRoot || !talkerRoot.gameObject)
             talkerRoot = new GameObject("Talkers").transform;
         Talkers.Clear();
         scenedTalkers.Clear();
@@ -35,9 +35,9 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, ISaveLoa
         }
     }
 
-    public DialogueData GetOrCreateDialogueData(Dialogue dialogue)
+    public static DialogueData GetOrCreateDialogueData(Dialogue dialogue)
     {
-        if(!dialogueDatas.TryGetValue(dialogue.ID, out var find))
+        if (!dialogueDatas.TryGetValue(dialogue.ID, out var find))
         {
             find = new DialogueData(dialogue);
             dialogueDatas.Add(dialogue.ID, find);
@@ -45,38 +45,66 @@ public class DialogueManager : SingletonMonoBehaviour<DialogueManager>, ISaveLoa
         return find;
     }
 
-    public void RemoveDialogueData(Dialogue dialogue)
+    public static void RemoveDialogueData(Dialogue dialogue)
     {
         if (!dialogue) return;
         dialogueDatas.Remove(dialogue.ID);
     }
 
-    public void SaveData(SaveData data)
+    [SaveMethod]
+    public static void SaveData(SaveData saveData)
     {
-        foreach (KeyValuePair<string, DialogueData> kvpDialog in dialogueDatas)
+
+        var dialog = new SaveDataItem();
+        saveData.data["dialogueData"] = dialog;
+        foreach (var d in dialogueDatas.Values)
         {
-            data.dialogueDatas.Add(new DialogueSaveData(kvpDialog.Value));
+            var ds = new SaveDataItem();
+            ds.stringData["dialogID"] = d.ID;
+            foreach (var w in d.wordsDatas)
+            {
+                var ws = new SaveDataItem();
+                for (int i = 0; i < w.OptionDatas.Count; i++)
+                {
+                    if (w.OptionDatas[i].isDone)
+                        ws.intList.Add(i);
+                }
+                ds.dataList.Add(ws);
+            }
+            dialog.subData[d.ID] = ds;
         }
     }
-    public void LoadData(SaveData data)
+
+    [LoadMethod]
+    public static void LoadData(SaveData saveData)
     {
         dialogueDatas.Clear();
-        Dialogue[] dialogues = Resources.LoadAll<Dialogue>("Configuration");
-        foreach (DialogueSaveData dsd in data.dialogueDatas)
+        if (saveData.data.TryGetValue("dialogueData", out var data))
         {
-            Dialogue find = dialogues.FirstOrDefault(x => x.ID == dsd.dialogID);
-            if (find)
+            Dictionary<string, Dialogue> dialogues = new Dictionary<string, Dialogue>();
+            foreach (var dialog in Resources.LoadAll<Dialogue>("Configuration"))
             {
-                DialogueData dd = new DialogueData(find);
-                for (int i = 0; i < dsd.wordsDatas.Count; i++)
+                dialogues[dialog.ID] = dialog;
+            }
+            foreach (var ds in data.subData)
+            {
+                if (dialogues.TryGetValue(ds.Key, out var find))
                 {
-                    for (int j = 0; j < dd.wordsDatas[i].optionDatas.Count; j++)
+                    DialogueData dd = new DialogueData(find);
+                    for (int i = 0; i < dd.wordsDatas.Count; i++)
                     {
-                        if (dsd.wordsDatas[i].IsOptionCmplt(j))
-                            dd.wordsDatas[i].optionDatas[j].isDone = true;
+                        try
+                        {
+                            var cmplt = new HashSet<int>(ds.Value.dataList[i].intList);
+                            for (int j = 0; j < dd.wordsDatas[i].OptionDatas.Count; j++)
+                            {
+                                if (cmplt.Contains(j)) dd.wordsDatas[i].OptionDatas[j].isDone = true;
+                            }
+                        }
+                        catch { }
                     }
+                    dialogueDatas.Add(dd.ID, dd);
                 }
-                dialogueDatas.Add(dsd.dialogID, dd);
             }
         }
     }

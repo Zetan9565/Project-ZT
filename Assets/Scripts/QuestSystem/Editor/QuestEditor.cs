@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ZetanStudio.Editor;
 
 public class QuestEditor : EditorWindow
 {
@@ -14,10 +15,10 @@ public class QuestEditor : EditorWindow
     private IMGUIContainer inspector;
     private UnityEngine.UIElements.ListView list;
     private ToolbarSearchField searchField;
-    private TabbedBar tabBar;
+    private ZetanStudio.Editor.TabbedBar tabBar;
     private string keyword;
 
-    [MenuItem("Zetan Studio/任务编辑器")]
+    [MenuItem("Window/Zetan Studio/任务编辑器")]
     public static void Create()
     {
         QuestEditor wnd = GetWindow<QuestEditor>();
@@ -94,7 +95,7 @@ public class QuestEditor : EditorWindow
             }
         };
         inspector = root.Q<IMGUIContainer>("quest-inspector");
-        tabBar = root.Q<TabbedBar>();
+        tabBar = root.Q<ZetanStudio.Editor.TabbedBar>();
         tabBar.Refresh(new string[] { "任务", "任务组" }, OnTabChanged);
         tabBar.onRightClick = OnTabMenu;
         tabBar.SetSelected(1);

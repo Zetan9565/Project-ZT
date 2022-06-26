@@ -29,21 +29,6 @@ public class ButtonWithText : ListItem<ButtonWithText, ButtonWithTextData>
         GetComponent<Button>().onClick.AddListener(OnClick);
     }
 
-    public void Init(ButtonWithTextData data)
-    {
-        text.text = data.text;
-        callback = data.callback;
-        callback_param = data.callback_param;
-        callback_getParam = data.callcack_getParam;
-    }
-    public void Init(string text, Action callback)
-    {
-        this.text.text = text;
-        this.callback = callback;
-        callback_param = null;
-        callback_getParam = null;
-    }
-
     public void OnClick()
     {
         callback?.Invoke();

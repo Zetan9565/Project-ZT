@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 
 public class ItemSlotData
 {
@@ -24,6 +24,25 @@ public class ItemSlotData
 
     public event Action<ItemSlotData> OnSlotStateChanged;
     public event Action<ItemSlotData, ItemSlotData> OnSlotSwap;
+
+    public sealed class Comparer : IComparer<ItemSlotData>
+    {
+        public static Comparer Default => new Comparer();
+
+        public int Compare(ItemSlotData x, ItemSlotData y)
+        {
+            if (x.IsEmpty && !y.IsEmpty) return 1;
+            else if (!x.IsEmpty && y.IsEmpty) return -1;
+            else if (x.ModelID == y.ModelID)
+            {
+                if (x.amount < y.amount) return 1;
+                else if (x.amount > y.amount) return -1;
+                else return 0;
+            }
+            else return Item.Comparer.Default.Compare(x.Model, y.Model);
+        }
+    }
+
 
     public ItemSlotData()
     {
@@ -130,11 +149,11 @@ public class ItemSlotData
         foreach (var info in infos)
         {
             if (!fixedSlotCount.HasValue || slots.Count < fixedSlotCount)
-                if (info.item.StackAble)
-                    slots.Add(new ItemSlotData(new ItemData(info.item, false), info.Amount));
+                if (info.Item.StackAble)
+                    slots.Add(new ItemSlotData(ItemData.Empty(info.Item), info.Amount));
                 else for (int i = 0; i < info.Amount; i++)
                     {
-                        slots.Add(new ItemSlotData(new ItemData(info.item, false), 1));
+                        slots.Add(new ItemSlotData(ItemData.Empty(info.Item), 1));
                     }
         }
         if (fixedSlotCount.HasValue)
@@ -144,7 +163,7 @@ public class ItemSlotData
             }
         return slots;
     }
-    public static List<ItemSlotData> Convert(IEnumerable<ItemWithAmount> items, int? fixedSlotCount = null)
+    public static List<ItemSlotData> Convert(IEnumerable<CountedItem> items, int? fixedSlotCount = null)
     {
         List<ItemSlotData> slots = new List<ItemSlotData>();
         foreach (var item in items)

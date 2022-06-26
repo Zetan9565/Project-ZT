@@ -29,7 +29,7 @@ public class CharacterData
         }
     }
 
-    public bool CanDash
+    public bool CanFlash
     {
         get
         {
@@ -121,7 +121,7 @@ public enum CharacterBusyStates
     [InspectorName("受伤")]
     GetHurt,
     [InspectorName("闪现")]
-    Dash,
+    Flash,
     [InspectorName("翻滚")]
     Roll,
     [InspectorName("格挡")]
@@ -136,6 +136,8 @@ public enum CharacterBusyStates
     Fishing,
     [InspectorName("谈话")]
     Talking,
+    [InspectorName("采集")]
+    Gathering,
     [InspectorName("操作UI")]
     UI,
 }

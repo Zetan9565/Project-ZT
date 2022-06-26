@@ -3,19 +3,28 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 
 public class Inventory
 {
     private readonly List<ItemSlotData> slots = new List<ItemSlotData>();
     private readonly HashSet<ItemSlotData> slotsMap = new HashSet<ItemSlotData>();
+    /// <summary>
+    /// 使用<see cref="Item.ID"/>索引的道具槽
+    /// </summary>
     private readonly Dictionary<string, List<ItemSlotData>> keyedSlots = new Dictionary<string, List<ItemSlotData>>();
-    private readonly Dictionary<string, ItemWithAmount> items = new Dictionary<string, ItemWithAmount>();
+    /// <summary>
+    /// 使用<see cref="ItemData.ID"/>索引的道具数量信息
+    /// </summary>
+    private readonly Dictionary<string, CountedItem> items = new Dictionary<string, CountedItem>();
+    /// <summary>
+    /// 使用<see cref="ItemData.ID"/>索引的隐藏道具
+    /// </summary>
     private readonly Dictionary<string, ItemData> hiddenItems = new Dictionary<string, ItemData>();
 
     public ReadOnlyCollection<ItemSlotData> Slots => slots.AsReadOnly();
 
-    public ReadOnlyDictionary<string, ItemWithAmount> Items => new ReadOnlyDictionary<string, ItemWithAmount>(items);
+    public ReadOnlyDictionary<string, CountedItem> Items => new ReadOnlyDictionary<string, CountedItem>(items);
 
     public ReadOnlyDictionary<string, ItemData> HiddenItems => new ReadOnlyDictionary<string, ItemData>(hiddenItems);
 
@@ -141,28 +150,38 @@ public class Inventory
         }
         return amount > 0;
     }
-    public bool TryGetDatas(string id, out List<ItemWithAmount> results)
+    public bool TryGetDatas(string id, out List<CountedItem> results)
     {
         results = items.Values.Where(x => x.source.ModelID == id).ToList();
         return results.Count > 0;
     }
-    public bool TryGetDatas(Item model, out List<ItemWithAmount> results)
+    public bool TryGetDatas(Item model, out List<CountedItem> results)
     {
         results = items.Values.Where(x => x.source.Model == model).ToList();
         return results.Count > 0;
     }
-    public bool TryGetDatas(Predicate<ItemData> predicate, out List<ItemWithAmount> results)
+    public bool TryGetDatas(Predicate<ItemData> predicate, out List<CountedItem> results)
     {
         results = items.Values.Where(x => predicate(x.source)).ToList();
         return results.Count > 0;
     }
 
+    /// <summary>
+    /// 按原型ID获取数量
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns>所有使用此原型的道具总数量</returns>
     public int GetAmount(string id)
     {
         var find = items.Values.Where(x => x.source.ModelID == id);
         if (find != null) return find.Sum(x => x.amount);
         else return 0;
     }
+    /// <summary>
+    /// 按原型获取数量
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns>所有使用此原型的道具总数量</returns>
     public int GetAmount(Item model)
     {
         if (!model) return 0;
@@ -170,6 +189,11 @@ public class Inventory
         if (find != null) return find.Sum(x => x.amount);
         else return 0;
     }
+    /// <summary>
+    /// 按实例获取数量
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns>该实例在背包中的数量</returns>
     public int GetAmount(ItemData item)
     {
         if (!item || !item.IsInstance) return 0;
@@ -183,7 +207,7 @@ public class Inventory
     }
     public bool ContainsItem(ItemData item)
     {
-        return items.ContainsKey(item.ID);
+        return items.ContainsKey(item.ID) || hiddenItems.ContainsKey(item.ID);
     }
     #endregion
 
@@ -193,28 +217,28 @@ public class Inventory
     /// </summary>
     /// <param name="model">道具原型</param>
     /// <param name="amount">数量</param>
-    /// <param name="simulLoseItems">同时失去的道具</param>
+    /// <param name="itemsToLose">同时失去的道具</param>
     /// <returns>实际获取数量</returns>
-    public int PeekGet(Item model, int amount, params ItemWithAmount[] simulLoseItems)
+    public int PeekGet(Item model, int amount, params CountedItem[] itemsToLose)
     {
         if (!model || amount <= 0) return 0;
-        return PeekGet(model.CreateData(false), amount, simulLoseItems);
+        return PeekGet(ItemData.Empty(model), amount, itemsToLose);
     }
-    public int PeekGet(ItemData item, int amount, params ItemWithAmount[] simulLoseItems)
+    public int PeekGet(ItemData item, int amount, params CountedItem[] itemsToLose)
     {
         if (!item || amount <= 0) return 0;
         int finalGet = amount;
         float vacatedWeight = 0;
         int vacatedSpace = 0;
-        if (simulLoseItems != null)
-            foreach (var sli in simulLoseItems)
+        if (itemsToLose != null)
+            foreach (var itl in itemsToLose)
             {
-                if (sli.IsValid)
+                if (itl.IsValid)
                 {
-                    if (!PeekLose(sli.source, sli.amount, out _)) return 0;
-                    vacatedWeight += sli.source.Model.Weight * sli.amount;
-                    if (sli.source.Model.InfiniteStack) vacatedSpace += sli.amount >= GetAmount(sli.source) ? 1 : 0;
-                    else vacatedSpace += Mathf.FloorToInt(sli.amount * 1.0f / sli.source.Model.StackLimit);
+                    if (!PeekLose(itl.source, itl.amount, out _)) return 0;
+                    vacatedWeight += itl.source.Model.Weight * itl.amount;
+                    if (itl.source.Model.InfiniteStack) vacatedSpace += itl.amount >= GetAmount(itl.source) ? 1 : 0;
+                    else vacatedSpace += Mathf.FloorToInt(itl.amount * 1.0f / itl.source.Model.StackLimit);
                 }
             }
         if (!ignoreSpace)
@@ -246,18 +270,18 @@ public class Inventory
     /// <param name="model">道具原型</param>
     /// <param name="amount">数量</param>
     /// <param name="errorType">错误类型</param>
-    /// <param name="simulLoseItems">同时失去的道具</param>
+    /// <param name="itemsToLose">同时失去的道具</param>
     /// <returns>是否可以获取</returns>
-    public bool PeekGet(Item model, int amount, out InventoryError errorType, params ItemWithAmount[] simulLoseItems)
+    public bool PeekGet(Item model, int amount, out InventoryError errorType, params CountedItem[] itemsToLose)
     {
         if (!model || amount <= 0)
         {
             errorType = InventoryError.Invalid;
             return false;
         }
-        return PeekGet(model.CreateData(false), amount, out errorType, simulLoseItems);
+        return PeekGet(ItemData.Empty(model), amount, out errorType, itemsToLose);
     }
-    public bool PeekGet(ItemData item, int amount, out InventoryError errorType, params ItemWithAmount[] simulLoseItems)
+    public bool PeekGet(ItemData item, int amount, out InventoryError errorType, params CountedItem[] itemsToLose)
     {
         if (!item || !item.Model || amount <= 0)
         {
@@ -268,12 +292,12 @@ public class Inventory
         errorType = InventoryError.None;
         float vacatedWeight = 0;
         int vacatedSpace = 0;
-        if (simulLoseItems != null)
-            foreach (var sli in simulLoseItems)
+        if (itemsToLose != null)
+            foreach (var itl in itemsToLose)
             {
-                if (sli.IsValid)
+                if (itl.IsValid)
                 {
-                    if (!PeekLose(sli.source, sli.amount, out errorType))
+                    if (!PeekLose(itl.source, itl.amount, out errorType))
                     {
                         switch (errorType)
                         {
@@ -286,9 +310,9 @@ public class Inventory
                         }
                         return false;
                     }
-                    vacatedWeight += sli.source.Model.Weight * sli.amount;
-                    if (sli.source.Model.InfiniteStack) vacatedSpace += sli.amount >= GetAmount(sli.source) ? 1 : 0;
-                    else vacatedSpace += Mathf.FloorToInt(sli.amount * 1.0f / sli.source.Model.StackLimit);
+                    vacatedWeight += itl.source.Model.Weight * itl.amount;
+                    if (itl.source.Model.InfiniteStack) vacatedSpace += itl.amount >= GetAmount(itl.source) ? 1 : 0;
+                    else vacatedSpace += Mathf.FloorToInt(itl.amount * 1.0f / itl.source.Model.StackLimit);
                 }
             }
         if (!ignoreWeight && amount * item.Model.Weight > WeightLimit - WeightCost + vacatedWeight)
@@ -323,16 +347,16 @@ public class Inventory
         }
         return true;
     }
-    public bool PeekGet(IEnumerable<ItemInfo> infos, out InventoryError errorType, params ItemWithAmount[] simulLoseItems)
+    public bool PeekGet(IEnumerable<IItemInfo> infos, out InventoryError errorType, params CountedItem[] itemsToLose)
     {
         if (infos == null)
         {
             errorType = InventoryError.Invalid;
             return false;
         }
-        return PeekGet(ItemWithAmount.Convert(infos), out errorType, simulLoseItems);
+        return PeekGet(CountedItem.Convert(infos), out errorType, itemsToLose);
     }
-    public bool PeekGet(IEnumerable<ItemWithAmount> items, out InventoryError errorType, params ItemWithAmount[] simulLoseItems)
+    public bool PeekGet(IEnumerable<CountedItem> items, out InventoryError errorType, params CountedItem[] itemsToLose)
     {
         if (items == null)
         {
@@ -341,12 +365,12 @@ public class Inventory
         }
         float vacatedWeight = 0;
         int vacatedSpace = 0;
-        if (simulLoseItems != null)
-            foreach (var sli in simulLoseItems)
+        if (itemsToLose != null)
+            foreach (var itl in itemsToLose)
             {
-                if (sli.IsValid)
+                if (itl.IsValid)
                 {
-                    if (!PeekLose(sli.source, sli.amount, out errorType))
+                    if (!PeekLose(itl.source, itl.amount, out errorType))
                     {
                         switch (errorType)
                         {
@@ -359,9 +383,9 @@ public class Inventory
                         }
                         return false;
                     }
-                    vacatedWeight += sli.source.Model.Weight * sli.amount;
-                    if (sli.source.Model.InfiniteStack) vacatedSpace += sli.amount >= GetAmount(sli.source) ? 1 : 0;
-                    else vacatedSpace += Mathf.FloorToInt(sli.amount * 1.0f / sli.source.Model.StackLimit);
+                    vacatedWeight += itl.source.Model.Weight * itl.amount;
+                    if (itl.source.Model.InfiniteStack) vacatedSpace += itl.amount >= GetAmount(itl.source) ? 1 : 0;
+                    else vacatedSpace += Mathf.FloorToInt(itl.amount * 1.0f / itl.source.Model.StackLimit);
                 }
             }
         foreach (var item in items)
@@ -421,112 +445,71 @@ public class Inventory
     /// </summary>
     /// <param name="model">道具原型</param>
     /// <param name="amount">数量</param>
-    /// <param name="simulLoseItems">同时失去的道具</param>
-    public void Get(Item model, int amount, params ItemWithAmount[] simulLoseItems)
+    /// <param name="itemsToLose">同时失去的道具</param>
+    public void Get(Item model, int amount, params CountedItem[] itemsToLose)
     {
-        if (customGetAction != null && customGetAction(new ItemData(model, false), amount)) return;
+        if (customGetAction != null && customGetAction(ItemData.Empty(model), amount)) return;
 
-        if (!model || amount < 1) return;
-        WeightCost += model.Weight * amount;
-        if (simulLoseItems != null && simulLoseItems.Length > 0) Lose(simulLoseItems);
-        ItemData item = null;
-        int oldAmount = 0;
-        if (keyedSlots.TryGetValue(model.ID, out var find))
-        {
-            ItemWithAmount iwa = null;
-            foreach (var slot in find)
-            {
-                oldAmount += slot.amount;
-                if (!item)
-                {
-                    item = slot.item;
-                    if (item) items.TryGetValue(item.ID, out iwa);
-                }
-                int take = slot.Put(amount);
-                if (iwa) iwa.amount += take;
-                amount -= take;
-            }
-        }
+        if (itemsToLose != null && itemsToLose.Length > 0) Lose(itemsToLose);
+        int oldAmount;
+        if (model.StackAble) oldAmount = PutStackableItem(ItemFactory.MakeItem(model), amount);
         else
         {
-            find = new List<ItemSlotData>();
-            keyedSlots.Add(model.ID, find);
+            oldAmount = PutUnstackableItem(ItemFactory.MakeItem(model));
+            for (int i = 0; i < amount - 1; i++)
+            {
+                PutUnstackableItem(ItemFactory.MakeItem(model));
+            }
         }
-        CostEmptySlot(find);
         OnItemAmountChanged?.Invoke(model, oldAmount, oldAmount + amount);
-
-        void CostEmptySlot(List<ItemSlotData> collection)
-        {
-            if (amount <= 0 || collection == null) return;
-            if (model.StackAble && item == null) item = model.CreateData();//如果物品可叠加但没有在背包中找到，则这个是新物品
-            ItemSlotData temp;
-            if (model.InfiniteStack)
-            {
-                temp = PutIntoEmptySlot(item, amount);
-                if (temp) collection.Add(temp);
-            }
-            else
-            {
-                for (int i = 0; i < amount / model.StackLimit; i++)
-                {
-                    temp = PutIntoEmptySlot(model.StackAble ? item : model.CreateData(), model.StackLimit);
-                    if (temp) collection.Add(temp);
-                }
-                if (model.StackAble)
-                {
-                    temp = PutIntoEmptySlot(item, amount % model.StackLimit);
-                    if (temp) collection.Add(temp);
-                }
-            }
-        }
     }
     /// <summary>
     /// 按个例放入道具
     /// </summary>
     /// <param name="item">道具个例</param>
     /// <param name="amount">数量</param>
-    /// <param name="simulLoseItems">同时失去的道具</param>
-    public void Get(ItemData item, int amount, params ItemWithAmount[] simulLoseItems)
+    /// <param name="itemsToLose">同时失去的道具</param>
+    public void Get(ItemData item, int amount, params CountedItem[] itemsToLose)
     {
         if (customGetAction != null && customGetAction(item, amount)) return;
 
-        if (item.Model.StackAble || !item.IsInstance) Get(item.Model, amount, simulLoseItems);
-        else if (!item.Model.StackAble && amount == 1)
+        if (!item.IsInstance) Get(item.Model, amount, itemsToLose);
+        else if (item.Model.StackAble)
         {
-            int oldAmount = 0;
-            if (simulLoseItems != null && simulLoseItems.Length > 0) Lose(simulLoseItems);
-            if (keyedSlots.TryGetValue(item.ModelID, out var find))
-            {
-                oldAmount = find.Count;
-                find.Add(PutIntoEmptySlot(item, 1));
-            }
-            else keyedSlots.Add(item.ModelID, new List<ItemSlotData>() { PutIntoEmptySlot(item, 1) });
+            if (itemsToLose != null && itemsToLose.Length > 0) Lose(itemsToLose);
+            int oldAmount = PutStackableItem(item, amount);
             OnItemAmountChanged?.Invoke(item.Model, oldAmount, oldAmount + amount);
+        }
+        else
+        {
+            if (itemsToLose != null && itemsToLose.Length > 0) Lose(itemsToLose);
+            int oldAmount = PutUnstackableItem(item);
+            OnItemAmountChanged?.Invoke(item.Model, oldAmount, oldAmount + 1);
         }
     }
     /// <summary>
     /// 按列表放入道具
     /// </summary>
     /// <param name="infos">道具列表</param>
-    /// <param name="simulLoseItems">同时失去的道具</param>
-    public void Get(IEnumerable<ItemInfo> infos, params ItemWithAmount[] simulLoseItems)
+    /// <param name="itemsToLose">同时失去的道具</param>
+    public void Get(IEnumerable<IItemInfo> infos, params CountedItem[] itemsToLose)
     {
         if (infos == null) return;
-        if (simulLoseItems != null && simulLoseItems.Length > 0) Lose(simulLoseItems);
+        if (itemsToLose != null && itemsToLose.Length > 0) Lose(itemsToLose);
         foreach (var info in infos)
         {
-            if (info.IsValid) Get(info.item, info.Amount);
+            if (info.IsValid) Get(info.Item, info.Amount);
         }
     }
     /// <summary>
     /// 按个例列表放入道具
     /// </summary>
     /// <param name="items">道具列表</param>
-    /// <param name="simulLoseItems">同时失去的道具</param>
-    public void Get(IEnumerable<ItemWithAmount> items, params ItemWithAmount[] simulLoseItems)
+    /// <param name="itemsToLose">同时失去的道具</param>
+    public void Get(IEnumerable<CountedItem> items, params CountedItem[] itemsToLose)
     {
         if (items == null) return;
-        if (simulLoseItems != null && simulLoseItems.Length > 0) Lose(simulLoseItems);
+        if (itemsToLose != null && itemsToLose.Length > 0) Lose(itemsToLose);
         foreach (var item in items)
         {
             if (item.IsValid) Get(item.source, item.amount);
@@ -535,7 +518,7 @@ public class Inventory
     #endregion
 
     #region 道具失去相关
-    public bool PeekLose(string id, int amount, out InventoryError errorType, params ItemWithAmount[] simulGetItems)
+    public bool PeekLose(string id, int amount, out InventoryError errorType, params CountedItem[] itemsToGet)
     {
         if (string.IsNullOrEmpty(id) && amount < 0)
         {
@@ -562,10 +545,10 @@ public class Inventory
                 errorType = InventoryError.Locked;
                 return false;
             }
-            if (simulGetItems != null)
+            if (itemsToGet != null)
             {
                 SimulateLose(data.Model, amount);
-                if (!PeekGet(simulGetItems, out errorType))
+                if (!PeekGet(itemsToGet, out errorType))
                 {
                     UnsimlulateLose(data.Model, amount);
                     return false;
@@ -587,16 +570,16 @@ public class Inventory
             return false;
         }
     }
-    public bool PeekLose(Item model, int amount, out InventoryError errorType, params ItemWithAmount[] simulGetItems)
+    public bool PeekLose(Item model, int amount, out InventoryError errorType, params CountedItem[] itemsToGet)
     {
         if (!model)
         {
             errorType = InventoryError.Invalid;
             return false;
         }
-        return PeekLose(model.ID, amount, out errorType, simulGetItems);
+        return PeekLose(model.ID, amount, out errorType, itemsToGet);
     }
-    public bool PeekLose(ItemData item, int amount, out InventoryError errorType, params ItemWithAmount[] simulGetItems)
+    public bool PeekLose(ItemData item, int amount, out InventoryError errorType, params CountedItem[] itemsToGet)
     {
         if (item && amount > -1)
             if (amount == 0)
@@ -617,30 +600,35 @@ public class Inventory
                 errorType = InventoryError.Locked;
                 return false;
             }
-            else if (!item.IsInstance) return PeekLose(item.Model, amount, out errorType, simulGetItems);
-            else if (items.ContainsKey(item.ID))
+            else if (!item.IsInstance) return PeekLose(item.Model, amount, out errorType, itemsToGet);
+            else if (ContainsItem(item))
             {
-                if (item.Model.StackAble) return PeekLose(item.ModelID, amount, out errorType, simulGetItems);
+                if (item.Model.StackAble) return PeekLose(item.ModelID, amount, out errorType, itemsToGet);
                 errorType = InventoryError.None;
                 return true;
+            }
+            else
+            {
+                errorType = InventoryError.Lack;
+                return false;
             }
         errorType = InventoryError.Invalid;
         return false;
     }
-    public bool PeekLose(IEnumerable<ItemWithAmount> items, out InventoryError errorType, params ItemWithAmount[] simulGetItems)
+    public bool PeekLose(IEnumerable<CountedItem> items, out InventoryError errorType, params CountedItem[] itemsToGet)
     {
         if (items == null)
         {
             errorType = InventoryError.Invalid;
             return false;
         }
-        if (simulGetItems != null)
+        if (itemsToGet != null)
         {
             foreach (var item in items)
             {
                 SimulateLose(item.source.Model, item.amount);
             }
-            if (!PeekGet(simulGetItems, out errorType))
+            if (!PeekGet(itemsToGet, out errorType))
             {
                 foreach (var item in items)
                 {
@@ -685,8 +673,8 @@ public class Inventory
     /// </summary>
     /// <param name="id">原型ID</param>
     /// <param name="amount">数量</param>
-    /// <param name="simulGetItems">同时获得的道具</param>
-    public void Lose(string id, int amount, params ItemWithAmount[] simulGetItems)
+    /// <param name="itemsToGet">同时获得的道具</param>
+    public void Lose(string id, int amount, params CountedItem[] itemsToGet)
     {
         if (string.IsNullOrEmpty(id) || amount < 1) return;
         if (keyedSlots.TryGetValue(id, out var find) && find.Count > 0)
@@ -705,11 +693,11 @@ public class Inventory
                     if (slot.IsEmpty) find.Remove(slot);
                 }
                 SpaceCost -= oldCount - find.Count;
-                if (!ignoreWeight) WeightCost -= data.Model.Weight * amount;
+                WeightCost -= data.Model.Weight * amount;
                 if (find.Count < 1) items.Remove(data.ID);
                 else items[data.ID].amount -= amount;
                 OnItemAmountChanged?.Invoke(data.Model, oldAmount, oldAmount - amount);
-                if (simulGetItems != null && simulGetItems.Length > 0) Get(simulGetItems);
+                if (itemsToGet != null && itemsToGet.Length > 0) Get(itemsToGet);
             }
         }
     }
@@ -718,24 +706,24 @@ public class Inventory
     /// </summary>
     /// <param name="model">原型</param>
     /// <param name="amount">数量</param>
-    /// <param name="simulGetItems">同时获得的道具</param>
-    public void Lose(Item model, int amount, params ItemWithAmount[] simulGetItems)
+    /// <param name="itemsToGet">同时获得的道具</param>
+    public void Lose(Item model, int amount, params CountedItem[] itemsToGet)
     {
         if (!model) return;
-        Lose(model.ID, amount, simulGetItems);
+        Lose(model.ID, amount, itemsToGet);
     }
     /// <summary>
     /// 失去道具，可选同时获得道具，无视限制
     /// </summary>
     /// <param name="item">道具个例</param>
     /// <param name="amount">数量</param>
-    /// <param name="simulGetItems">同时获得的道具</param>
-    public void Lose(ItemData item, int amount, params ItemWithAmount[] simulGetItems)
+    /// <param name="itemsToGet">同时获得的道具</param>
+    public void Lose(ItemData item, int amount, params CountedItem[] itemsToGet)
     {
         if (customLoseAction != null && customLoseAction(item, amount)) return;
 
         if (!item || amount < 1) return;
-        if (item.Model.StackAble || !item.IsInstance) Lose(item.ModelID, amount, simulGetItems);
+        if (item.Model.StackAble || !item.IsInstance) Lose(item.ModelID, amount, itemsToGet);
         else if (!item.Model.StackAble && keyedSlots.TryGetValue(item.ModelID, out var find) && amount == 1)
         {
             int oldAmount = find.Count;
@@ -747,11 +735,11 @@ public class Inventory
                     slot.TakeAll();
                     find.RemoveAt(i);
                     SpaceCost--;
-                    if (!ignoreWeight) WeightCost -= item.Model.Weight;
+                    WeightCost -= item.Model.Weight;
                     i--;
                 }
             }
-            if (simulGetItems != null && simulGetItems.Length > 0) Get(simulGetItems);
+            if (itemsToGet != null && itemsToGet.Length > 0) Get(itemsToGet);
             items.Remove(item.ID);
             OnItemAmountChanged?.Invoke(item.Model, oldAmount, oldAmount - amount);
         }
@@ -760,19 +748,23 @@ public class Inventory
     /// 失去多个道具，可选同时获得道具，无视限制
     /// </summary>
     /// <param name="items">道具与数量列表</param>
-    /// <param name="simulGetItems">同时获得的道具</param>
-    public void Lose(IEnumerable<ItemWithAmount> items, params ItemWithAmount[] simulGetItems)
+    /// <param name="itemsToGet">同时获得的道具</param>
+    public void Lose(IEnumerable<CountedItem> items, params CountedItem[] itemsToGet)
     {
         if (items == null) return;
         foreach (var item in items)
         {
             if (item.IsValid) Lose(item.source, item.amount);
         }
-        if (simulGetItems != null && simulGetItems.Length > 0) Get(simulGetItems);
+        if (itemsToGet != null && itemsToGet.Length > 0) Get(itemsToGet);
     }
     #endregion
 
     #region 其它
+    public bool CanUnhide()
+    {
+        return ignoreSpace || SpaceCost + 1 <= SpaceLimit;
+    }
     public bool HideItem(ItemData item)
     {
         if (!item || item.Model.StackAble) return false;
@@ -796,12 +788,17 @@ public class Inventory
     }
     public bool UnhideItem(ItemData item)
     {
+        return UnhideItem(item, null);
+    }
+    private bool UnhideItem(ItemData item, ItemSlotData slot)
+    {
         if (!item || item.Model.StackAble) return false;
         if (hiddenItems.TryGetValue(item.ID, out var find) && find == item)
         {
             hiddenItems.Remove(item.ID);
             if (!ignoreSpace && SpaceCost + 1 > SpaceLimit) return false;
-            PutIntoEmptySlot(item, 1);
+            if (slot) PutIntoSlot(item, 1, slot);
+            else PutIntoEmptySlot(item, 1);
             OnItemAmountChanged(item.Model, 0, 1);
             return true;
         }
@@ -809,8 +806,9 @@ public class Inventory
     }
     public bool SwapHiddenItem(ItemData unhide, ItemData hide)
     {
-        if (!unhide || !hide || hide.Model.StackAble) return false;
-        return HideItem(hide) && UnhideItem(unhide);
+        if (!hide || hide.Model.StackAble) return false;
+        ItemSlotData slot = slots.Find(x => x.item == hide);
+        return HideItem(hide) && (!unhide || UnhideItem(unhide, slot));
     }
 
     private void SimulateLose(Item model, int amount)
@@ -882,22 +880,93 @@ public class Inventory
     }
     public void Arrange()
     {
-        slots.Sort(SlotComparer.Default);
+        slots.Sort(ItemSlotData.Comparer.Default);
         for (int i = 0; i < slots.Count; i++)
         {
             slots[i].index = i;
         }
     }
+    private int PutUnstackableItem(ItemData item)
+    {
+        int oldAmount = 0;
+        WeightCost += item.Weight;
+        if (keyedSlots.TryGetValue(item.ModelID, out var find))
+        {
+            oldAmount = find.Count;
+            find.Add(PutIntoEmptySlot(item, 1));
+        }
+        else keyedSlots.Add(item.ModelID, new List<ItemSlotData>() { PutIntoEmptySlot(item, 1) });
+        return oldAmount;
+    }
+    private int PutStackableItem(ItemData item, int amount)
+    {
+        WeightCost += item.Weight * amount;
+        ItemData exist = null;
+        int oldAmount = 0;
+        if (keyedSlots.TryGetValue(item.ModelID, out var find))
+        {
+            CountedItem iwa = null;
+            foreach (var slot in find)
+            {
+                oldAmount += slot.amount;
+                if (!exist)
+                {
+                    exist = slot.item;
+                    if (exist) items.TryGetValue(exist.ID, out iwa);
+                }
+                int take = slot.Put(amount);
+                if (iwa) iwa.amount += take;
+                amount -= take;
+            }
+        }
+        else
+        {
+            find = new List<ItemSlotData>();
+            keyedSlots.Add(item.ModelID, find);
+        }
+        //尝试处理剩下的数量
+        costEmptySlot(find);
+        return oldAmount;
+
+        void costEmptySlot(List<ItemSlotData> collection)
+        {
+            if (amount <= 0 || collection == null) return;
+            if (exist == null) exist = item;//如果物品可叠加但没有在背包中找到，则这个是新物品
+            ItemSlotData temp;
+            if (item.InfiniteStack)
+            {
+                temp = PutIntoEmptySlot(exist, amount);
+                if (temp) collection.Add(temp);
+            }
+            else
+            {
+                //尝试以叠加上限依次填充空槽，直到下次无法填满
+                for (int i = 0; i < amount / item.StackLimit; i++)
+                {
+                    temp = PutIntoEmptySlot(exist, item.StackLimit);
+                    if (temp) collection.Add(temp);
+                }
+                //尝试处理剩余的部分
+                temp = PutIntoEmptySlot(exist, amount % item.StackLimit);
+                if (temp) collection.Add(temp);
+            }
+        }
+    }
     private ItemSlotData PutIntoEmptySlot(ItemData item, int amount)
     {
         if (!item || amount <= 0) return null;
-        var slot = slots.Find(x => x.IsEmpty);
-        if (slot) slot.Put(item, amount);
-        else if (ignoreSpace) slot = MakeSlot();
-        else throw new InvalidOperationException("往已满的库存中增加新道具");
+        return PutIntoSlot(item, amount, slots.Find(x => x.IsEmpty));
+    }
+    private ItemSlotData PutIntoSlot(ItemData item, int amount, ItemSlotData slot)
+    {
+        if (!item || amount <= 0) return null;
+        if (!slot)
+            if (ignoreSpace) slot = MakeSlot();
+            else throw new InvalidOperationException("往已满的库存中增加新道具");
+        slot.Put(item, amount);
         SpaceCost++;
         if (items.TryGetValue(item.ID, out var find)) find.amount += amount;
-        else items.Add(item.ID, new ItemWithAmount(item, amount));
+        else items.Add(item.ID, new CountedItem(item, amount));
         return slot;
     }
     private ItemSlotData MakeSlot()
@@ -956,11 +1025,93 @@ public class Inventory
         return self != null;
     }
 
+    public SaveDataItem GetSaveData()
+    {
+        var save = new SaveDataItem();
+        save.stringData["money"] = Money.ToString();
+        save.intData["spaceCost"] = SpaceCost;
+        save.intData["spaceLimit"] = SpaceLimit;
+        save.floatData["weightCost"] = WeightCost;
+        save.floatData["weightLimit"] = WeightLimit;
+        var items = new SaveDataItem();
+        save.subData["items"] = items;
+        var slots = new SaveDataItem();
+        save.subData["slots"] = slots;
+        foreach (var slot in this.slots)
+        {
+            var ss = new SaveDataItem();
+            ss.intData["index"] = slot.index;
+            ss.intData["amount"] = slot.amount;
+            ss.stringData["item"] = slot.ItemID;
+            slots.dataList.Add(ss);
+        }
+        foreach (var item in this.items.Values)
+        {
+            items.intData[item.source.ID] = item.amount;
+        }
+        var hidden = new SaveDataItem();
+        save.subData["hiddenItems"] = hidden;
+        foreach (var item in hiddenItems.Values)
+        {
+            hidden.stringList.Add(item.ID);
+        }
+        return save;
+    }
+    public void LoadSaveData(SaveDataItem save)
+    {
+        if (save.stringData.TryGetValue("money", out var money) && long.TryParse(money, out var mv)) Money = mv;
+        if (save.intData.TryGetValue("spaceCost", out var space)) SpaceCost = space;
+        if (save.intData.TryGetValue("spaceLimit", out var spaceLmt)) SpaceLimit = spaceLmt;
+        if (save.floatData.TryGetValue("weightCost", out var weight)) WeightCost = weight;
+        if (save.floatData.TryGetValue("weightLimit", out var weightLmt)) WeightLimit = weightLmt;
+        this.items.Clear();
+        if (save.subData.TryGetValue("items", out var items))
+        {
+            foreach (var amount in items.intData)
+            {
+                if (ItemFactory.GetItem(amount.Key) is ItemData loadedItem)
+                    this.items[amount.Key] = new CountedItem(loadedItem, amount.Value);
+            }
+        }
+        this.slots.Clear();
+        slotsMap.Clear();
+        keyedSlots.Clear();
+
+        if (save.subData.TryGetValue("slots", out var slots))
+        {
+            foreach (var sd in slots.dataList)
+            {
+                var slot = new ItemSlotData(this.slots.Count);
+                if (sd.intData.TryGetValue("index", out var index)) slot.index = index;
+                if (sd.intData.TryGetValue("amount", out var amount)) slot.amount = amount;
+                if (sd.stringData.TryGetValue("item", out var itemID) && this.items.TryGetValue(itemID, out var item))
+                {
+                    slot.item = item.source;
+                    if (keyedSlots.TryGetValue(slot.ModelID, out var list)) list.Add(slot);
+                    else keyedSlots[slot.ModelID] = new List<ItemSlotData>() { slot };
+                }
+                this.slots.Add(slot);
+                slotsMap.Add(slot);
+            }
+        }
+        hiddenItems.Clear();
+        if (save.subData.TryGetValue("hiddenItems", out var hiddens))
+        {
+            foreach (var hidden in hiddens.stringList)
+            {
+                if (this.items.TryGetValue(hidden, out var item))
+                    hiddenItems[hidden] = item.source;
+            }
+        }
+    }
+
+    #region 委托
     public delegate void InventoryMoneyListener(Inventory inventory, long oldMoney);
     public delegate void InventorySpaceListener(Inventory inventory, int oldSpaceLimit);
     public delegate void InventoryWeightListener(Inventory inventory, float oldWeightLimit);
     public delegate void ItemAmountListener(Item item, int oldAmount, int newAmount);
     public delegate void ItemSlotStateListener(ItemSlotData slot);
+    #endregion
 }
 
 public enum InventoryError
@@ -978,20 +1129,13 @@ public enum InventoryError
 }
 
 #region 各种工具类
-public interface IInventoryHolder
-{
-    public string Name { get; }
-
-    public Inventory Inventory { get; }
-}
-
 public static class InventoryUtility
 {
     /// <summary>
     /// 丢弃道具
     /// </summary>
     /// <param name="data">道具信息</param>
-    public static void DiscardItem(IInventoryHandler handler, ItemData data, Vector3? amountPosition = null)
+    public static void DiscardItem(InventoryHandler handler, ItemData data, Vector3? amountPosition = null)
     {
         if (data == null || !data.Model) return;
         if (!handler.ContainsItem(data))
@@ -1010,7 +1154,7 @@ public static class InventoryUtility
             ConfirmWindow.StartConfirm($"确定丢弃1个 [{data.Model.ColorName}] 吗？",
                 delegate
                 {
-                    if (handler.LoseItem(data, 1))
+                    if (handler.Lose(data, 1))
                         MessageManager.Instance.New($"丢掉了1个 [{data.Name}]");
                 });
         }
@@ -1019,7 +1163,7 @@ public static class InventoryUtility
             ConfirmWindow.StartConfirm($"确定丢弃{amount}个 [{data.Model.ColorName}] 吗？",
                 delegate
                 {
-                    if (handler.LoseItem(data, (int)amount))
+                    if (handler.Lose(data, (int)amount))
                         MessageManager.Instance.New($"丢掉了{amount}个 [{data.Name}]");
                 });
         }, amount, "丢弃数量", amountPosition);

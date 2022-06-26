@@ -12,7 +12,7 @@ public interface IForEachBreakable<out T>
     /// 带中断的遍历
     /// </summary>
     /// <param name="action">返回值表示是否中断的访问器</param>
-    public void ForEachBreakable(Predicate<T> action);
+    public void ForEach(Predicate<T> action);
 }
 
 public interface IHideable
@@ -88,9 +88,9 @@ public interface IScaleAble<T> where T : MonoBehaviour
     }
 }
 
-public interface IDragAble
+public interface IDraggable
 {
-    Sprite DragAbleIcon { get; }
+    Sprite DraggableIcon { get; }
 }
 
 public interface IManageAble

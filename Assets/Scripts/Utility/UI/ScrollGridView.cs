@@ -12,12 +12,6 @@ public abstract class ScrollGridView<TItem, TData> : GridView<TItem, TData>, ISc
         ScrollToIndex(index);
     }
 
-    public override void Refresh()
-    {
-        base.Refresh();
-        ScrollRect.normalizedPosition = ScrollRect.normalizedPosition;
-    }
-
     protected override void RefreshLayoutGroup()
     {
         ScrollRect = GetComponent<ScrollRect>();

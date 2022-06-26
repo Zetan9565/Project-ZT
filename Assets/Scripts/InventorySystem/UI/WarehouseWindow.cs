@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.UI;
 
 public class WarehouseWindow : InventoryWindow
 {
-    public override IInventoryHandler Handler => WarehouseManager.Instance;
+    public override InventoryHandler Handler => WarehouseManager.Instance;
 
     protected override string InventoryMoneyChangedMsgKey => WarehouseManager.WarehouseMoneyChanged;
     protected override string InventorySpaceChangedMsgKey => WarehouseManager.WarehouseSpaceChanged;
@@ -12,7 +13,7 @@ public class WarehouseWindow : InventoryWindow
     protected override string ItemAmountChangedMsgKey => WarehouseManager.WarehouseItemAmountChanged;
     protected override string SlotStateChangedMsgKey => WarehouseManager.WarehouseSlotStateChanged;
 
-    protected override ButtonWithTextData[] GetSlotButtons(ItemSlot slot)
+    protected override ButtonWithTextData[] GetSlotButtons(ItemSlotEx slot)
     {
         if (!slot || slot.IsEmpty) return null;
 
@@ -99,21 +100,21 @@ public class WarehouseWindow : InventoryWindow
         int have = Handler.GetAmount(item);
         if (!all)
             if (have == 1 && OnTakeOut(item, 1, 1) > 0)
-                MessageManager.Instance.New($"取出了1个 [{item.Model.ColorName}");
+                MessageManager.Instance.New($"取出了1个 [{item.ColorName}");
             else
             {
                 AmountWindow.StartInput(delegate (long amount)
                 {
                     int take = OnTakeOut(item, (int)amount, have);
                     if (take > 0)
-                        MessageManager.Instance.New($"取出了{take}个 [{item.Model.ColorName}]");
+                        MessageManager.Instance.New($"取出了{take}个 [{item.ColorName}]");
                 }, have, "取出数量", ZetanUtility.ScreenCenter, Vector2.zero);
             }
         else
         {
             int take = OnTakeOut(item, have, have);
             if (take > 0)
-                MessageManager.Instance.New($"取出了{have + take}个 [{item.Model.ColorName}]");
+                MessageManager.Instance.New($"取出了{have + take}个 [{item.ColorName}]");
         }
     }
 
@@ -138,7 +139,7 @@ public class WarehouseWindow : InventoryWindow
         if (!all)
         {
             if (have == 1 && OnStore(item, 1) > 0)
-                MessageManager.Instance.New($"存入了1个 [{item.Model.ColorName}]");
+                MessageManager.Instance.New($"存入了1个 [{item.ColorName}]");
             else
             {
                 int maxGet = Handler.Inventory.PeekGet(item, have);
@@ -146,7 +147,7 @@ public class WarehouseWindow : InventoryWindow
                 {
                     int store = OnStore(item, (int)amount);
                     if (store > 0)
-                        MessageManager.Instance.New($"存入了{store}个 [{item.Model.ColorName}]");
+                        MessageManager.Instance.New($"存入了{store}个 [{item.ColorName}]");
                 }, have > maxGet ? maxGet : have, "存入数量", ZetanUtility.ScreenCenter, Vector2.zero);
             }
         }
@@ -155,7 +156,7 @@ public class WarehouseWindow : InventoryWindow
             int amountBef = Handler.GetAmount(item);
             int store = OnStore(item, have);
             if (store > 0)
-                MessageManager.Instance.New($"存入了{store}个 [{item.Model.ColorName}]");
+                MessageManager.Instance.New($"存入了{store}个 [{item.ColorName}]");
         }
     }
 
@@ -167,21 +168,21 @@ public class WarehouseWindow : InventoryWindow
         return finalGet;
     }
 
-    protected override void OnSlotEndDrag(GameObject go, ItemSlot slot)
+    protected override void OnSlotEndDrag(GameObject go, ItemSlotEx slot)
     {
-        ItemSlot target = go.GetComponentInParent<ItemSlot>();
-        if (Type != OpenType.Preview && target && slot != target && grid.ContainsItem(target)) slot.Swap(target);
+        ItemSlotEx target = go.GetComponentInParent<ItemSlotEx>();
+        if (Type != OpenType.Preview && target && slot != target && grid.Contains(target)) slot.Swap(target);
         else if (Type != OpenType.Preview && go.GetComponentInParent<DiscardButton>() == discardButton)
         {
             InventoryUtility.DiscardItem(Handler, slot.Item, discardButton.transform.position);
         }
         else if (WindowsManager.IsWindowOpen<ItemSelectionWindow>(out var selecter) && (target && selecter.ContainsSlot(target) || go == selecter.PlacementArea))
             selecter.Place(slot);
-        else if (Type == OpenType.Store && OtherWindow && (target && OtherWindow.Grid.ContainsItem(target) || target == OtherWindow.Grid.Container))
+        else if (Type == OpenType.Store && OtherWindow && (target && OtherWindow.Grid.Contains(target) || target == OtherWindow.Grid.Container))
             TakeOutItem(slot.Item);
     }
 
-    protected override void OnSlotRightClick(ItemSlot slot)
+    protected override void OnSlotRightClick(ItemSlotEx slot)
     {
         switch (Type)
         {

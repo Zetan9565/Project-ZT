@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 using ZetanStudio.Extension.Editor;
 
 [CustomPropertyDrawer(typeof(Objective), true)]

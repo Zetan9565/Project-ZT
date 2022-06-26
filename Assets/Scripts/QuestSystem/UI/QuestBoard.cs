@@ -71,9 +71,8 @@ public class QuestBoard : SingletonWindow<QuestBoard>, IPointerClickHandler
         objectiveText.text = objectives.ToString();
     }
 
-    protected override void OnStart()
+    protected override void OnAwake()
     {
-        base.OnStart();
         Defocus();
     }
 
@@ -88,7 +87,7 @@ public class QuestBoard : SingletonWindow<QuestBoard>, IPointerClickHandler
         if (msg.Length > 0 && msg[0] is QuestData quest && msg[1] is bool ipBef)
             if (Quest == null && quest.InProgress && !ipBef)//任务栏没有在显示的任务，这是新接取的任务
                 FocusOnQuest(quest);
-            else if (!quest.InProgress && ipBef)//任务已提交或放弃
+            else if (Quest == quest && !quest.InProgress && ipBef)//任务已提交或放弃
                 Defocus();
     }
 

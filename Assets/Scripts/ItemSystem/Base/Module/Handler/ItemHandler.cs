@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     public abstract class ItemHandler : ScriptableObject
     {
-        public abstract string Name { get; }
+        [SerializeField]
+        protected string _name;
+        public string Name => _name;
 
         protected virtual ItemHandler Instance => this;
 

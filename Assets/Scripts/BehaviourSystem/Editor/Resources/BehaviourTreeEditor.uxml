@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Scripts/BehaviourSystem/Editor/BehaviourTreeEditor.uss?fileID=7433441132597879392&amp;guid=4aa7045723842c548af9b7870490cd32&amp;type=3#BehaviourTreeEditor" />
+    <uie:Toolbar>
+        <uie:ToolbarMenu display-tooltip-when-elided="true" text="文件" name="assets" style="width: 48px; -unity-font: resource(&apos;Font/Default&apos;); padding-right: 2px;" />
+        <uie:ToolbarMenu display-tooltip-when-elided="true" name="exe-select" text="选择行为树" style="flex-direction: row; -unity-font: resource(&apos;Font/Default&apos;); justify-content: flex-start; position: relative; right: auto;" />
+        <uie:ToolbarButton text="撤销" display-tooltip-when-elided="true" name="undo" />
+        <uie:ToolbarButton text="重做" display-tooltip-when-elided="true" name="redo" />
+    </uie:Toolbar>
+    <SplitView fixed-pane-initial-dimension="300">
+        <SplitView orientation="Vertical" fixed-pane-initial-dimension="360" name="left-container" style="min-width: 250px;">
+            <ui:VisualElement name="inspector-container">
+                <ZetanStudio.Editor.TabbedBar name="inspector-tab" style="min-width: auto; width: auto; height: 22px; min-height: 22px;" />
+                <ui:Label text="检查器" display-tooltip-when-elided="true" name="inspector-label" style="background-color: rgba(0, 0, 0, 0.5); height: 18px; font-size: 14px;" />
+                <ui:ScrollView>
+                    <ZetanStudio.BehaviourTree.Editor.InspectorView style="flex-grow: 1; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; display: flex;" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement name="variable-container">
+                <ui:Label text="变量" display-tooltip-when-elided="true" name="variable-title" style="background-color: rgba(0, 0, 0, 0.5); height: 18px; font-size: 14px;" />
+                <ZetanStudio.Editor.TabbedBar name="variable-tab" style="min-width: auto; width: auto; height: 22px; min-height: 22px;" />
+                <ui:ScrollView horizontal-scroller-visibility="Hidden" style="padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                    <ui:IMGUIContainer name="variables" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </SplitView>
+        <ui:VisualElement name="right-container" style="min-width: 500px; min-height: 400px;">
+            <ui:Label text="行为树视图" display-tooltip-when-elided="true" name="tree-name" style="background-color: rgba(0, 0, 0, 0.5); height: 18px; font-size: 14px;" />
+            <ZetanStudio.BehaviourTree.Editor.BehaviourTreeView focusable="true" style="flex-grow: 1;" />
+        </ui:VisualElement>
+    </SplitView>
+</ui:UXML>

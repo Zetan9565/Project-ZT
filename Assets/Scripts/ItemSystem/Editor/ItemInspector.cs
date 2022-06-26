@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-namespace ZetanStudio.Item.Editor
+namespace ZetanStudio.ItemSystem.Editor
 {
     [CustomEditor(typeof(Item))]
     public sealed class ItemInspector : UnityEditor.Editor

@@ -2,9 +2,9 @@
 using UnityEditor;
 using UnityEngine;
 using ZetanStudio.Extension.Editor;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem.Module;
 
-namespace ZetanStudio.Item.Editor
+namespace ZetanStudio.ItemSystem.Editor
 {
     [CustomMuduleDrawer(typeof(CommonModule), true)]
     public class CommonBlock : ModuleBlock
@@ -26,7 +26,6 @@ namespace ZetanStudio.Item.Editor
         {
             EditorGUILayout.PropertyField(Name, new GUIContent($"名称{(string.IsNullOrEmpty(Name.stringValue) ? "(名称为空)" : (Duplicate() ? "(名称重复)" : string.Empty))}"));
             EditorGUILayout.PropertyField(Parameter);
-            errorBef = !HasError();
         }
         private bool Duplicate()
         {
@@ -38,7 +37,7 @@ namespace ZetanStudio.Item.Editor
         }
         protected override bool HasError()
         {
-            return userData is ItemModule module && !module.IsValid || Duplicate();
+            return userData is CommonModule module && !module.IsValid || Duplicate();
         }
     }
 }

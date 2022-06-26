@@ -33,7 +33,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         private static BehaviourTreeEditorSettings Find()
         {
             var settings = ZetanUtility.Editor.LoadAssets<BehaviourTreeEditorSettings>();
-            if (settings.Count > 1) Debug.LogWarning(Language.Tr(settings[0].language, "找到多个行为树编辑器配置，将使用第一个"));
+            if (settings.Count > 1) Debug.LogWarning(L.Tr(settings[0].language, "找到多个行为树编辑器配置，将使用第一个"));
             if (settings.Count > 0) return settings[0];
             return null;
         }
@@ -44,7 +44,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             if (settings == null)
             {
                 settings = CreateInstance<BehaviourTreeEditorSettings>();
-                AssetDatabase.CreateAsset(settings, AssetDatabase.GenerateUniqueAssetPath("Assets/Scripts/BehaviourSystem/Editor/BehaviourTreeSettings.asset"));
+                AssetDatabase.CreateAsset(settings, AssetDatabase.GenerateUniqueAssetPath("Assets/Scripts/BehaviourSystem/Editor/Resources/BehaviourTreeSettings.asset"));
             }
             return settings;
         }
@@ -56,12 +56,12 @@ namespace ZetanStudio.BehaviourTree.Editor
                 var settings = GetOrCreate();
                 var provider = new SettingsProvider("Project/Zetan Studio/ZSBTSettingsUIElementsSettings", SettingsScope.Project)
                 {
-                    label = Language.Tr(settings ? settings.language : null, "行为树编辑器"),
+                    label = L.Tr(settings ? settings.language : null, "行为树编辑器"),
                     activateHandler = (searchContext, rootElement) =>
                     {
                         SerializedObject serializedObject = new SerializedObject(GetOrCreate());
 
-                        Label title = new Label() { text = Language.Tr(settings ? settings.language : null, "行为树编辑器设置") };
+                        Label title = new Label() { text = L.Tr(settings ? settings.language : null, "行为树编辑器设置") };
                         title.style.paddingLeft = 10f;
                         title.style.fontSize = 19f;
                         title.AddToClassList("title");

@@ -1,8 +1,9 @@
 using System;
-using System.IO;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -35,17 +36,17 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
             SaveData data = new SaveData(Application.version);
 
-            SaveTime(data);
-            SaveBag(data);
-            SaveStructure(data);
-            SaveMaking(data);
-            SaveWarehouse(data);
-            SaveQuest(data);
-            SaveDialogue(data);
-            SaveTrigger(data);
-            SaveActions(data);
-            SaveMapMark(data);
-
+            //SaveTime(data);
+            //SaveBag(data);
+            //SaveStructure(data);
+            //SaveMaking(data);
+            //SaveWarehouse(data);
+            //SaveQuest(data);
+            //SaveDialogue(data);
+            //SaveTrigger(data);
+            //SaveActions(data);
+            //SaveMapMark(data);
+            SaveMethodAttribute.SaveAll(data);
             bf.Serialize(fs, data);
             ZetanUtility.Encrypt(fs, encryptKey);
 
@@ -64,29 +65,9 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         }
     }
 
-    void SaveTime(SaveData data)
-    {
-        TimeManager.Instance.SaveData(data);
-    }
-
-    void SaveBag(SaveData data)
-    {
-        //BackpackManager.Instance.SaveData(data);
-    }
-
-    void SaveStructure(SaveData data)
-    {
-        StructureManager.Instance.SaveData(data);
-    }
-
-    void SaveMaking(SaveData data)
-    {
-        //MakingManager.Instance.SaveData(data);
-    }
-
     void SaveWarehouse(SaveData data)
     {
-        //foreach (var talker in DialogueManager.Instance.Talkers.Values)
+        //foreach (var talker in DialogueManager.Talkers.Values)
         //{
         //    if (talker.Info.IsWarehouseAgent)
         //        data.warehouseDatas.Add(new WarehouseSaveData(talker.TalkerID, talker.warehouse));
@@ -97,16 +78,6 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         //}
     }
 
-    void SaveQuest(SaveData data)
-    {
-        QuestManager.Instance.SaveData(data);
-    }
-
-    void SaveDialogue(SaveData data)
-    {
-        DialogueManager.Instance.SaveData(data);
-    }
-
     void SaveActions(SaveData data)
     {
         foreach (var action in ActionStack.ToArray().Reverse())
@@ -115,7 +86,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void SaveTrigger(SaveData data)
     {
-        TriggerManager.Instance.SaveData(data);
+        TriggerManager.SaveData(data);
     }
 
     void SaveMapMark(SaveData data)
@@ -159,17 +130,17 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
         LoadPlayer(data);
         yield return new WaitUntil(() => { return BackpackManager.Instance.Inventory != null; });
-        LoadBackpack(data);
-        LoadStructure(data);
-        LoadMaking(data);
-        LoadWarehouse(data);
-        LoadQuest(data);
-        LoadDialogue(data);
-        LoadMapMark(data);
-        LoadActions(data);
-        LoadTrigger(data);
-        LoadTime(data);
-
+        //LoadBackpack(data);
+        //LoadStructure(data);
+        //LoadMaking(data);
+        //LoadWarehouse(data);
+        //LoadQuest(data);
+        //LoadDialogue(data);
+        //LoadMapMark(data);
+        //LoadActions(data);
+        //LoadTrigger(data);
+        //LoadTime(data);
+        LoadMethodAttribute.LoadAll(data);
         IsLoading = false;
     }
 
@@ -180,33 +151,13 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         PlayerManager.Instance.PlayerTransform.position = new Vector3(data.playerPosX, data.playerPosY, data.playerPosZ);
     }
 
-    void LoadTime(SaveData data)
-    {
-        TimeManager.Instance.LoadData(data);
-    }
-
-    void LoadBackpack(SaveData data)
-    {
-        //BackpackManager.Instance.LoadData(data.backpackData);
-    }
-
-    void LoadStructure(SaveData data)
-    {
-        StructureManager.Instance.LoadData(data.structureSystemData);
-    }
-
-    void LoadMaking(SaveData data)
-    {
-        //MakingManager.Instance.LoadData(data);
-    }
-
     void LoadWarehouse(SaveData data)
     {
         //Warehouse[] warehouses = FindObjectsOfType<Warehouse>();
         //foreach (WarehouseSaveData wd in data.warehouseDatas)
         //{
         //    WarehouseData warehouse = null;
-        //    DialogueManager.Instance.Talkers.TryGetValue(wd.handlerID, out TalkerData handler);
+        //    DialogueManager.Talkers.TryGetValue(wd.handlerID, out TalkerData handler);
         //    if (handler) warehouse = handler.warehouse;
         //    else
         //    {
@@ -230,16 +181,6 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         //}
     }
 
-    void LoadQuest(SaveData data)
-    {
-        QuestManager.Instance.LoadQuest(data);
-    }
-
-    void LoadDialogue(SaveData data)
-    {
-        DialogueManager.Instance.LoadData(data);
-    }
-
     void LoadActions(SaveData data)
     {
         var actions = FindObjectsOfType<ActionExecutor>();
@@ -251,7 +192,7 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
 
     void LoadTrigger(SaveData data)
     {
-        TriggerManager.Instance.LoadData(data);
+        TriggerManager.LoadData(data);
     }
 
     void LoadMapMark(SaveData data)
@@ -259,4 +200,170 @@ public class SaveManager : SingletonMonoBehaviour<SaveManager>
         MapManager.Instance.LoadData(data);
     }
     #endregion
+}
+
+[AttributeUsage(AttributeTargets.Method)]
+public class SaveMethodAttribute : Attribute
+{
+    public readonly int priority;
+
+    public SaveMethodAttribute(int priority = 0)
+    {
+        this.priority = priority;
+    }
+
+    public static void SaveAll(SaveData data)
+    {
+        var methods = new List<MethodInfo>(ZetanUtility.GetMethodsWithAttribute<SaveMethodAttribute>());
+        methods.Sort((x, y) =>
+        {
+            var attrx = x.GetCustomAttribute<SaveMethodAttribute>();
+            var attry = y.GetCustomAttribute<SaveMethodAttribute>();
+            if (attrx.priority < attry.priority)
+                return -1;
+            else if (attrx.priority > attry.priority)
+                return 1;
+            return 0;
+        });
+        foreach (var method in methods)
+        {
+            try
+            {
+                method.Invoke(null, new object[] { data });
+            }
+            catch { }
+        }
+    }
+}
+[AttributeUsage(AttributeTargets.Method)]
+public class LoadMethodAttribute : Attribute
+{
+    public readonly int priority;
+
+    public LoadMethodAttribute(int priority = 0)
+    {
+        this.priority = priority;
+    }
+
+    public static void LoadAll(SaveData data)
+    {
+        var methods = new List<MethodInfo>(ZetanUtility.GetMethodsWithAttribute<LoadMethodAttribute>());
+        methods.Sort((x, y) =>
+        {
+            var attrx = x.GetCustomAttribute<LoadMethodAttribute>();
+            var attry = y.GetCustomAttribute<LoadMethodAttribute>();
+            if (attrx.priority < attry.priority)
+                return -1;
+            else if (attrx.priority > attry.priority)
+                return 1;
+            return 0;
+        });
+        foreach (var method in methods)
+        {
+            try
+            {
+                method.Invoke(null, new object[] { data });
+            }
+            catch { }
+        }
+    }
+}
+
+namespace ZetanStudio.Serialization
+{
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
+
+    public class PloyListConverter<T> : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return true;
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            List<T> values = new List<T>();
+            try
+            {
+                foreach (var item in JObject.Load(reader).Properties())
+                {
+                    values.Add((T)item.Value.ToObject(Type.GetType(item.Name)));
+                }
+            }
+            catch { }
+            return values;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var list = (List<T>)value;
+            var obj = new JObject();
+            foreach (var item in list)
+            {
+                obj.Add(item.GetType().AssemblyQualifiedName, JToken.FromObject(item));
+            }
+            serializer.Serialize(writer, obj);
+        }
+    }
+    public class PloyArrayConverter<T> : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return true;
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            List<T> values = new List<T>();
+            try
+            {
+                foreach (var item in JObject.Load(reader).Properties())
+                {
+                    values.Add((T)item.Value.ToObject(Type.GetType(item.Name)));
+                }
+            }
+            catch { }
+            return values.ToArray();
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var list = (T[])value;
+            var obj = new JObject();
+            foreach (var item in list)
+            {
+                obj.Add(item.GetType().AssemblyQualifiedName, JToken.FromObject(item));
+            }
+            serializer.Serialize(writer, obj);
+        }
+    }
+    public class PloyConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return true;
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            try
+            {
+                foreach (var item in JObject.Load(reader).Properties())
+                {
+                    return item.Value.ToObject(Type.GetType(item.Name));
+                }
+            }
+            catch
+            {
+                return null;
+            }
+            return null;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            serializer.Serialize(writer, new JObject() { { value.GetType().AssemblyQualifiedName, JToken.FromObject(value) } });
+        }
+    }
 }

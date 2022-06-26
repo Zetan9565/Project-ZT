@@ -1,23 +1,39 @@
 ﻿using System;
 using UnityEngine;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 
 [RequireComponent(typeof(RectTransform)), DisallowMultipleComponent]
-public class ItemGrid : GridView<ItemSlotBase, ItemSlotData>, ISlotContainer, IFiltableItemContainer
+public class ItemGrid : GridView<ItemSlot, ItemSlotData>, ISlotContainer, IFiltableItemContainer
 {
-    public void DarkIf(Predicate<ItemSlotBase> condition)
+    private Predicate<ItemSlot> darkCondition;
+    private Predicate<ItemSlot> markCondition;
+    private Predicate<Item> filter;
+
+    public void DarkIf(Predicate<ItemSlot> condition)
     {
+        darkCondition = condition;
         ForEach(x => x.SetDarkCondition(condition, true));
     }
 
     public void DoFilter(Predicate<Item> filter)
     {
-        AddItemFilter(i => i.IsEmpty || (filter?.Invoke(i.Data?.Model) ?? true), true);
+        this.filter = filter;
+        AddItemFilter(DoFilter, true);
+    }
+    private bool DoFilter(ItemSlot i)
+    {
+        return i.IsEmpty || (filter?.Invoke(i.Data?.Model) ?? true);
+    }
+    public void MarkIf(Predicate<ItemSlot> condition)
+    {
+        markCondition = condition;
+        ForEach(x => x.SetMarkCondition(condition, true));
     }
 
-    public void MarkIf(Predicate<ItemSlotBase> condition)
+    protected override void OnModifyItem(ItemSlot item)
     {
-        ForEach(x => x.SetMarkCondition(condition, true));
+        item.SetDarkCondition(darkCondition);
+        item.SetMarkCondition(markCondition);
     }
 }
 public interface IFiltableItemContainer

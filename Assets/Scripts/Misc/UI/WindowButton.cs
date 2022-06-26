@@ -17,7 +17,7 @@ public class WindowButton : MonoBehaviour
 
     private void OpenClose()
     {
-        if (!openClose) WindowsManager.OpenWindow(type.Split('.')[^1]);
-        else WindowsManager.OpenClose(type.Split('.')[^1]);
+        if (!openClose) WindowsManager.OpenWindow(ZetanUtility.GetTypeByFullName(type));
+        else WindowsManager.OpenClose(ZetanUtility.GetTypeByFullName(type));
     }
 }

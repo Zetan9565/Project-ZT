@@ -10,7 +10,7 @@ public class LootAgent : Interactive2D
     private Coroutine recycleRoutine;
 
     [HideInInspector]
-    public List<ItemWithAmount> lootItems = new List<ItemWithAmount>();
+    public List<CountedItem> lootItems = new List<CountedItem>();
 
     public override bool IsInteractive
     {
@@ -20,7 +20,7 @@ public class LootAgent : Interactive2D
         }
     }
 
-    public void Init(List<ItemWithAmount> lootItems, Vector3 position)
+    public void Init(List<CountedItem> lootItems, Vector3 position)
     {
         if (lootItems == null)
         {
@@ -45,6 +45,12 @@ public class LootAgent : Interactive2D
         ObjectPool.Put(gameObject);
         if (recycleRoutine != null) StopCoroutine(recycleRoutine);
         recycleRoutine = null;
+    }
+
+    protected override void OnNotInteractable()
+    {
+        if (WindowsManager.IsWindowOpen<LootWindow>(out var window) && window.Target == this)
+            window.Interrupt();
     }
 
     public override bool DoInteract()

@@ -4,6 +4,15 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "misc settings", menuName = "Zetan Studio/杂项设置")]
 public class MiscSettings : SingletonScriptableObject<MiscSettings>
 {
+    [SerializeField]
+    private string coinName = "铜币";
+
+    [SerializeField]
+    private float lootInvaildDistance;
+    public float LootInvaildDistance => lootInvaildDistance;
+
+    public string CoinName => ZetanStudio.LM.Tr(GetType().Name, coinName);
+
     [field: Header("任务相关"), SerializeField, SpriteSelector]
     public Sprite QuestIcon { get; private set; }
     [field: SerializeField]

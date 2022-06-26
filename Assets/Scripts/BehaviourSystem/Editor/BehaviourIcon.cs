@@ -12,7 +12,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         {
             GameObject go = EditorUtility.InstanceIDToObject(instanceId) as GameObject;
             if (go == null) return;
-            if (go.GetComponent<BehaviourExecutor>() || go.GetComponent<BehaviourManager>())
+            if (go.GetComponent<BehaviourTreeExecutor>() || go.GetComponent<BehaviourTreeManager>())
                 DrawIcon(selectionRect);
         }
 

@@ -14,9 +14,9 @@ public abstract class CharacterInformation : ScriptableObject
     protected CharacterSMParams _SMParams;
     public CharacterSMParams SMParams => _SMParams;
 
-    [SerializeField]
-    protected RoleAttributeGroup attribute;
-    public RoleAttributeGroup Attribute => attribute;
+    //[SerializeField]
+    //protected RoleAttributeGroup attribute;
+    //public RoleAttributeGroup Attribute => attribute;
 
     public int level;
 

@@ -80,7 +80,7 @@ public class GatheringInfoInspector : Editor
         editCmplt &= !string.IsNullOrEmpty(_ID.stringValue);
         editCmplt &= !string.IsNullOrEmpty(_name.stringValue);
         editCmplt &= lootPrefab.objectReferenceValue != null;
-        editCmplt &= !info.ProductItems.Exists(x => x.Item == null || x.OnlyDropForQuest && x.BindedQuest == null);
+        editCmplt &= !info.ProductItems.Exists(x => x.Item == null);
 
         return editCmplt;
     }

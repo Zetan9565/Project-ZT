@@ -16,12 +16,13 @@ public class CalendarWindow : Window
 
     protected override void OnAwake()
     {
+        slider.value = TimeManager.Instance.multiples;
         slider.onValueChanged.AddListener(value => TimeManager.Instance.multiples = (int)value);
     }
 
     protected override void RegisterNotify()
     {
-        NotifyCenter.AddListener(NotifyCenter.CommonKeys.DayChanged, OnDayChange);
+        NotifyCenter.AddListener(NotifyCenter.CommonKeys.DayChanged, OnDayChange, this);
     }
 
     protected override bool OnOpen(params object[] args)

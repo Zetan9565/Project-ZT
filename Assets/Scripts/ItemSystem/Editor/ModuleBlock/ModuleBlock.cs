@@ -2,59 +2,78 @@
 using System.Reflection;
 using UnityEditor;
 using UnityEngine.UIElements;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem.Module;
 
-namespace ZetanStudio.Item.Editor
+namespace ZetanStudio.ItemSystem.Editor
 {
     public class ModuleBlock : ItemInspectorBlock
     {
         protected readonly SerializedObject serializedObject;
-        protected readonly SerializedProperty property;
+        public readonly SerializedProperty property;
         protected bool shouldCheckError;
         protected bool errorBef;
+        public ItemModule Module => userData as ItemModule;
 
         public ModuleBlock(SerializedProperty property, ItemModule module)
         {
-            serializedObject = property.serializedObject;
-            shouldCheckError = property.serializedObject.targetObject is Item;
-            this.property = property;
-            userData = module;
-            value = property.isExpanded;
-            this.Q<Toggle>().RegisterValueChangedCallback(evt => property.isExpanded = evt.newValue);
-            if (property.hasVisibleChildren)
+            if (module)
             {
-                IMGUIContainer inspector = new IMGUIContainer(() =>
+                serializedObject = property.serializedObject;
+                shouldCheckError = property.serializedObject.targetObject is Item;
+                this.property = property;
+                userData = module;
+                value = property.isExpanded;
+                this.RegisterValueChangedCallback(evt => property.isExpanded = evt.newValue);
+                if (property.hasVisibleChildren)
                 {
-                    if (serializedObject.targetObject)
+                    IMGUIContainer inspector = new IMGUIContainer(() =>
                     {
-                        if (errorBef != HasError())
+                        if (serializedObject.targetObject)
                         {
-                            errorBef = !errorBef;
-                            RefreshTitle();
+                            if (errorBef != HasError())
+                            {
+                                errorBef = !errorBef;
+                                EditorApplication.delayCall += RefreshTitle;
+                            }
+                            EditorGUI.BeginChangeCheck();
+                            serializedObject.UpdateIfRequiredOrScript();
+                            OnInspectorGUI();
+                            if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
                         }
-                        EditorGUI.BeginChangeCheck();
-                        serializedObject.UpdateIfRequiredOrScript();
-                        OnInspectorGUI();
-                        if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
-                    }
-                });
-                inspector.style.flexGrow = 1;
-                Add(inspector);
+                    });
+                    Add(inspector);
+                }
+                else
+                {
+                    this.Q<Toggle>().Q("unity-checkmark").visible = false;
+                    contentContainer.style.paddingBottom = default;
+                }
+                errorBef = HasError();
+                RefreshTitle();
             }
             else
             {
-                this.Q<Toggle>().Q("unity-checkmark").visible = false;
-                contentContainer.style.paddingBottom = default;
+                text = Tr("(失效的模块)");
+                HelpBox helpBox = new HelpBox(Tr("模块已失效"), HelpBoxMessageType.Warning);
+                Add(helpBox);
+                Button fix = new Button(click) { text = Tr("尝试修复") };
+                Add(fix);
+
+                static void click()
+                {
+                    ReferencesFixing.CreateWindow((c) =>
+                    {
+                        if (c > 0 && EditorWindow.HasOpenInstances<ItemEditor>())
+                            EditorWindow.GetWindow<ItemEditor>().RefreshModules();
+                    });
+                }
             }
-            errorBef = HasError();
-            RefreshTitle();
         }
 
         private void RefreshTitle()
         {
-            text = ItemModule.GetName(userData.GetType());
-            this.Q<Toggle>().tooltip = null;
-            if (errorBef) text += "(存在错误)";
+            EditorApplication.delayCall -= RefreshTitle;
+            text = ItemModule.GetName(userData.GetType()) + (errorBef ? $"({Tr("存在错误")})" : string.Empty);
             MarkDirtyRepaint();
         }
 
@@ -75,20 +94,21 @@ namespace ZetanStudio.Item.Editor
         }
         protected virtual bool HasError()
         {
-            return userData is ItemModule module && shouldCheckError && !module.IsValid;
+            return shouldCheckError && userData is ItemModule module && !module.IsValid;
         }
 
         public static ModuleBlock Create(SerializedProperty property, ItemModule module)
         {
-            foreach (var type in TypeCache.GetTypesWithAttribute<CustomMuduleDrawerAttribute>())
-            {
-                if (typeof(ModuleBlock).IsAssignableFrom(type))
+            if (module)
+                foreach (var type in TypeCache.GetTypesWithAttribute<CustomMuduleDrawerAttribute>())
                 {
-                    var attr = type.GetCustomAttribute<CustomMuduleDrawerAttribute>();
-                    if (attr.useForChildren ? attr.type.IsAssignableFrom(module.GetType()) : (attr.type == module.GetType()))
-                        return Activator.CreateInstance(type, property, module) as ModuleBlock;
+                    if (typeof(ModuleBlock).IsAssignableFrom(type))
+                    {
+                        var attr = type.GetCustomAttribute<CustomMuduleDrawerAttribute>();
+                        if (attr.useForChildren ? attr.type.IsAssignableFrom(module.GetType()) : (attr.type == module.GetType()))
+                            return Activator.CreateInstance(type, property, module) as ModuleBlock;
+                    }
                 }
-            }
             return new ModuleBlock(property, module);
         }
 

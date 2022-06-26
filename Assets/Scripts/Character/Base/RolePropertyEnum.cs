@@ -1,56 +1,59 @@
 ﻿using System;
-using UnityEditor;
 using UnityEngine;
 
 namespace ZetanStudio.Character
 {
-    public class RolePropertyEnum : SingletonScriptableObject<RolePropertyEnum>
+    [CreateAssetMenu(menuName = "Zetan Studio/角色/枚举/属性枚举")]
+    public sealed class RolePropertyEnum : ScriptableObjectEnum<RolePropertyEnum, RolePropertyType>
     {
+
     }
 
-    public abstract class RoleProperty
+    /// <summary>
+    /// 角色的实际属性，是在基础属性<see cref="RoleAttributeType"/>的基础上通过各种公式计算得到的角色实际属性，可通过装备、BUFF等各种途径改变
+    /// </summary>
+    [Serializable]
+    public sealed class RolePropertyType : ScriptableObjectEnumItem
     {
-        public string name;
-        public string formula;
+        [field: SerializeField]
+        public string ID { get; private set; }
 
-        public abstract ValueType GetValue();
-        public abstract void SetValue(RoleAttributeGroup value);
-    }
-    public abstract class RoleProperty<T> : RoleProperty where T : struct
-    {
-        protected T value;
-        public T Value
+        [field: SerializeField]
+        public string Alias { get; private set; }
+
+        [field: SerializeField]
+        public int Priority { get; private set; }
+
+        [field: SerializeField]
+        public RoleValueType ValueType { get; private set; }
+
+        [field: SerializeField]
+        public string Description { get; private set; }
+
+        [field: SerializeField]
+        public string Format { get; private set; } = "{0}";
+
+        [field: SerializeField, TextArea]
+        public string Expression { get; private set; }
+
+        [field: SerializeField]
+        public bool SkillCost { get; private set; }
+
+        [field: SerializeField]
+        public bool ShowInPanel { get; private set; } = true;
+
+        [field: SerializeField]
+        public bool OnlyForPlayer { get; private set; }
+
+        public override bool Equals(object obj)
         {
-            get
-            {
-                return value;
-            }
-            protected set
-            {
-                if (!Equals(this.value, value))
-                {
-                    var oldValue = this.value;
-                    this.value = value;
-                    OnValueChanged?.Invoke(this, value);
-                }
-            }
+            if (obj is RolePropertyType type && GetType() == obj.GetType() && type.Name == Name && type.ID == ID) return true;
+            return base.Equals(obj);
         }
 
-        public override ValueType GetValue()
+        public override int GetHashCode()
         {
-            return Value;
-        }
-
-        public override void SetValue(RoleAttributeGroup value)
-        {
-
-        }
-
-        public event Action<RoleProperty, T> OnValueChanged;
-
-        public static implicit operator T(RoleProperty<T> self)
-        {
-            return self.Value;
+            return HashCode.Combine(Name, ID);
         }
     }
 }

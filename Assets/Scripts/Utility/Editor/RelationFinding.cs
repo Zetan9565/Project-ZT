@@ -14,7 +14,7 @@ public class RelationFinding : EditorWindow
     private readonly List<SearchResult> results = new List<SearchResult>();
     private Vector2 scrollPos = Vector2.zero;
 
-    [MenuItem("Zetan Studio/工具/查找关联配置")]
+    [MenuItem("Window/Zetan Studio/工具/查找关联配置")]
     public static void CreateWindow()
     {
         RelationFinding window = GetWindow<RelationFinding>("查找关联配置");

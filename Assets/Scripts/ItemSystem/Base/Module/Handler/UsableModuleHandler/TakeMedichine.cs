@@ -1,12 +1,14 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [CreateAssetMenu(fileName = "take medichine", menuName = "Zetan Studio/道具/用途/吃药")]
     public class TakeMedichine : ItemUsage
     {
-        public override string Name => "吃药";
+        public TakeMedichine()
+        {
+            _name = "吃药";
+        }
 
         protected override bool Use(ItemData item)
         {

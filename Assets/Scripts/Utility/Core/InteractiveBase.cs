@@ -52,12 +52,9 @@ public abstract class InteractiveBase : MonoBehaviour, IInteractive
     }
     protected void Remove()
     {
-        if (activated && interactable && IsInteractive)
-        {
-            InteractionPanel.Instance.Remove(this);
-            interactable = false;
-            OnNotInteractable();
-        }
+        InteractionPanel.Instance.Remove(this);
+        interactable = false;
+        OnNotInteractable();
     }
 
     protected virtual void OnEndInteraction() { }

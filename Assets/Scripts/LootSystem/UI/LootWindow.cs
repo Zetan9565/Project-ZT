@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.GatheringSystem;
+using ZetanStudio.ItemSystem.UI;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("Zetan Studio/管理器/拾取管理器")]
@@ -13,12 +15,12 @@ public class LootWindow : InteractionWindow<LootAgent>
     private int slotCount = 10;
 
     [SerializeField]
-    private GridView<ItemSlotBase, ItemSlotData> productList;
+    private GridView<ItemSlot, ItemSlotData> productList;
 
     private LootAgent lootAgent;
     public override LootAgent Target => lootAgent;
 
-    private ButtonWithTextData[] GetHandleButtons(ItemSlot slot)
+    private ButtonWithTextData[] GetHandleButtons(ItemSlotEx slot)
     {
         if (!slot || slot.IsEmpty) return null;
 
@@ -28,11 +30,12 @@ public class LootWindow : InteractionWindow<LootAgent>
             {
                 TakeItem(slot.Data);
             }),
-            new ButtonWithTextData("全部取出", delegate
+        };
+        if (lootAgent.lootItems.Find(x => x.source == slot.Item).amount > 1)
+            buttons.Add(new ButtonWithTextData("全部取出", delegate
             {
                 TakeItem(slot.Data, true);
-            })
-        };
+            }));
         return buttons.ToArray();
     }
 
@@ -57,7 +60,7 @@ public class LootWindow : InteractionWindow<LootAgent>
         if (!lootAgent) return;
         if (!lootAgent.lootItems.Exists(x => x.source == item.item)) return;
         int takeAmount = BackpackManager.Instance.Inventory.PeekGet(item.item, amount);
-        if (BackpackManager.Instance.GetItem(item.item, takeAmount)) item.amount -= takeAmount;
+        if (BackpackManager.Instance.Get(item.item, takeAmount)) item.amount -= takeAmount;
         if (item.amount < 1) lootAgent.lootItems.RemoveAll(x => x.source == item.item);
         if (lootAgent.lootItems.Count < 1)
         {
@@ -73,7 +76,7 @@ public class LootWindow : InteractionWindow<LootAgent>
         foreach (var item in lootAgent.lootItems)
         {
             int takeAmount = BackpackManager.Instance.Inventory.PeekGet(item.source, item.amount);
-            if (BackpackManager.Instance.GetItem(item.source, takeAmount)) item.amount -= takeAmount;
+            if (BackpackManager.Instance.Get(item.source, takeAmount)) item.amount -= takeAmount;
             productList.Refresh(ItemSlotData.Convert(lootAgent.lootItems, slotCount));
         }
         lootAgent.lootItems.RemoveAll(x => x.amount < 1);
@@ -91,7 +94,7 @@ public class LootWindow : InteractionWindow<LootAgent>
             MessageManager.Instance.New("请先拾取完上一个物品");
             return false;
         }
-        if (GatherManager.Instance.IsGathering)
+        if (GatherManager.IsGathering)
         {
             MessageManager.Instance.New("请先等待采集完成");
             return false;
@@ -103,12 +106,20 @@ public class LootWindow : InteractionWindow<LootAgent>
         return base.OnOpen(args);
     }
 
+    protected override bool OnClose(params object[] args)
+    {
+        base.OnClose(args);
+        WindowsManager.CloseWindow<ItemWindow>();
+        lootAgent = null;
+        productList.Clear();
+        return true;
+    }
     protected override void OnAwake()
     {
         takeAllButton.onClick.AddListener(TakeAll);
         productList.SetItemModifier(x =>
         {
-            if (x is ItemSlot slot)
+            if (x is ItemSlotEx slot)
                 slot.SetCallbacks(GetHandleButtons, x => TakeItem(x.Data, true));
         });
     }

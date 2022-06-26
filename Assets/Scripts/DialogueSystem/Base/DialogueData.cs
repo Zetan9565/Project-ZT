@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using ZetanStudio.Extension;
 
 public class DialogueData
 {
@@ -28,9 +30,11 @@ public class DialogueWordsData
     public readonly DialogueWords model;
     public readonly DialogueData parent;
 
-    public bool IsDone => optionDatas.TrueForAll(x => x.isDone);
+    public bool IsDone => optionDatas.None(x => !x.isDone);
 
-    public readonly List<WordsOptionData> optionDatas = new List<WordsOptionData>();
+    public ReadOnlyCollection<WordsOptionData> OptionDatas => new ReadOnlyCollection<WordsOptionData>(optionDatas);
+
+    private readonly List<WordsOptionData> optionDatas = new List<WordsOptionData>();
 
     public DialogueWordsData(DialogueWords words, DialogueData parent)
     {

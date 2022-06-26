@@ -1,6 +1,28 @@
 ﻿using UnityEngine;
 
-public abstract class SingletonScriptableObject : ScriptableObject { }
+public abstract class SingletonScriptableObject : ScriptableObject
+{
+#if UNITY_EDITOR
+    [UnityEditor.InitializeOnLoadMethod]
+    protected static void FindEditorInstance()
+    {
+        foreach (var type in UnityEditor.TypeCache.GetTypesDerivedFrom<SingletonScriptableObject>())
+        {
+            if (!type.IsAbstract && !type.IsGenericType)
+            {
+                type.GetField("instance", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy).SetValue(null, instance(type));
+            }
+        }
+
+        static SingletonScriptableObject instance(System.Type type)
+        {
+            SingletonScriptableObject instance = Resources.Load("", type) as SingletonScriptableObject;
+            if (!instance) instance = ZetanUtility.Editor.LoadAsset(type) as SingletonScriptableObject;
+            return instance;
+        }
+    }
+#endif
+}
 
 public abstract class SingletonScriptableObject<T> : SingletonScriptableObject where T : SingletonScriptableObject<T>
 {

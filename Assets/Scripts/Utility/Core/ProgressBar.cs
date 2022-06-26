@@ -109,7 +109,7 @@ public class ProgressBar : SingletonMonoBehaviour<ProgressBar>
     public void New(float seconds, Func<bool> breakCondition, Action breakAction,
         Action doneAction, Action cancelAction, string actionName = null, bool displayCancel = false)
     {
-        if (seconds <= 0 || loopTimes < 0) return;
+        if (seconds <= 0) return;
         if (progressCoroutine != null)
         {
             StopCoroutine(progressCoroutine);

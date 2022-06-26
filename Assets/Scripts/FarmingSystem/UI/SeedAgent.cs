@@ -1,7 +1,7 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
 
 public class SeedAgent : ListItem<SeedAgent, Item>,
     IBeginDragHandler, IDragHandler, IEndDragHandler
@@ -22,9 +22,9 @@ public class SeedAgent : ListItem<SeedAgent, Item>,
         parentRect = (View as SeedList).ScrollRect;
     }
 
-    public override void OnClear()
+    public override void Clear()
     {
-        base.OnClear();
+        base.Clear();
         nameText.text = string.Empty;
     }
 

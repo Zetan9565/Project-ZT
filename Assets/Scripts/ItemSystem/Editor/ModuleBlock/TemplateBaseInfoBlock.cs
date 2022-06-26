@@ -4,8 +4,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine.UIElements;
 using ZetanStudio.Extension.Editor;
+using ZetanStudio.ItemSystem.Editor;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     public class TemplateBaseInfoBlock : ItemInspectorBlock
     {

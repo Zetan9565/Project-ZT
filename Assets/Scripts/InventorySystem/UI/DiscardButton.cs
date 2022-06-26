@@ -15,13 +15,13 @@ public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-#if UNITY_STANDARD
+#if UNITY_STANDALONE
             if (DragableManager.Instance.IsDraging)
             {
-                ItemSlotAgent source = DragableManager.Instance.Current as ItemSlotAgent;
+                ItemSlot source = DragableManager.Instance.Current as ItemSlot;
                 if (source)
                 {
-                    InventoryUtility.DiscardItem(Window.Handler, source.Item);
+                    InventoryUtility.DiscardItem(window.Handler, source.Item);
                     source.FinishDrag();
                 }
             }
@@ -40,29 +40,29 @@ public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     {
 #if UNITY_STANDALONE
         if (!DragableManager.Instance.IsDraging)
-            TipsManager.Instance.ShowText(transform.position, "将物品放置到此按钮丢弃，或者点击该按钮进行多选。", 3);
+            FloatTipsPanel.ShowText(transform.position, "将物品放置到此按钮丢弃，或者点击该按钮进行多选。", 3);
 #endif
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
-        TipsManager.Instance.Hide();
+        WindowsManager.CloseWindow<FloatTipsPanel>();
 #endif
     }
 
     private void OpenDiscardWindow()
     {
-        static bool canSelect(ItemSlotBase slot)
+        static bool canSelect(ItemSlot slot)
         {
             return slot && slot.Item && slot.Item.Model.Discardable;
         }
-        void discardItems(IEnumerable<ItemWithAmount> items)
+        void discardItems(IEnumerable<CountedItem> items)
         {
             if (items == null) return;
             foreach (var item in items)
-                window.Handler.LoseItem(item.source, item.amount);
+                window.Handler.Lose(item.source, item.amount);
         }
-        ItemSelectionWindow.StartSelection(ItemSelectionType.SelectAll, window.Grid as ISlotContainer, window.Handler, discardItems, "丢弃物品", "确定要丢掉这些道具吗？", selectCondition: canSelect);
+        ItemSelectionWindow.StartSelection(ItemSelectionType.SelectAll, window.Grid as ISlotContainer, window.Handler, discardItems, $"从{window.Handler.Name}中丢弃物品", "确定要丢掉这些道具吗？", selectCondition: canSelect);
     }
 }

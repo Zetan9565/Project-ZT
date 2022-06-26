@@ -14,7 +14,7 @@ public class CharacterController2DInspector : Editor
     SerializedProperty distanceOffset;
 
     SerializedProperty moveSpeed;
-    SerializedProperty dashForce;
+    SerializedProperty flashForce;
     SerializedProperty defaultDirection;
     SerializedProperty input;
 
@@ -28,7 +28,7 @@ public class CharacterController2DInspector : Editor
         distanceOffset = serializedObject.FindProperty("distanceOffset");
         moveSpeed = serializedObject.FindProperty("moveSpeed");
         defaultDirection = serializedObject.FindProperty("defaultDirection");
-        dashForce = serializedObject.FindProperty("dashForce");
+        flashForce = serializedObject.FindProperty("dashForce");
         input = serializedObject.FindProperty("input");
     }
 
@@ -43,7 +43,7 @@ public class CharacterController2DInspector : Editor
             EditorGUILayout.PropertyField(distanceOffset, new GUIContent("检测距离修正量"));
         }
         EditorGUILayout.PropertyField(moveSpeed, new GUIContent("移动速度"));
-        EditorGUILayout.PropertyField(dashForce, new GUIContent("闪现力度"));
+        EditorGUILayout.PropertyField(flashForce, new GUIContent("闪现力度"));
         EditorGUILayout.PropertyField(defaultDirection, new GUIContent("初始翻滚/闪现方向"));
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.PropertyField(input, new GUIContent("当前方向"));

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     [CreateAssetMenu(fileName = "currency type", menuName = "Zetan Studio/道具/枚举/货币类型")]
     public sealed class CurrencyTypeEnum : ScriptableObjectEnum<CurrencyTypeEnum, CurrencyType>

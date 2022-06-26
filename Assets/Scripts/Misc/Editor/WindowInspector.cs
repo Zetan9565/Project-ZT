@@ -55,7 +55,7 @@ public class WindowInspector : Editor
         EditorGUILayout.EndHorizontal();
         Rect rect = EditorGUILayout.GetControlRect();
         EditorGUI.PropertyField(new Rect(rect.x, rect.y, rect.width / 2 - 1, rect.height), animated);
-        if (animated.boolValue) EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2 + 1, rect.y, rect.width - 1, rect.height), duration);
+        if (animated.boolValue) EditorGUI.PropertyField(new Rect(rect.x + rect.width / 2 + 1, rect.y, rect.width / 2 - 1, rect.height), duration);
         EditorGUILayout.PropertyField(content);
         EditorGUILayout.PropertyField(closeButton);
         InspectOther();
@@ -64,16 +64,15 @@ public class WindowInspector : Editor
 
     protected virtual void InspectOther()
     {
-        SerializedProperty temp = closeButton.GetEndProperty();
-        if (temp != null && !string.IsNullOrEmpty(temp.propertyPath))
+        SerializedProperty iterator = serializedObject.GetIterator();
+        bool enterChildren = true;
+        int count = 0;
+        while (iterator.NextVisible(enterChildren))
         {
-            EditorGUILayout.PropertyField(temp, true);
-            bool enterChildren = true;
-            while (temp.NextVisible(enterChildren))
-            {
-                EditorGUILayout.PropertyField(temp, true);
-                enterChildren = false;
-            }
+            if (count > 4)
+                EditorGUILayout.PropertyField(iterator, true);
+            enterChildren = false;
+            count++;
         }
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class DragableManager : SingletonMonoBehaviour<DragableManager>
 {
-    public IDragAble Current { get; private set; }
+    public IDraggable Current { get; private set; }
 
     public bool IsDraging
     {
@@ -35,7 +35,7 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
     private void Update()
     {
         eventData = new PointerEventData(EventSystem.current);
-        eventData.position = InputManager.mousePosition;
+        eventData.position = Input.mousePosition;
         MoveIcon();
     }
 
@@ -43,27 +43,24 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
     {
         if (Current != null)
         {
-            if (InputManager.GetMouseButtonDown(1) || UnityEngine.InputSystem.Touchscreen.current != null && UnityEngine.InputSystem.Touchscreen.current.touches.Count > 0
-                && UnityEngine.InputSystem.Touchscreen.current.touches[1].press.wasPressedThisFrame)
-                CancelDrag();
-            if (InputManager.GetMouseButtonDown(0) || UnityEngine.InputSystem.Pointer.current.press.wasReleasedThisFrame)
-                EndDrag();
+            if (Input.GetMouseButtonDown(1) || Input.GetTouchDown(1)) CancelDrag();
+            if (Input.GetPointerUp()) EndDrag();
             icon.transform.position = eventData.position;
         }
     }
 
-    public void BeginDrag(IDragAble dragable, Action<PointerEventData> endDragAction, float width = 100, float height = 100)
+    public void BeginDrag(IDraggable dragable, Action<PointerEventData> endDragAction, float width = 100, float height = 100)
     {
-        if (!dragable.DragAbleIcon) return;
+        if (!dragable.DraggableIcon) return;
         iconSortCanvas.sortingOrder = 999;
         Current = dragable;
-        icon.overrideSprite = dragable.DragAbleIcon;
+        icon.overrideSprite = dragable.DraggableIcon;
         icon.color = Color.white;
-        ZetanUtility.SetActive(icon.gameObject, true);
         onEndDrag = endDragAction;
         icon.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
         icon.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
-        MoveIcon();
+        Update();
+        ZetanUtility.SetActive(icon.gameObject, true);
     }
 
     public void ResetIcon()
@@ -71,7 +68,7 @@ public class DragableManager : SingletonMonoBehaviour<DragableManager>
         Current = null;
         onEndDrag = null;
         raycastResults.Clear();
-        ZetanUtility.SetActive(icon.gameObject, false);
+        ZetanUtility.SetActive(icon, false);
     }
 
     public void CancelDrag()

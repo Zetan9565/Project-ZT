@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem.Editor
 {
     public abstract class ItemInspectorBlock : Foldout
     {
+        protected ItemEditorSettings settings;
+
         public ItemInspectorBlock()
         {
             this.Q<Toggle>().style.unityFontStyleAndWeight = new StyleEnum<FontStyle>(FontStyle.Bold);
@@ -13,6 +15,16 @@ namespace ZetanStudio.Item
             style.borderBottomColor = Color.black;
             contentContainer.style.paddingRight = 2;
             contentContainer.style.paddingBottom = 5;
+            settings = ItemEditorSettings.GetOrCreate();
+        }
+
+        protected string Tr(string text)
+        {
+            return L.Tr(settings.language, text);
+        }
+        protected string Tr(string text, params object[] args)
+        {
+            return L.Tr(settings.language, text, args);
         }
     }
 }

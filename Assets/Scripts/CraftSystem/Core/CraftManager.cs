@@ -1,30 +1,22 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 using ZetanStudio.Collections;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
 
-public class CraftManager : SingletonMonoBehaviour<CraftManager>, ISaveLoad
+public static class CraftManager
 {
-    private readonly SortedSet<Item> learnedItems = new SortedSet<Item>(Item.Comparer.Default);
-    public ReadOnlySet<Item> readOnlyLearnedItems;
-    public ReadOnlySet<Item> LearnedItems
-    {
-        get
-        {
-            if (readOnlyLearnedItems == null) readOnlyLearnedItems = new ReadOnlySet<Item>(learnedItems);
-            return readOnlyLearnedItems;
-        }
-    }
-    public bool Learn(Item item)
+    private static readonly SortedSet<Item> learnedItems = new SortedSet<Item>(Item.Comparer.Default);
+    public static ReadOnlySet<Item> LearnedItems => new ReadOnlySet<Item>(learnedItems);
+
+    public static bool Learn(Item item)
     {
         if (!item) return false;
-        if (item.GetModule<CraftableModule>() is not CraftableModule craft || !craft.IsValid)
+        if (!item.TryGetModule<CraftableModule>(out var craft) || !craft.IsValid)
         {
             MessageManager.Instance.New("无法制作的道具");
             return false;
         }
-        if (HadLearned(item))
+        if (IsLearned(item))
         {
             ConfirmWindow.StartConfirm("已经学会制作 [" + item.Name + "]，无需再学习。");
             return false;
@@ -36,41 +28,34 @@ public class CraftManager : SingletonMonoBehaviour<CraftManager>, ISaveLoad
         return true;
     }
 
-    public bool HadLearned(Item item)
+    public static bool IsLearned(Item item)
     {
         return learnedItems.Contains(item);
     }
 
-    public void SaveData(SaveData data)
+    [SaveMethod]
+    public static void SaveData(SaveData saveData)
     {
+        var learded = new SaveDataItem();
         foreach (var item in learnedItems)
         {
-            data.craftDatas.Add(item.ID);
+            learded.stringList.Add(item.ID);
         }
+        saveData.data["craftData"] = learded;
     }
-
-    public void LoadData(SaveData data)
+    [LoadMethod]
+    public static void LoadData(SaveData saveData)
     {
         learnedItems.Clear();
-        foreach (var md in data.craftDatas)
-        {
-            learnedItems.Add(ItemUtility.GetItemByID(md));
-        }
+        if(saveData.data.TryGetValue("craftData", out var learned))
+            foreach (var item in learned.stringList)
+            {
+                learnedItems.Add(ItemFactory.GetModel(item));
+            }
     }
 
     #region 消息
     public const string LearnedCraftableItem = "LearnedCraftableItem";
     public const string CraftCanceled = "CraftCanceled";
     #endregion
-}
-namespace ZetanStudio.Item.Craft
-{
-    public enum CraftType
-    {
-        [InspectorName("单种道具")]
-        SingleItem,//单种道具
-
-        [InspectorName("同类道具")]
-        SameType//同类道具
-    }
 }

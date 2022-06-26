@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     [CreateAssetMenu(fileName = "item type", menuName = "Zetan Studio/道具/枚举/道具类型")]
     public sealed class ItemTypeEnum : ScriptableObjectEnum<ItemTypeEnum, ItemType>

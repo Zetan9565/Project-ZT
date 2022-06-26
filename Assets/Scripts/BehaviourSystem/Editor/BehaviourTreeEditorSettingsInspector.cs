@@ -62,7 +62,7 @@ namespace ZetanStudio.BehaviourTree.Editor
 
         public string Tr(string text)
         {
-            return Language.Tr(language.objectReferenceValue as LanguageMap, text);
+            return L.Tr(language.objectReferenceValue as LanguageMap, text);
         }
     }
 }

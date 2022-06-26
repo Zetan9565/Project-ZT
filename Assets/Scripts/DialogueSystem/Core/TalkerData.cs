@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ShopSystem;
 
-[System.Serializable]
 public class TalkerData : CharacterData, IWarehouseKeeper
 {
     public TalkerInformation Info => GetInfo<TalkerInformation>();

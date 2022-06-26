@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using UnityEngine;
 
-namespace ZetanStudio.Item.Craft
+namespace ZetanStudio.ItemSystem.Craft
 {
     [CreateAssetMenu(fileName = "craft tool type", menuName = "Zetan Studio/道具/枚举/工艺工具")]
     public sealed class CraftToolTypeEnum : ScriptableObjectEnum<CraftToolTypeEnum, CraftToolType>

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [Name("耐久度")]
     public class DurabilityModule : ItemModule
@@ -13,6 +13,31 @@ namespace ZetanStudio.Item.Module
         public override ItemModuleData CreateData(ItemData item)
         {
             return new DurabilityData(item, this);
+        }
+    }
+
+    public class DurabilityData : ItemModuleData<DurabilityModule>
+    {
+        public int currentDurability;
+        public int maxDurability;
+
+        public DurabilityData(ItemData item, DurabilityModule module) : base(item, module)
+        {
+            maxDurability = module.Durability;
+            currentDurability = maxDurability;
+        }
+
+        public override SaveDataItem GetSaveData()
+        {
+            var data = new SaveDataItem();
+            data.intData["currentDurability"] = currentDurability;
+            data.intData["maxDurability"] = maxDurability;
+            return data;
+        }
+        public override void LoadSaveData(SaveDataItem data)
+        {
+            currentDurability = data.intData["currentDurability"];
+            maxDurability = data.intData["maxDurability"];
         }
     }
 }

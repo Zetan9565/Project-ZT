@@ -1,8 +1,11 @@
 ﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
+using ZetanStudio.ItemSystem.UI;
+using ZetanStudio.ShopSystem;
+using ZetanStudio.UI;
 
 public class ShopWindow : Window
 {
@@ -13,7 +16,7 @@ public class ShopWindow : Window
     private GoodsList goodsList;
 
     [SerializeField]
-    private TabBar tabBar;
+    private TabbedBar tabBar;
 
     public ShopData MShop { get; private set; }
 
@@ -91,7 +94,7 @@ public class ShopWindow : Window
         if (!BackpackManager.Instance.CanLoseMoney(amount * data.Info.Price))
             return false;
         BackpackManager.Instance.LoseMoney(amount * data.Info.Price);
-        BackpackManager.Instance.GetItem(data.Item, amount);
+        BackpackManager.Instance.Get(data.Item, amount);
         if (data.Info.EmptyAble) data.LeftAmount -= amount;
         goodsList.RefreshItemIf(x => x.Data == data);
         return true;
@@ -159,7 +162,7 @@ public class ShopWindow : Window
         Item item = items[0].source.Model;
         if (!BackpackManager.Instance.CanLose(items[0].source, amount)) return false;
         BackpackManager.Instance.GetMoney(amount * data.Info.Price);
-        BackpackManager.Instance.LoseItem(items[0].source, amount);
+        BackpackManager.Instance.Lose(items[0].source, amount);
         if (data.Info.EmptyAble)
         {
             data.LeftAmount -= amount;
@@ -180,13 +183,13 @@ public class ShopWindow : Window
             Debug.Log(item);
             return;
         }
-        if (item.Model.GetModule<SellableModule>() is not SellableModule sellAble)
+        if (item.Model.GetModule<SellableModule>() is null)
         {
             MessageManager.Instance.New("这种物品不可出售");
             return;
         }
-        if (item.GetModuleData<EquipmentData>() is EquipmentData equipment)
-            if (equipment.gems.Count > 0)
+        if (item.TryGetModuleData<GemSlotData>(out var slot))
+            if (slot.gems.Count > 0)
             {
                 MessageManager.Instance.New("镶嵌宝石的物品不可出售");
                 return;
@@ -221,7 +224,7 @@ public class ShopWindow : Window
     {
         if (MShop == null || item == null || !item.Model || amount < 1)
             return false;
-        if (item.Model.GetModule<SellableModule>() is not SellableModule sellAble)
+        if (item.Model.TryGetModule<SellableModule>(out var sellAble))
         {
             MessageManager.Instance.New("这种物品不可出售");
             return false;
@@ -238,7 +241,7 @@ public class ShopWindow : Window
         }
         if (!BackpackManager.Instance.CanLose(item, amount)) return false;
         BackpackManager.Instance.GetMoney(amount * sellAble.Price);
-        BackpackManager.Instance.LoseItem(item, amount);
+        BackpackManager.Instance.Lose(item, amount);
         return true;
     }
     #endregion
@@ -279,7 +282,7 @@ public class ShopWindow : Window
 
     protected override void RegisterNotify()
     {
-        NotifyCenter.AddListener(ShopManager.VendorGoodsRefresh, OnGoodsRefresh, this);
+        NotifyCenter.AddListener(ShopManager.vendorGoodsRefresh, OnGoodsRefresh, this);
     }
     private void OnGoodsRefresh(object[] msg)
     {

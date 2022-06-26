@@ -1,27 +1,26 @@
-using System.Linq;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using UnityEngine;
 using ZetanStudio;
-using ZetanStudio.Item;
-using System.Collections.ObjectModel;
+using ZetanStudio.ItemSystem;
 
-[DisallowMultipleComponent]
-public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
+public static class QuestManager
 {
-    private readonly Dictionary<ObjectiveData, List<MapIcon>> questIcons = new Dictionary<ObjectiveData, List<MapIcon>>();
+    private static readonly Dictionary<ObjectiveData, List<MapIcon>> questIcons = new Dictionary<ObjectiveData, List<MapIcon>>();
 
-    private readonly List<QuestData> questsInProgress = new List<QuestData>();
-    public ReadOnlyCollection<QuestData> QuestInProgress => questsInProgress.AsReadOnly();
+    private static readonly List<QuestData> questsInProgress = new List<QuestData>();
+    public static ReadOnlyCollection<QuestData> QuestInProgress => questsInProgress.AsReadOnly();
 
-    private readonly List<QuestData> questsFinished = new List<QuestData>();//分开存储完成任务可减少不必要的检索开销
-    public ReadOnlyCollection<QuestData> QuestFinished => questsFinished.AsReadOnly();
+    private static readonly List<QuestData> questsFinished = new List<QuestData>();//分开存储完成任务可减少不必要的检索开销
+    public static ReadOnlyCollection<QuestData> QuestFinished => questsFinished.AsReadOnly();
 
     #region 任务处理相关
     /// <summary>
     /// 接取任务
     /// </summary>
     /// <param name="quest">要接取的任务</param>
-    public bool AcceptQuest(QuestData quest)
+    public static bool AcceptQuest(QuestData quest)
     {
         if (!quest || !IsQuestValid(quest.Model))
         {
@@ -78,31 +77,31 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
             if (o is TalkObjectiveData to)
                 if (!o.IsComplete)
                 {
-                    var talker = DialogueManager.Instance.Talkers[to.Model.NPCToTalk.ID];
+                    var talker = DialogueManager.Talkers[to.Model.NPCToTalk.ID];
                     talker.objectivesTalkToThis.Add(to);
                     o.OnStateChangeEvent += talker.TryRemoveObjective;
                 }
             if (o is MoveObjectiveData mo)
-                mo.targetPoint = CheckPointManager.Instance.CreateCheckPoint(mo.Model.AuxiliaryPos, mo.UpdateMoveState);
+                mo.targetPoint = CheckPointManager.CreateCheckPoint(mo.Model.AuxiliaryPos, mo.UpdateMoveState);
             if (o is SubmitObjectiveData so)
                 if (!o.IsComplete)
                 {
-                    var talker = DialogueManager.Instance.Talkers[so.Model.NPCToSubmit.ID];
+                    var talker = DialogueManager.Talkers[so.Model.NPCToSubmit.ID];
                     talker.objectivesSubmitToThis.Add(so);
                     o.OnStateChangeEvent += talker.TryRemoveObjective;
                 }
             if (o is TriggerObjectiveData cuo)
             {
-                TriggerManager.Instance.RegisterTriggerEvent(cuo.UpdateTriggerState);
-                var state = TriggerManager.Instance.GetTriggerState(cuo.Model.TriggerName);
+                TriggerManager.RegisterTriggerEvent(cuo.UpdateTriggerState);
+                var state = TriggerManager.GetTriggerState(cuo.Model.TriggerName);
                 if (cuo.Model.CheckStateAtAcpt && state != TriggerState.NotExist)
-                    TriggerManager.Instance.SetTrigger(cuo.Model.TriggerName, state == TriggerState.On);
+                    TriggerManager.SetTrigger(cuo.Model.TriggerName, state == TriggerState.On);
             }
         }
         quest.InProgress = true;
         questsInProgress.Add(quest);
         if (quest.Model.NPCToSubmit)
-            DialogueManager.Instance.Talkers[quest.Model.NPCToSubmit.ID].TransferQuestToThis(quest);
+            DialogueManager.Talkers[quest.Model.NPCToSubmit.ID].TransferQuestToThis(quest);
         if (!SaveManager.Instance.IsLoading) MessageManager.Instance.New(Tr("接取了任务{0}", quest.Title));
         quest.latestHandleDays = TimeManager.Instance.Days;
         CreateObjectiveMapIcon(quest.Objectives[0]);
@@ -115,7 +114,7 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
     /// </summary>
     /// <param name="quest">要放弃的任务</param>
     /// <returns>是否成功完成任务</returns>
-    public bool CompleteQuest(QuestData quest)
+    public static bool CompleteQuest(QuestData quest)
     {
         if (!quest) return false;
         if (HasOngoingQuest(quest) && quest.IsComplete)
@@ -148,7 +147,7 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
                 if (o is CollectObjectiveData co)
                 {
                     BackpackManager.Instance.Inventory.OnItemAmountChanged -= co.UpdateCollectAmount;
-                    if (!SaveManager.Instance.IsLoading && co.Model.LoseItemAtSbmt) BackpackManager.Instance.LoseItem(co.Model.ItemToCollect, o.Model.Amount);
+                    if (!SaveManager.Instance.IsLoading && co.Model.LoseItemAtSbmt) BackpackManager.Instance.Lose(co.Model.ItemToCollect, o.Model.Amount);
                 }
                 if (o is KillObjectiveData ko)
                 {
@@ -177,30 +176,30 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
                 }
                 if (o is TalkObjectiveData to)
                 {
-                    var talker = DialogueManager.Instance.Talkers[to.Model.NPCToTalk.ID];
+                    var talker = DialogueManager.Talkers[to.Model.NPCToTalk.ID];
                     talker.objectivesTalkToThis.RemoveAll(x => x == to);
                     o.OnStateChangeEvent -= talker.TryRemoveObjective;
                 }
                 if (o is MoveObjectiveData mo)
                 {
                     mo.targetPoint = null;
-                    CheckPointManager.Instance.RemoveCheckPointListener(mo.Model.AuxiliaryPos, mo.UpdateMoveState);
+                    CheckPointManager.RemoveCheckPointListener(mo.Model.AuxiliaryPos, mo.UpdateMoveState);
                 }
                 if (o is SubmitObjectiveData so)
                 {
-                    var talker = DialogueManager.Instance.Talkers[so.Model.NPCToSubmit.ID];
+                    var talker = DialogueManager.Talkers[so.Model.NPCToSubmit.ID];
                     talker.objectivesSubmitToThis.RemoveAll(x => x == so);
                     o.OnStateChangeEvent -= talker.TryRemoveObjective;
                 }
                 if (o is TriggerObjectiveData cuo)
                 {
-                    TriggerManager.Instance.DeleteTriggerListner(cuo.UpdateTriggerState);
+                    TriggerManager.DeleteTriggerListner(cuo.UpdateTriggerState);
                 }
                 RemoveObjectiveMapIcon(o);
             }
             if (!SaveManager.Instance.IsLoading)
             {
-                BackpackManager.Instance.GetItem(quest.Model.RewardItems);
+                BackpackManager.Instance.Get(quest.Model.RewardItems);
                 MessageManager.Instance.New(Tr("提交了任务{0}", quest.Title));
             }
             quest.latestHandleDays = TimeManager.Instance.Days;
@@ -214,7 +213,7 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
     /// 放弃任务
     /// </summary>
     /// <param name="quest">要放弃的任务</param>
-    public bool AbandonQuest(QuestData quest)
+    public static bool AbandonQuest(QuestData quest)
     {
         if (!quest.Model.Abandonable) ConfirmWindow.StartConfirm(Tr("该任务无法放弃。"));
         else if (HasOngoingQuest(quest) && quest && quest.Model.Abandonable)
@@ -270,24 +269,24 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
                     if (o is TalkObjectiveData to)
                     {
                         to.CurrentAmount = 0;
-                        DialogueManager.Instance.Talkers[to.Model.NPCToTalk.ID].objectivesTalkToThis.RemoveAll(x => x == to);
-                        DialogueManager.Instance.RemoveDialogueData(to.Model.Dialogue);
+                        DialogueManager.Talkers[to.Model.NPCToTalk.ID].objectivesTalkToThis.RemoveAll(x => x == to);
+                        DialogueManager.RemoveDialogueData(to.Model.Dialogue);
                     }
                     if (o is MoveObjectiveData mo)
                     {
                         mo.CurrentAmount = 0;
                         mo.targetPoint = null;
-                        CheckPointManager.Instance.RemoveCheckPointListener(mo.Model.AuxiliaryPos, mo.UpdateMoveState);
+                        CheckPointManager.RemoveCheckPointListener(mo.Model.AuxiliaryPos, mo.UpdateMoveState);
                     }
                     if (o is SubmitObjectiveData so)
                     {
                         so.CurrentAmount = 0;
-                        DialogueManager.Instance.Talkers[so.Model.NPCToSubmit.ID].objectivesSubmitToThis.RemoveAll(x => x == so);
+                        DialogueManager.Talkers[so.Model.NPCToSubmit.ID].objectivesSubmitToThis.RemoveAll(x => x == so);
                     }
                     if (o is TriggerObjectiveData cuo)
                     {
                         cuo.CurrentAmount = 0;
-                        TriggerManager.Instance.DeleteTriggerListner(cuo.UpdateTriggerState);
+                        TriggerManager.DeleteTriggerListner(cuo.UpdateTriggerState);
                     }
                     RemoveObjectiveMapIcon(o);
                 }
@@ -302,7 +301,7 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
         return false;
     }
 
-    private void OnObjectiveStateChange(ObjectiveData objective, bool befCmplt)
+    private static void OnObjectiveStateChange(ObjectiveData objective, bool befCmplt)
     {
         if (!SaveManager.Instance.IsLoading)
         {
@@ -361,13 +360,13 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
     #endregion
 
     #region UI相关
-    private void CreateObjectiveMapIcon(ObjectiveData objective)
+    private static void CreateObjectiveMapIcon(ObjectiveData objective)
     {
         if (!objective || !objective.Model.ShowMapIcon) return;
         //Debug.Log("Create icon for " + objective.DisplayName);
         if (objective is TalkObjectiveData to)
         {
-            if (DialogueManager.Instance.Talkers.TryGetValue(to.Model.NPCToTalk.ID, out TalkerData talkerFound))
+            if (DialogueManager.Talkers.TryGetValue(to.Model.NPCToTalk.ID, out TalkerData talkerFound))
             {
                 if (talkerFound.currentScene == ZetanUtility.ActiveScene.name)
                     CreateIcon(talkerFound.currentPosition);
@@ -375,7 +374,7 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
         }
         else if (objective is SubmitObjectiveData so)
         {
-            if (DialogueManager.Instance.Talkers.TryGetValue(so.Model.NPCToSubmit.ID, out TalkerData talkerFound))
+            if (DialogueManager.Talkers.TryGetValue(so.Model.NPCToSubmit.ID, out TalkerData talkerFound))
             {
                 if (talkerFound.currentScene == ZetanUtility.ActiveScene.name)
                     CreateIcon(talkerFound.currentPosition);
@@ -403,7 +402,7 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
             }
         }
     }
-    private void RemoveObjectiveMapIcon(ObjectiveData objective)
+    private static void RemoveObjectiveMapIcon(ObjectiveData objective)
     {
         if (!objective) return;
         if (questIcons.TryGetValue(objective, out var icons))
@@ -418,31 +417,31 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
     #endregion
 
     #region 其它
-    public bool HasOngoingQuest(QuestData quest)
+    public static bool HasOngoingQuest(QuestData quest)
     {
         return questsInProgress.Contains(quest);
     }
-    public bool HasOngoingQuest(string ID)
+    public static bool HasOngoingQuest(string ID)
     {
         return questsInProgress.Exists(x => x.Model.ID == ID);
     }
 
-    public bool HasCompleteQuest(QuestData quest)
+    public static bool HasCompleteQuest(QuestData quest)
     {
         return questsFinished.Contains(quest);
     }
-    public bool HasCompleteQuestWithID(string questID)
+    public static bool HasCompleteQuestWithID(string questID)
     {
         return questsFinished.Exists(x => x.Model.ID == questID);
     }
 
-    public bool HasQuestNeedAsCondition(Quest quest, out QuestData findQuest)
+    public static bool HasQuestNeedAsCondition(Quest quest, out QuestData findQuest)
     {
         findQuest = questsInProgress.Find(x => x.Model.AcceptCondition.Conditions.Exists(y => y.Type == ConditionType.AcceptQuest && y.RelatedQuest.ID == quest.ID));
         return findQuest != null;
     }
 
-    public QuestData FindQuest(string ID)
+    public static QuestData FindQuest(string ID)
     {
         return questsInProgress.Find(x => x.Model.ID == ID) ?? questsFinished.Find(x => x.Model.ID == ID);
     }
@@ -450,7 +449,7 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
     /// <summary>
     /// 更新某个收集类任务目标，用于在其他前置目标完成时，更新其后置收集类目标
     /// </summary>
-    private void UpdateNextCollectObjectives(ObjectiveData objective)
+    private static void UpdateNextCollectObjectives(ObjectiveData objective)
     {
         if (!objective || !objective.nextObjective) return;
         ObjectiveData nextObjective = objective.nextObjective;
@@ -478,7 +477,7 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
     public static bool IsQuestValid(Quest quest)
     {
         if (string.IsNullOrEmpty(quest.ID) || string.IsNullOrEmpty(quest.Title)) return false;
-        if (quest.NPCToSubmit && !DialogueManager.Instance.Talkers.ContainsKey(quest.NPCToSubmit.ID)) return false;
+        if (quest.NPCToSubmit && !DialogueManager.Talkers.ContainsKey(quest.NPCToSubmit.ID)) return false;
         foreach (var obj in quest.Objectives)
             if (!obj.IsValid) return false;
         return true;
@@ -490,11 +489,11 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
     /// <param name="item">要判定的道具ID</param>
     /// <param name="leftAmount">要判定的数量</param>
     /// <returns>是否需要该道具</returns>
-    public bool HasQuestRequiredItem(Item item, int leftAmount)
+    public static bool HasQuestRequiredItem(Item item, int leftAmount)
     {
         return FindQuestsRequiredItem(item, leftAmount).Count() > 0;
     }
-    private IEnumerable<QuestData> FindQuestsRequiredItem(Item item, int leftAmount)
+    private static IEnumerable<QuestData> FindQuestsRequiredItem(Item item, int leftAmount)
     {
         return questsInProgress.FindAll(quest =>
         {
@@ -535,70 +534,101 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
         }).AsEnumerable();
     }
 
-    public void SaveData(SaveData data)
+    [SaveMethod]
+    public static void SaveData(SaveData saveData)
     {
+        var inProgress = new SaveDataItem();
+        saveData.data["questsInProgress"] = inProgress;
         foreach (QuestData quest in questsInProgress)
         {
-            data.inProgressQuestDatas.Add(new QuestSaveData(quest));
+            var qs = new SaveDataItem();
+            qs.stringData["ID"] = quest.Model.ID;
+            qs.stringData["giverID"] = quest.originalQuestHolder.TalkerID;
+            inProgress.dataList.Add(qs);
+            foreach (var obj in quest.Objectives)
+            {
+                qs.intData[obj.ID] = obj.CurrentAmount;
+            }
         }
+        var finished = new SaveDataItem();
+        saveData.data["questsFinished"] = finished;
         foreach (QuestData quest in questsFinished)
         {
-            data.finishedQuestDatas.Add(new QuestSaveData(quest));
+            var qs = new SaveDataItem();
+            qs.stringData["ID"] = quest.Model.ID;
+            qs.stringData["giverID"] = quest.originalQuestHolder.TalkerID;
+            finished.dataList.Add(qs);
         }
     }
 
-    public void Init()
+    [InitMethod]
+    public static void Init()
     {
         foreach (var quest in questsInProgress)
             foreach (ObjectiveData o in quest.Objectives)
                 RemoveObjectiveMapIcon(o);
         questsInProgress.Clear();
         questsFinished.Clear();
-        NotifyCenter.RemoveListener(this);
         NotifyCenter.AddListener(NotifyCenter.CommonKeys.TriggerChanged, OnTriggerChange);
     }
 
-    public void LoadQuest(SaveData data)
+    [LoadMethod]
+    public static void LoadData(SaveData saveData)
     {
         questsInProgress.Clear();
-        foreach (QuestSaveData questData in data.inProgressQuestDatas)
+        if (saveData.data.TryGetValue("questsInProgress", out var quests))
         {
-            HandlingQuestData(questData);
-        }
-        questsFinished.Clear();
-        foreach (QuestSaveData questData in data.finishedQuestDatas)
-        {
-            QuestData quest = HandlingQuestData(questData);
-            CompleteQuest(quest);
-        }
-    }
-    private QuestData HandlingQuestData(QuestSaveData questData)
-    {
-        TalkerData questGiver = DialogueManager.Instance.Talkers[questData.originalGiverID];
-        if (!questGiver) return null;
-        QuestData quest = questGiver.questInstances.Find(x => x.Model.ID == questData.questID);
-        if (!quest) return null;
-        AcceptQuest(quest);
-        foreach (ObjectiveSaveData od in questData.objectiveDatas)
-        {
-            foreach (ObjectiveData o in quest.Objectives)
+            foreach (var quest in quests.dataList)
             {
-                if (o.ID == od.objectiveID)
-                {
-                    o.CurrentAmount = od.currentAmount;
-                    break;
-                }
+                HandlingQuestData(quest, false);
             }
         }
-        return quest;
+        questsFinished.Clear();
+        if (saveData.data.TryGetValue("questsFinished", out quests))
+        {
+            foreach (var quest in quests.dataList)
+            {
+                HandlingQuestData(quest, true);
+            }
+        }
+
+        static void HandlingQuestData(SaveDataItem questData, bool finished)
+        {
+            if (!questData.stringData.TryGetValue("giverID", out var giverID)) return;
+            if (!DialogueManager.Talkers.TryGetValue(giverID, out var questGiver)) return;
+            if (!questData.stringData.TryGetValue("ID", out var ID)) return;
+            QuestData quest = questGiver.questInstances.Find(x => x.Model.ID == ID);
+            if (!quest) return;
+            AcceptQuest(quest);
+            if (!finished)
+                foreach (var od in questData.intData)
+                {
+                    foreach (ObjectiveData o in quest.Objectives)
+                    {
+                        if (o.ID == od.Key)
+                        {
+                            o.CurrentAmount = od.Value;
+                            break;
+                        }
+                    }
+                }
+            else
+            {
+                foreach (var o in quest.Objectives)
+                {
+                    o.CurrentAmount = o.Model.Amount;
+                }
+                CompleteQuest(quest);
+            }
+        }
     }
 
-    public void OnTriggerChange(params object[] args)
+    public static void OnTriggerChange(params object[] args)
     {
         //TODO 处理触发器改变时
     }
 
-    public void OnLoadScene()
+    public static void OnLoadScene()
     {
         //TODO 重新遍历对话人、敌人等来绑定对话类、杀敌类、提交类等的回调
     }
@@ -616,13 +646,13 @@ public sealed class QuestManager : SingletonMonoBehaviour<QuestManager>
     #endregion
 
     #region 语言相关
-    public string Tr(string text)
+    public static string Tr(string text)
     {
-        return LM.Tr(GetType().Name, text);
+        return LM.Tr(typeof(QuestManager).Name, text);
     }
-    public string Tr(string text, params object[] args)
+    public static string Tr(string text, params object[] args)
     {
-        return LM.Tr(GetType().Name, text, args);
+        return LM.Tr(typeof(QuestManager).Name, text, args);
     }
     #endregion
 }

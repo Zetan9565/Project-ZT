@@ -12,7 +12,7 @@ public class WarehouseSelectionWindow : Window
     [SerializeField]
     private Button deselect;
 
-    public float defaultCheckRange;
+    public float defaultCheckRaduis = 20f;
     public LayerMask defaultCheckLayer;
 
     private bool noneCheck;
@@ -21,24 +21,24 @@ public class WarehouseSelectionWindow : Window
     private IWarehouseKeeper selected;
     private bool doConfirm;
 
-    public static WarehouseSelectionWindow StartSelection(Action<IWarehouseKeeper> selectCallback, bool noneCheck, bool physics2D, Vector3 point, float? range = null, LayerMask? layer = null)
+    public static WarehouseSelectionWindow StartSelection(Action<IWarehouseKeeper> selectCallback, bool noneCheck, bool physics2D, Vector3 point, float? radius = null, LayerMask? layer = null)
     {
-        return StartSelection(selectCallback, null, null, noneCheck, physics2D, point, range, layer);
+        return StartSelection(selectCallback, null, null, noneCheck, physics2D, point, radius, layer);
     }
     public static WarehouseSelectionWindow StartSelection(Action<IWarehouseKeeper> selectCallback, Action cancelCallback,
-        bool noneCheck, bool physics2D, Vector3 point, float? range = null, LayerMask? layer = null)
+        bool noneCheck, bool physics2D, Vector3 point, float? radius = null, LayerMask? layer = null)
     {
-        return StartSelection(selectCallback, cancelCallback, null, noneCheck, physics2D, point, range, layer);
+        return StartSelection(selectCallback, cancelCallback, null, noneCheck, physics2D, point, radius, layer);
     }
     public static WarehouseSelectionWindow StartSelection(Action<IWarehouseKeeper> selectCallback, Predicate<IWarehouseKeeper> defaultSelector,
-        bool noneCheck, bool physics2D, Vector3 point, float? range = null, LayerMask? layer = null)
+        bool noneCheck, bool physics2D, Vector3 point, float? radius = null, LayerMask? layer = null)
     {
-        return StartSelection(selectCallback, null, defaultSelector, noneCheck, physics2D, point, range, layer);
+        return StartSelection(selectCallback, null, defaultSelector, noneCheck, physics2D, point, radius, layer);
     }
     public static WarehouseSelectionWindow StartSelection(Action<IWarehouseKeeper> selectCallback, Action cancelCallback, Predicate<IWarehouseKeeper> defaultSelector,
-        bool noneCheck, bool physics2D, Vector3 point, float? range = null, LayerMask? layer = null)
+        bool noneCheck, bool physics2D, Vector3 point, float? radius = null, LayerMask? layer = null)
     {
-        return WindowsManager.OpenWindow<WarehouseSelectionWindow>(selectCallback, cancelCallback, defaultSelector, noneCheck, physics2D, point, range, layer);
+        return WindowsManager.OpenWindow<WarehouseSelectionWindow>(selectCallback, cancelCallback, defaultSelector, noneCheck, physics2D, point, radius, layer);
     }
 
     protected override bool OnOpen(params object[] args)
@@ -46,13 +46,13 @@ public class WarehouseSelectionWindow : Window
         if (args == null || args.Length < 7) return false;
         List<IWarehouseKeeper> warehouses = new List<IWarehouseKeeper>();
         var par = (selectCallback: args[0] as Action<IWarehouseKeeper>, cancelCallback: args[1] as Action, defaultSelector: args[2] as Predicate<IWarehouseKeeper>,
-            noneCheck: (bool)args[3], physics2D: (bool)args[4], point: (Vector3)args[5], range: args[6] as float?, layer: args[7] as LayerMask?);
+            noneCheck: (bool)args[3], physics2D: (bool)args[4], point: (Vector3)args[5], radius: args[6] as float?, layer: args[7] as LayerMask?);
         onConfirm = par.selectCallback;
         onCancel = par.cancelCallback;
         noneCheck = par.noneCheck;
         if (par.physics2D)
         {
-            var colliders = Physics2D.OverlapCircleAll(par.point, par.range ?? defaultCheckRange, par.layer ?? defaultCheckLayer);
+            var colliders = Physics2D.OverlapCircleAll(par.point, par.radius ?? defaultCheckRaduis, par.layer ?? defaultCheckLayer);
             foreach (var collider in colliders)
             {
                 if (collider.TryGetComponent<Warehouse>(out var warehouse))
@@ -67,7 +67,7 @@ public class WarehouseSelectionWindow : Window
         }
         else
         {
-            var colliders = Physics.OverlapSphere(par.point, par.range ?? defaultCheckRange, par.layer ?? defaultCheckLayer);
+            var colliders = Physics.OverlapSphere(par.point, par.radius ?? defaultCheckRaduis, par.layer ?? defaultCheckLayer);
             foreach (var collider in colliders)
             {
                 if (collider.TryGetComponent<Warehouse>(out var warehouse))
@@ -94,6 +94,7 @@ public class WarehouseSelectionWindow : Window
 
     protected override void OnAwake()
     {
+        list.Selectable = true;
         list.SetSelectCallback(OnSelected);
         confirm.onClick.AddListener(Confirm);
         deselect.onClick.AddListener(Deselect);
@@ -102,14 +103,14 @@ public class WarehouseSelectionWindow : Window
 
     private void OnSelected(WarehouseAgent warehouse)
     {
-        if (warehouse.IsSelected) selected = warehouse.Data;
-        else if (warehouse.Data == selected) selected = null;
+        if (warehouse) selected = warehouse.Data;
+        else selected = null;
         deselect.interactable = list.SelectedIndices.Count > 0;
     }
 
     private void Deselect()
     {
-        list.DeselectAll();
+        list.ClearSelection();
     }
 
     private void Confirm()

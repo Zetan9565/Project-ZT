@@ -73,7 +73,7 @@ public partial class @CommonInput : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Dash"",
+                    ""name"": ""Flash"",
                     ""type"": ""Button"",
                     ""id"": ""82726d39-a567-4574-8ee3-a001029e4b4c"",
                     ""expectedControlType"": ""Button"",
@@ -293,7 +293,7 @@ public partial class @CommonInput : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard"",
-                    ""action"": ""Dash"",
+                    ""action"": ""Flash"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -304,7 +304,7 @@ public partial class @CommonInput : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
-                    ""action"": ""Dash"",
+                    ""action"": ""Flash"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -542,7 +542,7 @@ public partial class @CommonInput : IInputActionCollection2, IDisposable
         m_Player_MouseLeft = m_Player.FindAction("MouseLeft", throwIfNotFound: true);
         m_Player_MouseRight = m_Player.FindAction("MouseRight", throwIfNotFound: true);
         m_Player_MouseMiddle = m_Player.FindAction("MouseMiddle", throwIfNotFound: true);
-        m_Player_Dash = m_Player.FindAction("Dash", throwIfNotFound: true);
+        m_Player_Flash = m_Player.FindAction("Flash", throwIfNotFound: true);
         m_Player_Roll = m_Player.FindAction("Roll", throwIfNotFound: true);
         m_Player_Action_1 = m_Player.FindAction("Action_1", throwIfNotFound: true);
         m_Player_Parry = m_Player.FindAction("Parry", throwIfNotFound: true);
@@ -618,7 +618,7 @@ public partial class @CommonInput : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_MouseLeft;
     private readonly InputAction m_Player_MouseRight;
     private readonly InputAction m_Player_MouseMiddle;
-    private readonly InputAction m_Player_Dash;
+    private readonly InputAction m_Player_Flash;
     private readonly InputAction m_Player_Roll;
     private readonly InputAction m_Player_Action_1;
     private readonly InputAction m_Player_Parry;
@@ -631,7 +631,7 @@ public partial class @CommonInput : IInputActionCollection2, IDisposable
         public InputAction @MouseLeft => m_Wrapper.m_Player_MouseLeft;
         public InputAction @MouseRight => m_Wrapper.m_Player_MouseRight;
         public InputAction @MouseMiddle => m_Wrapper.m_Player_MouseMiddle;
-        public InputAction @Dash => m_Wrapper.m_Player_Dash;
+        public InputAction @Flash => m_Wrapper.m_Player_Flash;
         public InputAction @Roll => m_Wrapper.m_Player_Roll;
         public InputAction @Action_1 => m_Wrapper.m_Player_Action_1;
         public InputAction @Parry => m_Wrapper.m_Player_Parry;
@@ -659,9 +659,9 @@ public partial class @CommonInput : IInputActionCollection2, IDisposable
                 @MouseMiddle.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMouseMiddle;
                 @MouseMiddle.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMouseMiddle;
                 @MouseMiddle.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMouseMiddle;
-                @Dash.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnDash;
-                @Dash.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnDash;
-                @Dash.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnDash;
+                @Flash.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFlash;
+                @Flash.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFlash;
+                @Flash.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnFlash;
                 @Roll.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRoll;
                 @Roll.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRoll;
                 @Roll.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRoll;
@@ -690,9 +690,9 @@ public partial class @CommonInput : IInputActionCollection2, IDisposable
                 @MouseMiddle.started += instance.OnMouseMiddle;
                 @MouseMiddle.performed += instance.OnMouseMiddle;
                 @MouseMiddle.canceled += instance.OnMouseMiddle;
-                @Dash.started += instance.OnDash;
-                @Dash.performed += instance.OnDash;
-                @Dash.canceled += instance.OnDash;
+                @Flash.started += instance.OnFlash;
+                @Flash.performed += instance.OnFlash;
+                @Flash.canceled += instance.OnFlash;
                 @Roll.started += instance.OnRoll;
                 @Roll.performed += instance.OnRoll;
                 @Roll.canceled += instance.OnRoll;
@@ -804,7 +804,7 @@ public partial class @CommonInput : IInputActionCollection2, IDisposable
         void OnMouseLeft(InputAction.CallbackContext context);
         void OnMouseRight(InputAction.CallbackContext context);
         void OnMouseMiddle(InputAction.CallbackContext context);
-        void OnDash(InputAction.CallbackContext context);
+        void OnFlash(InputAction.CallbackContext context);
         void OnRoll(InputAction.CallbackContext context);
         void OnAction_1(InputAction.CallbackContext context);
         void OnParry(InputAction.CallbackContext context);

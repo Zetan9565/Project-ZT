@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 
 public static class MiscFuntion
 {
@@ -118,7 +117,7 @@ public static class MiscFuntion
                         indexStr = string.Empty;
                         GetRPNItem(item);
                     }
-                    if (c == '(' || c == ')' || c == '+' || c == '*' || c == '~')
+                    if (c == '(' || c == ')' || c == '|' || c == '&' || c == '!')
                     {
                         item = c + "";
                         GetRPNItem(item);
@@ -156,13 +155,17 @@ public static class MiscFuntion
                         return true;
                     }
                 }
-                else if (values.Count > 1)
+                else if (values.Count > 0)
                 {
-                    if (item == "+") values.Push(values.Pop() | values.Pop());
-                    else if (item == "~") values.Push(!values.Pop());
-                    else if (item == "*") values.Push(values.Pop() & values.Pop());
+                    if (item == "!") values.Push(!values.Pop());
+                    else if (values.Count > 1)
+                    {
+                        bool right = values.Pop();
+                        bool left = values.Pop();
+                        if (item == "|") values.Push(left | right);
+                        else if (item == "&") values.Push(left & right);
+                    }
                 }
-                else if (item == "~") values.Push(!values.Pop());
             }
             if (values.Count == 1)
             {
@@ -173,14 +176,14 @@ public static class MiscFuntion
             void GetRPNItem(string item)
             {
                 //Debug.Log(item);
-                if (item == "+" || item == "*" || item == "~")//遇到运算符
+                if (item == "!" || item == "&" || item == "|")//遇到运算符
                 {
                     char opt = item[0];
                     if (optStack.Count < 1) optStack.Push(opt);//栈空则直接入栈
                     else while (optStack.Count > 0)//栈不空则出栈所有优先级大于或等于opt的运算符后才入栈opt
                         {
                             char top = optStack.Peek();
-                            if (top + "" == item || top == '~' || top == '*' && opt == '+')
+                            if (top + "" == item || top == '!' || top == '&' && opt == '|')
                             {
                                 RPN.Add(optStack.Pop() + "");
                                 if (optStack.Count < 1)
@@ -231,10 +234,10 @@ public static class MiscFuntion
         switch (condition.Type)
         {
             case ConditionType.CompleteQuest:
-                QuestData quest = QuestManager.Instance.FindQuest(condition.RelatedQuest.ID);
+                QuestData quest = QuestManager.FindQuest(condition.RelatedQuest.ID);
                 return quest && TimeManager.Instance.Days - quest.latestHandleDays >= condition.IntValue && quest.IsFinished;
             case ConditionType.AcceptQuest:
-                quest = QuestManager.Instance.FindQuest(condition.RelatedQuest.ID);
+                quest = QuestManager.FindQuest(condition.RelatedQuest.ID);
                 return quest && TimeManager.Instance.Days - quest.latestHandleDays >= condition.IntValue && quest.InProgress;
             case ConditionType.HasItem:
                 return BackpackManager.Instance.HasItemWithID(condition.RelatedItem.ID);
@@ -251,13 +254,33 @@ public static class MiscFuntion
                         return true;
                 }
             case ConditionType.TriggerSet:
-                var state = TriggerManager.Instance.GetTriggerState(condition.TriggerName);
+                var state = TriggerManager.GetTriggerState(condition.TriggerName);
                 return state != TriggerState.NotExist && (state == TriggerState.On);
             case ConditionType.TriggerReset:
-                state = TriggerManager.Instance.GetTriggerState(condition.TriggerName);
+                state = TriggerManager.GetTriggerState(condition.TriggerName);
                 return state != TriggerState.NotExist && (state == TriggerState.Off);
             default: return true;
         }
+    }
+
+    public static string GetColorAmountString(int current, int target, Color? enough = null, Color? lack = null)
+    {
+        return $"{ZetanUtility.ColorText(current, current >= target ? enough ?? Color.green : lack ?? Color.red)}/{target}";
+    }
+
+    public static string ToChineseSortNum(long value)
+    {
+        decimal temp = value / 100000000m;
+        if (temp >= 1)
+        {
+            return $"{temp:#0.#}亿";
+        }
+        temp = value / 10000m;
+        if (temp >= 1)
+        {
+            return $"{temp:#0.#}万";
+        }
+        return value.ToString();
     }
 
     public static string SecondsToSortTime(float seconds, string dayStr = "天", string hourStr = "时", string minuStr = "分", string secStr = "秒")

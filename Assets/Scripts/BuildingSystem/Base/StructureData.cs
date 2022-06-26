@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using ZetanStudio.Item.Craft;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
+using ZetanStudio.StructureSystem;
 
 public class StructureData : SceneObjectData<Structure2D>
 {
@@ -37,6 +38,20 @@ public class StructureData : SceneObjectData<Structure2D>
         ID = $"{Info.ID}-{Guid.NewGuid():N}";
         this.position = position;
         scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+    }
+    public StructureData(StructureInformation info, SaveDataItem data)
+    {
+        Info = info;
+        if (data.floatData.TryGetValue("leftBuildTime", out var leftBuildTime)) this.leftBuildTime = leftBuildTime;
+        if (data.intData.TryGetValue("stageIndex", out var stageIndex)) currentStageIndex = stageIndex;
+        if (data.stringData.TryGetValue("ID", out var ID)) this.ID = ID;
+        if (data.stringData.TryGetValue("scene", out var scene)) this.scene = scene;
+        if (this.leftBuildTime > 0 && currentStageIndex >= 0 && currentStageIndex < info.Stages.Count)
+        {
+            IsBuilt = false;
+            if (Info.AutoBuild) StartConstruct();
+        }
+        else BuildComplete();
     }
 
     public bool StartBuild()
@@ -72,7 +87,7 @@ public class StructureData : SceneObjectData<Structure2D>
         foreach (var material in targetMaterials)
         {
             if (targetMaterials == null || materialsStored == null || materialsStored.Count < 1) return false;
-            if (material.MakingType == CraftType.SingleItem)
+            if (material.CostType == MaterialCostType.SingleItem)
             {
                 if (material.Item.StackAble)
                 {
@@ -87,7 +102,7 @@ public class StructureData : SceneObjectData<Structure2D>
             }
             else
             {
-                var finds = materialsStored.Where(x => MaterialModule.Compare(x.item, material.MaterialType));//找到种类相同的道具
+                var finds = materialsStored.Where(x => MaterialModule.SameType(material.MaterialType, x.Item));//找到种类相同的道具
                 if (finds.Count() > 0)
                 {
                     if (finds.Select(x => x.Amount).Sum() < material.Amount) return false;//若材料总数不足，则无法制作
@@ -102,7 +117,7 @@ public class StructureData : SceneObjectData<Structure2D>
     {
         foreach (var material in targetMaterials)
         {
-            if (material.MakingType == CraftType.SingleItem)
+            if (material.CostType == MaterialCostType.SingleItem)
             {
                 if (material.Item.StackAble)
                 {
@@ -124,7 +139,7 @@ public class StructureData : SceneObjectData<Structure2D>
             }
             else
             {
-                var finds = materialsStored.Where(x => MaterialModule.Compare(x.item, material.MaterialType));//找到种类相同的道具
+                var finds = materialsStored.Where(x => MaterialModule.SameType(material.MaterialType, x.Item));//找到种类相同的道具
                 if (finds.Count() > 0)
                 {
 
@@ -144,29 +159,11 @@ public class StructureData : SceneObjectData<Structure2D>
         else leftBuildTime = currentStage.BuildTime;
     }
 
-    public void LoadBuild(StructureInformation info, StructureSaveData structureData)
-    {
-        if (Info != info) return;
-        leftBuildTime = structureData.leftBuildTime;
-        currentStageIndex = structureData.stageIndex;
-        ID = structureData.ID;
-        if (leftBuildTime > 0 && currentStageIndex >= 0 && currentStageIndex < info.Stages.Count)
-        {
-            IsBuilt = false;
-            if (Info.AutoBuild)
-                StartConstruct();
-        }
-        else
-        {
-            BuildComplete();
-        }
-    }
-
     private void BuildComplete()
     {
         IsBuilt = true;
         IsBuilding = false;
-        StructureManager.Instance.DoneBuild(this);
+        StructureManager.DoneBuild(this);
     }
 
     public void StartConstruct()
@@ -193,15 +190,15 @@ public class StructureData : SceneObjectData<Structure2D>
         if (IsBuilt) return;
         foreach (var material in materials)
         {
-            if (material.item.StackAble)
+            if (material.Item.StackAble)
             {
                 ItemInfo find = materialsStored.Find(x => x.ItemID == material.ItemID);
                 if (find) find.Amount += material.Amount;
-                else materialsStored.Add(new ItemInfo(material.item, material.Amount));
+                else materialsStored.Add(new ItemInfo(material.Item, material.Amount));
             }
             else
             {
-                materialsStored.Add(new ItemInfo(material.item));
+                materialsStored.Add(new ItemInfo(material.Item));
             }
         }
         if (Info.AutoBuild && !IsBuilding)
@@ -216,7 +213,7 @@ public class StructureData : SceneObjectData<Structure2D>
         List<string> info = new List<string>();
         using (var materialEnum = materials.GetEnumerator())
             while (materialEnum.MoveNext())
-                if (materialEnum.Current.MakingType == CraftType.SingleItem)
+                if (materialEnum.Current.CostType == MaterialCostType.SingleItem)
                 {
                     int amount = 0;
                     if (materialEnum.Current.Item.StackAble)
@@ -232,13 +229,27 @@ public class StructureData : SceneObjectData<Structure2D>
                 }
                 else
                 {
-                    var finds = materialsStored.FindAll(x => MaterialModule.Compare(x.item, materialEnum.Current.MaterialType));
+                    var finds = materialsStored.FindAll(x => MaterialModule.SameType(materialEnum.Current.MaterialType, x.Item));
                     int amount = 0;
                     foreach (var item in finds)
                         amount += item.Amount;
                     info.Add($"{materialEnum.Current.ItemName}\t[{amount}/{materialEnum.Current.Amount}]");
                 }
         return info;
+    }
+
+    public SaveDataItem GetSaveData()
+    {
+        var data = new SaveDataItem();
+        data.stringData["modelID"] = Info.ID;
+        data.stringData["ID"] = ID;
+        data.stringData["scene"] = scene;
+        data.floatData["posX"] = position.x;
+        data.floatData["posY"] = position.y;
+        data.floatData["posZ"] = position.z;
+        data.floatData["leftBuildTime"] = leftBuildTime;
+        data.intData["stageIndex"] = currentStageIndex;
+        return data;
     }
 
     public static implicit operator bool(StructureData self)

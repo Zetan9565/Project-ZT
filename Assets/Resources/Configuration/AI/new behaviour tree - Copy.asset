@@ -45,7 +45,7 @@ MonoBehaviour:
   - rid: 3760287421023387650
   - rid: 3760287421023387651
   - rid: 3760287437898121218
-  isRuntime: 0
+  scenceOnly: 0
   references:
     version: 2
     RefIds:

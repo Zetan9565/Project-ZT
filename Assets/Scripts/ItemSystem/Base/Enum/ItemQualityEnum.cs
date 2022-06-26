@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     [CreateAssetMenu(fileName = "item quality", menuName = "Zetan Studio/道具/枚举/道具品质")]
     public sealed class ItemQualityEnum : ScriptableObjectEnum<ItemQualityEnum, ItemQuality>

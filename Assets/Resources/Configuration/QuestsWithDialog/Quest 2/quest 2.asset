@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: quest 2
   m_EditorClassIdentifier: 
   _ID: QEST003
-  title: "\u7ED9\u739B\u4E3D\u4E9A\u770B\u8BC1\u636E"
-  description: "\u6536\u96C6\u602A\u7269\u7684\u6B66\u5668\u62FF\u7ED9\u739B\u4E3D\u4E9A\u770B\u3002"
+  title: "\u7ED9{[NPC]NPC001}\u770B\u8BC1\u636E"
+  description: "\u6536\u96C6\u602A\u7269\u7684\u6B66\u5668\u62FF\u7ED9{[NPC]NPC001}\u770B\u3002"
   abandonable: 1
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptCondition:
@@ -57,6 +57,7 @@ MonoBehaviour:
         showMapIcon: 1
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
+        showAmount: 1
         inOrder: 1
         priority: 1
         itemToCollect: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
@@ -72,6 +73,7 @@ MonoBehaviour:
         showMapIcon: 1
         auxiliaryPos: {fileID: 11400000, guid: 9a0622663668e9b429e4cebd536a4782, type: 2}
         amount: 1
+        showAmount: 1
         inOrder: 1
         priority: 0
         itemToCollect: {fileID: 2294737969574299077, guid: 11d254d59d262564aa42d1df5009d201,
@@ -81,12 +83,13 @@ MonoBehaviour:
     - rid: 2
       type: {class: SubmitObjective, ns: , asm: Assembly-CSharp}
       data:
-        displayName: "\u628A\u6536\u96C6\u7684\u5251\u7ED9\u739B\u4E3D\u4E9A\u770B"
+        displayName: "\u628A\u6536\u96C6\u7684\u5251\u7ED9{[NPC]NPC001}\u770B"
         display: 1
         canNavigate: 1
         showMapIcon: 1
         auxiliaryPos: {fileID: 0}
         amount: 1
+        showAmount: 0
         inOrder: 1
         priority: 2
         _NPCToSubmit: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}

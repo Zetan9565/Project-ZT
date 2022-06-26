@@ -389,16 +389,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12d026f0d5dcebe40a47aeaebc07607e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data:
-    rid: -2
   questFlagOffset: {x: 0, y: 2.8, z: 0}
   iconHolder: {fileID: 0}
   interactive: {fileID: 0}
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
 --- !u!58 &4978224793417098154
 CircleCollider2D:
   m_ObjectHideFlags: 0

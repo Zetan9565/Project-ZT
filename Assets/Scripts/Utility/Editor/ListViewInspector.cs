@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 [CustomEditor(typeof(ListViewBase), true)]
@@ -17,7 +18,7 @@ public class ListViewInspector : Editor
 
     SerializedProperty clickable;
     SerializedProperty selectable;
-    SerializedProperty multiSelection;
+    SerializedProperty selectionLimit;
 
     SerializedProperty cacheCapacity;
     SerializedProperty container;
@@ -38,7 +39,7 @@ public class ListViewInspector : Editor
         applyCellSize = serializedObject.FindProperty("applyCellSize");
         clickable = serializedObject.FindProperty("clickable");
         selectable = serializedObject.FindProperty("selectable");
-        multiSelection = serializedObject.FindProperty("multiSelection");
+        selectionLimit = serializedObject.FindProperty("selectionLimit");
         cacheCapacity = serializedObject.FindProperty("cacheCapacity");
         container = serializedObject.FindProperty("container");
         prefab = serializedObject.FindProperty("prefab");
@@ -48,7 +49,10 @@ public class ListViewInspector : Editor
     {
         serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
-        EditorGUI.BeginDisabledGroup(Application.isPlaying);
+        bool disable = Application.isPlaying && !EditorUtility.IsPersistent((target as Component).gameObject);
+        if (PrefabStageUtility.GetCurrentPrefabStage() is PrefabStage stage)
+            disable &= !stage.IsPartOfPrefabContents((target as Component).gameObject);
+        EditorGUI.BeginDisabledGroup(disable);
         EditorGUILayout.PropertyField(direction, new GUIContent("布局方向"));
         EditorGUILayout.PropertyField(childAlignment, new GUIContent("对齐方式"));
         EditorGUILayout.BeginVertical("Box");
@@ -68,7 +72,7 @@ public class ListViewInspector : Editor
             }
             EditorGUILayout.PropertyField(cellSize, new GUIContent("首选元素大小"));
         }
-        if (Application.isPlaying) EditorGUILayout.PropertyField(applyCellSize, new GUIContent("应用元素大小"));
+        if (disable) EditorGUILayout.PropertyField(applyCellSize, new GUIContent("应用元素大小"));
         EditorGUILayout.PropertyField(clickable, new GUIContent("元素可点击"));
         if (clickable.boolValue)
         {
@@ -78,7 +82,7 @@ public class ListViewInspector : Editor
             {
                 bool bef = GUI.enabled;
                 GUI.enabled = true;
-                EditorGUILayout.PropertyField(multiSelection, new GUIContent("多选"));
+                EditorGUILayout.PropertyField(selectionLimit, new GUIContent("选中上限"));
                 GUI.enabled = bef;
             }
             EditorGUILayout.EndHorizontal();

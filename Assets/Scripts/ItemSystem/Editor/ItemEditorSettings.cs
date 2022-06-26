@@ -3,7 +3,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     public class ItemEditorSettings : ScriptableObject
     {
@@ -19,7 +19,7 @@ namespace ZetanStudio.Item
         private static ItemEditorSettings Find()
         {
             var settings = ZetanUtility.Editor.LoadAssets<ItemEditorSettings>();
-            if (settings.Count > 1) Debug.LogWarning(Language.Tr(settings[0].language, "找到多个道具编辑器配置，将使用第一个"));
+            if (settings.Count > 1) Debug.LogWarning(L.Tr(settings[0].language, "找到多个道具编辑器配置，将使用第一个"));
             if (settings.Count > 0) return settings[0];
             return null;
         }
@@ -30,7 +30,7 @@ namespace ZetanStudio.Item
             if (settings == null)
             {
                 settings = CreateInstance<ItemEditorSettings>();
-                AssetDatabase.CreateAsset(settings, AssetDatabase.GenerateUniqueAssetPath("Assets/Scripts/ItemSystem/Editor/item editor settings.asset"));
+                AssetDatabase.CreateAsset(settings, AssetDatabase.GenerateUniqueAssetPath("Assets/Scripts/ItemSystem/Editor/Resources/item editor settings.asset"));
             }
             return settings;
         }
@@ -42,12 +42,12 @@ namespace ZetanStudio.Item
                 var settings = GetOrCreate();
                 var provider = new SettingsProvider("Project/Zetan Studio/ZSIESettingsUIElementsSettings", SettingsScope.Project)
                 {
-                    label = Language.Tr(settings ? settings.language : null, "道具编辑器"),
+                    label = L.Tr(settings ? settings.language : null, "道具编辑器"),
                     activateHandler = (searchContext, rootElement) =>
                     {
                         SerializedObject serializedObject = new SerializedObject(settings);
 
-                        Label title = new Label() { text = Language.Tr(settings ? settings.language : null, "道具编辑器设置") };
+                        Label title = new Label() { text = L.Tr(settings ? settings.language : null, "道具编辑器设置") };
                         title.style.paddingLeft = 10f;
                         title.style.fontSize = 19f;
                         title.AddToClassList("title");

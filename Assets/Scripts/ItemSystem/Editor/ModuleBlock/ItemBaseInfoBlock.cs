@@ -5,8 +5,9 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using ZetanStudio.Extension.Editor;
+using ZetanStudio.ItemSystem.Editor;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     public class ItemBaseInfoBlock : ItemInspectorBlock
     {
@@ -21,7 +22,6 @@ namespace ZetanStudio.Item
         private readonly SerializedProperty StackLimit;
         private readonly SerializedProperty Discardable;
         private readonly string IDPrefix;
-        private LanguageMap language;
         private List<Item> items;
         private HashSet<string> ids;
         public Action onInspectorChanged;
@@ -40,8 +40,7 @@ namespace ZetanStudio.Item
             Weight = serializedObject.FindAutoProperty("Weight");
             StackLimit = serializedObject.FindAutoProperty("StackLimit");
             Discardable = serializedObject.FindAutoProperty("Discardable");
-            language = ItemEditorSettings.GetOrCreate().language;
-            text = Language.Tr(language, "基本信息");
+            text = Tr("基本信息");
             RefreshCache();
             IMGUIContainer inspector = new IMGUIContainer(() =>
             {
@@ -64,14 +63,14 @@ namespace ZetanStudio.Item
                                                               typeof(Sprite),
                                                               false);
             string oldID = ID.stringValue;
-            if (string.IsNullOrEmpty(ID.stringValue))
+            if (string.IsNullOrEmpty(ID.stringValue) || ids.Contains(ID.stringValue))
             {
                 EditorGUI.PropertyField(new Rect(rect.x, rect.y, rect.width - 110, rect.height), ID);
-                if (GUI.Button(new Rect(rect.x + rect.width - 108, rect.y, 50, rect.height), Language.Tr(ItemEditorSettings.GetOrCreate().language, "生成ID")))
+                if (GUI.Button(new Rect(rect.x + rect.width - 108, rect.y, 50, rect.height), Tr("生成ID")))
                 {
                     ID.stringValue = Item.Editor.GetAutoID(serializedObject.targetObject as Item, items, IDPrefix);
                     serializedObject.ApplyModifiedProperties();
-                    CheckError();
+                    EditorApplication.delayCall += CheckError;
                     onInspectorChanged?.Invoke();
                 }
             }
@@ -118,34 +117,35 @@ namespace ZetanStudio.Item
 
         public void CheckError()
         {
+            EditorApplication.delayCall -= CheckError;
             SerializedProperty id = serializedObject.FindAutoProperty("ID");
             bool empty = string.IsNullOrEmpty(id.stringValue);
             bool dump = ids.Contains(id.stringValue);
             bool invalid = empty || dump;
             if (invalid)
             {
-                text = $"{Language.Tr(language, "基本信息")}({Language.Tr(language, "存在错误")})";
-                this.Q<Toggle>().tooltip = $"{Language.Tr(language, "错误类型")}: {(empty ? Language.Tr(language, "ID为空") : Language.Tr(language, "ID重复"))}";
+                text = $"{Tr("基本信息")}({Tr("存在错误")})";
+                this.Q<Toggle>().tooltip = $"{Tr("错误类型")}: {(empty ? Tr("ID为空") : Tr("ID重复"))}";
             }
             else
             {
                 SerializedProperty name = serializedObject.FindAutoProperty("Name");
                 if (string.IsNullOrEmpty(name.stringValue))
                 {
-                    text = $"{Language.Tr(language, "基本信息")}({Language.Tr(language, "可能有误")})";
-                    this.Q<Toggle>().tooltip = $"{Language.Tr(language, "错误类型")}：{Language.Tr(language, "道具名为空")}";
+                    text = $"{Tr("基本信息")}({Tr("可能有误")})";
+                    this.Q<Toggle>().tooltip = $"{Tr("错误类型")}：{Tr("道具名为空")}";
                 }
                 else
                 {
                     SerializedProperty icon = serializedObject.FindAutoProperty("Icon");
                     if (!icon.objectReferenceValue)
                     {
-                        text = $"{Language.Tr(language, "基本信息")}({Language.Tr(language, "可能有误")})";
-                        this.Q<Toggle>().tooltip = $"{Language.Tr(language, "错误类型")}：{Language.Tr(language, "图标为空")}";
+                        text = $"{Tr("基本信息")}({Tr("可能有误")})";
+                        this.Q<Toggle>().tooltip = $"{Tr("错误类型")}：{Tr("图标为空")}";
                     }
                     else
                     {
-                        text = Language.Tr(language, "基本信息");
+                        text = Tr("基本信息");
                         this.Q<Toggle>().tooltip = null;
                     }
                 }

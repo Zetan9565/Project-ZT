@@ -2,35 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[DefaultExecutionOrder(-1)]
-public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
+public static class WindowsManager
 {
-    [SerializeField]
-    private int startSortingOrder = 100;
+    private static int startSortingOrder = 100;
     public static int StartSortingOrder
     {
-        get => Instance ? Instance.startSortingOrder : 0;
+        get => startSortingOrder;
         set
         {
-            if (Instance)
+            if (startSortingOrder != value)
             {
-                if (Instance.startSortingOrder != value)
+                startSortingOrder = value;
+                for (int i = 0; i < windows.Count; i++)
                 {
-                    Instance.startSortingOrder = value;
-                    for (int i = 0; i < Instance.windows.Count; i++)
-                    {
-                        Instance.windows[i].WindowCanvas.sortingOrder = i + Instance.startSortingOrder;
-                    }
+                    windows[i].WindowCanvas.sortingOrder = i + startSortingOrder;
                 }
             }
         }
     }
 
-    public static int Count => Instance ? Instance.windows.Count : 0;
+    public static int Count => windows.Count;
 
-    private readonly Dictionary<string, Window> caches = new Dictionary<string, Window>();
-    private readonly Dictionary<string, IHideable> hideableCache = new Dictionary<string, IHideable>();
-    private readonly Dictionary<IHideable, bool> windowHideState = new Dictionary<IHideable, bool>();
+    private static readonly Dictionary<string, Window> caches = new Dictionary<string, Window>();
+    private static readonly Dictionary<string, IHideable> hideableCache = new Dictionary<string, IHideable>();
+    private static readonly Dictionary<IHideable, bool> windowHideState = new Dictionary<IHideable, bool>();
 
     #region 开启窗口
     public static Window OpenWindow(string name, params object[] args)
@@ -43,6 +38,18 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
                 return window;
         }
         else Debug.LogWarning($"找不到类型为{name}的窗口");
+        return null;
+    }
+    public static Window OpenWindow(Type type, params object[] args)
+    {
+        if (type == null) return null;
+        if (FindWindow(type) is Window window)
+        {
+            if (args == null) args = new object[0];
+            if (window.Open(args))
+                return window;
+        }
+        else Debug.LogWarning($"找不到类型为{type}的窗口");
         return null;
     }
     /// <summary>
@@ -58,7 +65,7 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
             if (window.Open(args))
                 return window;
         }
-        else Debug.LogWarning($"找不到类型为{typeof(T).Name}的窗口");
+        else Debug.LogWarning($"找不到类型为{typeof(T)}的窗口");
         return null;
     }
     public static Window OpenWindowBy(object openBy, string name, params object[] args)
@@ -71,6 +78,18 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
                 return window;
         }
         else Debug.LogWarning($"找不到类型为{name}的窗口");
+        return null;
+    }
+    public static Window OpenWindowBy(object openBy, Type type, params object[] args)
+    {
+        if (type == null) return null;
+        if (FindWindow(type) is Window window)
+        {
+            if (args == null) args = new object[0];
+            if (window.OpenBy(openBy, args))
+                return window;
+        }
+        else Debug.LogWarning($"找不到类型为{type}的窗口");
         return null;
     }
     /// <summary>
@@ -87,7 +106,7 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
             if (window.OpenBy(openBy, args))
                 return window;
         }
-        else Debug.LogWarning($"找不到类型为{typeof(T).Name}的窗口");
+        else Debug.LogWarning($"找不到类型为{typeof(T)}的窗口");
         return null;
     }
     public static Window OpenWindowWithAction(Action onOpen, string name, params object[] args)
@@ -105,15 +124,21 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
         else Debug.LogWarning($"找不到类型为{name}的窗口");
         return null;
     }
-
-    public static void Clear()
+    public static Window OpenWindowWithAction(Action onOpen, Type type, params object[] args)
     {
-        if (!Instance) return;
-        CloseAll();
-        Instance.windowHideState.Clear();
-        Instance.windows.Clear();
+        if (type == null) return null;
+        if (FindWindow(type) is Window window)
+        {
+            if (args == null) args = new object[0];
+            if (window.Open(args))
+            {
+                onOpen?.Invoke();
+                return window;
+            }
+        }
+        else Debug.LogWarning($"找不到类型为{type}的窗口");
+        return null;
     }
-
     /// <summary>
     /// 打开窗口，并在打开后执行回调，参数格式详见<typeparamref name="T"/>.OnOpen()
     /// </summary>
@@ -131,22 +156,50 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
                 return window;
             }
         }
-        else Debug.LogWarning($"找不到类型为{typeof(T).Name}的窗口");
+        else Debug.LogWarning($"找不到类型为{typeof(T)}的窗口");
         return null;
     }
     public static void OpenClose(string name)
     {
-        var window = FindWindow(name);
+        var window = FindWindow(name, false);
+        if (!window) window = FindWindow(name);
+        if (!window) return;
+        if (window.IsOpen) window.Close();
+        else window.Open();
+    }
+    public static void OpenClose(Type type)
+    {
+        var window = FindWindow(type, false);
+        if (!window) window = FindWindow(type);
         if (!window) return;
         if (window.IsOpen) window.Close();
         else window.Open();
     }
     public static void OpenClose<T>() where T : Window
     {
-        var window = FindWindow<T>();
+        var window = FindWindow<T>(false);
+        if (!window) window = FindWindow<T>();
         if (!window) return;
         if (window.IsOpen) window.Close();
         else window.Open();
+    }
+    public static Window UnhideOrOpenWindow(string name)
+    {
+        if (IsWindowHidden(name, out var window))
+        {
+            HideWindow(window as IHideable, false);
+            return window;
+        }
+        else return OpenWindow(name);
+    }
+    public static Window UnhideOrOpenWindow(Type type)
+    {
+        if (IsWindowHidden(type, out var window))
+        {
+            HideWindow(window as IHideable, false);
+            return window;
+        }
+        else return OpenWindow(type);
     }
     public static T UnhideOrOpenWindow<T>() where T : Window, IHideable
     {
@@ -163,12 +216,21 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     public static bool CloseWindow(string name, params object[] args)
     {
         if (string.IsNullOrEmpty(name)) return false;
-        if (FindWindow(name) is Window window)
+        if (FindWindow(name, false) is Window window)
         {
             if (args == null) args = new object[0];
             return window.Close(args);
         }
-        else Debug.LogWarning($"找不到类型为{name}的窗口");
+        return false;
+    }
+    public static bool CloseWindow(Type type, params object[] args)
+    {
+        if (type == null) return false;
+        if (FindWindow(type, false) is Window window)
+        {
+            if (args == null) args = new object[0];
+            return window.Close(args);
+        }
         return false;
     }
     /// <summary>
@@ -178,23 +240,31 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     /// <returns>是否成功关闭</returns>
     public static bool CloseWindow<T>(params object[] args) where T : Window
     {
-        if (FindWindow<T>() is T window)
+        if (FindWindow<T>(false) is T window)
         {
             if (args == null) args = new object[0];
             return window.Close(args);
         }
-        else Debug.LogWarning($"找不到类型为{typeof(T).Name}的窗口");
         return false;
     }
     public static bool CloseWindowBy(object closeBy, string name, params object[] args)
     {
         if (string.IsNullOrEmpty(name)) return false;
-        if (FindWindow(name) is Window window)
+        if (FindWindow(name, false) is Window window)
         {
             if (args == null) args = new object[0];
             return window.CloseBy(closeBy, args);
         }
-        else Debug.LogWarning($"找不到类型为{name}的窗口");
+        return false;
+    }
+    public static bool CloseWindowBy(object closeBy, Type type, params object[] args)
+    {
+        if (type == null) return false;
+        if (FindWindow(type, false) is Window window)
+        {
+            if (args == null) args = new object[0];
+            return window.CloseBy(closeBy, args);
+        }
         return false;
     }
     /// <summary>
@@ -205,18 +275,17 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     /// <returns>是否成功关闭</returns>
     public static bool CloseWindowBy<T>(object closeBy, params object[] args) where T : Window
     {
-        if (FindWindow<T>() is T window)
+        if (FindWindow<T>(false) is T window)
         {
             if (args == null) args = new object[0];
             return window.CloseBy(closeBy, args);
         }
-        else Debug.LogWarning($"找不到类型为{typeof(T).Name}的窗口");
         return false;
     }
     public static bool CloseWindowWithAction(Action onClose, string name, params object[] args)
     {
         if (string.IsNullOrEmpty(name)) return false;
-        if (FindWindow(name) is Window window)
+        if (FindWindow(name, false) is Window window)
         {
             if (args == null) args = new object[0];
             if (window.Close(args))
@@ -225,7 +294,20 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
                 return true;
             }
         }
-        else Debug.LogWarning($"找不到类型为{name}的窗口");
+        return false;
+    }
+    public static bool CloseWindowWithAction(Action onClose, Type type, params object[] args)
+    {
+        if (type == null) return false;
+        if (FindWindow(type, false) is Window window)
+        {
+            if (args == null) args = new object[0];
+            if (window.Close(args))
+            {
+                onClose?.Invoke();
+                return true;
+            }
+        }
         return false;
     }
     /// <summary>
@@ -236,7 +318,7 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     /// <returns>是否成功关闭</returns>
     public static bool CloseWindowWithAction<T>(Action onClose, params object[] args) where T : Window
     {
-        if (FindWindow<T>() is T window)
+        if (FindWindow<T>(false) is T window)
         {
             if (args == null) args = new object[0];
             if (window.Close(args))
@@ -245,7 +327,6 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
                 return true;
             }
         }
-        else Debug.LogWarning($"找不到类型为{typeof(T).Name}的窗口");
         return false;
     }
     public static void CloseTop()
@@ -254,17 +335,15 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     }
     public static void CloseAll()
     {
-        if (!Instance) return;
-        foreach (var window in Instance.windows)
+        foreach (var window in windows.ConvertAll(w => w))
         {
             window.Close();
         }
     }
     public static void CloseAllExceptName(params string[] exceptions)
     {
-        if (!Instance) return;
         HashSet<string> names = new HashSet<string>(exceptions ?? new string[0]);
-        foreach (var window in Instance.windows)
+        foreach (var window in windows)
         {
             string name = window.GetType().Name;
             if (!names.Contains(name))
@@ -273,9 +352,8 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     }
     public static void CloseAllExceptType(params Type[] exceptions)
     {
-        if (!Instance) return;
         HashSet<Type> types = new HashSet<Type>(exceptions ?? new Type[0]);
-        foreach (var window in Instance.windows)
+        foreach (var window in windows)
         {
             Type type = window.GetType();
             if (!types.Contains(type))
@@ -284,9 +362,8 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     }
     public static void CloseAllExcept(params Window[] exceptions)
     {
-        if (!Instance) return;
         HashSet<Window> windows = new HashSet<Window>(exceptions ?? new Window[0]);
-        foreach (var window in Instance.windows)
+        foreach (var window in windows)
         {
             if (!windows.Contains(window))
                 window.Close();
@@ -297,9 +374,16 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     #region 显隐窗口
     public static void HideWindow(string name, bool hide, params object[] args)
     {
-        if (!Instance || string.IsNullOrEmpty(name)) return;
-        if (!Instance.hideableCache.TryGetValue(name, out var window) || window == null)
-            window = FindWindow(name) as IHideable;
+        if (string.IsNullOrEmpty(name)) return;
+        if (!hideableCache.TryGetValue(name, out var window) || window == null)
+            window = FindWindow(name, false) as IHideable;
+        HideWindow(window, hide, args);
+    }
+    public static void HideWindow(Type type, bool hide, params object[] args)
+    {
+        if (type == null) return;
+        if (!hideableCache.TryGetValue(type.Name, out var window) || window == null)
+            window = FindWindow(type, false) as IHideable;
         HideWindow(window, hide, args);
     }
     /// <summary>
@@ -309,92 +393,86 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     /// <returns>成功打开的窗口</returns>
     public static void HideWindow<T>(bool hide, params object[] args) where T : Window, IHideable
     {
-        if (!Instance) return;
         string name = typeof(T).Name;
-        if (!Instance.hideableCache.TryGetValue(name, out var window) || window == null)
-            window = FindWindow<T>();
+        if (!hideableCache.TryGetValue(name, out var window) || window == null)
+            window = FindWindow<T>(false);
         HideWindow(window, hide, args);
     }
     public static void HideWindow(IHideable window, bool hide, params object[] args)
     {
-        if (!Instance) return;
         if (window != null && window.IsHidden != hide && (window as Window).IsOpen)
         {
             if (args == null) args = new object[0];
             window.Hide(hide, args);
-            Instance.windowHideState[window] = hide;
-            NotifyCenter.PostNotify(Window.WindowStateChanged, window.GetType().Name, hide ? WindowStates.Hidden : WindowStates.Shown);
+            windowHideState[window] = hide;
+            NotifyCenter.PostNotify(Window.WindowStateChanged, window.GetType(), hide ? WindowStates.Hidden : WindowStates.Shown);
         }
     }
     public static void HideAll(bool hide)
     {
-        if (!Instance) return;
-        foreach (var window in Instance.caches.Values)
+        foreach (var window in caches.Values)
         {
             if (window.IsOpen && window is IHideable hideable)
             {
-                if (Instance.windowHideState.TryGetValue(hideable, out var isHiddenBef))
+                if (windowHideState.TryGetValue(hideable, out var isHiddenBef))
                 {
                     if (isHiddenBef && !hide) continue;//HideAll()之前隐藏了，现在却不想隐藏，就不行
                 }
-                else Instance.windowHideState.Add(hideable, hideable.IsHidden);
+                else windowHideState.Add(hideable, hideable.IsHidden);
                 hideable.Hide(hide);
             }
         }
     }
     public static void HideAllExceptName(bool hide, params string[] exceptions)
     {
-        if (!Instance) return;
         HashSet<string> names = new HashSet<string>(exceptions ?? new string[0]);
-        foreach (var window in Instance.caches.Values)
+        foreach (var window in caches.Values)
         {
             string name = window.GetType().Name;
             if (!names.Contains(name) && window.IsOpen && window is IHideable hideable && hideable.IsHidden != hide)
             {
-                if (Instance.windowHideState.TryGetValue(hideable, out var isHiddenBef))
+                if (windowHideState.TryGetValue(hideable, out var isHiddenBef))
                 {
                     if (isHiddenBef && !hide) continue;//HideAll()之前隐藏了，现在却不想隐藏，就不行
                 }
-                else Instance.windowHideState.Add(hideable, hideable.IsHidden);
+                else windowHideState.Add(hideable, hideable.IsHidden);
                 hideable.Hide(hide);
-                NotifyCenter.PostNotify(Window.WindowStateChanged, name, WindowStates.Hidden);
+                NotifyCenter.PostNotify(Window.WindowStateChanged, window.GetType(), WindowStates.Hidden);
             }
         }
     }
     public static void HideAllExceptType(bool hide, params Type[] exceptions)
     {
-        if (!Instance) return;
         HashSet<Type> types = new HashSet<Type>(exceptions ?? new Type[0]);
-        foreach (var window in Instance.caches.Values)
+        foreach (var window in caches.Values)
         {
             Type type = window.GetType();
             if (!types.Contains(type) && window.IsOpen && window is IHideable hideable && hideable.IsHidden != hide)
             {
-                if (Instance.windowHideState.TryGetValue(hideable, out var isHiddenBef))
+                if (windowHideState.TryGetValue(hideable, out var isHiddenBef))
                 {
                     if (isHiddenBef && !hide) continue;//HideAll()之前隐藏了，现在却不想隐藏，就不行
                 }
-                else Instance.windowHideState.Add(hideable, hideable.IsHidden);
+                else windowHideState.Add(hideable, hideable.IsHidden);
                 hideable.Hide(hide);
-                NotifyCenter.PostNotify(Window.WindowStateChanged, type.Name, WindowStates.Hidden);
+                NotifyCenter.PostNotify(Window.WindowStateChanged, type, WindowStates.Hidden);
             }
         }
     }
     public static void HideAllExcept(bool hide, params Window[] exceptions)
     {
-        if (!Instance) return;
         HashSet<Window> windows = new HashSet<Window>(exceptions ?? (new Window[0]));
-        foreach (var window in Instance.caches.Values)
+        foreach (var window in caches.Values)
         {
             if (!windows.Contains(window) && window.IsOpen && window is IHideable hideable && hideable.IsHidden != hide)
             {
-                if (Instance.windowHideState.TryGetValue(hideable, out var isHiddenBef))
+                if (windowHideState.TryGetValue(hideable, out var isHiddenBef))
                 {
                     if (isHiddenBef && !hide) continue;//HideAll()之前隐藏了，现在却不想隐藏，就不行
                 }
-                else Instance.windowHideState.Add(hideable, hideable.IsHidden);
+                else windowHideState.Add(hideable, hideable.IsHidden);
                 hideable.Hide(hide);
-                NotifyCenter.PostNotify(Window.WindowStateChanged, window.GetType().Name, WindowStates.Hidden);
+                NotifyCenter.PostNotify(Window.WindowStateChanged, window.GetType(), WindowStates.Hidden);
             }
         }
     }
@@ -403,83 +481,126 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     #region 查找相关
     public static Window FindWindow(string name)
     {
-        if (!Instance || string.IsNullOrEmpty(name)) return null;
-        if (Instance.caches.TryGetValue(name, out var window) && window) return window;
-        else window = FindObjectOfType(ZetanUtility.GetTypeWithoutAssembly(name), true) as Window;
+        return FindWindow(name, true);
+    }
+    private static Window FindWindow(string name, bool create)
+    {
+        if (string.IsNullOrEmpty(name)) return null;
+        if (caches.TryGetValue(name, out var window) && window) return window;
+        else return FindWindow(ZetanUtility.GetTypeByFullName(name), create);
+    }
+    public static Window FindWindow(Type type)
+    {
+        return FindWindow(type, true);
+    }
+    private static Window FindWindow(Type type, bool create)
+    {
+        if (type == null) return null;
+        if (caches.TryGetValue(type.Name, out var window) && window) return window;
+        else window = UnityEngine.Object.FindObjectOfType(type, true) as Window;
+        if (!window && create)
+        {
+            if (WindowPrefabs.Instance.GetWindowPrefab(type) is Window prefab)
+                window = UnityEngine.Object.Instantiate(prefab, UIManager.Instance.transform);
+        }
         Cache(window);
         return window;
     }
     public static T FindWindow<T>() where T : Window
     {
-        if (!Instance) return null;
+        return FindWindow<T>(true);
+    }
+    private static T FindWindow<T>(bool create) where T : Window
+    {
         string name = typeof(T).Name;
-        if (Instance.caches.TryGetValue(name, out var window) && window) return window as T;
-        else window = FindObjectOfType<T>(true);
-        Cache(window);
-        return window as T;
+        if (caches.TryGetValue(name, out var window) && window) return window as T;
+        else return FindWindow(typeof(T), create) as T;
     }
     public static void Cache(Window window)
     {
-        if (!Instance || !window) return;
+        if (!window) return;
         string name = window.GetType().Name;
-        Instance.caches[name] = window;
-        if (window is IHideable h) Instance.hideableCache[name] = h;
+        caches[name] = window;
+        if (window is IHideable h) hideableCache[name] = h;
     }
     #endregion
 
     #region 判断相关
     public static bool IsWindowOpen(string name)
     {
-        var window = FindWindow(name);
+        var window = FindWindow(name, false);
+        if (!window) return false;
+        else return window.IsOpen;
+    }
+    public static bool IsWindowOpen(Type type)
+    {
+        var window = FindWindow(type, false);
         if (!window) return false;
         else return window.IsOpen;
     }
     public static bool IsWindowOpen<T>() where T : Window
     {
-        var window = FindWindow<T>();
+        var window = FindWindow<T>(false);
         if (!window) return false;
         else return window.IsOpen;
     }
     public static bool IsWindowOpen(string name, out Window window)
     {
-        window = FindWindow(name);
+        window = FindWindow(name, false);
+        if (!window) return false;
+        else return window.IsOpen;
+    }
+    public static bool IsWindowOpen(Type type, out Window window)
+    {
+        window = FindWindow(type, false);
         if (!window) return false;
         else return window.IsOpen;
     }
     public static bool IsWindowOpen<T>(out T window) where T : Window
     {
-        window = FindWindow<T>();
+        window = FindWindow<T>(false);
         if (!window) return false;
         else return window.IsOpen;
     }
 
     public static bool IsWindowHidden(string name)
     {
-        if (FindWindow(name) is not IHideable window) return false;
+        if (FindWindow(name, false) is not IHideable window) return false;
+        else return window.IsHidden;
+    }
+    public static bool IsWindowHidden(Type type)
+    {
+        if (FindWindow(type, false) is not IHideable window) return false;
         else return window.IsHidden;
     }
     public static bool IsWindowHidden<T>() where T : Window, IHideable
     {
-        var window = FindWindow<T>();
+        var window = FindWindow<T>(false);
         if (!window) return false;
         else return window.IsHidden;
     }
     public static bool IsWindowHidden(string name, out Window window)
     {
-        window = FindWindow(name);
+        window = FindWindow(name, false);
+        if (window is not IHideable hideable) return false;
+        else return hideable.IsHidden;
+    }
+    public static bool IsWindowHidden(Type type, out Window window)
+    {
+        window = FindWindow(type, false);
         if (window is not IHideable hideable) return false;
         else return hideable.IsHidden;
     }
     public static bool IsWindowHidden<T>(out T window) where T : Window, IHideable
     {
-        window = FindWindow<T>();
+        window = FindWindow<T>(false);
         if (!window) return false;
         else return window.IsHidden;
     }
     #endregion
 
     #region 窗口栈结构
-    private readonly List<Window> windows = new List<Window>();
+    private static readonly List<Window> windows = new List<Window>();
 
     /// <summary>
     /// 压入窗口栈，仅供<see cref="Window.Open(object[])"/>内部使用，其它地方请勿使用
@@ -487,10 +608,10 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     /// <param name="window">窗口</param>
     public static void Push(Window window)
     {
-        if (!Instance || !window) return;
+        if (!window) return;
         Remove(window);
-        window.WindowCanvas.sortingOrder = Instance.windows.Count + Instance.startSortingOrder;
-        Instance.windows.Add(window);
+        window.WindowCanvas.sortingOrder = windows.Count + startSortingOrder;
+        windows.Add(window);
     }
     private static Window Pop()
     {
@@ -504,13 +625,12 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     /// <returns>开启且未隐藏的顶窗口</returns>
     public static Window Peek()
     {
-        if (Instance)
-            for (int i = Instance.windows.Count - 1; i >= 0; i--)
-            {
-                var window = Instance.windows[i];
-                if (window is not IHideable hideable || !hideable.IsHidden)
-                    return window;
-            }
+        for (int i = windows.Count - 1; i >= 0; i--)
+        {
+            var window = windows[i];
+            if (window is not IHideable hideable || !hideable.IsHidden)
+                return window;
+        }
         return null;
     }
     /// <summary>
@@ -519,7 +639,7 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     /// <returns>顶窗口</returns>
     public static Window Top()
     {
-        if (Instance && Instance.windows.Count > 0) return Instance.windows[^1];
+        if (windows.Count > 0) return windows[^1];
         return null;
     }
     /// <summary>
@@ -528,13 +648,31 @@ public class WindowsManager : SingletonMonoBehaviour<WindowsManager>
     /// <param name="window">窗口</param>
     public static void Remove(Window window)
     {
-        if (!Instance || !window) return;
-        Instance.windows.Remove(window);
-        if (window is IHideable hideable) Instance.windowHideState.Remove(hideable);
-        for (int i = 0; i < Instance.windows.Count; i++)
+        if (!window) return;
+        windows.Remove(window);
+        if (window is IHideable hideable) windowHideState.Remove(hideable);
+        for (int i = 0; i < windows.Count; i++)
         {
-            Instance.windows[i].WindowCanvas.sortingOrder = i + Instance.startSortingOrder;
+            windows[i].WindowCanvas.sortingOrder = i + startSortingOrder;
         }
     }
     #endregion
+
+    [InitMethod(int.MinValue)]
+    public static void Init()
+    {
+        CloseAll();
+        Clear();
+        foreach (var window in UnityEngine.Object.FindObjectsOfType<Window>())
+        {
+            Cache(window);
+        }
+    }
+    public static void Clear()
+    {
+        caches.Clear();
+        hideableCache.Clear();
+        windowHideState.Clear();
+        windows.Clear();
+    }
 }

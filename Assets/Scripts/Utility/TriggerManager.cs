@@ -3,16 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 
 public delegate void TriggerStateListner(string name, bool value);
-[DisallowMultipleComponent]
-[AddComponentMenu("Zetan Studio/管理器/触发器管理器")]
-public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
+
+public static class TriggerManager
 {
-    private readonly Dictionary<string, TriggerState> triggers = new Dictionary<string, TriggerState>();
-    private readonly Dictionary<string, TriggerHolder> holders = new Dictionary<string, TriggerHolder>();
+    private static readonly Dictionary<string, TriggerState> triggers = new Dictionary<string, TriggerState>();
+    private static readonly Dictionary<string, TriggerHolder> holders = new Dictionary<string, TriggerHolder>();
 
-    private event TriggerStateListner OnTriggerSetEvent;
+    private static event TriggerStateListner OnTriggerSetEvent;
 
-    public void SetTrigger(string triggerName, bool value)
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    public static void Init()
+    {
+        triggers.Clear();
+        holders.Clear();
+    }
+
+    public static void SetTrigger(string triggerName, bool value)
     {
         if (!triggers.ContainsKey(triggerName))
             triggers.Add(triggerName, value ? TriggerState.On : TriggerState.Off);
@@ -21,18 +27,18 @@ public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
         NotifyCenter.PostNotify(NotifyCenter.CommonKeys.TriggerChanged, triggerName, value);
     }
 
-    public TriggerState GetTriggerState(string triggerName)
+    public static TriggerState GetTriggerState(string triggerName)
     {
         if (!triggers.TryGetValue(triggerName, out var state))
             return TriggerState.NotExist;
         else return state;
     }
 
-    public void RegisterTriggerEvent(TriggerStateListner listner)
+    public static void RegisterTriggerEvent(TriggerStateListner listner)
     {
         OnTriggerSetEvent += listner;
     }
-    public void RegisterTriggerHolder(TriggerHolder holder)
+    public static void RegisterTriggerHolder(TriggerHolder holder)
     {
         if (!holder && holders.ContainsKey(holder.ID)) return;
         OnTriggerSetEvent += holder.OnTriggerSet;
@@ -41,25 +47,27 @@ public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
         holders.Add(holder.ID, holder);
     }
 
-    public void DeleteTriggerListner(TriggerStateListner listner)
+    public static void DeleteTriggerListner(TriggerStateListner listner)
     {
         if (OnTriggerSetEvent != null) OnTriggerSetEvent -= listner;
     }
-    public void DeleteTriggerHolder(TriggerHolder holder)
+    public static void DeleteTriggerHolder(TriggerHolder holder)
     {
         if (!holder || !holders.ContainsKey(holder.ID)) return;
         holders.Remove(holder.ID);
         if (OnTriggerSetEvent != null) OnTriggerSetEvent -= holder.OnTriggerSet;
     }
 
-    public void SaveData(SaveData data)
+    [SaveMethod]
+    public static void SaveData(SaveData data)
     {
         foreach (var trigger in triggers)
             data.triggerData.stateDatas.Add(new TriggerStateSaveData(trigger.Key, trigger.Value));
         foreach (var holder in holders)
             data.triggerData.holderDatas.Add(new TriggerHolderSaveData(holder.Value));
     }
-    public void LoadData(SaveData data)
+    [LoadMethod]
+    public static void LoadData(SaveData data)
     {
         triggers.Clear();
         foreach (TriggerStateSaveData sd in data.triggerData.stateDatas)
@@ -69,9 +77,9 @@ public class TriggerManager : SingletonMonoBehaviour<TriggerManager>
                 triggers.Add(sd.triggerName, state ? TriggerState.On : TriggerState.Off);
             else triggers[sd.triggerName] = state ? TriggerState.On : TriggerState.Off;
         }
-        foreach (var holder in this.holders.Values.ToArray())
+        foreach (var holder in TriggerManager.holders.Values.ToArray())
             DeleteTriggerHolder(holder);
-        var holders = FindObjectsOfType<TriggerHolder>();
+        var holders = UnityEngine.Object.FindObjectsOfType<TriggerHolder>();
         foreach (TriggerHolderSaveData hd in data.triggerData.holderDatas)
             foreach (var holder in holders)
                 holder.LoadData(hd);

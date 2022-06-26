@@ -1,5 +1,22 @@
-﻿public class WarehouseManager : SingletonInventoryHandler<WarehouseManager>
+﻿using UnityEngine;
+
+public class WarehouseManager : InventoryHandler
 {
+    private static WarehouseManager instance;
+    public static WarehouseManager Instance
+    {
+        get
+        {
+            if (!instance) instance = new WarehouseManager();
+            return instance;
+        }
+    }
+
+    private WarehouseManager()
+    {
+        _name = PlayerConfig.Instance.WarehouseName;
+    }
+
     public IWarehouseKeeper Warehouse { get; private set; }
     public override Inventory Inventory { get => Warehouse != null ? Warehouse.Inventory : base.Inventory; protected set => base.Inventory = value; }
 
@@ -9,6 +26,7 @@
         Warehouse = warehouse;
         ListenInventoryChange(true);
     }
+
     #region 消息相关
     public override string InventoryMoneyChangedMsgKey => WarehouseMoneyChanged;
 

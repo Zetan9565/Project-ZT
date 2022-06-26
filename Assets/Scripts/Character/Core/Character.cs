@@ -37,6 +37,10 @@ public abstract class Character : MonoBehaviour
     {
         StateMachine?.SetCurrentState<T>();
     }
+    public void SetMachineState<T>(Transition transition) where T : CharacterMachineState
+    {
+        StateMachine?.SetCurrentState<T>(transition);
+    }
     public void SetMachineAndCharacterState<T>(CharacterStates main, dynamic sub) where T : CharacterMachineState
     {
         StateMachine?.SetCurrentState<T>();

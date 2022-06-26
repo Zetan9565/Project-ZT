@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <uie:Toolbar>
+        <uie:ToolbarButton text="新建" display-tooltip-when-elided="true" name="create" />
+        <uie:ToolbarButton text="删除" display-tooltip-when-elided="true" name="delete" />
+        <uie:ToolbarButton text="新建脚本" display-tooltip-when-elided="true" name="create-script" />
+    </uie:Toolbar>
+    <SplitView fixed-pane-initial-dimension="200">
+        <ui:VisualElement name="left-container" style="min-width: 200px;">
+            <ui:VisualElement name="dropdown-area" style="padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;" />
+            <ui:ListView focusable="true" show-alternating-row-backgrounds="All" fixed-item-height="18" style="border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px;" />
+        </ui:VisualElement>
+        <ui:ScrollView name="right-container" mode="Vertical" style="min-width: 300px; padding-left: 5px; padding-right: 5px; padding-top: 5px; padding-bottom: 5px;" />
+    </SplitView>
+</ui:UXML>

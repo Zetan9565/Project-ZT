@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [Name("触发器"), Require(typeof(UsableModule))]
     public class TriggerModule : ItemModule

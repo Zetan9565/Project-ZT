@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ShopSystem;
 
 public class ShopData
 {
@@ -93,7 +94,7 @@ public class GoodsData
             {
                 leftRefreshTime = Info.RefreshTime;
                 LeftAmount += Random.Range(Info.MinRefreshAmount, Info.MaxRefreshAmount);
-                NotifyCenter.PostNotify(ShopManager.VendorGoodsRefresh, this);
+                NotifyCenter.PostNotify(ShopManager.vendorGoodsRefresh, this);
             }
         }
     }

@@ -55,16 +55,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12d026f0d5dcebe40a47aeaebc07607e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data:
-    rid: -2
   questFlagOffset: {x: 0, y: 2.8, z: 0}
   iconHolder: {fileID: 0}
   interactive: {fileID: 0}
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
 --- !u!114 &7930979857417960551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,9 +241,9 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1429737066326795183}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de3699ba1d38e394ca0f01d1dbb2fe67, type: 3}
+  m_Script: {fileID: 11500000, guid: 7872916f14d6d544c99d2f77f2c9c6fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   behaviour: {fileID: 11400000, guid: c5ec8c6ef09bcfc4bbd513d3b902651f, type: 2}
@@ -260,26 +253,10 @@ MonoBehaviour:
   restartOnComplete: 0
   resetOnRestart: 0
   gizmos: 1
-  presetVariables:
-  - rid: 28978064716988469
-  - rid: 28978064716988470
+  presetVariables: []
   references:
     version: 2
-    RefIds:
-    - rid: 28978064716988469
-      type: {class: SharedString, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _name: Log1
-        isGlobal: 0
-        isShared: 1
-        value: "\u4F7F\u7528\u6280\u80FD1"
-    - rid: 28978064716988470
-      type: {class: SharedString, ns: ZetanStudio.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _name: Log2
-        isGlobal: 0
-        isShared: 1
-        value: "\u4F7F\u7528\u6280\u80FD2"
+    RefIds: []
 --- !u!1 &2071858054320287229
 GameObject:
   m_ObjectHideFlags: 0

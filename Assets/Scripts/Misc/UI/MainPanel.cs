@@ -15,12 +15,6 @@ public sealed class MainPanel : SingletonWindow<MainPanel>, IHideable
         IsHidden = hide;
     }
 
-    protected override bool OnOpen(params object[] args)
-    {
-        return true;
-    }
-    protected override bool OnClose(params object[] args)
-    {
-        return false;
-    }
+    protected override bool OnOpen(params object[] args) => false;
+    protected override bool OnClose(params object[] args) => false;
 }

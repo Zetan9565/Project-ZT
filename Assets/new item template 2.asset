@@ -18,7 +18,14 @@ MonoBehaviour:
   <Description>k__BackingField: 
   <StackLimit>k__BackingField: 1
   <Discardable>k__BackingField: 1
-  modules: []
+  modules:
+  - rid: 3760287572189511680
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 3760287572189511680
+      type: {class: UsableModule, ns: ZetanStudio.ItemSystem.Module, asm: Assembly-CSharp}
+      data:
+        <UseActionName>k__BackingField: "\u4F7F\u7528"
+        <Cost>k__BackingField: 1
+        <Usage>k__BackingField: {fileID: 0}

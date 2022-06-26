@@ -34,7 +34,7 @@ public partial class CharacterInfoInspector
         {
             EditorGUILayout.PropertyField(lootPrefab, new GUIContent("掉落道具预制件"));
         }
-        EditorGUILayout.PropertyField(attribute, new GUIContent("属性"));
+        //EditorGUILayout.PropertyField(attribute, new GUIContent("属性"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
     }

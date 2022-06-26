@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [Name("材料")]
     public class MaterialModule : ItemModule
@@ -11,10 +11,10 @@ namespace ZetanStudio.Item.Module
 
         public override bool IsValid => type >= 0;
 
-        public static bool Compare(Item item, MaterialType materialType)
+        public static bool SameType(MaterialType materialType, Item item)
         {
             if (!item) return false;
-            return item.GetModule<MaterialModule>() is MaterialModule material && material.Type == materialType;
+            return item.TryGetModule<MaterialModule>(out var material) && material.Type == materialType;
         }
     }
 }

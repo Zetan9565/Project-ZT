@@ -55,14 +55,14 @@ public class CropAgent : ListItem<CropAgent, Crop>
         Data.Data.OnStageChanged += OnStageChanged;
     }
 
-    public override void OnClear()
+    public override void Clear()
     {
         if (Data)
         {
             Data.UI = null;
             Data.Data.OnStageChanged -= OnStageChanged;
         }
-        base.OnClear();
+        base.Clear();
     }
 
     public override void Refresh()

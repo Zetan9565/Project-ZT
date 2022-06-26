@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-namespace ZetanStudio.Item.Editor
+namespace ZetanStudio.ItemSystem.Editor
 {
     [CustomEditor(typeof(ItemEditorSettings))]
     public class ItemEditorSettingsInspector : UnityEditor.Editor
@@ -109,11 +107,11 @@ namespace ZetanStudio.Item.Editor
 
         private string Tr(string text)
         {
-            return Language.Tr(language.objectReferenceValue as LanguageMap, text);
+            return L.Tr(language.objectReferenceValue as LanguageMap, text);
         }
         private string Tr(string text, params object[] args)
         {
-            return Language.Tr(language.objectReferenceValue as LanguageMap, text, args);
+            return L.Tr(language.objectReferenceValue as LanguageMap, text, args);
         }
     }
 }

@@ -23,7 +23,7 @@ public class ShowIfDrawer : EnhancedAttributeDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         ShowIfAttribute showAttr = attribute as ShowIfAttribute;
-        this.TryGetOnwerValue(property, out var owner);
+        this.TryGetOwnerValue(property, out var owner);
         shouldShow = ICheckValueAttribute.Check(owner, showAttr);
         if (shouldShow || showAttr.readOnly) return base.GetPropertyHeight(property, label);
         return -EditorGUIUtility.standardVerticalSpacing;

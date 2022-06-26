@@ -413,3 +413,30 @@ The following packages were 已更新:
   com.unity.render-pipelines.universal 从版本 12.1.6 到 13.1.8
 The following packages were 已移除:
   com.unity.2d.path@5.0.2
+
+=== Thu Jun  2 12:32:35 2022
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.render-pipelines.core 从版本 12.1.6 到 12.1.7
+  com.unity.render-pipelines.universal 从版本 12.1.6 到 12.1.7
+
+=== Fri Jun  3 12:55:50 2022
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.render-pipelines.core 从版本 12.1.6 到 12.1.7
+  com.unity.render-pipelines.universal 从版本 12.1.6 到 12.1.7
+
+=== Thu Jun 23 17:16:00 2022
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.render-pipelines.core 从版本 12.1.6 到 12.1.7
+  com.unity.render-pipelines.universal 从版本 12.1.6 到 12.1.7

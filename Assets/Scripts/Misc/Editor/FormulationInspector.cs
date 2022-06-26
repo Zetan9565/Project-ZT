@@ -1,7 +1,7 @@
 using System;
 using UnityEditor;
 using UnityEngine;
-using ZetanStudio.Item.Craft;
+using ZetanStudio.ItemSystem;
 
 [CustomEditor(typeof(Formulation))]
 public class FormulationInspector : Editor
@@ -21,7 +21,7 @@ public class FormulationInspector : Editor
         formulations = Resources.LoadAll<Formulation>("Configuration");
         remark = serializedObject.FindProperty("remark");
         materials = serializedObject.FindProperty("materials");
-        listDrawer = new MaterialListDrawer(serializedObject, materials, EditorGUIUtility.singleLineHeight, EditorGUIUtility.singleLineHeight + 2);
+        listDrawer = new MaterialListDrawer(materials);
     }
 
     public override void OnInspectorGUI()
@@ -40,9 +40,9 @@ public class FormulationInspector : Editor
             for (int j = 0; j < formulation.Materials.Count; j++)
             {
                 var right = formulation.Materials[j];
-                if (i != j && left.MakingType == right.MakingType)
+                if (i != j && left.CostType == right.CostType)
                 {
-                    if (left.MakingType == CraftType.SingleItem && left.Item == right.Item || left.MakingType == CraftType.SameType && left.MaterialType == right.MaterialType)
+                    if (left.CostType == MaterialCostType.SingleItem && left.Item == right.Item || left.CostType == MaterialCostType.SameType && left.MaterialType == right.MaterialType)
                     {
                         EditorGUILayout.HelpBox($"第[{i + 1}]和第[{j + 1}]个材料重复！", MessageType.Error);
                         bre = true;

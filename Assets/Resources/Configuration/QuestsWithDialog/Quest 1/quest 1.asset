@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ID: QEST002
   title: "\u6E05\u7406\u602A\u7269#2"
-  description: "\u518D\u6740\u51E0\u53EA\u602A\u7269\uFF0C\u7136\u540E\u53BB\u5B89\u6170\u739B\u4E3D\u4E9A\u3002"
+  description: "\u518D\u6740\u51E0\u53EA\u602A\u7269\uFF0C\u7136\u540E\u53BB\u5B89\u6170{[NPC]NPC001}\u3002"
   abandonable: 1
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptCondition:
@@ -67,7 +67,7 @@ MonoBehaviour:
     - rid: 1
       type: {class: TalkObjective, ns: , asm: Assembly-CSharp}
       data:
-        displayName: "\u5B89\u6170\u739B\u4E3D\u4E9A"
+        displayName: "\u5B89\u6170{[NPC]NPC001}"
         display: 1
         canNavigate: 1
         showMapIcon: 1

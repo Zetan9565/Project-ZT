@@ -10,7 +10,7 @@ using Debug = UnityEngine.Debug;
 
 public class TextTool : EditorWindow
 {
-    [MenuItem("Zetan Studio/Text工具")]
+    [MenuItem("Window/Zetan Studio/工具/Text工具")]
     private static void CreateWindow()
     {
         TextTool window = GetWindowWithRect<TextTool>(new Rect(0, 0, 450, 720), false, "Text工具");

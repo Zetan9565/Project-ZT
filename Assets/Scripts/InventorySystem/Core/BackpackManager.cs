@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
 
-public class BackpackManager : SingletonInventoryHandler<BackpackManager>
+public class BackpackManager : InventoryHandler
 {
     [SerializeField, HideWhenPlaying]
     protected bool ignoreLock = false;
@@ -15,9 +15,26 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
     [SerializeField]
     private float maxWeightLimit = 0;
 
+    private static BackpackManager instance;
+    public static BackpackManager Instance
+    {
+        get
+        {
+            if (!instance) instance = new BackpackManager();
+            return instance;
+        }
+    }
+
+    private BackpackManager()
+    {
+        _name = PlayerConfig.Instance.BackpackName;
+        Inventory = new Inventory(defaultSpaceLimit, defaultWeightLimit, ignoreLock, customGetAction: TryGetCurrency, customLoseChecker: CheckQuest);
+        ListenInventoryChange(true);
+    }
+
     private bool CheckQuest(ItemData data, int amount)
     {
-        if (QuestManager.Instance.HasQuestRequiredItem(data.Model, Inventory.GetAmount(data.ModelID) - amount))
+        if (QuestManager.HasQuestRequiredItem(data.Model, Inventory.GetAmount(data.ModelID) - amount))
         {
             MessageManager.Instance.New($"部分[{data.Model.ColorName}]已被任务锁定");
             return false;
@@ -26,7 +43,7 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
     }
     private bool TryGetCurrency(ItemData data, int amount)
     {
-        if (data.Model.GetModule<CurrencyModule>() is CurrencyModule currency)
+        if (data.Model.TryGetModule<CurrencyModule>(out var currency))
             switch (currency.Type.Name)
             {
                 case "金币":
@@ -87,12 +104,17 @@ public class BackpackManager : SingletonInventoryHandler<BackpackManager>
         return true;
     }
 
-    protected override void OnAwake()
+    [SaveMethod]
+    public static void SaveData(SaveData saveData)
     {
-        Inventory = new Inventory(defaultSpaceLimit, defaultWeightLimit, ignoreLock, customGetAction: TryGetCurrency, customLoseChecker: CheckQuest);
-        ListenInventoryChange(true);
+        saveData.data["backpackData"] = Instance.Inventory.GetSaveData();
     }
-
+    [LoadMethod]
+    public static void LoadData(SaveData saveData)
+    {
+        if (saveData.data.TryGetValue("backpackData", out var data))
+            Instance.Inventory.LoadSaveData(data);
+    }
     #region 消息定义
     public const string BackpackMoneyChanged = "BackpackMoneyChanged";
     public const string BackpackSpaceChanged = "BackpackSpaceChanged";

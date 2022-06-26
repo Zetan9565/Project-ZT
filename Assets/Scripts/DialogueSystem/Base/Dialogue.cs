@@ -276,8 +276,8 @@ public class WordsOption
             return !(optionType == WordsOptionType.BranchDialogue && (!dialogue || dialogue.Words.Count < 1)
                 || optionType == WordsOptionType.BranchWords && string.IsNullOrEmpty(words)
                 || optionType == WordsOptionType.Choice && hasWordsToSay && string.IsNullOrEmpty(words))
-                || optionType == WordsOptionType.SubmitAndGet && (!ItemToSubmit || !ItemToSubmit.item || string.IsNullOrEmpty(words))
-                || optionType == WordsOptionType.OnlyGet && (!ItemCanGet || !ItemCanGet.item || string.IsNullOrEmpty(words));
+                || optionType == WordsOptionType.SubmitAndGet && (!ItemToSubmit || !ItemToSubmit.Item || string.IsNullOrEmpty(words))
+                || optionType == WordsOptionType.OnlyGet && (!ItemCanGet || !ItemCanGet.Item || string.IsNullOrEmpty(words));
         }
     }
 

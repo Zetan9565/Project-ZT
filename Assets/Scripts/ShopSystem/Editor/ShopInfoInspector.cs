@@ -1,8 +1,8 @@
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
 
 [CustomEditor(typeof(ShopInformation))]
 public class ShopInfoInspector : Editor

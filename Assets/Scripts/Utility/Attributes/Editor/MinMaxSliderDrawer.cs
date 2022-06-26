@@ -4,10 +4,11 @@ using UnityEditor;
 [CustomPropertyDrawer(typeof(MinMaxSliderAttribute))]
 public class MinMaxSliderDrawer : PropertyDrawer
 {
+    private bool isVector2;
+    private bool isVector2Int;
+
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        bool isVector2 = property.propertyType == SerializedPropertyType.Vector2;
-        bool isVector2Int = property.propertyType == SerializedPropertyType.Vector2Int;
         if (isVector2 || isVector2Int)
         {
             MinMaxSliderAttribute attr = attribute as MinMaxSliderAttribute;
@@ -103,6 +104,9 @@ public class MinMaxSliderDrawer : PropertyDrawer
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        return EditorGUI.GetPropertyHeight(property, label);
+        isVector2 = property.propertyType == SerializedPropertyType.Vector2;
+        isVector2Int = property.propertyType == SerializedPropertyType.Vector2Int;
+        if (isVector2 || isVector2Int) return EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+        else return EditorGUI.GetPropertyHeight(property, label);
     }
 }

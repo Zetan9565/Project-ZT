@@ -11,6 +11,8 @@ public class CharacterRollState : CharacterBusyState
     private float duration;
     private float canMoveStartTime;
     private float canMoveEndTime;
+    private const string moveInAdvance = "move in advance";
+    private const string rollComplete = "roll complete";
 
     public CharacterRollState(CharacterStateMachine stateMachine) : base(stateMachine) { }
 
@@ -20,6 +22,7 @@ public class CharacterRollState : CharacterBusyState
         Character.SetSubState(CharacterBusyStates.Roll);
         hasRollStart = false;
         control.ReadValue(CharacterInputNames.Instance.Direction, out direction);
+        direction.Normalize();
         speedCurve = Machine.Params.RollSpeedCurve;
         startTime = Machine.Params.RollEffectedTime.x;
         endTime = Machine.Params.RollEffectedTime.y;
@@ -39,40 +42,43 @@ public class CharacterRollState : CharacterBusyState
     {
         base.OnFixedUpdate();
 
-        if (hasRollStart)
-            motion.SetVelocity(direction * rollSpeed);
+        if (hasRollStart) motion.SetVelocity(direction * rollSpeed);
     }
 
     protected override void OnUpdate()
     {
         base.OnUpdate();
-
         bool isRolling = animator.CurrentState.IsTag(CharacterAnimaTags.Roll);
         float normalizedTime = animator.CurrentState.normalizedTime;
-        if (!hasRollStart && isRolling && normalizedTime >= startTime)
-        {
-            hasRollStart = true;
-            control.ResetTrigger(CharacterInputNames.Instance.Roll);
-        }
+        if (!hasRollStart && isRolling && normalizedTime >= startTime) hasRollStart = true;
         if (hasRollStart)
         {
             control.ResetTrigger(CharacterInputNames.Instance.Roll);
-            if (normalizedTime >= canMoveStartTime && normalizedTime < canMoveEndTime
-                && control.ReadValue(CharacterInputNames.Instance.Move, out Vector2 move) && (move.x != 0 || move.y != 0))
+            if (CanMove(normalizedTime))
             {
-                Machine.SetCurrentState<CharacterMoveState>();
+                Machine.SetCurrentState<CharacterMoveState>(new StringTransition(moveInAdvance));
             }
             else if (!isRolling || normalizedTime >= endTime)
             {
                 motion.SetVelocity(Vector2.zero);
-                Machine.SetCurrentState<CharacterIdleState>();
+                Machine.SetCurrentState<CharacterIdleState>(new StringTransition(rollComplete));
             }
             else rollSpeed = speedCurve.Evaluate(NormalizedTime(normalizedTime));
         }
+    }
+
+    private bool CanMove(float normalizedTime)
+    {
+        return normalizedTime >= canMoveStartTime && normalizedTime < canMoveEndTime
+                        && control.ReadValue(CharacterInputNames.Instance.Move, out Vector2 move) && (move.x != 0 || move.y != 0);
     }
 
     private float NormalizedTime(float normalizedTime)
     {
         return (normalizedTime - startTime) / duration;
     }
+
+    public override bool CanTransitTo<T>(Transition transition) => transition is StringTransition s
+                                                                   && (s.value == moveInAdvance && IsState<CharacterMoveState, T>() || s.value == rollComplete && IsState<CharacterIdleState, T>())
+                                                                   || IsState<CharacterDeathState, T>();
 }

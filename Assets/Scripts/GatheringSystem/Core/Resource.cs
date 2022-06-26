@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using ZetanStudio.GatheringSystem;
 
 public class Resource : Interactive2D
 {
@@ -17,7 +18,7 @@ public class Resource : Interactive2D
     {
         get
         {
-            return isRefresh && resourceInfo && resourceInfo.ProductItems.Count > 0 && GatherManager.Instance.Resource != this;
+            return isRefresh && resourceInfo && resourceInfo.ProductItems.Count > 0 && GatherManager.Resource != this;
         }
     }
 
@@ -70,7 +71,7 @@ public class Resource : Interactive2D
 
     public override bool DoInteract()
     {
-        if (GatherManager.Instance.Gather(this))
+        if (GatherManager.Gather(this))
         {
             return true;
         }
@@ -79,7 +80,7 @@ public class Resource : Interactive2D
 
     protected override void OnNotInteractable()
     {
-        if (GatherManager.Instance.Resource == this)
-            GatherManager.Instance.Cancel();
+        if (GatherManager.Resource == this)
+            GatherManager.Cancel();
     }
 }

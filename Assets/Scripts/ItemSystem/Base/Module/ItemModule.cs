@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
+#if UNITY_EDITOR
+using System.Collections.Generic;
+#endif
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [Serializable]
     public abstract class ItemModule
@@ -29,6 +33,54 @@ namespace ZetanStudio.Item.Module
                     this.modules[i + 1] = modules[i];
                 }
             }
+
+#if UNITY_EDITOR
+            [UnityEditor.InitializeOnLoadMethod]
+            private static void CheckLoop()
+            {
+                foreach (var type in UnityEditor.TypeCache.GetTypesDerivedFrom<ItemModule>())
+                {
+                    if (type.GetCustomAttribute<RequireAttribute>() is RequireAttribute attr)
+                        foreach (var mType in attr.modules)
+                        {
+                            if (mType.GetCustomAttribute<RequireAttribute>() is RequireAttribute mAttr && mAttr.modules.Contains(type))
+                                ZetanUtility.LogWarning($"模块 {type.Name} 和 {mType.Name} 存在相互依赖，是否是有意为之?");
+                        }
+                }
+            }
+            [UnityEditor.InitializeOnLoadMethod]
+            private static void CheckMissing()
+            {
+                foreach (var item in Item.Editor.GetItems())
+                {
+                    List<Type> requires = new List<Type>();
+                    foreach (var module in item.Modules)
+                    {
+                        if (module && module.GetType().GetCustomAttribute<RequireAttribute>() is RequireAttribute require)
+                            requires.AddRange(require.modules);
+                    }
+                    foreach (var r in requires)
+                    {
+                        if (Item.Editor.AddModule(item, r))
+                            ZetanUtility.LogWarning($"补充了道具 {item.Name} 缺失的模块: {GetName(r)}");
+                    }
+                }
+                foreach (var temp in ZetanUtility.Editor.LoadAssets<ItemTemplate>())
+                {
+                    List<Type> requires = new List<Type>();
+                    foreach (var module in temp.Modules)
+                    {
+                        if (module && module.GetType().GetCustomAttribute<RequireAttribute>() is RequireAttribute require)
+                            requires.AddRange(require.modules);
+                    }
+                    foreach (var r in requires)
+                    {
+                        if (ItemTemplate.Editor.AddModule(temp, r))
+                            ZetanUtility.LogWarning($"补充了模板 {temp.Name} 缺失的模块: {GetName(r)}");
+                    }
+                }
+            }
+#endif
         }
 
         [Obsolete("暂不支持不共存模块设置")]
@@ -49,7 +101,11 @@ namespace ZetanStudio.Item.Module
 
         public abstract bool IsValid { get; }
 
-        public virtual ItemModuleData CreateData(ItemData item) => null;
+        public virtual ItemModuleData CreateData(ItemData item)
+        {
+            //ZetanUtility.Log(GetType().Assembly.GetTypes().FirstOrDefault(t => !t.IsAbstract && typeof(ItemModuleData).IsAssignableFrom(t) && t.BaseType.IsGenericType && t.BaseType.GetGenericArguments()[0] == GetType()));
+            return null;
+        }
 
         public static string GetName(Type type)
         {
@@ -64,14 +120,63 @@ namespace ZetanStudio.Item.Module
 
         public ItemModule Copy() => MemberwiseClone() as ItemModule;
 
-        public static bool Duplicate(ItemModule module, Type type)
+        public static bool Duplicate(ItemModule module, Type type, out Type dupliacte)
         {
-            return module is not CommonModule && (module.GetType().IsAssignableFrom(type) || type.IsAssignableFrom(module.GetType()));
+            dupliacte = null;
+            if (!module) return true;
+            if (module is CommonModule) return false;
+            type = baseType(type);
+            var mType = baseType(module.GetType());
+            var result = mType.IsAssignableFrom(type);
+            if (!result) result = type.IsAssignableFrom(mType);
+            if (result)
+            {
+                dupliacte = module.GetType();
+                return result;
+            }
+            return false;
+
+            static Type baseType(Type type)
+            {
+                while (type.BaseType != null && type.BaseType != typeof(ItemModule))
+                {
+                    type = type.BaseType;
+                }
+                return type;
+            }
         }
 
         public static implicit operator bool(ItemModule self)
         {
             return self != null;
+        }
+    }
+
+    public abstract class ItemModuleData
+    {
+        public ItemData Item { get; protected set; }
+
+        public abstract ItemModule GetModule();
+
+        public static implicit operator bool(ItemModuleData self)
+        {
+            return self != null;
+        }
+
+        public abstract SaveDataItem GetSaveData();
+        public abstract void LoadSaveData(SaveDataItem data);
+    }
+
+    public abstract class ItemModuleData<T> : ItemModuleData where T : ItemModule
+    {
+        public T Module { get; protected set; }
+
+        public sealed override ItemModule GetModule() => Module;
+
+        protected ItemModuleData(ItemData item, T module)
+        {
+            Item = item;
+            Module = module;
         }
     }
 }

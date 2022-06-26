@@ -2,13 +2,14 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.UI;
 
 public abstract class InventoryWindow : Window, IHideable
 {
     [SerializeField]
-    protected GridView<ItemSlotBase, ItemSlotData> grid;
-    public GridView<ItemSlotBase, ItemSlotData> Grid => grid;
+    protected GridView<ItemSlot, ItemSlotData> grid;
+    public GridView<ItemSlot, ItemSlotData> Grid => grid;
 
     [SerializeField]
     protected ItemTypeDropDown pageSelector;
@@ -35,7 +36,7 @@ public abstract class InventoryWindow : Window, IHideable
 
     public bool IsHidden { get; private set; }
 
-    public abstract IInventoryHandler Handler { get; }
+    public abstract InventoryHandler Handler { get; }
 
     protected abstract string InventoryMoneyChangedMsgKey { get; }
     protected abstract string InventorySpaceChangedMsgKey { get; }
@@ -54,6 +55,7 @@ public abstract class InventoryWindow : Window, IHideable
     {
         if (WindowsManager.IsWindowOpen<ItemSelectionWindow>(out var selector) && selector.IsSelectFor(grid as ISlotContainer))
             WindowsManager.CloseWindow<ItemSelectionWindow>();
+        if (WindowsManager.IsWindowOpen<ItemWindow>(out var item) && Handler.ContainsItem(item.Item)) item.Close();
         IsHidden = false;
         return true;
     }
@@ -76,9 +78,9 @@ public abstract class InventoryWindow : Window, IHideable
         //pageSelector.Value = pageSelector.Value;
     }
 
-    protected virtual void ModifiySlot(ItemSlotBase item)
+    protected virtual void ModifiySlot(ItemSlot item)
     {
-        if (item is ItemSlot s)
+        if (item is ItemSlotEx s)
             s.SetCallbacks(GetSlotButtons, OnSlotRightClick, OnSlotEndDrag);
     }
 
@@ -113,9 +115,9 @@ public abstract class InventoryWindow : Window, IHideable
     }
     #endregion
 
-    protected abstract ButtonWithTextData[] GetSlotButtons(ItemSlot slot);
-    protected abstract void OnSlotEndDrag(GameObject go, ItemSlot slot);
-    protected abstract void OnSlotRightClick(ItemSlot slot);
+    protected abstract ButtonWithTextData[] GetSlotButtons(ItemSlotEx slot);
+    protected abstract void OnSlotEndDrag(GameObject go, ItemSlotEx slot);
+    protected abstract void OnSlotRightClick(ItemSlotEx slot);
 
     #region 消息相关
     protected override void RegisterNotify()
@@ -178,7 +180,7 @@ public abstract class InventoryWindow : Window, IHideable
             return;
         }
 
-        bool itemFilter(ItemSlotBase ia) => !ia.IsEmpty && ia.Item.Name.Contains(searchInput.text);
+        bool itemFilter(ItemSlot ia) => !ia.IsEmpty && ia.Item.Name.Contains(searchInput.text);
         grid.AddItemFilter(itemFilter, true);
         grid.RemoveItemFilter(itemFilter);
         searchInput.text = string.Empty;
@@ -191,8 +193,8 @@ public abstract class InventoryWindow : Window, IHideable
         WindowsManager.CloseWindow<ItemWindow>();
     }
 
-    public static ItemSelectionWindow OpenSelectionWindow<T>(ItemSelectionType selectionType, Action<List<ItemWithAmount>> confirm, string title = null, string confirmDialog = null,
-        int? typeLimit = null, int? amountLimit = null, Predicate<ItemSlotBase> selectCondition = null, Action cancel = null, params object[] args) where T : InventoryWindow
+    public static ItemSelectionWindow OpenSelectionWindow<T>(ItemSelectionType selectionType, Action<List<CountedItem>> confirm, string title = null, string confirmDialog = null,
+        int? typeLimit = null, int? amountLimit = null, Predicate<ItemSlot> selectCondition = null, Action cancel = null, params object[] args) where T : InventoryWindow
     {
         var window = WindowsManager.FindWindow<T>();
         if (window)

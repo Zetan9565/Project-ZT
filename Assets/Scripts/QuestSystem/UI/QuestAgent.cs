@@ -22,8 +22,8 @@ public class QuestAgent : ListItem<QuestAgent, QuestAgentData>
     protected override void RefreshSelected()
     {
         ZetanUtility.SetActive(selected, IsSelected);
-        ZetanUtility.SetActive(questList, Data.group && IsSelected);
-        if (!IsSelected) questList.DeselectAll();
+        ZetanUtility.SetActive(questList, Data != null && Data.group && IsSelected);
+        if (!IsSelected) questList.ClearSelection();
     }
     public override void Refresh()
     {
@@ -33,7 +33,7 @@ public class QuestAgent : ListItem<QuestAgent, QuestAgentData>
             if (Data.quests.Count > 0)
             {
                 ZetanUtility.SetActive(questContent, true);
-                var quest = base.Data.quests[0];
+                var quest = Data.quests[0];
                 questText.text = quest.IsFinished ? quest.Title : (quest.IsComplete ? $"{LM.Tr(GetType().Name, "[已完成]")}{quest.Title}" :
                     (quest.InProgress ? quest.Title : $"{LM.Tr(GetType().Name, "[未接取]")}{quest.Title}"));
             }
@@ -58,9 +58,9 @@ public class QuestAgent : ListItem<QuestAgent, QuestAgentData>
         return results;
     }
 
-    public override void OnClear()
+    public override void Clear()
     {
-        base.OnClear();
+        base.Clear();
         questList.Clear();
     }
 }

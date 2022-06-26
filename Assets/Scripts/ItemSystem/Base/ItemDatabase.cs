@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     [CreateAssetMenu]
     public sealed class ItemDatabase : SingletonScriptableObject<ItemDatabase>
@@ -21,7 +21,17 @@ namespace ZetanStudio.Item
 
         public static List<Item> GetItems()
         {
-            return new List<Item>(GetOrCreate().items);
+            return new List<Item>(Instance.items);
+        }
+        public static List<Item> GetItemsWhere(System.Predicate<Item> predicate)
+        {
+            var results = new List<Item>();
+            foreach (var item in Instance.items)
+            {
+                if (predicate(item))
+                    results.Add(item);
+            }
+            return results;
         }
 
 #if UNITY_EDITOR
@@ -29,7 +39,7 @@ namespace ZetanStudio.Item
         {
             public static List<Item> GetItems()
             {
-                return ItemDatabase.GetItems();
+                return GetOrCreate().items;
             }
             public static List<Item> GetItems(ItemTemplate template)
             {
@@ -41,12 +51,44 @@ namespace ZetanStudio.Item
                 }
                 return results;
             }
+            public static List<Item> GetItemsWhere(System.Predicate<Item> predicate)
+            {
+                List<Item> results = new List<Item>();
+                foreach (var item in GetOrCreate().items)
+                {
+                    if (predicate(item))
+                        results.Add(item);
+                }
+                return results;
+            }
+
+            public static Item CloneItem(Item item)
+            {
+                var instance = GetOrCreate();
+                Item cloned = Instantiate(item);
+                instance.items.Add(cloned);
+                AssetDatabase.AddObjectToAsset(cloned, instance);
+                return cloned;
+            }
             public static Item MakeItem(ItemTemplate template)
             {
                 var instance = GetOrCreate();
                 Item item = CreateInstance<Item>();
                 Item.Editor.ApplyTemplate(item, template);
                 Item.Editor.SetAutoID(item, instance.items, template ? template.IDPrefix : null);
+                item.name = item.ID;
+                ZetanUtility.Editor.SaveChange(item);
+                instance.items.Add(item);
+                AssetDatabase.AddObjectToAsset(item, instance);
+                ZetanUtility.Editor.SaveChange(instance);
+                return item;
+            }
+            public static Item MakeItem(ItemFilterAttribute itemFilter)
+            {
+                var instance = GetOrCreate();
+                Item item = CreateInstance<Item>();
+                Item.Editor.ApplyFilter(item, itemFilter);
+                if (string.IsNullOrEmpty(item.ID)) Item.Editor.SetAutoID(item, instance.items);
                 item.name = item.ID;
                 ZetanUtility.Editor.SaveChange(item);
                 instance.items.Add(item);

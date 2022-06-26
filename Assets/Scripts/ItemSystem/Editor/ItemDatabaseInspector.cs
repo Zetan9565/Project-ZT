@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace ZetanStudio.Item.Editor
+namespace ZetanStudio.ItemSystem.Editor
 {
     [CustomEditor(typeof(ItemDatabase))]
     public class ItemDatabaseInspector : UnityEditor.Editor

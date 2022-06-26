@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem.Module;
+using ZetanStudio.StructureSystem;
 
 public class StructureManageWindow : InteractionWindow<Interactive2D>, IHideable
 {
@@ -54,7 +55,7 @@ public class StructureManageWindow : InteractionWindow<Interactive2D>, IHideable
             ZetanUtility.SetActive(manageButton, CurrentStructure.Info.Manageable);
             manageButton.onClick.AddListener(ManageCurrent);
             manageText.text = CurrentStructure.Info.ManageBtnName;
-            destroyButton.onClick.AddListener(delegate { StructureManager.Instance.DestroyStructure(CurrentStructure.Data); });
+            destroyButton.onClick.AddListener(delegate { StructureManager.DestroyStructure(CurrentStructure.Data); });
             return base.OnOpen(args);
         }
         else if (args[0] is StructurePreview2D preview)
@@ -69,7 +70,7 @@ public class StructureManageWindow : InteractionWindow<Interactive2D>, IHideable
             ZetanUtility.SetActive(manageButton, !CurrentPreview.Data.Info.AutoBuild);
             manageButton.onClick.AddListener(SwitchMorePanel);
             manageText.text = "更多";
-            destroyButton.onClick.AddListener(delegate { StructureManager.Instance.DestroyStructure(CurrentPreview.Data); });
+            destroyButton.onClick.AddListener(delegate { StructureManager.DestroyStructure(CurrentPreview.Data); });
             return base.OnOpen(args);
         }
         else return false;
@@ -132,9 +133,9 @@ public class StructureManageWindow : InteractionWindow<Interactive2D>, IHideable
     private void SetMaterials()
     {
         ZetanUtility.SetActive(morePanel, false);
-        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnPutMaterials, "预留材料", selectCondition: (slot) => { return slot && slot.Item && slot.Item.GetModule<MaterialModule>() is not null; });
+        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnPutMaterials, "预留材料", selectCondition: (slot) => { return slot && slot.Item && slot.Item.GetModule<MaterialModule>(); });
     }
-    private void OnPutMaterials(IEnumerable<ItemWithAmount> materials)
+    private void OnPutMaterials(IEnumerable<CountedItem> materials)
     {
         List<ItemInfo> materialsConvert = new List<ItemInfo>();
         foreach (var isd in materials)

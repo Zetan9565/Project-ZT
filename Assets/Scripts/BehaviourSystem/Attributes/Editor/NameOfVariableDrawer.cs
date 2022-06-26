@@ -14,7 +14,7 @@ namespace ZetanStudio.BehaviourTree
             if ((attribute as NameOfVariableAttribute).global && !global)
             {
                 if (!(property.serializedObject.targetObject as BehaviourTree).IsInstance) global = ZetanUtility.Editor.LoadAsset<GlobalVariables>();
-                else global = BehaviourManager.Instance.GlobalVariables;
+                else global = BehaviourTreeManager.Instance.GlobalVariables;
             }
             return base.GetPropertyHeight(property, label);
         }
@@ -31,7 +31,7 @@ namespace ZetanStudio.BehaviourTree
             var tree = property.serializedObject.targetObject as BehaviourTree;
             if (attribute.global && !global)
                 if (!tree.IsInstance) global = ZetanUtility.Editor.LoadAsset<GlobalVariables>();
-                else global = BehaviourManager.Instance.GlobalVariables;
+                else global = BehaviourTreeManager.Instance.GlobalVariables;
             var variables = attribute.global ? global.GetVariables(attribute.type) : tree.GetVariables(attribute.type);
             string[] varNames = variables.Select(x => x.name).Prepend(L10n.Tr("None")).ToArray();
             GUIContent[] contents = new GUIContent[varNames.Length];

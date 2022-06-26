@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.StructureSystem;
 
 public class FieldWindow : Window, IHideable
 {
@@ -64,7 +65,7 @@ public class FieldWindow : Window, IHideable
 
     public void DestroyCurrentField()
     {
-        if (CurrentField) StructureManager.Instance.DestroyStructure(CurrentField.Data);
+        if (CurrentField) StructureManager.DestroyStructure(CurrentField.Data);
     }
 
     public void DispatchWorker()

@@ -554,7 +554,7 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         if (!UI || !UI.gameObject || !MapMaskRect) return;
         Rect screenSpaceRect = ZetanUtility.GetScreenSpaceRect(MapMaskRect);
         Vector3[] corners = new Vector3[4];
-        UI.mapMaskRect.GetWorldCorners(corners);
+        MapMaskRect.GetWorldCorners(corners);
         if (circle && !isViewingWorldMap)
         {
             float radius = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) * 0.5f * this.radius;

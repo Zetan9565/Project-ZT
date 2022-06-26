@@ -4,9 +4,8 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using ZetanStudio.Extension;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Craft;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
 
 public class ConfigurationFinding : EditorWindow
 {
@@ -25,7 +24,7 @@ public class ConfigurationFinding : EditorWindow
 
     private readonly List<SearchResult> results = new List<SearchResult>();
 
-    [MenuItem("Zetan Studio/工具/查找配置")]
+    [MenuItem("Window/Zetan Studio/工具/查找配置")]
     public static void CreateWindow()
     {
         ConfigurationFinding window = GetWindow<ConfigurationFinding>("查找配置文件");
@@ -226,16 +225,16 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case ItemKeyType.Formu:
-                    if (item.GetModule<CraftableModule>() is CraftableModule makable && makable.Formulation == objKeys[0])
+                    if (item.TryGetModule<CraftableModule>(out var makable) && typeof(CraftableModule).GetField("formulation", ZetanUtility.CommonBindingFlags).GetValue(makable).Equals(objKeys[0]))
                     {
                         take = true;
                         remark = $"[名称：{item.Name}]使用该配方";
                     }
                     break;
                 case ItemKeyType.Mater:
-                    if (item.GetModule<CraftableModule>() is CraftableModule makable2 && makable2.Formulation)
+                    if (item.TryGetModule<CraftableModule>(out var makable2) && makable2.IsValid)
                     {
-                        int index = makable2.Formulation.Materials.FindIndex(x => x.MakingType == CraftType.SingleItem && x.Item == objKeys[0]);
+                        int index = makable2.Materials.FindIndex(x => x.CostType == MaterialCostType.SingleItem && x.Item == objKeys[0]);
                         if (index >= 0)
                         {
                             take = true;
@@ -244,9 +243,9 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case ItemKeyType.MatType:
-                    if (item.GetModule<CraftableModule>() is CraftableModule makable3 && makable3.Formulation)
+                    if (item.TryGetModule<CraftableModule>(out var makable3) && makable3.IsValid)
                     {
-                        int index = makable3.Formulation.Materials.FindIndex(x => x.MakingType == CraftType.SameType && x.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]);
+                        int index = makable3.Materials.FindIndex(x => x.CostType == MaterialCostType.SameType && x.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]);
                         if (index >= 0)
                         {
                             take = true;
@@ -355,7 +354,7 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case QuestKeyType.Reward:
-                    if (quest.RewardItems.Exists(x => x.item == objKeys[0]))
+                    if (quest.RewardItems.Exists(x => x.Item == objKeys[0]))
                         take = true;
                     break;
                 case QuestKeyType.ObjTitle:
@@ -682,7 +681,7 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case FormulationKeyType.Mater:
-                    int index = formulation.Materials.FindIndex(x => x.MakingType == CraftType.SingleItem && x.Item == objKeys[0]);
+                    int index = formulation.Materials.FindIndex(x => x.CostType == MaterialCostType.SingleItem && x.Item == objKeys[0]);
                     if (index >= 0)
                     {
                         take = true;
@@ -690,7 +689,7 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case FormulationKeyType.MatType:
-                    index = formulation.Materials.FindIndex(x => x.MakingType == CraftType.SameType && x.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]);
+                    index = formulation.Materials.FindIndex(x => x.CostType == MaterialCostType.SameType && x.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]);
                     if (index >= 0)
                     {
                         take = true;
@@ -821,19 +820,19 @@ public class ConfigurationFinding : EditorWindow
                     }
                     break;
                 case StructureKeyType.Mater:
-                    index = building.Stages.FindIndex(x => x.Formulation && x.Formulation.Materials.Exists(y => y.MakingType == CraftType.SingleItem && y.Item == objKeys[0]));
+                    index = building.Stages.FindIndex(x => x.Formulation && x.Formulation.Materials.Exists(y => y.CostType == MaterialCostType.SingleItem && y.Item == objKeys[0]));
                     if (index >= 0)
                     {
                         take = true;
-                        remark = $"第[{index + 1}]个阶段的第[{building.Stages[index].Formulation.Materials.FindIndex(x => x.MakingType == CraftType.SingleItem && x.Item == objKeys[0]) + 1}]个材料是该道具";
+                        remark = $"第[{index + 1}]个阶段的第[{building.Stages[index].Formulation.Materials.FindIndex(x => x.CostType == MaterialCostType.SingleItem && x.Item == objKeys[0]) + 1}]个材料是该道具";
                     }
                     break;
                 case StructureKeyType.MatType:
-                    index = building.Stages.FindIndex(x => x.Formulation && x.Formulation.Materials.Exists(y => y.MakingType == CraftType.SameType && y.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]));
+                    index = building.Stages.FindIndex(x => x.Formulation && x.Formulation.Materials.Exists(y => y.CostType == MaterialCostType.SameType && y.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]));
                     if (index >= 0)
                     {
                         take = true;
-                        remark = $"第[{index + 1}]个阶段的第[{building.Stages[index].Formulation.Materials.FindIndex(x => x.MakingType == CraftType.SameType && x.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]) + 1}]个材料是该类型";
+                        remark = $"第[{index + 1}]个阶段的第[{building.Stages[index].Formulation.Materials.FindIndex(x => x.CostType == MaterialCostType.SameType && x.MaterialType == MaterialTypeEnum.Instance[intKeys[0]]) + 1}]个材料是该类型";
                     }
                     break;
                 case StructureKeyType.Prefab:

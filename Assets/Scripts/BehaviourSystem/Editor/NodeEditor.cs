@@ -205,7 +205,7 @@ namespace ZetanStudio.BehaviourTree.Editor
 
         private string Tr(string text)
         {
-            return Language.Tr(settings.language, text);
+            return L.Tr(settings.language, text);
         }
 
         private class NodePort : Port

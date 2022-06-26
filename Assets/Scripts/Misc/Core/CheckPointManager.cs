@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using ZetanStudio.Extension;
 
-public class CheckPointManager : SingletonMonoBehaviour<CheckPointManager>
+public static class CheckPointManager
 {
-    private Transform pointRoot;
-    private Dictionary<string, Transform> pointParents = new Dictionary<string, Transform>();
+    private static Transform pointRoot;
+    private static Dictionary<string, Transform> pointParents = new Dictionary<string, Transform>();
 
-    private Dictionary<CheckPointInformation, CheckPointData> checkPoints = new Dictionary<CheckPointInformation, CheckPointData>();
+    private static Dictionary<CheckPointInformation, CheckPointData> checkPoints = new Dictionary<CheckPointInformation, CheckPointData>();
 
-    private void Awake()
+    [InitMethod(-2)]
+    public static void Init()
     {
         if (!pointRoot) pointRoot = new GameObject("CheckPoints").transform;
         pointRoot.position = Vector3.zero;
     }
 
-    public CheckPointData CreateCheckPoint(CheckPointInformation info, Action<CheckPointInformation> moveIntoAction, Action<CheckPointInformation> leaveAction = null)
+    public static CheckPointData CreateCheckPoint(CheckPointInformation info, Action<CheckPointInformation> moveIntoAction, Action<CheckPointInformation> leaveAction = null)
     {
         if (!info || !info.IsValid || info.Scene != ZetanUtility.ActiveScene.name) return null;
         CheckPointData checkPointData = new CheckPointData(info);
@@ -28,7 +29,7 @@ public class CheckPointManager : SingletonMonoBehaviour<CheckPointManager>
         return checkPointData;
     }
 
-    public CheckPoint CreateCheckPointEntity(CheckPointData data, Vector3 position)
+    public static CheckPoint CreateCheckPointEntity(CheckPointData data, Vector3 position)
     {
         if (!pointParents.TryGetValue(data.Info.ID, out var parent))
         {
@@ -40,14 +41,14 @@ public class CheckPointManager : SingletonMonoBehaviour<CheckPointManager>
         return checkPoint;
     }
 
-    public void DeleteCheckPoint(CheckPointInformation info)
+    public static void DeleteCheckPoint(CheckPointInformation info)
     {
         if (pointParents.TryGetValue(info.ID, out var parent))
-            Destroy(parent.gameObject);
+            UnityEngine.Object.Destroy(parent.gameObject);
         checkPoints.Remove(info);
     }
 
-    public CheckPointData AddCheckPointListener(CheckPointInformation info, Action<CheckPointInformation> moveIntoAction, Action<CheckPointInformation> leaveAction = null)
+    public static CheckPointData AddCheckPointListener(CheckPointInformation info, Action<CheckPointInformation> moveIntoAction, Action<CheckPointInformation> leaveAction = null)
     {
         if (checkPoints.TryGetValue(info, out var checkPoint))
         {
@@ -65,7 +66,7 @@ public class CheckPointManager : SingletonMonoBehaviour<CheckPointManager>
         else return CreateCheckPoint(info, moveIntoAction, leaveAction);
     }
 
-    public void RemoveCheckPointListener(CheckPointInformation info, Action<CheckPointInformation> moveIntoAction, Action<CheckPointInformation> leaveAction = null)
+    public static void RemoveCheckPointListener(CheckPointInformation info, Action<CheckPointInformation> moveIntoAction, Action<CheckPointInformation> leaveAction = null)
     {
         if (checkPoints.TryGetValue(info, out var checkPoint))
         {

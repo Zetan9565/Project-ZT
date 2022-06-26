@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     public class ItemFilterAttribute : Attribute
     {
@@ -13,6 +13,10 @@ namespace ZetanStudio.Item
         public ItemFilterAttribute(params object[] filters)
         {
             this.filters = filters;
+        }
+        public ItemFilterAttribute(params Type[] modules)
+        {
+            filters = modules;
         }
 
         public bool DoFilter(Item item)
@@ -31,6 +35,7 @@ namespace ZetanStudio.Item
             if (filter is string f)
             {
                 f = f.ToLower();
+                if (f == "clear") return true;
                 bool revers = f.StartsWith("not ");
                 f = f.Replace("not ", "");
                 string value = f.Split(':')[^1];

@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ZetanStudio.Extension;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 
 [DisallowMultipleComponent]
 public class Talker : Character, IInteractive
 {
-    [SerializeReference, ReadOnly]
+    //[SerializeReference, ReadOnly]
     protected TalkerData data;
 
     public string TalkerID => GetData<TalkerData>() ? GetData<TalkerData>().Info.ID : string.Empty;
@@ -114,7 +114,7 @@ public class Talker : Character, IInteractive
 #if UNITY_ANDROID
         time = 2;
 #endif
-        FloatTipsPanel.ShowText(InputManager.mousePosition, GetMapIconName(), time);
+        FloatTipsPanel.ShowText(Input.mousePosition, GetMapIconName(), time);
     }
     private void HideNameImmediately()
     {

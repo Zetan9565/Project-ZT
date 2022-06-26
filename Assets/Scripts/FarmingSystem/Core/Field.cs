@@ -35,7 +35,7 @@ public class Field : Structure2D
         {
             entity = this
         };
-        FieldManager.Instance.Reclaim(FData);
+        FieldManager.Reclaim(FData);
     }
 
     public void PlantCrop(CropInformation crop, Vector3 position)

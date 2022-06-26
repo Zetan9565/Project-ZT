@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     [CreateAssetMenu(fileName = "material type", menuName = "Zetan Studio/道具/枚举/材料类型")]
     public sealed class MaterialTypeEnum : ScriptableObjectEnum<MaterialTypeEnum, MaterialType>
@@ -31,6 +31,9 @@ namespace ZetanStudio.Item
     [System.Serializable]
     public sealed class MaterialType : ScriptableObjectEnumItem
     {
+        [SerializeField]
+        public Sprite Icon { get; private set; }
+
         public MaterialType()
         {
             Name = "未定义";

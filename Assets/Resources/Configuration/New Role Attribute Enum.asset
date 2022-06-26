@@ -12,11 +12,102 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69c3bb92a0c4dc648aa119210316ce85, type: 3}
   m_Name: New Role Attribute Enum
   m_EditorClassIdentifier: 
-  names:
-  - "\u653B\u51FB\u529B"
-  - "\u9632\u5FA1\u529B"
-  - "\u751F\u547D\u503C"
-  - "\u9B54\u6CD5\u503C"
-  - "\u5C5E\u60274"
-  - "\u5C5E\u6027"
-  types: 000000000000000000000000000000000000000000000000
+  _enum:
+  - <Name>k__BackingField: "\u57FA\u7840\u4F53\u529B"
+    <ID>k__BackingField: B_HP
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 0
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u4F53\u529B\u503C"
+  - <Name>k__BackingField: "\u57FA\u7840\u80FD\u91CF"
+    <ID>k__BackingField: B_MP
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 1
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u80FD\u91CF\u503C"
+  - <Name>k__BackingField: "\u57FA\u7840\u8010\u529B"
+    <ID>k__BackingField: B_STM
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 2
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u8010\u529B\u503C"
+  - <Name>k__BackingField: "\u57FA\u7840\u653B\u51FB"
+    <ID>k__BackingField: B_ATK
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 3
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u653B\u51FB\u529B"
+  - <Name>k__BackingField: "\u57FA\u7840\u9632\u5FA1"
+    <ID>k__BackingField: B_DEF
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 4
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u9632\u5FA1\u529B"
+  - <Name>k__BackingField: "\u57FA\u7840\u66B4\u51FB\u7387"
+    <ID>k__BackingField: B_CRIT
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 5
+    <Format>k__BackingField: '{0:p1}'
+    <ValueType>k__BackingField: 1
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u66B4\u51FB\u7387"
+  - <Name>k__BackingField: "\u57FA\u7840\u66B4\u51FB\u4F24\u5BB3"
+    <ID>k__BackingField: B_CDMG
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 6
+    <Format>k__BackingField: '{0:p1}'
+    <ValueType>k__BackingField: 1
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u66B4\u51FB\u4F24\u5BB3"
+  - <Name>k__BackingField: "\u57FA\u7840\u547D\u4E2D"
+    <ID>k__BackingField: B_ACC
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 7
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u547D\u4E2D\u529B"
+  - <Name>k__BackingField: "\u57FA\u7840\u95EA\u907F"
+    <ID>k__BackingField: B_EVA
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 8
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u95EA\u907F\u529B"
+  - <Name>k__BackingField: "\u57FA\u7840\u5F02\u5E38\u72B6\u6001\u62B5\u6297"
+    <ID>k__BackingField: B_ARES
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 9
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 1
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u5F02\u5E38\u72B6\u6001\u62B5\u6297\u529B"
+  - <Name>k__BackingField: "\u57FA\u7840\u8010\u997F"
+    <ID>k__BackingField: B_HRES
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 10
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u9965\u997F\u5FCD\u8010\u529B"
+  - <Name>k__BackingField: "\u57FA\u7840\u8010\u6E34"
+    <ID>k__BackingField: B_TRES
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 11
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u53E3\u6E34\u5FCD\u8010\u529B"
+  - <Name>k__BackingField: "\u57FA\u7840\u8010\u5BD2"
+    <ID>k__BackingField: B_CRES
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 12
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u5BD2\u51B7\u5FCD\u8010\u529B"
+  - <Name>k__BackingField: "\u57FA\u7840\u8010\u70ED"
+    <ID>k__BackingField: B_HtRES
+    <Alias>k__BackingField: 
+    <Priority>k__BackingField: 13
+    <Format>k__BackingField: '{0}'
+    <ValueType>k__BackingField: 0
+    <Description>k__BackingField: "\u89D2\u8272\u57FA\u672C\u708E\u70ED\u5FCD\u8010\u529B"

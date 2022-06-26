@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem.Module;
 #if UNITY_EDITOR
 using System.Linq;
 using System.Reflection;
 #endif
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
     /// <summary>
     /// 设计思路：<br/>
@@ -18,7 +18,7 @@ namespace ZetanStudio.Item
     /// </summary>
     public sealed class Item : ScriptableObject
     {
-        private const bool useDatabase = false;
+        private const bool useDatabase = true;
         public static bool UseDatabase => useDatabase;
 
         public const string assetsFolder = "Assets/Resources/Configuration/Item";
@@ -29,7 +29,7 @@ namespace ZetanStudio.Item
         [field: SerializeField, Label("名称")]
         public string Name { get; private set; } = "未命名道具";
 
-        public string ColorName => ZetanUtility.ColorText(Name, Quality.Color);
+        public string ColorName => ZetanUtility.ColorText(LM.Tr(GetType().Name, Name), Quality.Color);
 
         [field: SerializeField, Label("图标"), SpriteSelector]
         public Sprite Icon { get; private set; }
@@ -64,14 +64,17 @@ namespace ZetanStudio.Item
         {
             return modules.Find(x => x is T) as T;
         }
+        public bool TryGetModule<T>(out T module) where T : ItemModule
+        {
+            return module = GetModule<T>();
+        }
         public CommonModule<T> GetCommonModule<T>(string name)
         {
             return modules.Find(x => x is CommonModule<T> c && c.Name == name) as CommonModule<T>;
         }
-
-        public ItemData CreateData(bool instance = true)
+        public bool TryGetCommonModule<T>(string name, out CommonModule<T> module)
         {
-            return new ItemData(this, instance);
+            return module = GetCommonModule<T>(name);
         }
 
         public class Comparer : IComparer<Item>
@@ -80,14 +83,10 @@ namespace ZetanStudio.Item
 
             public int Compare(Item x, Item y)
             {
-                if (x.Type.Priority < y.Type.Priority)
-                    return -1;
-                else if (x.Type.Priority > y.Type.Priority)
-                    return 1;
-                else if (x.Quality.Priority < y.Quality.Priority)
-                    return -1;
-                else if (x.Quality.Priority > y.Quality.Priority)
-                    return 1;
+                if (x.Type.Priority < y.Type.Priority) return -1;
+                else if (x.Type.Priority > y.Type.Priority) return 1;
+                else if (x.Quality.Priority < y.Quality.Priority) return -1;
+                else if (x.Quality.Priority > y.Quality.Priority) return 1;
                 else
                 {
                     int result = string.Compare(x.Name, y.Name);
@@ -102,7 +101,11 @@ namespace ZetanStudio.Item
             if (UseDatabase) return ItemDatabase.GetItems();
             else return new List<Item>(Resources.LoadAll<Item>(assetsFolder.Remove(0, "Assets/Resources".Length)));
         }
-
+        public static List<Item> GetItemsWhere(Predicate<Item> predicate)
+        {
+            if (UseDatabase) return ItemDatabase.GetItemsWhere(predicate);
+            else return new List<Item>(Resources.LoadAll<Item>(assetsFolder.Remove(0, "Assets/Resources".Length)).Where(x => predicate(x)));
+        }
 #if UNITY_EDITOR
         #region Editor相关
         public static class Editor
@@ -114,6 +117,11 @@ namespace ZetanStudio.Item
                     else return ZetanUtility.Editor.LoadMainAssetsWhere<Item>(x => MatchTemplate(x, template), assetsFolder);
                 if (UseDatabase) return ItemDatabase.Editor.GetItems();
                 else return ZetanUtility.Editor.LoadMainAssets<Item>(assetsFolder);
+            }
+            public static List<Item> GetItemsWhere(Predicate<Item> predicate)
+            {
+                if (UseDatabase) return ItemDatabase.Editor.GetItemsWhere(predicate);
+                else return ZetanUtility.Editor.LoadMainAssetsWhere<Item>(predicate, assetsFolder);
             }
             public static void SetAutoID(Item item, IEnumerable<Item> items, string IDPrefix = null)
             {
@@ -157,16 +165,65 @@ namespace ZetanStudio.Item
                     item.type = template.Type;
                     item.StackLimit = template.StackLimit;
                     item.Discardable = template.Discardable;
-                    var keyedModules = new KeyedByTypeCollection<ItemModule>();
+                    var keyedModules = new Dictionary<Type, ItemModule>();
                     foreach (var module in item.modules)
                     {
-                        if (module is not CommonModule) keyedModules.Add(module);
+                        if (module is not CommonModule) keyedModules.Add(module.GetType(), module);
                     }
                     foreach (var module in template.Modules)
                     {
-                        if (module is not CommonModule && keyedModules.Contains(module.GetType())) continue;
+                        if (module is not CommonModule && keyedModules.ContainsKey(module.GetType())) continue;
                         var copy = module.Copy();
                         item.modules.Add(copy);
+                    }
+                    ZetanUtility.Editor.SaveChange(item);
+                }
+            }
+            public static void ApplyFilter(Item item, ItemFilterAttribute itemFilter)
+            {
+                if (itemFilter != null)
+                {
+                    foreach (var filter in itemFilter.filters)
+                    {
+                        if (filter is string f)
+                        {
+                            f = f.ToLower();
+                            bool revers = f.StartsWith("not ");
+                            f = f.Replace("not ", "");
+                            string value = f.Split(':')[^1];
+                            if (f.StartsWith("n:") || f.StartsWith("name:"))
+                            {
+                                if (!revers) item.Name = value;
+                            }
+                            else if (f.StartsWith("i:") || f.StartsWith("id:"))
+                            {
+                                if (!revers) item.ID = value;
+                            }
+                            else if (f.StartsWith("t:") || f.StartsWith("type:"))
+                            {
+                                if (int.TryParse(value, out var index))
+                                {
+                                    if (!revers) item.type = index;
+                                }
+                                else if (!revers) item.quality = ItemTypeEnum.NameToIndex(value);
+                            }
+                            else if (f.StartsWith("q:") || f.StartsWith("quality:"))
+                            {
+                                if (int.TryParse(value, out var index))
+                                {
+                                    if (!revers) item.quality = index;
+                                }
+                                else if (!revers) item.quality = ItemQualityEnum.NameToIndex(value);
+                            }
+                            else if (f.StartsWith("d:") || f.StartsWith("des:") || f.StartsWith("desc:") || f.StartsWith("description:"))
+                            {
+                                if (!revers) item.Description = value;
+                            }
+                            else if (f.StartsWith("m:") || f.StartsWith("module:"))
+                                if (!revers) AddModule(item, ZetanUtility.GetTypeWithoutAssembly(value));
+                        }
+                        else if (filter is Type type)
+                            AddModule(item, type);
                     }
                     ZetanUtility.Editor.SaveChange(item);
                 }
@@ -177,12 +234,12 @@ namespace ZetanStudio.Item
                 if (!template) return true;
                 if (item.type != template.Type) return false;
 
-                var keyedModules = new KeyedByTypeCollection<ItemModule>();
+                var keyedModules = new Dictionary<Type, ItemModule>();
                 Dictionary<Type, HashSet<string>> commons = new Dictionary<Type, HashSet<string>>();
                 foreach (var module in item.modules)
                 {
                     if (module is not CommonModule common)
-                        keyedModules.Add(module);
+                        keyedModules.Add(module.GetType(), module);
                     else if (commons.TryGetValue(common.GetType(), out var find))
                         find.Add(common.Name);
                     else commons.Add(common.GetType(), new HashSet<string>() { common.Name });
@@ -192,7 +249,7 @@ namespace ZetanStudio.Item
                     //若道具的模块没有模版上应有的模块，则不匹配
                     if (module is not CommonModule common)
                     {
-                        if (!keyedModules.Contains(module.GetType()))
+                        if (!keyedModules.ContainsKey(module.GetType()))
                             return false;
                     }
                     else if (!commons.TryGetValue(common.GetType(), out var find) || !find.Contains(common.Name))
@@ -204,8 +261,8 @@ namespace ZetanStudio.Item
             public static ItemModule AddModule(Item item, Type type, int index = -1)
             {
                 if (item == null || type == null) return null;
-                if (!CommonModule.IsCommon(type) && item.modules.Exists(x => ItemModule.Duplicate(x, type))) return null;
-                var attr = type.GetCustomAttribute<ItemModule.RequireAttribute>();
+                if (!CommonModule.IsCommon(type) && item.modules.Exists(x => ItemModule.Duplicate(x, type, out _))) return null;
+                var attr = type.GetCustomAttribute<ItemModule.RequireAttribute>(true);
                 if (attr != null)
                 {
                     foreach (var m in attr.modules)
@@ -225,6 +282,12 @@ namespace ZetanStudio.Item
                 item.modules.Remove(module);
                 ZetanUtility.Editor.SaveChange(item);
                 return true;
+            }
+            public static bool ClearInvalidModule(Item item)
+            {
+                int count = item.modules.RemoveAll(x => !x);
+                if (count > 0 && UseDatabase) ZetanUtility.Editor.SaveChange(ItemDatabase.Instance);
+                return count > 0;
             }
         }
         #endregion

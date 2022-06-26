@@ -228,7 +228,7 @@ MonoBehaviour:
   applyCellSize: {x: 0, y: 0}
   clickable: 1
   selectable: 1
-  multiSelection: 0
+  selectionLimit: 1
   cacheCapacity: 200
   container: {fileID: 0}
   prefab: {fileID: 6872456793810074503}

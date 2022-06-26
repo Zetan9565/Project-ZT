@@ -11,11 +11,36 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using ZetanStudio.Extension;
+using Random = UnityEngine.Random;
 #if UNITY_EDITOR
 using UnityEditor;
 using Object = UnityEngine.Object;
 #endif
 
+namespace ZetanStudio
+{
+    public class EqualityComparer<T> : IEqualityComparer<T>
+    {
+        private readonly Func<T, T, bool> equals;
+        private readonly Func<T, int> hashCode;
+
+        public EqualityComparer(Func<T, T, bool> equals, Func<T, int> hashCode)
+        {
+            this.equals = equals;
+            this.hashCode = hashCode;
+        }
+
+        public bool Equals(T x, T y)
+        {
+            return equals(x, y);
+        }
+
+        public int GetHashCode(T obj)
+        {
+            return hashCode(obj);
+        }
+    }
+}
 namespace ZetanStudio.Extension
 {
     public static class IEnumerableExtension
@@ -55,6 +80,10 @@ namespace ZetanStudio.Extension
         {
             return source.GroupBy(keySelector).Any(g => g.Count() > 1);
         }
+        public static bool None<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            return !source.Any(predicate);
+        }
     }
 
     public static class TransformExtension
@@ -67,8 +96,7 @@ namespace ZetanStudio.Extension
         {
             if (string.IsNullOrEmpty(name)) name = $"Child ({source.transform.childCount})";
             GameObject child = new GameObject(name, components);
-            child.transform.SetParent(source);
-            child.transform.localPosition = Vector3.zero;
+            child.transform.SetParent(source, false);
             return child.transform;
         }
 
@@ -184,8 +212,7 @@ namespace ZetanStudio.Extension
         {
             if (string.IsNullOrEmpty(name)) name = $"Child ({source.transform.childCount})";
             GameObject child = new GameObject(name, components);
-            child.transform.SetParent(source.transform);
-            child.transform.localPosition = Vector3.zero;
+            child.transform.SetParent(source.transform, false);
             return child;
         }
 
@@ -400,17 +427,17 @@ namespace ZetanStudio.Collections
             return ((IEnumerable)set).GetEnumerator();
         }
 
-        public bool Add(T item)
+        bool ISet<T>.Add(T item)
         {
             throw new InvalidOperationException("只读");
         }
 
-        public void ExceptWith(IEnumerable<T> other)
+        void ISet<T>.ExceptWith(IEnumerable<T> other)
         {
             throw new InvalidOperationException("只读");
         }
 
-        public void IntersectWith(IEnumerable<T> other)
+        void ISet<T>.IntersectWith(IEnumerable<T> other)
         {
             throw new InvalidOperationException("只读");
         }
@@ -445,12 +472,12 @@ namespace ZetanStudio.Collections
             return set.Equals(other);
         }
 
-        public void SymmetricExceptWith(IEnumerable<T> other)
+        void ISet<T>.SymmetricExceptWith(IEnumerable<T> other)
         {
             throw new InvalidOperationException("只读");
         }
 
-        public void UnionWith(IEnumerable<T> other)
+        void ISet<T>.UnionWith(IEnumerable<T> other)
         {
             throw new InvalidOperationException("只读");
         }
@@ -460,7 +487,7 @@ namespace ZetanStudio.Collections
             throw new InvalidOperationException("只读");
         }
 
-        public void Clear()
+        void ICollection<T>.Clear()
         {
             throw new InvalidOperationException("只读");
         }
@@ -475,7 +502,7 @@ namespace ZetanStudio.Collections
             set.CopyTo(array, arrayIndex);
         }
 
-        public bool Remove(T item)
+        bool ICollection<T>.Remove(T item)
         {
             throw new InvalidOperationException("只读");
         }
@@ -530,6 +557,11 @@ namespace ZetanStudio.Extension.Editor
         {
             return ZetanUtility.Editor.TrySetValue(source, value);
         }
+
+        public static bool TryGetOwnerValue(this SerializedProperty source, out object value)
+        {
+            return ZetanUtility.Editor.TryGetOwnerValue(source, out value);
+        }
     }
 
     public static class PropertyDrawerExtension
@@ -552,43 +584,50 @@ namespace ZetanStudio.Extension.Editor
             }
             return null;
         }
-        public static bool TryGetOnwerValue(this PropertyDrawer source, SerializedProperty property, out object value)
+        /// <summary>
+        /// 尝试获取拥有此成员的对象值。当<paramref name="property"/>位于<see cref="IList"/>中时，返回对应<see cref="IList"/>
+        /// </summary>
+        /// <returns>是否成功获取</returns>
+        public static bool TryGetOwnerValue(this PropertyDrawer source, SerializedProperty property, out object owner)
         {
-            value = default;
-            FieldInfo fieldInfo = null;
+            owner = default;
             if (property.serializedObject.targetObject)
             {
                 try
                 {
-                    string[] paths = property.propertyPath.Split('.');
-                    value = property.serializedObject.targetObject;
+                    string[] paths = property.propertyPath.Replace(".Array.data[", "[").Split('.');
+                    object temp = property.serializedObject.targetObject;
+                    FieldInfo fieldInfo = null;
                     for (int i = 0; i < paths.Length; i++)
                     {
-                        if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
+                        if (paths[i].EndsWith(']'))
                         {
-                            if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
+                            if (int.TryParse(paths[i].Split('[', ']')[^2], out var index))
                             {
-                                if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
+                                fieldInfo = temp.GetType().GetField(paths[i][..^$"[{index}]".Length], ZetanUtility.CommonBindingFlags);
+                                if (fieldInfo == source.fieldInfo)
                                 {
-                                    fieldInfo = value.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
-                                    if (fieldInfo == source.fieldInfo) return true;
-                                    value = (fieldInfo.GetValue(value) as IList)[index];
-                                    i += 2;
+                                    owner = fieldInfo.GetValue(temp);
+                                    return true;
                                 }
+                                temp = (fieldInfo.GetValue(temp) as IList)[index];
                             }
                         }
                         else
                         {
-                            fieldInfo = value.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
-                            if (fieldInfo == source.fieldInfo) return true;
-                            value = fieldInfo.GetValue(value);
+                            fieldInfo = temp.GetType().GetField(paths[i], ZetanUtility.CommonBindingFlags);
+                            if (fieldInfo == source.fieldInfo)
+                            {
+                                owner = temp;
+                                return true;
+                            }
+                            temp = fieldInfo.GetValue(temp);
                         }
                     }
-                    return fieldInfo != null;
                 }
                 catch
                 {
-                    value = default;
+                    owner = default;
                     return false;
                 }
             }
@@ -1358,6 +1397,7 @@ public class ScopeFloat
 
 public sealed class ZetanUtility
 {
+    #region 通用
     public static bool IsMouseInsideScreen
     {
         get
@@ -1376,12 +1416,12 @@ public sealed class ZetanUtility
     /// <summary>
     /// 概率计算
     /// </summary>
-    /// <param name="probability">百分比数值</param>
+    /// <param name="probability">概率(0~1)</param>
     /// <returns>是否命中</returns>
     public static bool Probability(float probability)
     {
-        if (probability <= 0) return false;
-        return UnityEngine.Random.Range(0f, 100f) <= probability;
+        if (probability <= 0f) return false;
+        return Random.Range(0f, 1f) <= probability;
     }
 
     public static string ColorText(string text, Color color)
@@ -1389,11 +1429,27 @@ public sealed class ZetanUtility
         if (!color.Equals(Color.clear)) return string.Format("<color=#{0}>{1}</color>", ColorUtility.ToHtmlStringRGB(color), text);
         else return text;
     }
+    public static string ColorText(object text, Color color)
+    {
+        if (!color.Equals(Color.clear)) return string.Format("<color=#{0}>{1}</color>", ColorUtility.ToHtmlStringRGB(color), text.ToString());
+        else return text.ToString();
+    }
 
     public static bool IsPrefab(GameObject gameObject)
     {
         if (!gameObject) return false;
         return gameObject.scene.name == null;
+    }
+
+    public static bool IsDontDestroyOnLoad(GameObject gameObject)
+    {
+        if (!gameObject) return false;
+        return gameObject.scene.name == "DontDestroyOnLoad";
+    }
+    public static bool IsDontDestroyOnLoad(Component component)
+    {
+        if (!component) return false;
+        return component.gameObject.scene.name == "DontDestroyOnLoad";
     }
 
     public static Transform CreateChild(Transform parent, string name = null)
@@ -1478,11 +1534,11 @@ public sealed class ZetanUtility
 
     public static void KeepInsideScreen(RectTransform rectTransform, bool left = true, bool right = true, bool top = true, bool bottom = true)
     {
-        Rect fixedRect = GetScreenSpaceRect(rectTransform);
-        float leftWidth = rectTransform.pivot.x * fixedRect.width;
-        float rightWidth = fixedRect.width - leftWidth;
-        float bottomHeight = rectTransform.pivot.y * fixedRect.height;
-        float topHeight = fixedRect.height - bottomHeight;
+        Rect repairedRect = GetScreenSpaceRect(rectTransform);
+        float leftWidth = rectTransform.pivot.x * repairedRect.width;
+        float rightWidth = repairedRect.width - leftWidth;
+        float bottomHeight = rectTransform.pivot.y * repairedRect.height;
+        float topHeight = repairedRect.height - bottomHeight;
         if (left && rectTransform.position.x - leftWidth < 0) rectTransform.position += Vector3.right * (leftWidth - rectTransform.position.x);
         if (right && rectTransform.position.x + rightWidth > Screen.width) rectTransform.position -= Vector3.right * (rectTransform.position.x + rightWidth - Screen.width);
         if (bottom && rectTransform.position.y - bottomHeight < 0) rectTransform.position += Vector3.up * (bottomHeight - rectTransform.position.y);
@@ -1495,13 +1551,23 @@ public sealed class ZetanUtility
         return viewportPoint.x > 0 && viewportPoint.x < 1 && viewportPoint.y > 0 && viewportPoint.y < 1;
     }
 
+    #region 反射相关
+    public static string ToJson(object value)
+    {
+        return Newtonsoft.Json.JsonConvert.SerializeObject(value);
+    }
+    public static T FromJson<T>(string json)
+    {
+        return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
+    }
+
     private static string SerializeObject(object target, bool includeProperty, int depth, int indentation)
     {
-        if (target == null) return "空";
+        if (target == null) return $"{target}";
         if (depth < 0) return target.ToString();
         Type type = target.GetType();
         if (type.IsEnum) return $"{type}.{target}";
-        if (type.IsValueType) return target.ToString();
+        if (IsNumericType(type)) return target.ToString();
         StringBuilder sb = new StringBuilder();
         if (type == typeof(string))
         {
@@ -1534,7 +1600,7 @@ public sealed class ZetanUtility
             }
             sb.Append("}");
         }
-        else if (type.IsClass)
+        else
         {
             sb.Append("{\n");
             foreach (var field in type.GetFields(CommonBindingFlags))
@@ -1551,7 +1617,12 @@ public sealed class ZetanUtility
                     sb.Append(SerializeObject(field.GetValue(target), includeProperty, depth - 1, indentation + 1));
                     sb.Append(",\n");
                 }
-                catch { continue; }
+                catch
+                {
+                    sb.Append("?<access denied>");
+                    sb.Append(",\n");
+                    continue;
+                }
             }
             if (includeProperty)
                 foreach (var property in type.GetProperties(CommonBindingFlags))
@@ -1568,7 +1639,12 @@ public sealed class ZetanUtility
                         sb.Append(SerializeObject(property.GetValue(target), includeProperty, depth - 1, indentation + 1));
                         sb.Append(",\n");
                     }
-                    catch { continue; }
+                    catch
+                    {
+                        sb.Append("?<access denied>");
+                        sb.Append(",\n");
+                        continue;
+                    }
                 }
             for (int i = 0; i < indentation; i++)
             {
@@ -1576,15 +1652,50 @@ public sealed class ZetanUtility
             }
             sb.Append("}");
         }
-        else
-        {
-            sb.Append(target);
-        }
         return sb.ToString();
+
+        static bool IsNumericType(Type type)
+        {
+            if (type == typeof(Vector2) || type == typeof(Vector3) || type == typeof(Vector4) || type == typeof(Vector2Int) || type == typeof(Vector3Int))
+                return true;
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                    return true;
+                case TypeCode.Object:
+                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                        return IsNumericType(Nullable.GetUnderlyingType(type));
+                    return false;
+                default:
+                    return false;
+            }
+        }
     }
     public static string SerializeObject(object target, bool includeProperty, int depth = 3)
     {
         return SerializeObject(target, includeProperty, depth, 0);
+    }
+    public static string SerializeObject(IEnumerable<string> target, int depth = 3)
+    {
+        return SerializeObject(target, false, depth, 0);
+    }
+    public static string SerializeObject(IEnumerable<int> target, int depth = 3)
+    {
+        return SerializeObject(target, false, depth, 0);
+    }
+    public static string SerializeObject(IEnumerable<float> target, int depth = 3)
+    {
+        return SerializeObject(target, false, depth, 0);
     }
 
     public static string GetMemberName<T>(Expression<Func<T>> memberAccessor)
@@ -1616,6 +1727,7 @@ public sealed class ZetanUtility
         memberInfo = null;
         string[] fields = path.Split('.');
         object mv = target;
+        if (mv == null) return false;
         var mType = mv.GetType();
         for (int i = 0; i < fields.Length; i++)
         {
@@ -1648,10 +1760,65 @@ public sealed class ZetanUtility
     /// 通过类名获取类<see cref="Type"/>
     /// </summary>
     /// <param name="name">类名，含命名空间</param>
-    public static Type GetTypeWithoutAssembly(string name)
+    internal static Type GetTypeWithoutAssembly(string name)
     {
         if (string.IsNullOrEmpty(name)) return null;
         return Assembly.GetCallingAssembly().GetType(name);
+    }
+
+    public static Type GetTypeByFullName(string fullName)
+    {
+        if (string.IsNullOrEmpty(fullName)) return null;
+        fullName = fullName.Split(',')[0];
+        return AppDomain.CurrentDomain.GetAssemblies().Select(x => x.GetType(fullName)).FirstOrDefault(x => x != null);
+    }
+
+    internal static Type[] GetTypesDerivedFrom(Type type)
+    {
+        List<Type> results = new List<Type>();
+        foreach (var t in Assembly.GetCallingAssembly().GetTypes())
+        {
+            if (t != type && type.IsAssignableFrom(t))
+                results.Add(t);
+        }
+        return results.ToArray();
+    }
+    internal static Type[] GetTypesDerivedFrom<T>()
+    {
+        return GetTypesDerivedFrom(typeof(T));
+    }
+    internal static Type[] GetTypesWithAttribute(Type attribute)
+    {
+        List<Type> results = new List<Type>();
+        if (!typeof(Attribute).IsAssignableFrom(attribute)) return results.ToArray();
+        foreach (var t in Assembly.GetCallingAssembly().GetTypes())
+        {
+            if (t.GetCustomAttribute(attribute) != null)
+                results.Add(t);
+        }
+        return results.ToArray();
+    }
+    internal static Type[] GetTypesWithAttribute<T>() where T : Attribute
+    {
+        return GetTypesWithAttribute(typeof(T));
+    }
+    internal static MethodInfo[] GetMethodsWithAttribute(Type attribute)
+    {
+        List<MethodInfo> results = new List<MethodInfo>();
+        if (!typeof(Attribute).IsAssignableFrom(attribute)) return results.ToArray();
+        foreach (var t in Assembly.GetCallingAssembly().GetTypes())
+        {
+            foreach (var method in t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+            {
+                if (method.GetCustomAttribute(attribute) != null)
+                    results.Add(method);
+            }
+        }
+        return results.ToArray();
+    }
+    internal static MethodInfo[] GetMethodsWithAttribute<T>() where T : Attribute
+    {
+        return GetMethodsWithAttribute(typeof(T));
     }
 
     public static string GetInspectorName(Enum enumValue)
@@ -1686,6 +1853,7 @@ public sealed class ZetanUtility
     }
 
     public const BindingFlags CommonBindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
+    #endregion
 
     public static void Stopwatch(Action action)
     {
@@ -1704,20 +1872,18 @@ public sealed class ZetanUtility
     }
 
     #region Debug.Log相关
-    public static void Log(object message) => Debug.Log(message);
-    public static void Log(params object[] messages)
+    public static void Log(object message, params object[] messages)
     {
+        StringBuilder sb = new StringBuilder(message?.ToString());
         if (messages != null)
         {
-            StringBuilder sb = new StringBuilder(messages[0]?.ToString());
-            for (int i = 1; i < messages.Length; i++)
+            for (int i = 0; i < messages.Length; i++)
             {
                 sb.Append(", ");
                 sb.Append(messages[i]);
             }
-            Debug.Log(sb);
         }
-        else Debug.Log(messages);
+        Debug.Log(sb);
     }
     public static void LogWarning(object message) => Debug.LogWarning(message);
     public static void LogWarning(params object[] messages)
@@ -2032,8 +2198,9 @@ public sealed class ZetanUtility
         return Path.GetFileNameWithoutExtension(path);
     }
     #endregion
+    #endregion
 
-    #region Editor相关
+    #region Editor
 #if UNITY_EDITOR
     public static class Editor
     {
@@ -2084,50 +2251,57 @@ public sealed class ZetanUtility
             return null;
         }
 
+        /// <summary>
+        /// 尝试获取拥有此成员的对象值。当<paramref name="property"/>位于<see cref="IList"/>中时，返回对应<see cref="IList"/>
+        /// </summary>
+        /// <returns>是否成功获取</returns>
         public static bool TryGetOwnerValue(SerializedProperty property, out object owner)
         {
             owner = null;
-            object temp = property.serializedObject.targetObject;
-            FieldInfo fieldInfo = null;
-            if (temp != null)
+            if (property.serializedObject.targetObject)
             {
                 try
                 {
-                    string[] paths = property.propertyPath.Split('.');
+                    string[] paths = property.propertyPath.Replace(".Array.data[", "[").Split('.');
+                    object temp = property.serializedObject.targetObject;
+                    FieldInfo fieldInfo = null;
                     for (int i = 0; i < paths.Length; i++)
                     {
-                        if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
+                        if (paths[i].EndsWith(']'))
                         {
-                            if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
+                            if (int.TryParse(paths[i].Split('[', ']')[^2], out var index))
                             {
-                                if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
+                                fieldInfo = temp.GetType().GetField(paths[i][..^$"[{index}]".Length], CommonBindingFlags);
+                                if (i == paths.Length - 1)
                                 {
-                                    fieldInfo = temp.GetType().GetField(paths[i], CommonBindingFlags);
-                                    temp = (fieldInfo.GetValue(temp) as IList)[index];
-                                    i += 2;
+                                    if (fieldInfo != null)
+                                    {
+                                        owner = fieldInfo.GetValue(temp);
+                                        return true;
+                                    }
                                 }
+                                else temp = (fieldInfo.GetValue(temp) as IList)[index];
                             }
                         }
                         else
                         {
                             fieldInfo = temp.GetType().GetField(paths[i], CommonBindingFlags);
-                            if (fieldInfo != null)
+                            if (i == paths.Length - 1)
                             {
-                                if (i < paths.Length - 1)
-                                    temp = fieldInfo.GetValue(temp);
+                                if (fieldInfo != null)
+                                {
+                                    owner = temp;
+                                    return true;
+                                }
                             }
-                            else break;
+                            temp = fieldInfo.GetValue(temp);
                         }
                     }
-                    if (fieldInfo != null)
-                    {
-                        owner = temp;
-                        return true;
-                    }
-                    else return false;
                 }
-                catch
+                catch// (Exception ex)
                 {
+                    //Debug.LogException(ex);
+                    owner = default;
                     return false;
                 }
             }
@@ -2146,7 +2320,7 @@ public sealed class ZetanUtility
         /// 获取SerializedProperty关联字段的值
         /// </summary>
         /// <param name="property"><see cref="SerializedProperty"/></param>
-        /// <param name="fieldInfo">字段信息，找不到关联字段时是null</param>
+        /// <param name="fieldInfo">字段信息，找不到关联字段时是null，若<paramref name="property"/>处于<see cref="IList"/>中，此字段信息指向<see cref="IList"/></param>
         /// <returns>获取到的字段值</returns>
         public static bool TryGetValue(SerializedProperty property, out object value, out FieldInfo fieldInfo)
         {
@@ -2156,20 +2330,16 @@ public sealed class ZetanUtility
             {
                 try
                 {
-                    string[] paths = property.propertyPath.Split('.');
+                    string[] paths = property.propertyPath.Replace(".Array.data[", "[").Split('.');
                     value = property.serializedObject.targetObject;
                     for (int i = 0; i < paths.Length; i++)
                     {
-                        if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
+                        if (paths[i].EndsWith(']'))
                         {
-                            if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
+                            if (int.TryParse(paths[i].Split('[', ']')[^2], out var index))
                             {
-                                if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
-                                {
-                                    fieldInfo = value.GetType().GetField(paths[i], CommonBindingFlags);
-                                    value = (fieldInfo.GetValue(value) as IList)[index];
-                                    i += 2;
-                                }
+                                fieldInfo = value.GetType().GetField(paths[i][..^$"[{index}]".Length], CommonBindingFlags);
+                                value = (fieldInfo.GetValue(value) as IList)[index];
                             }
                         }
                         else
@@ -2180,8 +2350,9 @@ public sealed class ZetanUtility
                     }
                     return fieldInfo != null;
                 }
-                catch
+                catch// (Exception ex)
                 {
+                    //Debug.LogException(ex);
                     value = default;
                     fieldInfo = null;
                     return false;
@@ -2202,19 +2373,15 @@ public sealed class ZetanUtility
             {
                 try
                 {
-                    string[] paths = property.propertyPath.Split('.');
+                    string[] paths = property.propertyPath.Replace(".Array.data[", "[").Split('.');
                     for (int i = 0; i < paths.Length; i++)
                     {
-                        if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
+                        if (paths[i].EndsWith(']'))
                         {
-                            if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
+                            if (int.TryParse(paths[i].Split('[', ']')[^2], out var index))
                             {
-                                if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
-                                {
-                                    fieldInfo = temp.GetType().GetField(paths[i], CommonBindingFlags);
-                                    temp = (fieldInfo.GetValue(temp) as IList)[index];
-                                    i += 2;
-                                }
+                                fieldInfo = temp.GetType().GetField(paths[i][..^$"[{index}]".Length], CommonBindingFlags);
+                                temp = (fieldInfo.GetValue(temp) as IList)[index];
                             }
                         }
                         else
@@ -2235,8 +2402,9 @@ public sealed class ZetanUtility
                     }
                     else return false;
                 }
-                catch
+                catch// (Exception ex)
                 {
+                    //Debug.LogException(ex);
                     return false;
                 }
             }
@@ -2495,7 +2663,7 @@ public sealed class ZetanUtility
                 if (!string.IsNullOrEmpty(path))
                 {
                     if (!string.IsNullOrEmpty(root) && !path.Contains($"Assets/{root}"))
-                        if (!EditorUtility.DisplayDialog("路径错误", $"请选择Assets/{root}范围内的路径", "确定", "取消"))
+                        if (!EditorUtility.DisplayDialog("路径错误", $"请选择Assets/{root}范围内的路径", "继续", "取消"))
                             return null;
                     try
                     {
@@ -2507,7 +2675,7 @@ public sealed class ZetanUtility
                     }
                     catch
                     {
-                        if (!EditorUtility.DisplayDialog("保存失败", "请检查路径或者资源的有效性。", "确定", "取消"))
+                        if (!EditorUtility.DisplayDialog("保存失败", "请检查路径或者资源的有效性。", "继续", "取消"))
                             return null;
                     }
                 }
@@ -2517,6 +2685,27 @@ public sealed class ZetanUtility
         public static Object SaveFilePanel(Func<Object> creation, string assetName = null, string title = "选择保存位置", string extension = "asset", string folder = null, string root = null, bool ping = false, bool select = false)
         {
             return SaveFilePanel<Object>(creation, assetName, title, extension, folder, root, ping, select);
+        }
+
+        public static void SaveFolderPanel(Action<string> callback, string path = null)
+        {
+            while (true)
+            {
+                path = EditorUtility.SaveFolderPanel("选择保存路径", path ?? "Assets", null);
+                if (!string.IsNullOrEmpty(path))
+                    if (!ZetanUtility.Editor.IsValidFolder(path))
+                    {
+                        if (!EditorUtility.DisplayDialog("路径错误", $"请选择Assets范围内的路径", "继续", "取消"))
+                            break;
+                    }
+                    else
+                    {
+                        path = ConvertToAssetsPath(path);
+                        callback?.Invoke(path);
+                        break;
+                    }
+                else break;
+            }
         }
 
         public static void MinMaxSlider(string label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
@@ -2529,21 +2718,19 @@ public sealed class ZetanUtility
         }
         public static void MinMaxSlider(Rect rect, string label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
         {
-            EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), label);
-            minValue = EditorGUI.FloatField(new Rect(rect.x + EditorGUIUtility.labelWidth + 2, rect.y, 40, rect.height), minValue);
-            if (minValue < minLimit) minValue = minLimit;
-            maxValue = EditorGUI.FloatField(new Rect(rect.x + rect.width - 40, rect.y, 40, rect.height), maxValue);
-            if (maxValue > maxLimit) maxValue = maxLimit;
-            EditorGUI.MinMaxSlider(new Rect(rect.x + EditorGUIUtility.labelWidth + 45, rect.y, rect.width - EditorGUIUtility.labelWidth - 88, rect.height), ref minValue, ref maxValue, minLimit, maxLimit);
+            MinMaxSlider(rect, new GUIContent(label), ref minValue, ref maxValue, minLimit, maxLimit);
         }
         public static void MinMaxSlider(Rect rect, GUIContent label, ref float minValue, ref float maxValue, float minLimit, float maxLimit)
         {
+            int indentLevel = EditorGUI.indentLevel;
             EditorGUI.LabelField(new Rect(rect.x, rect.y, EditorGUIUtility.labelWidth, rect.height), label);
+            EditorGUI.indentLevel = 0;
             minValue = EditorGUI.FloatField(new Rect(rect.x + EditorGUIUtility.labelWidth + 2, rect.y, 40, rect.height), minValue);
-            if (minValue < minLimit) minValue = minLimit;
             maxValue = EditorGUI.FloatField(new Rect(rect.x + rect.width - 40, rect.y, 40, rect.height), maxValue);
-            if (maxValue > maxLimit) maxValue = maxLimit;
             EditorGUI.MinMaxSlider(new Rect(rect.x + EditorGUIUtility.labelWidth + 45, rect.y, rect.width - EditorGUIUtility.labelWidth - 88, rect.height), ref minValue, ref maxValue, minLimit, maxLimit);
+            if (minValue < minLimit) minValue = minLimit;
+            if (maxValue > maxLimit) maxValue = maxLimit;
+            EditorGUI.indentLevel = indentLevel;
         }
 
         public static class Style
@@ -2610,16 +2797,7 @@ public sealed class ZetanUtility
             }
             public static void CreateNewScript(string fileName, string folder, TextAsset templateFile)
             {
-                var template = new ScriptTemplate() { fileName = fileName, folder = folder, templateFile = templateFile };
-                string path = $"{template.folder}";
-                if (path.EndsWith("/")) path = path[0..^1];
-
-                Object script = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
-                Selection.activeObject = script;
-                EditorGUIUtility.PingObject(script);
-
-                string templatePath = AssetDatabase.GetAssetPath(template.templateFile);
-                ProjectWindowUtil.CreateScriptAssetFromTemplateFile(templatePath, template.fileName);
+                CreateNewScript(new ScriptTemplate() { fileName = fileName, folder = folder, templateFile = templateFile });
             }
         }
     }

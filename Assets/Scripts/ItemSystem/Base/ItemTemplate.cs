@@ -1,16 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem.Module;
 #if UNITY_EDITOR
 using System;
 using System.Linq;
 using System.Reflection;
 #endif
 
-namespace ZetanStudio.Item
+namespace ZetanStudio.ItemSystem
 {
-    [CreateAssetMenu]
     public sealed class ItemTemplate : ScriptableObject
     {
         [field: SerializeField]
@@ -38,11 +37,11 @@ namespace ZetanStudio.Item
 #if UNITY_EDITOR
         public static class Editor
         {
-            public static ItemModule AddModule(ItemTemplate template, Type type, int index = -1, KeyedByTypeCollection<ItemModule> keyedModules = null)
+            public static ItemModule AddModule(ItemTemplate template, Type type, int index = -1, Dictionary<Type, ItemModule> keyedModules = null)
             {
                 if (template == null || type == null) return null;
-                if (keyedModules == null) keyedModules = new KeyedByTypeCollection<ItemModule>(template.modules.Where(x => x is not CommonModule));
-                if (!CommonModule.IsCommon(type) && keyedModules.Contains(type)) return null;
+                if (keyedModules == null) keyedModules = template.modules.Where(x => x is not CommonModule).ToDictionary(x => x.GetType(), x => x);
+                if (!CommonModule.IsCommon(type) && keyedModules.ContainsKey(type)) return null;
                 var attr = type.GetCustomAttribute<ItemModule.RequireAttribute>();
                 if (attr != null)
                 {
@@ -54,7 +53,7 @@ namespace ZetanStudio.Item
                 ItemModule module = Activator.CreateInstance(type) as ItemModule;
                 if (index < 0) template.modules.Add(module);
                 else template.modules.Insert(index, module);
-                if (!CommonModule.IsCommon(type)) keyedModules.Add(module);
+                if (!CommonModule.IsCommon(type)) keyedModules.Add(type, module);
                 ZetanUtility.Editor.SaveChange(template);
                 return module;
             }
@@ -64,6 +63,13 @@ namespace ZetanStudio.Item
                 template.modules.Remove(module);
                 ZetanUtility.Editor.SaveChange(template);
                 return true;
+            }
+
+            public static bool ClearInvalidModule(ItemTemplate template)
+            {
+                int count = template.modules.RemoveAll(x => !x);
+                if (count > 0) ZetanUtility.Editor.SaveChange(template);
+                return count > 0;
             }
         }
 #endif

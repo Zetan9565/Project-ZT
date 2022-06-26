@@ -10,14 +10,14 @@ namespace ZetanStudio
     {
         private IEnumerable<Dialogue> dialogues;
         private IEnumerable<TalkerInformation> talkers;
-        private IEnumerable<Item.Item> items;
+        private IEnumerable<ItemSystem.Item> items;
         private IEnumerable<EnemyInformation> enemies;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             dialogues ??= ZetanUtility.Editor.LoadAssets<Dialogue>();
             talkers ??= ZetanUtility.Editor.LoadAssets<TalkerInformation>();
-            items ??= Item.Item.GetItems();
+            items ??= ItemSystem.Item.GetItems();
             enemies ??= ZetanUtility.Editor.LoadAssets<EnemyInformation>();
             Draw(position, property, label, dialogues, talkers, items, enemies);
         }

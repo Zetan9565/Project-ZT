@@ -6,13 +6,11 @@ public class ProductInfoInspector : Editor
 {
     SerializedProperty remark;
     SerializedProperty products;
-    DropItemListDrawer listDrawer;
 
     private void OnEnable()
     {
         remark = serializedObject.FindProperty("remark");
         products = serializedObject.FindProperty("products");
-        listDrawer = new DropItemListDrawer(products, EditorGUIUtility.singleLineHeight, EditorGUIUtility.singleLineHeight + 2);
     }
 
     public override void OnInspectorGUI()
@@ -20,11 +18,8 @@ public class ProductInfoInspector : Editor
         serializedObject.UpdateIfRequiredOrScript();
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(remark, new GUIContent("备注"));
+        EditorGUILayout.PropertyField(products, new GUIContent("产出"));
         if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
-
-        serializedObject.UpdateIfRequiredOrScript();
-        listDrawer.DoLayoutDraw();
-        serializedObject.ApplyModifiedProperties();
     }
 }

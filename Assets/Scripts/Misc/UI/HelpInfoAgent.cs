@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
+using ZetanStudio;
 
 public class HelpInfoAgent : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -15,8 +16,8 @@ public class HelpInfoAgent : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 #if UNITY_ANDROID
         if (!string.IsNullOrEmpty(infoToShow))
         {
-            if (!autoHide) FloatTipsPanel.ShowText(transform.position, infoToShow, closeBtn: true);
-            else FloatTipsPanel.ShowText(transform.position, infoToShow, hideDelay);
+            if (!autoHide) FloatTipsPanel.ShowText(transform.position, Tr(infoToShow), closeBtn: true);
+            else FloatTipsPanel.ShowText(transform.position, Tr(infoToShow), hideDelay);
         }
 #endif
     }
@@ -24,15 +25,20 @@ public class HelpInfoAgent : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     public void OnPointerEnter(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
-        if (!autoHide) TipsManager.Instance.ShowText(transform.position, infoToShow);
-        else TipsManager.Instance.ShowText(transform.position, infoToShow, hideDelay);
+        if (!autoHide) FloatTipsPanel.ShowText(transform.position, Tr(infoToShow));
+        else FloatTipsPanel.ShowText(transform.position, Tr(infoToShow), hideDelay);
 #endif
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
 #if UNITY_STANDALONE
-        if (!string.IsNullOrEmpty(infoToShow)) TipsManager.Instance.Hide();
+        if (!string.IsNullOrEmpty(infoToShow)) WindowsManager.CloseWindow<FloatTipsPanel>();
 #endif
+    }
+
+    private string Tr(string text)
+    {
+        return LM.Tr(GetType().Name, text);
     }
 }

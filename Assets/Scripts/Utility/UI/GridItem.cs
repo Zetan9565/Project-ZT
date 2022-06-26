@@ -25,9 +25,9 @@ public class GridItem : GridItem<GridItem, object>
         onRefreshSelected?.Invoke(this);
     }
 
-    public override void OnClear()
+    public override void Clear()
     {
-        base.OnClear();
+        base.Clear();
         onClear?.Invoke(this);
     }
 

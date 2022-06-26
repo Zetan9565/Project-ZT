@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
 
 [System.Serializable]
 public class Condition
@@ -105,7 +105,7 @@ public class ConditionGroup
     public List<Condition> Conditions => conditions;
 
     [SerializeField]
-    [Tooltip("1、操作数为条件的序号\n2、运算符可使用 \"(\"、\")\"、\"+\"(或)、\"*\"(且)、\"~\"(非)" +
+    [Tooltip("1、操作数为条件的序号\n2、运算符可使用 \"(\"、\")\"、\"|\"(或)、\"&\"(且)、\"!\"(非)" +
                         "\n3、未对非法输入进行处理，需规范填写\n4、例：(0 + 1) * ~2 表示满足条件0或1且不满足条件2\n5、为空时默认进行相互的“且”运算")]
     private string relational;
     public string Relational => relational;

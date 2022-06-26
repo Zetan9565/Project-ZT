@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item.Module
+namespace ZetanStudio.ItemSystem.Module
 {
     [Name("药品"), Require(typeof(UsableModule))]
     public class MedichineModule : ItemModule

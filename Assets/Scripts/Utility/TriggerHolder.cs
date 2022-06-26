@@ -23,13 +23,13 @@ public class TriggerHolder : MonoBehaviour
 
     public void Init()
     {
-        if (TriggerManager.Instance && !string.IsNullOrEmpty(triggerName))
+        if (!string.IsNullOrEmpty(triggerName))
         {
-            TriggerManager.Instance.RegisterTriggerHolder(this);
+            TriggerManager.RegisterTriggerHolder(this);
             if (setStateAtFirst && !isSetAtFirst)
             {
                 isSetAtFirst = true;
-                TriggerManager.Instance.SetTrigger(TriggerName, originalState);
+                TriggerManager.SetTrigger(TriggerName, originalState);
             }
         }
     }
@@ -46,20 +46,20 @@ public class TriggerHolder : MonoBehaviour
     public void LoadData(TriggerHolderSaveData data)
     {
         if (data.ID != ID) return;
-        if (TriggerManager.Instance && !string.IsNullOrEmpty(triggerName))
+        if (!string.IsNullOrEmpty(triggerName))
         {
-            TriggerManager.Instance.RegisterTriggerHolder(this);
+            TriggerManager.RegisterTriggerHolder(this);
             if (setStateAtFirst && !data.isSetAtFirst)
             {
                 isSetAtFirst = true;
-                TriggerManager.Instance.SetTrigger(TriggerName, originalState);
+                TriggerManager.SetTrigger(TriggerName, originalState);
             }
         }
     }
 
     private void OnDestroy()
     {
-        if (TriggerManager.Instance) TriggerManager.Instance.DeleteTriggerHolder(this);
+        TriggerManager.DeleteTriggerHolder(this);
     }
 }
 [System.Serializable]

@@ -7,7 +7,7 @@ using ZetanStudio;
 [DefaultExecutionOrder(-1)]
 public abstract class Window : MonoBehaviour, IFadeAble<Window>
 {
-    public virtual string LKName => GetType().Name;
+    protected virtual string LangSelector => GetType().Name;
 
     [Label("淡入淡出")]
     public bool animated = true;
@@ -39,7 +39,8 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
     public Window MonoBehaviour => this;
     public CanvasGroup FadeTarget => content;
     public Coroutine FadeCoroutine { get; set; }
-
+    public virtual void OnOpenComplete() { }
+    public virtual void OnCloseComplete() { }
     /// <summary>
     /// 打开窗口
     /// </summary>
@@ -51,14 +52,15 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
         if (OnOpen(args))
         {
             WindowsManager.Push(this);
-            NotifyCenter.PostNotify(WindowStateChanged, GetType().Name, WindowStates.Open);
+            NotifyCenter.PostNotify(WindowStateChanged, GetType(), WindowStates.Open);
             IsOpen = true;
             closeBy = null;
-            if (animated) IFadeAble<Window>.FadeTo(this, 1, duration, () => content.blocksRaycasts = true);
+            if (animated) IFadeAble<Window>.FadeTo(this, 1, duration, () => { content.blocksRaycasts = true; OnOpenComplete(); });
             else
             {
                 content.alpha = 1;
                 content.blocksRaycasts = true;
+                OnOpenComplete();
             }
             return true;
         }
@@ -86,7 +88,7 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
         if (OnClose(args))
         {
             WindowsManager.Remove(this);
-            NotifyCenter.PostNotify(WindowStateChanged, GetType().Name, WindowStates.Closed);
+            NotifyCenter.PostNotify(WindowStateChanged, GetType(), WindowStates.Closed);
             IsOpen = false;
             onClose?.Invoke();
             onClose = null;
@@ -94,12 +96,13 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
             if (animated)
             {
                 content.blocksRaycasts = false;
-                IFadeAble<Window>.FadeTo(this, 0, duration);
+                IFadeAble<Window>.FadeTo(this, 0, duration, () => OnCloseComplete());
             }
             else
             {
                 content.alpha = 0;
                 content.blocksRaycasts = false;
+                OnCloseComplete();
             }
             return true;
         }
@@ -135,13 +138,6 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
     /// </summary>
     protected virtual void OnAwake() { }
     /// <summary>
-    /// <see cref="Start"/>时调用，默认进行消息监听注册操作
-    /// </summary>
-    protected virtual void OnStart()
-    {
-        RegisterNotify();
-    }
-    /// <summary>
     /// <see cref="OnDestroy"/>时调用，默认进行取消消息监听操作
     /// </summary>
     protected virtual void OnDestroy_()
@@ -168,10 +164,7 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
         WindowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
         if (closeButton) closeButton.onClick.AddListener(() => Close());
         OnAwake();
-    }
-    private void Start()
-    {
-        OnStart();
+        RegisterNotify();
     }
     private void OnDestroy()
     {
@@ -186,21 +179,88 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
 
     public string Tr(string text)
     {
-        return LM.Tr(LKName, text);
+        return LM.Tr(LangSelector, text);
     }
     public string Tr(string text, params object[] args)
     {
-        return LM.Tr(LKName, text, args);
+        return LM.Tr(LangSelector, text, args);
     }
     public IEnumerable<string> TrM(string text, params string[] texts)
     {
-        return LM.TrM(LKName, text, texts);
+        return LM.TrM(LangSelector, text, texts);
     }
 
     public static bool IsName<T>(string name) where T : Window
     {
         return typeof(T).Name == name;
     }
+    public static bool IsType<T>(Type type) where T : Window
+    {
+        return typeof(T).IsAssignableFrom(type);
+    }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        try
+        {
+            Vector3[] corners = new Vector3[4];
+            content.GetComponent<RectTransform>().GetWorldCorners(corners);
+            Gizmos.DrawLine(corners[0], corners[1]);
+            Gizmos.DrawLine(corners[1], corners[2]);
+            Gizmos.DrawLine(corners[2], corners[3]);
+            Gizmos.DrawLine(corners[3], corners[0]);
+        }
+        catch { }
+    }
+    [UnityEditor.MenuItem("GameObject/Zetan Studio/WindowPanel", true)]
+    private static bool CanCreateUI()
+    {
+        return UnityEditor.Selection.activeGameObject is GameObject go && go.transform is RectTransform;
+    }
+    [UnityEditor.MenuItem("GameObject/Zetan Studio/WindowPanel")]
+    private static void CreateUI()
+    {
+        var win = new GameObject("UndifinedWindow", typeof(RectTransform));
+        win.layer = LayerMask.NameToLayer("UI");
+        if (UnityEditor.Selection.activeGameObject is GameObject go && go.transform is RectTransform transform)
+        {
+            win.transform.SetParent(transform, false);
+        }
+        var wTrans = win.GetComponent<RectTransform>();
+        wTrans.anchorMin = Vector2.zero;
+        wTrans.anchorMax = Vector2.one;
+        wTrans.sizeDelta = Vector2.zero;
+        var content = new GameObject("Content", typeof(CanvasGroup), typeof(Image));
+        content.layer = LayerMask.NameToLayer("UI");
+        content.transform.SetParent(win.transform, false);
+        content.GetComponent<RectTransform>().sizeDelta = new Vector2(400, 600);
+        var title = new GameObject("WindowTitle", typeof(Text));
+        title.layer = LayerMask.NameToLayer("UI");
+        title.transform.SetParent(content.transform, false);
+        var tTrans = title.GetComponent<RectTransform>();
+        tTrans.anchorMin = Vector2.up;
+        tTrans.anchorMax = Vector2.up;
+        tTrans.anchoredPosition = new Vector2(90, -20);
+        tTrans.sizeDelta = new Vector2(160, 40);
+        var tText = title.GetComponent<Text>();
+        tText.fontSize = 32;
+        tText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        tText.alignment = TextAnchor.MiddleLeft;
+        tText.text = "Undifined";
+        if (ColorUtility.TryParseHtmlString("#323232", out var tColor)) tText.color = tColor;
+        else tText.color = Color.black;
+        var close = new GameObject("Close", typeof(Image), typeof(Button));
+        close.layer = LayerMask.NameToLayer("UI");
+        close.transform.SetParent(content.transform, false);
+        var cTrans = close.GetComponent<RectTransform>();
+        cTrans.anchorMin = Vector2.one;
+        cTrans.anchorMax = Vector2.one;
+        cTrans.pivot = Vector2.one;
+        cTrans.sizeDelta = new Vector2(60, 60);
+        UnityEditor.Selection.activeGameObject = win;
+    }
+#endif
 }
 
 public abstract class SingletonWindow<T> : Window where T : Window
@@ -210,7 +270,7 @@ public abstract class SingletonWindow<T> : Window where T : Window
     {
         get
         {
-            if (!instance) instance = FindObjectOfType<T>();
+            if (!instance) instance = FindObjectOfType<T>(true);
             return instance;
         }
     }

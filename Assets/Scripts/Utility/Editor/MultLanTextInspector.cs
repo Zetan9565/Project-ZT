@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine.UI;
 
-[CustomEditor(typeof(MultLanText))]
+[CustomEditor(typeof(MultLangText))]
 public class MultLanTextInspector : UnityEditor.UI.TextEditor
 {
     //Text text;

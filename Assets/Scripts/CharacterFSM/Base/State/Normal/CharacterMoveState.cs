@@ -39,11 +39,11 @@ public class CharacterMoveState : CharacterNormalState
             animator.SetDesiredSpeed(Vector2.zero);
             Machine.SetCurrentState<CharacterRollState>();
         }
-        else if (control.ReadTrigger(CharacterInputNames.Instance.Dash))
+        else if (control.ReadTrigger(CharacterInputNames.Instance.Flash))
         {
             motion.SetVelocity(Vector2.zero);
             animator.SetDesiredSpeed(Vector2.zero);
-            Machine.SetCurrentState<CharacterDashState>();
+            Machine.SetCurrentState<CharacterFlashState>();
         }
     }
 }

@@ -2,25 +2,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
-public class CraftAgent : ListItem<CraftAgent, ZetanStudio.Item.Item>
+public class CraftAgent : ListItem<CraftAgent, ZetanStudio.ItemSystem.Item>
 {
     [SerializeField]
-    private ItemSlotBase icon;
+    private ItemSlot icon;
 
     [SerializeField]
     private Text nameText;
 
-    private CraftWindow window;
-
-    private void Awake()
-    {
-        GetComponent<Button>().onClick.AddListener(OnClick);
-    }
-
-    public void OnClick()
-    {
-        if (Data) window.ShowDescription(Data);
-    }
+    [SerializeField]
+    private GameObject selected;
 
     public override void Refresh()
     {
@@ -28,14 +19,14 @@ public class CraftAgent : ListItem<CraftAgent, ZetanStudio.Item.Item>
         nameText.text = Data.Name;
     }
 
-    public void SetWindow(CraftWindow window)
+    protected override void RefreshSelected()
     {
-        this.window = window;
+        ZetanUtility.SetActive(selected, isSelected);
     }
 
-    public override void OnClear()
+    public override void Clear()
     {
-        base.OnClear();
+        base.Clear();
         nameText.text = string.Empty;
         Data = null;
         icon.Vacate();

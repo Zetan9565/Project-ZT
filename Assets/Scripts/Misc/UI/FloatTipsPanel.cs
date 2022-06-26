@@ -15,7 +15,7 @@ public class FloatTipsPanel : Window
 
     protected override void OnAwake()
     {
-        base.OnAwake();
+        StartCoroutine(FixTextWidth());
     }
 
     private readonly List<TipsButton> buttons = new List<TipsButton>();
@@ -95,11 +95,5 @@ public class FloatTipsPanel : Window
         if (bc < 3) buttonParent.constraintCount = bc;
         else buttonParent.constraintCount = 3;
         if (index >= 0 && index < tb.transform.parent.childCount - 1) tb.transform.SetSiblingIndex(0);
-    }
-
-    protected override void OnStart()
-    {
-        base.OnStart();
-        StartCoroutine(FixTextWidth());
     }
 }

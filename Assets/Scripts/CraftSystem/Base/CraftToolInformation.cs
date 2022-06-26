@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.Item.Craft
+namespace ZetanStudio.ItemSystem.Craft
 {
 
     [CreateAssetMenu(fileName = "tool info", menuName = "Zetan Studio/制作工具信息")]

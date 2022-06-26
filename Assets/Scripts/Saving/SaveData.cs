@@ -2,7 +2,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
-using ZetanStudio.Item;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
 
 [Serializable]
 public class SaveData
@@ -17,18 +18,22 @@ public class SaveData
     public float playerPosY;
     public float playerPosZ;
 
-    public BackpackSaveData backpackData = new BackpackSaveData();
+    public Dictionary<string, SaveDataItem> data = new();
 
-    public List<string> craftDatas = new List<string>();
+    //public BackpackSaveData backpackData = new BackpackSaveData();
+    //public InventorySaveData backpack = new InventorySaveData();
+    //public ItemDatabaseSaveData itemDatabase = new ItemDatabaseSaveData();
 
-    public StructureSystemSaveData structureSystemData = new StructureSystemSaveData();
+    //public List<string> craftDatas = new List<string>();
 
-    public List<WarehouseSaveData> warehouseDatas = new List<WarehouseSaveData>();
+    //public StructureSystemSaveData structureSystemData = new StructureSystemSaveData();
 
-    public List<QuestSaveData> inProgressQuestDatas = new List<QuestSaveData>();
-    public List<QuestSaveData> finishedQuestDatas = new List<QuestSaveData>();
+    //public List<WarehouseSaveData> warehouseDatas = new List<WarehouseSaveData>();
 
-    public List<DialogueSaveData> dialogueDatas = new List<DialogueSaveData>();
+    //public List<QuestSaveData> inProgressQuestDatas = new List<QuestSaveData>();
+    //public List<QuestSaveData> finishedQuestDatas = new List<QuestSaveData>();
+
+    //public List<DialogueSaveData> dialogueDatas = new List<DialogueSaveData>();
 
     public List<MapMarkSaveData> markDatas = new List<MapMarkSaveData>();
 
@@ -48,6 +53,22 @@ public class SaveData
     }
 }
 
+[Serializable]
+public sealed class SaveDataItem
+{
+    public List<int> intList = new();
+    public List<float> floatList = new();
+    public List<bool> boolList = new();
+    public List<string> stringList = new();
+    public List<SaveDataItem> dataList = new();
+
+    public Dictionary<string, int> intData = new();
+    public Dictionary<string, float> floatData = new();
+    public Dictionary<string, bool> boolData = new();
+    public Dictionary<string, string> stringData = new();
+    public Dictionary<string, SaveDataItem> subData = new();
+}
+
 #region 道具相关
 [Serializable]
 public class BackpackSaveData
@@ -60,7 +81,7 @@ public class BackpackSaveData
     public float currentWeight;
     public float maxWeightLoad;
 
-    public List<ItemSaveData> itemDatas = new List<ItemSaveData>();
+    //public List<ItemSaveData> itemDatas = new List<ItemSaveData>();
     public List<string> items;
 }
 
@@ -78,7 +99,7 @@ public class WarehouseSaveData
     public int currentSize;
     public int maxSize;
 
-    public List<ItemSaveData> itemDatas = new List<ItemSaveData>();
+    //public List<ItemSaveData> itemDatas = new List<ItemSaveData>();
 
     public WarehouseSaveData(string id, WarehouseData warehouse)
     {
@@ -98,34 +119,52 @@ public class WarehouseSaveData
 }
 public class InventorySaveData
 {
-    public List<InventoryItemSaveData> items;
+    public long money;
+
+    public int spaceCost;
+    public int spaceLimit;
+
+    public float weightCost;
+    public float weightLimit;
+
+    public List<InventoryItemSaveData> items = new List<InventoryItemSaveData>();
+    public List<SlotSaveData> slots = new List<SlotSaveData>();
+    public List<string> hiddenItems = new List<string>();
 }
 [Serializable]
-public class ItemSaveData
+public class ItemDatabaseSaveData
 {
-    public string itemID;
+    public Dictionary<string, ItemSaveData> items = new Dictionary<string, ItemSaveData>();
 
-    public int amount;
-
-    public int indexInGrid;
-
-    public ItemSaveData(ItemInfo itemInfo)
+    public void Add(ItemData item)
     {
-        itemID = itemInfo.ItemID;
-        amount = itemInfo.Amount;
-        //indexInGrid = itemInfo.indexInGrid;
+        items[item.ID] = new ItemSaveData(item);
+    }
+    public Dictionary<string, ItemData> Load()
+    {
+        Dictionary<string, ItemData> results = new Dictionary<string, ItemData>();
+        //foreach (var item in items)
+        //{
+        //    results[item.Key] = new ItemData(item.Value);
+        //}
+        return results;
     }
 }
 [Serializable]
-public class NewItemSaveData//因为存在同一个ItemData可能分别存储在不同Inventory中的情况，所以用一个总的列表存储它们，最后读档时再根据ID从中依次读取到相应的Inventory。
+public class ItemSaveData//因为存在同一个ItemData可能分别存储在不同Inventory中的情况，所以用一个总的列表存储它们，最后读档时再根据ID从中依次读取到相应的Inventory。
 {
     public string modelID;
     public string ID;
+    public List<ItemModuleSaveData> moduleData = new List<ItemModuleSaveData>();
 
-    public NewItemSaveData(ItemData item)
+    public ItemSaveData(ItemData item)
     {
         modelID = item.ModelID;
         ID = item.ID;
+        foreach (var module in item.ModuleData)
+        {
+            moduleData.Add(new ItemModuleSaveData(module));
+        }
     }
 }
 [Serializable]
@@ -154,11 +193,28 @@ public class SlotSaveData
 {
     public int index;
     public int amount;
+    public string item;
 
     public SlotSaveData(ItemSlotData slot)
     {
         index = slot.index;
         amount = slot.amount;
+        item = slot.ItemID;
+    }
+}
+[Serializable]
+public sealed class ItemModuleSaveData
+{
+    public string moduleType;
+    public Dictionary<string, int> intData = new Dictionary<string, int>();
+    public Dictionary<string, float> floatData = new Dictionary<string, float>();
+    public Dictionary<string, bool> boolData = new Dictionary<string, bool>();
+    public Dictionary<string, string> stringData = new Dictionary<string, string>();
+
+    public ItemModuleSaveData(ItemModuleData data)
+    {
+        moduleType = data.GetModule().GetType().FullName;
+        //data.Save(this);
     }
 }
 #endregion
@@ -259,9 +315,9 @@ public class DialogueWordsSaveData
 
     public DialogueWordsSaveData(DialogueWordsData words)
     {
-        for (int i = 0; i < words.optionDatas.Count; i++)
+        for (int i = 0; i < words.OptionDatas.Count; i++)
         {
-            if (words.optionDatas[i].isDone)
+            if (words.OptionDatas[i].isDone)
                 cmpltOptionIndexes.Add(i);
         }
     }
@@ -352,8 +408,33 @@ public class MapMarkSaveData
 }
 #endregion
 
-public interface ISaveLoad
+[Serializable]
+public class RoleValueSaveData
 {
-    void SaveData(SaveData data);
-    void LoadData(SaveData data);
+    public string ID;
+    public int intValue;
+    public float floatValue;
+    public bool boolValue;
+
+    public RoleValueSaveData()
+    {
+
+    }
+
+    public RoleValueSaveData(ZetanStudio.Character.IRoleValue value)
+    {
+        ID = value.ID;
+        switch (value.ValueType)
+        {
+            case ZetanStudio.Character.RoleValueType.Integer:
+                intValue = value.IntValue;
+                break;
+            case ZetanStudio.Character.RoleValueType.Float:
+                floatValue = value.FloatValue;
+                break;
+            case ZetanStudio.Character.RoleValueType.Boolean:
+                boolValue = value.BoolValue;
+                break;
+        }
+    }
 }

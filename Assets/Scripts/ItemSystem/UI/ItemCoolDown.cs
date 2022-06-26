@@ -1,6 +1,6 @@
 using System;
-using ZetanStudio.Item;
-using ZetanStudio.Item.Module;
+using ZetanStudio.ItemSystem;
+using ZetanStudio.ItemSystem.Module;
 
 public class ItemCoolDown : CoolDown
 {
@@ -10,6 +10,8 @@ public class ItemCoolDown : CoolDown
     {
         this.item = item;
         ZetanUtility.SetActive(this, item);
+        if (!item) Disable();
+        else Enable();
     }
 
     protected override void OnAwake()
@@ -20,7 +22,7 @@ public class ItemCoolDown : CoolDown
     private void OnUseItem(object[] msg)
     {
         if (msg[0] is ItemData item && item == this.item)
-            Restart();
+            Enable();
     }
 
     private void OnDestroy()
@@ -31,6 +33,7 @@ public class ItemCoolDown : CoolDown
     private CoolDownData CD => item.GetModuleData<CoolDownData>();
 
     protected override bool Active => item && CD && !CD.Available;
+
 
     public override Func<float> GetTime
     {

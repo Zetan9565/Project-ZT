@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ZetanStudio.BehaviourTree.Editor
 {
-    [CustomEditor(typeof(BehaviourManager))]
+    [CustomEditor(typeof(BehaviourTreeManager))]
     public sealed class BehaviourManagerInspector : UnityEditor.Editor
     {
         SerializedProperty globalVariables;
@@ -38,7 +38,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             serializedVariables = serializedGlobal.FindProperty("variables");
             variableList = new SharedVariableListDrawer(serializedVariables, false);
             presetVariableList = new SharedVariablePresetListDrawer(presetVariables, serializedGlobal.targetObject as ISharedVariableHandler,
-                                                                    (target as BehaviourManager).GetPresetVariableTypeAtIndex);
+                                                                    (target as BehaviourTreeManager).GetPresetVariableTypeAtIndex);
             showGlobal = new AnimBool(serializedVariables.isExpanded);
             showGlobal.valueChanged.AddListener(() => { Repaint(); if (serializedVariables != null) serializedVariables.isExpanded = showGlobal.target; });
             showPreset = new AnimBool(presetVariables.isExpanded);
@@ -47,9 +47,9 @@ namespace ZetanStudio.BehaviourTree.Editor
 
         public override void OnInspectorGUI()
         {
-            if (FindObjectsOfType<BehaviourManager>().Count(x => x.isActiveAndEnabled) > 1)
+            if (FindObjectsOfType<BehaviourTreeManager>().Count(x => x.isActiveAndEnabled) > 1)
             {
-                EditorGUILayout.HelpBox(Language.Tr(settings.language, "存在多个激活的{0}，请移除或失活其它", typeof(BehaviourManager).Name), MessageType.Error);
+                EditorGUILayout.HelpBox(L.Tr(settings.language, "存在多个激活的{0}，请移除或失活其它", typeof(BehaviourTreeManager).Name), MessageType.Error);
                 return;
             }
             serializedObject.UpdateIfRequiredOrScript();
@@ -73,7 +73,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 if (EditorGUILayout.BeginFadeGroup(showGlobal.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
-                if (!Application.isPlaying && !ZetanUtility.IsPrefab((target as BehaviourManager).gameObject))
+                if (!Application.isPlaying && !ZetanUtility.IsPrefab((target as BehaviourTreeManager).gameObject))
                 {
                     showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, Tr("变量预设列表"), true);
                     if (EditorGUILayout.BeginFadeGroup(showPreset.faded))
@@ -86,7 +86,7 @@ namespace ZetanStudio.BehaviourTree.Editor
 
         private string Tr(string text)
         {
-            return Language.Tr(settings.language, text);
+            return L.Tr(settings.language, text);
         }
     }
 }

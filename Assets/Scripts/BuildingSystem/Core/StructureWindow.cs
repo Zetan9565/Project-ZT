@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.StructureSystem;
 
 public class StructureWindow : Window, IHideable
 {
@@ -44,7 +45,7 @@ public class StructureWindow : Window, IHideable
         HideDescription();
         HideBuiltList();
         currentInfo = info;
-        preview = Instantiate(currentInfo.Preview, StructureManager.Instance.StructureRoot);
+        preview = Instantiate(currentInfo.Preview, StructureManager.StructureRoot);
         WindowsManager.HideAll(true);
         IsPreviewing = true;
         isDraging = true;
@@ -71,7 +72,7 @@ public class StructureWindow : Window, IHideable
         if (!currentInfo || !preview) return;
         if (preview.BuildAble)
         {
-            StructureManager.Instance.TryBuild(currentInfo, preview);
+            StructureManager.TryBuild(currentInfo, preview);
             FinishPreview();
         }
         else
@@ -115,15 +116,15 @@ public class StructureWindow : Window, IHideable
     }
     private Vector2 GetMovePosition()
     {
-        if (ZetanUtility.IsMouseInsideScreen) return Camera.main.ScreenToWorldPoint(InputManager.mousePosition);
+        if (ZetanUtility.IsMouseInsideScreen) return Camera.main.ScreenToWorldPoint(Input.mousePosition);
         else return preview.transform.position;
     }
 
     public void MovePreview()
     {
         if (isDraging) return;
-        var horizontal = InputManager.GetAsix("Horizontal");
-        var vertical = InputManager.GetAsix("Vertical");
+        var horizontal = Input.GetAsix("Horizontal");
+        var vertical = Input.GetAsix("Vertical");
         var input = new Vector2(horizontal, vertical).normalized;
         if (input.sqrMagnitude > 0.25)
             moveTime += Time.deltaTime;
@@ -187,7 +188,7 @@ public class StructureWindow : Window, IHideable
 
     public void ShowBuiltList(StructureInformation info)
     {
-        var structures = StructureManager.Instance.GetStructures(info);
+        var structures = StructureManager.GetStructures(info);
         if (structures == null || structures.Count < 1)
         {
             HideBuiltList();
@@ -224,7 +225,7 @@ public class StructureWindow : Window, IHideable
 
     public void Refresh()
     {
-        infoList.Refresh(StructureManager.Instance.StructuresLearned);
+        infoList.Refresh(StructureManager.StructuresLearned);
         structureList.Refresh(null);
     }
 
