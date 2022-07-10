@@ -7,7 +7,7 @@ namespace ZetanStudio
     [CreateAssetMenu(menuName = "Zetan Studio/道具/枚举/道具属性枚举")]
     public class ItemAttributeEnum : ScriptableObjectEnum<ItemAttributeEnum, ItemAttributeType>
     {
-
+        public override ItemAttributeType this[string ID] => Array.Find(_enum, i => i.ID == ID) ?? new ItemAttributeType();
     }
 
     [Serializable]

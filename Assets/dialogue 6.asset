@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: dialogue 6
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091213465059459
+  - rid: 9026091213465059460
+  - rid: 9026091213465059461
+  - rid: 9026091213465059462
+  - rid: 9026091213465059463
+  exit:
+    <ID>k__BackingField: CON-8b9887ddfba74b279191eb6a89fc7533
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 1080, y: 0}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091213465059459
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-540d1eeb85364470bda025e6d2457ebe
+        events: []
+        options:
+        - <Title>k__BackingField: "\u60F3\u4E86\u89E3\u4F60\u7684\u5E74\u9F84"
+          <Content>k__BackingField:
+            rid: 9026091213465059460
+          <IsMain>k__BackingField: 0
+          lastContent: 
+        - <Title>k__BackingField: "\u60F3\u4E86\u89E3\u4F60\u7684\u559C\u597D"
+          <Content>k__BackingField:
+            rid: 9026091213465059461
+          <IsMain>k__BackingField: 0
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u4ECA\u5E74\u7684\u6536\u6210\u6BD4\u53BB\u5E74\u597D\u5462\u3002"
+    - rid: 9026091213465059460
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-ede67fb5fa9945cd9fe99d63b7665ac7
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059463
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 360, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u6211\u4ECA\u5E7420\u5C81\u4E86\u3002"
+    - rid: 9026091213465059461
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-fce00b197b674dd9990e26af1425184b
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059462
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 360, y: 100}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u6211\u559C\u6B22\u52B3\u52A8\uFF0C\u52B3\u52A8\u6700\u5149\u8363\u3002"
+    - rid: 9026091213465059462
+      type: {class: RecursionSuffix, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-fff4f5c5572049a7bf1a1783475e3c4a
+        events: []
+        options: []
+        <ExitHere>k__BackingField: 0
+        _position: {x: 720, y: 100}
+        lastExitHere: 0
+        <Depth>k__BackingField: 2
+    - rid: 9026091213465059463
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-1b081a38893f4406923a982ee5ee3064
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 1
+        _position: {x: 720, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u6BCF\u5929\u90FD\u5FD9\u5F97\u4E0D\u53EF\u5F00\u4EA4\u3002"

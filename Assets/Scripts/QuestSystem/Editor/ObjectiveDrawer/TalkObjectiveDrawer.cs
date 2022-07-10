@@ -1,6 +1,8 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using ZetanStudio.DialogueSystem;
+using ZetanStudio.Extension.Editor;
 
 [CustomPropertyDrawer(typeof(TalkObjective))]
 public sealed class TalkObjectiveDrawer : ObjectiveDrawer
@@ -18,12 +20,12 @@ public sealed class TalkObjectiveDrawer : ObjectiveDrawer
 
         Quest quest = objective.serializedObject.targetObject as Quest;
         SerializedProperty _NPCToTalk = objective.FindPropertyRelative("_NPCToTalk");
-        SerializedProperty dialogue = objective.FindPropertyRelative("dialogue");
+        SerializedProperty dialogue = objective.FindAutoPropertyRelative("Dialogue");
         EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), _NPCToTalk, new GUIContent("与此NPC交谈"));
         lineCount++;
         EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), dialogue, new GUIContent("交谈时的对话"));
         lineCount++;
-        if (dialogue.objectReferenceValue is Dialogue dialog)
+        if (dialogue.objectReferenceValue is NewDialogue dialog)
         {
             Quest find = Array.Find(questCache, x => x != quest && x.Objectives.Exists(y => y is TalkObjective to && to.Dialogue == dialog));
             if (find)
@@ -49,8 +51,8 @@ public sealed class TalkObjectiveDrawer : ObjectiveDrawer
             if (objective.FindPropertyRelative("display").boolValue || !quest.InOrder) lineCount++;//标题
             lineCount++;//目标NPC
             lineCount++; //交谈时对话
-            SerializedProperty dialogue = objective.FindPropertyRelative("dialogue");
-            if (dialogue.objectReferenceValue is Dialogue dialog)
+            SerializedProperty dialogue = objective.FindAutoPropertyRelative("Dialogue");
+            if (dialogue.objectReferenceValue is NewDialogue dialog)
             {
                 if (Array.Find(questCache, x => x != quest && x.Objectives.Exists(y => y is TalkObjective to && to.Dialogue == dialog)))
                     lineCount += 2;//逻辑错误

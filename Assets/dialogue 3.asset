@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: dialogue 3
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091213465059441
+  exit:
+    <ID>k__BackingField: CON-351914166b894fd0aed7ea8a45dbc1fc
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 360, y: 0}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091213465059441
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-7a6152bb00194bd5866d23aa50901ed1
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 1
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u4F60\u597D\u50CF\u6709\u79CD\u5B50\u554A\uFF0C\u4E0D\u8BD5\u7740\u79CD\u4E00\u4E0B\u5417\uFF1F"

@@ -42,10 +42,10 @@ public class StructureData : SceneObjectData<Structure2D>
     public StructureData(StructureInformation info, SaveDataItem data)
     {
         Info = info;
-        if (data.floatData.TryGetValue("leftBuildTime", out var leftBuildTime)) this.leftBuildTime = leftBuildTime;
-        if (data.intData.TryGetValue("stageIndex", out var stageIndex)) currentStageIndex = stageIndex;
-        if (data.stringData.TryGetValue("ID", out var ID)) this.ID = ID;
-        if (data.stringData.TryGetValue("scene", out var scene)) this.scene = scene;
+        if (data.TryReadFloat("leftBuildTime", out var leftBuildTime)) this.leftBuildTime = leftBuildTime;
+        if (data.TryReadInt("stageIndex", out var stageIndex)) currentStageIndex = stageIndex;
+        if (data.TryReadString("ID", out var ID)) this.ID = ID;
+        if (data.TryReadString("scene", out var scene)) this.scene = scene;
         if (this.leftBuildTime > 0 && currentStageIndex >= 0 && currentStageIndex < info.Stages.Count)
         {
             IsBuilt = false;
@@ -103,7 +103,7 @@ public class StructureData : SceneObjectData<Structure2D>
             else
             {
                 var finds = materialsStored.Where(x => MaterialModule.SameType(material.MaterialType, x.Item));//找到种类相同的道具
-                if (finds.Count() > 0)
+                if (finds.Any())
                 {
                     if (finds.Select(x => x.Amount).Sum() < material.Amount) return false;//若材料总数不足，则无法制作
                 }
@@ -140,7 +140,7 @@ public class StructureData : SceneObjectData<Structure2D>
             else
             {
                 var finds = materialsStored.Where(x => MaterialModule.SameType(material.MaterialType, x.Item));//找到种类相同的道具
-                if (finds.Count() > 0)
+                if (finds.Any())
                 {
 
                 }
@@ -241,14 +241,14 @@ public class StructureData : SceneObjectData<Structure2D>
     public SaveDataItem GetSaveData()
     {
         var data = new SaveDataItem();
-        data.stringData["modelID"] = Info.ID;
-        data.stringData["ID"] = ID;
-        data.stringData["scene"] = scene;
-        data.floatData["posX"] = position.x;
-        data.floatData["posY"] = position.y;
-        data.floatData["posZ"] = position.z;
-        data.floatData["leftBuildTime"] = leftBuildTime;
-        data.intData["stageIndex"] = currentStageIndex;
+        data["modelID"] = Info.ID;
+        data["ID"] = ID;
+        data["scene"] = scene;
+        data["posX"] = position.x;
+        data["posY"] = position.y;
+        data["posZ"] = position.z;
+        data["leftBuildTime"] = leftBuildTime;
+        data["stageIndex"] = currentStageIndex;
         return data;
     }
 

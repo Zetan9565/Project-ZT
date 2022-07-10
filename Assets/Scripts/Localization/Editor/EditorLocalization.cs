@@ -32,7 +32,7 @@ namespace ZetanStudio
         }
     }
 
-    public sealed class EL
+    public sealed class EDL
     {
         public static string Tr(string text)
         {

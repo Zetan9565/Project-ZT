@@ -22,6 +22,14 @@ namespace ZetanStudio.Character
         public bool BoolValue { get; }
 
         public RoleValueType ValueType { get; }
+
+        public SaveDataItem GetSaveData()
+        {
+            var data = new SaveDataItem();
+            data["ID"] = ID;
+            data["value"] = Value;
+            return data;
+        }
     }
 
     public interface IRoleValue<T> : IRoleValue where T : ScriptableObjectEnumItem

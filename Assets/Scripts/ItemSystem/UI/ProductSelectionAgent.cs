@@ -14,7 +14,7 @@ namespace ZetanStudio.ItemSystem.UI
 
         public override void Refresh()
         {
-            _name.text = Data.Item.ColorName;
+            _name.text = ItemFactory.GetColorName(Data.Item);
             icon.overrideSprite = Data.Item.Icon;
         }
 

@@ -92,20 +92,6 @@ public interface IDraggable
 {
     Sprite DraggableIcon { get; }
 }
-
-public interface IManageAble
-{
-    public bool IsInit { get; }
-
-    public bool Init();
-
-    public bool Reset();
-
-    public bool OnSaveGame(SaveData data);
-
-    public bool OnLoadGame(SaveData data);
-}
-
 public interface IDirectionMove
 {
     public void Move(Vector2 vector2);

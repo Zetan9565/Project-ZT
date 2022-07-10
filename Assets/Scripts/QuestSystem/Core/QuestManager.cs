@@ -38,83 +38,23 @@ public static class QuestManager
             return false;
         }
         ObjectiveData currentObjective = quest.Objectives[0];
-        for (int i = 0; i < quest.Objectives.Count; i++)
-        {
-            var o = quest.Objectives[i];
-            o.OnStateChangeEvent += OnObjectiveStateChange;
-            if (o is CollectObjectiveData co)
-            {
-                BackpackManager.Instance.Inventory.OnItemAmountChanged += co.UpdateCollectAmount;
-                if (o.AllPrevComplete)
-                {
-                    if (co.Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.CurrentAmount = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect);
-                    else if (!co.Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.amountWhenStart = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect);
-                }
-            }
-            if (o is KillObjectiveData ko)
-            {
-                switch (ko.Model.KillType)
-                {
-                    case KillObjectiveType.Specific:
-                        GameManager.Enemies[ko.Model.Enemy.ID].ForEach(e => e.OnDeathEvent += ko.UpdateKillAmount);
-                        break;
-                    case KillObjectiveType.Race:
-                        foreach (List<Enemy> enemies in GameManager.Enemies.Values.Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Model.Race))
-                            enemies.ForEach(e => e.OnDeathEvent += ko.UpdateKillAmount);
-                        break;
-                    case KillObjectiveType.Group:
-                        foreach (List<Enemy> enemies in GameManager.Enemies.Values.Where(x => x.Count > 0 && ko.Model.Group.Contains(x[0].Info.ID)))
-                        {
-                            enemies.ForEach(e => e.OnDeathEvent += ko.UpdateKillAmount);
-                        }
-                        break;
-                    case KillObjectiveType.Any:
-                        foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
-                            enemies.ForEach(e => e.OnDeathEvent += ko.UpdateKillAmount);
-                        break;
-                }
-            }
-            if (o is TalkObjectiveData to)
-                if (!o.IsComplete)
-                {
-                    var talker = DialogueManager.Talkers[to.Model.NPCToTalk.ID];
-                    talker.objectivesTalkToThis.Add(to);
-                    o.OnStateChangeEvent += talker.TryRemoveObjective;
-                }
-            if (o is MoveObjectiveData mo)
-                mo.targetPoint = CheckPointManager.CreateCheckPoint(mo.Model.AuxiliaryPos, mo.UpdateMoveState);
-            if (o is SubmitObjectiveData so)
-                if (!o.IsComplete)
-                {
-                    var talker = DialogueManager.Talkers[so.Model.NPCToSubmit.ID];
-                    talker.objectivesSubmitToThis.Add(so);
-                    o.OnStateChangeEvent += talker.TryRemoveObjective;
-                }
-            if (o is TriggerObjectiveData cuo)
-            {
-                TriggerManager.RegisterTriggerEvent(cuo.UpdateTriggerState);
-                var state = TriggerManager.GetTriggerState(cuo.Model.TriggerName);
-                if (cuo.Model.CheckStateAtAcpt && state != TriggerState.NotExist)
-                    TriggerManager.SetTrigger(cuo.Model.TriggerName, state == TriggerState.On);
-            }
-        }
-        quest.InProgress = true;
+        quest.OnAccept(OnQuestStateChanged, OnObjectiveAmountChanged, OnObjectiveStateChanged);
         questsInProgress.Add(quest);
         if (quest.Model.NPCToSubmit)
-            DialogueManager.Talkers[quest.Model.NPCToSubmit.ID].TransferQuestToThis(quest);
+            DialogueManager.Talkers[quest.Model.NPCToSubmit.ID].TransferQuest(quest);
         if (!SaveManager.Instance.IsLoading) MessageManager.Instance.New(Tr("接取了任务{0}", quest.Title));
         quest.latestHandleDays = TimeManager.Instance.Days;
         CreateObjectiveMapIcon(quest.Objectives[0]);
-        NotifyCenter.PostNotify(QuestStateChanged, quest, false);
+        NotifyCenter.PostNotify(QuestAcceptStateChanged, quest, false);
         return true;
     }
 
     /// <summary>
-    /// 完成任务
+    /// 提交任务
     /// </summary>
-    /// <param name="quest">要放弃的任务</param>
-    /// <returns>是否成功完成任务</returns>
-    public static bool CompleteQuest(QuestData quest)
+    /// <param name="quest">要提交的任务</param>
+    /// <returns>是否成功提交任务</returns>
+    public static bool SubmitQuest(QuestData quest)
     {
         if (!quest) return false;
         if (HasOngoingQuest(quest) && quest.IsComplete)
@@ -137,73 +77,17 @@ public static class QuestManager
                     }
                 }
             }
-            quest.InProgress = false;
             questsInProgress.Remove(quest);
             quest.currentQuestHolder.questInstances.Remove(quest);
             questsFinished.Add(quest);
-            foreach (ObjectiveData o in quest.Objectives)
-            {
-                o.OnStateChangeEvent -= OnObjectiveStateChange;
-                if (o is CollectObjectiveData co)
-                {
-                    BackpackManager.Instance.Inventory.OnItemAmountChanged -= co.UpdateCollectAmount;
-                    if (!SaveManager.Instance.IsLoading && co.Model.LoseItemAtSbmt) BackpackManager.Instance.Lose(co.Model.ItemToCollect, o.Model.Amount);
-                }
-                if (o is KillObjectiveData ko)
-                {
-                    switch (ko.Model.KillType)
-                    {
-                        case KillObjectiveType.Specific:
-                            GameManager.Enemies[ko.Model.Enemy.ID].ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                            break;
-                        case KillObjectiveType.Race:
-                            foreach (List<Enemy> enemies in GameManager.Enemies.Values.Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Model.Race))
-                            {
-                                enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                            }
-                            break;
-                        case KillObjectiveType.Group:
-                            foreach (List<Enemy> enemies in GameManager.Enemies.Values.Where(x => x.Count > 0 && ko.Model.Group.Contains(x[0].Info.ID)))
-                            {
-                                enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                            }
-                            break;
-                        case KillObjectiveType.Any:
-                            foreach (List<Enemy> enemies in GameManager.Enemies.Values)
-                                enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                            break;
-                    }
-                }
-                if (o is TalkObjectiveData to)
-                {
-                    var talker = DialogueManager.Talkers[to.Model.NPCToTalk.ID];
-                    talker.objectivesTalkToThis.RemoveAll(x => x == to);
-                    o.OnStateChangeEvent -= talker.TryRemoveObjective;
-                }
-                if (o is MoveObjectiveData mo)
-                {
-                    mo.targetPoint = null;
-                    CheckPointManager.RemoveCheckPointListener(mo.Model.AuxiliaryPos, mo.UpdateMoveState);
-                }
-                if (o is SubmitObjectiveData so)
-                {
-                    var talker = DialogueManager.Talkers[so.Model.NPCToSubmit.ID];
-                    talker.objectivesSubmitToThis.RemoveAll(x => x == so);
-                    o.OnStateChangeEvent -= talker.TryRemoveObjective;
-                }
-                if (o is TriggerObjectiveData cuo)
-                {
-                    TriggerManager.DeleteTriggerListner(cuo.UpdateTriggerState);
-                }
-                RemoveObjectiveMapIcon(o);
-            }
+            quest.OnSubmit(RemoveObjectiveMapIcon);
             if (!SaveManager.Instance.IsLoading)
             {
                 BackpackManager.Instance.Get(quest.Model.RewardItems);
                 MessageManager.Instance.New(Tr("提交了任务{0}", quest.Title));
             }
             quest.latestHandleDays = TimeManager.Instance.Days;
-            NotifyCenter.PostNotify(QuestStateChanged, quest, true);
+            NotifyCenter.PostNotify(QuestAcceptStateChanged, quest, true);
             return true;
         }
         return false;
@@ -225,96 +109,37 @@ public static class QuestManager
             }
             else
             {
-                bool isCmplt = quest.IsComplete;
-                quest.InProgress = false;
                 questsInProgress.Remove(quest);
-                foreach (ObjectiveData o in quest.Objectives)
-                {
-                    o.OnStateChangeEvent -= OnObjectiveStateChange;
-                    if (o is CollectObjectiveData)
-                    {
-                        CollectObjectiveData co = o as CollectObjectiveData;
-                        co.CurrentAmount = 0;
-                        co.amountWhenStart = 0;
-                        BackpackManager.Instance.Inventory.OnItemAmountChanged -= co.UpdateCollectAmount;
-                    }
-                    if (o is KillObjectiveData ko)
-                    {
-                        ko.CurrentAmount = 0;
-                        switch (ko.Model.KillType)
-                        {
-                            case KillObjectiveType.Specific:
-                                GameManager.Enemies[ko.Model.Enemy.ID].ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                                break;
-                            case KillObjectiveType.Race:
-                                foreach (List<Enemy> enemies in GameManager.Enemies.Values.Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == ko.Model.Race))
-                                {
-                                    enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                                }
-                                break;
-                            case KillObjectiveType.Group:
-                                foreach (List<Enemy> enemies in GameManager.Enemies.Values.Where(x => x.Count > 0 && ko.Model.Group.Contains(x[0].Info.ID)))
-                                {
-                                    enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                                }
-                                break;
-                            case KillObjectiveType.Any:
-                                foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
-                                {
-                                    enemies.ForEach(e => e.OnDeathEvent -= ko.UpdateKillAmount);
-                                }
-                                break;
-                        }
-                    }
-                    if (o is TalkObjectiveData to)
-                    {
-                        to.CurrentAmount = 0;
-                        DialogueManager.Talkers[to.Model.NPCToTalk.ID].objectivesTalkToThis.RemoveAll(x => x == to);
-                        DialogueManager.RemoveDialogueData(to.Model.Dialogue);
-                    }
-                    if (o is MoveObjectiveData mo)
-                    {
-                        mo.CurrentAmount = 0;
-                        mo.targetPoint = null;
-                        CheckPointManager.RemoveCheckPointListener(mo.Model.AuxiliaryPos, mo.UpdateMoveState);
-                    }
-                    if (o is SubmitObjectiveData so)
-                    {
-                        so.CurrentAmount = 0;
-                        DialogueManager.Talkers[so.Model.NPCToSubmit.ID].objectivesSubmitToThis.RemoveAll(x => x == so);
-                    }
-                    if (o is TriggerObjectiveData cuo)
-                    {
-                        cuo.CurrentAmount = 0;
-                        TriggerManager.DeleteTriggerListner(cuo.UpdateTriggerState);
-                    }
-                    RemoveObjectiveMapIcon(o);
-                }
+                quest.OnAbandon(RemoveObjectiveMapIcon);
                 if (quest.Model.NPCToSubmit)
-                    quest.originalQuestHolder.TransferQuestToThis(quest);
+                    quest.originalQuestHolder.TransferQuest(quest);
                 quest.latestHandleDays = TimeManager.Instance.Days;
-                NotifyCenter.PostNotify(QuestStateChanged, quest, true);
+                NotifyCenter.PostNotify(QuestAcceptStateChanged, quest, true);
                 return true;
             }
         }
         MessageManager.Instance.New(Tr("该任务未在进行"));
         return false;
     }
-
-    private static void OnObjectiveStateChange(ObjectiveData objective, bool befCmplt)
+    private static void OnQuestStateChanged(QuestData quest, bool oldState)
     {
-        if (!SaveManager.Instance.IsLoading)
+        if (!SaveManager.Instance.IsLoading && oldState != quest.IsComplete)
+            MessageManager.Instance.New($"[{Tr("任务")}]{quest.Title}({Tr("已完成")})");
+        NotifyCenter.PostNotify(QuestAcceptStateChanged, quest, oldState);
+    }
+    private static void OnObjectiveAmountChanged(ObjectiveData objective, int oldAmount)
+    {
+        if (!SaveManager.Instance.IsLoading && objective.CurrentAmount > 0)
         {
-            if (objective.CurrentAmount > 0)
-            {
-                string message = objective.DisplayName + (objective.IsComplete ? $"({Tr("完成")}" : $"[{objective.AmountString}]");
-                MessageManager.Instance.New(message);
-            }
-            if (objective.parent.IsComplete) MessageManager.Instance.New($"[{Tr("任务")}]{objective.parent.Title}({Tr("已完成")})");
+            string message = objective.DisplayName + (objective.IsComplete ? $"({Tr("完成")})" : $"[{objective.AmountString}]");
+            MessageManager.Instance.New(message);
         }
-        if (!befCmplt && objective.IsComplete)
+        NotifyCenter.PostNotify(ObjectiveAmountUpdate, objective, oldAmount);
+    }
+    private static void OnObjectiveStateChanged(ObjectiveData objective, bool oldState)
+    {
+        if (objective.IsComplete)
         {
-            UpdateNextCollectObjectives(objective);
             //Debug.Log("\"" + objective.DisplayName + "\"" + "从没完成变成完成");
             ObjectiveData nextToDo = null;
             QuestData quest = objective.parent;
@@ -355,7 +180,7 @@ public static class QuestManager
             RemoveObjectiveMapIcon(objective);
         }
         //else Debug.Log("无操作");
-        NotifyCenter.PostNotify(ObjectiveUpdate, objective, befCmplt);
+        NotifyCenter.PostNotify(ObjectiveStateUpdate, objective, oldState);
     }
     #endregion
 
@@ -447,29 +272,6 @@ public static class QuestManager
     }
 
     /// <summary>
-    /// 更新某个收集类任务目标，用于在其他前置目标完成时，更新其后置收集类目标
-    /// </summary>
-    private static void UpdateNextCollectObjectives(ObjectiveData objective)
-    {
-        if (!objective || !objective.nextObjective) return;
-        ObjectiveData nextObjective = objective.nextObjective;
-        while (nextObjective != null)
-        {
-            if (nextObjective is not CollectObjectiveData && nextObjective.Model.InOrder && nextObjective.nextObjective != null && nextObjective.nextObjective.Model.InOrder && nextObjective.Model.Priority < nextObjective.nextObjective.Model.Priority)
-            {
-                //若相邻后置目标不是收集类目标，该后置目标按顺序执行，其相邻后置也按顺序执行，且两者不可同时执行，则说明无法继续更新后置的收集类目标
-                return;
-            }
-            if (nextObjective is CollectObjectiveData co)
-            {
-                if (co.Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.CurrentAmount = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect);
-                else if (!co.Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) co.amountWhenStart = BackpackManager.Instance.GetAmount(co.Model.ItemToCollect);
-            }
-            nextObjective = nextObjective.nextObjective;
-        }
-    }
-
-    /// <summary>
     /// 任务是否有效
     /// </summary>
     /// <param name="quest"></param>
@@ -477,7 +279,8 @@ public static class QuestManager
     public static bool IsQuestValid(Quest quest)
     {
         if (string.IsNullOrEmpty(quest.ID) || string.IsNullOrEmpty(quest.Title)) return false;
-        if (quest.NPCToSubmit && !DialogueManager.Talkers.ContainsKey(quest.NPCToSubmit.ID)) return false;
+        if (quest.NPCToSubmit && !DialogueManager.Talkers.ContainsKey(quest.NPCToSubmit.ID))
+            return false;
         foreach (var obj in quest.Objectives)
             if (!obj.IsValid) return false;
         return true;
@@ -491,7 +294,7 @@ public static class QuestManager
     /// <returns>是否需要该道具</returns>
     public static bool HasQuestRequiredItem(Item item, int leftAmount)
     {
-        return FindQuestsRequiredItem(item, leftAmount).Count() > 0;
+        return FindQuestsRequiredItem(item, leftAmount).Any();
     }
     private static IEnumerable<QuestData> FindQuestsRequiredItem(Item item, int leftAmount)
     {
@@ -538,26 +341,26 @@ public static class QuestManager
     public static void SaveData(SaveData saveData)
     {
         var inProgress = new SaveDataItem();
-        saveData.data["questsInProgress"] = inProgress;
+        saveData["questsInProgress"] = inProgress;
         foreach (QuestData quest in questsInProgress)
         {
             var qs = new SaveDataItem();
-            qs.stringData["ID"] = quest.Model.ID;
-            qs.stringData["giverID"] = quest.originalQuestHolder.TalkerID;
-            inProgress.dataList.Add(qs);
+            qs["ID"] = quest.Model.ID;
+            qs["giverID"] = quest.originalQuestHolder.TalkerID;
+            inProgress.Write(qs);
             foreach (var obj in quest.Objectives)
             {
-                qs.intData[obj.ID] = obj.CurrentAmount;
+                qs[obj.ID] = obj.CurrentAmount;
             }
         }
         var finished = new SaveDataItem();
-        saveData.data["questsFinished"] = finished;
+        saveData["questsFinished"] = finished;
         foreach (QuestData quest in questsFinished)
         {
             var qs = new SaveDataItem();
-            qs.stringData["ID"] = quest.Model.ID;
-            qs.stringData["giverID"] = quest.originalQuestHolder.TalkerID;
-            finished.dataList.Add(qs);
+            qs["ID"] = quest.Model.ID;
+            qs["giverID"] = quest.originalQuestHolder.TalkerID;
+            finished.Write(qs);
         }
     }
 
@@ -576,17 +379,17 @@ public static class QuestManager
     public static void LoadData(SaveData saveData)
     {
         questsInProgress.Clear();
-        if (saveData.data.TryGetValue("questsInProgress", out var quests))
+        if (saveData.TryReadData("questsInProgress", out var quests))
         {
-            foreach (var quest in quests.dataList)
+            foreach (var quest in quests.ReadDataList())
             {
                 HandlingQuestData(quest, false);
             }
         }
         questsFinished.Clear();
-        if (saveData.data.TryGetValue("questsFinished", out quests))
+        if (saveData.TryReadData("questsFinished", out quests))
         {
-            foreach (var quest in quests.dataList)
+            foreach (var quest in quests.ReadDataList())
             {
                 HandlingQuestData(quest, true);
             }
@@ -594,14 +397,14 @@ public static class QuestManager
 
         static void HandlingQuestData(SaveDataItem questData, bool finished)
         {
-            if (!questData.stringData.TryGetValue("giverID", out var giverID)) return;
+            if (!questData.TryReadString("giverID", out var giverID)) return;
             if (!DialogueManager.Talkers.TryGetValue(giverID, out var questGiver)) return;
-            if (!questData.stringData.TryGetValue("ID", out var ID)) return;
+            if (!questData.TryReadString("ID", out var ID)) return;
             QuestData quest = questGiver.questInstances.Find(x => x.Model.ID == ID);
             if (!quest) return;
             AcceptQuest(quest);
             if (!finished)
-                foreach (var od in questData.intData)
+                foreach (var od in questData.ReadIntDict())
                 {
                     foreach (ObjectiveData o in quest.Objectives)
                     {
@@ -618,7 +421,7 @@ public static class QuestManager
                 {
                     o.CurrentAmount = o.Model.Amount;
                 }
-                CompleteQuest(quest);
+                SubmitQuest(quest);
             }
         }
     }
@@ -638,11 +441,19 @@ public static class QuestManager
     /// <summary>
     /// 任务更新消息，格式：([发生变化的任务：<see cref="QuestData"/>], [任务之前的进行状态：<see cref="bool"/>])
     /// </summary>
+    public const string QuestAcceptStateChanged = "QuestAcceptStateChanged";
+    /// <summary>
+    /// 任务更新消息，格式：([发生变化的任务：<see cref="QuestData"/>], [任务之前的完成状态：<see cref="bool"/>])
+    /// </summary>
     public const string QuestStateChanged = "QuestStateChanged";
     /// <summary>
     /// 目标更新消息，格式：([发生变化的目标：<see cref="ObjectiveData"/>]，[目标之前的完成状态：<see cref="bool"/>])
     /// </summary>
-    public const string ObjectiveUpdate = "ObjectiveUpdate";
+    public const string ObjectiveStateUpdate = "ObjectiveStateUpdate";
+    /// <summary>
+    /// 目标更新消息，格式：([发生变化的目标：<see cref="ObjectiveData"/>]，[目标之前的完成数量：<see cref="int"/>])
+    /// </summary>
+    public const string ObjectiveAmountUpdate = "ObjectiveAmountUpdate";
     #endregion
 
     #region 语言相关

@@ -329,7 +329,7 @@ public abstract class InventoryHandler
     public bool IsMaterialsEnough(IEnumerable<MaterialInfo> materials)
     {
         if (!Inventory || materials == null) return false;
-        if (materials.Count() < 1) return true;
+        if (!materials.Any()) return true;
         var materialEnum = materials.GetEnumerator();
         while (materialEnum.MoveNext())
         {
@@ -347,7 +347,7 @@ public abstract class InventoryHandler
     }
     public bool IsMaterialsEnough(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfo> givenMaterials)
     {
-        if (!Inventory || targetMaterials == null || targetMaterials.Count() < 1 || givenMaterials == null || givenMaterials.Count() < 1 || targetMaterials.Count() != givenMaterials.Count()) return false;
+        if (!Inventory || targetMaterials == null || !targetMaterials.Any() || givenMaterials == null || !givenMaterials.Any() || targetMaterials.Count() != givenMaterials.Count()) return false;
         foreach (var material in targetMaterials)
         {
             if (material.CostType == MaterialCostType.SingleItem)
@@ -360,7 +360,7 @@ public abstract class InventoryHandler
             else
             {
                 var finds = givenMaterials.Where(x => MaterialModule.SameType(material.MaterialType, x.Item));//找到种类相同的道具
-                if (finds.Count() > 0)
+                if (finds.Any())
                 {
                     if (finds.Select(x => x.Amount).Sum() != material.Amount) return false;//若材料总数不符合，则无法制作
                     foreach (var find in finds)
@@ -383,7 +383,7 @@ public abstract class InventoryHandler
 
         List<CountedItem> items = new List<CountedItem>();
         HashSet<string> itemsToken = new HashSet<string>();
-        if (targetMaterials.Count() < 1) return items;
+        if (!targetMaterials.Any()) return items;
 
         var materialEnum = targetMaterials.GetEnumerator();
         while (materialEnum.MoveNext())
@@ -534,7 +534,7 @@ public abstract class InventoryHandler
     public int GetAmountCanCraft(IEnumerable<MaterialInfo> materials)
     {
         if (!Inventory) return 0;
-        if (materials.Count() < 1) return 1;
+        if (!materials.Any()) return 1;
         List<int> amounts = new List<int>();
         using (var materialEnum = materials.GetEnumerator())
             while (materialEnum.MoveNext())
@@ -556,7 +556,7 @@ public abstract class InventoryHandler
     }
     public int GetAmountCanCraft(IEnumerable<MaterialInfo> targetMaterials, IEnumerable<ItemInfo> givenMaterials)
     {
-        if (!Inventory || givenMaterials == null || givenMaterials.Count() < 1 || targetMaterials == null || targetMaterials.Count() < 1 || targetMaterials.Count() != givenMaterials.Count()) return 0;
+        if (!Inventory || givenMaterials == null || !givenMaterials.Any() || targetMaterials == null || !targetMaterials.Any() || targetMaterials.Count() != givenMaterials.Count()) return 0;
         List<int> amounts = new List<int>();
         foreach (var material in targetMaterials)
         {
@@ -570,7 +570,7 @@ public abstract class InventoryHandler
             else
             {
                 var finds = givenMaterials.Where(x => MaterialModule.SameType(material.MaterialType, x.Item));//找到种类相同的道具
-                if (finds.Count() > 0)
+                if (finds.Any())
                 {
                     if (finds.Select(x => x.Amount).Sum() != material.Amount) return 0;//若材料总数不符合，则无法制作
                     foreach (var find in finds)

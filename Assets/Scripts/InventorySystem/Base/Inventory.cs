@@ -566,6 +566,7 @@ public class Inventory
         }
         else
         {
+            Debug.Log(id);
             errorType = InventoryError.Lack;
             return false;
         }
@@ -689,13 +690,19 @@ public class Inventory
                 {
                     var slot = find[i];
                     oldAmount += slot.amount;
+                    var item = slot.item;
                     left -= slot.Take(left);
-                    if (slot.IsEmpty) find.Remove(slot);
+                    if (slot.IsEmpty)
+                    {
+                        find.Remove(slot);
+                        if (!data.StackAble) items.Remove(item.ID);
+                    }
                 }
                 SpaceCost -= oldCount - find.Count;
                 WeightCost -= data.Model.Weight * amount;
-                if (find.Count < 1) items.Remove(data.ID);
-                else items[data.ID].amount -= amount;
+                if (data.StackAble)
+                    if (find.Count < 0) items.Remove(data.ID);
+                    else items[data.ID].amount -= amount;
                 OnItemAmountChanged?.Invoke(data.Model, oldAmount, oldAmount - amount);
                 if (itemsToGet != null && itemsToGet.Length > 0) Get(itemsToGet);
             }
@@ -709,8 +716,7 @@ public class Inventory
     /// <param name="itemsToGet">同时获得的道具</param>
     public void Lose(Item model, int amount, params CountedItem[] itemsToGet)
     {
-        if (!model) return;
-        Lose(model.ID, amount, itemsToGet);
+        if (model) Lose(model.ID, amount, itemsToGet);
     }
     /// <summary>
     /// 失去道具，可选同时获得道具，无视限制
@@ -1028,46 +1034,46 @@ public class Inventory
     public SaveDataItem GetSaveData()
     {
         var save = new SaveDataItem();
-        save.stringData["money"] = Money.ToString();
-        save.intData["spaceCost"] = SpaceCost;
-        save.intData["spaceLimit"] = SpaceLimit;
-        save.floatData["weightCost"] = WeightCost;
-        save.floatData["weightLimit"] = WeightLimit;
+        save["money"] = Money.ToString();
+        save["spaceCost"] = SpaceCost;
+        save["spaceLimit"] = SpaceLimit;
+        save["weightCost"] = WeightCost;
+        save["weightLimit"] = WeightLimit;
         var items = new SaveDataItem();
-        save.subData["items"] = items;
+        save["items"] = items;
         var slots = new SaveDataItem();
-        save.subData["slots"] = slots;
+        save["slots"] = slots;
         foreach (var slot in this.slots)
         {
             var ss = new SaveDataItem();
-            ss.intData["index"] = slot.index;
-            ss.intData["amount"] = slot.amount;
-            ss.stringData["item"] = slot.ItemID;
-            slots.dataList.Add(ss);
+            ss["index"] = slot.index;
+            ss["amount"] = slot.amount;
+            ss["item"] = slot.ItemID;
+            slots.Write(ss);
         }
         foreach (var item in this.items.Values)
         {
-            items.intData[item.source.ID] = item.amount;
+            items[item.source.ID] = item.amount;
         }
         var hidden = new SaveDataItem();
-        save.subData["hiddenItems"] = hidden;
+        save["hiddenItems"] = hidden;
         foreach (var item in hiddenItems.Values)
         {
-            hidden.stringList.Add(item.ID);
+            hidden.Write(item.ID);
         }
         return save;
     }
     public void LoadSaveData(SaveDataItem save)
     {
-        if (save.stringData.TryGetValue("money", out var money) && long.TryParse(money, out var mv)) Money = mv;
-        if (save.intData.TryGetValue("spaceCost", out var space)) SpaceCost = space;
-        if (save.intData.TryGetValue("spaceLimit", out var spaceLmt)) SpaceLimit = spaceLmt;
-        if (save.floatData.TryGetValue("weightCost", out var weight)) WeightCost = weight;
-        if (save.floatData.TryGetValue("weightLimit", out var weightLmt)) WeightLimit = weightLmt;
+        if (save.TryReadString("money", out var money) && long.TryParse(money, out var mv)) Money = mv;
+        if (save.TryReadInt("spaceCost", out var space)) SpaceCost = space;
+        if (save.TryReadInt("spaceLimit", out var spaceLmt)) SpaceLimit = spaceLmt;
+        if (save.TryReadFloat("weightCost", out var weight)) WeightCost = weight;
+        if (save.TryReadFloat("weightLimit", out var weightLmt)) WeightLimit = weightLmt;
         this.items.Clear();
-        if (save.subData.TryGetValue("items", out var items))
+        if (save.TryReadData("items", out var items))
         {
-            foreach (var amount in items.intData)
+            foreach (var amount in items.ReadIntDict())
             {
                 if (ItemFactory.GetItem(amount.Key) is ItemData loadedItem)
                     this.items[amount.Key] = new CountedItem(loadedItem, amount.Value);
@@ -1077,14 +1083,14 @@ public class Inventory
         slotsMap.Clear();
         keyedSlots.Clear();
 
-        if (save.subData.TryGetValue("slots", out var slots))
+        if (save.TryReadData("slots", out var slots))
         {
-            foreach (var sd in slots.dataList)
+            foreach (var sd in slots.ReadDataList())
             {
                 var slot = new ItemSlotData(this.slots.Count);
-                if (sd.intData.TryGetValue("index", out var index)) slot.index = index;
-                if (sd.intData.TryGetValue("amount", out var amount)) slot.amount = amount;
-                if (sd.stringData.TryGetValue("item", out var itemID) && this.items.TryGetValue(itemID, out var item))
+                if (sd.TryReadInt("index", out var index)) slot.index = index;
+                if (sd.TryReadInt("amount", out var amount)) slot.amount = amount;
+                if (sd.TryReadString("item", out var itemID) && this.items.TryGetValue(itemID, out var item))
                 {
                     slot.item = item.source;
                     if (keyedSlots.TryGetValue(slot.ModelID, out var list)) list.Add(slot);
@@ -1095,9 +1101,9 @@ public class Inventory
             }
         }
         hiddenItems.Clear();
-        if (save.subData.TryGetValue("hiddenItems", out var hiddens))
+        if (save.TryReadData("hiddenItems", out var hiddens))
         {
-            foreach (var hidden in hiddens.stringList)
+            foreach (var hidden in hiddens.ReadStringList())
             {
                 if (this.items.TryGetValue(hidden, out var item))
                     hiddenItems[hidden] = item.source;
@@ -1151,7 +1157,7 @@ public static class InventoryUtility
         int amount = handler.GetAmount(data);
         if (amount < 2 && amount > 0)
         {
-            ConfirmWindow.StartConfirm($"确定丢弃1个 [{data.Model.ColorName}] 吗？",
+            ConfirmWindow.StartConfirm($"确定丢弃1个 [{data.ColorName}] 吗？",
                 delegate
                 {
                     if (handler.Lose(data, 1))
@@ -1160,7 +1166,7 @@ public static class InventoryUtility
         }
         else AmountWindow.StartInput(delegate (long amount)
         {
-            ConfirmWindow.StartConfirm($"确定丢弃{amount}个 [{data.Model.ColorName}] 吗？",
+            ConfirmWindow.StartConfirm($"确定丢弃{amount}个 [{data.ColorName}] 吗？",
                 delegate
                 {
                     if (handler.Lose(data, (int)amount))

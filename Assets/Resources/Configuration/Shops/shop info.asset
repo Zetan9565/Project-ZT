@@ -21,13 +21,6 @@ MonoBehaviour:
     refreshTime: 300
     minRefreshAmount: 1
     maxRefreshAmount: 1
-  - item: {fileID: 8516276107217364782, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
-    maxAmount: 1
-    priceMultiple: 1
-    emptyAble: 0
-    refreshTime: 300
-    minRefreshAmount: 1
-    maxRefreshAmount: 1
   acquisitions:
   - item: {fileID: -4938875555958233210, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     maxAmount: 1

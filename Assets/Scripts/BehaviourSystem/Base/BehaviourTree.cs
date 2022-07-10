@@ -465,9 +465,9 @@ namespace ZetanStudio.BehaviourTree
         /// <returns>是否在遍历时产生终止</returns>
         public static bool Traverse(Node node, Func<Node, bool> onAccess)
         {
-            if (node)
+            if (onAccess != null && node)
             {
-                if (onAccess.Invoke(node)) return true;
+                if (onAccess(node)) return true;
                 if (node is ParentNode parent)
                     foreach (Node n in parent.GetChildren())
                         if (Traverse(n, onAccess))
@@ -478,10 +478,14 @@ namespace ZetanStudio.BehaviourTree
 
         public bool Reachable(Node node)
         {
+            return Reachable(entry, node);
+        }
+        public static bool Reachable(Node from, Node to)
+        {
             bool reachable = false;
-            Traverse(entry, (n) =>
+            Traverse(from, n =>
             {
-                reachable = n == node;
+                reachable = n == to;
                 return reachable;
             });
             return reachable;

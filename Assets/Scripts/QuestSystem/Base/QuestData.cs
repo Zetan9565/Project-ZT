@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ZetanStudio;
@@ -17,7 +18,7 @@ public class QuestData
 
     public Quest Model { get; }
 
-    private List<ObjectiveData> objectives = new List<ObjectiveData>();
+    private readonly List<ObjectiveData> objectives = new List<ObjectiveData>();
     private ReadOnlyCollection<ObjectiveData> readOnlyObjectives;
     public ReadOnlyCollection<ObjectiveData> Objectives
     {
@@ -28,13 +29,83 @@ public class QuestData
         }
     }
 
+    private readonly List<ObjectiveData> ongoingObjectives = new List<ObjectiveData>();
+    public ReadOnlyCollection<ObjectiveData> OngoingObjectives => new ReadOnlyCollection<ObjectiveData>(ongoingObjectives);
+
     public TalkerData originalQuestHolder;
 
     public TalkerData currentQuestHolder;
 
-    public int latestHandleDays;
+    private Action<QuestData, bool> onStateChanged;
+    private Action<ObjectiveData, int> onObjectiveAmountChanged;
+    private event Action<ObjectiveData, bool> OnObjectiveStateChanged;
 
-    public bool InProgress { get; set; }
+    public int latestHandleDays;
+    public void CalculateOngoing()
+    {
+        var oldComplete = IsComplete;
+        HashSet<ObjectiveData> ongoingBef = new HashSet<ObjectiveData>(ongoingObjectives);
+        ongoingObjectives.Clear();
+        foreach (var objective in objectives)
+        {
+            if (!objective.IsComplete && (!objective.Model.InOrder || objective.AllPrevComplete))
+                ongoingObjectives.Add(objective);
+        }
+        List<ObjectiveData> changedAfterStart = new List<ObjectiveData>(ongoingObjectives.Count);
+        ongoingObjectives.ForEach(o =>
+        {
+            if (!ongoingBef.Contains(o))
+            {
+                int oldAmount = 0;
+                o.Start(onObjectiveAmountChanged, OnObjectiveStateChanged);
+                if (oldAmount != o.CurrentAmount) changedAfterStart.Add(o);
+            }
+        });
+        changedAfterStart.ForEach(o =>
+        {
+            onObjectiveAmountChanged(o, 0);
+            OnObjectiveStateChanged(o, false);
+        });
+        ongoingObjectives.RemoveAll(x => x.IsComplete);
+        if (oldComplete != IsComplete) onStateChanged?.Invoke(this, oldComplete);
+    }
+    public void OnAccept(Action<QuestData, bool> questStateListener, Action<ObjectiveData, int> objectiveAmountListener, Action<ObjectiveData, bool> objectiveStateListener)
+    {
+        InProgress = true;
+        onStateChanged = questStateListener;
+        onObjectiveAmountChanged = objectiveAmountListener;
+        OnObjectiveStateChanged = null;
+        OnObjectiveStateChanged += ObjectiveStateChanged;
+        OnObjectiveStateChanged += objectiveStateListener;
+        CalculateOngoing();
+    }
+    public void OnSubmit(Action<ObjectiveData> objecitveAccesser = null)
+    {
+        InProgress = false;
+        onStateChanged = null;
+        onObjectiveAmountChanged = null;
+        OnObjectiveStateChanged = null;
+        objectives.ForEach(o =>
+        {
+            o.Submit();
+            objecitveAccesser?.Invoke(o);
+        });
+        ongoingObjectives.Clear();
+    }
+    public void OnAbandon(Action<ObjectiveData> objecitveAccesser = null)
+    {
+        InProgress = false;
+        onStateChanged = null;
+        onObjectiveAmountChanged = null;
+        OnObjectiveStateChanged = null;
+        objectives.ForEach(o =>
+        {
+            o.Abandon();
+            objecitveAccesser?.Invoke(o);
+        });
+        ongoingObjectives.Clear();
+    }
+    public bool InProgress { get; private set; }
 
     /// <summary>
     /// 目标是否都已达成
@@ -50,12 +121,18 @@ public class QuestData
     /// <summary>
     /// 是否已经提交
     /// </summary>
-    public bool IsFinished
+    public bool IsSubmitted
     {
         get
         {
             return IsComplete && !InProgress;
         }
+    }
+
+    private void ObjectiveStateChanged(ObjectiveData objective, bool oldState)
+    {
+        if (!objective) return;
+        CalculateOngoing();
     }
 
     public QuestData(Quest quest)
@@ -123,8 +200,8 @@ public class QuestData
         return self != null;
     }
 
-    public string Tr(string displayName)
+    public string Tr(string text)
     {
-        return LM.Tr(GetType().Name, displayName);
+        return LM.Tr(GetType().Name, text);
     }
 }

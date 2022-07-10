@@ -15,15 +15,13 @@ MonoBehaviour:
   _ID: NPC002
   _name: "\u6069\u683C\u65AF"
   _SMParams: {fileID: 0}
-  attribute:
-    attributes: []
   level: 0
   sex: 1
   enable: 1
   scene: UI
   position: {x: 2.5, y: 3.51, z: 0}
   prefab: {fileID: 1429737066326795183, guid: c129bba4cb2b9c549bda4aef1c16b7ab, type: 3}
-  defaultDialogue: {fileID: 11400000, guid: 982521bacf361f14289d5658a605bca4, type: 2}
+  defaultDialogue: {fileID: 11400000, guid: 47ca2d36d39938e49af4c6a75cb07825, type: 2}
   conditionDialogues:
   - condition:
       conditions:
@@ -36,7 +34,7 @@ MonoBehaviour:
         relatedCharInfo: {fileID: 0}
         triggerName: 
       relational: 
-    dialogue: {fileID: 11400000, guid: ee87b06aec0879548b1c88221a4c5e8e, type: 2}
+    dialogue: {fileID: 11400000, guid: 0af03633419a3e04ca87cfe3c8338b5e, type: 2}
   isWarehouseAgent: 1
   warehouseCapcity: 30
   isVendor: 0
@@ -46,12 +44,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5288a43013e44284baed8b30be1f92de, type: 2}
   - {fileID: 11400000, guid: 75021802295611e4bb73ffff88713358, type: 2}
   canDEV_RLAT: 1
-  normalItemDialogue: {fileID: 11400000, guid: e62a2ffe7b33df643a3f543395d50229, type: 2}
+  normalItemDialogue: {fileID: 11400000, guid: e5402b883f863fe4fb8ad37ecd5bc5d7, type: 2}
   normalIntimacyValue: 5
   giftDialogues:
   - lowerBound: 6
     upperBound: 30
-    dialogue: {fileID: 11400000, guid: 9d3cef39d7a19e944b6a7b2556195be9, type: 2}
+    dialogue: {fileID: 11400000, guid: 7a033f665a28ceb4e86fc942433d13d3, type: 2}
   affectiveItems:
   - item: {fileID: -8659359920512167614, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     intimacyValue: 25

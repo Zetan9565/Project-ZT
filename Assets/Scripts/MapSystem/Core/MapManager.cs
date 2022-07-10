@@ -621,17 +621,29 @@ public class MapManager : SingletonMonoBehaviour<MapManager>
         }
     }
 
-    public void SaveData(SaveData data)
+    [SaveMethod]
+    public void SaveData(SaveData saveData)
     {
-        ClearMarks();
+        var data = saveData.Write("markData", new SaveDataItem());
         foreach (var iconWoH in NormalIcons)
-            if (iconWoH.iconType == MapIconType.Mark) data.markDatas.Add(new MapMarkSaveData(iconWoH));
+            if (iconWoH.iconType == MapIconType.Mark)
+            {
+                var md = data.Write(new SaveDataItem());
+                md["worldPosX"] = iconWoH.Position.x;
+                md["worldPosY"] = iconWoH.Position.y;
+                md["worldPosZ"] = iconWoH.Position.z;
+                md["keepOnMap"] = iconWoH.KeepOnMap;
+                md["removeAble"] = iconWoH.RemoveAble;
+                md["textToDisplay"] = iconWoH.TextToDisplay;
+            }
     }
 
-    public void LoadData(SaveData data)
+    public void LoadData(SaveData saveData)
     {
-        foreach (var md in data.markDatas)
-            CreateDefaultMark(new Vector3(md.worldPosX, md.worldPosY, md.worldPosZ), md.keepOnMap, md.removeAble, md.textToDisplay);
+        ClearMarks();
+        if (saveData.TryReadData("markData", out var data))
+            foreach (var md in data.ReadDataList())
+                CreateDefaultMark(new Vector3(md.ReadFloat("worldPosX"), md.ReadFloat("worldPosY"), md.ReadFloat("worldPosZ")), md.ReadBool("keepOnMap"), md.ReadBool("removeAble"), md.ReadString("textToDisplay"));
     }
 
     [Serializable]

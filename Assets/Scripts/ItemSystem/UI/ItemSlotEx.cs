@@ -8,7 +8,7 @@ using ZetanStudio.ItemSystem.UI;
 [DisallowMultipleComponent]
 public class ItemSlotEx : ItemSlot, IDraggable, IPointerDownHandler, IPointerUpHandler
 {
-    public Sprite DraggableIcon => icon.overrideSprite;
+    Sprite IDraggable.DraggableIcon => icon.overrideSprite;
 
     [HideInInspector]
     public int indexInGrid;

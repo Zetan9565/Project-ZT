@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using ZetanStudio.ItemSystem;
+using ZetanStudio.DialogueSystem;
 
 /// <summary>
 /// 任务目标
@@ -222,15 +223,8 @@ public class TalkObjective : Objective
         }
     }
 
-    [SerializeField]
-    private Dialogue dialogue;
-    public Dialogue Dialogue
-    {
-        get
-        {
-            return dialogue;
-        }
-    }
+    [field: SerializeField]
+    public NewDialogue Dialogue { get; private set; }
 
     public TalkObjective()
     {
@@ -246,7 +240,7 @@ public class TalkObjective : Objective
     {
         get
         {
-            return base.IsValid && _NPCToTalk && dialogue;
+            return base.IsValid && _NPCToTalk && Dialogue;
         }
     }
 }

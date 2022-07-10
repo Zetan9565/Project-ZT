@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ZetanStudio.DialogueSystem;
 using ZetanStudio.Extension;
 
 public delegate void DialogueListner();
@@ -9,6 +10,8 @@ public static class DialogueManager
     private static Transform talkerRoot;
 
     private static readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
+
+    private static readonly Dictionary<string, DialogueContentData> data = new Dictionary<string, DialogueContentData>();
 
     public static Dictionary<string, TalkerData> Talkers { get; } = new Dictionary<string, TalkerData>();
     private readonly static Dictionary<string, List<TalkerData>> scenedTalkers = new Dictionary<string, List<TalkerData>>();
@@ -45,10 +48,25 @@ public static class DialogueManager
         return find;
     }
 
+    public static DialogueContentData GetOrCreateData(EntryContent entry)
+    {
+        if (!entry) return null;
+        if (!data.TryGetValue(entry.ID, out var find))
+            data.Add(entry.ID, find = new DialogueContentData(entry));
+        else find.Refresh(entry);
+        return find;
+    }
+
     public static void RemoveDialogueData(Dialogue dialogue)
     {
         if (!dialogue) return;
         dialogueDatas.Remove(dialogue.ID);
+    }
+
+    public static void RemoveDialogueData(EntryContent entry)
+    {
+        if (!entry) return;
+        data.Remove(entry.ID);
     }
 
     [SaveMethod]
@@ -56,57 +74,22 @@ public static class DialogueManager
     {
 
         var dialog = new SaveDataItem();
-        saveData.data["dialogueData"] = dialog;
-        foreach (var d in dialogueDatas.Values)
+        saveData["dialogueData"] = dialog;
+        foreach (var d in data.Values)
         {
-            var ds = new SaveDataItem();
-            ds.stringData["dialogID"] = d.ID;
-            foreach (var w in d.wordsDatas)
-            {
-                var ws = new SaveDataItem();
-                for (int i = 0; i < w.OptionDatas.Count; i++)
-                {
-                    if (w.OptionDatas[i].isDone)
-                        ws.intList.Add(i);
-                }
-                ds.dataList.Add(ws);
-            }
-            dialog.subData[d.ID] = ds;
+            dialog[d.ID] = d.GetSaveData();
         }
     }
 
     [LoadMethod]
     public static void LoadData(SaveData saveData)
     {
-        dialogueDatas.Clear();
-        if (saveData.data.TryGetValue("dialogueData", out var data))
-        {
-            Dictionary<string, Dialogue> dialogues = new Dictionary<string, Dialogue>();
-            foreach (var dialog in Resources.LoadAll<Dialogue>("Configuration"))
+        data.Clear();
+        if(saveData.TryReadData("dialogueData", out var dialog))
+            foreach (var kvp in dialog.ReadDataDict())
             {
-                dialogues[dialog.ID] = dialog;
+                data[kvp.Key] = new DialogueContentData(kvp.Value);
             }
-            foreach (var ds in data.subData)
-            {
-                if (dialogues.TryGetValue(ds.Key, out var find))
-                {
-                    DialogueData dd = new DialogueData(find);
-                    for (int i = 0; i < dd.wordsDatas.Count; i++)
-                    {
-                        try
-                        {
-                            var cmplt = new HashSet<int>(ds.Value.dataList[i].intList);
-                            for (int j = 0; j < dd.wordsDatas[i].OptionDatas.Count; j++)
-                            {
-                                if (cmplt.Contains(j)) dd.wordsDatas[i].OptionDatas[j].isDone = true;
-                            }
-                        }
-                        catch { }
-                    }
-                    dialogueDatas.Add(dd.ID, dd);
-                }
-            }
-        }
     }
 }
 

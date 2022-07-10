@@ -26,8 +26,8 @@ namespace ZetanStudio
 
         public EqualityComparer(Func<T, T, bool> equals, Func<T, int> hashCode)
         {
-            this.equals = equals;
-            this.hashCode = hashCode;
+            this.equals = equals ?? throw new ArgumentNullException(nameof(equals));
+            this.hashCode = hashCode ?? throw new ArgumentNullException(nameof(hashCode));
         }
 
         public bool Equals(T x, T y)
@@ -40,225 +40,18 @@ namespace ZetanStudio
             return hashCode(obj);
         }
     }
-}
-namespace ZetanStudio.Extension
-{
-    public static class IEnumerableExtension
+    public class Comparer<T> : IComparer<T>
     {
-        public static int IndexOf<T>(this IEnumerable<T> source, T item)
-        {
-            if (source == null || source is ISet<T>) return -1;
-            if (source is IList<T> gList) return gList.IndexOf(item);
-            if (source is IList list) return list.IndexOf(item);
-            int index = 0;
-            foreach (var temp in source)
-            {
-                if (Equals(temp, item)) return index;
-                index++;
-            }
-            return -1;
-        }
-        public static int FindIndex<T>(this IEnumerable<T> source, Predicate<T> predicate)
-        {
-            if (source == null || predicate == null || source is ISet<T>) return -1;
-            if (source is List<T> list) return list.FindIndex(predicate);
-            if (source is T[] array) return Array.FindIndex(array, predicate);
-            int index = 0;
-            foreach (var item in source)
-            {
-                if (predicate(item)) return index;
-                index++;
-            }
-            return -1;
-        }
-        public static bool IsSubsetOf<T>(this IEnumerable<T> source, IEnumerable<T> other)
-        {
-            if (source == null || other == null) return false;
-            return source.Except(other).Any();
-        }
-        public static bool ExistsDuplicate<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector)
-        {
-            return source.GroupBy(keySelector).Any(g => g.Count() > 1);
-        }
-        public static bool None<T>(this IEnumerable<T> source, Func<T, bool> predicate)
-        {
-            return !source.Any(predicate);
-        }
-    }
+        private readonly Func<T, T, int> comparison;
 
-    public static class TransformExtension
-    {
-        public static Transform CreateChild(this Transform source, params Type[] components)
+        public Comparer(Func<T, T, int> comparison)
         {
-            return source.CreateChild(null, components);
-        }
-        public static Transform CreateChild(this Transform source, string name, params Type[] components)
-        {
-            if (string.IsNullOrEmpty(name)) name = $"Child ({source.transform.childCount})";
-            GameObject child = new GameObject(name, components);
-            child.transform.SetParent(source, false);
-            return child.transform;
+            this.comparison = comparison ?? throw new ArgumentNullException(nameof(comparison));
         }
 
-        /// <summary>
-        /// 查找子对象，没有则创建
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="n">名字</param>
-        /// <returns>子对象（注意：当子对象的<see cref="Transform"/>被替换成<see cref="RectTransform"/>时，会销毁此处返回的<see cref="Transform"/>）</returns>
-        public static Transform FindOrCreate(this Transform source, string n)
+        public int Compare(T x, T y)
         {
-            var child = source.Find(n);
-            return child != null ? child : source.CreateChild(n);
-        }
-    }
-
-    public static class RectTransformExtension
-    {
-        /// <summary>
-        /// 查找子对象，没有则创建
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="n">名字</param>
-        /// <returns>子对象</returns>
-        public static RectTransform FindOrCreate(this RectTransform source, string n)
-        {
-            var child = source.Find(n);
-            return child != null ? child.GetOrAddComponent<RectTransform>() : source.CreateChild(n).GetOrAddComponent<RectTransform>();
-        }
-    }
-
-    public static class ComponentExtension
-    {
-        public static RectTransform GetRectTransform(this Component source)
-        {
-            return source.GetComponent<RectTransform>();
-        }
-
-        public static T AddComponent<T>(this Component source) where T : Component
-        {
-            return source.gameObject.AddComponent<T>();
-        }
-        public static T GetOrAddComponent<T>(this Component source) where T : Component
-        {
-            var comp = source.GetComponent<T>();
-            return comp != null ? comp : source.gameObject.AddComponent<T>();
-        }
-
-        public static Component GetComponentInFamily(this Component source, Type type)
-        {
-            Component component = source.GetComponentInParent(type);
-            if (Equals(component, null)) component = source.GetComponentInChildren(type);
-            return component;
-        }
-        public static T GetComponentInFamily<T>(this Component source)
-        {
-            T component = source.GetComponentInParent<T>();
-            if (Equals(component, null)) component = source.GetComponentInChildren<T>();
-            return component;
-        }
-
-        public static T[] GetComponentsInChildrenInOrder<T>(this Component source)
-        {
-            List<T> finds = new List<T>();
-            for (int i = 0; i < source.transform.childCount; i++)
-            {
-                var c = source.transform.GetChild(i).GetComponent<T>();
-                if (c != null) finds.Add(c);
-            }
-            return finds.ToArray();
-        }
-
-        public static string GetPath(this Component source)
-        {
-            StringBuilder sb = new StringBuilder();
-            Transform parent = source.transform.parent;
-            while (parent)
-            {
-                sb.Append(parent.gameObject.name);
-                sb.Append("/");
-                parent = parent.parent;
-            }
-            sb.Append(source.gameObject.name);
-            return sb.ToString();
-        }
-    }
-
-    public static class GameObjectExtension
-    {
-        public static RectTransform GetRectTransform(this GameObject source)
-        {
-            return source.GetComponent<RectTransform>();
-        }
-        public static T GetOrAddComponent<T>(this GameObject source) where T : Component
-        {
-            var comp = source.GetComponent<T>();
-            return comp != null ? comp : source.AddComponent<T>();
-        }
-        public static Component GetComponentInFamily(this GameObject source, Type type)
-        {
-            Component component = source.GetComponentInParent(type);
-            if (Equals(component, null)) component = source.GetComponentInChildren(type);
-            return component;
-        }
-        public static T GetComponentInFamily<T>(this GameObject source)
-        {
-            T component = source.GetComponentInParent<T>();
-            if (Equals(component, null)) component = source.GetComponentInChildren<T>();
-            return component;
-        }
-
-        public static GameObject CreateChild(this GameObject source, string name = null, params Type[] components)
-        {
-            if (string.IsNullOrEmpty(name)) name = $"Child ({source.transform.childCount})";
-            GameObject child = new GameObject(name, components);
-            child.transform.SetParent(source.transform, false);
-            return child;
-        }
-
-        public static void SetActiveSuper(this GameObject source, bool value)
-        {
-            if (source.activeSelf != value) source.SetActive(value);
-        }
-
-        public static GameObject Instantiate(this GameObject source)
-        {
-            return Object.Instantiate(source);
-        }
-        public static GameObject Instantiate(this GameObject source, Transform parent)
-        {
-            return Object.Instantiate(source, parent);
-        }
-        public static GameObject Instantiate(this GameObject source, Transform parent, bool worldPositionStays)
-        {
-            return Object.Instantiate(source, parent, worldPositionStays);
-        }
-        public static GameObject Instantiate(this GameObject source, Vector3 position, Quaternion rotation)
-        {
-            return Object.Instantiate(source, position, rotation);
-        }
-        public static GameObject Instantiate(this GameObject source, Vector3 position, Quaternion rotation, Transform parent)
-        {
-            return Object.Instantiate(source, position, rotation, parent);
-        }
-
-        public static string GetPath(this GameObject source)
-        {
-            StringBuilder sb = new StringBuilder();
-            Transform parent = source.transform.parent;
-            Stack<string> parents = new Stack<string>();
-            while (parent)
-            {
-                parents.Push(parent.gameObject.name);
-                parent = parent.parent;
-            }
-            while (parents.Count > 0)
-            {
-                sb.Append(parents.Pop());
-                sb.Append("/");
-            }
-            sb.Append(source.name);
-            return sb.ToString();
+            return comparison(x, y);
         }
     }
 }
@@ -508,22 +301,347 @@ namespace ZetanStudio.Collections
         }
     }
 }
+namespace ZetanStudio.Extension
+{
+    public static class IEnumerableExtension
+    {
+        public static int IndexOf<T>(this IEnumerable<T> source, T item)
+        {
+            if (source == null || source is ISet<T>) return -1;
+            if (source is IList<T> gList) return gList.IndexOf(item);
+            if (source is IList list) return list.IndexOf(item);
+            int index = 0;
+            foreach (var temp in source)
+            {
+                if (Equals(temp, item)) return index;
+                index++;
+            }
+            return -1;
+        }
+        public static int FindIndex<T>(this IEnumerable<T> source, Predicate<T> predicate)
+        {
+            if (source == null || predicate == null || source is ISet<T>) return -1;
+            if (source is List<T> list) return list.FindIndex(predicate);
+            if (source is T[] array) return Array.FindIndex(array, predicate);
+            int index = 0;
+            foreach (var item in source)
+            {
+                if (predicate(item)) return index;
+                index++;
+            }
+            return -1;
+        }
+        public static bool IsSubsetOf<T>(this IEnumerable<T> source, IEnumerable<T> other)
+        {
+            if (source == null || other == null) return false;
+            return source.Except(other).Any();
+        }
+        public static bool ExistsDuplicate<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector)
+        {
+            return source.GroupBy(keySelector).Any(g => g.Count() > 1);
+        }
+        public static bool None<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            return !source.Any(predicate);
+        }
+        public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+        {
+            foreach (var item in source)
+            {
+                action?.Invoke(item);
+            }
+        }
+    }
 
+    public static class TransformExtension
+    {
+        public static Transform CreateChild(this Transform source, params Type[] components)
+        {
+            return source.CreateChild(null, components);
+        }
+        public static Transform CreateChild(this Transform source, string name, params Type[] components)
+        {
+            if (string.IsNullOrEmpty(name)) name = $"Child ({source.transform.childCount})";
+            GameObject child = new GameObject(name, components);
+            child.transform.SetParent(source, false);
+            return child.transform;
+        }
+
+        /// <summary>
+        /// 查找子对象，没有则创建
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="n">名字</param>
+        /// <returns>子对象（注意：当子对象的<see cref="Transform"/>被替换成<see cref="RectTransform"/>时，会销毁此处返回的<see cref="Transform"/>）</returns>
+        public static Transform FindOrCreate(this Transform source, string n)
+        {
+            var child = source.Find(n);
+            return child != null ? child : source.CreateChild(n);
+        }
+    }
+
+    public static class RectTransformExtension
+    {
+        /// <summary>
+        /// 查找子对象，没有则创建
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="n">名字</param>
+        /// <returns>子对象</returns>
+        public static RectTransform FindOrCreate(this RectTransform source, string n)
+        {
+            var child = source.Find(n);
+            return child != null ? child.GetOrAddComponent<RectTransform>() : source.CreateChild(n).GetOrAddComponent<RectTransform>();
+        }
+    }
+
+    public static class ComponentExtension
+    {
+        public static RectTransform GetRectTransform(this Component source)
+        {
+            return source.GetComponent<RectTransform>();
+        }
+
+        public static T AddComponent<T>(this Component source) where T : Component
+        {
+            return source.gameObject.AddComponent<T>();
+        }
+        public static T GetOrAddComponent<T>(this Component source) where T : Component
+        {
+            var comp = source.GetComponent<T>();
+            return comp != null ? comp : source.gameObject.AddComponent<T>();
+        }
+
+        public static Component GetComponentInFamily(this Component source, Type type)
+        {
+            Component component = source.GetComponentInParent(type);
+            if (Equals(component, null)) component = source.GetComponentInChildren(type);
+            return component;
+        }
+        public static T GetComponentInFamily<T>(this Component source)
+        {
+            T component = source.GetComponentInParent<T>();
+            if (Equals(component, null)) component = source.GetComponentInChildren<T>();
+            return component;
+        }
+
+        public static T[] GetComponentsInChildrenInOrder<T>(this Component source)
+        {
+            List<T> finds = new List<T>();
+            for (int i = 0; i < source.transform.childCount; i++)
+            {
+                var c = source.transform.GetChild(i).GetComponent<T>();
+                if (c != null) finds.Add(c);
+            }
+            return finds.ToArray();
+        }
+
+        public static string GetPath(this Component source)
+        {
+            StringBuilder sb = new StringBuilder();
+            Transform parent = source.transform.parent;
+            while (parent)
+            {
+                sb.Append(parent.gameObject.name);
+                sb.Append("/");
+                parent = parent.parent;
+            }
+            sb.Append(source.gameObject.name);
+            return sb.ToString();
+        }
+    }
+
+    public static class GameObjectExtension
+    {
+        public static RectTransform GetRectTransform(this GameObject source)
+        {
+            return source.GetComponent<RectTransform>();
+        }
+        public static T GetOrAddComponent<T>(this GameObject source) where T : Component
+        {
+            var comp = source.GetComponent<T>();
+            return comp != null ? comp : source.AddComponent<T>();
+        }
+        public static Component GetComponentInFamily(this GameObject source, Type type)
+        {
+            Component component = source.GetComponentInParent(type);
+            if (Equals(component, null)) component = source.GetComponentInChildren(type);
+            return component;
+        }
+        public static T GetComponentInFamily<T>(this GameObject source)
+        {
+            T component = source.GetComponentInParent<T>();
+            if (Equals(component, null)) component = source.GetComponentInChildren<T>();
+            return component;
+        }
+
+        public static GameObject CreateChild(this GameObject source, string name = null, params Type[] components)
+        {
+            if (string.IsNullOrEmpty(name)) name = $"Child ({source.transform.childCount})";
+            GameObject child = new GameObject(name, components);
+            child.transform.SetParent(source.transform, false);
+            return child;
+        }
+
+        public static void SetActiveSuper(this GameObject source, bool value)
+        {
+            if (source.activeSelf != value) source.SetActive(value);
+        }
+
+        public static GameObject Instantiate(this GameObject source)
+        {
+            return Object.Instantiate(source);
+        }
+        public static GameObject Instantiate(this GameObject source, Transform parent)
+        {
+            return Object.Instantiate(source, parent);
+        }
+        public static GameObject Instantiate(this GameObject source, Transform parent, bool worldPositionStays)
+        {
+            return Object.Instantiate(source, parent, worldPositionStays);
+        }
+        public static GameObject Instantiate(this GameObject source, Vector3 position, Quaternion rotation)
+        {
+            return Object.Instantiate(source, position, rotation);
+        }
+        public static GameObject Instantiate(this GameObject source, Vector3 position, Quaternion rotation, Transform parent)
+        {
+            return Object.Instantiate(source, position, rotation, parent);
+        }
+
+        public static string GetPath(this GameObject source)
+        {
+            StringBuilder sb = new StringBuilder();
+            Transform parent = source.transform.parent;
+            Stack<string> parents = new Stack<string>();
+            while (parent)
+            {
+                parents.Push(parent.gameObject.name);
+                parent = parent.parent;
+            }
+            while (parents.Count > 0)
+            {
+                sb.Append(parents.Pop());
+                sb.Append("/");
+            }
+            sb.Append(source.name);
+            return sb.ToString();
+        }
+    }
+}
+namespace ZetanStudio.Serialization
+{
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
+
+    public class PloyListConverter<T> : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return true;
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            List<T> values = new List<T>();
+            try
+            {
+                foreach (var item in JObject.Load(reader).Properties())
+                {
+                    values.Add((T)item.Value.ToObject(Type.GetType(item.Name)));
+                }
+            }
+            catch { }
+            return values;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var list = (List<T>)value;
+            var obj = new JObject();
+            foreach (var item in list)
+            {
+                obj.Add(item.GetType().AssemblyQualifiedName, JToken.FromObject(item));
+            }
+            serializer.Serialize(writer, obj);
+        }
+    }
+    public class PloyArrayConverter<T> : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return true;
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            List<T> values = new List<T>();
+            try
+            {
+                foreach (var item in JObject.Load(reader).Properties())
+                {
+                    values.Add((T)item.Value.ToObject(Type.GetType(item.Name)));
+                }
+            }
+            catch { }
+            return values.ToArray();
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var list = (T[])value;
+            var obj = new JObject();
+            foreach (var item in list)
+            {
+                obj.Add(item.GetType().AssemblyQualifiedName, JToken.FromObject(item));
+            }
+            serializer.Serialize(writer, obj);
+        }
+    }
+    public class PloyConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return true;
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            try
+            {
+                foreach (var item in JObject.Load(reader).Properties())
+                {
+                    return item.Value.ToObject(Type.GetType(item.Name));
+                }
+            }
+            catch
+            {
+                return null;
+            }
+            return null;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            serializer.Serialize(writer, new JObject() { { value.GetType().AssemblyQualifiedName, JToken.FromObject(value) } });
+        }
+    }
+}
 #if UNITY_EDITOR
 namespace ZetanStudio.Extension.Editor
 {
     public static class SerializedObjectExtension
     {
-        public static SerializedProperty FindAutoProperty(this SerializedObject obj, string propName)
+        public static SerializedProperty FindAutoProperty(this SerializedObject obj, string propertyPath)
         {
-            return obj.FindProperty(string.Format("<{0}>k__BackingField", propName));
+            return obj.FindProperty($"<{propertyPath}>k__BackingField");
         }
     }
     public static class SerializedPropertyExtension
     {
-        public static SerializedProperty FindAutoPropertyRelative(this SerializedProperty prop, string propName)
+        public static SerializedProperty FindAutoPropertyRelative(this SerializedProperty prop, string relativePropertyPath)
         {
-            return prop.FindPropertyRelative(string.Format("<{0}>k__BackingField", propName));
+            return prop.FindPropertyRelative($"<{relativePropertyPath}>k__BackingField");
         }
         public static int GetArrayIndex(this SerializedProperty prop)
         {
@@ -561,6 +679,11 @@ namespace ZetanStudio.Extension.Editor
         public static bool TryGetOwnerValue(this SerializedProperty source, out object value)
         {
             return ZetanUtility.Editor.TryGetOwnerValue(source, out value);
+        }
+
+        public static bool IsName(this SerializedProperty source, string name)
+        {
+            return source.name == name || source.name == $"<{name}>k__BackingField";
         }
     }
 
@@ -1554,20 +1677,27 @@ public sealed class ZetanUtility
     #region 反射相关
     public static string ToJson(object value)
     {
-        return Newtonsoft.Json.JsonConvert.SerializeObject(value);
+        return Newtonsoft.Json.JsonConvert.SerializeObject(value, new Newtonsoft.Json.JsonSerializerSettings()
+        {
+            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+            DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
+        });
     }
     public static T FromJson<T>(string json)
     {
-        return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
+        return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json, new Newtonsoft.Json.JsonSerializerSettings()
+        {
+            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+            DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
+        });
     }
 
     private static string SerializeObject(object target, bool includeProperty, int depth, int indentation)
     {
-        if (target == null) return $"{target}";
-        if (depth < 0) return target.ToString();
+        if (target == null) return $"Null";
         Type type = target.GetType();
         if (type.IsEnum) return $"{type}.{target}";
-        if (IsNumericType(type)) return target.ToString();
+        if (IsNumericType(type) || type == typeof(bool)) return target.ToString();
         StringBuilder sb = new StringBuilder();
         if (type == typeof(string))
         {
@@ -1575,30 +1705,56 @@ public sealed class ZetanUtility
             sb.Append(target);
             sb.Append("\"");
         }
+        else if (depth < 0) return target.ToString();
         else if (typeof(IEnumerable).IsAssignableFrom(type))
         {
-            bool canIndex = type.IsArray || typeof(IList).IsAssignableFrom(type);
-            var tEnum = (target as IEnumerable).GetEnumerator();
-            sb.Append("{\n");
-            int index = 0;
-            while (tEnum.MoveNext())
+            if (!typeof(IDictionary).IsAssignableFrom(type))
             {
-                for (int i = 0; i < indentation + 1; i++)
+                bool canIndex = type.IsArray || typeof(IList).IsAssignableFrom(type);
+                var tEnum = (target as IEnumerable).GetEnumerator();
+                sb.Append("{\n");
+                int index = 0;
+                while (tEnum.MoveNext())
+                {
+                    for (int i = 0; i < indentation + 1; i++)
+                    {
+                        sb.Append("    ");
+                    }
+                    sb.Append("[");
+                    sb.Append(canIndex ? index.ToString() : "?");
+                    sb.Append("] = ");
+                    sb.Append(SerializeObject(tEnum.Current, includeProperty, depth - 1, indentation + 1));
+                    sb.Append(",\n");
+                    index++;
+                }
+                for (int i = 0; i < indentation; i++)
                 {
                     sb.Append("    ");
                 }
-                sb.Append("[");
-                sb.Append(canIndex ? index.ToString() : "?");
-                sb.Append("] = ");
-                sb.Append(SerializeObject(tEnum.Current, includeProperty, depth - 1, indentation + 1));
-                sb.Append(",\n");
-                index++;
+                sb.Append("}");
             }
-            for (int i = 0; i < indentation; i++)
+            else
             {
-                sb.Append("    ");
+                var dict = target as IDictionary;
+                sb.Append("{\n");
+                foreach (var key in dict.Keys)
+                {
+                    for (int i = 0; i < indentation + 1; i++)
+                    {
+                        sb.Append("    ");
+                    }
+                    sb.Append('[');
+                    sb.Append(SerializeObject(key, includeProperty, depth - 1, indentation + 1));
+                    sb.Append("] = ");
+                    sb.Append(SerializeObject(dict[key], includeProperty, depth - 1, indentation + 1));
+                    sb.Append(",\n");
+                }
+                for (int i = 0; i < indentation; i++)
+                {
+                    sb.Append("    ");
+                }
+                sb.Append("}");
             }
-            sb.Append("}");
         }
         else
         {
@@ -1681,7 +1837,7 @@ public sealed class ZetanUtility
             }
         }
     }
-    public static string SerializeObject(object target, bool includeProperty, int depth = 3)
+    public static string SerializeObject(object target, bool includeProperty = false, int depth = 3)
     {
         return SerializeObject(target, includeProperty, depth, 0);
     }
@@ -1760,10 +1916,19 @@ public sealed class ZetanUtility
     /// 通过类名获取类<see cref="Type"/>
     /// </summary>
     /// <param name="name">类名，含命名空间</param>
-    internal static Type GetTypeWithoutAssembly(string name)
+    public static Type GetTypeWithoutAssembly(string name)
     {
         if (string.IsNullOrEmpty(name)) return null;
-        return Assembly.GetCallingAssembly().GetType(name);
+        if (Assembly.GetCallingAssembly().GetType(name) is Type type) return type;
+        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies().Where(x => x.FullName.StartsWith("Assembly-CSharp") || x.FullName.StartsWith("ZetanStudio")))
+        {
+            foreach (var t in asm.GetTypes())
+            {
+                if (t.Name == name)
+                    return t;
+            }
+        }
+        return null;
     }
 
     public static Type GetTypeByFullName(string fullName)
@@ -1773,7 +1938,7 @@ public sealed class ZetanUtility
         return AppDomain.CurrentDomain.GetAssemblies().Select(x => x.GetType(fullName)).FirstOrDefault(x => x != null);
     }
 
-    internal static Type[] GetTypesDerivedFrom(Type type)
+    public static Type[] GetTypesDerivedFrom(Type type)
     {
         List<Type> results = new List<Type>();
         foreach (var t in Assembly.GetCallingAssembly().GetTypes())
@@ -1783,11 +1948,11 @@ public sealed class ZetanUtility
         }
         return results.ToArray();
     }
-    internal static Type[] GetTypesDerivedFrom<T>()
+    public static Type[] GetTypesDerivedFrom<T>()
     {
         return GetTypesDerivedFrom(typeof(T));
     }
-    internal static Type[] GetTypesWithAttribute(Type attribute)
+    public static Type[] GetTypesWithAttribute(Type attribute)
     {
         List<Type> results = new List<Type>();
         if (!typeof(Attribute).IsAssignableFrom(attribute)) return results.ToArray();
@@ -1798,11 +1963,11 @@ public sealed class ZetanUtility
         }
         return results.ToArray();
     }
-    internal static Type[] GetTypesWithAttribute<T>() where T : Attribute
+    public static Type[] GetTypesWithAttribute<T>() where T : Attribute
     {
         return GetTypesWithAttribute(typeof(T));
     }
-    internal static MethodInfo[] GetMethodsWithAttribute(Type attribute)
+    public static MethodInfo[] GetMethodsWithAttribute(Type attribute)
     {
         List<MethodInfo> results = new List<MethodInfo>();
         if (!typeof(Attribute).IsAssignableFrom(attribute)) return results.ToArray();
@@ -1816,7 +1981,7 @@ public sealed class ZetanUtility
         }
         return results.ToArray();
     }
-    internal static MethodInfo[] GetMethodsWithAttribute<T>() where T : Attribute
+    public static MethodInfo[] GetMethodsWithAttribute<T>() where T : Attribute
     {
         return GetMethodsWithAttribute(typeof(T));
     }
@@ -1874,7 +2039,7 @@ public sealed class ZetanUtility
     #region Debug.Log相关
     public static void Log(object message, params object[] messages)
     {
-        StringBuilder sb = new StringBuilder(message?.ToString());
+        StringBuilder sb = new StringBuilder(message?.ToString() ?? "null");
         if (messages != null)
         {
             for (int i = 0; i < messages.Length; i++)

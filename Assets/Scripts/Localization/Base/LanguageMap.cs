@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace ZetanStudio
@@ -27,7 +28,14 @@ namespace ZetanStudio
 
         public string Tr(string text)
         {
-            return items.Find(x => x.Key == text)?.Value ?? text;
+            var item = items.Find(x => x.Key == text);
+            if (item != null) return item.Value;
+            else
+            {
+                var match = Regex.Match(text, @"(?<=^<color=[\w]*>)(.*)(?=</color>$)");
+                if (match.Success) return text.Replace(match.Value, Tr(match.Value));
+            }
+            return text;
         }
     }
 

@@ -69,6 +69,6 @@ public class IDDrawer : PropertyDrawer
     }
     private bool ExistID(Object item, string id)
     {
-        return items.Any(x => fieldInfo.GetValue(x).ToString() == id && x != item);
+        return items.Any(x => fieldInfo?.GetValue(x)?.ToString() == id && x != item);
     }
 }

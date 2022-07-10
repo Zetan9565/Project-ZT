@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.DialogueSystem;
+using ZetanStudio;
 
 [Serializable]
 [CreateAssetMenu(fileName = "quest", menuName = "Zetan Studio/任务/任务", order = 1)]
@@ -43,14 +45,16 @@ public class Quest : ScriptableObject
     public TimeUnit TimeUnit => timeUnit;
 
     [SerializeField]
-    private Dialogue beginDialogue;
-    public Dialogue BeginDialogue => beginDialogue;
+    private NewDialogue beginDialogue;
+    public NewDialogue BeginDialogue => beginDialogue;
+
     [SerializeField]
-    private Dialogue ongoingDialogue;
-    public Dialogue OngoingDialogue => ongoingDialogue;
+    private NewDialogue ongoingDialogue;
+    public NewDialogue OngoingDialogue => ongoingDialogue;
+
     [SerializeField]
-    private Dialogue completeDialogue;
-    public Dialogue CompleteDialogue => completeDialogue;
+    private NewDialogue completeDialogue;
+    public NewDialogue CompleteDialogue => completeDialogue;
 
     [SerializeField]
     private List<ItemInfo> rewardItems = new List<ItemInfo>();
@@ -91,29 +95,34 @@ public class Quest : ScriptableObject
         return find != quest || (find == quest && Array.FindAll(all, x => x.ID == quest.ID).Length > 1);
     }
 
-    public string GetObjectiveString()
+#if UNITY_EDITOR
+    public static class Editor
     {
-        List<Objective> objectives = new List<Objective>();
-        objectives.AddRange(this.objectives);
-        objectives.Sort((x, y) =>
+        public static string GetObjectiveString(Quest quest)
         {
-            if (x.Priority > y.Priority) return 1;
-            else if (x.Priority < y.Priority) return -1;
-            else return 0;
-        });
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        foreach (var objective in objectives)
-        {
-            if (objective.Display)
+            List<Objective> objectives = new List<Objective>();
+            objectives.AddRange(quest.objectives);
+            objectives.Sort((x, y) =>
             {
-                sb.Append("-");
-                sb.Append(objective.DisplayName);
-                sb.Append("\n");
+                if (x.Priority > y.Priority) return 1;
+                else if (x.Priority < y.Priority) return -1;
+                else return 0;
+            });
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            foreach (var objective in objectives)
+            {
+                if (objective.Display)
+                {
+                    sb.Append("-");
+                    sb.Append(Keywords.Editor.HandlingKeyWords(objective.DisplayName));
+                    sb.Append("\n");
+                }
             }
+            if (sb.Length > 1) sb.Remove(sb.Length - 1, 1);
+            return sb.ToString();
         }
-        if (sb.Length > 1) sb.Remove(sb.Length - 1, 1);
-        return sb.ToString();
     }
+#endif
 }
 
 public enum QuestType

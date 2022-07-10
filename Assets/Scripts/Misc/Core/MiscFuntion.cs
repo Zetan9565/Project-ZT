@@ -3,25 +3,23 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using ZetanStudio.ItemSystem;
+using ZetanStudio;
 
 public static class MiscFuntion
 {
-    public static string HandlingKeyWords(string input, bool color = false, params IEnumerable<ScriptableObject>[] configs)
+    public static string HandlingKeyWords(string input, bool color = false)
     {
         StringBuilder output = new StringBuilder();
         StringBuilder keyWordsGetter = new StringBuilder();
         bool startGetting = false;
         for (int i = 0; i < input.Length; i++)
         {
-            if (i + 1 < input.Length && input[i] == '{' && input[i + 1] != '{')
-            {
-                startGetting = true;
-                i++;
-            }
+            if (i + 1 < input.Length && input[i] == '{' && input[i + 1] != '{') startGetting = true;
             else if (startGetting && input[i] == '}' && (i + 1 >= input.Length || input[i + 1] != '}'))
             {
                 startGetting = false;
-                output.Append(HandlingName(keyWordsGetter.ToString()));
+                keyWordsGetter.Append(input[i]);
+                output.Append(Keywords.Translate(keyWordsGetter.ToString(), color));
                 keyWordsGetter.Clear();
             }
             else if (!startGetting) output.Append(input[i]);
@@ -29,69 +27,6 @@ public static class MiscFuntion
         }
 
         return output.ToString();
-
-        string HandlingName(string keyWords)
-        {
-            if (keyWords.StartsWith("[NPC]"))
-            {
-                keyWords = keyWords.Replace("[NPC]", string.Empty);
-                IEnumerable<TalkerInformation> talkers = null;
-                if (configs != null)
-                {
-                    foreach (var array in configs)
-                    {
-                        if (typeof(IEnumerable<TalkerInformation>).IsAssignableFrom(array.GetType()))
-                            if (array.GetType().GetElementType() == typeof(TalkerInformation))
-                                talkers = array as IEnumerable<TalkerInformation>;
-                    }
-                }
-                if (talkers == null) talkers = Application.isPlaying ? GameManager.TalkerInfos.Values : Resources.LoadAll<TalkerInformation>("Configuration");
-                var talker = talkers.FirstOrDefault(x => x.ID == keyWords);
-                if (talker) keyWords = talker.Name;
-                if (MiscSettings.Instance && MiscSettings.Instance.KeywordColors.Count > 0)
-                    return color ? ZetanUtility.ColorText(keyWords, MiscSettings.Instance.KeywordColors[0]) : keyWords;
-                return color ? ZetanUtility.ColorText(keyWords, Color.green) : keyWords;
-            }
-            else if (keyWords.StartsWith("[ITEM]"))
-            {
-                keyWords = keyWords.Replace("[ITEM]", string.Empty);
-                IEnumerable<Item> items = null;
-                if (configs != null)
-                {
-                    foreach (var array in configs)
-                    {
-                        if (typeof(IEnumerable<Item>).IsAssignableFrom(array.GetType()))
-                            items = array as IEnumerable<Item>;
-                    }
-                }
-                if (items == null) items = Item.GetItems();
-                var item = items.FirstOrDefault(x => x.ID == keyWords);
-                if (item) keyWords = item.Name;
-                if (MiscSettings.Instance && MiscSettings.Instance.KeywordColors.Count > 1)
-                    return color ? ZetanUtility.ColorText(keyWords, MiscSettings.Instance.KeywordColors[1]) : keyWords;
-                return color ? ZetanUtility.ColorText(keyWords, Color.yellow) : keyWords;
-            }
-            else if (keyWords.StartsWith("[ENMY]"))
-            {
-                keyWords = keyWords.Replace("[ENMY]", string.Empty);
-                IEnumerable<EnemyInformation> enemies = null;
-                if (configs != null)
-                {
-                    foreach (var array in configs)
-                    {
-                        if (typeof(IEnumerable<EnemyInformation>).IsAssignableFrom(array.GetType()))
-                            enemies = array as IEnumerable<EnemyInformation>;
-                    }
-                }
-                if (enemies == null) enemies = Application.isPlaying ? GameManager.EnemyInfos.Values : Resources.LoadAll<EnemyInformation>("Configuration");
-                var enemy = enemies.FirstOrDefault(x => x.ID == keyWords);
-                if (enemy) keyWords = enemy.Name;
-                if (MiscSettings.Instance && MiscSettings.Instance.KeywordColors.Count > 2)
-                    return color ? ZetanUtility.ColorText(keyWords, MiscSettings.Instance.KeywordColors[2]) : keyWords;
-                return color ? ZetanUtility.ColorText(keyWords, Color.red) : keyWords;
-            }
-            return keyWords;
-        }
     }
     public static bool CheckCondition(ConditionGroup group)
     {
@@ -235,7 +170,7 @@ public static class MiscFuntion
         {
             case ConditionType.CompleteQuest:
                 QuestData quest = QuestManager.FindQuest(condition.RelatedQuest.ID);
-                return quest && TimeManager.Instance.Days - quest.latestHandleDays >= condition.IntValue && quest.IsFinished;
+                return quest && TimeManager.Instance.Days - quest.latestHandleDays >= condition.IntValue && quest.IsSubmitted;
             case ConditionType.AcceptQuest:
                 quest = QuestManager.FindQuest(condition.RelatedQuest.ID);
                 return quest && TimeManager.Instance.Days - quest.latestHandleDays >= condition.IntValue && quest.InProgress;

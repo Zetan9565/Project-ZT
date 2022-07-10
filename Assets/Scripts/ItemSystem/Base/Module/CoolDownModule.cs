@@ -43,12 +43,12 @@ namespace ZetanStudio.ItemSystem.Module
         public override SaveDataItem GetSaveData()
         {
             var data = new SaveDataItem();
-            data.floatData["time"] = Time;
+            data["time"] = Time;
             return data;
         }
         public override void LoadSaveData(SaveDataItem data)
         {
-            Module.Cooler.SetTime(Item, data.floatData["time"]);
+            Module.Cooler.SetTime(Item, data.ReadFloat("time"));
         }
     }
 }

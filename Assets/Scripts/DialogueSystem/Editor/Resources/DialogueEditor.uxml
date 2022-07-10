@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <uie:Toolbar>
+        <uie:ToolbarButton text="新建" display-tooltip-when-elided="true" name="create" />
+        <uie:ToolbarButton text="删除" display-tooltip-when-elided="true" name="delete" />
+        <ui:Label text="导航图" display-tooltip-when-elided="true" name="minimap-label" style="flex-direction: row; -unity-text-align: middle-left;" />
+        <ui:Toggle name="minimap-toggle" style="width: 17px; transform-origin: center; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; border-right-width: 1px; border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5); padding-right: 0;" />
+    </uie:Toolbar>
+    <SplitView fixed-pane-initial-dimension="250" style="min-width: auto;">
+        <ui:VisualElement name="left-container" style="min-width: 200px; min-height: auto;">
+            <SplitView orientation="Vertical" fixed-pane-initial-dimension="450">
+                <ui:VisualElement style="min-height: 150px;">
+                    <ui:Label text="对话列表" display-tooltip-when-elided="true" style="-unity-text-align: middle-center; background-color: rgba(0, 0, 0, 0.25);" />
+                    <ui:ListView focusable="true" name="dialogue-list" fixed-item-height="20" selection-type="Multiple" show-border="true" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="min-height: 150px;">
+                    <ui:Label text="检查器" display-tooltip-when-elided="true" style="-unity-text-align: middle-center; background-color: rgba(0, 0, 0, 0.25);" />
+                    <ui:ScrollView style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;">
+                        <ui:IMGUIContainer name="inspector" style="margin-left: 3px; margin-right: 3px;" />
+                    </ui:ScrollView>
+                </ui:VisualElement>
+            </SplitView>
+        </ui:VisualElement>
+        <ui:VisualElement name="right-container" style="min-width: 400px; margin-right: 0; margin-left: 0; margin-top: 0; margin-bottom: 0; padding-left: 3px; padding-right: 3px;" />
+    </SplitView>
+</ui:UXML>

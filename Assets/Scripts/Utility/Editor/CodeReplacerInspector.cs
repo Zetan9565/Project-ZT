@@ -11,6 +11,7 @@ using System.IO;
 
 namespace ZetanStudio
 {
+    using System.Text;
     using ZetanStudio.ItemSystem;
     using ZetanStudio.ItemSystem.Module;
 
@@ -22,7 +23,7 @@ namespace ZetanStudio
         //private Vector2Int IntRange;
         //private AnimationCurve curve = new AnimationCurve();
         private string format;
-        private int value;
+        private string value;
 
         private MemoryStream stream;
         [System.NonSerialized]
@@ -62,12 +63,12 @@ namespace ZetanStudio
             //formula = EditorGUILayout.TextField(formula);
             //IntRange = EditorGUILayout.Vector2IntField("范围", IntRange);
             //curve = EditorGUILayout.CurveField(curve);
-            format = EditorGUILayout.TextArea(format);
-            //value = EditorGUILayout.IntField(value);
+            format = EditorGUILayout.TextField(format);
+            value = EditorGUILayout.TextField(value);
             if (GUILayout.Button("测试"))
             {
-                if (Time.timeScale > 0) Time.timeScale = 0;
-                else Time.timeScale = 1;
+                var match = Regex.Match(value, @format);
+                if (match.Success) Debug.Log(value.Replace(@match.Value, "Replace"));
             }
         }
     }

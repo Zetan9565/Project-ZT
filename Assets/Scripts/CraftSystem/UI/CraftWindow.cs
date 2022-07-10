@@ -202,9 +202,9 @@ public class CraftWindow : Window, IHideable
         }
     }
 
-    private bool CanSelect(ItemSlot slot)
+    private bool CanSelect(ItemData item)
     {
-        return slot.Item && slot.Item.Model.GetModule<MaterialModule>();
+        return item?.Model.GetModule<MaterialModule>();
     }
 
     private void CraftCurrent(IEnumerable<CountedItem> materialsRaw)
@@ -284,7 +284,7 @@ public class CraftWindow : Window, IHideable
         {
             int amoutBef = handler.GetAmount(item.ID);
             if (handler.Get(item, craftable.RandomAmount(), materialsRaw.ToArray()))
-                MessageManager.Instance.New(Tr("制作了 {0} 个 [{1}]", handler.GetAmount(currentItem.ID) - amoutBef, currentItem.ColorName));
+                MessageManager.Instance.New(Tr("制作了 {0} 个 [{1}]", handler.GetAmount(item.ID) - amoutBef, ItemFactory.GetColorName(item)));
         }
         else MessageManager.Instance.New(Tr("材料不足，无法继续制作"));
     }
@@ -295,7 +295,7 @@ public class CraftWindow : Window, IHideable
     /// <param name="materialsRaw">放入的材料</param>
     private bool ProductItem(Item item, IEnumerable<CountedItem> materialsRaw)
     {
-        if (!item || materialsRaw == null || materialsRaw.Count() < 1 || !item.TryGetModule<CraftableModule>(out var craftable) || !craftable.IsValid)
+        if (!item || materialsRaw == null || !materialsRaw.Any() || !item.TryGetModule<CraftableModule>(out var craftable) || !craftable.IsValid)
         {
             MessageManager.Instance.New(Tr("无效的制作"));
             return false;
@@ -330,7 +330,7 @@ public class CraftWindow : Window, IHideable
                 else
                 {
                     var finds = materialsRaw.Where(x => MaterialModule.SameType(material.MaterialType, x.source.Model));//找到种类相同的道具
-                    if (finds.Count() > 0)
+                    if (finds.Any())
                     {
                         if (finds.Select(x => x.amount).Sum() != material.Amount)
                         {

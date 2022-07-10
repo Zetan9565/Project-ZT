@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace ZetanStudio
@@ -58,14 +59,7 @@ namespace ZetanStudio
 
         public string Tr(string selector, string text)
         {
-            List<Dictionary<string, string>> dicts = FindDictionaries(selector);
-            if (dicts != null)
-                foreach (var dict in dicts)
-                {
-                    if (dict.TryGetValue(text, out var content))
-                        return content;
-                }
-            return text;
+            return Tr(text, FindDictionaries(selector));
         }
         public string Tr(string selector, string text, params object[] args)
         {
@@ -82,23 +76,27 @@ namespace ZetanStudio
             }
             else
             {
-                results.Add(tr(text));
+                results.Add(Tr(text, dicts));
                 foreach (var t in texts)
                 {
-                    results.Add(tr(t));
-                }
-
-                string tr(string text)
-                {
-                    foreach (var dict in dicts)
-                    {
-                        if (dict.TryGetValue(text, out var content))
-                            return content;
-                    }
-                    return text;
+                    results.Add(Tr(t, dicts));
                 }
             }
             return results.AsEnumerable();
+        }
+
+        private static string Tr(string text, List<Dictionary<string, string>> dicts)
+        {
+            if (dicts != null)
+                foreach (var dict in dicts)
+                {
+                    if (dict.TryGetValue(text, out var content))
+                        return content;
+                    var match = Regex.Match(text, @"(?<=^<color=[\w]*>)(.*)(?=</color>$)");
+                    if (match.Success && dict.TryGetValue(match.Value, out content))
+                        return text.Replace(match.Value, content); ;
+                }
+            return text;
         }
     }
 }

@@ -99,9 +99,9 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     {
         currentTalker = talker;
         CurrentType = DialogueType.Normal;
-        ShowButtons(talker.GetData<TalkerData>().Info.CanDEV_RLAT, talker.GetData<TalkerData>().Info.IsVendor, talker.GetData<TalkerData>().Info.IsWarehouseAgent, talker.QuestInstances.FindAll(q => !q.IsFinished && MiscFuntion.CheckCondition(q.Model.AcceptCondition)).Count > 0);
+        ShowButtons(talker.GetData<TalkerData>().Info.CanDEV_RLAT, talker.GetData<TalkerData>().Info.IsVendor, talker.GetData<TalkerData>().Info.IsWarehouseAgent, talker.QuestInstances.FindAll(q => !q.IsSubmitted && MiscFuntion.CheckCondition(q.Model.AcceptCondition)).Count > 0);
         HideQuestDescription();
-        StartDialogue(talker.DefaultDialogue);
+        //StartDialogue(talker.DefaultDialogue);
         talker.OnTalkBegin();
     }
 
@@ -195,7 +195,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         var norQuests = new List<QuestData>();
         foreach (var quest in currentTalker.QuestInstances)
         {
-            if (MiscFuntion.CheckCondition(quest.Model.AcceptCondition) && !quest.IsFinished)
+            if (MiscFuntion.CheckCondition(quest.Model.AcceptCondition) && !quest.IsSubmitted)
                 if (quest.IsComplete)
                     cmpltQuests.Add(quest);
                 else norQuests.Add(quest);
@@ -208,7 +208,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                 currentQuest = quest;
                 CurrentType = DialogueType.Quest;
                 ShowButtons(false, false, false, false);
-                StartDialogue(quest.Model.CompleteDialogue);
+                //StartDialogue(quest.Model.CompleteDialogue);
             }));
         }
         foreach (var quest in norQuests)
@@ -218,7 +218,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                 currentQuest = quest;
                 CurrentType = DialogueType.Quest;
                 ShowButtons(false, false, false, false);
-                StartDialogue(quest.InProgress ? quest.Model.OngoingDialogue : quest.Model.BeginDialogue);
+                //StartDialogue(quest.InProgress ? quest.Model.OngoingDialogue : quest.Model.BeginDialogue);
             }));
         }
         RefreshOptions(Tr("任务"));
@@ -229,7 +229,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         {
             var cmpltQuest = currentTalker.QuestInstances.Where(x => x.InProgress && x.IsComplete);
 
-            if (cmpltQuest != null && cmpltQuest.Count() > 0)
+            if (cmpltQuest != null && cmpltQuest.Any())
             {
                 foreach (var quest in cmpltQuest)
                 {
@@ -237,7 +237,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                     {
                         currentQuest = quest;
                         ShowButtons(false, false, false, false);
-                        StartDialogue(quest.Model.CompleteDialogue);
+                        //StartDialogue(quest.Model.CompleteDialogue);
                     }));
                 }
                 RefreshOptions("任务");
@@ -282,7 +282,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         {
             SetNextClick("完成", delegate
             {
-                if (QuestManager.CompleteQuest(currentQuest))
+                if (QuestManager.SubmitQuest(currentQuest))
                 {
                     CurrentType = DialogueType.Normal;
                     ShowTalkerQuest();
@@ -320,7 +320,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                 {
                     currentQuest = qParent;
                     CurrentType = DialogueType.Quest;
-                    StartDialogue(qParent.Model.CompleteDialogue);
+                    //StartDialogue(qParent.Model.CompleteDialogue);
                 });
             }
         }
@@ -344,7 +344,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                 {
                     currentQuest = qParent;
                     CurrentType = DialogueType.Quest;
-                    StartDialogue(qParent.Model.CompleteDialogue);
+                    //StartDialogue(qParent.Model.CompleteDialogue);
                 });
             }
         }
@@ -376,7 +376,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
                     currentTalkObj = to;
                     CurrentType = DialogueType.Objective;
                     ShowButtons(false, false, false, false);
-                    StartDialogue(currentTalkObj.Model.Dialogue);
+                    //StartDialogue(currentTalkObj.Model.Dialogue);
                 }));
             }
         }
@@ -593,7 +593,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         PlayerManager.Instance.Player.SetMachineState<PlayerTalkingState>();
         currentTalker = args[0] as Talker;
         BeginNewDialogue();
-        return base.OnClose(args);
+        return base.OnOpen(args);
     }
     protected override bool OnClose(params object[] args)
     {
@@ -671,23 +671,23 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
     }
     public void OpenGiftWindow()
     {
-        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnSendGift, "挑选一件礼物", "确定要送出这个礼物吗？", 1, 1, cancel: () => WindowsManager.HideWindow(this, false));
+        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnSendGift, "挑选一件礼物", "确定要送出这个礼物吗？", 1, i => 1, cancel: () => WindowsManager.HideWindow(this, false));
         WindowsManager.HideWindow(this, true);
     }
     private void OnSendGift(IEnumerable<CountedItem> items)
     {
-        if (items != null && items.Count() > 0)
-        {
-            var isd = items.ElementAt(0);
-            Dialogue dialogue = currentTalker.OnGetGift(isd.source.Model);
-            if (dialogue)
-            {
-                BackpackManager.Instance.Lose(isd.source, isd.amount);
-                CurrentType = DialogueType.Gift;
-                ShowButtons(false, false, false, false);
-                StartDialogue(dialogue);
-            }
-        }
+        //if (items != null && items.Count() > 0)
+        //{
+        //    var isd = items.ElementAt(0);
+        //    Dialogue dialogue = currentTalker.OnGetGift(isd.source.Model);
+        //    if (dialogue)
+        //    {
+        //        BackpackManager.Instance.Lose(isd.source, isd.amount);
+        //        CurrentType = DialogueType.Gift;
+        //        ShowButtons(false, false, false, false);
+        //        StartDialogue(dialogue);
+        //    }
+        //}
         WindowsManager.HideWindow(this, false);
     }
 
@@ -730,7 +730,7 @@ public class DialogueWindow : InteractionWindow<Talker>, IHideable
         ZetanUtility.SetActive(warehouseButton.gameObject, false);
         ZetanUtility.SetActive(shopButton.gameObject, false);
         GoBackDefault();
-        if (currentTalker.QuestInstances.Where(x => !x.IsFinished).Count() > 0)
+        if (currentTalker.QuestInstances.Where(x => !x.IsSubmitted).Any())
         {
             Skip();
             RefreshQuestOptions();

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.DialogueSystem;
 using ZetanStudio.Extension;
 using ZetanStudio.ItemSystem;
+using ZetanStudio.UI;
 
 [DisallowMultipleComponent]
 public class Talker : Character, IInteractive
@@ -30,7 +32,7 @@ public class Talker : Character, IInteractive
         }
     }
 
-    public Dialogue DefaultDialogue
+    public NewDialogue DefaultDialogue
     {
         get
         {
@@ -81,14 +83,14 @@ public class Talker : Character, IInteractive
         GetData<TalkerData>()?.OnTalkFinished();
     }
 
-    public Dialogue OnGetGift(Item gift)
+    public NewDialogue OnGetGift(Item gift)
     {
         return GetData<TalkerData>()?.OnGetGift(gift);
     }
 
     public bool DoInteract()
     {
-        if (DialogueWindow.TalkWith(this))
+        if (NewDialogueWindow.TalkWith(this))
         {
             SetMachineState<CharacterTalkingState>();
             return true;
@@ -103,8 +105,8 @@ public class Talker : Character, IInteractive
 
     private void OnNotInteractable()
     {
-        if (WindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && dialogue.Target == this)
-            dialogue.CancelTalk();
+        if (WindowsManager.IsWindowOpen<NewDialogueWindow>(out var dialogue) && dialogue.Target == this)
+            dialogue.Interrupt();
     }
 
     #region UI相关

@@ -10,6 +10,9 @@
     }
     protected virtual void OnInterrupt() { }
 
+    /// <summary>
+    /// 派生类重写时，应至少调用一次<see cref="InteractionWindow{T}.OnOpen(object[])"/>
+    /// </summary>
     protected override bool OnOpen(params object[] args)
     {
         if (hidePanelOnInteract) InteractionPanel.Instance.ShowOrHidePanelBy(Target, false);
@@ -19,8 +22,6 @@
     /// <summary>
     /// 派生类重写时，应优先调用<see cref="InteractionWindow{T}.OnClose(object[])"/>，再进行后续操作
     /// </summary>
-    /// <param name="args"></param>
-    /// <returns></returns>
     protected override bool OnClose(params object[] args)
     {
         if (hidePanelOnInteract) InteractionPanel.Instance.ShowOrHidePanelBy(Target, true);

@@ -90,7 +90,7 @@ public class ItemInfo : IItemInfo
             if (ii.IsValid)
             {
                 sb.Append('[');
-                sb.Append(ii.Item.ColorName);
+                sb.Append(ItemFactory.GetColorName(ii.Item));
                 sb.Append("] ");
                 sb.Append(ii.Amount);
             }
@@ -204,7 +204,7 @@ public class DropItemInfo
             if (di.IsValid)
             {
                 sb.Append('[');
-                sb.Append(di.item.ColorName);
+                sb.Append(ItemFactory.GetColorName(di.item));
                 sb.Append("] ");
                 sb.Append(di.MinAmount);
                 if (di.MinAmount != di.MaxAmount)
@@ -281,7 +281,7 @@ public class MaterialInfo : IItemInfo
 
     public static bool CheckMaterialsDuplicate(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<MaterialInfo> otherMaterials)
     {
-        if (itemMaterials == null || itemMaterials.Count() < 1 || otherMaterials == null || otherMaterials.Count() < 1 || itemMaterials.Count() != otherMaterials.Count()) return false;
+        if (itemMaterials == null || !itemMaterials.Any() || otherMaterials == null || !otherMaterials.Any() || itemMaterials.Count() != otherMaterials.Count()) return false;
         using (var materialEnum = itemMaterials.GetEnumerator())
             while (materialEnum.MoveNext())
             {
@@ -309,7 +309,7 @@ public class MaterialInfo : IItemInfo
     /// <returns>是否匹配</returns>
     public static bool CheckMaterialsMatch(IEnumerable<MaterialInfo> itemMaterials, IEnumerable<ItemInfo> givenMaterials)
     {
-        if (itemMaterials == null || itemMaterials.Count() < 1 || givenMaterials == null || givenMaterials.Count() < 1 || itemMaterials.Count() != givenMaterials.Count()) return false;
+        if (itemMaterials == null || !itemMaterials.Any() || givenMaterials == null || !givenMaterials.Any() || itemMaterials.Count() != givenMaterials.Count()) return false;
         using (var materialEnum = itemMaterials.GetEnumerator())
             while (materialEnum.MoveNext())
             {

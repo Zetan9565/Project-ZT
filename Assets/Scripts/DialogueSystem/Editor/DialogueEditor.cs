@@ -1,67 +1,232 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
+using UnityEditor.Callbacks;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-public class DialogueEditor : ConfigurationEditor<Dialogue>
+namespace ZetanStudio.DialogueSystem.Editor
 {
-    [MenuItem("Zetan Studio/ÈÖçÁΩÆÁÆ°ÁêÜ/ÂØπËØù")]
-    public static void CreateWindow()
-    {
-        DialogueEditor window = GetWindowWithRect<DialogueEditor>(new Rect(0, 0, 450, 720), false, "ÂØπËØùÁÆ°ÁêÜÂô®");
-        window.Show();
-    }
+    using Extension.Editor;
 
-    protected override bool CompareKey(Dialogue element, out string remark)
+    public class DialogueEditor : EditorWindow
     {
-        remark = string.Empty;
-        if (!element) return false;
-        if (element.ID.Contains(keyWords))
+        #region æ≤Ã¨∑Ω∑®
+        [MenuItem("Window/Zetan Studio/∂‘ª∞±‡º≠∆˜")]
+        public static void CreateWindow()
         {
-            remark = $"ËØÜÂà´Á†ÅÔºö{ZetanUtility.Editor.TrimContentByKey(element.ID, keyWords, 16)}";
-            return true;
+            var settings = DialogueEditorSettings.GetOrCreate();
+            DialogueEditor wnd = GetWindow<DialogueEditor>(L.Tr(settings.language, "∂‘ª∞±‡º≠∆˜"));
+            wnd.minSize = settings.minWindowSize;
         }
-        for (int i = 0; i < element.Words.Count; i++)
+        public static void CreateWindow(NewDialogue dialogue)
         {
-            var words = element.Words[i];
-            if (words.Content.Contains(keyWords))
+            var settings = DialogueEditorSettings.GetOrCreate();
+            DialogueEditor wnd = GetWindow<DialogueEditor>(L.Tr(settings.language, "∂‘ª∞±‡º≠∆˜"));
+            wnd.minSize = settings.minWindowSize;
+            wnd.list.SetSelection(wnd.dialogues.IndexOf(dialogue));
+            EditorApplication.delayCall += () => wnd.list.ScrollToItem(wnd.dialogues.IndexOf(dialogue));
+        }
+
+        [OnOpenAsset]
+#pragma warning disable IDE0060 // …æ≥˝Œ¥ π”√µƒ≤Œ ˝
+        public static bool OnOpenAsset(int instanceID, int line)
+#pragma warning restore IDE0060 // …æ≥˝Œ¥ π”√µƒ≤Œ ˝
+        {
+            if (EditorUtility.InstanceIDToObject(instanceID) is NewDialogue tree)
             {
-                remark = $"Á¨¨[{i}]Âè•Ôºö{ZetanUtility.Editor.TrimContentByKey(words.Content, keyWords, 20)}";
+                CreateWindow(tree);
                 return true;
             }
-            else if (MiscFuntion.HandlingKeyWords(words.Content).Contains(keyWords))
+            return false;
+        }
+        #endregion
+
+        #region ±‰¡ø…˘√˜
+        private DialogueEditorSettings settings;
+        private Button delete;
+        private DialogueView dialogueView;
+        private UnityEngine.UIElements.ListView list;
+        private List<NewDialogue> dialogues;
+        private NewDialogue selectedDialogue;
+        private IMGUIContainer inspector;
+        #endregion
+
+        #region Unityªÿµ˜
+        public void CreateGUI()
+        {
+            try
             {
-                remark = $"Á¨¨[{i}]Âè•Ôºö{ZetanUtility.Editor.TrimContentByKey(MiscFuntion.HandlingKeyWords(words.Content, false, objects.ToArray()), keyWords, 20)}";
-                return true;
-            }
-            for (int j = 0; j < words.Options.Count; j++)
-            {
-                var option = words.Options[j];
-                if (option.Title.Contains(keyWords))
+                settings = settings ? settings : DialogueEditorSettings.GetOrCreate();
+
+                VisualElement root = rootVisualElement;
+
+                var visualTree = settings.treeUxml;
+                visualTree.CloneTree(root);
+
+                var styleSheet = settings.treeUss;
+                root.styleSheets.Add(styleSheet);
+
+                root.Q<Button>("create").clicked += ClickNew;
+                delete = root.Q<Button>("delete");
+                delete.clicked += ClickDelete;
+                Toggle toggle = root.Q<Toggle>("minimap-toggle");
+                toggle.RegisterValueChangedCallback(evt =>
                 {
-                    remark = $"Á¨¨[{i}]Âè•Á¨¨[{j}]‰∏™ÈÄâÈ°πÊ†áÈ¢òÔºö{ZetanUtility.Editor.TrimContentByKey(option.Title, keyWords, 16)}";
-                    return true;
+                    dialogueView?.ShowHideMiniMap(evt.newValue);
+                });
+                toggle.SetValueWithoutNotify(true);
+                var copy = new ToolbarButton(CopyOlds) { text = "“ªº˛µº»Îæ…∞Ê" };
+                root.Q<Toolbar>().Add(copy);
+
+                dialogueView = new DialogueView();
+                dialogueView.nodeSelectedCallback = OnNodeSelected;
+                dialogueView.nodeUnselectedCallback = OnNodeUnselected;
+                root.Q("right-container").Insert(0, dialogueView);
+                dialogueView.StretchToParentSize();
+
+                list = root.Q<UnityEngine.UIElements.ListView>();
+                list.selectionType = SelectionType.Multiple;
+                list.makeItem = () =>
+                {
+                    return new Label();
+                };
+                list.bindItem = (e, i) =>
+                {
+                    (e as Label).text = dialogues[i].name;
+                    e.userData = dialogues[i];
+                };
+                list.onSelectionChange += (os) =>
+                {
+                    if (os != null) OnDialogueSelected(os.Select(x => x as NewDialogue));
+                };
+                RefreshDialogues();
+                inspector = root.Q<IMGUIContainer>("inspector");
+                if (selectedDialogue)
+                {
+                    list.SetSelection(dialogues.IndexOf(selectedDialogue));
+                    list.ScrollToItem(dialogues.IndexOf(selectedDialogue));
                 }
             }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
-        return false;
-    }
 
-    protected override string GetNewFileName(System.Type type)
-    {
-        return "dialogue";
-    }
+        private void OnProjectChange()
+        {
+            RefreshDialogues();
+        }
+        #endregion
 
-    protected override string GetConfigurationName()
-    {
-        return "ÂØπËØù";
-    }
+        #region ∏˜÷÷ªÿµ˜
+        private void OnDialogueSelected(IEnumerable<NewDialogue> dialogues)
+        {
+            if (dialogues.Count() == 1) selectedDialogue = dialogues?.FirstOrDefault();
+            else selectedDialogue = null;
+            dialogueView?.DrawDialgoueView(selectedDialogue);
+            InspectDialogue();
+        }
+        private void OnNodeSelected(DialogueNode node)
+        {
+            inspector.onGUIHandler = null;
+            inspector.Clear();
+            if (node == null || dialogueView.nodes.Count(x => x.selected) > 1) return;
+            inspector.onGUIHandler = () =>
+            {
+                if (node.SerializedContent?.serializedObject?.targetObject)
+                {
+                    node.SerializedContent.serializedObject.UpdateIfRequiredOrScript();
+                    EditorGUI.BeginChangeCheck();
+                    using var copy = node.SerializedContent.Copy();
+                    SerializedProperty end = copy.GetEndProperty();
+                    bool enter = true;
+                    while (copy.NextVisible(enter) && !SerializedProperty.EqualContents(copy, end))
+                    {
+                        enter = false;
+                        if (!copy.IsName("options") && !copy.IsName("events") && !copy.IsName("ExitHere")
+                            && (node.content is TextContent || !copy.IsName("Text") && !copy.IsName("Talker")))
+                            EditorGUILayout.PropertyField(copy, true);
+                    }
+                    if (node.content is not INonEvent)
+                        EditorGUILayout.PropertyField(node.SerializedContent.FindPropertyRelative("events"));
+                    if (EditorGUI.EndChangeCheck()) node.SerializedContent.serializedObject.ApplyModifiedProperties();
+                }
+            };
+        }
+        private void OnNodeUnselected(DialogueNode node)
+        {
+            if (dialogueView.nodes.Count(x => x.selected) < 1)
+                InspectDialogue();
+        }
+        private void ClickNew()
+        {
+            NewDialogue dialogue = ZetanUtility.Editor.SaveFilePanel(CreateInstance<NewDialogue>);
+            if (dialogue)
+            {
+                Selection.activeObject = dialogue;
+                EditorGUIUtility.PingObject(dialogue);
+                dialogueView?.DrawDialgoueView(dialogue);
+            }
+        }
+        private void ClickDelete()
+        {
+            if (EditorUtility.DisplayDialog(Tr("…æ≥˝"), Tr("»∑∂®“™Ω´—°÷–µƒ∂‘ª∞“∆÷¡ªÿ ’’æ¬?"), Tr("»∑∂®"), Tr("»°œ˚")))
+                if (AssetDatabase.MoveAssetsToTrash(list.selectedItems.Select(x => AssetDatabase.GetAssetPath(x as NewDialogue)).ToArray(), new List<string>()))
+                {
+                    selectedDialogue = null;
+                    list.ClearSelection();
+                    InspectDialogue();
+                    dialogueView?.DrawDialgoueView(selectedDialogue);
+                }
+        }
+        #endregion
 
-    protected override string GetElementNameLabel()
-    {
-        return "ËØÜÂà´Á†Å";
-    }
+        #region ∆‰À¸
+        private void CopyOlds()
+        {
+            var olds = ZetanUtility.Editor.LoadAssets<Dialogue>();
+            olds.Sort((x, y) => string.Compare(x.name, y.name));
+            foreach (var old in olds)
+            {
+                var dialog = CreateInstance<NewDialogue>();
+                NewDialogue.Editor.CopyFromOld(dialog, old);
+                AssetDatabase.CreateAsset(dialog, AssetDatabase.GenerateUniqueAssetPath("Assets/" + old.name + ".asset"));
+            }
+            AssetDatabase.SaveAssets();
+        }
 
-    protected override string GetElementName(Dialogue element)
-    {
-        return element.ID;
+        private void InspectDialogue()
+        {
+            if (inspector == null) return;
+            inspector.Clear();
+            inspector.onGUIHandler = null;
+            if (selectedDialogue)
+            {
+                var editor = UnityEditor.Editor.CreateEditor(selectedDialogue);
+                inspector.onGUIHandler = () =>
+                {
+                    if (editor && editor.serializedObject?.targetObject)
+                        editor.OnInspectorGUI();
+                };
+            }
+        }
+
+        private void RefreshDialogues()
+        {
+            dialogues = ZetanUtility.Editor.LoadAssets<NewDialogue>();
+            list.itemsSource = dialogues;
+            list.Rebuild();
+        }
+
+        private string Tr(string text)
+        {
+            return L.Tr(settings.language, text);
+        }
+        #endregion
+
     }
 }

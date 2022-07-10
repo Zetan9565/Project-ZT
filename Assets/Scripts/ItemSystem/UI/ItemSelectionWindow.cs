@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.Extension;
 using ZetanStudio.ItemSystem.UI;
+using ZetanStudio.Collections;
 
 [DisallowMultipleComponent]
 public class ItemSelectionWindow : Window
@@ -43,21 +44,28 @@ public class ItemSelectionWindow : Window
 
     private readonly Dictionary<string, ItemSlotEx> copySlots = new Dictionary<string, ItemSlotEx>();
     private readonly HashSet<ItemData> selectedItems = new HashSet<ItemData>();
+    public ReadOnlySet<ItemData> SelectedItems => new ReadOnlySet<ItemData>(selectedItems);
 
     public ItemSelectionType SelectionType { get; private set; }
 
     private int typeLimit;
-    private int amountLimit;
-    private Predicate<ItemSlot> canSelect;
+    private Func<ItemData, int> amountLimit;
+    private Predicate<ItemData> canSelect;
     private Action<List<CountedItem>> onConfirm;
+    private Func<List<CountedItem>, bool> onConfirm_check;
     private Action onCancel;
 
     private string dialog;
 
     public static ItemSelectionWindow StartSelection(ItemSelectionType selectionType, ISlotContainer container, InventoryHandler handler, Action<List<CountedItem>> confirm, string title = null, string confirmDialog = null,
-        int? typeLimit = null, int? amountLimit = null, Predicate<ItemSlot> selectCondition = null, Action cancel = null)
+        int? typeLimit = null, Func<ItemData, int> amountLimit = null, Predicate<ItemData> selectCondition = null, Action cancel = null)
     {
-        return WindowsManager.OpenWindow<ItemSelectionWindow>(selectionType, container, handler, confirm, title, confirmDialog, typeLimit ?? default, amountLimit ?? default, selectCondition, cancel);
+        return WindowsManager.OpenWindow<ItemSelectionWindow>(selectionType, container, handler, confirm, title, confirmDialog, typeLimit ?? default, amountLimit, selectCondition, cancel);
+    }
+    public static ItemSelectionWindow StartSelection(ItemSelectionType selectionType, ISlotContainer container, InventoryHandler handler, Func<List<CountedItem>, bool> confirm, string title = null, string confirmDialog = null,
+        int? typeLimit = null, Func<ItemData, int> amountLimit = null, Predicate<ItemData> selectCondition = null, Action cancel = null)
+    {
+        return WindowsManager.OpenWindow<ItemSelectionWindow>(selectionType, container, handler, confirm, title, confirmDialog, typeLimit ?? default, amountLimit, selectCondition, cancel);
     }
 
     public void Confirm()
@@ -75,13 +83,23 @@ public class ItemSelectionWindow : Window
         confirm = true;
         if (string.IsNullOrEmpty(dialog))
         {
-            onConfirm?.Invoke(items);
-            Close();
+            if (onConfirm_check == null)
+            {
+                onConfirm?.Invoke(items);
+                Close();
+            }
+            else if (onConfirm_check(items))
+                Close();
         }
-        else ConfirmWindow.StartConfirm(dialog, delegate
+        else ConfirmWindow.StartConfirm(dialog, () =>
         {
-            onConfirm?.Invoke(items);
-            Close();
+            if (onConfirm_check == null)
+            {
+                onConfirm?.Invoke(items);
+                Close();
+            }
+            else if (onConfirm_check(items))
+                Close();
         });
     }
 
@@ -104,20 +122,16 @@ public class ItemSelectionWindow : Window
         var slot = source.Data;
         int have = SourceHandler.GetAmount(slot.item);
         if (slot == null || slot.Model == null || have < 0) return;
+        var amountLimit = this.amountLimit?.Invoke(source.Item) ?? 0;
         if (slot.Model.StackAble && SelectionType == ItemSelectionType.SelectNum)
         {
-            if (!canSelect(source)) return;
+            if (!canSelect(source.Item)) return;
             if (typeLimit > 0 && copySlots.Count >= typeLimit)
             {
                 MessageManager.Instance.New($"每次最多只能选择{typeLimit}样物品");
                 return;
             }
-            if (have < 2)
-            {
-                if (SourceHandler.CanLose(slot.item, 1))
-                    MakeSlot(slot.item, 1);
-            }
-            else if (amountLimit == 1)
+            if (have < 2 || amountLimit == 1)
             {
                 if (SourceHandler.CanLose(slot.item, 1))
                     MakeSlot(slot.item, 1);
@@ -136,11 +150,11 @@ public class ItemSelectionWindow : Window
                         else MakeSlot(slot.item, (int)amount);
                         if (copySlots.Count > 0) ZetanUtility.SetActive(tips, false);
                     }
-                }, amountLimit > 0 ? amountLimit : have);
+                }, amountLimit > 0 ? (amountLimit < have ? amountLimit : have) : have);
             }
         }
         else if ((!slot.Model.StackAble && SelectionType == ItemSelectionType.SelectNum || SelectionType == ItemSelectionType.SelectAll)
-            && canSelect(source) && SourceHandler.CanLose(slot.item, have))
+            && canSelect(source.Item) && SourceHandler.CanLose(slot.item, have))
         {
             if (copySlots.ContainsKey(slot.item.ID))
             {
@@ -244,19 +258,20 @@ public class ItemSelectionWindow : Window
         if (args != null && args.Length > 8)
         {
             WindowsManager.CloseWindow<ItemWindow>();
-            var par = (selectionType: (ItemSelectionType)args[0], container: (ISlotContainer)args[1], handler: (InventoryHandler)args[2], confirm: args[3] as Action<List<CountedItem>>,
-                title: args[4] as string, confirmDialog: args[5] as string, typeLimit: (int)args[6], amountLimit: (int)args[7], selectCondition: args[8] as Predicate<ItemSlot>, cancel: args[9] as Action);
+            var par = (selectionType: (ItemSelectionType)args[0], container: (ISlotContainer)args[1], handler: (InventoryHandler)args[2], confirm: args[3] as Delegate,
+                title: args[4] as string, confirmDialog: args[5] as string, typeLimit: (int)args[6], amountLimit: (Func<ItemData, int>)args[7], selectCondition: args[8] as Predicate<ItemData>, cancel: args[9] as Action);
             SelectionType = par.selectionType;
             SourceContainer = par.container;
             SourceHandler = par.handler;
-            windowTitle.text = par.title;
+            windowTitle.text = !string.IsNullOrEmpty(par.title) ? par.title : Tr("选择道具");
             dialog = par.confirmDialog;
             typeLimit = par.typeLimit;
             amountLimit = par.amountLimit;
             if (par.selectCondition != null) canSelect = par.selectCondition;
             else canSelect = (a) => { return true; };
-            SourceContainer.DarkIf(x => !canSelect(x));
-            onConfirm = par.confirm;
+            SourceContainer.DarkIf(x => !canSelect(x.Item));
+            onConfirm = par.confirm as Action<List<CountedItem>>;
+            onConfirm_check = par.confirm as Func<List<CountedItem>, bool>;
             onCancel = par.cancel;
             confirm = false;
             RegisterNotify();
@@ -268,10 +283,7 @@ public class ItemSelectionWindow : Window
     protected override bool OnClose(params object[] args)
     {
         if (!IsOpen) return true;
-        foreach (var kvp in copySlots)
-        {
-            caches.Put(kvp.Value);
-        }
+        caches.Put(copySlots.Values);
         copySlots.Clear();
         selectedItems.Clear();
         SourceContainer.DarkIf(null);

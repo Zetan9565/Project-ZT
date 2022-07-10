@@ -44,17 +44,17 @@ namespace ZetanStudio.BehaviourTree.Editor
             if (settings == null)
             {
                 settings = CreateInstance<BehaviourTreeEditorSettings>();
-                AssetDatabase.CreateAsset(settings, AssetDatabase.GenerateUniqueAssetPath("Assets/Scripts/BehaviourSystem/Editor/Resources/BehaviourTreeSettings.asset"));
+                AssetDatabase.CreateAsset(settings, AssetDatabase.GenerateUniqueAssetPath($"Assets/Scripts/BehaviourSystem/Editor/Resources/{ObjectNames.NicifyVariableName(typeof(BehaviourTreeEditorSettings).Name)}.asset"));
             }
             return settings;
         }
-        private static class ZSBTSettingsUIElementsRegister
+        private static class ZSBTESettingsUIElementsRegister
         {
             [SettingsProvider]
-            public static SettingsProvider CreateZSBTSettingsProvider()
+            public static SettingsProvider CreateZSBTESettingsProvider()
             {
                 var settings = GetOrCreate();
-                var provider = new SettingsProvider("Project/Zetan Studio/ZSBTSettingsUIElementsSettings", SettingsScope.Project)
+                var provider = new SettingsProvider("Project/Zetan Studio/ZSBTESettingsUIElementsSettings", SettingsScope.Project)
                 {
                     label = L.Tr(settings ? settings.language : null, "行为树编辑器"),
                     activateHandler = (searchContext, rootElement) =>

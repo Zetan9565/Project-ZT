@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ZetanStudio.DialogueSystem;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.ShopSystem;
 
@@ -66,7 +67,7 @@ public class TalkerData : CharacterData, IWarehouseKeeper
         OnTalkFinishedEvent?.Invoke();
     }
 
-    public Dialogue OnGetGift(Item gift)
+    public NewDialogue OnGetGift(Item gift)
     {
         int add = 0;
         if (Info.AffectiveItems.Exists(x => x.Item.ID == gift.ID))
@@ -115,7 +116,7 @@ public class TalkerData : CharacterData, IWarehouseKeeper
                     objectivesSubmitToThis.RemoveAll(x => x == objective as SubmitObjectiveData);
     }
 
-    public void TransferQuestToThis(QuestData quest)
+    public void TransferQuest(QuestData quest)
     {
         if (!quest) return;
         questInstances.Add(quest);

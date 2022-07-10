@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: dialogue 9
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091213465059466
+  - rid: 9026091213465059467
+  - rid: 9026091213465059468
+  exit:
+    <ID>k__BackingField: CON-0e83e0b810994874af71a93b24f95c5c
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 1080, y: 0}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091213465059466
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-c208236b7dff4c918d2e8115c5eafde7
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059467
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC002}'
+        <Text>k__BackingField: "\u54DF\uFF0C\u4F60\u56DE\u6765\u4E86\u3002"
+    - rid: 9026091213465059467
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-1832052a30664191800380b6d1507df9
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059468
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 360, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[PLAYER]'
+        <Text>k__BackingField: "\u4F60\u62DC\u6258\u7684\u4E8B\u529E\u59A5\u4E86\u3002"
+    - rid: 9026091213465059468
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-285d5663e9d84e2ba2820d94b27e2377
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 1
+        _position: {x: 720, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC002}'
+        <Text>k__BackingField: "\u662F\u5417\uFF1F"

@@ -13,11 +13,11 @@ namespace ZetanStudio.BehaviourTree.Editor
 {
     public sealed class NodeEditor : UnityEditor.Experimental.GraphView.Node
     {
-        public Node node;
+        public readonly Node node;
         public Port output;
         public Port input;
 
-        private BehaviourTreeEditorSettings settings;
+        private readonly BehaviourTreeEditorSettings settings;
         private readonly Label des;
         private readonly Label abort;
         private readonly Label repeat;

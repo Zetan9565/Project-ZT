@@ -205,8 +205,6 @@ public class ObjectSelectorDrawer : PropertyDrawer
     }
     private static string GetTooltip(string memberAsName, string memberAsTooltip, Object obj)
     {
-        if (obj is Dialogue)
-            Debug.Log("");
         if (!obj) return null;
         string name = GetName(memberAsName, obj);
         string tooltip = name;

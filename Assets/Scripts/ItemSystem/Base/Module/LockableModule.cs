@@ -21,12 +21,12 @@
         public override SaveDataItem GetSaveData()
         {
             var data = new SaveDataItem();
-            data.boolData["locked"] = isLocked;
+            data["locked"] = isLocked;
             return data;
         }
         public override void LoadSaveData(SaveDataItem data)
         {
-            isLocked = data.boolData["locked"];
+            isLocked = data.ReadBool("locked");
         }
     }
 }

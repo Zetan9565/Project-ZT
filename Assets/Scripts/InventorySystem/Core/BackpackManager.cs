@@ -36,7 +36,7 @@ public class BackpackManager : InventoryHandler
     {
         if (QuestManager.HasQuestRequiredItem(data.Model, Inventory.GetAmount(data.ModelID) - amount))
         {
-            MessageManager.Instance.New($"部分[{data.Model.ColorName}]已被任务锁定");
+            MessageManager.Instance.New($"部分[{data.ColorName}]已被任务锁定");
             return false;
         }
         return true;
@@ -107,12 +107,12 @@ public class BackpackManager : InventoryHandler
     [SaveMethod]
     public static void SaveData(SaveData saveData)
     {
-        saveData.data["backpackData"] = Instance.Inventory.GetSaveData();
+        saveData["backpackData"] = Instance.Inventory.GetSaveData();
     }
     [LoadMethod]
     public static void LoadData(SaveData saveData)
     {
-        if (saveData.data.TryGetValue("backpackData", out var data))
+        if (saveData.TryReadData("backpackData", out var data))
             Instance.Inventory.LoadSaveData(data);
     }
     #region 消息定义

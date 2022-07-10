@@ -338,7 +338,6 @@ public class ConditionGroupDrawer
                 SerializedProperty type = condition.FindPropertyRelative("type");
                 ConditionType conditionType = (ConditionType)type.enumValueIndex;
                 EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width * 0.2f, lineHeight), condition, new GUIContent("条件[" + index + "]"), false);
-                EditorGUI.BeginChangeCheck();
                 EditorGUI.PropertyField(new Rect(rect.x + rect.width * 0.2f + 8, rect.y, rect.width * 0.8f - 8, lineHeight),
                     type, new GUIContent(string.Empty), true);
                 if (condition.isExpanded)
@@ -459,6 +458,7 @@ public class ConditionGroupDrawer
             EditorGUI.BeginChangeCheck();
             var re = property.FindPropertyRelative("relational");
             EditorGUILayout.PropertyField(re, new GUIContent("(?)条件关系表达式", re.tooltip));
+            if (EditorGUI.EndChangeCheck()) property.serializedObject.ApplyModifiedProperties();
         }
         List?.DoLayoutList();
     }
@@ -470,6 +470,7 @@ public class ConditionGroupDrawer
             EditorGUI.BeginChangeCheck();
             var re = property.FindPropertyRelative("relational");
             EditorGUI.PropertyField(rect, re, new GUIContent("(?)条件关系表达式", re.tooltip));
+            if (EditorGUI.EndChangeCheck()) property.serializedObject.ApplyModifiedProperties();
         }
         List?.DoList(List != null && List.count > 0 ? new Rect(rect.x, rect.y + lineHeightSpace, rect.width, rect.height) : rect);
     }

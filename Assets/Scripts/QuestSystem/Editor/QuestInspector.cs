@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEditorInternal;
 using UnityEngine;
+using ZetanStudio;
 using ZetanStudio.Extension.Editor;
 
 [CustomEditor(typeof(Quest))]
@@ -138,6 +139,10 @@ public class QuestInspector : Editor
                     GUI.enabled = true;
                     EditorGUILayout.EndHorizontal();
                 }
+                EditorGUILayout.LabelField("描述显示预览");
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.TextArea(Keywords.Editor.HandlingKeyWords(title.stringValue) + "\n" + Keywords.Editor.HandlingKeyWords(description.stringValue), new GUIStyle(EditorStyles.textArea) { wordWrap = true });
+                EditorGUI.EndDisabledGroup();
                 #endregion
                 break;
             case 1:
@@ -232,9 +237,9 @@ public class QuestInspector : Editor
                     objectiveList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
                 EditorGUILayout.LabelField("目标显示预览");
-                GUI.enabled = false;
-                EditorGUILayout.TextArea(quest.GetObjectiveString());
-                GUI.enabled = true;
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.TextArea(Quest.Editor.GetObjectiveString(quest), new GUIStyle(EditorStyles.textArea) { wordWrap = true });
+                EditorGUI.EndDisabledGroup();
                 if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
                 #endregion
                 break;

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using ZetanStudio.ItemSystem;
 
 public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -53,9 +54,9 @@ public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
     private void OpenDiscardWindow()
     {
-        static bool canSelect(ItemSlot slot)
+        static bool canSelect(ItemData item)
         {
-            return slot && slot.Item && slot.Item.Model.Discardable;
+            return item?.Model.Discardable ?? false;
         }
         void discardItems(IEnumerable<CountedItem> items)
         {
@@ -63,6 +64,6 @@ public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterH
             foreach (var item in items)
                 window.Handler.Lose(item.source, item.amount);
         }
-        ItemSelectionWindow.StartSelection(ItemSelectionType.SelectAll, window.Grid as ISlotContainer, window.Handler, discardItems, $"从{window.Handler.Name}中丢弃物品", "确定要丢掉这些道具吗？", selectCondition: canSelect);
+        ItemSelectionWindow.StartSelection(ItemSelectionType.SelectAll, window.Grid as ISlotContainer, window.Handler, discardItems, "丢弃", "确定要丢掉这些道具吗？", selectCondition: canSelect);
     }
 }

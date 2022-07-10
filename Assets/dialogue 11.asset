@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: dialogue 11
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091213465059451
+  - rid: 9026091213465059452
+  - rid: 9026091213465059453
+  exit:
+    <ID>k__BackingField: CON-25a9c656045946feb2d1cf55f70a6d0f
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 1080, y: 0}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091213465059451
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-e8587e64d105428c8524d00bf77ea746
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059452
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[PLAYER]'
+        <Text>k__BackingField: "\u558F\uFF0C\u8FD9\u662F\u6211\u6253\u6B7B\u602A\u7269\u6389\u7684\u6B66\u5668\uFF0C\u8FD9\u4E0B\u653E\u5FC3\u4E86\u5427\u3002"
+    - rid: 9026091213465059452
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-758c0d3f7ff14135aac00975089a9eb4
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059453
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 360, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u54C7\u54E6\uFF0C\u90A3\u4F60\u5F88\u68D2\u68D2\u54E6\uFF01\u8FD9\u4E0B\u6211\u5C31\u653E\u4E00\u767E\u4E2A\u5FC3\u4E86\u3002"
+    - rid: 9026091213465059453
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-6c18937187454794aaf1d75b0fd41a4e
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 1
+        _position: {x: 720, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[PLAYER]'
+        <Text>k__BackingField: "\u5475\u5475\u3002"

@@ -65,7 +65,12 @@ namespace ZetanStudio.ItemSystem.Editor
             ItemEditorSettings settings = ItemEditorSettings.GetOrCreate();
             wnd.minSize = settings.minWindowSize;
             wnd.titleContent = new GUIContent(L.Tr(settings.language, "道具编辑器"));
-            EditorApplication.delayCall += () => wnd.itemList.SetSelection(wnd.items.IndexOf(item));
+            EditorApplication.delayCall += () =>
+            {
+                int index = wnd.items.IndexOf(item);
+                wnd.itemList.SetSelection(index);
+                wnd.itemList.ScrollToItem(index);
+            };
         }
         public static void CreateWindow(ItemTemplate template)
         {
@@ -81,7 +86,9 @@ namespace ZetanStudio.ItemSystem.Editor
                 IEnumerator selete()
                 {
                     yield return new WaitForEndOfFrame();
-                    wnd.templateList.SetSelection(wnd.templates.IndexOf(template));
+                    int index = wnd.templates.IndexOf(template);
+                    wnd.templateList.SetSelection(index);
+                    wnd.templateList.ScrollToItem(index);
                 }
             };
         }

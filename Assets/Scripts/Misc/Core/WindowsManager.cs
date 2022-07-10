@@ -459,12 +459,12 @@ public static class WindowsManager
             }
         }
     }
-    public static void HideAllExcept(bool hide, params Window[] exceptions)
+    public static void HideAllExcept(bool hide, params IHideable[] exceptions)
     {
-        HashSet<Window> windows = new HashSet<Window>(exceptions ?? (new Window[0]));
+        HashSet<IHideable> hideableWin = new HashSet<IHideable>(exceptions ?? (new IHideable[0]));
         foreach (var window in caches.Values)
         {
-            if (!windows.Contains(window) && window.IsOpen && window is IHideable hideable && hideable.IsHidden != hide)
+            if (window is IHideable hideable && !hideableWin.Contains(hideable) && window.IsOpen && hideable.IsHidden != hide)
             {
                 if (windowHideState.TryGetValue(hideable, out var isHiddenBef))
                 {

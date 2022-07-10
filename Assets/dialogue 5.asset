@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: dialogue 5
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091213465059456
+  - rid: 9026091213465059457
+  - rid: 9026091213465059458
+  exit:
+    <ID>k__BackingField: CON-a2e95eeb2a3c4d71b65856f3e2166de6
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 720, y: 0}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091213465059456
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-d3ecb7ee20514ad88e0449dfb9483f05
+        events: []
+        options:
+        - <Title>k__BackingField: "\u9886\u53D6\u7834\u65E7\u7684\u5251"
+          <Content>k__BackingField:
+            rid: 9026091213465059457
+          <IsMain>k__BackingField: 0
+          lastContent: 
+        - <Title>k__BackingField: "\u5251\u6362\u5200"
+          <Content>k__BackingField:
+            rid: 9026091213465059458
+          <IsMain>k__BackingField: 0
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC002}'
+        <Text>k__BackingField: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
+    - rid: 9026091213465059457
+      type: {class: GetItemContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-05f5f83c6e8044aaa38430dd812f593e
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 1
+        _position: {x: 360, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u7ED9\u4F60\u7834\u65E7\u7684\u5251\uFF0C\u62FF\u597D\u54AF\u3002"
+        itemsCanGet:
+        - item: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
+            type: 2}
+          amount: 1
+    - rid: 9026091213465059458
+      type: {class: SubmitAndGetItemContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-45d53a2a81a9447e944737c2b5e7fbe1
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 1
+        _position: {x: 360, y: 100}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u7ED9\u4F60\u7834\u65E7\u7684\u5200\uFF0C\u62FF\u597D\u54AF\u3002"
+        itemsToSubmit:
+        - item: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
+            type: 2}
+          amount: 1
+        itemsCanGet:
+        - item: {fileID: 2294737969574299077, guid: 11d254d59d262564aa42d1df5009d201,
+            type: 2}
+          amount: 1

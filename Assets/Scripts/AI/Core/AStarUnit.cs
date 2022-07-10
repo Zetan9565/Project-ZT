@@ -235,7 +235,7 @@ public class AStarUnit : MonoBehaviour
 
     private void GetResult(IEnumerable<Vector3> newPath)
     {
-        if (newPath != null && newPath.Count() > 0)
+        if (newPath != null && newPath.Any())
         {
             path = newPath.ToArray();
             if (pathRenderer)

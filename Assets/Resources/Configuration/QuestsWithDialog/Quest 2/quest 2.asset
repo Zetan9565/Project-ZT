@@ -20,7 +20,7 @@ MonoBehaviour:
   acceptCondition:
     conditions:
     - type: 1
-      intValue: 1
+      intValue: 0
       compareType: 0
       relatedQuest: {fileID: 11400000, guid: 5288a43013e44284baed8b30be1f92de, type: 2}
       relatedItem: {fileID: 0}
@@ -31,9 +31,9 @@ MonoBehaviour:
   questType: 0
   repeatFrequancy: 0
   timeUnit: 2
-  beginDialogue: {fileID: 11400000, guid: 4d22d898b3b93fd4a9f8b4e6fbf2bf6b, type: 2}
-  ongoingDialogue: {fileID: 11400000, guid: 9a228683692d7504f96d6a13ae0aaf89, type: 2}
-  completeDialogue: {fileID: 11400000, guid: e6ac29e35c65fda4a9cc0756740de01f, type: 2}
+  beginDialogue: {fileID: 11400000, guid: 30f79a915d99df240b6b6975ea77d00d, type: 2}
+  ongoingDialogue: {fileID: 11400000, guid: d0ee242c068d67a459536d4be3c795ee, type: 2}
+  completeDialogue: {fileID: 11400000, guid: 11f260677655f09478dc90d7f801ea1b, type: 2}
   rewardItems:
   - item: {fileID: 4876839640930190242, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 1000

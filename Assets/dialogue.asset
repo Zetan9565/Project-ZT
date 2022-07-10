@@ -1,0 +1,230 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: dialogue
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091213465059423
+  - rid: 9026091213465059424
+  - rid: 9026091213465059425
+  - rid: 9026091213465059426
+  - rid: 9026091213465059429
+  - rid: 9026091213465059430
+  - rid: 9026091213465059431
+  - rid: 9026091213465059432
+  - rid: 9026091213465059434
+  - rid: 9026091213465059435
+  - rid: 9026091213465059436
+  - rid: 9026091213465059437
+  - rid: 9026091213465059438
+  exit:
+    <ID>k__BackingField: CON-e4ef23e944184d13834109c4a2a33186
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 2520, y: -0.0000021457672}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091213465059423
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-e86ab19d8c7844bfa3b4924d9d499674
+        events: []
+        options:
+        - <Title>k__BackingField: "\u6CA1\u4E8B"
+          <Content>k__BackingField:
+            rid: 9026091213465059424
+          <IsMain>k__BackingField: 0
+        - <Title>k__BackingField: "\u6709\u4E8B"
+          <Content>k__BackingField:
+            rid: 9026091213465059429
+          <IsMain>k__BackingField: 0
+        <ExitHere>k__BackingField: 0
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u5C0F\u5E05\u54E5\uFF0C\u6709\u4EC0\u4E48\u4E8B\u5417\uFF1F"
+    - rid: 9026091213465059424
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-55494b774ff74d0eac9d567fa1ec8f08
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059425
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 360, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u4E0D\u597D\u610F\u601D\uFF0C\u53EF\u80FD\u95EE\u9519\u4EBA\u4E86\u3002"
+    - rid: 9026091213465059425
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-0a792010c63a4ace957d120de0585eda
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059426
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 720, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u6CA1\u4E8B\u5C31\u7B97\u4E86\u3002"
+    - rid: 9026091213465059426
+      type: {class: RecursionSuffix, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-a51127fdf98a4eb9b546c3210cfe19af
+        events: []
+        options: []
+        <ExitHere>k__BackingField: 0
+        _position: {x: 1080, y: 0}
+        lastExitHere: 0
+        <Depth>k__BackingField: 3
+    - rid: 9026091213465059429
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-8df75fa2650048c084e14567950460fd
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059430
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 720.00006, y: 100.00002}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[PLAYER]'
+        <Text>k__BackingField: "\u542C\u8BF4\u4F60\u9047\u5230\u4E86\u602A\u7269\uFF0C\u662F\u5728\u54EA\u513F\u9047\u5230\u7684\uFF1F"
+    - rid: 9026091213465059430
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-99291d8e07d14a0bafdbc4a81408e3ec
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059431
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 1080, y: 100.00002}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u5662\uFF0C\u662F\u8FD9\u4E2A\u4E8B\u513F\u554A\u3002"
+    - rid: 9026091213465059431
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-7d0380565c3c46ea847e08a6b3b7f79a
+        events: []
+        options:
+        - <Title>k__BackingField: "\u76F8\u4FE1\u5979\u7684\u8BDD"
+          <Content>k__BackingField:
+            rid: 9026091213465059432
+          <IsMain>k__BackingField: 0
+        - <Title>k__BackingField: "\u4E0D\u76F8\u4FE1\u5979\u7684\u8BDD"
+          <Content>k__BackingField:
+            rid: 9026091213465059434
+          <IsMain>k__BackingField: 0
+        <ExitHere>k__BackingField: 0
+        _position: {x: 1440, y: 100.00002}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u602A\u7269\u5728\u6751\u5B50\u5317\u8FB9\u90A3\u6761\u8DEF\u7684\u51FA\u53E3\u90A3\u513F\u5F98\u5F8A\u7740\u5462\u3002"
+    - rid: 9026091213465059432
+      type: {class: DeleteOnDoneDecorator, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-50afffe16d3743328252c4fe999bbf71
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059438
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 1926.5004, y: 100}
+        lastExitHere: 0
+    - rid: 9026091213465059434
+      type: {class: DeleteOnDoneDecorator, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-d5280558ae4543899c054246812878cf
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059435
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 1926.5004, y: 200}
+        lastExitHere: 0
+    - rid: 9026091213465059435
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-7b5e2361380a418e80676b9ac77f3cfb
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059436
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 2160, y: 200.00002}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[PLAYER]'
+        <Text>k__BackingField: "\u6211\u4FE1\u4F60\u4E2A\u9B3C\uFF0C\u6211\u600E\u4E48\u6CA1\u770B\u89C1\uFF1F"
+    - rid: 9026091213465059436
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-d320c64e95664024889e4c456aa0a0a7
+        events: []
+        options:
+        - <Title>k__BackingField: "\u7EE7\u7EED"
+          <Content>k__BackingField:
+            rid: 9026091213465059437
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 2520, y: 200.00002}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u4F60\u4E0D\u4FE1\u5C31\u7B97\u4E86\uFF0C\u8FD8\u8BF4\u51FA\u8FD9\u79CD\u8BDD\uFF01"
+    - rid: 9026091213465059437
+      type: {class: RecursionSuffix, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-0b2ef0ec054347e9800c4e8dda05a58f
+        events: []
+        options: []
+        <ExitHere>k__BackingField: 0
+        _position: {x: 2880, y: 200.00002}
+        lastExitHere: 0
+        <Depth>k__BackingField: 3
+    - rid: 9026091213465059438
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-a08fd8ea5b9b47cbbe7049c5b13edf22
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 1
+        _position: {x: 2160, y: 100}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u8BF7\u5C0F\u5FC3\uFF01"

@@ -24,7 +24,7 @@ namespace ZetanStudio.ItemSystem.Module
 
     public class AttributeData : ItemModuleData<AttributeModule>
     {
-        public List<ItemProperty> properties;
+        public readonly List<ItemProperty> properties;
 
         public AttributeData(ItemData item, AttributeModule module) : base(item, module)
         {
@@ -38,36 +38,31 @@ namespace ZetanStudio.ItemSystem.Module
         public override SaveDataItem GetSaveData()
         {
             var data = new SaveDataItem();
-            List<RoleValueSaveData> saveDatas = new List<RoleValueSaveData>();
+            var ad = new SaveDataItem();
+            data["properties"] = ad;
             foreach (var prop in properties)
             {
-                saveDatas.Add(new RoleValueSaveData(prop));
+                var pd = (properties as IRoleValue).GetSaveData();
+                ad[prop.ID] = pd;
             }
-            data.stringData["properties"] = ZetanUtility.ToJson(saveDatas);
             return data;
         }
         public override void LoadSaveData(SaveDataItem data)
         {
-            List<RoleValueSaveData> loadDatas = ZetanUtility.FromJson<List<RoleValueSaveData>>(data.stringData["properties"]);
-            foreach (var load in loadDatas)
+            if (data.TryReadData("properties", out var ad))
             {
-                if(properties.Find(x=>x.ID == load.ID) is ItemProperty prop)
-                    switch (prop.ValueType)
+                properties.Clear();
+                foreach (var pd in ad.ReadDataDict())
+                {
+                    var prop = new ItemProperty(ItemAttributeEnum.Instance[pd.Key])
                     {
-                        case RoleValueType.Integer:
-                            prop.IntValue = load.intValue;
-                            break;
-                        case RoleValueType.Float:
-                            prop.FloatValue = load.floatValue;
-                            break;
-                        case RoleValueType.Boolean:
-                            prop.BoolValue = load.boolValue;
-                            break;
-                    }
+                        Value = (ValueType)pd.Value["value"]
+                    };
+                    properties.Add(prop);
+                }
             }
         }
     }
-
 }
 
 namespace ZetanStudio.ItemSystem

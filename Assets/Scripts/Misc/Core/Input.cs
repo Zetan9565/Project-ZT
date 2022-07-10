@@ -54,7 +54,7 @@ public static class Input
         if (IsTyping) return;
         if (WindowsManager.IsWindowOpen<LootWindow>(out var loot))
             loot.TakeAll();
-        else if (WindowsManager.IsWindowOpen<DialogueWindow>(out var window))
+        else if (WindowsManager.IsWindowOpen<ZetanStudio.UI.NewDialogueWindow>(out var window))
             window.Next();
         else InteractionPanel.Instance.DoSelectInteract();
     }

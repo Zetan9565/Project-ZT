@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bf7d33b3830cc2459abda8f90852b87, type: 3}
+  m_Name: Dialogue Editor Settings
+  m_EditorClassIdentifier: 
+  treeUxml: {fileID: 9197481963319205126, guid: a18bfaaee152ba24992c537d800f6c12,
+    type: 3}
+  treeUss: {fileID: 7433441132597879392, guid: 9a21f2faeb8d6f44595fe2675ef72e5e, type: 3}
+  minWindowSize: {x: 1280, y: 600}
+  nodeUxml: {fileID: 9197481963319205126, guid: cceaf1a235b79104cb92b2c54b34ac15,
+    type: 3}
+  language: {fileID: 0}

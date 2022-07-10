@@ -49,40 +49,54 @@ public static class TriggerManager
 
     public static void DeleteTriggerListner(TriggerStateListner listner)
     {
-        if (OnTriggerSetEvent != null) OnTriggerSetEvent -= listner;
+        OnTriggerSetEvent -= listner;
     }
     public static void DeleteTriggerHolder(TriggerHolder holder)
     {
         if (!holder || !holders.ContainsKey(holder.ID)) return;
         holders.Remove(holder.ID);
-        if (OnTriggerSetEvent != null) OnTriggerSetEvent -= holder.OnTriggerSet;
+        OnTriggerSetEvent -= holder.OnTriggerSet;
     }
 
     [SaveMethod]
-    public static void SaveData(SaveData data)
+    public static void SaveData(SaveData saveData)
     {
+        var data = saveData.Write("triggerData", new SaveDataItem());
+        var stateData = data.Write("stateData", new SaveDataItem());
         foreach (var trigger in triggers)
-            data.triggerData.stateDatas.Add(new TriggerStateSaveData(trigger.Key, trigger.Value));
+        {
+            stateData[trigger.Key] = (int)trigger.Value;
+        }
+        var holderData = data.Write("holderData", new SaveDataItem());
         foreach (var holder in holders)
-            data.triggerData.holderDatas.Add(new TriggerHolderSaveData(holder.Value));
+        {
+            holderData[holder.Key] = holder.Value.isSetAtFirst;
+        }
     }
     [LoadMethod]
-    public static void LoadData(SaveData data)
+    public static void LoadData(SaveData saveData)
     {
         triggers.Clear();
-        foreach (TriggerStateSaveData sd in data.triggerData.stateDatas)
+        if (saveData.TryReadData("triggerData", out var data))
         {
-            bool state = sd.triggerState == (int)TriggerState.On;
-            if (!triggers.ContainsKey(sd.triggerName))
-                triggers.Add(sd.triggerName, state ? TriggerState.On : TriggerState.Off);
-            else triggers[sd.triggerName] = state ? TriggerState.On : TriggerState.Off;
+            if (data.TryReadData("stateData", out var stateData))
+                foreach (var kvp in stateData.ReadIntDict())
+                {
+                    bool state = kvp.Value == (int)TriggerState.On;
+                    if (!triggers.ContainsKey(kvp.Key))
+                        triggers.Add(kvp.Key, state ? TriggerState.On : TriggerState.Off);
+                    else triggers[kvp.Key] = state ? TriggerState.On : TriggerState.Off;
+                }
+            foreach (var holder in TriggerManager.holders.Values.ToArray())
+                DeleteTriggerHolder(holder);
+            var holders = Object.FindObjectsOfType<TriggerHolder>();
+            if (data.TryReadData("holderData", out var holderData))
+                foreach (var holder in holders)
+                {
+                    if (holderData.TryReadBool(holder.TriggerName, out var isSetAtFirst))
+                        holder.LoadData(isSetAtFirst);
+                }
         }
-        foreach (var holder in TriggerManager.holders.Values.ToArray())
-            DeleteTriggerHolder(holder);
-        var holders = UnityEngine.Object.FindObjectsOfType<TriggerHolder>();
-        foreach (TriggerHolderSaveData hd in data.triggerData.holderDatas)
-            foreach (var holder in holders)
-                holder.LoadData(hd);
     }
 }
 public enum TriggerState

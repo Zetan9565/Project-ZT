@@ -41,13 +41,13 @@ namespace ZetanStudio.ItemSystem.Module
             var data = new SaveDataItem();
             foreach (var gem in gems)
             {
-                data.stringData[gem] = gem;
+                data[gem] = gem;
             }
             return data;
         }
         public override void LoadSaveData(SaveDataItem data)
         {
-            foreach (var kvp in data.stringData)
+            foreach (var kvp in data.ReadStringDict())
             {
                 gems.Add(kvp.Key);
             }

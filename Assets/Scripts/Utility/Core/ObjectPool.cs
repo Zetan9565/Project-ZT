@@ -13,7 +13,8 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
     private float cleanDelayTime = 600.0f;//池子东西放多放久了臭，要按时排掉
     private bool cleanning;
 
-    private readonly Dictionary<string, ObjectPool<GameObject>> pools = new Dictionary<string, ObjectPool<GameObject>>();
+    private readonly Dictionary<GameObject, ObjectPool<GameObject>> keyByPrefabPools = new Dictionary<GameObject, ObjectPool<GameObject>>();
+    private readonly Dictionary<GameObject, ObjectPool<GameObject>> keyByInstancePools = new Dictionary<GameObject, ObjectPool<GameObject>>();
     private readonly Dictionary<GameObject, Coroutine> putDelayCoroutines = new Dictionary<GameObject, Coroutine>();
 
     public static void Put(GameObject gameObject)
@@ -25,13 +26,8 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             return;
         }
         if (Instance.putDelayCoroutines.TryGetValue(gameObject, out var c)) Instance.StopCoroutine(c);
-        string goName = gameObject.name.EndsWith("(Clone)") ? gameObject.name : gameObject.name + "Clone";
-        if (!Instance.pools.TryGetValue(goName, out var pool))
-        {
-            pool = CreatePool(gameObject);
-            Instance.pools.Add(goName, pool);
-        }
-        pool.Release(gameObject);
+        if (Instance.keyByInstancePools.TryGetValue(gameObject, out var pool)) pool.Release(gameObject);
+        else Destroy(gameObject);
     }
     public static void Put(Component component)
     {
@@ -71,13 +67,14 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
             go = Instantiate(prefab, parent, worldPositionStays);
         else
         {
-            string goName = prefab.name.EndsWith("(Clone)") ? prefab.name : prefab.name + "(Clone)";
-            if (!Instance.pools.TryGetValue(goName, out var pool))
+            if (!Instance.keyByPrefabPools.TryGetValue(prefab, out var pool))
             {
                 pool = CreatePool(prefab);
-                Instance.pools.Add(goName, pool);
+                Instance.keyByPrefabPools.Add(prefab, pool);
             }
+            var count = pool.CountAll;
             go = pool.Get();
+            if (count != pool.CountAll) Instance.keyByInstancePools[go] = pool;
             go.transform.SetParent(parent, worldPositionStays);
             if (Instance.putDelayCoroutines.TryGetValue(go, out var c))
             {
@@ -103,14 +100,15 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
         }
         else
         {
-            string goName = prefab.name.EndsWith("(Clone)") ? prefab.name : prefab.name + "(Clone)";
-            Instance.pools.TryGetValue(goName, out var pool);
+            Instance.keyByPrefabPools.TryGetValue(prefab, out var pool);
             if (pool != null)
             {
                 pool = CreatePool(prefab);
-                Instance.pools.Add(goName, pool);
+                Instance.keyByPrefabPools.Add(prefab, pool);
             }
+            var count = pool.CountAll;
             go = pool.Get();
+            if (count != pool.CountAll) Instance.keyByInstancePools[go] = pool;
             go.transform.SetPositionAndRotation(position, rotation);
             go.transform.SetParent(parent, worldPositionStays);
             if (Instance.putDelayCoroutines.TryGetValue(go, out var c))
@@ -144,12 +142,12 @@ public class ObjectPool : SingletonMonoBehaviour<ObjectPool>
 
     public void Clean()
     {
-        if (pools.Count > 0)
+        if (keyByPrefabPools.Count > 0)
         {
-            List<string> keys = new List<string>(pools.Keys);
+            List<GameObject> keys = new List<GameObject>(keyByPrefabPools.Keys);
             for (int i = 0; i < keys.Count; i++)
-                pools[keys[i]].Clear();
-            pools.Clear();
+                keyByPrefabPools[keys[i]].Clear();
+            keyByPrefabPools.Clear();
             System.GC.Collect();
         }
     }
@@ -198,6 +196,12 @@ public class SimplePool<T> where T : Component
 
     private readonly ObjectPool<T> pool;
 
+    private readonly HashSet<T> instances = new HashSet<T>();
+
+    public int CountAll => pool.CountAll;
+    public int CountActive => pool.CountActive;
+    public int CountInactive => pool.CountInactive;
+
     public T Get(Transform parent = null, bool worldPositionStays = false)
     {
         var go = pool.Get();
@@ -211,10 +215,27 @@ public class SimplePool<T> where T : Component
         go.transform.SetParent(parent, worldPositionStays);
         return go;
     }
+    public T[] Get(int amount, Transform parent = null, bool worldPositionStays = false)
+    {
+        var results = new T[amount];
+        for (int i = 0; i < results.Length; i++)
+        {
+            results[i] = Get(parent, worldPositionStays);
+        }
+        return results;
+    }
     public void Put(T element)
     {
         pool.Release(element);
     }
+    public void Put(IEnumerable<T> elements)
+    {
+        foreach (var element in elements)
+        {
+            Put(element);
+        }
+    }
+    public bool Contains(T element) => instances.Contains(element);
     public void Clear()
     {
         pool.Clear();
@@ -222,9 +243,15 @@ public class SimplePool<T> where T : Component
     public SimplePool(T model, Transform poolRoot = null, int capacity = 100)
     {
         this.poolRoot = poolRoot;
-        pool = new ObjectPool<T>(() => Object.Instantiate(model), OnGetObject, OnPutObject, OnDestroyObject, maxSize: capacity); ;
+        pool = new ObjectPool<T>(() => Instantiate(model), OnGetObject, OnPutObject, OnDestroyObject, maxSize: capacity); ;
     }
 
+    private T Instantiate(T model)
+    {
+        var instance = Object.Instantiate(model);
+        instances.Add(instance);
+        return instance;
+    }
     private void OnGetObject(T go)
     {
         ZetanUtility.SetActive(go, true);

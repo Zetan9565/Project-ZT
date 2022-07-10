@@ -30,9 +30,9 @@ MonoBehaviour:
   questType: 0
   repeatFrequancy: 0
   timeUnit: 0
-  beginDialogue: {fileID: 11400000, guid: 860a800ebd1f57e409389453a7b350e1, type: 2}
-  ongoingDialogue: {fileID: 11400000, guid: c9bd66b12bc670d48895c486a701c376, type: 2}
-  completeDialogue: {fileID: 11400000, guid: 216422843cfd8d041970f69c4cccd4b4, type: 2}
+  beginDialogue: {fileID: 11400000, guid: 275bfae97e984f14b8fbf087db50075a, type: 2}
+  ongoingDialogue: {fileID: 11400000, guid: bfd7adcff617ee645aca70f3424d331a, type: 2}
+  completeDialogue: {fileID: 11400000, guid: 2a4c1492669da234b81ee1f0e9721550, type: 2}
   rewardItems:
   - item: {fileID: 4876839640930190242, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 1000
@@ -77,4 +77,5 @@ MonoBehaviour:
         inOrder: 1
         priority: 1
         _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-        dialogue: {fileID: 11400000, guid: 00931f27c4db01e44a9ff7817efe8119, type: 2}
+        <Dialogue>k__BackingField: {fileID: 11400000, guid: bfd174d2e328f2842a3ef0a7ddb98d6b,
+          type: 2}

@@ -39,16 +39,16 @@ public static class CraftManager
         var learded = new SaveDataItem();
         foreach (var item in learnedItems)
         {
-            learded.stringList.Add(item.ID);
+            learded.Write(item.ID);
         }
-        saveData.data["craftData"] = learded;
+        saveData["craftData"] = learded;
     }
     [LoadMethod]
     public static void LoadData(SaveData saveData)
     {
         learnedItems.Clear();
-        if(saveData.data.TryGetValue("craftData", out var learned))
-            foreach (var item in learned.stringList)
+        if(saveData.TryReadData("craftData", out var learned))
+            foreach (var item in learned.ReadStringList())
             {
                 learnedItems.Add(ItemFactory.GetModel(item));
             }

@@ -34,7 +34,7 @@ namespace ZetanStudio
             {
                 case MaterialCostType.SingleItem:
                     icon.overrideSprite = Data.Item.Icon;
-                    nameText.text = Data.Item.ColorName;
+                    nameText.text = ItemFactory.GetColorName(Data.Item);
                     break;
                 case MaterialCostType.SameType:
                     icon.overrideSprite = Data.MaterialType.Icon;

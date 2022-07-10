@@ -390,15 +390,13 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
     public static void SaveData(SaveData saveData)
     {
         if (!Instance) return;
-        var total = new SaveDataItem();
-        total.stringList.Add(Instance.timeStamp.ToString());
-        saveData.data["totalTime"] = total;
+        saveData["totalTime"] = Instance.timeStamp.ToString();
     }
     [LoadMethod]
     public static void LoadData(SaveData saveData)
     {
         if (!Instance) return;
-        if (saveData.data.TryGetValue("totalTime", out var total) && total.stringList.Count > 0 && decimal.TryParse(total.stringList[0], out var timeStamp))
+        if (saveData.TryReadString("totalTime", out var total) && decimal.TryParse(total, out var timeStamp))
         {
             Instance.timeStamp = timeStamp;
             Instance.SetTime(timeStamp);

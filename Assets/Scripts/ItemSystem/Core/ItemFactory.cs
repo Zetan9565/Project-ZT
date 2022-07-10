@@ -30,6 +30,8 @@ namespace ZetanStudio.ItemSystem
             return null;
         }
 
+        public static string GetColorName(Item model) => LM.Tr(typeof(Item).Name, model.Name);
+
         public static ItemData MakeItem(Item model)
         {
             ItemData item;
@@ -67,18 +69,18 @@ namespace ZetanStudio.ItemSystem
             var items = new SaveDataItem();
             foreach (var item in ItemFactory.items)
             {
-                items.subData[item.Key] = item.Value.GetSaveData();
+                items[item.Key] = item.Value.GetSaveData();
             }
-            saveData.data["items"] = items;
+            saveData["items"] = items;
         }
         [LoadMethod(-999)]
         public static void LoadData(SaveData saveData)
         {
             ItemFactory.items.Clear();
-            if (saveData.data.TryGetValue("items", out var items))
-                foreach (var sdi in items.subData.Values)
+            if (saveData.TryReadData("items", out var items))
+                foreach (var sdi in items.ReadDataDict().Values)
                 {
-                    if (sdi.stringData.TryGetValue("ID", out var ID))
+                    if (sdi.TryReadString("ID", out var ID))
                         if (!ItemFactory.items.ContainsKey(ID))
                         {
                             var item = new ItemData(sdi);

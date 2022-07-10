@@ -45,7 +45,7 @@ public class QuestBoard : SingletonWindow<QuestBoard>, IPointerClickHandler
 
     public void Refresh()
     {
-        if (!Quest || Quest.IsFinished)
+        if (!Quest || Quest.IsSubmitted)
         {
             Defocus();
             return;
@@ -78,11 +78,11 @@ public class QuestBoard : SingletonWindow<QuestBoard>, IPointerClickHandler
 
     protected override void RegisterNotify()
     {
-        NotifyCenter.AddListener(QuestManager.QuestStateChanged, OnQuestStateChanged, this);
-        NotifyCenter.AddListener(QuestManager.ObjectiveUpdate, OnObjectiveUpdate, this);
+        NotifyCenter.AddListener(QuestManager.QuestAcceptStateChanged, OnQuestAcceptStateChanged, this);
+        NotifyCenter.AddListener(QuestManager.ObjectiveAmountUpdate, OnObjectiveUpdate, this);
     }
 
-    private void OnQuestStateChanged(object[] msg)
+    private void OnQuestAcceptStateChanged(object[] msg)
     {
         if (msg.Length > 0 && msg[0] is QuestData quest && msg[1] is bool ipBef)
             if (Quest == null && quest.InProgress && !ipBef)//任务栏没有在显示的任务，这是新接取的任务

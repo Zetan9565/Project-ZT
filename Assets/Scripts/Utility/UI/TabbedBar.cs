@@ -50,7 +50,7 @@ namespace ZetanStudio.UI
 
         private void OnSwitch(int index)
         {
-            if (index < 0 || index > toggles.Count) return;
+            if (index < 0 || index >= toggles.Count) return;
             if (toggles[index].isOn)
             {
                 selectedIndex = index + 1;

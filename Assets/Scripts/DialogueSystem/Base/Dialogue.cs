@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.DialogueSystem;
 
 [CreateAssetMenu(fileName = "dialogue", menuName = "Zetan Studio/剧情/对话")]
 public class Dialogue : ScriptableObject
@@ -34,14 +35,14 @@ public class Dialogue : ScriptableObject
         return PreviewDialogue(this);
     }
 
-    public static string PreviewDialogue(Dialogue dialogue, params IEnumerable<ScriptableObject>[] caches)
+    public static string PreviewDialogue(Dialogue dialogue)
     {
         if (!dialogue) return null;
         string dialoguePreview = string.Empty;
         for (int i = 0; i < dialogue.Words.Count; i++)
         {
             var words = dialogue.Words[i];
-            dialoguePreview += "[" + words.TalkerName + "]说：\n-" + MiscFuntion.HandlingKeyWords(words.Content, false, caches);
+            dialoguePreview += "[" + words.TalkerName + "]说：\n-" + MiscFuntion.HandlingKeyWords(words.Content, false);
             for (int j = 0; j < words.Options.Count; j++)
             {
                 dialoguePreview += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
@@ -382,8 +383,8 @@ public class AffectiveDialogue
     public int UpperBound => upperBound;
 
     [SerializeField]
-    private Dialogue dialogue;
-    public Dialogue Dialogue => dialogue;
+    private NewDialogue dialogue;
+    public NewDialogue Dialogue => dialogue;
 }
 
 [Serializable]
@@ -394,8 +395,8 @@ public class ConditionDialogue
     public ConditionGroup Condition => condition;
 
     [SerializeField]
-    private Dialogue dialogue;
-    public Dialogue Dialogue => dialogue;
+    private NewDialogue dialogue;
+    public NewDialogue Dialogue => dialogue;
 
     public bool IsValid => dialogue && condition.IsValid;
 }

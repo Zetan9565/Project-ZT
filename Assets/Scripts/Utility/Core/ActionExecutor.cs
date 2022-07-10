@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -149,6 +150,35 @@ public class ActionStack
         if (!popAll) actionStacks.Clear();
         else while (actionStacks.Count > 0)
                 Pop();
+    }
+
+    [SaveMethod]
+    public static void SaveData(SaveData saveData)
+    {
+        var data = saveData.Write("actionData", new SaveDataItem());
+        var array = ToArray();
+        for (int i = array.Length - 1; i >= 0; i--)
+        {
+            var stackElement = array[i];
+            var ad = new SaveDataItem();
+            ad["ID"] = stackElement.executor.ID;
+            ad["isExecuting"] = stackElement.executor.IsExecuting;
+            ad["executionTime"] = stackElement.executor.ExecutionTime;
+            ad["endDelayTime"] = stackElement.executor.EndDelayTime;
+            ad["isDone"] = stackElement.executor.IsDone;
+            ad["actionType"] = (int)stackElement.actionType;
+            data["ID"] = ad;
+        }
+    }
+
+    [LoadMethod]
+    public static void LoadData(SaveData saveData)
+    {
+        var actions = Object.FindObjectsOfType<ActionExecutor>();
+        foreach (var ad in saveData.ReadData("actionData").ReadDataDict())
+            foreach (var action in actions)
+                if (action.ID == ad.Key)
+                    Push(action, (ActionType)ad.Value.ReadInt("actionType"), ad.Value.ReadFloat("endDelayTime"), ad.Value.ReadFloat("executionTime"));
     }
 }
 

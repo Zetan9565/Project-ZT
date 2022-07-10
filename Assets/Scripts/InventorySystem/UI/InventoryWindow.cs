@@ -194,7 +194,27 @@ public abstract class InventoryWindow : Window, IHideable
     }
 
     public static ItemSelectionWindow OpenSelectionWindow<T>(ItemSelectionType selectionType, Action<List<CountedItem>> confirm, string title = null, string confirmDialog = null,
-        int? typeLimit = null, int? amountLimit = null, Predicate<ItemSlot> selectCondition = null, Action cancel = null, params object[] args) where T : InventoryWindow
+        int? typeLimit = null, Func<ItemData, int> amountLimit = null, Predicate<ItemData> selectCondition = null, Action cancel = null, params object[] args) where T : InventoryWindow
+    {
+        var window = WindowsManager.FindWindow<T>();
+        if (window)
+        {
+            bool openBef = window.IsOpen, hiddenBef = window.IsHidden;
+            if (window.IsHidden) WindowsManager.HideWindow<T>(false);
+            if (!window.IsOpen) window.Open(args);
+            var selection = ItemSelectionWindow.StartSelection(selectionType, window.grid as ISlotContainer, window.Handler, confirm, title, confirmDialog, typeLimit, amountLimit, selectCondition, cancel);
+            selection.onClose += () =>
+            {
+                if (!openBef) window.Close(typeof(ItemSelectionWindow));
+                else if (hiddenBef) WindowsManager.HideWindow<T>(true);
+            };
+            return selection;
+        }
+        return null;
+    }
+
+    public static ItemSelectionWindow OpenSelectionWindow<T>(ItemSelectionType selectionType, Func<List<CountedItem>, bool> confirm, string title = null, string confirmDialog = null,
+        int? typeLimit = null, Func<ItemData, int> amountLimit = null, Predicate<ItemData> selectCondition = null, Action cancel = null, params object[] args) where T : InventoryWindow
     {
         var window = WindowsManager.FindWindow<T>();
         if (window)

@@ -1,12 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.DialogueSystem;
+using ZetanStudio;
 
 [CreateAssetMenu(fileName = "talker info", menuName = "Zetan Studio/角色/谈话人信息")]
-public class TalkerInformation : NPCInformation
+public class TalkerInformation : NPCInformation, IKeywords
 {
     [SerializeField]
-    private Dialogue defaultDialogue;
-    public Dialogue DefaultDialogue => defaultDialogue;
+    private NewDialogue defaultDialogue;
+    public NewDialogue DefaultDialogue => defaultDialogue;
+
 
     [SerializeField, NonReorderable]
     private List<ConditionDialogue> conditionDialogues = new List<ConditionDialogue>();
@@ -38,8 +41,8 @@ public class TalkerInformation : NPCInformation
     public bool CanDEV_RLAT => canDEV_RLAT;
 
     [SerializeField]
-    private Dialogue normalItemDialogue;
-    public Dialogue NormalItemDialogue => normalItemDialogue;
+    private NewDialogue normalItemDialogue;
+    public NewDialogue NormalItemDialogue => normalItemDialogue;
 
     [SerializeField]
     private int normalIntimacyValue = 5;
@@ -65,6 +68,18 @@ public class TalkerInformation : NPCInformation
             return base.IsValid && (!enable || enable && !string.IsNullOrEmpty(scene) && prefab && defaultDialogue && (!isVendor || isVendor && shop) && questsStored.TrueForAll(x => x != null)
                 && conditionDialogues.TrueForAll(x => x.IsValid) && (!canDEV_RLAT || canDEV_RLAT && normalItemDialogue && giftDialogues.TrueForAll(x => x.Dialogue) && affectiveItems.TrueForAll(x => x.Item)));
         }
+    }
+
+    string IKeywords.IDPrefix => "NPC";
+
+    Color IKeywords.Color => Color.cyan;
+
+    string IKeywords.Group => "NPC";
+
+    [GetKeywordsMethod, RuntimeGetKeywordsMethod]
+    public static IEnumerable<TalkerInformation> GetTalkers()
+    {
+        return Resources.LoadAll<TalkerInformation>("Configuration");
     }
 }
 

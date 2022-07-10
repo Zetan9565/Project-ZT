@@ -3,6 +3,8 @@ using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using ZetanStudio.DialogueSystem;
+using ZetanStudio.Extension.Editor;
 
 public partial class CharacterInfoInspector
 {
@@ -118,25 +120,25 @@ public partial class CharacterInfoInspector
                 serializedObject.UpdateIfRequiredOrScript();
                 EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(defalutDialogue, new GUIContent("默认对话"));
-                if (talker.DefaultDialogue)
-                {
-                    if (talker.DefaultDialogue.Words.Exists(x => x.NeedToChusCorrectOption))
-                        EditorGUILayout.HelpBox("该对话有选择型分支，不建议用作默认对话。", MessageType.Warning);
-                    string dialogue = string.Empty;
-                    for (int i = 0; i < talker.DefaultDialogue.Words.Count; i++)
-                    {
-                        var words = talker.DefaultDialogue.Words[i];
-                        dialogue += "[" + words.TalkerName + "]说：\n-" + words.Content;
-                        for (int j = 0; j < words.Options.Count; j++)
-                        {
-                            dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
-                        }
-                        dialogue += i == talker.DefaultDialogue.Words.Count - 1 ? string.Empty : "\n";
-                    }
-                    GUI.enabled = false;
-                    EditorGUILayout.TextArea(dialogue);
-                    GUI.enabled = true;
-                }
+                //if (talker.DefaultDialogue)
+                //{
+                //    if (talker.DefaultDialogue.Words.Exists(x => x.NeedToChusCorrectOption))
+                //        EditorGUILayout.HelpBox("该对话有选择型分支，不建议用作默认对话。", MessageType.Warning);
+                //    string dialogue = string.Empty;
+                //    for (int i = 0; i < talker.DefaultDialogue.Words.Count; i++)
+                //    {
+                //        var words = talker.DefaultDialogue.Words[i];
+                //        dialogue += "[" + words.TalkerName + "]说：\n-" + words.Content;
+                //        for (int j = 0; j < words.Options.Count; j++)
+                //        {
+                //            dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
+                //        }
+                //        dialogue += i == talker.DefaultDialogue.Words.Count - 1 ? string.Empty : "\n";
+                //    }
+                //    GUI.enabled = false;
+                //    EditorGUILayout.TextArea(dialogue);
+                //    GUI.enabled = true;
+                //}
                 EditorGUILayout.PropertyField(conditionDialogues, new GUIContent("条件触发对话" + (conditionDialogues.isExpanded ? string.Empty : "\t\t数量：" + conditionDialogues.arraySize.ToString())), false);
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
@@ -211,23 +213,23 @@ public partial class CharacterInfoInspector
                     serializedObject.UpdateIfRequiredOrScript();
                     EditorGUI.BeginChangeCheck();
                     EditorGUILayout.PropertyField(normalItemDialogue, new GUIContent("赠送中性物品时的对话"));
-                    if (talker.NormalItemDialogue)
-                    {
-                        string dialogue = string.Empty;
-                        for (int i = 0; i < talker.NormalItemDialogue.Words.Count; i++)
-                        {
-                            var words = talker.NormalItemDialogue.Words[i];
-                            dialogue += "[" + words.TalkerName + "]说：\n-" + words.Content;
-                            for (int j = 0; j < words.Options.Count; j++)
-                            {
-                                dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
-                            }
-                            dialogue += i == talker.NormalItemDialogue.Words.Count - 1 ? string.Empty : "\n";
-                        }
-                        GUI.enabled = false;
-                        EditorGUILayout.TextArea(dialogue);
-                        GUI.enabled = true;
-                    }
+                    //if (talker.NormalItemDialogue)
+                    //{
+                    //    string dialogue = string.Empty;
+                    //    for (int i = 0; i < talker.NormalItemDialogue.Words.Count; i++)
+                    //    {
+                    //        var words = talker.NormalItemDialogue.Words[i];
+                    //        dialogue += "[" + words.TalkerName + "]说：\n-" + words.Content;
+                    //        for (int j = 0; j < words.Options.Count; j++)
+                    //        {
+                    //            dialogue += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
+                    //        }
+                    //        dialogue += i == talker.NormalItemDialogue.Words.Count - 1 ? string.Empty : "\n";
+                    //    }
+                    //    GUI.enabled = false;
+                    //    EditorGUILayout.TextArea(dialogue);
+                    //    GUI.enabled = true;
+                    //}
                     EditorGUILayout.PropertyField(normalIntimacyValue, new GUIContent("中性物品增加的亲密值"));
                     EditorGUILayout.PropertyField(giftDialogues, new GUIContent("赠送物品时的对话\t\t" + (giftDialogues.arraySize > 0 ? "数量：" + giftDialogues.arraySize : "无")), false);
                     if (EditorGUI.EndChangeCheck())
@@ -274,11 +276,11 @@ public partial class CharacterInfoInspector
                 int lineCount = 1;
                 if (dialogue.objectReferenceValue)
                 {
-                    Dialogue dialog = dialogue.objectReferenceValue as Dialogue;
-                    if (dialog.Words[0])
+                    NewDialogue dialog = dialogue.objectReferenceValue as NewDialogue;
+                    if (dialog.Entry)
                     {
                         GUI.enabled = false;
-                        EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), $"[{dialog.Words[0].TalkerName}]说：{dialog.Words[0].Content}");
+                        EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), $"[{dialog.Entry.Talker}]说：{dialog.Entry.Text}");
                         GUI.enabled = true;
                         lineCount++;
                     }
@@ -365,11 +367,11 @@ public partial class CharacterInfoInspector
                 int lineCount = 1;
                 if (dialogue.objectReferenceValue)
                 {
-                    Dialogue dialog = dialogue.objectReferenceValue as Dialogue;
-                    if (dialog.Words[0])
+                    NewDialogue dialog = dialogue.objectReferenceValue as NewDialogue;
+                    if (dialog.Entry)
                     {
                         GUI.enabled = false;
-                        EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), $"[{dialog.Words[0].TalkerName}]说：{dialog.Words[0].Content}");
+                        EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), $"[{dialog.Entry.Talker}]说：{dialog.Entry.Text}");
                         GUI.enabled = true;
                         lineCount++;
                     }

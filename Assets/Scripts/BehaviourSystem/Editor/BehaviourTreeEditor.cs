@@ -5,11 +5,12 @@ using UnityEditor.Callbacks;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using ZetanStudio.Editor;
-using ZetanStudio.Extension;
 
 namespace ZetanStudio.BehaviourTree.Editor
 {
+    using ZetanStudio.Editor;
+    using Extension;
+
     public sealed class BehaviourTreeEditor : EditorWindow
     {
         #region 视图相关
@@ -17,8 +18,8 @@ namespace ZetanStudio.BehaviourTree.Editor
         private BehaviourTree tree;
         private Label inspectorLabel;
         private InspectorView inspectorView;
-        private ZetanStudio.Editor.TabbedBar inspectorTaber;
-        private ZetanStudio.Editor.TabbedBar variableTaber;
+        private TabbedBar inspectorTaber;
+        private TabbedBar variableTaber;
         private IMGUIContainer variables;
         private ToolbarMenu assetsMenu;
         private ToolbarMenu exeMenu;
@@ -398,7 +399,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 treeView.nodeUnselectedCallback = OnNodeUnselected;
                 treeView.undoRecordsChangedCallback = UpdateUndoEnable;
 
-                inspectorTaber = root.Q<ZetanStudio.Editor.TabbedBar>("inspector-tab");
+                inspectorTaber = root.Q<TabbedBar>("inspector-tab");
                 inspectorTaber.Refresh(L.TrM(settings.language, "检查器", "快速插入"), OnInspectorTab, 4);
                 inspectorLabel = root.Q<Label>("inspector-label");
                 showInspector = true;
@@ -415,7 +416,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 treeName = root.Q<Label>("tree-name");
 
                 root.Q<Label>("variable-title").text = Tr("变量");
-                variableTaber = root.Q<ZetanStudio.Editor.TabbedBar>("variable-tab");
+                variableTaber = root.Q<TabbedBar>("variable-tab");
                 variableTaber.Refresh(L.TrM(settings.language, "共享变量", "全局变量").ToArray(), OnVariableTab, 4);
                 serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourTreeManager.Instance ? BehaviourTreeManager.Instance.GlobalVariables : ZetanUtility.Editor.LoadAsset<GlobalVariables>());
 
@@ -532,7 +533,6 @@ namespace ZetanStudio.BehaviourTree.Editor
                 InitVariables();
                 Selection.activeObject = tree;
                 EditorGUIUtility.PingObject(tree);
-                settings = settings ? settings : BehaviourTreeEditorSettings.GetOrCreate();
                 if (!settings.changeOnSelected) ChangeTreeBySelection();
             }
         }

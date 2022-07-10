@@ -43,15 +43,14 @@ public class TriggerHolder : MonoBehaviour
                     ActionStack.Push(reset.action, reset.delay);
     }
 
-    public void LoadData(TriggerHolderSaveData data)
+    public void LoadData(bool isSetAtFirst)
     {
-        if (data.ID != ID) return;
         if (!string.IsNullOrEmpty(triggerName))
         {
             TriggerManager.RegisterTriggerHolder(this);
-            if (setStateAtFirst && !data.isSetAtFirst)
+            if (setStateAtFirst && !isSetAtFirst)
             {
-                isSetAtFirst = true;
+                this.isSetAtFirst = true;
                 TriggerManager.SetTrigger(TriggerName, originalState);
             }
         }

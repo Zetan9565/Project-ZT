@@ -133,7 +133,7 @@ public class QuestWindow : Window, IHideable
         for (int i = 0; i < displayObjectives.Length; i++)
         {
             string endLine = i == lineCount ? string.Empty : "\n";
-            if (selectedQuest.IsFinished)
+            if (selectedQuest.IsSubmitted)
                 objectives.AppendFormat("-{0}{1}", displayObjectives[i].DisplayName, endLine);
             else
                 objectives.AppendFormat("-{0}{1}{2}", displayObjectives[i], displayObjectives[i].IsComplete ? $" {Tr("(达成)")}" : string.Empty, endLine);
@@ -141,8 +141,8 @@ public class QuestWindow : Window, IHideable
         objectiveText.text = objectives.ToString();
         rewardList.Refresh(ItemSlotData.Convert(selectedQuest.Model.RewardItems, maxRewardCount));
 
-        ZetanUtility.SetActive(abandonButton.gameObject, !selectedQuest.IsFinished && selectedQuest.Model.Abandonable);
-        ZetanUtility.SetActive(traceButton.gameObject, !selectedQuest.IsFinished);
+        ZetanUtility.SetActive(abandonButton.gameObject, !selectedQuest.IsSubmitted && selectedQuest.Model.Abandonable);
+        ZetanUtility.SetActive(traceButton.gameObject, !selectedQuest.IsSubmitted);
         RefreshTraceText();
     }
 
@@ -234,8 +234,8 @@ public class QuestWindow : Window, IHideable
 
     protected override void RegisterNotify()
     {
-        NotifyCenter.AddListener(QuestManager.QuestStateChanged, OnQuestStateChanged, this);
-        NotifyCenter.AddListener(QuestManager.ObjectiveUpdate, OnObjectiveUpdate, this);
+        NotifyCenter.AddListener(QuestManager.QuestAcceptStateChanged, OnQuestStateChanged, this);
+        NotifyCenter.AddListener(QuestManager.ObjectiveStateUpdate, OnObjectiveUpdate, this);
     }
 
     private void OnQuestStateChanged(params object[] msg)

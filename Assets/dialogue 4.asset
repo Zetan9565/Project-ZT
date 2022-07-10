@@ -1,0 +1,184 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: dialogue 4
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091213465059442
+  - rid: 9026091213465059443
+  - rid: 9026091213465059445
+  - rid: 9026091213465059446
+  - rid: 9026091213465059447
+  - rid: 9026091213465059448
+  - rid: 9026091213465059449
+  - rid: 9026091213465059489
+  - rid: 9026091213465059490
+  exit:
+    <ID>k__BackingField: CON-018d6da07268437ba0969ffdaa59c112
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 1440, y: 0}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091213465059442
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-f6e0a180dd5545b4ac9ea4749533c43c
+        events: []
+        options:
+        - <Title>k__BackingField: "\u6B63\u786E\u9009\u9879"
+          <Content>k__BackingField:
+            rid: 9026091213465059443
+          <IsMain>k__BackingField: 0
+          lastContent: 
+        - <Title>k__BackingField: "\u9519\u8BEF\u9009\u9879"
+          <Content>k__BackingField:
+            rid: 9026091213465059445
+          <IsMain>k__BackingField: 0
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u4ECA\u5E74\u7684\u6536\u6210\u6BD4\u53BB\u5E74\u597D\u5462\u3002"
+    - rid: 9026091213465059443
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-5a71414a898043959b5372668cd58d59
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059447
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 360, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u606D\u559C\u4F60\u9009\u5BF9\u5566\u3002"
+    - rid: 9026091213465059445
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-3abbd509edd648ac842629f0fbe04b44
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091213465059446
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 720, y: 100}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u8FD9\u90FD\u80FD\u9009\u9519\uFF0C\u592A\u8521\u4E86\uFF01"
+    - rid: 9026091213465059446
+      type: {class: RecursionSuffix, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-55b5520233df42598002d4eb55405441
+        events: []
+        options: []
+        <ExitHere>k__BackingField: 0
+        _position: {x: 1080, y: 100}
+        lastExitHere: 0
+        <Depth>k__BackingField: 2
+    - rid: 9026091213465059447
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-7e06f8cbdcd24c99bbda1fc54681f1f3
+        events: []
+        options:
+        - <Title>k__BackingField: "\u5206\u652F\u4E00"
+          <Content>k__BackingField:
+            rid: 9026091213465059448
+          <IsMain>k__BackingField: 0
+          lastContent: 
+        - <Title>k__BackingField: "\u5206\u652F\u4E8C"
+          <Content>k__BackingField:
+            rid: 9026091213465059449
+          <IsMain>k__BackingField: 0
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 720, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u6BCF\u5929\u90FD\u5FD9\u5F97\u4E0D\u53EF\u5F00\u4EA4\u3002"
+    - rid: 9026091213465059448
+      type: {class: BranchContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-93e655038f53427cbe81166107011d5d
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 1
+        _position: {x: 1080, y: -92.95999}
+        lastExitHere: 0
+        <Dialogue>k__BackingField: {fileID: 0}
+    - rid: 9026091213465059449
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-0d7e8fcf9e2b46a78c044d5d9142ef62
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 1
+        _position: {x: 1080, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '[NPC]'
+        <Text>k__BackingField: "\u8FD9\u662F\u5206\u652F\u4E8C\u6D4B\u8BD5\u3002"
+    - rid: 9026091213465059489
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-220df7fc00c640d29c5cf2e4e26a9e4a
+        events: []
+        options:
+        - <Title>k__BackingField: "\u65B0\u9009\u9879"
+          <Content>k__BackingField:
+            rid: 9026091213465059490
+          <IsMain>k__BackingField: 0
+          lastContent: 
+        - <Title>k__BackingField: "\u65B0\u9009\u9879 (1)"
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 0
+          lastContent: 
+        <ExitHere>k__BackingField: 0
+        _position: {x: 433.55002, y: 287.50003}
+        lastExitHere: 0
+        <Talker>k__BackingField: 
+        <Text>k__BackingField: 
+    - rid: 9026091213465059490
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-16b830970700410cb8f2161c82a809f1
+        events: []
+        options: []
+        <ExitHere>k__BackingField: 0
+        _position: {x: 841.80005, y: 334.65002}
+        lastExitHere: 0
+        <Talker>k__BackingField: 
+        <Text>k__BackingField: 

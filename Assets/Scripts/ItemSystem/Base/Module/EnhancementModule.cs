@@ -89,12 +89,12 @@ namespace ZetanStudio.ItemSystem.Module
         public override SaveDataItem GetSaveData()
         {
             var data = new SaveDataItem();
-            data.intData["level"] = level;
+            data["level"] = level;
             return data;
         }
         public override void LoadSaveData(SaveDataItem data)
         {
-            level = data.intData["level"];
+            level = data.ReadInt("level");
         }
     }
 

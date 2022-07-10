@@ -1,440 +1,261 @@
+using Newtonsoft.Json;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
-using ZetanStudio.ItemSystem;
-using ZetanStudio.ItemSystem.Module;
 
 [Serializable]
-public class SaveData
+public class SaveData : SaveDataItem
 {
     public string version;
-    public string sceneName;
-
     public DateTime saveDate;
-    public decimal totalTime;
-
-    public float playerPosX;
-    public float playerPosY;
-    public float playerPosZ;
-
-    public Dictionary<string, SaveDataItem> data = new();
-
-    //public BackpackSaveData backpackData = new BackpackSaveData();
-    //public InventorySaveData backpack = new InventorySaveData();
-    //public ItemDatabaseSaveData itemDatabase = new ItemDatabaseSaveData();
-
-    //public List<string> craftDatas = new List<string>();
-
-    //public StructureSystemSaveData structureSystemData = new StructureSystemSaveData();
-
-    //public List<WarehouseSaveData> warehouseDatas = new List<WarehouseSaveData>();
-
-    //public List<QuestSaveData> inProgressQuestDatas = new List<QuestSaveData>();
-    //public List<QuestSaveData> finishedQuestDatas = new List<QuestSaveData>();
-
-    //public List<DialogueSaveData> dialogueDatas = new List<DialogueSaveData>();
-
-    public List<MapMarkSaveData> markDatas = new List<MapMarkSaveData>();
-
-    public List<ActionSaveData> actionDatas = new List<ActionSaveData>();
-
-    public TriggerSaveData triggerData = new TriggerSaveData();
 
     public SaveData(string version)
     {
         this.version = version;
-        sceneName = SceneManager.GetActiveScene().name;
         saveDate = DateTime.Now;
+        this["sceneName"] = SceneManager.GetActiveScene().name;
         var playerPos = PlayerManager.Instance.PlayerTransform.position;
-        playerPosX = playerPos.x;
-        playerPosY = playerPos.y;
-        playerPosZ = playerPos.z;
+        this["playerPosX"] = playerPos.x;
+        this["playerPosY"] = playerPos.y;
+        this["playerPosZ"] = playerPos.z;
     }
 }
 
 [Serializable]
-public sealed class SaveDataItem
+public class SaveDataItem
 {
-    public List<int> intList = new();
-    public List<float> floatList = new();
-    public List<bool> boolList = new();
-    public List<string> stringList = new();
-    public List<SaveDataItem> dataList = new();
-
-    public Dictionary<string, int> intData = new();
-    public Dictionary<string, float> floatData = new();
-    public Dictionary<string, bool> boolData = new();
-    public Dictionary<string, string> stringData = new();
-    public Dictionary<string, SaveDataItem> subData = new();
-}
-
-#region 道具相关
-[Serializable]
-public class BackpackSaveData
-{
-    public long money;
-
-    public int currentSize;
-    public int maxSize;
-
-    public float currentWeight;
-    public float maxWeightLoad;
-
-    //public List<ItemSaveData> itemDatas = new List<ItemSaveData>();
-    public List<string> items;
-}
-
-[Serializable]
-public class WarehouseSaveData
-{
-    public string handlerID;
-    public string scene;
-    public float posX;
-    public float posY;
-    public float posZ;
-
-    public long money;
-
-    public int currentSize;
-    public int maxSize;
-
-    //public List<ItemSaveData> itemDatas = new List<ItemSaveData>();
-
-    public WarehouseSaveData(string id, WarehouseData warehouse)
+    public object this[string key]
     {
-        handlerID = id;
-        scene = warehouse.scene;
-        posX = warehouse.position.x;
-        posY = warehouse.position.y;
-        posZ = warehouse.position.z;
-        money = warehouse.Inventory.Money;
-        currentSize = warehouse.Inventory.SpaceCost;
-        maxSize = warehouse.Inventory.SpaceLimit;
-        //foreach (ItemInfo info in warehouse.Items)
-        //{
-        //    itemDatas.Add(new ItemSaveData(info));
-        //}
-    }
-}
-public class InventorySaveData
-{
-    public long money;
-
-    public int spaceCost;
-    public int spaceLimit;
-
-    public float weightCost;
-    public float weightLimit;
-
-    public List<InventoryItemSaveData> items = new List<InventoryItemSaveData>();
-    public List<SlotSaveData> slots = new List<SlotSaveData>();
-    public List<string> hiddenItems = new List<string>();
-}
-[Serializable]
-public class ItemDatabaseSaveData
-{
-    public Dictionary<string, ItemSaveData> items = new Dictionary<string, ItemSaveData>();
-
-    public void Add(ItemData item)
-    {
-        items[item.ID] = new ItemSaveData(item);
-    }
-    public Dictionary<string, ItemData> Load()
-    {
-        Dictionary<string, ItemData> results = new Dictionary<string, ItemData>();
-        //foreach (var item in items)
-        //{
-        //    results[item.Key] = new ItemData(item.Value);
-        //}
-        return results;
-    }
-}
-[Serializable]
-public class ItemSaveData//因为存在同一个ItemData可能分别存储在不同Inventory中的情况，所以用一个总的列表存储它们，最后读档时再根据ID从中依次读取到相应的Inventory。
-{
-    public string modelID;
-    public string ID;
-    public List<ItemModuleSaveData> moduleData = new List<ItemModuleSaveData>();
-
-    public ItemSaveData(ItemData item)
-    {
-        modelID = item.ModelID;
-        ID = item.ID;
-        foreach (var module in item.ModuleData)
+        get
         {
-            moduleData.Add(new ItemModuleSaveData(module));
+            if (intDict.TryGetValue(key, out var intValue)) return intValue;
+            else if (floatDict.TryGetValue(key, out var floatValue)) return floatValue;
+            else if (boolDict.TryGetValue(key, out var boolValue)) return boolValue;
+            else if (stringDict.TryGetValue(key, out var stringValue)) return stringValue;
+            else if (dataDict.TryGetValue(key, out var dataValue)) return dataValue;
+            else throw new KeyNotFoundException(key);
         }
-    }
-}
-[Serializable]
-public class InventoryItemSaveData
-{
-    public string ID;
-    public int amount;
-    public bool isLocked;
-    public List<SlotSaveData> slots = new List<SlotSaveData>();
-
-    public string warehouseID;
-    public string structureID;
-
-    public InventoryItemSaveData(ItemData data, int amount, List<ItemSlotData> slots, Warehouse warehouse = null, Structure2D structure = null)
-    {
-        ID = data.ID;
-        this.amount = amount;
-        isLocked = data.IsLocked;
-        this.slots.AddRange(slots.ConvertAll(x => new SlotSaveData(x)));
-        warehouseID = warehouse != null ? warehouse.EntityID : string.Empty;
-        structureID = structure != null ? structure.EntityID : string.Empty;
-    }
-}
-[Serializable]
-public class SlotSaveData
-{
-    public int index;
-    public int amount;
-    public string item;
-
-    public SlotSaveData(ItemSlotData slot)
-    {
-        index = slot.index;
-        amount = slot.amount;
-        item = slot.ItemID;
-    }
-}
-[Serializable]
-public sealed class ItemModuleSaveData
-{
-    public string moduleType;
-    public Dictionary<string, int> intData = new Dictionary<string, int>();
-    public Dictionary<string, float> floatData = new Dictionary<string, float>();
-    public Dictionary<string, bool> boolData = new Dictionary<string, bool>();
-    public Dictionary<string, string> stringData = new Dictionary<string, string>();
-
-    public ItemModuleSaveData(ItemModuleData data)
-    {
-        moduleType = data.GetModule().GetType().FullName;
-        //data.Save(this);
-    }
-}
-#endregion
-
-#region 建筑相关
-[Serializable]
-public class StructureSystemSaveData
-{
-    public string[] learneds;
-
-    public List<StructureSaveData> structureDatas = new List<StructureSaveData>();
-}
-
-[Serializable]
-public class StructureSaveData
-{
-    public string modelID;
-    public string ID;
-
-    public string scene;
-    public float posX;
-    public float posY;
-    public float posZ;
-
-    public float leftBuildTime;
-    public int stageIndex;
-
-    public StructureSaveData(StructureData structure)
-    {
-        modelID = structure.Info.ID;
-        ID = structure.ID;
-        scene = structure.scene;
-        posX = structure.position.x;
-        posY = structure.position.y;
-        posZ = structure.position.z;
-        leftBuildTime = structure.leftBuildTime;
-    }
-}
-#endregion
-
-#region 任务相关
-[Serializable]
-public class QuestSaveData
-{
-    public string questID;
-
-    public string originalGiverID;
-
-    public List<ObjectiveSaveData> objectiveDatas = new List<ObjectiveSaveData>();
-
-    public QuestSaveData(QuestData quest)
-    {
-        questID = quest.Model.ID;
-        originalGiverID = quest.originalQuestHolder.TalkerID;
-        foreach (ObjectiveData o in quest.Objectives)
+        set
         {
-            objectiveDatas.Add(new ObjectiveSaveData(o));
-        }
-    }
-}
-[Serializable]
-public class ObjectiveSaveData
-{
-    public string objectiveID;
-
-    public int currentAmount;
-
-    public ObjectiveSaveData(ObjectiveData objective)
-    {
-        objectiveID = objective.ID;
-        currentAmount = objective.CurrentAmount;
-    }
-}
-#endregion
-
-#region 对话相关
-[Serializable]
-public class DialogueSaveData
-{
-    public string dialogID;
-
-    public List<DialogueWordsSaveData> wordsDatas = new List<DialogueWordsSaveData>();
-
-    public DialogueSaveData(DialogueData dialogue)
-    {
-        dialogID = dialogue.model.ID;
-        foreach (DialogueWordsData words in dialogue.wordsDatas)
-        {
-            wordsDatas.Add(new DialogueWordsSaveData(words));
-        }
-    }
-}
-
-[Serializable]
-public class DialogueWordsSaveData
-{
-    public HashSet<int> cmpltOptionIndexes = new HashSet<int>();//已完成的选项的序号集
-
-    public DialogueWordsSaveData(DialogueWordsData words)
-    {
-        for (int i = 0; i < words.OptionDatas.Count; i++)
-        {
-            if (words.OptionDatas[i].isDone)
-                cmpltOptionIndexes.Add(i);
+            if (value is int intValue) Write(key, intValue);
+            else if (value is float floatValue) Write(key, floatValue);
+            else if (value is bool boolValue) Write(key, boolValue);
+            else if (value is string stringValue) Write(key, stringValue);
+            else if (value is SaveDataItem dataValue) Write(key, dataValue);
+            else throw new InvalidCastException(key);
         }
     }
 
-    public bool IsOptionCmplt(int index)
+    [JsonProperty] private List<int> intList;
+    [JsonProperty] private List<float> floatList;
+    [JsonProperty] private List<bool> boolList;
+    [JsonProperty] private List<string> stringList;
+    [JsonProperty] private List<SaveDataItem> dataList;
+    [JsonProperty] private Dictionary<string, int> intDict;
+    [JsonProperty] private Dictionary<string, float> floatDict;
+    [JsonProperty] private Dictionary<string, bool> boolDict;
+    [JsonProperty] private Dictionary<string, string> stringDict;
+    [JsonProperty] private Dictionary<string, SaveDataItem> dataDict;
+
+    #region 写入列表
+    public int Write(int value)
     {
-        return cmpltOptionIndexes.Contains(index);
+        intList ??= new List<int>();
+        intList.Add(value);
+        return value;
     }
-}
-#endregion
-
-#region 其它
-[Serializable]
-public class TriggerSaveData
-{
-    public List<TriggerStateSaveData> stateDatas = new List<TriggerStateSaveData>();
-    public List<TriggerHolderSaveData> holderDatas = new List<TriggerHolderSaveData>();
-}
-[Serializable]
-public class TriggerHolderSaveData
-{
-    public string ID;
-    public bool isSetAtFirst;
-
-    public TriggerHolderSaveData(TriggerHolder holder)
+    public float Write(float value)
     {
-        ID = holder.ID;
-        isSetAtFirst = holder.isSetAtFirst;
+        floatList ??= new List<float>();
+        floatList.Add(value);
+        return value;
     }
-}
-[Serializable]
-public class TriggerStateSaveData
-{
-    public string triggerName;
-
-    public int triggerState;
-
-    public TriggerStateSaveData(string triggerName, TriggerState triggerState)
+    public bool Write(bool value)
     {
-        this.triggerName = triggerName;
-        this.triggerState = (int)triggerState;
+        boolList ??= new List<bool>();
+        boolList.Add(value);
+        return value;
     }
-}
-
-[Serializable]
-public class ActionSaveData
-{
-    public string ID;
-
-    public bool isExecuting;
-    public float executionTime;
-    public float endDelayTime;
-
-    public bool isDone;
-
-    public int actionType;
-
-    public ActionSaveData(ActionStackData stackElement)
+    public string Write(string value)
     {
-        ID = stackElement.executor.ID;
-        isExecuting = stackElement.executor.IsExecuting;
-        executionTime = stackElement.executor.ExecutionTime;
-        endDelayTime = stackElement.executor.EndDelayTime;
-        isDone = stackElement.executor.IsDone;
-        actionType = (int)stackElement.actionType;
+        stringList ??= new List<string>();
+        stringList.Add(value);
+        return value;
     }
-}
-
-[Serializable]
-public class MapMarkSaveData
-{
-    public float worldPosX;
-    public float worldPosY;
-    public float worldPosZ;
-    public bool keepOnMap;
-    public bool removeAble;
-    public string textToDisplay;
-
-    public MapMarkSaveData(MapIcon iconWoH)
+    public SaveDataItem Write(SaveDataItem value)
     {
-        worldPosX = iconWoH.Position.x;
-        worldPosY = iconWoH.Position.y;
-        worldPosZ = iconWoH.Position.z;
-        keepOnMap = iconWoH.KeepOnMap;
-        removeAble = iconWoH.RemoveAble;
-        textToDisplay = iconWoH.TextToDisplay;
+        dataList ??= new List<SaveDataItem>();
+        dataList.Add(value);
+        return value;
     }
-}
-#endregion
-
-[Serializable]
-public class RoleValueSaveData
-{
-    public string ID;
-    public int intValue;
-    public float floatValue;
-    public bool boolValue;
-
-    public RoleValueSaveData()
+    public IEnumerable<int> WriteAll(IEnumerable<int> values)
     {
+        intList ??= new List<int>();
+        intList.AddRange(values);
+        return values;
+    }
+    public IEnumerable<float> WriteAll(IEnumerable<float> values)
+    {
+        floatList ??= new List<float>();
+        floatList.AddRange(values);
+        return values;
+    }
+    public IEnumerable<bool> WriteAll(IEnumerable<bool> values)
+    {
+        boolList ??= new List<bool>();
+        boolList.AddRange(values);
+        return values;
+    }
+    public IEnumerable<string> WriteAll(IEnumerable<string> values)
+    {
+        stringList ??= new List<string>();
+        stringList.AddRange(values);
+        return values;
+    }
+    public IEnumerable<SaveDataItem> WriteAll(IEnumerable<SaveDataItem> values)
+    {
+        dataList ??= new List<SaveDataItem>();
+        dataList.AddRange(values);
+        return values;
+    }
+    #endregion
 
+    #region 写入字典
+    public int Write(string key, int value)
+    {
+        intDict ??= new Dictionary<string, int>();
+        return intDict[key] = value;
+    }
+    public float Write(string key, float value)
+    {
+        floatDict ??= new Dictionary<string, float>();
+        return floatDict[key] = value;
+    }
+    public bool Write(string key, bool value)
+    {
+        boolDict ??= new Dictionary<string, bool>();
+        return boolDict[key] = value;
+    }
+    public string Write(string key, string value)
+    {
+        stringDict ??= new Dictionary<string, string>();
+        return stringDict[key] = value;
+    }
+    public SaveDataItem Write(string key, SaveDataItem value)
+    {
+        dataDict ??= new Dictionary<string, SaveDataItem>();
+        return dataDict[key] = value;
+    }
+    #endregion
+
+    #region 按集合读取
+    public List<int> ReadIntList() => intList ?? new List<int>();
+    public List<float> ReadFloatList() => floatList ?? new List<float>();
+    public List<bool> ReadBoolList() => boolList ?? new List<bool>();
+    public List<string> ReadStringList() => stringList ?? new List<string>();
+    public List<SaveDataItem> ReadDataList() => dataList ?? new List<SaveDataItem>();
+    public Dictionary<string, int> ReadIntDict() => intDict ?? new Dictionary<string, int>();
+    public Dictionary<string, float> ReadFloatDict() => floatDict ?? new Dictionary<string, float>();
+    public Dictionary<string, bool> ReadBoolDict() => boolDict ?? new Dictionary<string, bool>();
+    public Dictionary<string, string> ReadStringDict() => stringDict ?? new Dictionary<string, string>();
+    public Dictionary<string, SaveDataItem> ReadDataDict() => dataDict ?? new Dictionary<string, SaveDataItem>();
+    #endregion
+
+    #region 按名称读取
+    public bool TryReadInt(string key, out int value)
+    {
+        if (intDict != null) return intDict.TryGetValue(key, out value);
+        value = default;
+        return false;
+    }
+    public bool TryReadFloat(string key, out float value)
+    {
+        if (floatDict != null) return floatDict.TryGetValue(key, out value);
+        value = default;
+        return false;
+    }
+    public bool TryReadBool(string key, out bool value)
+    {
+        if (boolDict != null) return boolDict.TryGetValue(key, out value);
+        value = default;
+        return false;
+    }
+    public bool TryReadString(string key, out string value)
+    {
+        if (stringDict != null) return stringDict.TryGetValue(key, out value);
+        value = default;
+        return false;
+    }
+    public bool TryReadData(string key, out SaveDataItem value)
+    {
+        if (dataDict != null) return dataDict.TryGetValue(key, out value);
+        value = default;
+        return false;
     }
 
-    public RoleValueSaveData(ZetanStudio.Character.IRoleValue value)
+    public int ReadInt(string key) => intDict != null && intDict.TryGetValue(key, out var value) ? value : default;
+    public float ReadFloat(string key) => floatDict != null && floatDict.TryGetValue(key, out var value) ? value : default;
+    public bool ReadBool(string key) => boolDict != null && boolDict.TryGetValue(key, out var value) ? value : default;
+    public string ReadString(string key) => stringDict != null && stringDict.TryGetValue(key, out var value) ? value : default;
+    public SaveDataItem ReadData(string key) => dataDict != null && dataDict.TryGetValue(key, out var value) ? value : default;
+    #endregion
+
+    #region 按下标读取
+    public bool TryReadInt(int index, out int value)
     {
-        ID = value.ID;
-        switch (value.ValueType)
+        if (intList != null && index >= 0 && index < intList.Count)
         {
-            case ZetanStudio.Character.RoleValueType.Integer:
-                intValue = value.IntValue;
-                break;
-            case ZetanStudio.Character.RoleValueType.Float:
-                floatValue = value.FloatValue;
-                break;
-            case ZetanStudio.Character.RoleValueType.Boolean:
-                boolValue = value.BoolValue;
-                break;
+            value = intList[index];
+            return true;
         }
+        value = default;
+        return false;
     }
+    public bool TryReadFloat(int index, out float value)
+    {
+        if (floatList != null && index >= 0 && index < floatList.Count)
+        {
+            value = floatList[index];
+            return true;
+        }
+        value = default;
+        return false;
+    }
+    public bool TryReadBool(int index, out bool value)
+    {
+        if (boolList != null && index >= 0 && index < boolList.Count)
+        {
+            value = boolList[index];
+            return true;
+        }
+        value = default;
+        return false;
+    }
+    public bool TryReadString(int index, out string value)
+    {
+        if (stringList != null && index >= 0 && index < stringList.Count)
+        {
+            value = stringList[index];
+            return true;
+        }
+        value = default;
+        return false;
+    }
+    public bool TryReadData(int index, out SaveDataItem value)
+    {
+        if (dataList != null && index >= 0 && index < dataList.Count)
+        {
+            value = dataList[index];
+            return true;
+        }
+        value = default;
+        return false;
+    }
+
+    public int ReadInt(int index) => intList != null && index >= 0 && index < intList.Count ? intList[index] : default;
+    public float ReadFloat(int index) => floatList != null && index >= 0 && index < floatList.Count ? floatList[index] : (float)default;
+    public bool ReadBool(int index) => boolList != null && index >= 0 && index < boolList.Count ? boolList[index] : default;
+    public string ReadString(int index) => stringList != null && index >= 0 && index < stringList.Count ? stringList[index] : default;
+    public SaveDataItem ReadData(int index) => dataList != null && index >= 0 && index < dataList.Count ? dataList[index] : default;
+    #endregion
 }

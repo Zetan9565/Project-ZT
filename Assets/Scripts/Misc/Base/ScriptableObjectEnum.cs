@@ -26,7 +26,7 @@ public abstract class ScriptableObjectEnum<TS, TI> : ScriptableObjectEnum where 
         }
     }
 
-    public TI this[int index]
+    public virtual TI this[int index]
     {
         get
         {
@@ -35,13 +35,13 @@ public abstract class ScriptableObjectEnum<TS, TI> : ScriptableObjectEnum where 
         }
     }
 
-    public TI this[string name] => this[Array.FindIndex(_enum, x => x.Name == name)];
+    public virtual TI this[string name] => this[Array.FindIndex(_enum, x => x.Name == name)];
 
     public int Count => _enum.Length;
 
     [SerializeField]
-    protected TI[] _enum;
-    public ReadOnlyCollection<TI> Enum => new ReadOnlyCollection<TI>(_enum);
+    protected TI[] _enum = { };
+    public virtual ReadOnlyCollection<TI> Enum => new ReadOnlyCollection<TI>(_enum);
 
     public static int NameToIndex(string name)
     {
@@ -67,7 +67,6 @@ public abstract class ScriptableObjectEnum<TS, TI> : ScriptableObjectEnum where 
     public ScriptableObjectEnum()
     {
         instance = this as TS;
-        _enum = new TI[0];
     }
 
     public sealed override ReadOnlyCollection<ScriptableObjectEnumItem> GetEnum()

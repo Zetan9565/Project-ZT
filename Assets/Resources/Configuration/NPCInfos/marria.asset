@@ -15,15 +15,13 @@ MonoBehaviour:
   _ID: NPC001
   _name: "\u739B\u4E3D\u4E9A"
   _SMParams: {fileID: 0}
-  attribute:
-    attributes: []
   level: 0
   sex: 2
   enable: 1
   scene: UI
   position: {x: 0, y: -12.6, z: 0}
   prefab: {fileID: 4978224793417098153, guid: a67902aeef35a3e4f953e660710595df, type: 3}
-  defaultDialogue: {fileID: 11400000, guid: 443c980ec87b8384e87fa0711e323969, type: 2}
+  defaultDialogue: {fileID: 11400000, guid: 407e2786a3737694d901907aec44c4e1, type: 2}
   conditionDialogues: []
   isWarehouseAgent: 0
   warehouseCapcity: 30
@@ -31,7 +29,7 @@ MonoBehaviour:
   shop: {fileID: 11400000, guid: 3bad6ec80d1443e44b45ff9d3ffca6a3, type: 2}
   questsStored: []
   canDEV_RLAT: 1
-  normalItemDialogue: {fileID: 11400000, guid: c761d5a3c1f0b214395f27054fb51f08, type: 2}
+  normalItemDialogue: {fileID: 11400000, guid: 979b963ac3c52574d830d0067e9da39b, type: 2}
   normalIntimacyValue: 5
   giftDialogues: []
   affectiveItems: []

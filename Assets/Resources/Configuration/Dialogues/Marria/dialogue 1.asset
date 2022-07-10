@@ -36,23 +36,9 @@ MonoBehaviour:
       itemToSubmit:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       itemCanGet:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       showOnlyWhenNotHave: 0
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
@@ -69,23 +55,9 @@ MonoBehaviour:
       itemToSubmit:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       itemCanGet:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       showOnlyWhenNotHave: 0
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
@@ -109,23 +81,9 @@ MonoBehaviour:
       itemToSubmit:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       itemCanGet:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       showOnlyWhenNotHave: 0
       onlyForQuest: 0
       bindedQuest: {fileID: 0}
@@ -142,23 +100,9 @@ MonoBehaviour:
       itemToSubmit:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       itemCanGet:
         item: {fileID: 0}
         amount: 1
-        indexInGrid: 0
-        durability:
-          min: 0
-          max: 1
-        gemSlotAmount: 0
-        gemstone1: {fileID: 0}
-        gemstone2: {fileID: 0}
       showOnlyWhenNotHave: 0
       onlyForQuest: 0
       bindedQuest: {fileID: 0}

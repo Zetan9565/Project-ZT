@@ -16,7 +16,8 @@ namespace ZetanStudio.ItemSystem
     ///2. 而 <b>不需要共用</b> 或 <b>会发生改变 </b>的内容可作为额外模块，例如，不是所有道具都可以锁定，且锁定状态会发生改变，就<br/>
     ///做成<see cref="LockableModule"/>，用相应的<see cref="LockableData"/>去记录状态。
     /// </summary>
-    public sealed class Item : ScriptableObject
+    [KeywordsGroup("道具")]
+    public sealed class Item : ScriptableObject, IKeywords
     {
         private const bool useDatabase = true;
         public static bool UseDatabase => useDatabase;
@@ -26,10 +27,10 @@ namespace ZetanStudio.ItemSystem
         [field: SerializeField]
         public string ID { get; private set; }
 
-        [field: SerializeField, Label("名称")]
-        public string Name { get; private set; } = "未命名道具";
+        string IKeywords.IDPrefix => "ITEM";
 
-        public string ColorName => ZetanUtility.ColorText(LM.Tr(GetType().Name, Name), Quality.Color);
+        [field: SerializeField, Label("名称")]
+        public string Name { get; private set; } = "未命名道具";   
 
         [field: SerializeField, Label("图标"), SpriteSelector]
         public Sprite Icon { get; private set; }
@@ -59,6 +60,10 @@ namespace ZetanStudio.ItemSystem
         [SerializeReference]
         private List<ItemModule> modules = new List<ItemModule>();
         public ReadOnlyCollection<ItemModule> Modules => modules.AsReadOnly();
+
+        string IKeywords.Group => Type.Name;
+
+        Color IKeywords.Color => Quality.Color;
 
         public T GetModule<T>() where T : ItemModule
         {
@@ -96,6 +101,7 @@ namespace ZetanStudio.ItemSystem
             }
         }
 
+        [RuntimeGetKeywordsMethod]
         public static List<Item> GetItems()
         {
             if (UseDatabase) return ItemDatabase.GetItems();
@@ -110,6 +116,10 @@ namespace ZetanStudio.ItemSystem
         #region Editor相关
         public static class Editor
         {
+            [GetKeywordsMethod]
+#pragma warning disable IDE0051 // 删除未使用的私有成员
+            private static List<Item> GetItemKeywords() => GetItems();
+#pragma warning restore IDE0051 // 删除未使用的私有成员
             public static List<Item> GetItems(ItemTemplate template = null)
             {
                 if (template)

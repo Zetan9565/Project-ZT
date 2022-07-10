@@ -63,12 +63,14 @@ public class ShopWindow : Window
                     MessageManager.Instance.New(string.Format("购买了1个 [{0}]", goods.Item.Name));
             });
         }
-        else if (goods.IsEmpty)
-        {
-            ConfirmWindow.StartConfirm("该商品暂时缺货");
-        }
+        else if (goods.IsEmpty) ConfirmWindow.StartConfirm("该商品暂时缺货");
         else
         {
+            if (!goods.Info.EmptyAble && maxAmount < 1)
+            {
+                MessageManager.Instance.New($"{MiscSettings.Instance.CoinName}不足");
+                return;
+            }
             AmountWindow.StartInput(delegate (long amount)
             {
                 ConfirmWindow.StartConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)amount, goods.Item.Name), delegate
@@ -103,38 +105,43 @@ public class ShopWindow : Window
     /// <summary>
     /// 从玩家那里购入道具
     /// </summary>
-    /// <param name="data">商品信息</param>
-    public void PurchaseItem(GoodsData data)
+    /// <param name="goods">商品信息</param>
+    public void PurchaseItem(GoodsData goods)
     {
-        if (MShop == null || data == null || !data.IsValid) return;
-        if (!MShop.Acquisitions.Contains(data)) return;
-        int backpackAmount = BackpackManager.Instance.GetAmount(data.Item);
-        int maxAmount = data.Info.EmptyAble ? (data.LeftAmount > backpackAmount ? backpackAmount : data.LeftAmount) : backpackAmount;
-        if (data.LeftAmount == 1 && data.Info.EmptyAble)
+        if (MShop == null || goods == null || !goods.IsValid) return;
+        if (!MShop.Acquisitions.Contains(goods)) return;
+        int backpackAmount = BackpackManager.Instance.GetAmount(goods.Item);
+        int maxAmount = goods.Info.EmptyAble ? (goods.LeftAmount > backpackAmount ? backpackAmount : goods.LeftAmount) : backpackAmount;
+        if (goods.LeftAmount == 1 && goods.Info.EmptyAble)
         {
-            ConfirmWindow.StartConfirm(string.Format("确定出售1个 [{0}] 吗？", data.Item.Name), delegate
+            ConfirmWindow.StartConfirm(string.Format("确定出售1个 [{0}] 吗？", goods.Item.Name), delegate
             {
-                if (OnPurchase(data, 1))
-                    MessageManager.Instance.New(string.Format("出售了1个 [{1}]", 1, data.Item.Name));
+                if (OnPurchase(goods, 1))
+                    MessageManager.Instance.New(string.Format("出售了1个 [{1}]", 1, goods.Item.Name));
             });
         }
-        else if (data.IsEmpty)
+        else if (goods.IsEmpty)
         {
             ConfirmWindow.StartConfirm("这种物品暂无特价收购需求，确定按原价出售吗？", delegate
             {
-                if (BackpackManager.Instance.GetItemData(data.Item, out var item, out var amount))
+                if (BackpackManager.Instance.GetItemData(goods.Item, out var item, out var amount))
                     PurchaseItem(item, amount, true);
-                else MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{data.Item.Name}");
+                else MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{goods.Item.Name}");
             });
         }
         else
         {
+            if (!goods.Info.EmptyAble && maxAmount < 1)
+            {
+                MessageManager.Instance.New($"数量不足");
+                return;
+            }
             AmountWindow.StartInput(delegate (long amount)
             {
-                ConfirmWindow.StartConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, data.Item.Name), delegate
+                ConfirmWindow.StartConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, goods.Item.Name), delegate
                 {
-                    if (OnPurchase(data, (int)amount))
-                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, data.Item.Name));
+                    if (OnPurchase(goods, (int)amount))
+                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, goods.Item.Name));
                 });
             }, maxAmount, "出售数量", ZetanUtility.ScreenCenter, Vector2.zero);
         }
@@ -258,6 +265,7 @@ public class ShopWindow : Window
             if (!backpack) return false;
             backpack.onClose += () => CloseBy(backpack);
             tabBar.SetIndex(1);
+            OnSwitchPage(1);
             return true;
         }
         else return false;

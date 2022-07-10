@@ -1,10 +1,15 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using ZetanStudio;
+using ZetanStudio.DialogueSystem;
 using ZetanStudio.ItemSystem;
 
 public abstract class ObjectiveData
 {
     public Objective Model { get; }
 
-    public string DisplayName => MiscFuntion.HandlingKeyWords(parent.Tr(Model.DisplayName));
+    public string DisplayName => Keywords.HandlingKeyWords(parent.Tr(Model.DisplayName));
 
     public T GetInfo<T>() where T : Objective
     {
@@ -16,7 +21,7 @@ public abstract class ObjectiveData
         Model = objective;
     }
 
-    private int currentAmount;
+    protected int currentAmount;
     public int CurrentAmount
     {
         get
@@ -27,14 +32,11 @@ public abstract class ObjectiveData
         {
             bool befCmplt = IsComplete;
             int befAmount = currentAmount;
-            if (value < Model.Amount && value >= 0)
-                currentAmount = value;
-            else if (value < 0)
-            {
-                currentAmount = 0;
-            }
+            if (value < Model.Amount && value >= 0) currentAmount = value;
+            else if (value < 0) currentAmount = 0;
             else currentAmount = Model.Amount;
-            if (befAmount != currentAmount) OnStateChangeEvent?.Invoke(this, befCmplt);
+            if (befAmount != currentAmount) OnAmountChanged?.Invoke(this, befAmount);
+            if (befCmplt != IsComplete) OnStateChanged?.Invoke(this, befCmplt);
         }
     }
 
@@ -55,7 +57,8 @@ public abstract class ObjectiveData
 
     public QuestData parent;
 
-    public System.Action<ObjectiveData, bool> OnStateChangeEvent;
+    public event Action<ObjectiveData, int> OnAmountChanged;
+    public event Action<ObjectiveData, bool> OnStateChanged;
 
     protected virtual void UpdateAmountUp(int amount = 1)
     {
@@ -122,6 +125,25 @@ public abstract class ObjectiveData
         else if (other.Model.Priority == Model.Priority) return true;
         return false;
     }
+    public void Start(Action<ObjectiveData, int> onAmountChanged, Action<ObjectiveData, bool> onStateChanged)
+    {
+        OnAmountChanged = onAmountChanged;
+        OnStateChanged = onStateChanged;
+        OnStart();
+    }
+    protected abstract void OnStart();
+    public void Submit()
+    {
+        OnStateChanged = null;
+        OnSubmit();
+    }
+    protected abstract void OnSubmit();
+    public void Abandon()
+    {
+        currentAmount = 0;
+        OnAbandon();
+    }
+    protected abstract void OnAbandon();
 
     public static implicit operator bool(ObjectiveData self)
     {
@@ -147,6 +169,27 @@ public class CollectObjectiveData : ObjectiveData<CollectObjective>
 
     public int amountWhenStart;
 
+    protected override void OnStart()
+    {
+        BackpackManager.Instance.Inventory.OnItemAmountChanged += UpdateCollectAmount;
+        if (AllPrevComplete)
+        {
+            if (Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) currentAmount = BackpackManager.Instance.GetAmount(Model.ItemToCollect);
+            else if (!Model.CheckBagAtStart && !SaveManager.Instance.IsLoading) amountWhenStart = BackpackManager.Instance.GetAmount(Model.ItemToCollect);
+        }
+    }
+
+    protected override void OnSubmit()
+    {
+        BackpackManager.Instance.Inventory.OnItemAmountChanged -= UpdateCollectAmount;
+        if (!SaveManager.Instance.IsLoading && Model.LoseItemAtSbmt) BackpackManager.Instance.Lose(Model.ItemToCollect, Model.Amount);
+    }
+
+    protected override void OnAbandon()
+    {
+        BackpackManager.Instance.Inventory.OnItemAmountChanged -= UpdateCollectAmount;
+    }
+
     public void UpdateCollectAmount(Item model, int oldAmount, int newAmount)
     {
         if (IsComplete) return;
@@ -169,6 +212,61 @@ public class KillObjectiveData : ObjectiveData<KillObjective>
 {
     public KillObjectiveData(KillObjective objective) : base(objective) { }
 
+    protected override void OnStart()
+    {
+        switch (Model.KillType)
+        {
+            case KillObjectiveType.Specific:
+                GameManager.Enemies[Model.Enemy.ID].ForEach(e => e.OnDeathEvent += UpdateKillAmount);
+                break;
+            case KillObjectiveType.Race:
+                foreach (List<Enemy> enemies in GameManager.Enemies.Values.Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == Model.Race))
+                    enemies.ForEach(e => e.OnDeathEvent += UpdateKillAmount);
+                break;
+            case KillObjectiveType.Group:
+                foreach (List<Enemy> enemies in GameManager.Enemies.Values.Where(x => x.Count > 0 && Model.Group.Contains(x[0].Info.ID)))
+                {
+                    enemies.ForEach(e => e.OnDeathEvent += UpdateKillAmount);
+                }
+                break;
+            case KillObjectiveType.Any:
+                foreach (List<Enemy> enemies in GameManager.Enemies.Select(x => x.Value))
+                    enemies.ForEach(e => e.OnDeathEvent += UpdateKillAmount);
+                break;
+        }
+    }
+
+    protected override void OnSubmit()
+    {
+        switch (Model.KillType)
+        {
+            case KillObjectiveType.Specific:
+                GameManager.Enemies[Model.Enemy.ID].ForEach(e => e.OnDeathEvent -= UpdateKillAmount);
+                break;
+            case KillObjectiveType.Race:
+                foreach (List<Enemy> enemies in GameManager.Enemies.Values.Where(x => x.Count > 0 && x[0].Info.Race && x[0].Info.Race == Model.Race))
+                {
+                    enemies.ForEach(e => e.OnDeathEvent -= UpdateKillAmount);
+                }
+                break;
+            case KillObjectiveType.Group:
+                foreach (List<Enemy> enemies in GameManager.Enemies.Values.Where(x => x.Count > 0 && Model.Group.Contains(x[0].Info.ID)))
+                {
+                    enemies.ForEach(e => e.OnDeathEvent -= UpdateKillAmount);
+                }
+                break;
+            case KillObjectiveType.Any:
+                foreach (List<Enemy> enemies in GameManager.Enemies.Values)
+                    enemies.ForEach(e => e.OnDeathEvent -= UpdateKillAmount);
+                break;
+        }
+    }
+
+    protected override void OnAbandon()
+    {
+        OnSubmit();
+    }
+
     public void UpdateKillAmount()
     {
         UpdateAmountUp();
@@ -178,6 +276,28 @@ public class KillObjectiveData : ObjectiveData<KillObjective>
 public class TalkObjectiveData : ObjectiveData<TalkObjective>
 {
     public TalkObjectiveData(TalkObjective objective) : base(objective) { }
+
+    protected override void OnStart()
+    {
+        if (!IsComplete)
+        {
+            var talker = DialogueManager.Talkers[Model.NPCToTalk.ID];
+            talker.objectivesTalkToThis.Add(this);
+            OnStateChanged += talker.TryRemoveObjective;
+        }
+    }
+    protected override void OnSubmit()
+    {
+        var talker = DialogueManager.Talkers[Model.NPCToTalk.ID];
+        talker.objectivesTalkToThis.Remove(this);
+        OnStateChanged -= talker.TryRemoveObjective;
+    }
+
+    protected override void OnAbandon()
+    {
+        OnSubmit();
+        DialogueManager.RemoveDialogueData(Model.Dialogue.Entry);
+    }
 
     public void UpdateTalkState()
     {
@@ -191,6 +311,19 @@ public class MoveObjectiveData : ObjectiveData<MoveObjective>
 
     public MoveObjectiveData(MoveObjective objective) : base(objective) { }
 
+    protected override void OnStart()
+    {
+        targetPoint = CheckPointManager.CreateCheckPoint(Model.AuxiliaryPos, UpdateMoveState);
+    }
+    protected override void OnSubmit()
+    {
+        targetPoint = null;
+        CheckPointManager.RemoveCheckPointListener(Model.AuxiliaryPos, UpdateMoveState);
+    }
+    protected override void OnAbandon()
+    {
+        OnSubmit();
+    }
     public void UpdateMoveState(CheckPointInformation point)
     {
         if (point == Model.AuxiliaryPos) UpdateAmountUp();
@@ -199,7 +332,34 @@ public class MoveObjectiveData : ObjectiveData<MoveObjective>
 
 public class SubmitObjectiveData : ObjectiveData<SubmitObjective>
 {
-    public SubmitObjectiveData(SubmitObjective objective) : base(objective) { }
+    public readonly EntryContent dialogue;
+
+    public SubmitObjectiveData(SubmitObjective objective) : base(objective)
+    {
+        dialogue = new EntryContent(ID, objective.TalkerType == TalkerType.Player ? "[PLAYER]" : "[NPC]", objective.WordsWhenSubmit);
+    }
+
+    protected override void OnStart()
+    {
+        if (!IsComplete)
+        {
+            var talker = DialogueManager.Talkers[Model.NPCToSubmit.ID];
+            talker.objectivesSubmitToThis.Add(this);
+            OnStateChanged += talker.TryRemoveObjective;
+        }
+    }
+    protected override void OnSubmit()
+    {
+        var talker = DialogueManager.Talkers[Model.NPCToSubmit.ID];
+        talker.objectivesSubmitToThis.Remove(this);
+        OnStateChanged -= talker.TryRemoveObjective;
+    }
+
+    protected override void OnAbandon()
+    {
+        OnSubmit();
+        DialogueManager.RemoveDialogueData(dialogue);
+    }
 
     public void UpdateSubmitState(int amount = 1)
     {
@@ -211,6 +371,21 @@ public class TriggerObjectiveData : ObjectiveData<TriggerObjective>
 {
     public TriggerObjectiveData(TriggerObjective objective) : base(objective) { }
 
+    protected override void OnStart()
+    {
+        TriggerManager.RegisterTriggerEvent(UpdateTriggerState);
+        var state = TriggerManager.GetTriggerState(Model.TriggerName);
+        if (Model.CheckStateAtAcpt && state != TriggerState.NotExist)
+            TriggerManager.SetTrigger(Model.TriggerName, state == TriggerState.On);
+    }
+    protected override void OnSubmit()
+    {
+        TriggerManager.DeleteTriggerListner(UpdateTriggerState);
+    }
+    protected override void OnAbandon()
+    {
+        OnSubmit();
+    }
     public void UpdateTriggerState(string name, bool state)
     {
         if (name != Model.TriggerName) return;

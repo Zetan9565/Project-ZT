@@ -133,7 +133,7 @@ public class StructureManageWindow : InteractionWindow<Interactive2D>, IHideable
     private void SetMaterials()
     {
         ZetanUtility.SetActive(morePanel, false);
-        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnPutMaterials, "预留材料", selectCondition: (slot) => { return slot && slot.Item && slot.Item.GetModule<MaterialModule>(); });
+        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnPutMaterials, "预留材料", selectCondition: item => { return item?.GetModule<MaterialModule>(); });
     }
     private void OnPutMaterials(IEnumerable<CountedItem> materials)
     {

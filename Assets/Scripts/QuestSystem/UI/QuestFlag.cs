@@ -40,8 +40,8 @@ public class QuestFlag : MonoBehaviour
         UpdateUI();
         Update();
         NotifyCenter.RemoveListener(this);
-        NotifyCenter.AddListener(QuestManager.QuestStateChanged, _ => UpdateUI(), this);
-        NotifyCenter.AddListener(QuestManager.ObjectiveUpdate, _ => UpdateUI(), this);
+        NotifyCenter.AddListener(QuestManager.QuestAcceptStateChanged, _ => UpdateUI(), this);
+        NotifyCenter.AddListener(QuestManager.ObjectiveStateUpdate, _ => UpdateUI(), this);
         NotifyCenter.AddListener(NotifyCenter.CommonKeys.TriggerChanged, OnTriggerChange, this);
     }
 

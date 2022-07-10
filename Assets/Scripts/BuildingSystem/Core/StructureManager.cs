@@ -48,20 +48,20 @@ namespace ZetanStudio.StructureSystem
         public static void SaveData(SaveData saveData)
         {
             var structData = new SaveDataItem();
-            saveData.data["structure"] = structData;
-            structData.stringList.AddRange(StructuresLearned.Select(x => x.ID));
+            saveData["structure"] = structData;
+            structData.WriteAll(StructuresLearned.Select(x => x.ID));
             foreach (var dict in structures)
             {
                 foreach (var str in dict.Value)
                 {
-                    structData.dataList.Add(str.GetSaveData());
+                    structData.Write(str.GetSaveData());
                 }
             }
         }
         [LoadMethod]
         public static void LoadData(SaveData saveData)
         {
-            if (!saveData.data.TryGetValue("structure", out var structData)) return;
+            if (!saveData.TryReadData("structure", out var structData)) return;
             foreach (var kvp in structureGroups)
             {
                 if (kvp.Value) UnityEngine.Object.Destroy(kvp.Value.gameObject);
@@ -73,7 +73,7 @@ namespace ZetanStudio.StructureSystem
                 structDict[str.ID] = str;
             }
             StructuresLearned.Clear();
-            foreach (var id in structData.stringList)
+            foreach (var id in structData.ReadStringList())
             {
                 if (structDict.TryGetValue(id, out var find))
                     StructuresLearned.Add(find);
@@ -86,16 +86,16 @@ namespace ZetanStudio.StructureSystem
                 }
             }
             structures.Clear();
-            foreach (var str in structData.dataList)
+            foreach (var str in structData.ReadDataList())
             {
-                if (str.stringData.TryGetValue("modelID", out var ID) && structDict.TryGetValue(ID, out var info))
+                if (str.TryReadString("modelID", out var ID) && structDict.TryGetValue(ID, out var info))
                 {
                     StructureData data = new StructureData(info, str);
                     if (data.leftBuildTime <= 0)
                     {
                         DoneBuild(data);
                     }
-                    else if (str.stringData.TryGetValue("scene", out var scene) && scene == UnityEngine.SceneManagement.SceneManager.GetActiveScene().name)
+                    else if (str.TryReadString("scene", out var scene) && scene == UnityEngine.SceneManagement.SceneManager.GetActiveScene().name)
                     {
                         StructurePreview2D preview = UnityEngine.Object.Instantiate(info.Preview);
                         preview.StartBuild(data);

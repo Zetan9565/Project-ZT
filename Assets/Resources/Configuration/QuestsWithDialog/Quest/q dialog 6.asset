@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: q dialog 6
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091136498532376
+  exit:
+    <ID>k__BackingField: CON-0f746a1f65b84211908bacbb3b101dd1
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 400, y: 0}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091136498532376
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-710db69891cd4e959b681127dcc2a689
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+          lastContent: 
+        <ExitHere>k__BackingField: 1
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: "\u6069\u683C\u65AF"
+        <Text>k__BackingField: "\u739B\u4E3D\u4E9A\u5728\u6751\u5B50\u5357\u9762\u7684\u78E8\u574A\u65C1\u8FB9\u3002"

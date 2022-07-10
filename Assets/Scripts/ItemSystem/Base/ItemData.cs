@@ -90,9 +90,9 @@ namespace ZetanStudio.ItemSystem
         }
         public ItemData(SaveDataItem data)
         {
-            if (data.stringData.TryGetValue("modelID", out var modelID)) Model = ItemFactory.GetModel(modelID);
+            if (data.TryReadString("modelID", out var modelID)) Model = ItemFactory.GetModel(modelID);
             else throw new KeyNotFoundException("modelID");
-            if (data.stringData.TryGetValue("ID", out var ID)) this.ID = ID;
+            if (data.TryReadString("ID", out var ID)) this.ID = ID;
             else throw new KeyNotFoundException("ID");
 
             foreach (var module in Model.Modules)
@@ -101,9 +101,9 @@ namespace ZetanStudio.ItemSystem
                 {
                     this.moduleData.Add(moduleData);
                     keydModuleData.Add(moduleData.GetType(), moduleData);
-                    if (data.subData.TryGetValue("modules", out var modules))
+                    if (data.TryReadData("modules", out var modules))
                     {
-                        if (modules.subData.TryGetValue(module.GetType().FullName, out var msd))
+                        if (modules.TryReadData(module.GetType().FullName, out var msd))
                             moduleData.LoadSaveData(msd);
                     }
                 }
@@ -117,13 +117,13 @@ namespace ZetanStudio.ItemSystem
         public SaveDataItem GetSaveData()
         {
             var data = new SaveDataItem();
-            data.stringData["ID"] = ID;
-            data.stringData["modelID"] = ModelID;
+            data["ID"] = ID;
+            data["modelID"] = ModelID;
             var modules = new SaveDataItem();
-            data.subData["modules"] = modules;
+            data["modules"] = modules;
             foreach (var module in moduleData)
             {
-                modules.subData[module.GetType().FullName] = module.GetSaveData();
+                modules[module.GetType().FullName] = module.GetSaveData();
             }
             return data;
         }

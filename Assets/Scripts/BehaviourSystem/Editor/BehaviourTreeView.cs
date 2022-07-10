@@ -63,7 +63,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             runtimeUndo.onRecordsChanged += OnUndoRecordsChanged;
             runtimeUndo.undoRedoPerformed += OnUndoRedo;
 
-            nodeUIFile = AssetDatabase.GetAssetPath(BehaviourTreeEditorSettings.GetOrCreate().nodeUxml);
+            nodeUIFile = AssetDatabase.GetAssetPath(settings.nodeUxml);
         }
 
         #region 操作相关
@@ -236,7 +236,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                     {
                         NodeEditor parent = edge.output.node as NodeEditor;
                         NodeEditor child = edge.input.node as NodeEditor;
-                        if (!removedNodes.Contains(parent) && !removedNodes.Contains(child))//不是是因删除结点引起的断连才记录
+                        if (!removedNodes.Contains(parent) && !removedNodes.Contains(child))//不是因删除结点引起的断连才记录
                             if (isLocal) Undo.RegisterCompleteObjectUndo(tree, Tr("断开子结点"));
                             else runtimeUndo.RecordTreeChange(tree, Tr("断开子结点"));
                         parent.node.RemoveChild(child.node);
@@ -376,22 +376,24 @@ namespace ZetanStudio.BehaviourTree.Editor
         #region 连线相关
         private void CreateEdges(Node node)
         {
-            if (node is ParentNode parent)
-                parent.GetChildren().ForEach(c =>
+            if (node is ParentNode parentNode)
+            {
+                NodeEditor parent = GetNodeByGuid(node.guid) as NodeEditor;
+                parentNode.GetChildren().ForEach(c =>
                 {
-                    NodeEditor parent = GetNodeByGuid(node.guid) as NodeEditor;
                     NodeEditor child = GetNodeByGuid(c.guid) as NodeEditor;
                     Edge edge = parent.output.ConnectTo(child.input);
                     UpdateValid(parent);
                     UpdateValid(child);
                     AddElement(edge);
                 });
+            }
         }
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
         {
-            return ports.ToList().Where(endPort =>
+            return ports.Where(endPort =>
             endPort.direction != startPort.direction &&
-            endPort.node != startPort.node).ToList();
+            endPort.node != startPort.node && !BehaviourTree.Reachable((endPort.node as NodeEditor).node, (startPort.node as NodeEditor).node)).ToList();
         }
         #endregion
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using ZetanStudio.ItemSystem;
 
 public sealed class CountedItem
@@ -30,6 +31,12 @@ public sealed class CountedItem
             results.Add(new CountedItem(info));
         }
         return results.ToArray();
+    }
+
+    public static int GetAmount(IEnumerable<CountedItem> items, Item model)
+    {
+        if (model.StackAble) return items.FirstOrDefault(x => x.source.Model == model)?.amount ?? 0;
+        else return items.Count(x => x.source.Model == model);
     }
 
     public static implicit operator bool(CountedItem self)

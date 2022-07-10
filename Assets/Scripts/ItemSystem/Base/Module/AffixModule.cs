@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ZetanStudio.Character;
@@ -31,7 +32,7 @@ namespace ZetanStudio.ItemSystem.Module
 
     public class AffixData : ItemModuleData<AffixModule>
     {
-        public List<ItemProperty> affixes;
+        public readonly List<ItemProperty> affixes;
 
         public AffixData(ItemData item, AffixModule module) : base(item, module)
         {
@@ -41,32 +42,28 @@ namespace ZetanStudio.ItemSystem.Module
         public override SaveDataItem GetSaveData()
         {
             var data = new SaveDataItem();
-            List<RoleValueSaveData> saveDatas = new List<RoleValueSaveData>();
+            var ad = new SaveDataItem();
+            data["affixes"] = ad;
             foreach (var prop in affixes)
             {
-                saveDatas.Add(new RoleValueSaveData(prop));
+                var pd = (affixes as IRoleValue).GetSaveData();
+                ad[prop.ID] = pd;
             }
-            data.stringData["affixes"] = ZetanUtility.ToJson(saveDatas);
             return data;
         }
         public override void LoadSaveData(SaveDataItem data)
         {
-            List<RoleValueSaveData> loadDatas = ZetanUtility.FromJson<List<RoleValueSaveData>>(data.stringData["affixes"]);
-            foreach (var load in loadDatas)
+            if (data.TryReadData("affixes", out var ad))
             {
-                if (affixes.Find(x => x.ID == load.ID) is ItemProperty prop)
-                    switch (prop.ValueType)
+                affixes.Clear();
+                foreach (var pd in ad.ReadDataDict())
+                {
+                    var prop = new ItemProperty(ItemAttributeEnum.Instance[pd.Key])
                     {
-                        case RoleValueType.Integer:
-                            prop.IntValue = load.intValue;
-                            break;
-                        case RoleValueType.Float:
-                            prop.FloatValue = load.floatValue;
-                            break;
-                        case RoleValueType.Boolean:
-                            prop.BoolValue = load.boolValue;
-                            break;
-                    }
+                        Value = (ValueType)pd.Value["value"]
+                    };
+                    affixes.Add(prop);
+                }
             }
         }
     }
