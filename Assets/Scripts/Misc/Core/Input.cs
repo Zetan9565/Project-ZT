@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
+using ZetanStudio.DialogueSystem.UI;
 
 public static class Input
 {
@@ -54,7 +55,7 @@ public static class Input
         if (IsTyping) return;
         if (WindowsManager.IsWindowOpen<LootWindow>(out var loot))
             loot.TakeAll();
-        else if (WindowsManager.IsWindowOpen<ZetanStudio.UI.NewDialogueWindow>(out var window))
+        else if (WindowsManager.IsWindowOpen<DialogueWindow>(out var window))
             window.Next();
         else InteractionPanel.Instance.DoSelectInteract();
     }

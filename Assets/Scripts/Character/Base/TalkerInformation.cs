@@ -7,8 +7,8 @@ using ZetanStudio;
 public class TalkerInformation : NPCInformation, IKeywords
 {
     [SerializeField]
-    private NewDialogue defaultDialogue;
-    public NewDialogue DefaultDialogue => defaultDialogue;
+    private Dialogue defaultDialogue;
+    public Dialogue DefaultDialogue => defaultDialogue;
 
 
     [SerializeField, NonReorderable]
@@ -41,8 +41,8 @@ public class TalkerInformation : NPCInformation, IKeywords
     public bool CanDEV_RLAT => canDEV_RLAT;
 
     [SerializeField]
-    private NewDialogue normalItemDialogue;
-    public NewDialogue NormalItemDialogue => normalItemDialogue;
+    private Dialogue normalItemDialogue;
+    public Dialogue NormalItemDialogue => normalItemDialogue;
 
     [SerializeField]
     private int normalIntimacyValue = 5;

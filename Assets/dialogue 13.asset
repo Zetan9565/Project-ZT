@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: dialogue 13
   m_EditorClassIdentifier: 
   contents:
-  - rid: 9026091213465059469
-  - rid: 9026091213465059470
-  - rid: 9026091213465059471
+  - rid: 9026091320329896230
+  - rid: 9026091320329896231
+  - rid: 9026091320329896232
   exit:
-    <ID>k__BackingField: CON-1a48903105dc4df2a1366deb5ac0b0c9
+    <ID>k__BackingField: CON-3a2842e82444419c892caa1609917e86
     events: []
     options: []
     <ExitHere>k__BackingField: 0
@@ -29,49 +29,46 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 9026091213465059469
+    - rid: 9026091320329896230
       type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
-        <ID>k__BackingField: CON-e5904296040347e0ac55fa9449035b63
+        <ID>k__BackingField: DLGb668d195958c4b61ae426e1b8ac106cf
         events: []
         options:
         - <Title>k__BackingField: 
           <Content>k__BackingField:
-            rid: 9026091213465059470
+            rid: 9026091320329896231
           <IsMain>k__BackingField: 1
-          lastContent: 
         <ExitHere>k__BackingField: 0
         _position: {x: 0, y: 0}
         lastExitHere: 0
         <Talker>k__BackingField: '[PLAYER]'
         <Text>k__BackingField: "\u6211\u5DF2\u7ECF\u628A\u90A3\u4E9B\u602A\u7269\u6559\u8BAD\u4E86\uFF0C\u73B0\u5728\u4F60\u53EF\u4EE5\u653E\u5FC3\u5927\u80C6\u5730\u5916\u51FA\u4E86\u3002"
-    - rid: 9026091213465059470
+    - rid: 9026091320329896231
       type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
-        <ID>k__BackingField: CON-b250bf0248dc4c0789b94e15a412fd01
+        <ID>k__BackingField: CON-0f37603605c3482086e057b24fe35633
         events: []
         options:
         - <Title>k__BackingField: 
           <Content>k__BackingField:
-            rid: 9026091213465059471
+            rid: 9026091320329896232
           <IsMain>k__BackingField: 1
-          lastContent: 
         <ExitHere>k__BackingField: 0
         _position: {x: 360, y: 0}
         lastExitHere: 0
         <Talker>k__BackingField: '{[NPC]NPC001}'
         <Text>k__BackingField: "\u771F\u7684\u54A9\uFF0C\u592A\u8C22\u8C22\u4F60\u4E86\uFF01"
-    - rid: 9026091213465059471
+    - rid: 9026091320329896232
       type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
-        <ID>k__BackingField: CON-12c33261eb1a4855993996b09bbf82f7
+        <ID>k__BackingField: CON-7290ca37d85a4b99a61440b488a2d614
         events: []
         options:
         - <Title>k__BackingField: 
           <Content>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
-          lastContent: 
         <ExitHere>k__BackingField: 1
         _position: {x: 720, y: 0}
         lastExitHere: 0

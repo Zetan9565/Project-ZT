@@ -1,6 +1,7 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;
@@ -10,7 +11,6 @@ using UnityEngine.UIElements;
 namespace ZetanStudio.DialogueSystem.Editor
 {
     using Extension.Editor;
-    using System.Text;
     using ZetanStudio.Editor;
 
     public class DialogueNode : Node
@@ -33,6 +33,7 @@ namespace ZetanStudio.DialogueSystem.Editor
         private readonly DialogueView view;
         private readonly TextField talker;
         private readonly TextArea text;
+        private readonly CurveField interval;
 
         public DialogueNode(DialogueView view, DialogueContent content, Action<DialogueNode> onSelected, Action<DialogueNode> onUnselected,
                           Action<DialogueNode, Vector2> onSetPosition, Action<DialogueOutput> onDeleteOutput, DialogueEditorSettings settings)
@@ -56,7 +57,7 @@ namespace ZetanStudio.DialogueSystem.Editor
             m_CollapseButton.Q("icon").visible = false;
 
             var width = DialogueContent.Editor.GetWidth(content.GetType());
-            if (width == 0) inputContainer.style.minWidth = 228f;
+            if (width <= 0) inputContainer.style.minWidth = 228f;
             else inputContainer.style.minWidth = width;
             #region 初始化入口端
             if (content is not EntryContent)
@@ -89,22 +90,38 @@ namespace ZetanStudio.DialogueSystem.Editor
             #region 初始化文本区
             if (content is TextContent)
             {
-                inputContainer.Add(talker = new TextField(Tr("讲述人")));
+                var talkerContianer = new VisualElement();
+                talkerContianer.style.maxWidth = width <= 0 ? 228f : width;
+                if (content is not EntryContent)
+                {
+                    talkerContianer.style.marginTop = -22;
+                    talkerContianer.style.marginBottom = 1;
+                    talkerContianer.style.marginLeft = 20;
+                }
+                inputContainer.Add(talkerContianer);
+                talkerContianer.Add(talker = new TextField(Tr("讲述人")));
+                talker.multiline = true;
+                talker.Q("unity-text-input").style.whiteSpace = WhiteSpace.Normal;
                 talker.BindProperty(SerializedContent.FindAutoPropertyRelative("Talker"));
                 EditorMiscFunction.SetAsKeywordsField(talker);
                 talker.labelElement.style.minWidth = 60;
-                talker.style.flexWrap = Wrap.Wrap;
-                talker.style.maxWidth = 252f;
-                if (content is not EntryContent)
-                {
-                    talker.style.marginTop = -22;
-                    talker.style.marginBottom = 1;
-                    talker.style.marginLeft = 20;
-                }
                 inputContainer.Add(text = new TextArea(string.Empty, 35));
-                text.style.maxWidth = 252f;
+                text.style.maxWidth = width <= 0 ? 228f : width;
                 text.BindProperty(SerializedContent.FindAutoPropertyRelative("Text"));
                 EditorMiscFunction.SetAsKeywordsField(text);
+                interval = new CurveField();
+                interval.style.alignItems = Align.Center;
+                interval.style.minWidth = 160f;
+                interval.label = Tr("吐字间隔");
+                interval.BindProperty(SerializedContent.FindAutoPropertyRelative("UtterInterval"));
+                interval.Q<Label>().style.minWidth = 0f;
+                interval.Q<Label>().style.paddingTop = 0f;
+                titleButtonContainer.Insert(1, interval);
+                titleContainer.RegisterCallback<GeometryChangedEvent>(evt =>
+                {
+                    talkerContianer.style.maxWidth = inputContainer.layout.width;
+                    text.style.maxWidth = inputContainer.layout.width;
+                });
             }
             #endregion
             #region 初始化检查器
@@ -124,7 +141,8 @@ namespace ZetanStudio.DialogueSystem.Editor
                         while (copy.NextVisible(enter) && !SerializedProperty.EqualContents(copy, end))
                         {
                             enter = false;
-                            if (!copy.IsName("options") && !copy.IsName("events") && !copy.IsName("ID") && !copy.IsName("Text") && !copy.IsName("Talker") && !copy.IsName("ExitHere"))
+                            if (!copy.IsName("options") && !copy.IsName("events") && !copy.IsName("ID") && !copy.IsName("ExitHere") &&
+                            !copy.IsName("Text") && !copy.IsName("Talker") && !copy.IsName("UtterInterval"))
                                 EditorGUILayout.PropertyField(copy, true);
                         }
                         if (EditorGUI.EndChangeCheck()) SerializedContent.serializedObject.ApplyModifiedProperties();
@@ -170,19 +188,18 @@ namespace ZetanStudio.DialogueSystem.Editor
                             sb.Append(Tr("(未定义)"));
                         else if (talker.ToUpper() == "[NPC]") sb.Append("交互对象");
                         else if (talker.ToUpper() == "[PLAYER]") sb.Append(Tr("玩家"));
-                        else sb.Append(Keywords.Editor.HandlingKeyWords(talker));
+                        else sb.Append(Keywords.Editor.HandleKeyWords(talker));
                         sb.Append(']');
                         sb.Append(Tr("说"));
                         sb.Append(": ");
                         if (string.IsNullOrEmpty(words))
                             sb.Append(Tr("(无内容)"));
-                        else sb.Append(Keywords.Editor.HandlingKeyWords(words));
+                        else sb.Append(Keywords.Editor.HandleKeyWords(words));
                     }
                 }
                 return sb.ToString();
             });
         }
-
 
         #region 选项相关
         private void NewOption()
@@ -267,6 +284,7 @@ namespace ZetanStudio.DialogueSystem.Editor
         public override void OnSelected()
         {
             base.OnSelected();
+            BringToFront();
             onSelected?.Invoke(this);
         }
         public override void OnUnselected()
@@ -296,6 +314,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                 {
                     talker?.BindProperty(SerializedContent.FindAutoPropertyRelative("Talker"));
                     text?.BindProperty(SerializedContent.FindAutoPropertyRelative("Text"));
+                    interval?.BindProperty(SerializedContent.FindAutoPropertyRelative("UtterInterval"));
                 }
                 outputs.ForEach(o => o.RefreshProperty());
             }

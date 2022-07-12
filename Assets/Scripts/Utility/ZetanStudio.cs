@@ -418,20 +418,19 @@ namespace ZetanStudio.Extension
             if (Equals(component, null)) component = source.GetComponentInChildren(type);
             return component;
         }
-        public static T GetComponentInFamily<T>(this Component source)
+        public static T GetComponentInFamily<T>(this Component source) where T : Component
         {
             T component = source.GetComponentInParent<T>();
             if (Equals(component, null)) component = source.GetComponentInChildren<T>();
             return component;
         }
 
-        public static T[] GetComponentsInChildrenInOrder<T>(this Component source)
+        public static T[] GetComponentsInChildrenInOrder<T>(this Component source) where T : Component
         {
             List<T> finds = new List<T>();
             for (int i = 0; i < source.transform.childCount; i++)
             {
-                var c = source.transform.GetChild(i).GetComponent<T>();
-                if (c != null) finds.Add(c);
+                if (source.transform.GetChild(i).TryGetComponent<T>(out var c)) finds.Add(c);
             }
             return finds.ToArray();
         }
@@ -468,7 +467,7 @@ namespace ZetanStudio.Extension
             if (Equals(component, null)) component = source.GetComponentInChildren(type);
             return component;
         }
-        public static T GetComponentInFamily<T>(this GameObject source)
+        public static T GetComponentInFamily<T>(this GameObject source) where T : Component
         {
             T component = source.GetComponentInParent<T>();
             if (Equals(component, null)) component = source.GetComponentInChildren<T>();
@@ -483,7 +482,7 @@ namespace ZetanStudio.Extension
             return child;
         }
 
-        public static void SetActiveSuper(this GameObject source, bool value)
+        public static void SetActiveEx(this GameObject source, bool value)
         {
             if (source.activeSelf != value) source.SetActive(value);
         }
@@ -691,21 +690,37 @@ namespace ZetanStudio.Extension.Editor
     {
         public static PropertyDrawer GetCustomDrawer(this PropertyDrawer source)
         {
-            foreach (var type in TypeCache.GetTypesWithAttribute<CustomPropertyDrawer>())
+            var drawers = TypeCache.GetTypesWithAttribute<CustomPropertyDrawer>().ToArray();
+            for (int i = 0; i < drawers.Length; i++)
             {
+                var type = drawers[i];
                 foreach (var attr in type.GetCustomAttributes<CustomPropertyDrawer>())
                 {
                     var child = (bool)typeof(CustomPropertyDrawer).GetField("m_UseForChildren", ZetanUtility.CommonBindingFlags).GetValue(attr);
                     var forType = typeof(CustomPropertyDrawer).GetField("m_Type", ZetanUtility.CommonBindingFlags).GetValue(attr) as Type;
-                    if (child && forType.IsAssignableFrom(source.fieldInfo.FieldType) || forType.Equals(source.fieldInfo.FieldType))
+                    if (forType.Equals(source.fieldInfo.FieldType)) return makeDrawer(type);
+                    else if (child && forType.IsAssignableFrom(source.fieldInfo.FieldType))
                     {
-                        var drawer = Activator.CreateInstance(type) as PropertyDrawer;
-                        typeof(PropertyDrawer).GetField("m_FieldInfo", ZetanUtility.CommonBindingFlags).SetValue(drawer, source.fieldInfo);
-                        return drawer;
+                        for (int j = i + 1; j < drawers.Length; j++)
+                        {
+                            foreach (var attr2 in drawers[j].GetCustomAttributes<CustomPropertyDrawer>())
+                            {
+                                var forType2 = typeof(CustomPropertyDrawer).GetField("m_Type", ZetanUtility.CommonBindingFlags).GetValue(attr2) as Type;
+                                if (forType2.Equals(source.fieldInfo.FieldType)) return makeDrawer(drawers[j]);
+                            }
+                        }
+                        return makeDrawer(type);
                     }
                 }
             }
             return null;
+
+            PropertyDrawer makeDrawer(Type type)
+            {
+                var drawer = Activator.CreateInstance(type) as PropertyDrawer;
+                typeof(PropertyDrawer).GetField("m_FieldInfo", ZetanUtility.CommonBindingFlags).SetValue(drawer, source.fieldInfo);
+                return drawer;
+            }
         }
         /// <summary>
         /// 尝试获取拥有此成员的对象值。当<paramref name="property"/>位于<see cref="IList"/>中时，返回对应<see cref="IList"/>
@@ -2607,10 +2622,10 @@ public sealed class ZetanUtility
             int len = end - start + 1;
             output = input.Substring(start, Mathf.Min(len, input.Length - start));
             index = output.IndexOf(key);
-            end = index + 1 + key.Length;
             output = output.Insert(index, "<");
-            if (end > output.Length - 1) end = output.Length - 1;
-            output = output.Insert(end, ">");
+            end = index + 1 + key.Length;
+            if (end > output.Length - 1) output += '>';
+            else output = output.Insert(end, ">");
             return output;
         }
         public static string HighlightContentByKey(string input, string key, int length)
@@ -2637,10 +2652,10 @@ public sealed class ZetanUtility
             int len = end - start + 1;
             output = input.Substring(start, Mathf.Min(len, input.Length - start));
             index = output.IndexOf(key);
-            end = index + 3 + key.Length;
             output = output.Insert(index, "<b>");
-            if (end > output.Length - 1) end = output.Length - 1;
-            output = output.Insert(end, "</b>");
+            end = index + 3 + key.Length;
+            if (end > output.Length - 1) output += "</b>";
+            else output = output.Insert(end, "</b>");
             return output;
         }
 

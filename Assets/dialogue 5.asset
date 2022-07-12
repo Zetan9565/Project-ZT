@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: dialogue 5
   m_EditorClassIdentifier: 
   contents:
-  - rid: 9026091213465059456
-  - rid: 9026091213465059457
-  - rid: 9026091213465059458
+  - rid: 9026091320329896217
+  - rid: 9026091320329896218
+  - rid: 9026091320329896219
   exit:
-    <ID>k__BackingField: CON-a2e95eeb2a3c4d71b65856f3e2166de6
+    <ID>k__BackingField: CON-801d9c35c5a74bbcbf352e914aaaa3f2
     events: []
     options: []
     <ExitHere>k__BackingField: 0
@@ -29,38 +29,35 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 9026091213465059456
+    - rid: 9026091320329896217
       type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
-        <ID>k__BackingField: CON-d3ecb7ee20514ad88e0449dfb9483f05
+        <ID>k__BackingField: DLG39b71af7f9894fae93a52967797c86de
         events: []
         options:
         - <Title>k__BackingField: "\u9886\u53D6\u7834\u65E7\u7684\u5251"
           <Content>k__BackingField:
-            rid: 9026091213465059457
+            rid: 9026091320329896218
           <IsMain>k__BackingField: 0
-          lastContent: 
         - <Title>k__BackingField: "\u5251\u6362\u5200"
           <Content>k__BackingField:
-            rid: 9026091213465059458
+            rid: 9026091320329896219
           <IsMain>k__BackingField: 0
-          lastContent: 
         <ExitHere>k__BackingField: 0
         _position: {x: 0, y: 0}
         lastExitHere: 0
         <Talker>k__BackingField: '{[NPC]NPC002}'
         <Text>k__BackingField: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
-    - rid: 9026091213465059457
+    - rid: 9026091320329896218
       type: {class: GetItemContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
-        <ID>k__BackingField: CON-05f5f83c6e8044aaa38430dd812f593e
+        <ID>k__BackingField: CON-df6597ed6bb4474d896a6f3a88b066fb
         events: []
         options:
         - <Title>k__BackingField: 
           <Content>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
-          lastContent: 
         <ExitHere>k__BackingField: 1
         _position: {x: 360, y: 0}
         lastExitHere: 0
@@ -70,17 +67,16 @@ MonoBehaviour:
         - item: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
             type: 2}
           amount: 1
-    - rid: 9026091213465059458
+    - rid: 9026091320329896219
       type: {class: SubmitAndGetItemContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
-        <ID>k__BackingField: CON-45d53a2a81a9447e944737c2b5e7fbe1
+        <ID>k__BackingField: CON-52171a6274554449be3881550e750e04
         events: []
         options:
         - <Title>k__BackingField: 
           <Content>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
-          lastContent: 
         <ExitHere>k__BackingField: 1
         _position: {x: 360, y: 100}
         lastExitHere: 0

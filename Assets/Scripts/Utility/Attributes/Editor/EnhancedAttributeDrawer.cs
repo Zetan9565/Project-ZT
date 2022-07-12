@@ -40,19 +40,19 @@ public abstract class EnhancedAttributeDrawer : PropertyDrawer
 
     protected void PropertyField(Rect position, SerializedProperty property, GUIContent label, bool includeChildren = false)
     {
-        if (IsLast() && GetCustomDrawer() is PropertyDrawer custom) custom.OnGUI(position, property, label);
+        if (IsLast() && TryGetCustomDrawer() is PropertyDrawer custom) custom.OnGUI(position, property, label);
         else EditorGUI.PropertyField(position, property, label, includeChildren);
     }
     protected float PropertyHeight(SerializedProperty property, GUIContent label)
     {
-        if (IsLast() && GetCustomDrawer() is PropertyDrawer custom) return custom.GetPropertyHeight(property, label);
+        if (IsLast() && TryGetCustomDrawer() is PropertyDrawer custom) return custom.GetPropertyHeight(property, label);
         else return EditorGUI.GetPropertyHeight(property, label);
     }
-    private PropertyDrawer GetCustomDrawer()
+    private PropertyDrawer TryGetCustomDrawer()
     {
         if (shouldCheckCustom)
         {
-            custom = PropertyDrawerExtension.GetCustomDrawer(this);
+            custom = this.GetCustomDrawer();
             shouldCheckCustom = false;
         }
         return custom;

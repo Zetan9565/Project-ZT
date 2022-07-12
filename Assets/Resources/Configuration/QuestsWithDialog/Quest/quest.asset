@@ -23,9 +23,9 @@ MonoBehaviour:
   questType: 0
   repeatFrequancy: 0
   timeUnit: 0
-  beginDialogue: {fileID: 11400000, guid: db50bb34176fc3a40a2778b56cbf6513, type: 2}
-  ongoingDialogue: {fileID: 11400000, guid: 753546fc8d9beb445bc57fae2df7277b, type: 2}
-  completeDialogue: {fileID: 11400000, guid: 5d214f37b34c81246982d9029e82f62e, type: 2}
+  beginDialogue: {fileID: 11400000, guid: b6b607945f22f494e8283dd36952a9b1, type: 2}
+  ongoingDialogue: {fileID: 11400000, guid: dc1af578f80b71a45ac1c3322a7a6e31, type: 2}
+  completeDialogue: {fileID: 11400000, guid: 9dd45bc7453cabd4390cf786185ec53a, type: 2}
   rewardItems:
   - item: {fileID: 4876839640930190242, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     amount: 1000

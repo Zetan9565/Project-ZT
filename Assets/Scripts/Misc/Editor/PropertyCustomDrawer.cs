@@ -8,6 +8,7 @@ using UnityEngine;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.ItemSystem.Editor;
 using ZetanStudio.ItemSystem.Module;
+using ZetanStudio.ConditionSystem;
 
 public class ItemInfoListDrawer
 {
@@ -332,81 +333,15 @@ public class ConditionGroupDrawer
         quests = ZetanUtility.Editor.LoadAssets<Quest>("").FindAll(x => x != property.serializedObject.targetObject);
         List = new ReorderableList(property.serializedObject, conditions, true, true, true, true)
         {
-            drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+            drawElementCallback = (rect, index, isActive, isFocused) =>
             {
                 SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
-                SerializedProperty type = condition.FindPropertyRelative("type");
-                ConditionType conditionType = (ConditionType)type.enumValueIndex;
-                EditorGUI.PropertyField(new Rect(rect.x + 8, rect.y, rect.width * 0.2f, lineHeight), condition, new GUIContent("条件[" + index + "]"), false);
-                EditorGUI.PropertyField(new Rect(rect.x + rect.width * 0.2f + 8, rect.y, rect.width * 0.8f - 8, lineHeight),
-                    type, new GUIContent(string.Empty), true);
-                if (condition.isExpanded)
-                    switch (conditionType)
-                    {
-                        case ConditionType.CompleteQuest:
-                        case ConditionType.AcceptQuest:
-                            SerializedProperty day = condition.FindPropertyRelative("intValue");
-                            SerializedProperty relatedQuest = condition.FindPropertyRelative("relatedQuest");
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), relatedQuest, new GUIContent("对应任务"));
-                            if (relatedQuest.objectReferenceValue == property.serializedObject.targetObject as Quest) relatedQuest.objectReferenceValue = null;
-                            day.intValue = EditorGUI.IntSlider(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), "后第几天", day.intValue, 0, 30);
-                            break;
-                        case ConditionType.HasItem:
-                            SerializedProperty relatedItem = condition.FindPropertyRelative("relatedItem");
-                            EditorGUI.PropertyField(new Rect(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight)), relatedItem, new GUIContent("需在此处使用的道具"));
-                            break;
-                        case ConditionType.Level:
-                            SerializedProperty level = condition.FindPropertyRelative("intValue");
-                            SerializedProperty compareType = condition.FindPropertyRelative("compareType");
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 1, rect.width, lineHeight), compareType, new GUIContent("比较方式"));
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * 2, rect.width, lineHeight), level, new GUIContent("对应等级"));
-                            if (level.intValue < 1) level.intValue = 1;
-                            break;
-                        case ConditionType.TriggerSet:
-                        case ConditionType.TriggerReset:
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace, rect.width, lineHeight),
-                                condition.FindPropertyRelative("triggerName"), new GUIContent("触发器名称"));
-                            break;
-                        case ConditionType.NPCIntimacy:
-                            int lineCount = 1;
-                            SerializedProperty npc = condition.FindPropertyRelative("relatedCharInfo");
-                            SerializedProperty intimacy = condition.FindPropertyRelative("intValue");
-                            compareType = condition.FindPropertyRelative("compareType");
-                            ObjectSelectorDrawer.Draw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), npc, new GUIContent("条件对象"), talkers, "_name");
-                            lineCount++;
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), npc, new GUIContent("对象引用"), false);
-                            lineCount++;
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), intimacy, new GUIContent("亲密度"));
-                            lineCount++;
-                            EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), compareType, new GUIContent("比较方式"));
-                            lineCount++;
-                            break;
-                        default: break;
-                    }
+                EditorGUI.PropertyField(rect, condition, new GUIContent(Condition.GetName(condition.managedReferenceValue.GetType())), true);
             },
 
-            elementHeightCallback = (int index) =>
+            elementHeightCallback = (index) =>
             {
-                if (index < 0 || index > conditions.arraySize - 1) return 0;
-                SerializedProperty condition = conditions.GetArrayElementAtIndex(index);
-                SerializedProperty type = condition.FindPropertyRelative("type");
-                ConditionType conditionType = (ConditionType)type.enumValueIndex;
-                if (condition.isExpanded)
-                    switch (conditionType)
-                    {
-                        case ConditionType.CompleteQuest:
-                        case ConditionType.AcceptQuest:
-                        case ConditionType.Level:
-                            return 3 * lineHeightSpace;
-                        case ConditionType.NPCIntimacy:
-                            return 5 * lineHeightSpace;
-                        case ConditionType.HasItem:
-                        case ConditionType.TriggerSet:
-                        case ConditionType.TriggerReset:
-                            return 2 * lineHeightSpace;
-                        default: return lineHeightSpace;
-                    }
-                else return lineHeightSpace;
+                return EditorGUI.GetPropertyHeight(conditions.GetArrayElementAtIndex(index), true);
             },
 
             onCanRemoveCallback = (list) =>
@@ -414,32 +349,39 @@ public class ConditionGroupDrawer
                 return list.IsSelected(list.index);
             },
 
+            onAddDropdownCallback = (rect, list) =>
+            {
+                GenericMenu menu = new GenericMenu();
+                foreach (var type in TypeCache.GetTypesDerivedFrom<Condition>())
+                {
+                    if (!type.IsAbstract)
+                    {
+                        string group = Condition.GetGroup(type);
+                        string name = Condition.GetName(type);
+                        if (!string.IsNullOrEmpty(group))
+                            group = group.EndsWith('/') ? group : group + '/';
+                        if (string.IsNullOrEmpty(name)) name = type.Name;
+                        menu.AddItem(new GUIContent($"{group}{name}"), false, insert, type);
+                    }
+                }
+                menu.ShowAsContext();
+
+                void insert(object type)
+                {
+                    conditions.arraySize++;
+                    var prop = conditions.GetArrayElementAtIndex(conditions.arraySize - 1);
+                    prop.managedReferenceValue = Activator.CreateInstance(type as Type);
+                    conditions.serializedObject.ApplyModifiedProperties();
+                    List.Select(conditions.arraySize - 1);
+                }
+            },
+
             drawHeaderCallback = (rect) =>
             {
                 int notCmpltCount = 0;
                 for (int i = 0; i < conditions.arraySize; i++)
                 {
-                    SerializedProperty condition = conditions.GetArrayElementAtIndex(i);
-                    SerializedProperty type = condition.FindPropertyRelative("type");
-                    ConditionType conditionType = (ConditionType)type.enumValueIndex;
-                    switch (conditionType)
-                    {
-                        case ConditionType.CompleteQuest:
-                        case ConditionType.AcceptQuest:
-                            if (condition.FindPropertyRelative("relatedQuest").objectReferenceValue == null) notCmpltCount++;
-                            break;
-                        case ConditionType.HasItem:
-                            if (condition.FindPropertyRelative("relatedItem").objectReferenceValue == null) notCmpltCount++;
-                            break;
-                        case ConditionType.Level:
-                            if (condition.FindPropertyRelative("intValue").intValue < 1) notCmpltCount++;
-                            break;
-                        case ConditionType.TriggerSet:
-                        case ConditionType.TriggerReset:
-                            if (!string.IsNullOrEmpty(condition.FindPropertyRelative("triggerName").stringValue)) notCmpltCount++;
-                            break;
-                        default: break;
-                    }
+                    if (conditions.GetArrayElementAtIndex(i).managedReferenceValue is Condition condition && !condition.IsValid) notCmpltCount++;
                 }
                 EditorGUI.LabelField(rect, listTitle, "数量：" + conditions.arraySize + (notCmpltCount > 0 ? "\t未补全：" + notCmpltCount : string.Empty));
             },

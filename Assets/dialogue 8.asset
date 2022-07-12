@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: dialogue 8
   m_EditorClassIdentifier: 
   contents:
-  - rid: 9026091213465059465
+  - rid: 9026091320329896226
   exit:
-    <ID>k__BackingField: CON-a9fb8d6d3f1a4c8788edafab736ef6fe
+    <ID>k__BackingField: CON-6d55c84afd3347f9af83ff08339827a3
     events: []
     options: []
     <ExitHere>k__BackingField: 0
@@ -27,17 +27,16 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 9026091213465059465
+    - rid: 9026091320329896226
       type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
-        <ID>k__BackingField: CON-b1c52aaa1fb040a18259a66e28a3d0d4
+        <ID>k__BackingField: DLG93b255cc09df45258bb06496a9616f5b
         events: []
         options:
         - <Title>k__BackingField: 
           <Content>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
-          lastContent: 
         <ExitHere>k__BackingField: 1
         _position: {x: 0, y: 0}
         lastExitHere: 0

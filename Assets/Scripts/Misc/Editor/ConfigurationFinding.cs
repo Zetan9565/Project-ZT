@@ -464,7 +464,7 @@ public class ConfigurationFinding : EditorWindow
                 else canSeek = true;
                 break;
             case DialogueKeyType.BraDialog:
-                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("使用对话"), objKeys[0], typeof(Dialogue), false);
+                objKeys[0] = EditorGUILayout.ObjectField(new GUIContent("使用对话"), objKeys[0], typeof(OldDialogue), false);
                 canSeek = objKeys[0];
                 break;
             default:
@@ -474,7 +474,7 @@ public class ConfigurationFinding : EditorWindow
     }
     private void SeekDialogue()
     {
-        Dialogue[] dialogues = Resources.LoadAll<Dialogue>("Configuration");
+        OldDialogue[] dialogues = Resources.LoadAll<OldDialogue>("Configuration");
         foreach (var dialog in dialogues)
         {
             bool take = false;

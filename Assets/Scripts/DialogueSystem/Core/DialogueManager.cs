@@ -38,7 +38,7 @@ public static class DialogueManager
         }
     }
 
-    public static DialogueData GetOrCreateDialogueData(Dialogue dialogue)
+    public static DialogueData GetOrCreateDialogueData(OldDialogue dialogue)
     {
         if (!dialogueDatas.TryGetValue(dialogue.ID, out var find))
         {
@@ -57,13 +57,13 @@ public static class DialogueManager
         return find;
     }
 
-    public static void RemoveDialogueData(Dialogue dialogue)
+    public static void RemoveDialogueData(OldDialogue dialogue)
     {
         if (!dialogue) return;
         dialogueDatas.Remove(dialogue.ID);
     }
 
-    public static void RemoveDialogueData(EntryContent entry)
+    public static void RemoveData(EntryContent entry)
     {
         if (!entry) return;
         data.Remove(entry.ID);
@@ -91,12 +91,4 @@ public static class DialogueManager
                 data[kvp.Key] = new DialogueContentData(kvp.Value);
             }
     }
-}
-
-public enum DialogueType
-{
-    Normal,
-    Quest,
-    Objective,
-    Gift,
 }

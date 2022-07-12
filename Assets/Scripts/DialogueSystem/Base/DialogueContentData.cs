@@ -7,8 +7,8 @@ namespace ZetanStudio.DialogueSystem
 {
     public sealed class DialogueContentData
     {
-        public DialogueContentData this[DialogueContent key] => family.TryGetValue(key?.ID, out var find) ? find : null;
-        public DialogueContentData this[string key] => family.TryGetValue(key, out var find) ? find : null;
+        public DialogueContentData this[DialogueContent content] => family.TryGetValue(content.ID, out var find) ? find : null;
+        public DialogueContentData this[string id] => family.TryGetValue(id, out var find) ? find : null;
 
         public readonly string ID;
         private bool said;
@@ -28,13 +28,13 @@ namespace ZetanStudio.DialogueSystem
         public void Refresh(EntryContent entry)
         {
             if (entry?.ID != ID) return;
-            NewDialogue.Traverse(entry, c =>
+            Dialogue.Traverse(entry, c =>
             {
                 if (!family.ContainsKey(c.ID)) family[c.ID] = new DialogueContentData(c, family);
                 family[c.ID].exitHere = c.ExitHere;
-                family[c.ID].returnable = NewDialogue.Traverse(c, c => c.Options.All(x => x.Content is RecursionSuffix));
+                family[c.ID].returnable = Dialogue.Traverse(c, c => c.Options.All(x => x.Content is RecursionSuffix));
             });
-            var invalid = family.Where(x => !NewDialogue.Traverse(entry, n => n.ID == x.Key));
+            var invalid = family.Where(x => !Dialogue.Traverse(entry, n => n.ID == x.Key));
             foreach (var kvp in invalid)
             {
                 family.Remove(kvp.Key);
@@ -98,7 +98,7 @@ namespace ZetanStudio.DialogueSystem
         {
             ID = content.ID;
             exitHere = content.ExitHere;
-            returnable = NewDialogue.Traverse(content, c => c.Options.All(x => x.Content is RecursionSuffix));
+            returnable = Dialogue.Traverse(content, c => c.Options.All(x => x.Content is RecursionSuffix));
             if (!exitHere)
                 foreach (var option in content.Options)
                 {

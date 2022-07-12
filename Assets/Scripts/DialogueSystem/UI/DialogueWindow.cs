@@ -1,791 +1,647 @@
-Ôªøusing System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanStudio.ItemSystem.UI;
-using ZetanStudio.UI;
 
-public class DialogueWindow : InteractionWindow<Talker>, IHideable
+namespace ZetanStudio.DialogueSystem.UI
 {
-    [SerializeField]
-    private Text nameText;
-    [SerializeField]
-    private Text wordsText;
+    using DialogueSystem;
+    using Extension;
+    using ItemSystem;
+    using ItemSystem.UI;
+    using ZetanStudio.UI;
 
-    [SerializeField]
-    private Transform buttonArea;
-    [SerializeField]
-    private Button backButton;
-    [SerializeField]
-    private Button giftButton;
-    [SerializeField]
-    private Button warehouseButton;
-    [SerializeField]
-    private Button shopButton;
-    [SerializeField]
-    private Button questButton;
-    [SerializeField]
-    private Button nextButton;
-    [SerializeField]
-    private Text nextBtnText;
-    [SerializeField]
-    private Button rejectButton;
-    [SerializeField]
-    private Text rejectBtnText;
-
-    [SerializeField]
-    private GameObject optionArea;
-    [SerializeField]
-    private GameObject optionTitleArea;
-    [SerializeField]
-    private Text optionTitle;
-    [SerializeField]
-    private TabbedBar optionTab;
-    [SerializeField]
-    private ButtonWithTextList optionList;
-
-    [SerializeField]
-    private CanvasGroup descriptionWindow;
-    [SerializeField]
-    private Text descriptionText;
-    [SerializeField]
-    private ItemGrid rewardList;
-
-    public event DialogueListner OnBeginDialogueEvent;
-    public event DialogueListner OnFinishDialogueEvent;
-    public override Talker Target => currentTalker;
-    private Talker currentTalker;
-
-    public DialogueType CurrentType { get; private set; } = DialogueType.Normal;
-    public bool IsHidden { get; protected set; }
-
-    public bool ShouldShowQuest
+    public class DialogueWindow : InteractionWindow<Talker>, IHideable
     {
-        get
+        #region UI…˘√˜
+        [SerializeField]
+        private Text nameText;
+        [SerializeField]
+        private Text wordsText;
+
+        [SerializeField]
+        private Transform buttonArea;
+        [SerializeField]
+        private Button backButton;
+        [SerializeField]
+        private Button giftButton;
+        [SerializeField]
+        private Button warehouseButton;
+        [SerializeField]
+        private Button shopButton;
+        [SerializeField]
+        private Button questButton;
+        [SerializeField]
+        private Button talkButton;
+        [SerializeField]
+        private Button nextButton;
+        [SerializeField]
+        private Text nextBtnText;
+        [SerializeField]
+        private Button rejectButton;
+        [SerializeField]
+        private Text rejectBtnText;
+
+        [SerializeField]
+        private GameObject optionArea;
+        [SerializeField]
+        private GameObject optionTitleArea;
+        [SerializeField]
+        private Text optionTitle;
+        [SerializeField]
+        private TabbedBar optionTab;
+        [SerializeField]
+        private ButtonWithTextList optionList;
+
+        [SerializeField]
+        private CanvasGroup descriptionWindow;
+        [SerializeField]
+        private Text descriptionText;
+        [SerializeField]
+        private ItemGrid rewardList;
+        #endregion
+
+        #region ‘À–– ±…˘√˜
+        private Talker currentTalker;
+        public override Talker Target => currentTalker;
+        public bool IsHidden { get; private set; }
+        protected override string LangSelector => typeof(Dialogue).Name;
+        private DialogueType currentType = DialogueType.Normal;
+        private EntryContent root;
+
+        public EntryContent CurrentEntry { get; private set; }
+        private DialogueContent currentContent;
+        private readonly Stack<DialogueContent> continueContent = new Stack<DialogueContent>();
+
+        public DialogueContentData CurrentEntryData => DialogueManager.GetOrCreateData(CurrentEntry) ?? null;
+        private DialogueContentData CurrentData => CurrentEntryData && currentContent ? CurrentEntryData[currentContent] : null;
+
+        private Action next;
+        private readonly List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
+        private Coroutine coroutine;
+
+        #region »ŒŒÒœ‡πÿ…˘√˜
+        private QuestData currentQuest;
+        private TalkObjectiveData currentTalkObj;
+        private SubmitObjectiveData currentSubmitObj;
+        #endregion
+        #endregion
+
+        #region ∂‘ª∞∑¢∆œ‡πÿ
+        public void StartWith(Dialogue dialogue) => StartWith(dialogue.Entry);
+        public void StartWith(string talker, string content) => StartWith(new EntryContent(talker, content));
+        public void StartWith(EntryContent entry)
         {
-            if (!currentTalker || !currentTalker.QuestInstances.Exists(x => !x.InProgress) || currentTalker.QuestInstances.Exists(x => x.IsComplete)) return false;
-            return true;
+            if (!entry) return;
+            root ??= entry;
+            CurrentEntry = entry;
+            HandleContent(entry);
         }
-    }
-
-    private DialogueData currentDialogue;
-    private DialogueWordsData currentWords;
-    private WordsOptionData currentOption;
-    private readonly Stack<DialogueData> dialogueToSay = new Stack<DialogueData>();
-    private readonly Stack<DialogueWordsData> wordsToSay = new Stack<DialogueWordsData>();
-    private readonly Stack<WordsOptionData> choiceOptionSaid = new Stack<WordsOptionData>();
-
-    private Action next;
-
-    private readonly List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
-
-    #region ‰ªªÂä°Áõ∏ÂÖ≥
-    private QuestData currentQuest;
-    private TalkObjectiveData currentTalkObj;
-    private SubmitObjectiveData currentSubmitObj;
-    #endregion
-
-    #region ÂºÄÂßãÊñ∞ÂØπËØù
-    public void BeginNewDialogue()
-    {
-        if (!currentTalker) return;
-        StartTalking(currentTalker);
-        OnBeginDialogueEvent?.Invoke();
-    }
-
-    private void StartTalking(Talker talker)
-    {
-        currentTalker = talker;
-        CurrentType = DialogueType.Normal;
-        ShowButtons(talker.GetData<TalkerData>().Info.CanDEV_RLAT, talker.GetData<TalkerData>().Info.IsVendor, talker.GetData<TalkerData>().Info.IsWarehouseAgent, talker.QuestInstances.FindAll(q => !q.IsSubmitted && MiscFuntion.CheckCondition(q.Model.AcceptCondition)).Count > 0);
-        HideQuestDescription();
-        //StartDialogue(talker.DefaultDialogue);
-        talker.OnTalkBegin();
-    }
-
-    public void StartDialogue(Dialogue dialogue)
-    {
-        dialogueToSay.Push(DialogueManager.GetOrCreateDialogueData(dialogue));
-        wordsToSay.Clear();
-        DoSay();
-    }
-
-    public void StartOneWords(DialogueWords words)
-    {
-        wordsToSay.Clear();
-        wordsToSay.Push(new DialogueWordsData(words, null));
-        DoSay();
-    }
-
-    private void DoSay()
-    {
-        ZetanUtility.SetActive(wordsText.gameObject, true);
-        SayNextWords();
-    }
-    #endregion
-
-    #region Â§ÑÁêÜÂØπËØùÈÄâÈ°π
-    private void SetNextClick(string text, Action action)
-    {
-        nextBtnText.text = text;
-        ZetanUtility.SetActive(nextButton, true);
-        nextButton.onClick.RemoveAllListeners();
-        nextButton.onClick.AddListener(() => action?.Invoke());
-        next = action;
-    }
-    private void SetRejectClick(string text, Action action)
-    {
-        rejectBtnText.text = text;
-        ZetanUtility.SetActive(rejectButton, true);
-        rejectButton.onClick.RemoveAllListeners();
-        rejectButton.onClick.AddListener(() => action?.Invoke());
-    }
-    private void HandlingButtons()
-    {
-        if (dialogueToSay.Count > 0 || wordsToSay.Count > 0 && (!currentWords.model.NeedToChusCorrectOption || currentWords.IsDone))
-            SetNextClick("ÁªßÁª≠", SayNextWords);
-        if (wordsToSay.Count < 1)//ÊúÄÂêé‰∏ÄÂè•
+        public void ContinueWith(DialogueContent content)
         {
-            //ÂÆåÊàêÂâßÊÉÖÁî®ÂØπËØùÊó∂ÔºåÁªìÊùüÂØπËØù
-            if (currentWords && currentWords.parent && currentWords.parent.model.StoryDialogue && currentWords.IsDone)
+            if (Dialogue.Reachable(CurrentEntry, content)) HandleContent(content);
+        }
+        /// <summary>
+        /// Ω´ƒ⁄»›»Î’ª°£µ±±æ¥Œ∂‘ª∞Ω· ¯ ±£¨Ω´ª·“‘’ª∂•ƒ⁄»›ºÃ–¯
+        /// </summary>
+        public void PushContinuance(DialogueContent content) => continueContent.Push(content);
+        private DialogueContent PopContinuance() => continueContent.Count > 0 ? continueContent.Pop() : null;
+        #endregion
+
+        #region ƒ⁄»›À¢–¬œ‡πÿ
+        private void HandleContent(DialogueContent content)
+        {
+            if (content == root && currentTalker)
             {
-                SetNextClick("ÁªìÊùü", delegate
-                {
-                    OnFinishDialogueEvent?.Invoke();
-                    Close();
-                });
+                var info = currentTalker.GetData<TalkerData>().GetInfo<TalkerInformation>();
+                ShowButtons(info.CanDEV_RLAT, info.IsVendor, info.IsWarehouseAgent, TalkerHasObjectives(),
+                    currentTalker.QuestInstances.Where(x => x.Model.AcceptCondition.IsMeet() && !x.IsSubmitted).Any());
             }
-            else if (CurrentType == DialogueType.Gift) SetNextClick("ËøîÂõû", GoBackDefault);
-        }
-    }
-    private void HandlingOptions()
-    {
-        if (currentWords)
-        {
-            foreach (var option in currentWords.OptionDatas)
+            else ShowButtons(false, false, false, false, false);
+            ResetInteraction();
+            while (content is DecoratorContent)
             {
-                if (!option.isDone || option.model.OptionType != WordsOptionType.Choice)
+                CurrentEntryData[content]?.Access();
+                content = content[0]?.Content;
+            }
+            if (!content.Enter()) return;
+            currentContent = content;
+            CurrentData?.Access();
+            if (content is TextContent text)
+            {
+                if (text.Talker.ToUpper() == "[NPC]") nameText.text = currentTalker ? currentTalker.TalkerName : Tr("…Ò√ÿ»À");
+                else if (text.Talker.ToUpper() == "[PLAYER]") nameText.text = PlayerManager.Instance.PlayerInfo.Name;
+                else nameText.text = Keywords.HandleKeyWords(text.Talker);
+                if (coroutine != null) StopCoroutine(coroutine);
+                coroutine = StartCoroutine(Play(text));
+                HandleInteraction();
+            }
+            currentContent?.Events.ForEach(e => e?.Invoke());
+        }
+        private void HandleLast()
+        {
+            if (currentQuest) HandleLastQuest();
+            else if (currentTalkObj) HandleLastTalkObj();
+            else if (currentSubmitObj) HandleLastSubmitObj();
+        }
+        private void HandleInteraction()
+        {
+            buttonDatas.Clear();
+            if (currentContent.ExitHere)
+            {
+                if (PopContinuance() is DialogueContent content)
                 {
-                    string title = option.model.Title;
-                    if (option.model.OptionType == WordsOptionType.SubmitAndGet)
-                        title += $"(ÈúÄ[{option.model.ItemToSubmit.ItemName}]{option.model.ItemToSubmit.Amount}‰∏™)";
-                    buttonDatas.Add(new ButtonWithTextData(title, delegate
+                    currentContent = content;
+                    HandleInteraction();
+                }
+                else HandleLast();
+            }
+            else
+            {
+                if (currentContent.Options.Count == 1 && currentContent.Options[0].IsMain)
+                    SetNextClick(Tr("ºÃ–¯"), () => DoOption(currentContent.Options[0]));
+                else foreach (var option in currentContent.Options)
                     {
-                        DoOption(option);
-                    }));
+                        string title = option.Title;
+                        bool skip = false;
+                        if (option.Content is DecoratorContent)
+                        {
+                            var temp = option.Content;
+                            while (temp is DecoratorContent decorator)
+                            {
+                                if (!decorator.Decorate(CurrentData, currentContent, option, ref title))
+                                {
+                                    skip = true;
+                                    break;
+                                }
+                                temp = temp[0]?.Content;
+                            }
+                        }
+                        if (!skip) buttonDatas.Add(new ButtonWithTextData(Tr(title), () => DoOption(option)));
+                    }
+                RefreshOptions(Tr("ª•∂Ø"));
+            }
+        }
+        private void ResetInteraction()
+        {
+            ZetanUtility.SetActive(optionArea, false);
+            ZetanUtility.SetActive(nextButton, false);
+            ZetanUtility.SetActive(rejectButton, false);
+            next = null;
+        }
+        private IEnumerator Play(TextContent content)
+        {
+            var text = Keywords.HandleKeyWords(content.Text, true);
+            if (!string.IsNullOrEmpty(text))
+            {
+                Stack<string> ends = new Stack<string>();
+                string temp = string.Empty;
+                for (int i = 0; i < text.Length; i++)
+                {
+                    string end = ends.Count > 0 ? ends.Peek() : string.Empty;
+                    if (checkColor(i))
+                    {
+                        ends.Push("</color>");
+                        temp = temp.Insert(0, "</color>");
+                        while (text[i] != '>' && i < text.Length) i++;
+                    }
+                    else if (checkSize(i))
+                    {
+                        ends.Push("</size>");
+                        temp = temp.Insert(0, "</size>");
+                        while (text[i] != '>' && i < text.Length) i++;
+                    }
+                    else if (checkItalic(i))
+                    {
+                        ends.Push("</i>");
+                        temp = temp.Insert(0, "</i>");
+                        i += 2;
+                    }
+                    else if (checkBold(i))
+                    {
+                        ends.Push("</b>");
+                        temp = temp.Insert(0, "</b>");
+                        i += 2;
+                    }
+                    else if (ends.Count > 0 && i + end.Length < text.Length && text[i..(i + end.Length)] == end)
+                    {
+                        i += end.Length - 1;
+                        temp = temp[0..^ends.Pop().Length];
+                    }
+                    else
+                    {
+                        wordsText.text = text[0..(i + 1)] + temp;
+                        var interval = getNextUtterInterval(i);
+                        if (interval > 0 && !Mathf.Approximately(interval, 0)) yield return new WaitForSecondsRealtime(interval);
+                    }
+                }
+
+                bool checkColor(int i) => i + 6 < text.Length && text[i..(i + 6)].ToLower() == "<color";
+                bool checkSize(int i) => i + 5 < text.Length && text[i..(i + 5)].ToLower() == "<size";
+                bool checkBold(int i) => i + 3 < text.Length && text[i..(i + 3)].ToLower() == "<b>";
+                bool checkItalic(int i) => i + 3 < text.Length && text[i..(i + 3)].ToLower() == "<i>";
+                float getNextUtterInterval(int i)
+                {
+                    if (i < 0 || i > text.Length - 1 || content.UtterInterval == null || content.UtterInterval.keys.Length < 2) return 0;
+                    return content.UtterInterval.Evaluate((i + 1.0f) / text.Length);
                 }
             }
+            wordsText.text = text;
         }
-        RefreshOptions();
-    }
+        #endregion
 
-    private void RefreshOptions(string title = null)
-    {
-        title ??= Tr("‰∫íÂä®");
-        optionTitle.text = title;
-        optionList.Refresh(buttonDatas);
-        ZetanUtility.SetActive(optionArea, optionList.Count > 0);
-    }
-
-    private void RefreshQuestOptions()
-    {
-        var cmpltQuests = new List<QuestData>();
-        var norQuests = new List<QuestData>();
-        foreach (var quest in currentTalker.QuestInstances)
+        #region »ŒŒÒœ‡πÿ
+        private void HandleLastQuest()
         {
-            if (MiscFuntion.CheckCondition(quest.Model.AcceptCondition) && !quest.IsSubmitted)
-                if (quest.IsComplete)
-                    cmpltQuests.Add(quest);
-                else norQuests.Add(quest);
-        }
-        buttonDatas.Clear();
-        foreach (var quest in cmpltQuests)
-        {
-            buttonDatas.Add(new ButtonWithTextData(quest.Title + "(Â∑≤ÂÆåÊàê)", delegate
+            if (!currentQuest.InProgress || currentQuest.IsComplete) ShowQuestDescription(currentQuest);
+            if (!currentQuest.IsComplete && !currentQuest.InProgress)
             {
-                currentQuest = quest;
-                CurrentType = DialogueType.Quest;
-                ShowButtons(false, false, false, false);
-                //StartDialogue(quest.Model.CompleteDialogue);
-            }));
-        }
-        foreach (var quest in norQuests)
-        {
-            buttonDatas.Add(new ButtonWithTextData(quest.Title + (quest.InProgress ? "(ËøõË°å‰∏≠)" : string.Empty), delegate
-            {
-                currentQuest = quest;
-                CurrentType = DialogueType.Quest;
-                ShowButtons(false, false, false, false);
-                //StartDialogue(quest.InProgress ? quest.Model.OngoingDialogue : quest.Model.BeginDialogue);
-            }));
-        }
-        RefreshOptions(Tr("‰ªªÂä°"));
-    }
-    private void HandlingLastWords()
-    {
-        if (!currentOption && !currentQuest && (!currentWords || currentWords.OptionDatas.Count < 1))
-        {
-            var cmpltQuest = currentTalker.QuestInstances.Where(x => x.InProgress && x.IsComplete);
-
-            if (cmpltQuest != null && cmpltQuest.Any())
-            {
-                foreach (var quest in cmpltQuest)
+                SetNextClick(Tr("Ω” ‹"), delegate
                 {
-                    buttonDatas.Add(new ButtonWithTextData($"{quest.Title}(Â∑≤ÂÆåÊàê)", delegate
+                    if (QuestManager.AcceptQuest(currentQuest))
+                    {
+                        currentType = DialogueType.Normal;
+                        ShowTalkerQuest();
+                    }
+                });
+            }
+            else if (currentQuest.IsComplete && currentQuest.InProgress)
+            {
+                SetNextClick(Tr("ÕÍ≥…"), delegate
+                {
+                    if (QuestManager.SubmitQuest(currentQuest))
+                    {
+                        currentType = DialogueType.Normal;
+                        ShowTalkerQuest();
+                    }
+                });
+            }
+            if (!currentQuest.IsComplete && currentQuest.InProgress)
+            {
+                SetNextClick(Tr("∑µªÿ"), delegate
+                {
+                    currentType = DialogueType.Normal;
+                    ShowTalkerQuest();
+                });
+            }
+            else
+            {
+                SetRejectClick(currentQuest.InProgress ? Tr("∑µªÿ") : Tr("æ‹æ¯"), delegate
+                {
+                    currentType = DialogueType.Normal;
+                    ShowTalkerQuest();
+                });
+            }
+        }
+        public void ShowTalkerQuest()
+        {
+            if (!currentTalker) return;
+            ReturnToRoot();
+            ResetInteraction();
+            if (currentTalker.QuestInstances.Where(x => !x.IsSubmitted).Any())
+            {
+                buttonDatas.Clear();
+                var cmpltQuests = new List<QuestData>();
+                var norQuests = new List<QuestData>();
+                foreach (var quest in currentTalker.QuestInstances)
+                {
+                    if (quest.Model.AcceptCondition.IsMeet() && !quest.IsSubmitted)
+                        if (quest.IsComplete) cmpltQuests.Add(quest);
+                        else norQuests.Add(quest);
+                }
+                foreach (var quest in cmpltQuests)
+                {
+                    buttonDatas.Add(new ButtonWithTextData(quest.Title + "(“—ÕÍ≥…)", delegate
                     {
                         currentQuest = quest;
-                        ShowButtons(false, false, false, false);
-                        //StartDialogue(quest.Model.CompleteDialogue);
+                        currentType = DialogueType.Special;
+                        StartWith(quest.Model.CompleteDialogue);
                     }));
                 }
-                RefreshOptions("‰ªªÂä°");
-            }
-        }
-        if (CurrentType != DialogueType.Gift)
-        {
-            if (currentQuest)//ËøôÊòØÁî±‰ªªÂä°ÂºïÂèëÁöÑÂØπËØù
-            {
-                HandlingLast_Quest();
-            }
-            else if (currentSubmitObj)//ËøôÊòØÁî±Êèê‰∫§ÁõÆÊ†áÂºïÂèëÁöÑÂØπËØù
-            {
-                HandlingLast_SumbitObj();
-            }
-            else if (currentTalkObj)//ËøôÊòØÁî±ÂØπËØùÁõÆÊ†áÂºïÂèëÁöÑÂØπËØù
-            {
-                HandlingLast_TalkObj();
-            }
-            else if (currentTalker)//ÊôÆÈÄöÂØπËØù
-            {
-                HandlingLast_Normal();
-            }
-        }
-        OnFinishDialogueEvent?.Invoke();
-    }
-    private void HandlingLast_Quest()
-    {
-        if (!currentQuest.InProgress || currentQuest.IsComplete) ShowQuestDescription(currentQuest);
-        if (!currentQuest.IsComplete && !currentQuest.InProgress)
-        {
-            SetNextClick("Êé•Âèó", delegate
-            {
-                if (QuestManager.AcceptQuest(currentQuest))
+                foreach (var quest in norQuests)
                 {
-                    CurrentType = DialogueType.Normal;
-                    ShowTalkerQuest();
+                    buttonDatas.Add(new ButtonWithTextData(quest.Title + (quest.InProgress ? "(Ω¯––÷–)" : string.Empty), delegate
+                    {
+                        currentQuest = quest;
+                        currentType = DialogueType.Special;
+                        StartWith(quest.InProgress ? quest.Model.OngoingDialogue : quest.Model.BeginDialogue);
+                    }));
                 }
-            });
+                RefreshOptions(Tr("»ŒŒÒ"));
+            }
         }
-        else if (currentQuest.IsComplete && currentQuest.InProgress)
+        public bool ShouldShowQuest() => currentType == DialogueType.Normal && (CurrentData?.IsDone ?? false) && TalkerHasQuests();
+        private bool TalkerHasQuests() => currentTalker && (currentTalker.QuestInstances.Exists(x => x.IsComplete) ||
+            currentTalker.QuestInstances.Exists(x => x.Model.AcceptCondition.IsMeet() && !x.InProgress));
+        public void ShowQuestDescription(QuestData quest)
         {
-            SetNextClick("ÂÆåÊàê", delegate
+            if (quest == null) return;
+            currentQuest = quest;
+            descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[ŒØÕ–»À: {1}]\n{2}", currentQuest.Title,
+                currentQuest.originalQuestHolder.TalkerName, currentQuest.Description).ToString();
+            rewardList.Refresh(ItemSlotData.Convert(currentQuest.Model.RewardItems, 10));
+            descriptionWindow.alpha = 1;
+            descriptionWindow.blocksRaycasts = true;
+        }
+        public void HideQuestDescription()
+        {
+            currentQuest = null;
+            descriptionWindow.alpha = 0;
+            descriptionWindow.blocksRaycasts = false;
+            WindowsManager.CloseWindow<ItemWindow>();
+        }
+
+        #region ƒø±Íœ‡πÿ
+        private void HandleLastTalkObj()
+        {
+            if (!CurrentData.IsDone) return;
+            currentTalkObj.UpdateTalkState();
+            TryShowQuest(currentTalkObj);
+            currentTalkObj = null;
+            currentType = DialogueType.Normal;
+        }
+        private void HandleLastSubmitObj()
+        {
+            currentSubmitObj.UpdateSubmitState();
+            TryShowQuest(currentSubmitObj);
+            currentSubmitObj = null;
+            currentType = DialogueType.Normal;
+        }
+        private void TryShowQuest(ObjectiveData objective)
+        {
+            if (objective.IsComplete)
             {
-                if (QuestManager.SubmitQuest(currentQuest))
+                QuestData qParent = objective.parent;
+                //∏√ƒø±Í «»ŒŒÒµƒ◊Ó∫Û“ª∏ˆƒø±Í£¨‘Úø…“‘÷±Ω”Ã·Ωª»ŒŒÒ
+                if (qParent.currentQuestHolder == currentTalker.GetData<TalkerData>() && qParent.IsComplete && qParent.Objectives.IndexOf(objective) == qParent.Objectives.Count - 1)
                 {
-                    CurrentType = DialogueType.Normal;
-                    ShowTalkerQuest();
+                    SetNextClick(Tr("ºÃ–¯"), delegate
+                    {
+                        currentQuest = qParent;
+                        currentType = DialogueType.Special;
+                        StartWith(qParent.Model.CompleteDialogue);
+                    });
                 }
-            });
-        }
-        if (!currentQuest.IsComplete && currentQuest.InProgress)
-        {
-            SetNextClick("ËøîÂõû", delegate
-            {
-                CurrentType = DialogueType.Normal;
-                ShowTalkerQuest();
-            });
-        }
-        else
-        {
-            SetRejectClick(currentQuest.InProgress ? "ËøîÂõû" : "ÊãíÁªù", delegate
-            {
-                CurrentType = DialogueType.Normal;
-                ShowTalkerQuest();
-            });
-        }
-    }
-    private void HandlingLast_TalkObj()
-    {
-        if (!currentWords.IsDone) return;
-        currentTalkObj.UpdateTalkState();
-        if (currentTalkObj.IsComplete)
-        {
-            QuestData qParent = currentTalkObj.parent;
-            //ËØ•ÁõÆÊ†áÊòØ‰ªªÂä°ÁöÑÊúÄÂêé‰∏Ä‰∏™ÁõÆÊ†áÔºåÂàôÂèØ‰ª•Áõ¥Êé•Êèê‰∫§‰ªªÂä°
-            if (qParent.currentQuestHolder == currentTalker.GetData<TalkerData>() && qParent.IsComplete && qParent.Objectives.IndexOf(currentTalkObj) == qParent.Objectives.Count - 1)
-            {
-                SetNextClick("ÁªßÁª≠", delegate
-                {
-                    currentQuest = qParent;
-                    CurrentType = DialogueType.Quest;
-                    //StartDialogue(qParent.Model.CompleteDialogue);
-                });
             }
         }
-        currentTalkObj = null;//ÈáçÁΩÆÁÆ°ÁêÜÂô®ÁöÑÂØπËØùÁõÆÊ†á‰ª•Èò≤Âá∫Èîô
-    }
-    private void HandlingLast_SumbitObj()
-    {
-        //ÂèåÈáçÁ°ÆËÆ§Ôºå‰ª•Èò≤Âá∫Èîô
-        if (CheckSumbitAble(currentSubmitObj))
+        public void ShowTalkerObjective()
         {
-            BackpackManager.Instance.Lose(currentSubmitObj.Model.ItemToSubmit, currentSubmitObj.Model.Amount);
-            currentSubmitObj.UpdateSubmitState(currentSubmitObj.Model.Amount);
-        }
-        if (currentSubmitObj.IsComplete)
-        {
-            QuestData qParent = currentSubmitObj.parent;
-            //Ëã•ËØ•ÁõÆÊ†áÊòØ‰ªªÂä°ÁöÑÊúÄÂêé‰∏Ä‰∏™ÁõÆÊ†áÔºåÂàôÂèØ‰ª•Áõ¥Êé•Êèê‰∫§‰ªªÂä°
-            if (qParent.currentQuestHolder == currentTalker.GetData<TalkerData>() && qParent.IsComplete && qParent.Objectives.IndexOf(currentSubmitObj) == qParent.Objectives.Count - 1)
+            if (!currentTalker) return;
+            ReturnToRoot();
+            ResetInteraction();
+            buttonDatas.Clear();
+            foreach (TalkObjectiveData to in currentTalker.GetData<TalkerData>().objectivesTalkToThis.Where(o => !o.IsComplete))
             {
-                SetNextClick("ÁªßÁª≠", delegate
+                if (to.AllPrevComplete && !to.AnyNextOngoing)
                 {
-                    currentQuest = qParent;
-                    CurrentType = DialogueType.Quest;
-                    //StartDialogue(qParent.Model.CompleteDialogue);
-                });
-            }
-        }
-        currentSubmitObj = null;//ÈáçÁΩÆÁÆ°ÁêÜÂô®ÁöÑÊèê‰∫§ÁõÆÊ†á‰ª•Èò≤Âá∫Èîô
-    }
-    private bool CheckSumbitAble(SubmitObjectiveData so)
-    {
-        QuestData qParent = so.parent;
-        var amount = BackpackManager.Instance.GetAmount(so.Model.ItemToSubmit);
-        if (qParent.Model.InOrder)
-            foreach (var o in qParent.Objectives)
-                if (o is CollectObjectiveData co && co.Model.LoseItemAtSbmt && o.Model.InOrder && o.IsComplete)
-                    if (amount - so.Model.Amount < o.Model.Amount)
+                    buttonDatas.Add(new ButtonWithTextData(to.parent.Title, delegate
                     {
-                        MessageManager.Instance.New($"ËØ•Áâ©ÂìÅ‰∏∫ÁõÆÊ†á[{o.DisplayName}]ÊâÄÈúÄ");
-                        return false;
-                    }
-        return BackpackManager.Instance.CanLose(so.Model.ItemToSubmit, so.Model.Amount);
-    }
+                        currentTalkObj = to;
+                        currentType = DialogueType.Special;
+                        StartWith(currentTalkObj.Model.Dialogue);
+                    }));
+                }
+            }
+            foreach (SubmitObjectiveData so in currentTalker.GetData<TalkerData>().objectivesSubmitToThis.Where(o => !o.IsComplete))
+            {
+                if (so.AllPrevComplete && !so.AnyNextOngoing)
+                {
+                    buttonDatas.Add(new ButtonWithTextData(so.DisplayName, delegate
+                    {
+                        if (checkSumbitAble())
+                        {
+                            currentSubmitObj = so;
+                            currentType = DialogueType.Special;
+                            WindowsManager.HideWindow(this, true);
+                            InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, confirm, amountLimit: amount, selectCondition: condition, cancel: cancel);
 
-    private void HandlingLast_Normal()
-    {
-        foreach (TalkObjectiveData to in currentTalker.GetData<TalkerData>().objectivesTalkToThis.Where(o => !o.IsComplete))
-        {
-            if (to.AllPrevComplete && !to.AnyNextOngoing)
-            {
-                buttonDatas.Add(new ButtonWithTextData(to.parent.Title, delegate
-                {
-                    currentTalkObj = to;
-                    CurrentType = DialogueType.Objective;
-                    ShowButtons(false, false, false, false);
-                    //StartDialogue(currentTalkObj.Model.Dialogue);
-                }));
-            }
-        }
-        foreach (SubmitObjectiveData so in currentTalker.GetData<TalkerData>().objectivesSubmitToThis.Where(o => !o.IsComplete))
-        {
-            if (so.AllPrevComplete && !so.AnyNextOngoing)
-            {
-                buttonDatas.Add(new ButtonWithTextData(so.DisplayName, delegate
-                {
-                    if (CheckSumbitAble(so))
-                    {
-                        currentSubmitObj = so;
-                        CurrentType = DialogueType.Objective;
-                        ShowButtons(false, false, false, false);
-                        StartOneWords(new DialogueWords(currentWords.model.TalkerInfo, currentSubmitObj.Model.WordsWhenSubmit));
-                    }
-                }));
-            }
-        }
-        currentTalker.OnTalkFinished();
-    }
-    #endregion
-
-    #region Â§ÑÁêÜÊØèÂè•ËØù
-    private void SayNextWords()
-    {
-        if (wordsToSay.Count > 0)
-        {
-            currentWords = wordsToSay.Pop();
-            DoOneWords(currentWords.model);
-        }
-        else if (dialogueToSay.Count > 0)
-        {
-            currentDialogue = dialogueToSay.Pop();
-            DoDialogue(currentDialogue.model);
-            SayNextWords();
-        }
-    }
-
-    private void DoOneWords(DialogueWords words)
-    {
-        string talkerName = words.TalkerName;
-        if (currentDialogue)
-            talkerName = currentDialogue.model.UseUnifiedNPC ? (currentDialogue.model.UseCurrentTalkerInfo ? currentTalker.GetData<TalkerData>().Info.Name : currentDialogue.model.UnifiedNPC.Name) : talkerName;
-        if (words.TalkerType == TalkerType.Player && PlayerManager.Instance.PlayerInfo)
-            talkerName = PlayerManager.Instance.PlayerInfo.Name;
-        nameText.text = talkerName;
-        wordsText.text = MiscFuntion.HandlingKeyWords(words.Content, true);
-        HandlingWords();
-    }
-    private void HandlingWords()
-    {
-        ClearButtons();
-        if (wordsToSay.Count < 1)
-        {
-            if (currentOption)//ÈÄâÈ°πÂºïÂèëÁöÑÂØπËØùÊúÄÂêé‰∏ÄÂè•
-            {
-                if (choiceOptionSaid.Count > 0 && this.currentOption == choiceOptionSaid.Peek())
-                    choiceOptionSaid.Pop();
-                var currentOption = this.currentOption;
-                this.currentOption = null;
-                if (currentOption.model.OptionType == WordsOptionType.SubmitAndGet || currentOption.model.OptionType == WordsOptionType.OnlyGet)
-                    SetNextClick("ËøîÂõû", GoBackDefault);
-                if (currentOption.model.OptionType != WordsOptionType.Choice || currentOption.model.OptionType == WordsOptionType.Choice && currentOption.model.DeleteWhenCmplt)
-                    currentOption.isDone = true;
-                if (currentOption.model.OptionType == WordsOptionType.Choice && currentOption.parent.model.IsCorrectOption(currentOption.model))//ÈÄâÊã©ÂûãÈÄâÈ°πÁöÑÊúÄÂêé‰∏ÄÂè•
-                {
-                    foreach (var option in currentOption.parent.OptionDatas.Where(x => x.model.OptionType == WordsOptionType.Choice))
-                    {
-                        option.isDone = true;
-                    }
-                    while (choiceOptionSaid.Count > 0)
-                    {
-                        var preOption = choiceOptionSaid.Pop();
-                        preOption.isDone = true;
-                        if (choiceOptionSaid.Count < 1)
-                            foreach (var option in preOption.parent.OptionDatas.Where(x => x.model.OptionType == WordsOptionType.Choice))
+                            bool confirm(IEnumerable<CountedItem> items)
                             {
-                                option.isDone = true;
+                                if (CountedItem.GetAmount(items, so.Model.ItemToSubmit) != so.Model.Amount)
+                                {
+                                    MessageManager.Instance.New(" ˝¡ø≤ª’˝»∑");
+                                    return false;
+                                }
+                                if (BackpackManager.Instance.Lose(items)) StartWith(so.Dialogue);
+                                WindowsManager.HideWindow(this, false);
+                                return true;
                             }
-                    }
+                            int amount(ItemData item) => so.Model.ItemToSubmit == item.Model ? so.Model.Amount : 0;
+                            bool condition(ItemData item) => so.Model.ItemToSubmit == item?.Model;
+                            void cancel() => WindowsManager.HideWindow(this, false);
+                        }
+                    }));
                 }
-                else if (currentOption.model.GoBack || currentOption.parent.parent.model.StoryDialogue)
-                    DoDialogue(currentOption.parent.parent.model, currentOption.indexToGoBack);
-            }
-            HandlingLastWords();
-            if (currentWords.IsDone)//Êï¥Âè•ËØùÂÆåÊàê‰∫ÜÊâçËß¶Âèë‰∫ã‰ª∂
-                ExecuteEvents(currentWords.model);
-        }
-        HandlingButtons();
-        HandlingOptions();
-    }
 
-    private void ClearButtons()
-    {
-        buttonDatas.Clear();
-        ZetanUtility.SetActive(nextButton, false);
-        ZetanUtility.SetActive(rejectButton, false);
-        next = null;
-    }
-
-    private void DoDialogue(Dialogue dialogue, int startIndex = 0)
-    {
-        var findDialog = DialogueManager.GetOrCreateDialogueData(dialogue);
-        if (startIndex < 0) startIndex = 0;
-        wordsToSay.Clear();
-        for (int i = findDialog.wordsDatas.Count - 1; i >= startIndex; i--)
-        {
-            wordsToSay.Push(findDialog.wordsDatas[i]);
-        }
-        PauseButtons(dialogue.StoryDialogue);
-    }
-
-    private void DoOption(WordsOptionData option)
-    {
-        wordsToSay.Clear();
-        currentOption = option;
-
-        if (option.model.OptionType == WordsOptionType.SubmitAndGet)
-        {
-            if (option.model.IsValid)
-            {
-                if (BackpackManager.Instance.CanLose(option.model.ItemToSubmit.Item, option.model.ItemToSubmit.Amount, (CountedItem)option.model.ItemCanGet))
-                    BackpackManager.Instance.Lose(option.model.ItemToSubmit.Item, option.model.ItemToSubmit.Amount, (CountedItem)option.model.ItemCanGet);
-                else
+                bool checkSumbitAble()
                 {
-                    currentOption = null;
-                    return;
+                    QuestData qParent = so.parent;
+                    var amount = BackpackManager.Instance.GetAmount(so.Model.ItemToSubmit);
+                    if (qParent.Model.InOrder)
+                        foreach (var o in qParent.Objectives)
+                            if (o is CollectObjectiveData co && co.Model.LoseItemAtSbmt && o.Model.InOrder && o.IsComplete)
+                                if (amount - so.Model.Amount < o.Model.Amount)
+                                {
+                                    MessageManager.Instance.New($"∏√ŒÔ∆∑Œ™ƒø±Í[{o.DisplayName}]À˘–Ë");
+                                    return false;
+                                }
+                    return BackpackManager.Instance.CanLose(so.Model.ItemToSubmit, so.Model.Amount);
                 }
             }
-            else MessageManager.Instance.New("Êó†ÊïàÁöÑÈÄâÈ°π");
+            RefreshOptions(Tr("ΩªÃ∏"));
         }
-        if (option.model.OptionType == WordsOptionType.OnlyGet)
+        private bool ShouldShowObjectives() => currentType == DialogueType.Normal && (CurrentData?.IsDone ?? false) && TalkerHasObjectives();
+        private bool TalkerHasObjectives() => currentTalker && (currentTalker.GetData<TalkerData>().objectivesSubmitToThis.Count > 0 ||
+            currentTalker.GetData<TalkerData>().objectivesTalkToThis.Count > 0);
+        #endregion
+        #endregion
+
+        #region ≤Ÿ◊˜œ‡πÿ
+        private void SetNextClick(string text, Action action)
         {
-            if (option.model.IsValid)
+            nextBtnText.text = text;
+            ZetanUtility.SetActive(nextButton, true);
+            nextButton.onClick.RemoveAllListeners();
+            nextButton.onClick.AddListener(() => action?.Invoke());
+            next = action;
+        }
+        private void SetRejectClick(string text, Action action)
+        {
+            rejectBtnText.text = text;
+            ZetanUtility.SetActive(rejectButton, true);
+            rejectButton.onClick.RemoveAllListeners();
+            rejectButton.onClick.AddListener(() => action?.Invoke());
+        }
+        public void Next()
+        {
+            if (next != null) next.Invoke();
+            else if (optionList.Count > 0) optionList.Items[0].OnClick();
+            else if (ShouldShowObjectives()) ShowTalkerObjective();
+            else if (ShouldShowQuest()) ShowTalkerQuest();
+        }
+        public void ReturnToRoot()
+        {
+            currentQuest = null;
+            currentTalkObj = null;
+            currentSubmitObj = null;
+            next = null;
+            continueContent.Clear();
+            currentType = DialogueType.Normal;
+            HideQuestDescription();
+            StartWith(root);
+        }
+        private void DoOption(DialogueOption option)
+        {
+            if (!option.Content) return;
+            if (option.Content.IsManual()) option.Content.Manual(this);
+            else HandleContent(option.Content);
+        }
+        private void RefreshOptions(string title = null)
+        {
+            optionTitle.text = title;
+            ZetanUtility.SetActive(optionTitleArea, title != null);
+            optionList.Refresh(buttonDatas);
+            ZetanUtility.SetActive(optionArea, optionList.Count > 0);
+        }
+        #endregion
+
+        #region π¶ƒ‹∞¥≈•œ‡πÿ
+        private void ShowButtons(bool gift = true, bool shop = true, bool warehouse = true, bool talk = true, bool quest = true, bool back = true)
+        {
+            ZetanUtility.SetActive(giftButton.gameObject, gift);
+            ZetanUtility.SetActive(shopButton.gameObject, shop);
+            ZetanUtility.SetActive(warehouseButton.gameObject, warehouse);
+            ZetanUtility.SetActive(talkButton.gameObject, talk);
+            ZetanUtility.SetActive(questButton.gameObject, quest);
+            ZetanUtility.SetActive(backButton.gameObject, back);
+        }
+        private void OpenTalkerWarehouse()
+        {
+            if (!currentTalker || !currentTalker.GetData<TalkerData>().Info.IsWarehouseAgent) return;
+            var warehouse = WindowsManager.OpenWindow<WarehouseWindow>(WarehouseWindow.OpenType.Store, currentTalker.GetData<TalkerData>(),
+                WindowsManager.FindWindow<BackpackWindow>());
+            if (warehouse)
             {
-                if (!BackpackManager.Instance.CanGet(option.model.ItemCanGet.Item, option.model.ItemCanGet.Amount))
+                warehouse.onClose += () => WindowsManager.HideWindow(this, false);
+                WindowsManager.HideWindow(this, true);
+            }
+        }
+        private void OpenTalkerShop()
+        {
+            if (!currentTalker || !currentTalker.GetData<TalkerData>().Info.IsVendor) return;
+            var shop = WindowsManager.OpenWindow<ShopWindow>(currentTalker.GetData<TalkerData>().shop);
+            if (shop)
+            {
+                shop.onClose += () => WindowsManager.HideWindow(this, false);
+                WindowsManager.HideWindow(this, true);
+            }
+        }
+        private void OpenGiftWindow()
+        {
+            InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnSendGift, "ÃÙ—°“ªº˛¿ÒŒÔ", "»∑∂®“™ÀÕ≥ˆ’‚∏ˆ¿ÒŒÔ¬£ø", 1, i => 1, cancel: () => WindowsManager.HideWindow(this, false));
+            WindowsManager.HideWindow(this, true);
+        }
+        private void OnSendGift(IEnumerable<CountedItem> items)
+        {
+            if (items != null && items.Any())
+            {
+                var isd = items.ElementAt(0);
+                Dialogue dialogue = currentTalker.OnGetGift(isd.source.Model);
+                if (dialogue)
                 {
-                    currentOption = null;
-                    return;
+                    BackpackManager.Instance.Lose(isd.source, isd.amount);
+                    currentType = DialogueType.Special;
+                    ShowButtons(false, false, false, false);
+                    StartWith(dialogue);
                 }
-                else BackpackManager.Instance.Get(option.model.ItemCanGet.Item, option.model.ItemCanGet.Amount);
             }
-            else MessageManager.Instance.New("Êó†ÊïàÁöÑÈÄâÈ°π");
+            WindowsManager.HideWindow(this, false);
         }
-        if (option.model.OptionType == WordsOptionType.Choice)//ÊòØÈÄâÊã©ÂûãÈÄâÈ°π
-        {
-            choiceOptionSaid.Push(option);
-            if (option.parent.model.IsCorrectOption(option.model))
-            {
-                DoDialogue(option.parent.parent.model, option.indexToGoBack);
-            }
-            else
-            {
-                NewWords(option.parent.model.TalkerType != TalkerType.Player, option.parent.model.WrongChoiceWords);//ÂØπËØù‰∫∫ÁöÑÁ±ªÂûãÁî±Âè•Â≠êÂÜ≥ÂÆöÔºåËØ¥ÁöÑËØùÊòØÂè•Â≠êÂ∏¶ÁöÑÈÄâÊã©ÈîôËØØÊó∂ËØ¥ÁöÑËØù
-            }
-        }
-        if (option.model.HasWordsToSay || option.model.OptionType == WordsOptionType.BranchWords)
-        {
-            NewWords(option.model.TalkerType != TalkerType.Player, option.model.Words);//ÂØπËØù‰∫∫ÁöÑÁ±ªÂûãÁî±ÈÄâÈ°πÂÜ≥ÂÆöÔºåËØ¥ÁöÑËØùÊòØÈÄâÈ°πËá™Â∏¶ÁöÑ
-        }
-        else if (option.model.OptionType == WordsOptionType.BranchDialogue)
-        {
-            DoDialogue(option.model.Dialogue, option.model.SpecifyIndex);
-        }
-        SayNextWords();
+        #endregion
 
-        void NewWords(bool condition, string words)
+        #region ∆‰À¸
+        private void Clear()
         {
-            TalkerInformation talkerInfo = null;
-            if (condition)
-            {
-                if (!option.parent.parent.model.UseUnifiedNPC)
-                    talkerInfo = option.parent.model.TalkerInfo;
-                else if (option.parent.parent.model.UseUnifiedNPC && option.parent.parent.model.UseCurrentTalkerInfo)
-                    talkerInfo = currentTalker.GetData<TalkerData>().Info;
-                else if (option.parent.parent.model.UseUnifiedNPC && !option.parent.parent.model.UseCurrentTalkerInfo)
-                    talkerInfo = option.parent.parent.model.UnifiedNPC;
-                wordsToSay.Push(new DialogueWordsData(new DialogueWords(talkerInfo, words), null));
-            }
-            else
-            {
-                wordsToSay.Push(new DialogueWordsData(new DialogueWords(null, words, TalkerType.Player), null));
-            }
+            root = null;
+            currentTalker = null;
+            currentQuest = null;
+            currentTalkObj = null;
+            currentSubmitObj = null;
+            optionList.Clear();
+            HideQuestDescription();
+            currentType = DialogueType.Normal;
         }
-    }
-    #endregion
-
-    #region UIÁõ∏ÂÖ≥
-    public static bool TalkWith(Talker talker)
-    {
-        if (!talker) return false;
-        if (PlayerManager.Instance.CheckIsNormalWithAlert())
+        protected override void OnAwake()
         {
-            WindowsManager.OpenWindow<DialogueWindow>(talker);
+            backButton.onClick.AddListener(ReturnToRoot);
+            giftButton.onClick.AddListener(OpenGiftWindow);
+            shopButton.onClick.AddListener(OpenTalkerShop);
+            warehouseButton.onClick.AddListener(OpenTalkerWarehouse);
+            questButton.onClick.AddListener(ShowTalkerQuest);
+            talkButton.onClick.AddListener(ShowTalkerObjective);
+        }
+        protected override void OnInterrupt()
+        {
+            IsHidden = false;
+        }
+        #endregion
+
+        #region ¥∞ø⁄œ‘ æœ‡πÿ
+        public static bool TalkWith(Talker talker)
+        {
+            if (!talker) return false;
+            if (PlayerManager.Instance.CheckIsNormalWithAlert())
+            {
+                WindowsManager.OpenWindow<DialogueWindow>(talker);
+                return true;
+            }
+            return false;
+        }
+        protected override bool OnOpen(params object[] args)
+        {
+            if (args.Length < 1) return false;
+            if (args[0] is Talker talker)
+            {
+                currentTalker = talker;
+                StartWith(currentTalker.GetData().GetInfo<TalkerInformation>().DefaultDialogue);
+                if (currentTalker.GetData<TalkerData>().Info.IsWarehouseAgent)
+                    if (WindowsManager.IsWindowOpen<WarehouseWindow>(out var warehouse) && warehouse.Handler.Inventory == currentTalker.GetData<TalkerData>().Inventory)
+                        warehouse.Close(); ;
+            }
+            else if (args[0] is EntryContent entry) StartWith(entry);
+            else if (args[0] is string talker2 && args[1] is string content) StartWith(talker2, content);
+            else return false;
+            WindowsManager.HideAllExcept(true, this);
+            PlayerManager.Instance.Player.SetMachineState<PlayerTalkingState>();
+            return base.OnOpen(args);
+        }
+        protected override bool OnClose(params object[] args)
+        {
+            base.OnClose(args);
+            Clear();
+            WindowsManager.HideAll(false);
+            WindowsManager.HideWindow<WarehouseWindow>(false);
+            WindowsManager.CloseWindow<WarehouseWindow>();
+            WindowsManager.CloseWindow<ShopWindow>();
+            PlayerManager.Instance.Player.SetMachineState<CharacterIdleState>();
+            IsHidden = false;
             return true;
         }
-        return false;
-    }
-    public void CancelTalk()
-    {
-        IsHidden = false;
-        Close();
-    }
-
-    protected override bool OnOpen(params object[] args)
-    {
-        if (args == null || args.Length < 1) return false;
-        if (currentTalker && currentTalker.GetData<TalkerData>().Info.IsWarehouseAgent)
-            if (WindowsManager.IsWindowOpen<WarehouseWindow>(out var warehouse) && warehouse.Handler.Inventory == currentTalker.GetData<TalkerData>().Inventory)
-                warehouse.Close(); ;
-        Clear();
-        WindowsManager.HideAllExcept(true, this);
-        PlayerManager.Instance.Player.SetMachineState<PlayerTalkingState>();
-        currentTalker = args[0] as Talker;
-        BeginNewDialogue();
-        return base.OnOpen(args);
-    }
-    protected override bool OnClose(params object[] args)
-    {
-        base.OnClose(args);
-        CurrentType = DialogueType.Normal;
-        Clear();
-        WindowsManager.HideAll(false);
-        WindowsManager.HideWindow<WarehouseWindow>(false);
-        WindowsManager.CloseWindow<WarehouseWindow>();
-        WindowsManager.CloseWindow<ShopWindow>();
-        PlayerManager.Instance.Player.SetMachineState<CharacterIdleState>();
-        IsHidden = false;
-        return true;
-    }
-
-    private void Clear()
-    {
-        currentTalker = null;
-        currentQuest = null;
-        currentTalkObj = null;
-        currentSubmitObj = null;
-        choiceOptionSaid.Clear();
-        optionList.Clear();
-        HideQuestDescription();
-    }
-
-    public void Hide(bool hide, params object[] args)
-    {
-        if (!IsOpen) return;
-        content.alpha = hide ? 0 : 1;
-        content.blocksRaycasts = !hide;
-        IsHidden = hide;
-    }
-
-    public void ShowQuestDescription(QuestData quest)
-    {
-        if (quest == null) return;
-        currentQuest = quest;
-        descriptionText.text = new StringBuilder().AppendFormat("<b>{0}</b>\n[ÂßîÊâò‰∫∫: {1}]\n{2}",
-            currentQuest.Title,
-            currentQuest.originalQuestHolder.TalkerName,
-            currentQuest.Description).ToString();
-        rewardList.Refresh(ItemSlotData.Convert(currentQuest.Model.RewardItems, 10));
-        descriptionWindow.alpha = 1;
-        descriptionWindow.blocksRaycasts = true;
-    }
-    public void HideQuestDescription()
-    {
-        currentQuest = null;
-        descriptionWindow.alpha = 0;
-        descriptionWindow.blocksRaycasts = false;
-        WindowsManager.CloseWindow<ItemWindow>();
-    }
-
-    public void OpenTalkerWarehouse()
-    {
-        if (!currentTalker || !currentTalker.GetData<TalkerData>().Info.IsWarehouseAgent) return;
-        var warehouse = WindowsManager.OpenWindow<WarehouseWindow>(WarehouseWindow.OpenType.Store, currentTalker.GetData<TalkerData>(),
-            WindowsManager.FindWindow<BackpackWindow>());
-        if (warehouse)
+        public void Hide(bool hide, params object[] args)
         {
-            warehouse.onClose += () => WindowsManager.HideWindow(this, false);
-            WindowsManager.HideWindow(this, true);
+            if (!IsOpen) return;
+            IHideable.HideHelper(content, hide);
+            IsHidden = hide;
+        }
+        #endregion
+
+        private enum DialogueType
+        {
+            Normal,
+            Special,
         }
     }
-    public void OpenTalkerShop()
-    {
-        if (!currentTalker || !currentTalker.GetData<TalkerData>().Info.IsVendor) return;
-        var shop = WindowsManager.OpenWindow<ShopWindow>(currentTalker.GetData<TalkerData>().shop);
-        if (shop)
-        {
-            shop.onClose += () => WindowsManager.HideWindow(this, false);
-            WindowsManager.HideWindow(this, true);
-        }
-    }
-    public void OpenGiftWindow()
-    {
-        InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, OnSendGift, "ÊåëÈÄâ‰∏Ä‰ª∂Á§ºÁâ©", "Á°ÆÂÆöË¶ÅÈÄÅÂá∫Ëøô‰∏™Á§ºÁâ©ÂêóÔºü", 1, i => 1, cancel: () => WindowsManager.HideWindow(this, false));
-        WindowsManager.HideWindow(this, true);
-    }
-    private void OnSendGift(IEnumerable<CountedItem> items)
-    {
-        //if (items != null && items.Count() > 0)
-        //{
-        //    var isd = items.ElementAt(0);
-        //    Dialogue dialogue = currentTalker.OnGetGift(isd.source.Model);
-        //    if (dialogue)
-        //    {
-        //        BackpackManager.Instance.Lose(isd.source, isd.amount);
-        //        CurrentType = DialogueType.Gift;
-        //        ShowButtons(false, false, false, false);
-        //        StartDialogue(dialogue);
-        //    }
-        //}
-        WindowsManager.HideWindow(this, false);
-    }
-
-    private void ShowButtons(bool gift, bool shop, bool warehouse, bool quest, bool back = true)
-    {
-        ZetanUtility.SetActive(giftButton.gameObject, gift);
-        ZetanUtility.SetActive(shopButton.gameObject, shop);
-        ZetanUtility.SetActive(warehouseButton.gameObject, warehouse);
-        ZetanUtility.SetActive(questButton.gameObject, quest);
-        ZetanUtility.SetActive(backButton.gameObject, back);
-    }
-
-    private void PauseButtons(bool pause)
-    {
-        ZetanUtility.SetActive(buttonArea, !pause);
-    }
-
-    #endregion
-
-    #region ÂÖ∂ÂÆÉ
-    protected override void OnAwake()
-    {
-        giftButton.onClick.AddListener(SendTalkerGifts);
-        warehouseButton.onClick.AddListener(OpenTalkerWarehouse);
-        shopButton.onClick.AddListener(OpenTalkerShop);
-        backButton.onClick.AddListener(GoBackDefault);
-        questButton.onClick.AddListener(ShowTalkerQuest);
-    }
-
-    public void SendTalkerGifts()
-    {
-        if (!currentTalker || !currentTalker.GetData<TalkerData>().Info.CanDEV_RLAT) return;
-        OpenGiftWindow();
-    }
-
-    public void ShowTalkerQuest()
-    {
-        if (currentTalker == null) return;
-        ZetanUtility.SetActive(questButton.gameObject, false);
-        ZetanUtility.SetActive(warehouseButton.gameObject, false);
-        ZetanUtility.SetActive(shopButton.gameObject, false);
-        GoBackDefault();
-        if (currentTalker.QuestInstances.Where(x => !x.IsSubmitted).Any())
-        {
-            Skip();
-            RefreshQuestOptions();
-        }
-    }
-
-    public void Skip()
-    {
-        foreach (var words in currentDialogue.wordsDatas)
-        {
-            if (!words.IsDone) return;//Âè™Ë¶ÅÊúâ‰∏ÄÂè•ËØùÁöÑÂàÜÊîØÊúâÊ≤°ÂÆåÊàêÁöÑÔºåÂàôÊó†Ê≥ïË∑≥Ëøá
-        }
-        while (wordsToSay.Count > 0)
-            SayNextWords();
-    }
-
-    public void GoBackDefault()
-    {
-        currentOption = null;
-        currentDialogue = null;
-        currentQuest = null;
-        currentSubmitObj = null;
-        currentTalkObj = null;
-        currentWords = null;
-        choiceOptionSaid.Clear();
-        optionList.Clear();
-        HideQuestDescription();
-        StartTalking(currentTalker);
-    }
-
-    private void ExecuteEvents(DialogueWords words)
-    {
-        foreach (var we in words.Events)
-        {
-            switch (we.EventType)
-            {
-                case WordsEventType.Trigger:
-                    TriggerManager.SetTrigger(we.WordsTrigrName, we.TriggerActType == TriggerActionType.Set);
-                    break;
-                case WordsEventType.GetAmity:
-                    //TODO Â¢ûÂä†Â•ΩÊÑü
-                    break;
-                case WordsEventType.LoseAmity:
-                    //TODO ÂáèÂ∞ëÂ•ΩÊÑü
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    public void Next()
-    {
-        if (next != null) next.Invoke();
-        else if (optionList.Count > 0) optionList.Items.First().OnClick();
-    }
-    #endregion
 }

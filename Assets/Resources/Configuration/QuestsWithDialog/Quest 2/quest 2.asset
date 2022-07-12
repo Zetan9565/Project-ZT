@@ -19,14 +19,7 @@ MonoBehaviour:
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptCondition:
     conditions:
-    - type: 1
-      intValue: 0
-      compareType: 0
-      relatedQuest: {fileID: 11400000, guid: 5288a43013e44284baed8b30be1f92de, type: 2}
-      relatedItem: {fileID: 0}
-      relatedCharInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0,
-        type: 2}
-      triggerName: 
+    - rid: 9026091293677191176
     relational: 
   questType: 0
   repeatFrequancy: 0
@@ -97,3 +90,8 @@ MonoBehaviour:
           type: 2}
         wordsWhenSubmit: "\u8FD9\u662F\u4EC0\u4E48\u4E1C\u897F\uFF0C\u54EA\u6765\u7684\uFF1F"
         talkerType: 0
+    - rid: 9026091293677191176
+      type: {class: QuestCompleted, ns: ZetanStudio.ConditionSystem, asm: Assembly-CSharp}
+      data:
+        <Quest>k__BackingField: {fileID: 11400000, guid: 5288a43013e44284baed8b30be1f92de,
+          type: 2}

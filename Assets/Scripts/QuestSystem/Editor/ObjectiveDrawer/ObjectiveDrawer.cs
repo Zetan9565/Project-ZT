@@ -9,9 +9,6 @@ using ZetanStudio.Extension.Editor;
 public class ObjectiveDrawer : PropertyDrawer
 {
     public Quest[] questCache;
-    public TalkerInformation[] talkerCache;
-    public Item[] itemCache;
-    public Dialogue[] dialogueCache;
     protected float lineHeight;
     protected float lineHeightSpace;
 
@@ -20,8 +17,6 @@ public class ObjectiveDrawer : PropertyDrawer
         lineHeight = EditorGUIUtility.singleLineHeight;
         lineHeightSpace = lineHeight + 2;
         questCache = Resources.LoadAll<Quest>("Configuration");
-        talkerCache = Resources.LoadAll<TalkerInformation>("Configuration").Where(x => x.Enable).ToArray();
-        itemCache = Resources.LoadAll<Item>("Configuration");
     }
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)

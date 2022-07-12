@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace ZetanStudio.ItemSystem
 {
-    [CreateAssetMenu]
+    [CreateAssetMenu(fileName = "item database", menuName = "Zetan Studio/道具/数据库")]
     public sealed class ItemDatabase : SingletonScriptableObject<ItemDatabase>
     {
         [SerializeField]

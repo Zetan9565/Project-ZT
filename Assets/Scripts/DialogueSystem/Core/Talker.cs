@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ZetanStudio.DialogueSystem;
+using ZetanStudio.DialogueSystem.UI;
 using ZetanStudio.Extension;
 using ZetanStudio.ItemSystem;
-using ZetanStudio.UI;
 
 [DisallowMultipleComponent]
 public class Talker : Character, IInteractive
@@ -32,13 +32,13 @@ public class Talker : Character, IInteractive
         }
     }
 
-    public NewDialogue DefaultDialogue
+    public Dialogue DefaultDialogue
     {
         get
         {
             foreach (var cd in GetData<TalkerData>().Info.ConditionDialogues)
             {
-                if (MiscFuntion.CheckCondition(cd.Condition))
+                if (cd.Condition.IsMeet())
                     return cd.Dialogue;
             }
             return GetData<TalkerData>().Info.DefaultDialogue;
@@ -83,14 +83,14 @@ public class Talker : Character, IInteractive
         GetData<TalkerData>()?.OnTalkFinished();
     }
 
-    public NewDialogue OnGetGift(Item gift)
+    public Dialogue OnGetGift(Item gift)
     {
         return GetData<TalkerData>()?.OnGetGift(gift);
     }
 
     public bool DoInteract()
     {
-        if (NewDialogueWindow.TalkWith(this))
+        if (DialogueWindow.TalkWith(this))
         {
             SetMachineState<CharacterTalkingState>();
             return true;
@@ -105,7 +105,7 @@ public class Talker : Character, IInteractive
 
     private void OnNotInteractable()
     {
-        if (WindowsManager.IsWindowOpen<NewDialogueWindow>(out var dialogue) && dialogue.Target == this)
+        if (WindowsManager.IsWindowOpen<DialogueWindow>(out var dialogue) && dialogue.Target == this)
             dialogue.Interrupt();
     }
 

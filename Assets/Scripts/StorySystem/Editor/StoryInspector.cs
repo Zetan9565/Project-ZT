@@ -115,11 +115,11 @@ public class StoryInspector : Editor
                                     EditorGUI.PropertyField(new Rect(rect2.x, rect2.y + lineHeightSpace * _lineCount, rect2.width, lineHeight),
                                         dialogue, new GUIContent("对话"));
                                     _lineCount++;
-                                    if (dialogue.objectReferenceValue && (dialogue.objectReferenceValue as Dialogue).Words.Count > 0 && (dialogue.objectReferenceValue as Dialogue).Words[0] != null)
+                                    if (dialogue.objectReferenceValue && (dialogue.objectReferenceValue as OldDialogue).Words.Count > 0 && (dialogue.objectReferenceValue as OldDialogue).Words[0] != null)
                                     {
                                         GUI.enabled = false;
                                         EditorGUI.TextField(new Rect(rect2.x, rect2.y + lineHeightSpace * _lineCount, rect2.width, lineHeight),
-                                            (dialogue.objectReferenceValue as Dialogue).Words[0].Content);
+                                            (dialogue.objectReferenceValue as OldDialogue).Words[0].Content);
                                         GUI.enabled = true;
                                         _lineCount++;
                                     }

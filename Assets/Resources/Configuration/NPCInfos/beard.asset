@@ -24,15 +24,7 @@ MonoBehaviour:
   defaultDialogue: {fileID: 11400000, guid: 47ca2d36d39938e49af4c6a75cb07825, type: 2}
   conditionDialogues:
   - condition:
-      conditions:
-      - type: 3
-        intValue: 1
-        compareType: 0
-        relatedQuest: {fileID: 0}
-        relatedItem: {fileID: 5948240964464067290, guid: 11d254d59d262564aa42d1df5009d201,
-          type: 2}
-        relatedCharInfo: {fileID: 0}
-        triggerName: 
+      conditions: []
       relational: 
     dialogue: {fileID: 11400000, guid: 0af03633419a3e04ca87cfe3c8338b5e, type: 2}
   isWarehouseAgent: 1
@@ -54,3 +46,6 @@ MonoBehaviour:
   - item: {fileID: -8659359920512167614, guid: 11d254d59d262564aa42d1df5009d201, type: 2}
     intimacyValue: 25
   canMarry: 0
+  references:
+    version: 2
+    RefIds: []

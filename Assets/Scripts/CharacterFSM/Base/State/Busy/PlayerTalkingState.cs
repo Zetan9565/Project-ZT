@@ -1,4 +1,6 @@
-﻿public class PlayerTalkingState : CharacterTalkingState
+﻿using ZetanStudio.DialogueSystem.UI;
+
+public class PlayerTalkingState : CharacterTalkingState
 {
     public PlayerTalkingState(CharacterStateMachine stateMachine) : base(stateMachine)
     {

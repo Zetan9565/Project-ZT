@@ -140,7 +140,6 @@ public class StructureWindow : Window, IHideable
     #region UI相关
     protected override bool OnOpen(params object[] args)
     {
-        if (WindowsManager.IsWindowOpen<DialogueWindow>()) return false;
         Refresh();
         ZetanUtility.SetActive(buildButton, false);
         ZetanUtility.SetActive(backButton, false);

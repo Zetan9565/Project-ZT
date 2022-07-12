@@ -1,402 +1,245 @@
 using System;
-using System.Collections.Generic;
+using System.Text;
+using System.Collections.ObjectModel;
 using UnityEngine;
-using ZetanStudio.DialogueSystem;
 
-[CreateAssetMenu(fileName = "dialogue", menuName = "Zetan Studio/剧情/对话")]
-public class Dialogue : ScriptableObject
+namespace ZetanStudio.DialogueSystem
 {
-    [SerializeField]
-    private string _ID;
-    public string ID => _ID;
-
-    [SerializeField]
-    private bool storyDialogue;
-    public bool StoryDialogue => storyDialogue;
-
-    [SerializeField]
-    private bool useUnifiedNPC;
-    public bool UseUnifiedNPC => useUnifiedNPC;
-
-    [SerializeField]
-    private bool useCurrentTalkerInfo;
-    public bool UseCurrentTalkerInfo => useCurrentTalkerInfo && !storyDialogue;
-
-    [SerializeField]
-    private TalkerInformation unifiedNPC;
-    public TalkerInformation UnifiedNPC => unifiedNPC;
-
-    [SerializeField, NonReorderable]
-    private List<DialogueWords> words = new List<DialogueWords>();
-    public List<DialogueWords> Words => words;
-
-    public string Preview()
+    [CreateAssetMenu(fileName = "dialogue", menuName = "Zetan Studio/����/�Ի�")]
+    public sealed class Dialogue : ScriptableObject
     {
-        return PreviewDialogue(this);
-    }
+        public string ID => Entry?.ID ?? string.Empty;
 
-    public static string PreviewDialogue(Dialogue dialogue)
-    {
-        if (!dialogue) return null;
-        string dialoguePreview = string.Empty;
-        for (int i = 0; i < dialogue.Words.Count; i++)
+        [SerializeReference]
+        private DialogueContent[] contents = { };
+        public ReadOnlyCollection<DialogueContent> Contents => new ReadOnlyCollection<DialogueContent>(contents);
+
+        public EntryContent Entry => contents[0] as EntryContent;
+
+        public bool Exitable => Traverse(Entry, n => n.ExitHere);
+
+        public Dialogue() => contents = new DialogueContent[] { new EntryContent() };
+
+        public bool Reachable(DialogueContent content) => Reachable(Entry, content);
+        public static bool Reachable(DialogueContent from, DialogueContent to)
         {
-            var words = dialogue.Words[i];
-            dialoguePreview += "[" + words.TalkerName + "]说：\n-" + MiscFuntion.HandlingKeyWords(words.Content, false);
-            for (int j = 0; j < words.Options.Count; j++)
+            if (!to) return false;
+            bool reachable = false;
+            Traverse(from, c =>
             {
-                dialoguePreview += "\n--(选项" + (j + 1) + ")" + words.Options[j].Title;
-            }
-            dialoguePreview += i == dialogue.Words.Count - 1 ? string.Empty : "\n";
+                reachable = c == to;
+                return reachable;
+            });
+            return reachable;
         }
-        return dialoguePreview;
-    }
 
-    public static string GetFirstWords(Dialogue dialogue)
-    {
-        if (dialogue && dialogue.Words.Count > 0)
+        public static void Traverse(DialogueContent content, Action<DialogueContent> onAccess, bool normalOnly = false)
         {
-            return MiscFuntion.HandlingKeyWords(dialogue.Words[0].ToString(), true);
+            if (content)
+            {
+                if (!normalOnly || DialogueContent.IsNormal(content)) onAccess?.Invoke(content);
+                foreach (var option in content.Options)
+                {
+                    Traverse(option.Content, onAccess, normalOnly);
+                }
+            }
         }
-        return string.Empty;
-    }
+
+        ///<param name="onAccess">����ֹ�����ķ����������� <i>true</i> ʱ����ֹ����</param>
+        /// <returns>�Ƿ��ڱ���ʱ������ֹ</returns>
+        public static bool Traverse(DialogueContent content, Func<DialogueContent, bool> onAccess, bool normalOnly = false)
+        {
+            if (onAccess != null && content)
+            {
+                if (!normalOnly || DialogueContent.IsNormal(content))
+                    if (onAccess(content)) return true;
+                foreach (var option in content.Options)
+                {
+                    if (Traverse(option.Content, onAccess, normalOnly))
+                        return true;
+                }
+            }
+            return false;
+        }
 
 #if UNITY_EDITOR
-    public static class Editor
-    {
-        public static string GetAutoID(Dialogue[] all, int length = 6)
+        /// <summary>
+        /// �����ڱ༭���м�¼�����˳��㣬��Ӧ����Ϸ�߼���ʹ��
+        /// </summary>
+        public ExitContent exit = new ExitContent();
+        /// <summary>
+        /// �����ڱ༭���б�ע���ζԻ�����;����Ӧ����Ϸ�߼���ʹ��
+        /// </summary>
+        [TextArea]
+        public string description;
+
+        public static class Editor
         {
-            string newID = string.Empty;
-            var len = Mathf.Pow(10, length);
-            for (int i = 1; i < len; i++)
+            public static DialogueContent AddContent(Dialogue dialogue, Type type)
             {
-                newID = "DIALG" + i.ToString().PadLeft(length, '0');
-                if (!Array.Exists(all, x => x.ID == newID))
-                    break;
+                if (!typeof(DialogueContent).IsAssignableFrom(type)) return null;
+                var content = Activator.CreateInstance(type) as DialogueContent;
+                UnityEditor.ArrayUtility.Add(ref dialogue.contents, content);
+                return content;
             }
-            return newID;
-        }
+            public static DialogueContent RemoveContent(Dialogue dialogue, DialogueContent content)
+            {
+                UnityEditor.ArrayUtility.Remove(ref dialogue.contents, content);
+                return content;
+            }
+            public static void CopyFromOld(Dialogue dialogue, OldDialogue old)
+            {
+                dialogue.contents = new DialogueContent[] { };
+                DialogueContent parent = null;
+                for (int i = 0; i < old.Words.Count; i++)
+                {
+                    var words = old.Words[i];
+                    bool last = i == old.Words.Count - 1;
+                    DialogueContent content;
+                    string talker;
+                    if (words.TalkerType == TalkerType.NPC) talker = Keywords.Generate(words.TalkerInfo);
+                    else if (words.TalkerType == TalkerType.UnifiedNPC) talker = old.UseCurrentTalkerInfo ? "[NPC]" : Keywords.Generate(old.UnifiedNPC);
+                    else talker = "[PLAYER]";
+                    if (i == 0)
+                    {
+                        parent = content = addContent(new EntryContent(talker, words.Content));
+                        if (old.Words.Count > 1 || old.Words[i].Options.Count > 0)
+                        {
+                            DialogueContent.Editor.SetAsExit(parent, false);
+                            DialogueContent.Editor.RemoveOption(parent, parent[0]);
+                        }
+                    }
+                    else
+                    {
+                        DialogueOption.Editor.SetContent(DialogueContent.Editor.AddOption(parent, true), content = addContent(new WordsContent(talker, words.Content)));
+                        content._position = new Vector2(parent._position.x + 360f, parent._position.y);
+                        parent = content;
+                    }
+                    if (words.Options.Count > 0)
+                    {
+                        float y = content._position.y;
+                        for (int j = 0; j < words.Options.Count; j++)
+                        {
+                            var oopt = words.Options[j];
+                            var opt = DialogueContent.Editor.AddOption(content, false, oopt.Title);
+                            DialogueContent child;
+                            switch (oopt.OptionType)
+                            {
+                                case WordsOptionType.BranchDialogue:
+                                    DialogueOption.Editor.SetContent(opt, child = addContent(new BranchContent() { _position = new Vector2(content._position.x + 360f, y) }));
+                                    parent = child;
+                                    if (last) DialogueContent.Editor.SetAsExit(child);
+                                    break;
+                                case WordsOptionType.Choice:
+                                    if (oopt.DeleteWhenCmplt)
+                                    {
+                                        var delete = addContent(new DeleteOnDoneDecorator());
+                                        delete._position = new Vector2(content._position.x + 360f, y);
+                                        DialogueOption.Editor.SetContent(opt, delete);
+                                        DialogueOption.Editor.SetContent(delete[0],
+                                            child = addContent(new WordsContent(oopt.TalkerType == TalkerType.NPC ? "[NPC]" : "[PLAYER]", oopt.Words)
+                                            {
+                                                _position = new Vector2(delete._position.x + 360f, y)
+                                            }));
+                                    }
+                                    else
+                                    {
+                                        DialogueOption.Editor.SetContent(opt,
+                                            child = addContent(new WordsContent(oopt.TalkerType == TalkerType.NPC ? "[NPC]" : "[PLAYER]", oopt.Words)
+                                            {
+                                                _position = new Vector2(content._position.x + 360f, y)
+                                            }));
+                                    }
+                                    if (words.NeedToChusCorrectOption && words.IndexOfCorrectOption != j)
+                                    {
+                                        DialogueContent wrong = addContent(new WordsContent("[NPC]", words.WrongChoiceWords));
+                                        wrong._position = new Vector2(child._position.x + 360f, child._position.y);
+                                        DialogueOption.Editor.SetContent(DialogueContent.Editor.AddOption(wrong, true),
+                                            addContent(new RecursionSuffix(3) { _position = new Vector2(wrong._position.x + 360f, wrong._position.y) }));
+                                        DialogueOption.Editor.SetContent(DialogueContent.Editor.AddOption(child, true), wrong);
+                                    }
+                                    else
+                                    {
+                                        parent = child;
+                                        if (last) DialogueContent.Editor.SetAsExit(child);
+                                    }
+                                    break;
+                                case WordsOptionType.SubmitAndGet:
+                                    if (oopt.ItemCanGet?.Item)
+                                        DialogueOption.Editor.SetContent(opt,
+                                            child = addContent(new SubmitAndGetItemContent("[NPC]", oopt.Words, new ItemInfo[] { oopt.ItemToSubmit }, new ItemInfo[] { oopt.ItemCanGet })
+                                            {
+                                                _position = new Vector2(content._position.x + 360f, y)
+                                            }));
+                                    else DialogueOption.Editor.SetContent(opt,
+                                        child = addContent(new SubmitItemContent("[NPC]", oopt.Words, oopt.ItemToSubmit) { _position = new Vector2(content._position.x + 360f, y) }));
+                                    parent = child;
+                                    if (last) DialogueContent.Editor.SetAsExit(child);
+                                    break;
+                                case WordsOptionType.OnlyGet:
+                                    DialogueOption.Editor.SetContent(opt,
+                                        child = addContent(new GetItemContent("[NPC]", oopt.Words, oopt.ItemCanGet) { _position = new Vector2(content._position.x + 360f, y) }));
+                                    parent = child;
+                                    if (last) DialogueContent.Editor.SetAsExit(child);
+                                    break;
+                                default:
+                                    DialogueOption.Editor.SetContent(opt,
+                                        child = addContent(new WordsContent(oopt.TalkerType == TalkerType.NPC ? "[NPC]" : "[PLAYER]", oopt.Words)
+                                        {
+                                            _position = new Vector2(content._position.x + 360f, y)
+                                        }));
+                                    if (!oopt.GoBack)
+                                    {
+                                        parent = child;
+                                        if (last) DialogueContent.Editor.SetAsExit(child);
+                                    }
+                                    else
+                                    {
+                                        DialogueOption.Editor.SetContent(DialogueContent.Editor.AddOption(child, true),
+                                            addContent(new RecursionSuffix(oopt.IndexToGoBack < 0 ? 2 : 2 + (i - oopt.IndexToGoBack))
+                                            {
+                                                _position = new Vector2(child._position.x + 360f, child._position.y)
+                                            }));
+                                    }
+                                    break;
+                            }
+                            y += 100;
+                        }
+                    }
+                    else if (last) DialogueContent.Editor.SetAsExit(content);
+                }
+                dialogue.exit._position = new Vector2(dialogue.contents[^1]._position.x + 360f, 0);
+                DialogueContent addContent(DialogueContent content)
+                {
+                    UnityEditor.ArrayUtility.Add(ref dialogue.contents, content);
+                    return content;
+                }
+            }
 
-        public static bool IsIDDuplicate(Dialogue dialogue, Dialogue[] all)
-        {
-            Dialogue find = Array.Find(all, x => x.ID == dialogue.ID);
-            if (!find) return false;//若没有找到，则ID可用
-                                    //找到的对象不是原对象 或者 找到的对象是原对象且同ID超过一个 时为true
-            return find != dialogue || (find == dialogue && Array.FindAll(all, x => x.ID == dialogue.ID).Length > 1);
+            public static string Preview(Dialogue dialogue)
+            {
+                if (!dialogue) return null;
+                StringBuilder sb = new StringBuilder();
+                foreach (var content in dialogue.contents)
+                {
+                    if (content is TextContent text)
+                    {
+                        sb.Append(Keywords.Editor.HandleKeyWords(text.Talker));
+                        sb.Append(": ");
+                        sb.Append(Keywords.Editor.HandleKeyWords(text.Text));
+                        if (dialogue.contents[^1] != content) sb.Append('\n');
+                    }
+                    else if (content is BranchContent branch && branch.Dialogue)
+                    {
+                        sb.Append(Keywords.Editor.HandleKeyWords(branch.Dialogue.Entry.Talker));
+                        sb.Append(": ");
+                        sb.Append(Keywords.Editor.HandleKeyWords(branch.Dialogue.Entry.Text));
+                        if (dialogue.contents[^1] != content) sb.Append('\n');
+                    }
+                }
+                return sb.ToString();
+            }
         }
-    }
 #endif
-}
-[Serializable]
-public class DialogueWords
-{
-    public string TalkerName
-    {
-        get
-        {
-            if (TalkerType == TalkerType.NPC)
-                if (TalkerInfo) return TalkerInfo.Name;
-                else return "未知NPC";
-            else if (TalkerType == TalkerType.UnifiedNPC)
-                return "NPC";
-            else return "玩家角色";
-        }
     }
-
-    [SerializeField]
-    private TalkerType talkerType = TalkerType.Player;
-    public TalkerType TalkerType => talkerType;
-
-    [SerializeField]
-    private TalkerInformation talkerInfo;
-    public TalkerInformation TalkerInfo => talkerInfo;
-
-    [SerializeField, TextArea(3, 10)]
-    private string content;
-    public string Content => content;
-
-    [SerializeField]
-    private int indexOfCorrectOption;
-    public int IndexOfCorrectOption => indexOfCorrectOption;
-
-    public bool NeedToChusCorrectOption//仅当选择型选项多于1个时才需要选取正确选项
-    {
-        get
-        {
-            return indexOfCorrectOption > -1 && options.FindAll(x => x.OptionType == WordsOptionType.Choice).Count > 1;
-        }
-    }
-
-    [SerializeField]
-    private string wrongChoiceWords;
-    public string WrongChoiceWords => wrongChoiceWords;
-
-    [SerializeField, NonReorderable]
-    private List<WordsOption> options = new List<WordsOption>();
-    public List<WordsOption> Options => options;
-
-    [SerializeField, NonReorderable]
-    private List<WordsEvent> events = new List<WordsEvent>();
-    public List<WordsEvent> Events => events;
-
-    public bool IsValid
-    {
-        get
-        {
-            return !(TalkerType == TalkerType.NPC && !talkerInfo || string.IsNullOrEmpty(content) ||
-            options.Exists(b => b && !b.IsValid) || events.Exists(e => e && !e.IsValid) || NeedToChusCorrectOption && string.IsNullOrEmpty(wrongChoiceWords));
-        }
-    }
-
-    public DialogueWords()
-    {
-
-    }
-
-    public DialogueWords(TalkerInformation talkerInfo, string words, TalkerType talkerType = 0)
-    {
-        this.talkerInfo = talkerInfo;
-        this.content = words;
-        this.talkerType = talkerType;
-    }
-
-    public bool IsCorrectOption(WordsOption option)
-    {
-        return NeedToChusCorrectOption && Options.Contains(option) && Options.IndexOf(option) == IndexOfCorrectOption;
-    }
-
-    public override string ToString()
-    {
-        if (TalkerType == TalkerType.NPC && talkerInfo)
-            return "[" + talkerInfo.Name + "]说：" + content;
-        else if (TalkerType == TalkerType.Player)
-            return "[玩家]说：" + content;
-        else return "[Unnamed]说：" + content;
-    }
-
-    public static implicit operator bool(DialogueWords self)
-    {
-        return self != null;
-    }
-}
-[Serializable]
-public class WordsOption
-{
-    [SerializeField]
-    private string title;
-    public string Title
-    {
-        get
-        {
-            if (string.IsNullOrEmpty(title)) return "……";
-            return title;
-        }
-    }
-
-    [SerializeField]
-    private WordsOptionType optionType;
-    public WordsOptionType OptionType => optionType;
-
-    [SerializeField]
-    private bool hasWordsToSay;
-    public bool HasWordsToSay
-    {
-        get
-        {
-            return hasWordsToSay && optionType == WordsOptionType.Choice || optionType != WordsOptionType.Choice && optionType != WordsOptionType.BranchDialogue;
-        }
-    }
-
-    [SerializeField]
-    private TalkerType talkerType;
-    public TalkerType TalkerType => talkerType;
-
-    [SerializeField]
-    private string words;
-    public string Words => words;
-
-    [SerializeField]
-    private Dialogue dialogue;
-    public Dialogue Dialogue => dialogue;
-
-    [SerializeField]
-    private int specifyIndex = 0;
-    /// <summary>
-    /// 指定分支句子序号，在进入该分支时从第几句开始
-    /// </summary>
-    public int SpecifyIndex => specifyIndex;
-
-    [SerializeField]
-    private bool goBack;
-    public bool GoBack
-    {
-        get
-        {
-            return goBack || optionType == WordsOptionType.Choice || optionType == WordsOptionType.SubmitAndGet || optionType == WordsOptionType.OnlyGet;
-        }
-    }
-
-    [SerializeField]
-    private int indexToGoBack = -1;//-1表示返回分支开始时的句子
-    /// <summary>
-    /// 指定对话返回序号，在返回原对话时从第几句开始
-    /// </summary>
-    public int IndexToGoBack => indexToGoBack;
-
-    [SerializeField]
-    private ItemInfo itemToSubmit;
-    public ItemInfo ItemToSubmit => itemToSubmit;
-
-    [SerializeField]
-    private ItemInfo itemCanGet;
-    public ItemInfo ItemCanGet => itemCanGet;
-    [SerializeField]
-    private bool showOnlyWhenNotHave;
-    public bool ShowOnlyWhenNotHave => showOnlyWhenNotHave;
-    [SerializeField]
-    private bool onlyForQuest;
-    public bool OnlyForQuest
-    {
-        get
-        {
-            return onlyForQuest && optionType == WordsOptionType.OnlyGet ? showOnlyWhenNotHave : true;
-        }
-    }
-    [SerializeField]
-    private Quest bindedQuest;
-    public Quest BindedQuest => bindedQuest;
-
-    [SerializeField]
-    private bool deleteWhenCmplt = true;
-    public bool DeleteWhenCmplt => deleteWhenCmplt && optionType == WordsOptionType.Choice;
-
-    public bool IsValid
-    {
-        get
-        {
-            return !(optionType == WordsOptionType.BranchDialogue && (!dialogue || dialogue.Words.Count < 1)
-                || optionType == WordsOptionType.BranchWords && string.IsNullOrEmpty(words)
-                || optionType == WordsOptionType.Choice && hasWordsToSay && string.IsNullOrEmpty(words))
-                || optionType == WordsOptionType.SubmitAndGet && (!ItemToSubmit || !ItemToSubmit.Item || string.IsNullOrEmpty(words))
-                || optionType == WordsOptionType.OnlyGet && (!ItemCanGet || !ItemCanGet.Item || string.IsNullOrEmpty(words));
-        }
-    }
-
-    public WordsOption() { }
-
-    public WordsOption(WordsOptionType optionType)
-    {
-        this.optionType = optionType;
-    }
-
-    public static implicit operator bool(WordsOption self)
-    {
-        return self != null;
-    }
-}
-public enum WordsOptionType
-{
-    [InspectorName("类型：一句分支")]
-    BranchWords,
-
-    [InspectorName("类型：一段分支")]
-    BranchDialogue,
-
-    [InspectorName("类型：选择项")]
-    Choice,
-
-    [InspectorName("提交、交换道具")]
-    SubmitAndGet,
-
-    [InspectorName("取得道具")]
-    OnlyGet
-}
-
-[Serializable]
-public class WordsEvent
-{
-    [SerializeField]
-    private WordsEventType eventType;
-    public WordsEventType EventType => eventType;
-
-    [SerializeField]
-    private string wordsTrigrName;
-    public string WordsTrigrName => wordsTrigrName;
-
-    [SerializeField]
-    private bool doOnlyOnce;
-    public bool DoOnlyOnce => doOnlyOnce;
-
-    [SerializeField]
-    private TriggerActionType triggerActType;
-    public TriggerActionType TriggerActType => triggerActType;
-
-    [SerializeField]
-    private TalkerInformation toWhom;
-    public TalkerInformation ToWhom => toWhom;
-
-    [SerializeField]
-    private int favorabilityValue;
-    public int AmityValue => favorabilityValue;
-
-    public bool IsValid => eventType == WordsEventType.Trigger && !string.IsNullOrEmpty(wordsTrigrName)
-        || eventType != WordsEventType.Trigger && toWhom && favorabilityValue >= 0;
-
-    public static implicit operator bool(WordsEvent self)
-    {
-        return self != null;
-    }
-}
-public enum WordsEventType
-{
-    [InspectorName("触发器")]
-    Trigger,
-
-    [InspectorName("增加好感")]
-    GetAmity,
-
-    [InspectorName("减少好感")]
-    LoseAmity
-}
-
-public enum TalkerType
-{
-    [InspectorName("NPC")]
-    NPC,
-
-    [InspectorName("玩家角色")]
-    Player,
-
-    [InspectorName("统一的NPC")]
-    UnifiedNPC
-}
-
-[Serializable]
-public class AffectiveDialogue
-{
-    [SerializeField]
-    private int lowerBound = 10;
-    public int LowerBound => lowerBound;
-
-    [SerializeField]
-    private int upperBound = 20;
-    public int UpperBound => upperBound;
-
-    [SerializeField]
-    private NewDialogue dialogue;
-    public NewDialogue Dialogue => dialogue;
-}
-
-[Serializable]
-public class ConditionDialogue
-{
-    [SerializeField]
-    private ConditionGroup condition;
-    public ConditionGroup Condition => condition;
-
-    [SerializeField]
-    private NewDialogue dialogue;
-    public NewDialogue Dialogue => dialogue;
-
-    public bool IsValid => dialogue && condition.IsValid;
 }

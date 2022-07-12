@@ -49,7 +49,7 @@ namespace ZetanStudio
             return $"{{[{keywords.IDPrefix}]{keywords.ID}}}";
         }
 
-        public static string HandlingKeyWords(string input, bool color = false)
+        public static string HandleKeyWords(string input, bool color = false)
         {
             if (string.IsNullOrEmpty(input)) return string.Empty;
             StringBuilder output = new StringBuilder();
@@ -70,6 +70,27 @@ namespace ZetanStudio
             }
 
             return output.ToString();
+        }
+
+        public static IEnumerable<KeyValuePair<string, string>> ExtractKeyWords(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return new KeyValuePair<string, string>[0];
+            List<KeyValuePair<string, string>> pairs = new List<KeyValuePair<string, string>>();
+            StringBuilder keyWordsGetter = new StringBuilder();
+            bool startGetting = false;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (i + 1 < input.Length && input[i] == '{' && input[i + 1] != '{') startGetting = true;
+                else if (startGetting && input[i] == '}' && (i + 1 >= input.Length || input[i + 1] != '}'))
+                {
+                    startGetting = false;
+                    keyWordsGetter.Append(input[i]);
+                    pairs.Add(KeyValuePair.Create(keyWordsGetter.ToString(), Translate(keyWordsGetter.ToString())));
+                    keyWordsGetter.Clear();
+                }
+                if (startGetting) keyWordsGetter.Append(input[i]);
+            }
+            return pairs;
         }
 
 #if UNITY_EDITOR
@@ -114,7 +135,7 @@ namespace ZetanStudio
                 return keywords;
             }
 
-            public static string HandlingKeyWords(string input)
+            public static string HandleKeyWords(string input)
             {
                 if (string.IsNullOrEmpty(input)) return string.Empty;
                 StringBuilder output = new StringBuilder();
@@ -135,6 +156,27 @@ namespace ZetanStudio
                 }
 
                 return output.ToString();
+            }
+
+            public static IEnumerable<KeyValuePair<string, string>> ExtractKeyWords(string input)
+            {
+                if (string.IsNullOrEmpty(input)) return new KeyValuePair<string, string>[0];
+                List<KeyValuePair<string, string>> pairs = new List<KeyValuePair<string, string>>();
+                StringBuilder keyWordsGetter = new StringBuilder();
+                bool startGetting = false;
+                for (int i = 0; i < input.Length; i++)
+                {
+                    if (i + 1 < input.Length && input[i] == '{' && input[i + 1] != '{') startGetting = true;
+                    else if (startGetting && input[i] == '}' && (i + 1 >= input.Length || input[i + 1] != '}'))
+                    {
+                        startGetting = false;
+                        keyWordsGetter.Append(input[i]);
+                        pairs.Add(KeyValuePair.Create(keyWordsGetter.ToString(), Translate(keyWordsGetter.ToString())));
+                        keyWordsGetter.Clear();
+                    }
+                    if (startGetting) keyWordsGetter.Append(input[i]);
+                }
+                return pairs;
             }
         }
 #endif

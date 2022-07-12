@@ -56,8 +56,8 @@ public class PlotAction
     }
 
     [SerializeField]
-    private Dialogue dialogue;
-    public Dialogue Dialogue
+    private OldDialogue dialogue;
+    public OldDialogue Dialogue
     {
         get
         {

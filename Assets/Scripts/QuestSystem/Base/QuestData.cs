@@ -13,8 +13,8 @@ public enum QuestState
 
 public class QuestData
 {
-    public string Title => MiscFuntion.HandlingKeyWords(Tr(Model.Title));
-    public string Description => MiscFuntion.HandlingKeyWords(Tr(Model.Description));
+    public string Title => Keywords.HandleKeyWords(Tr(Model.Title));
+    public string Description => Keywords.HandleKeyWords(Tr(Model.Description));
 
     public Quest Model { get; }
 
@@ -41,7 +41,7 @@ public class QuestData
     private event Action<ObjectiveData, bool> OnObjectiveStateChanged;
 
     public int latestHandleDays;
-    public void CalculateOngoing()
+    public ReadOnlyCollection<ObjectiveData> CalculateOngoing()
     {
         var oldComplete = IsComplete;
         HashSet<ObjectiveData> ongoingBef = new HashSet<ObjectiveData>(ongoingObjectives);
@@ -68,6 +68,7 @@ public class QuestData
         });
         ongoingObjectives.RemoveAll(x => x.IsComplete);
         if (oldComplete != IsComplete) onStateChanged?.Invoke(this, oldComplete);
+        return OngoingObjectives;
     }
     public void OnAccept(Action<QuestData, bool> questStateListener, Action<ObjectiveData, int> objectiveAmountListener, Action<ObjectiveData, bool> objectiveStateListener)
     {

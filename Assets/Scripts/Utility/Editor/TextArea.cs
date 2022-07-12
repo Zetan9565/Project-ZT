@@ -1,7 +1,5 @@
-﻿using System.Collections;
+﻿using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEditor.UIElements;
-using UnityEngine;
 
 namespace ZetanStudio.Editor
 {
@@ -15,18 +13,9 @@ namespace ZetanStudio.Editor
 
         private TextInputBase textInput;
 
-        public TextArea()
-        {
-            Init();
-        }
-        public TextArea(string label) : base(label)
-        {
-            Init();
-        }
-        public TextArea(string label, float defaultHeight) : this(label)
-        {
-            textInput.style.minHeight = defaultHeight;
-        }
+        public TextArea() => Init();
+        public TextArea(string label) : base(label) => Init();
+        public TextArea(string label, float defaultHeight) : this(label) => textInput.style.minHeight = defaultHeight;
         private void Init()
         {
             base.multiline = true;
@@ -35,7 +24,6 @@ namespace ZetanStudio.Editor
             textInput.style.unityTextAlign = TextAnchor.UpperLeft;
             textInput.style.whiteSpace = WhiteSpace.Normal;
             labelElement.style.marginBottom = 2;
-
         }
     }
 }

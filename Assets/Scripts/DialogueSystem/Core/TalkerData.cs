@@ -67,7 +67,7 @@ public class TalkerData : CharacterData, IWarehouseKeeper
         OnTalkFinishedEvent?.Invoke();
     }
 
-    public NewDialogue OnGetGift(Item gift)
+    public Dialogue OnGetGift(Item gift)
     {
         int add = 0;
         if (Info.AffectiveItems.Exists(x => x.Item.ID == gift.ID))

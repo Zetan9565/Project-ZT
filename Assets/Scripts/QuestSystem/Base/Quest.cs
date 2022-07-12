@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ZetanStudio.DialogueSystem;
+using ZetanStudio.ConditionSystem;
 using ZetanStudio;
 
 [Serializable]
@@ -45,16 +46,16 @@ public class Quest : ScriptableObject
     public TimeUnit TimeUnit => timeUnit;
 
     [SerializeField]
-    private NewDialogue beginDialogue;
-    public NewDialogue BeginDialogue => beginDialogue;
+    private Dialogue beginDialogue;
+    public Dialogue BeginDialogue => beginDialogue;
 
     [SerializeField]
-    private NewDialogue ongoingDialogue;
-    public NewDialogue OngoingDialogue => ongoingDialogue;
+    private Dialogue ongoingDialogue;
+    public Dialogue OngoingDialogue => ongoingDialogue;
 
     [SerializeField]
-    private NewDialogue completeDialogue;
-    public NewDialogue CompleteDialogue => completeDialogue;
+    private Dialogue completeDialogue;
+    public Dialogue CompleteDialogue => completeDialogue;
 
     [SerializeField]
     private List<ItemInfo> rewardItems = new List<ItemInfo>();
@@ -114,7 +115,7 @@ public class Quest : ScriptableObject
                 if (objective.Display)
                 {
                     sb.Append("-");
-                    sb.Append(Keywords.Editor.HandlingKeyWords(objective.DisplayName));
+                    sb.Append(Keywords.Editor.HandleKeyWords(objective.DisplayName));
                     sb.Append("\n");
                 }
             }

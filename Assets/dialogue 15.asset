@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
-  m_Name: new new dialogue 3
+  m_Name: dialogue 15
   m_EditorClassIdentifier: 
   contents:
-  - rid: 9026091136498532360
+  - rid: 9026091320329896240
   exit:
-    <ID>k__BackingField: CON-83e75b686e5041129e425bd155cec342
+    <ID>k__BackingField: CON-120caae3f7b94fd1ade0ab81493a77f8
     events: []
     options: []
     <ExitHere>k__BackingField: 0
-    _position: {x: 508, y: 0}
+    _position: {x: 360, y: 0}
     lastExitHere: 0
   description: 
   references:
@@ -27,19 +27,18 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 9026091136498532360
+    - rid: 9026091320329896240
       type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
-        <ID>k__BackingField: CON-579fff4018be40078211ef2a2927e77e
+        <ID>k__BackingField: DLG3c68a785131a46d1b2b221e3d9a8bf14
         events: []
         options:
         - <Title>k__BackingField: 
           <Content>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
-          lastContent: 
         <ExitHere>k__BackingField: 1
         _position: {x: 0, y: 0}
         lastExitHere: 0
-        <Talker>k__BackingField: "\u6069\u683C\u65AF"
-        <Text>k__BackingField: "\u5206\u652F\u4E8C\u7B2C\u4E00\u53E5"
+        <Talker>k__BackingField: '{[NPC]NPC002}'
+        <Text>k__BackingField: "{[NPC]NPC001}\u5728\u6751\u5B50\u5357\u9762\u7684\u78E8\u574A\u65C1\u8FB9\u3002"

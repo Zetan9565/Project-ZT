@@ -4,16 +4,17 @@
         <uie:ToolbarButton text="删除" display-tooltip-when-elided="true" name="delete" />
         <ui:Label text="导航图" display-tooltip-when-elided="true" name="minimap-label" style="flex-direction: row; -unity-text-align: middle-left;" />
         <ui:Toggle name="minimap-toggle" style="width: 17px; transform-origin: center; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; border-right-width: 1px; border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5); padding-right: 0;" />
+        <uie:ToolbarSearchField focusable="true" />
     </uie:Toolbar>
     <SplitView fixed-pane-initial-dimension="250" style="min-width: auto;">
         <ui:VisualElement name="left-container" style="min-width: 200px; min-height: auto;">
-            <SplitView orientation="Vertical" fixed-pane-initial-dimension="450">
+            <SplitView orientation="Vertical" fixed-pane-initial-dimension="350">
                 <ui:VisualElement style="min-height: 150px;">
-                    <ui:Label text="对话列表" display-tooltip-when-elided="true" style="-unity-text-align: middle-center; background-color: rgba(0, 0, 0, 0.25);" />
+                    <ui:Label text="对话列表" display-tooltip-when-elided="true" style="-unity-text-align: middle-center; background-color: rgba(0, 0, 0, 0.25); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(89, 89, 89); border-right-color: rgb(89, 89, 89); border-top-color: rgb(89, 89, 89); border-bottom-color: rgb(89, 89, 89); border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px;" />
                     <ui:ListView focusable="true" name="dialogue-list" fixed-item-height="20" selection-type="Multiple" show-border="true" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;" />
                 </ui:VisualElement>
                 <ui:VisualElement style="min-height: 150px;">
-                    <ui:Label text="检查器" display-tooltip-when-elided="true" style="-unity-text-align: middle-center; background-color: rgba(0, 0, 0, 0.25);" />
+                    <ui:Label text="检查器" display-tooltip-when-elided="true" style="-unity-text-align: middle-center; background-color: rgba(0, 0, 0, 0.25); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(89, 89, 89); border-right-color: rgb(89, 89, 89); border-top-color: rgb(89, 89, 89); border-bottom-color: rgb(89, 89, 89); border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px;" />
                     <ui:ScrollView style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0;">
                         <ui:IMGUIContainer name="inspector" style="margin-left: 3px; margin-right: 3px;" />
                     </ui:ScrollView>
@@ -22,4 +23,14 @@
         </ui:VisualElement>
         <ui:VisualElement name="right-container" style="min-width: 400px; margin-right: 0; margin-left: 0; margin-top: 0; margin-bottom: 0; padding-left: 3px; padding-right: 3px;" />
     </SplitView>
+    <ui:VisualElement name="events-view" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.25); align-items: center; justify-content: center; display: none;">
+        <ui:VisualElement style="width: 300px; height: 300px; background-color: rgb(56, 56, 56); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(89, 89, 89); border-right-color: rgb(89, 89, 89); border-top-color: rgb(89, 89, 89); border-bottom-color: rgb(89, 89, 89);">
+            <ui:Label text="对话事件" display-tooltip-when-elided="true" style="-unity-text-align: middle-center; background-color: rgb(40, 40, 40); border-top-left-radius: 5px; border-top-right-radius: 5px; height: 20px;" />
+            <ui:ScrollView style="flex-grow: 1; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">
+                <ui:IMGUIContainer name="events-inspector" style="padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0;" />
+            </ui:ScrollView>
+            <ui:Button text="确定" display-tooltip-when-elided="true" name="events-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:ListView focusable="true" name="search-list" virtualization-method="DynamicHeight" style="max-height: 300px; width: 295px; position: absolute; background-color: rgb(56, 56, 56); border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 5px; border-bottom-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; top: 17px; left: 128px; padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;" />
 </ui:UXML>

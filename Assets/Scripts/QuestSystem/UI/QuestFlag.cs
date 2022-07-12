@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.ConditionSystem;
 
 [RequireComponent(typeof(Image), typeof(CanvasGroup))]
 public class QuestFlag : MonoBehaviour
@@ -34,7 +36,7 @@ public class QuestFlag : MonoBehaviour
         triggerNames.Clear();
         foreach (var quest in questHolder.QuestInstances)
         {
-            Condition find = quest.Model.AcceptCondition.Conditions.Find(x => x.Type == ConditionType.TriggerSet || x.Type == ConditionType.TriggerReset);
+            TriggerIsState find = quest.Model.AcceptCondition.Conditions.FirstOrDefault(x => x is TriggerIsState) as TriggerIsState;
             if (find) triggerNames.Add(find.TriggerName);
         }
         UpdateUI();
@@ -68,7 +70,7 @@ public class QuestFlag : MonoBehaviour
         }
         foreach (var quest in questHolder.QuestInstances)
         {
-            if (!quest.IsComplete && !quest.InProgress && MiscFuntion.CheckCondition(quest.Model.AcceptCondition))//只要有一个没接取
+            if (!quest.IsComplete && !quest.InProgress && quest.Model.AcceptCondition.IsMeet())//只要有一个没接取
             {
                 icon.overrideSprite = notAccepted;
                 mapIcon.iconImage.overrideSprite = notAccepted;

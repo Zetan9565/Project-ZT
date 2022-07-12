@@ -36,7 +36,7 @@ public class QuestBoard : SingletonWindow<QuestBoard>, IPointerClickHandler
 
     protected override bool OnOpen(params object[] args)
     {
-        return false;
+        return true;
     }
     protected override bool OnClose(params object[] args)
     {
@@ -56,16 +56,13 @@ public class QuestBoard : SingletonWindow<QuestBoard>, IPointerClickHandler
         if (Quest.IsComplete) objectiveText.text = string.Empty;
         else
         {
-            var displayObjectives = Quest.Objectives.Where(x => x.Model.Display).ToArray();
+            var displayObjectives = Quest.CalculateOngoing().Where(x => x.Model.Display).ToArray();
             int lineCount = displayObjectives.Length - 1;
             for (int i = 0; i < displayObjectives.Length; i++)
             {
                 var objective = displayObjectives[i];
-                if (!objective.IsComplete && (!objective.Model.InOrder || objective.AllPrevComplete))
-                {
-                    string endLine = i == lineCount ? string.Empty : "\n";
-                    objectives.AppendFormat("-{0}{1}", objective, endLine);
-                }
+                string endLine = i == lineCount ? string.Empty : "\n";
+                objectives.AppendFormat("-{0}{1}", objective, endLine);
             }
         }
         objectiveText.text = objectives.ToString();

@@ -9,7 +9,7 @@ public abstract class ObjectiveData
 {
     public Objective Model { get; }
 
-    public string DisplayName => Keywords.HandlingKeyWords(parent.Tr(Model.DisplayName));
+    public string DisplayName => Keywords.HandleKeyWords(parent.Tr(Model.DisplayName));
 
     public T GetInfo<T>() where T : Objective
     {
@@ -296,7 +296,7 @@ public class TalkObjectiveData : ObjectiveData<TalkObjective>
     protected override void OnAbandon()
     {
         OnSubmit();
-        DialogueManager.RemoveDialogueData(Model.Dialogue.Entry);
+        DialogueManager.RemoveData(Model.Dialogue.Entry);
     }
 
     public void UpdateTalkState()
@@ -332,11 +332,10 @@ public class MoveObjectiveData : ObjectiveData<MoveObjective>
 
 public class SubmitObjectiveData : ObjectiveData<SubmitObjective>
 {
-    public readonly EntryContent dialogue;
+    public EntryContent Dialogue { get; private set; }
 
     public SubmitObjectiveData(SubmitObjective objective) : base(objective)
     {
-        dialogue = new EntryContent(ID, objective.TalkerType == TalkerType.Player ? "[PLAYER]" : "[NPC]", objective.WordsWhenSubmit);
     }
 
     protected override void OnStart()
@@ -346,6 +345,7 @@ public class SubmitObjectiveData : ObjectiveData<SubmitObjective>
             var talker = DialogueManager.Talkers[Model.NPCToSubmit.ID];
             talker.objectivesSubmitToThis.Add(this);
             OnStateChanged += talker.TryRemoveObjective;
+            Dialogue = new EntryContent(ID, Model.TalkerType == TalkerType.Player ? "[PLAYER]" : "[NPC]", Model.WordsWhenSubmit);
         }
     }
     protected override void OnSubmit()
@@ -358,7 +358,7 @@ public class SubmitObjectiveData : ObjectiveData<SubmitObjective>
     protected override void OnAbandon()
     {
         OnSubmit();
-        DialogueManager.RemoveDialogueData(dialogue);
+        DialogueManager.RemoveData(Dialogue);
     }
 
     public void UpdateSubmitState(int amount = 1)

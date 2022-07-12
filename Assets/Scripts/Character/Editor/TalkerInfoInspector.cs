@@ -276,7 +276,7 @@ public partial class CharacterInfoInspector
                 int lineCount = 1;
                 if (dialogue.objectReferenceValue)
                 {
-                    NewDialogue dialog = dialogue.objectReferenceValue as NewDialogue;
+                    Dialogue dialog = dialogue.objectReferenceValue as Dialogue;
                     if (dialog.Entry)
                     {
                         GUI.enabled = false;
@@ -337,7 +337,7 @@ public partial class CharacterInfoInspector
 
             drawHeaderCallback = (rect) =>
             {
-                int notCmpltCount = talker.ConditionDialogues.FindAll(x => !x.Dialogue || x.Condition.Conditions.Exists(y => !y.IsValid)).Count;
+                int notCmpltCount = talker.ConditionDialogues.FindAll(x => !x.Dialogue || !x.Condition.IsValid).Count;
                 EditorGUI.LabelField(rect, "条件对话列表", notCmpltCount > 0 ? "未补全：" + notCmpltCount : string.Empty);
             },
 
@@ -367,7 +367,7 @@ public partial class CharacterInfoInspector
                 int lineCount = 1;
                 if (dialogue.objectReferenceValue)
                 {
-                    NewDialogue dialog = dialogue.objectReferenceValue as NewDialogue;
+                    Dialogue dialog = dialogue.objectReferenceValue as Dialogue;
                     if (dialog.Entry)
                     {
                         GUI.enabled = false;

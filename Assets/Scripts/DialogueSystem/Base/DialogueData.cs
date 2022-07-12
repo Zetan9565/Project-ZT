@@ -6,11 +6,11 @@ public class DialogueData
 {
     public string ID => model ? model.ID : string.Empty;
 
-    public readonly Dialogue model;
+    public readonly OldDialogue model;
 
     public readonly List<DialogueWordsData> wordsDatas = new List<DialogueWordsData>();
 
-    public DialogueData(Dialogue dialogue)
+    public DialogueData(OldDialogue dialogue)
     {
         model = dialogue;
         foreach (DialogueWords words in model.Words)

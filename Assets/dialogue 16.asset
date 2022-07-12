@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: dialogue 16
   m_EditorClassIdentifier: 
   contents:
-  - rid: 9026091213465059480
-  - rid: 9026091213465059481
+  - rid: 9026091320329896241
+  - rid: 9026091320329896242
   exit:
-    <ID>k__BackingField: CON-c004e1b3c76a4f59805b17d813cef276
+    <ID>k__BackingField: CON-49aac8ce678d4414b4955f745f1b7073
     events: []
     options: []
     <ExitHere>k__BackingField: 0
@@ -28,33 +28,31 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 9026091213465059480
+    - rid: 9026091320329896241
       type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
-        <ID>k__BackingField: CON-0b4664e9498f4de5a0767c9574fc0a80
+        <ID>k__BackingField: DLG92fe3c9176d848549c53706d35d1a1b1
         events: []
         options:
         - <Title>k__BackingField: 
           <Content>k__BackingField:
-            rid: 9026091213465059481
+            rid: 9026091320329896242
           <IsMain>k__BackingField: 1
-          lastContent: 
         <ExitHere>k__BackingField: 0
         _position: {x: 0, y: 0}
         lastExitHere: 0
         <Talker>k__BackingField: '[PLAYER]'
         <Text>k__BackingField: "\u6211\u5DF2\u7ECF\u628A\u602A\u7269\u5904\u7F6E\u4E86\uFF0C{[NPC]NPC001}\u4E5F\u5B89\u6170\u4E86\u3002"
-    - rid: 9026091213465059481
+    - rid: 9026091320329896242
       type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
-        <ID>k__BackingField: CON-00d13d44a9a948aa9dedc18f5b24e9f9
+        <ID>k__BackingField: CON-ce5be462f61e4bd1b90ab711c7ec74cf
         events: []
         options:
         - <Title>k__BackingField: 
           <Content>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
-          lastContent: 
         <ExitHere>k__BackingField: 1
         _position: {x: 360, y: 0}
         lastExitHere: 0

@@ -25,7 +25,7 @@ public sealed class TalkObjectiveDrawer : ObjectiveDrawer
         lineCount++;
         EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), dialogue, new GUIContent("交谈时的对话"));
         lineCount++;
-        if (dialogue.objectReferenceValue is NewDialogue dialog)
+        if (dialogue.objectReferenceValue is Dialogue dialog)
         {
             Quest find = Array.Find(questCache, x => x != quest && x.Objectives.Exists(y => y is TalkObjective to && to.Dialogue == dialog));
             if (find)
@@ -52,7 +52,7 @@ public sealed class TalkObjectiveDrawer : ObjectiveDrawer
             lineCount++;//目标NPC
             lineCount++; //交谈时对话
             SerializedProperty dialogue = objective.FindAutoPropertyRelative("Dialogue");
-            if (dialogue.objectReferenceValue is NewDialogue dialog)
+            if (dialogue.objectReferenceValue is Dialogue dialog)
             {
                 if (Array.Find(questCache, x => x != quest && x.Objectives.Exists(y => y is TalkObjective to && to.Dialogue == dialog)))
                     lineCount += 2;//逻辑错误

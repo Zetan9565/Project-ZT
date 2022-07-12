@@ -1,13 +1,10 @@
-﻿using UnityEditor;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEditor.UIElements;
-using UnityEditor.Experimental.GraphView;
-using System;
-using System.Reflection;
-using System.Linq;
-using System.Collections.Generic;
-using ZetanStudio.Extension.Editor;
 
 namespace ZetanStudio.DialogueSystem.Editor
 {
@@ -19,14 +16,14 @@ namespace ZetanStudio.DialogueSystem.Editor
 
         #region 声明
         private readonly DialogueEditorSettings settings;
-        private NewDialogue dialogueBef;
+        private Dialogue dialogueBef;
         private SerializedObject serializedDialog;
         public Action<DialogueNode> nodeSelectedCallback;
         public Action<DialogueNode> nodeUnselectedCallback;
         private readonly MiniMap miniMap;
         private DialogueNode exit;
-        private NewDialogue dialogue;
-        private readonly Label errors;
+        private Dialogue dialogue;
+        private readonly VisualElement errors;
         #endregion
 
         #region 属性
@@ -47,7 +44,7 @@ namespace ZetanStudio.DialogueSystem.Editor
         }
         #endregion
 
-        public NewDialogue Dialogue { get => dialogue; set => DrawDialgoueView(value); }
+        public Dialogue Dialogue { get => dialogue; set => DrawDialgoueView(value); }
         public SerializedProperty SerializedContents { get; private set; }
         #endregion
 
@@ -74,11 +71,11 @@ namespace ZetanStudio.DialogueSystem.Editor
             v.style.top = 0;
             v.style.bottom = 0;
             v.style.flexDirection = FlexDirection.ColumnReverse;
+            v.style.alignItems = Align.FlexStart;
             Add(v);
-            v.Add(errors = new Label());
-            errors.enableRichText = true;
-            errors.pickingMode = PickingMode.Ignore;
-            CheckErrors();
+            v.Add(errors = new VisualElement());
+            errors.style.flexDirection = FlexDirection.ColumnReverse;
+            errors.style.paddingLeft = 3f;
             RegisterCallback<GeometryChangedEvent>(evt =>
             {
                 miniMap.style.width = miniMap.maxWidth = evt.newRect.width / 4;
@@ -97,7 +94,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                 foreach (var type in TypeCache.GetTypesDerivedFrom<DialogueContent>())
                 {
                     if (!type.IsAbstract && type != typeof(EntryContent) && type != typeof(ExitContent))
-                        evt.menu.AppendAction($"{Group(type)}{DialogueContent.GetName(type)}", a => CreateContent(type, nodePosition));
+                        evt.menu.AppendAction($"{GetMenuGroup(type)}{DialogueContent.GetName(type)}", a => CreateContent(type, nodePosition));
                 }
             }
             else if (evt.target is DialogueNode node)
@@ -129,7 +126,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                 if (endPort.direction == startPort.direction) return false;
                 if (endPort.node == startPort.node) return false;
                 if (startPort.direction == Direction.Input) (startPort, endPort) = (endPort, startPort);
-                if (NewDialogue.Reachable(content(endPort), content(startPort))) return false;
+                if (Dialogue.Reachable(content(endPort), content(startPort))) return false;
                 return content(endPort).CanLinkFrom(content(startPort), startPort.userData as DialogueOption);
 
                 static DialogueContent content(Port port)
@@ -144,7 +141,7 @@ namespace ZetanStudio.DialogueSystem.Editor
         private void CreateContent(Type type, Vector2 position, Action<DialogueNode> callback = null)
         {
             Undo.RecordObject(Dialogue, Tr("修改{0}", Dialogue.name));
-            var content = NewDialogue.Editor.AddContent(Dialogue, type);
+            var content = Dialogue.Editor.AddContent(Dialogue, type);
             if (content != null)
             {
                 content._position = position;
@@ -204,7 +201,6 @@ namespace ZetanStudio.DialogueSystem.Editor
                         output.DisconnectAll();
                     }
                     AddElement(output.ConnectTo(exit.input));
-                    CheckErrors();
                     output.node.RefreshOptionButton();
                 });
                 menu.AddSeparator("");
@@ -214,7 +210,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                 if (type.IsAbstract || output.Option.IsMain && typeof(DecoratorContent).IsAssignableFrom(type) || type == typeof(EntryContent) ||
                     type == typeof(ExitContent) || output.node.content is DecoratorContent decorator && decorator.GetType() == type ||
                     output.node.content is EntryContent && typeof(SuffixContent).IsAssignableFrom(type)) continue;
-                menu.AddItem(new GUIContent($"{Group(type)}{DialogueContent.GetName(type)}"), false, () => CreateContent(type, nodePosition, followUp));
+                menu.AddItem(new GUIContent($"{GetMenuGroup(type)}{DialogueContent.GetName(type)}"), false, () => CreateContent(type, nodePosition, followUp));
             }
             menu.ShowAsContext();
 
@@ -242,7 +238,17 @@ namespace ZetanStudio.DialogueSystem.Editor
         }
         private void OnUndoPerformed()
         {
+            List<string> selectedNodes = new List<string>();
+            foreach (var item in selection)
+            {
+                if (item is Node node) selectedNodes.Add(node.viewDataKey);
+            }
             DrawDialgoueView(Dialogue);
+            foreach (var id in selectedNodes)
+            {
+                if (GetNodeByGuid(id) is Node node)
+                    AddToSelection(node);
+            }
         }
         private void OnNodePositionChanged(DialogueNode editor, Vector2 oldPos)
         {
@@ -257,13 +263,12 @@ namespace ZetanStudio.DialogueSystem.Editor
             if (graphViewChange.elementsToRemove != null)
             {
                 HashSet<DialogueNode> removedNodes = new HashSet<DialogueNode>();
-                //为了保证撤销重做的顺利进行，先遍历结点，再遍历连线
                 graphViewChange.elementsToRemove.ForEach(elem =>
                 {
                     if (elem is DialogueNode node)
                     {
                         Undo.RecordObject(Dialogue, Tr("修改{0}", Dialogue.name));
-                        NewDialogue.Editor.RemoveContent(Dialogue, node.content);
+                        Dialogue.Editor.RemoveContent(Dialogue, node.content);
                         removedNodes.Add(node);
                     }
                 });
@@ -328,7 +333,6 @@ namespace ZetanStudio.DialogueSystem.Editor
             {
                 EditorUtility.SetDirty(Dialogue);
                 serializedDialog.UpdateIfRequiredOrScript();
-                CheckErrors();
             }
 
             return graphViewChange;
@@ -338,49 +342,74 @@ namespace ZetanStudio.DialogueSystem.Editor
         #region 其它
         public void ShowHideMiniMap(bool show)
         {
-            if (miniMap != null) miniMap.style.display = new StyleEnum<DisplayStyle>(show ? DisplayStyle.Flex : DisplayStyle.None);
+            if (miniMap != null) miniMap.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
         }
-        public void DrawDialgoueView(NewDialogue newDialogue)
+        public void DrawDialgoueView(Dialogue newDialogue)
         {
-            if (newDialogue)
-            {
-                if (dialogueBef != newDialogue) Undo.ClearUndo(dialogueBef);
-                dialogue = newDialogue;
-            }
+            if (newDialogue && dialogueBef != newDialogue) Undo.ClearUndo(dialogueBef);
             Vocate();
-            if (Dialogue)
+            dialogue = newDialogue;
+            if (dialogue)
             {
-                dialogueBef = Dialogue;
+                dialogueBef = dialogue;
                 serializedDialog = new SerializedObject(Dialogue);
                 SerializedContents = serializedDialog.FindProperty("contents");
+                exit = CreateNode(Dialogue.exit);
+                dialogue.Contents.ForEach(c => CreateNode(c));
+                dialogue.Contents.ForEach(c => CreateEdges(c));
             }
             else
             {
                 serializedDialog = null;
                 SerializedContents = null;
-                return;
             }
-            exit = CreateNode(Dialogue.exit);
-            Dialogue.Contents.ForEach(c => CreateNode(c));
-            Dialogue.Contents.ForEach(c => CreateEdges(c));
-            CheckErrors();
         }
-        public void Vocate()
+        private void Vocate()
         {
             graphViewChanged -= OnGraphViewChanged;
             DeleteElements(nodes.ToList());
             DeleteElements(edges.ToList());
             graphViewChanged += OnGraphViewChanged;
         }
-        private void CheckErrors()
+        public void CheckErrors()
         {
+            errors.Clear();
             if (Dialogue)
             {
-                errors.text = Tr("无错误");
+
                 if (!Dialogue.Exitable)
-                    errors.text = ZetanUtility.ColorText($"{Tr("错误")}: {Tr("对话无结束点")}", Color.red);
+                {
+                    var label = new Label(ZetanUtility.ColorText($"{Tr("错误")}: {Tr("对话无结束点")}", Color.red)) { enableRichText = true };
+                    label.RegisterCallback<PointerDownEvent>(evt =>
+                    {
+                        EditorApplication.delayCall += () =>
+                        {
+                            ClearSelection();
+                            AddToSelection(exit);
+                            FrameSelection();
+                        };
+                    });
+                    errors.Add(label);
+                }
+                for (int i = 0; i < dialogue.Contents.Count; i++)
+                {
+                    var content = dialogue.Contents[i];
+                    if (!content.IsValid && dialogue.Reachable(content))
+                    {
+                        var label = new Label(ZetanUtility.ColorText($"{Tr("错误")}: {Tr("第{0}个内容填写错误", i)}", Color.red)) { enableRichText = true };
+                        label.RegisterCallback<PointerDownEvent>(evt =>
+                        {
+                            EditorApplication.delayCall += () =>
+                            {
+                                ClearSelection();
+                                AddToSelection(GetNodeByGuid(content.ID));
+                                FrameSelection();
+                            };
+                        });
+                        errors.Add(label);
+                    }
+                }
             }
-            else errors.text = Tr("未选择对话");
         }
         private void SetAsExit(DialogueNode node)
         {
@@ -393,13 +422,12 @@ namespace ZetanStudio.DialogueSystem.Editor
             else output = node.outputs[0];
             AddElement(output.ConnectTo(exit.input));
             node.RefreshOptionButton();
-            CheckErrors();
         }
-        private static string Group(Type type)
+        private static string GetMenuGroup(Type type)
         {
             string group = DialogueContent.GetGroup(type);
             if (string.IsNullOrEmpty(group)) return group;
-            else return group.Replace("/", "") + "/";
+            else return group.EndsWith("/") ? group : (group + "/");
         }
         #endregion
 

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.DialogueSystem.UI;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.ItemSystem.Module;
 using ZetanStudio.ItemSystem.UI;

@@ -48,7 +48,6 @@ public class BackpackManager : InventoryHandler
             {
                 case "金币":
                     GetMoney(currency.ValueEach * amount);
-                    Debug.Log("获得钱");
                     return true;
                 case "经验":
                     //TODO 获得经验

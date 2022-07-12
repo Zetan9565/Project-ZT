@@ -141,7 +141,7 @@ public class QuestInspector : Editor
                 }
                 EditorGUILayout.LabelField("描述显示预览");
                 EditorGUI.BeginDisabledGroup(true);
-                EditorGUILayout.TextArea(Keywords.Editor.HandlingKeyWords(title.stringValue) + "\n" + Keywords.Editor.HandlingKeyWords(description.stringValue), new GUIStyle(EditorStyles.textArea) { wordWrap = true });
+                EditorGUILayout.TextArea(Keywords.Editor.HandleKeyWords(title.stringValue) + "\n" + Keywords.Editor.HandleKeyWords(description.stringValue), new GUIStyle(EditorStyles.textArea) { wordWrap = true });
                 EditorGUI.EndDisabledGroup();
                 #endregion
                 break;
@@ -176,10 +176,6 @@ public class QuestInspector : Editor
                         }
                     }
                 }
-                else
-                {
-                    NewDialogueFor(beginDialogue);
-                }
                 EditorGUILayout.PropertyField(ongoingDialogue, new GUIContent("进行中的对话"));
                 if (ongoingDialogue.objectReferenceValue)
                 {
@@ -195,10 +191,6 @@ public class QuestInspector : Editor
                         }
                     }
                 }
-                else
-                {
-                    NewDialogueFor(ongoingDialogue);
-                }
                 EditorGUILayout.PropertyField(completeDialogue, new GUIContent("完成时的对话"));
                 if (completeDialogue.objectReferenceValue)
                 {
@@ -213,10 +205,6 @@ public class QuestInspector : Editor
                             EditorGUILayout.HelpBox("已有任务使用该对话，游戏中可能会产生逻辑错误。\n配置路径：\n" + AssetDatabase.GetAssetPath(find), MessageType.Warning);
                         }
                     }
-                }
-                else
-                {
-                    NewDialogueFor(completeDialogue);
                 }
                 if (EditorGUI.EndChangeCheck())
                     serializedObject.ApplyModifiedProperties();
@@ -243,19 +231,6 @@ public class QuestInspector : Editor
                 if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
                 #endregion
                 break;
-        }
-
-        void NewDialogueFor(SerializedProperty dialogue)
-        {
-            if (GUILayout.Button("新建"))
-            {
-                Dialogue dialogInstance = ZetanUtility.Editor.SaveFilePanel(CreateInstance<Dialogue>, "dialogue", ping: true);
-                if (dialogInstance)
-                {
-                    dialogue.objectReferenceValue = dialogInstance;
-                    EditorUtility.OpenPropertyEditor(dialogInstance);
-                }
-            }
         }
     }
 
@@ -321,7 +296,7 @@ public class QuestInspector : Editor
 
         editComplete &= !(string.IsNullOrEmpty(quest.ID) || string.IsNullOrEmpty(quest.Title) || string.IsNullOrEmpty(quest.Description));
 
-        editComplete &= !quest.AcceptCondition.Conditions.Exists(x => !x.IsValid);
+        editComplete &= quest.AcceptCondition.IsValid;
 
         editComplete &= quest.BeginDialogue && quest.OngoingDialogue && quest.CompleteDialogue;
 

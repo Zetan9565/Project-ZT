@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 using ZetanStudio;
+using ZetanStudio.ConditionSystem;
 using ZetanStudio.ItemSystem;
 
 public static class QuestManager
@@ -27,7 +28,7 @@ public static class QuestManager
             MessageManager.Instance.New(Tr("无效任务"));
             return false;
         }
-        if (!MiscFuntion.CheckCondition(quest.Model.AcceptCondition) && !SaveManager.Instance.IsLoading)
+        if (!quest.Model.AcceptCondition.IsMeet() && !SaveManager.Instance.IsLoading)
         {
             MessageManager.Instance.New(Tr("未满足任务接取条件"));
             return false;
@@ -246,6 +247,10 @@ public static class QuestManager
     {
         return questsInProgress.Contains(quest);
     }
+    public static bool HasOngoingQuest(Quest model)
+    {
+        return questsInProgress.Exists(x => x.Model == model);
+    }
     public static bool HasOngoingQuest(string ID)
     {
         return questsInProgress.Exists(x => x.Model.ID == ID);
@@ -255,14 +260,18 @@ public static class QuestManager
     {
         return questsFinished.Contains(quest);
     }
-    public static bool HasCompleteQuestWithID(string questID)
+    public static bool HasCompleteQuest(Quest model)
+    {
+        return questsFinished.Exists(x => x.Model == model);
+    }
+    public static bool HasCompleteQuest(string questID)
     {
         return questsFinished.Exists(x => x.Model.ID == questID);
     }
 
     public static bool HasQuestNeedAsCondition(Quest quest, out QuestData findQuest)
     {
-        findQuest = questsInProgress.Find(x => x.Model.AcceptCondition.Conditions.Exists(y => y.Type == ConditionType.AcceptQuest && y.RelatedQuest.ID == quest.ID));
+        findQuest = questsInProgress.Find(x => x.Model.AcceptCondition.Conditions.Any(y => y is QuestAccepted accept && accept.Quest == quest));
         return findQuest != null;
     }
 

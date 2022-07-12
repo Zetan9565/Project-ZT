@@ -16,20 +16,22 @@ namespace ZetanStudio.DialogueSystem
         [field: SerializeField, TextArea]
         public string ID { get; protected set; } = "CON-" + Guid.NewGuid().ToString("N");
 
-        [SerializeField, NonReorderable]
-        protected WordsEvent[] events = { };
-        public ReadOnlyCollection<WordsEvent> Events => new ReadOnlyCollection<WordsEvent>(events);
+        [SerializeReference, PolymorphismList("GetName")]
+        protected DialogueEvent[] events = { };
+        public ReadOnlyCollection<DialogueEvent> Events => new ReadOnlyCollection<DialogueEvent>(events);
 
         [SerializeField]
         protected DialogueOption[] options = { };
         public ReadOnlyCollection<DialogueOption> Options => new ReadOnlyCollection<DialogueOption>(options);
 
-        public DialogueOption FirstOption => options.Length > 0 ? options[0] : null;
-
         [field: SerializeField]
         public bool ExitHere { get; protected set; }
 
-        public bool Exitable => NewDialogue.Traverse(this, n => n.ExitHere);
+        public bool Exitable => Dialogue.Traverse(this, n => n.ExitHere);
+
+        public abstract bool IsValid { get; }
+
+        public DialogueOption this[int index] => index >= 0 && index < options.Length ? options[index] : null;
 
         public string GetName() => GetName(GetType());
 
@@ -37,19 +39,13 @@ namespace ZetanStudio.DialogueSystem
 
         public virtual bool IsManual() => false;
 
-        public virtual void Manual(NewDialogueWindow window) { }
+        public virtual void Manual(DialogueWindow window) { }
 
         public static string GetGroup(Type type) => type.GetCustomAttribute<GroupAttribute>()?.group ?? string.Empty;
         public static string GetName(Type type) => type.GetCustomAttribute<NameAttribute>()?.name ?? type.Name;
-        public static bool IsNormal(DialogueContent content)
-        {
-            return content is not null && content is not DecoratorContent && content is not SuffixContent;
-        }
+        public static bool IsNormal(DialogueContent content) => content is not null && content is not DecoratorContent && content is not SuffixContent;
 
-        public static implicit operator bool(DialogueContent self)
-        {
-            return self != null;
-        }
+        public static implicit operator bool(DialogueContent self) => self != null;
 
         #region 特性
         [AttributeUsage(AttributeTargets.Class)]
@@ -132,24 +128,25 @@ namespace ZetanStudio.DialogueSystem
     {
         public DecoratorContent() => options = new DialogueOption[] { new DialogueOption(true, null) };
 
+        public override bool IsValid => true;
+
         public sealed override bool IsManual() => false;
-        public sealed override void Manual(NewDialogueWindow window) { }
+        public sealed override void Manual(DialogueWindow window) { }
 
         /// <returns><i>false</i> 该选项会被剔除</returns>
-        public abstract bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, out string title);
+        public abstract bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, ref string title);
 
 #if UNITY_EDITOR
-        public override bool CanLinkFrom(DialogueContent from, DialogueOption option) => !option.IsMain;
+        public override bool CanLinkFrom(DialogueContent from, DialogueOption option) => from is DecoratorContent || !option.IsMain;
 #endif
     }
 
     [Serializable, Name("完成删除"), Group("选项修饰器"), Width(50f)]
     public sealed class DeleteOnDoneDecorator : DecoratorContent
     {
-        public override bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, out string title)
+        public override bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, ref string title)
         {
-            title = option.Title;
-            if (owner.FirstOption == option && owner.Options.Where(x => x != option).All(opt =>
+            if (owner[0] == option && owner.Options.Where(x => x != option).All(opt =>
             {
                 var temp = opt.Content;
                 while (temp is DecoratorContent decorator)
@@ -159,8 +156,12 @@ namespace ZetanStudio.DialogueSystem
                         if (findTarget(delete) is DialogueContent target && data[target].IsDone)
                             return true;
                     }
-                    else if (!decorator.Decorate(data, owner, opt, out _)) return true;
-                    temp = temp.FirstOption?.Content;
+                    else
+                    {
+                        string cache = null;
+                        if (!decorator.Decorate(data, owner, opt, ref cache)) return true;
+                    }
+                    temp = temp[0]?.Content;
                 }
                 return false;
             })) return true;
@@ -173,7 +174,7 @@ namespace ZetanStudio.DialogueSystem
                 DialogueContent temp = delete;
                 while (temp is DecoratorContent)
                 {
-                    temp = temp.FirstOption?.Content;
+                    temp = temp[0]?.Content;
                     if (temp is not DecoratorContent)
                         target = temp;
                 }
@@ -181,21 +182,21 @@ namespace ZetanStudio.DialogueSystem
             }
         }
     }
-    [Serializable, Name("条件"), Group("选项修饰器")]
+    [Serializable, Name("条件显示"), Group("选项修饰器")]
     public sealed class ConditionDecorator : DecoratorContent
     {
-        public override bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, out string title)
+        public override bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, ref string title)
         {
-            throw new NotImplementedException();
+            return true;
         }
     }
-    [Serializable, Name("染色"), Group("选项修饰器")]
+    [Serializable, Name("染色"), Group("选项修饰器"), Width(50f)]
     public sealed class ColorfulDecorator : DecoratorContent
     {
         [field: SerializeField]
-        public Color Color { get; private set; }
+        public Color Color { get; private set; } = Color.black;
 
-        public override bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, out string title)
+        public override bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, ref string title)
         {
             title = ZetanUtility.ColorText(option.Title, Color);
             return true;
@@ -212,6 +213,14 @@ namespace ZetanStudio.DialogueSystem
 
         [field: SerializeField, TextArea]
         public string Text { get; protected set; }
+
+        //[field: SerializeField]
+        //public Sprite Portrait { get; protected set; }
+
+        [field: SerializeField]
+        public AnimationCurve UtterInterval { get; protected set; } = new AnimationCurve(new Keyframe(0, 0.02f), new Keyframe(1, 0.02f));
+
+        public override bool IsValid => !string.IsNullOrEmpty(Talker) && !string.IsNullOrEmpty(Text);
     }
 
     [Serializable, Name("开始")]
@@ -245,6 +254,8 @@ namespace ZetanStudio.DialogueSystem
     [Serializable, Name("语句"), Group("文本")]
     public sealed class WordsContent : TextContent
     {
+        public WordsContent() { }
+
         public WordsContent(string talker, string content)
         {
             Talker = talker;
@@ -259,6 +270,8 @@ namespace ZetanStudio.DialogueSystem
         private ItemInfo[] itemsToSubmit = { };
         public ReadOnlyCollection<ItemInfo> ItemsToSubmit => new ReadOnlyCollection<ItemInfo>(itemsToSubmit);
 
+        public override bool IsValid => base.IsValid && itemsToSubmit.Length > 0 && itemsToSubmit.All(x => x.IsValid);
+
         public SubmitItemContent() { }
 
         public SubmitItemContent(string talker, string content, params ItemInfo[] items)
@@ -270,7 +283,7 @@ namespace ZetanStudio.DialogueSystem
 
         public override bool IsManual() => true;
 
-        public override void Manual(NewDialogueWindow window)
+        public override void Manual(DialogueWindow window)
         {
             if (InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, confirm, cancel: cancel, amountLimit: amount, selectCondition: condition))
                 WindowsManager.HideWindow(window, true);
@@ -281,7 +294,7 @@ namespace ZetanStudio.DialogueSystem
                 {
                     if (items.FirstOrDefault(x => info.Item == x.source.Model) is not CountedItem find || info.Amount != find.amount)
                     {
-                        MessageManager.Instance.New(LM.Tr(typeof(NewDialogue).Name, "数量不正确"));
+                        MessageManager.Instance.New(LM.Tr(typeof(Dialogue).Name, "数量不正确"));
                         return false;
                     }
                 }
@@ -295,12 +308,16 @@ namespace ZetanStudio.DialogueSystem
         }
     }
 
-    [Serializable, Name("提交并获得道具"), Group("文本")]
+    [Serializable, Name("交换道具"), Group("文本")]
     public sealed class SubmitAndGetItemContent : SubmitItemContent
     {
         [SerializeField]
         private ItemInfo[] itemsCanGet = { };
         public ReadOnlyCollection<ItemInfo> ItemsCanGet => new ReadOnlyCollection<ItemInfo>(itemsCanGet);
+
+        public override bool IsValid => base.IsValid && itemsCanGet.Length > 0 && itemsCanGet.All(x => x.IsValid);
+
+        public SubmitAndGetItemContent() { }
 
         public SubmitAndGetItemContent(string talker, string content, ItemInfo[] itemsToSubmit, ItemInfo[] itemsCanGet) : base(talker, content, itemsToSubmit)
         {
@@ -309,7 +326,7 @@ namespace ZetanStudio.DialogueSystem
             this.itemsCanGet = itemsCanGet;
         }
 
-        public override void Manual(NewDialogueWindow window)
+        public override void Manual(DialogueWindow window)
         {
             if (InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, confirm, cancel: cancel, amountLimit: amount, selectCondition: condition))
                 WindowsManager.HideWindow(window, true);
@@ -320,7 +337,7 @@ namespace ZetanStudio.DialogueSystem
                 {
                     if (items.FirstOrDefault(x => info.Item == x.source.Model) is not CountedItem find || info.Amount != find.amount)
                     {
-                        MessageManager.Instance.New(LM.Tr(typeof(NewDialogue).Name, "数量不正确"));
+                        MessageManager.Instance.New(LM.Tr(typeof(Dialogue).Name, "数量不正确"));
                         return false;
                     }
                 }
@@ -340,6 +357,8 @@ namespace ZetanStudio.DialogueSystem
         [SerializeField]
         private ItemInfo[] itemsCanGet = { };
         public ReadOnlyCollection<ItemInfo> ItemsCanGet => new ReadOnlyCollection<ItemInfo>(itemsCanGet);
+
+        public override bool IsValid => base.IsValid && itemsCanGet.Length > 0 && itemsCanGet.All(i => i.IsValid);
 
         public GetItemContent() { }
 
@@ -369,6 +388,8 @@ namespace ZetanStudio.DialogueSystem
         [field: SerializeField, Min(2)]
         public int Depth { get; private set; } = 2;
 
+        public override bool IsValid => Depth > 1;
+
         public RecursionSuffix() { }
 
         public RecursionSuffix(int depth) => Depth = depth;
@@ -381,7 +402,7 @@ namespace ZetanStudio.DialogueSystem
             DialogueContent temp = this;
             while (temp && depth < Depth)
             {
-                if (!NewDialogue.Traverse(entry, c =>
+                if (!Dialogue.Traverse(entry, c =>
                 {
                     if (c.Options.Any(x => x.Content == temp))
                     {
@@ -398,7 +419,7 @@ namespace ZetanStudio.DialogueSystem
         }
 
         public override bool IsManual() => true;
-        public override void Manual(NewDialogueWindow window)
+        public override void Manual(DialogueWindow window)
         {
             window.CurrentEntryData[this].Access();
             window.ContinueWith(FindRecursionPoint(window.CurrentEntry));
@@ -423,6 +444,8 @@ namespace ZetanStudio.DialogueSystem
     {
         public ExitContent() => _position = new Vector2(360, 0);
 
+        public override bool IsValid => true;
+
         public override bool CanLinkFrom(DialogueContent from, DialogueOption option) => option.IsMain && from.Options.Count == 1 && from is not DecoratorContent;
     }
 #endif
@@ -431,7 +454,9 @@ namespace ZetanStudio.DialogueSystem
     public sealed class BranchContent : DialogueContent
     {
         [field: SerializeField]
-        public NewDialogue Dialogue { get; private set; }
+        public Dialogue Dialogue { get; private set; }
+
+        public override bool IsValid => Dialogue;
 
         public override bool Enter()
         {
@@ -440,7 +465,7 @@ namespace ZetanStudio.DialogueSystem
 
         public override bool IsManual() => true;
 
-        public override void Manual(NewDialogueWindow window)
+        public override void Manual(DialogueWindow window)
         {
             window.CurrentEntryData[this].Access();
             window.PushContinuance(this);
@@ -486,5 +511,42 @@ namespace ZetanStudio.DialogueSystem
             public static void SetIsMain(DialogueOption option, bool main) => option.IsMain = main;
         }
 #endif
+    }
+
+    [Serializable]
+    public abstract class DialogueEvent
+    {
+        public abstract void Invoke();
+
+        [AttributeUsage(AttributeTargets.Class)]
+        protected sealed class NameAttribute : Attribute
+        {
+            public readonly string name;
+
+            public NameAttribute(string name)
+            {
+                this.name = name;
+            }
+        }
+
+        public static string GetName(Type type)
+        {
+            return type.GetCustomAttribute<NameAttribute>()?.name ?? type.Name;
+        }
+    }
+
+    [Serializable, Name("设置触发器")]
+    public sealed class SetTriggerEvent : DialogueEvent
+    {
+        [field: SerializeField]
+        public string TriggerName { get; private set; }
+
+        [field: SerializeField]
+        public bool State { get; private set; }
+
+        public override void Invoke()
+        {
+            TriggerManager.SetTrigger(TriggerName, State);
+        }
     }
 }

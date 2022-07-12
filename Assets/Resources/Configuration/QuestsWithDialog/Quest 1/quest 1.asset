@@ -19,13 +19,7 @@ MonoBehaviour:
   group: {fileID: 11400000, guid: 224c60f5b172d344baf57de089ebff5f, type: 2}
   acceptCondition:
     conditions:
-    - type: 1
-      intValue: 0
-      compareType: 0
-      relatedQuest: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f, type: 2}
-      relatedItem: {fileID: 0}
-      relatedCharInfo: {fileID: 0}
-      triggerName: 
+    - rid: 9026091293677191175
     relational: 
   questType: 0
   repeatFrequancy: 0
@@ -78,4 +72,9 @@ MonoBehaviour:
         priority: 1
         _NPCToTalk: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
         <Dialogue>k__BackingField: {fileID: 11400000, guid: bfd174d2e328f2842a3ef0a7ddb98d6b,
+          type: 2}
+    - rid: 9026091293677191175
+      type: {class: QuestCompleted, ns: ZetanStudio.ConditionSystem, asm: Assembly-CSharp}
+      data:
+        <Quest>k__BackingField: {fileID: 11400000, guid: 0695897911eb36541b2b7b6b8590c93f,
           type: 2}

@@ -7,18 +7,12 @@ using ZetanStudio.ItemSystem.Module;
 [CustomPropertyDrawer(typeof(MoveObjective))]
 public sealed class MoveObjectiveDrawer : ObjectiveDrawer
 {
-    private readonly IEnumerable<CheckPointInformation> pointsCache;
-
-    public MoveObjectiveDrawer()
-    {
-        pointsCache = ZetanUtility.Editor.LoadAssets<CheckPointInformation>();
-    }
-
     protected override void DrawAdditionalProperty(SerializedProperty objective, Rect rect, ref int lineCount)
     {
         SerializedProperty canNavigate = objective.FindPropertyRelative("canNavigate");
         SerializedProperty showMapIcon = objective.FindPropertyRelative("showMapIcon");
         SerializedProperty auxiliaryPos = objective.FindPropertyRelative("auxiliaryPos");
+        SerializedProperty itemToUseHere = objective.FindPropertyRelative("itemToUseHere");
         EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width * 0.5f, lineHeight), showMapIcon, new GUIContent("显示地图图标"));
         lineCount++;
         if (showMapIcon.boolValue)
@@ -26,11 +20,9 @@ public sealed class MoveObjectiveDrawer : ObjectiveDrawer
             EditorGUI.PropertyField(new Rect(rect.x + rect.width * 0.5f, rect.y + lineHeightSpace * (lineCount - 1), rect.width * 0.5f, lineHeight),
                canNavigate, new GUIContent("可导航"));
         }
-        ObjectSelectorDrawer.Draw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), auxiliaryPos, new GUIContent("检查点"), pointsCache);
+        EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), auxiliaryPos, new GUIContent("检查点"));
         lineCount++;
-        SerializedProperty itemToUseHere = objective.FindPropertyRelative("itemToUseHere");
-        ItemSelectorDrawer.Draw(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), itemToUseHere, new GUIContent("需在此处使用的道具"),
-           () => ArrayUtility.FindAll(itemCache, x => x.GetModule<TriggerModule>()));
+        EditorGUI.PropertyField(new Rect(rect.x, rect.y + lineHeightSpace * lineCount, rect.width, lineHeight), itemToUseHere, new GUIContent("需在此处使用的道具"));
         lineCount++;
     }
     public override float GetObejctiveItemDrawHeight(SerializedProperty objective)

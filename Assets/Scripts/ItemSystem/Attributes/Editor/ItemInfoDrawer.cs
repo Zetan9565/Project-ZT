@@ -22,17 +22,9 @@ namespace ZetanStudio.ItemSystem.Editor
             {
                 SerializedProperty item = property.FindPropertyRelative("item");
                 SerializedProperty amount = property.FindPropertyRelative("amount");
-                var indexLabel = new GUIContent($"[{property.GetArrayIndex() + 1}]");
-                float labelWidth = GUI.skin.label.CalcSize(indexLabel).x;
-                EditorGUI.LabelField(new Rect(position.x, position.y, labelWidth, EditorGUIUtility.singleLineHeight), indexLabel);
-                float halfWidth = (position.width - labelWidth) / 2 - 1;
-                float oldLabelWdith = EditorGUIUtility.labelWidth;
-                var tL = new GUIContent(L.Tr(settings.language, "道具"));
-                EditorGUIUtility.labelWidth = GUI.skin.label.CalcSize(tL).x;
-                EditorGUI.PropertyField(new Rect(position.x + labelWidth, position.y, halfWidth, EditorGUIUtility.singleLineHeight), item, tL);
-                tL = new GUIContent(L.Tr(settings.language, "数量"));
-                EditorGUI.PropertyField(new Rect(position.x + labelWidth + halfWidth + 2, position.y, halfWidth, EditorGUIUtility.singleLineHeight), amount, tL);
-                EditorGUIUtility.labelWidth = oldLabelWdith;
+                float halfWidth = (position.width) / 2 - 1;
+                EditorGUI.PropertyField(new Rect(position.x, position.y, halfWidth, EditorGUIUtility.singleLineHeight), item, GUIContent.none);
+                EditorGUI.PropertyField(new Rect(position.x + halfWidth + 2, position.y, halfWidth, EditorGUIUtility.singleLineHeight), amount, GUIContent.none);
             }
             else EditorGUI.PropertyField(position, property, label, true);
         }

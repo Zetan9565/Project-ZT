@@ -149,10 +149,10 @@ namespace ZetanStudio.ItemSystem.Editor
                 root.styleSheets.Add(styleSheet);
 
                 searchField = root.Q<ToolbarSearchField>("search-input");
-                searchField.RegisterValueChangedCallback(new EventCallback<ChangeEvent<string>>(evt =>
+                searchField.RegisterValueChangedCallback(evt =>
                 {
                     DoSearchDropdown(evt.newValue);
-                }));
+                });
                 searchDropdown = root.Q<UnityEngine.UIElements.ListView>("search-dropdown");
                 searchDropdown.makeItem = () => new Label() { enableRichText = true };
                 searchDropdown.onSelectionChange += OnSearchListSelected;
@@ -332,12 +332,12 @@ namespace ZetanStudio.ItemSystem.Editor
         #endregion
 
         #region 搜索相关
-        private void DoSearchDropdown(string keyword = null)
+        private void DoSearchDropdown(string keywords = null)
         {
             IList itemsSource = new List<object>();
             Action<VisualElement, int> bindItem = (e, i) => { };
-            bool empty = string.IsNullOrEmpty(keyword);
-            searchDropdown.style.display = new StyleEnum<DisplayStyle>(empty ? DisplayStyle.None : DisplayStyle.Flex);
+            bool empty = string.IsNullOrEmpty(keywords);
+            searchDropdown.style.display = empty ? DisplayStyle.None : DisplayStyle.Flex;
             if (!empty)
             {
                 List<string> contents = new List<string>();
@@ -347,39 +347,39 @@ namespace ZetanStudio.ItemSystem.Editor
                         bool searchItemID(Item item, out string content)
                         {
                             content = null;
-                            bool result = item.ID.Contains(keyword);
-                            if (result) content = $"{item.Name}\n({Tr("ID")}: {ZetanUtility.Editor.HighlightContentByKey(item.ID, keyword, item.ID.Length)})";
+                            bool result = item.ID.Contains(keywords);
+                            if (result) content = $"{item.Name}\n({Tr("ID")}: {ZetanUtility.Editor.HighlightContentByKey(item.ID, keywords, item.ID.Length)})";
                             return result;
                         }
                         bool searchItemName(Item item, out string content)
                         {
                             content = null;
-                            bool result = item.Name.Contains(keyword);
-                            if (result) content = $"{ZetanUtility.Editor.HighlightContentByKey(item.Name, keyword, item.Name.Length)}";
+                            bool result = item.Name.Contains(keywords);
+                            if (result) content = $"{ZetanUtility.Editor.HighlightContentByKey(item.Name, keywords, item.Name.Length)}";
                             return result;
                         }
                         bool searchItemType(Item item, out string content)
                         {
                             content = null;
-                            bool result = item.Type.Name.Contains(keyword);
-                            if (result) content = $"{item.Name}\n({Tr("类型")}: {ZetanUtility.Editor.HighlightContentByKey(item.Type.Name, keyword, item.Type.Name.Length)})";
+                            bool result = item.Type.Name.Contains(keywords);
+                            if (result) content = $"{item.Name}\n({Tr("类型")}: {ZetanUtility.Editor.HighlightContentByKey(item.Type.Name, keywords, item.Type.Name.Length)})";
                             return result;
                         }
                         bool searchItemDesc(Item item, out string content)
                         {
                             content = null;
-                            bool result = item.Description.Contains(keyword);
-                            if (result) content = $"{item.Name}\n({Tr("描述")}: {ZetanUtility.Editor.HighlightContentByKey(item.Description, keyword, 30)})";
+                            bool result = item.Description.Contains(keywords);
+                            if (result) content = $"{item.Name}\n({Tr("描述")}: {ZetanUtility.Editor.HighlightContentByKey(item.Description, keywords, 30)})";
                             return result;
                         }
                         bool searchItemMod(Item item, out string content)
                         {
                             content = null;
-                            bool result = item.Modules.Any(x => x.GetName().Contains(keyword));
+                            bool result = item.Modules.Any(x => x.GetName().Contains(keywords));
                             if (result)
                             {
-                                content = item.Modules.FirstOrDefault(x => x.GetName().Contains(keyword)).GetName();
-                                content = $"{item.Name}\n({Tr("模块")}: {ZetanUtility.Editor.HighlightContentByKey(content, keyword, content.Length)})";
+                                content = item.Modules.FirstOrDefault(x => x.GetName().Contains(keywords)).GetName();
+                                content = $"{item.Name}\n({Tr("模块")}: {ZetanUtility.Editor.HighlightContentByKey(content, keywords, content.Length)})";
                             }
                             return result;
                         }
@@ -453,40 +453,40 @@ namespace ZetanStudio.ItemSystem.Editor
                         bool searchTempID(ItemTemplate template, out string content)
                         {
                             content = null;
-                            bool result = template.IDPrefix.Contains(keyword);
-                            if (result) content = $"{template.Name}\n({Tr("ID前缀")}: {ZetanUtility.Editor.HighlightContentByKey(template.IDPrefix, keyword, template.IDPrefix.Length)})";
+                            bool result = template.IDPrefix.Contains(keywords);
+                            if (result) content = $"{template.Name}\n({Tr("ID前缀")}: {ZetanUtility.Editor.HighlightContentByKey(template.IDPrefix, keywords, template.IDPrefix.Length)})";
                             return result;
                         }
                         bool searchTempName(ItemTemplate template, out string content)
                         {
                             content = null;
-                            bool result = template.Name.Contains(keyword);
-                            if (result) content = $"{ZetanUtility.Editor.HighlightContentByKey(template.Name, keyword, template.Name.Length)}";
+                            bool result = template.Name.Contains(keywords);
+                            if (result) content = $"{ZetanUtility.Editor.HighlightContentByKey(template.Name, keywords, template.Name.Length)}";
                             return result;
                         }
                         bool searchTempType(ItemTemplate template, out string content)
                         {
                             content = null;
                             var type = ItemTypeEnum.Instance[template.Type];
-                            bool result = type.Name.Contains(keyword);
-                            if (result) content = $"{template.Name}\n({Tr("默认类型")}: {ZetanUtility.Editor.HighlightContentByKey(type.Name, keyword, type.Name.Length)})";
+                            bool result = type.Name.Contains(keywords);
+                            if (result) content = $"{template.Name}\n({Tr("默认类型")}: {ZetanUtility.Editor.HighlightContentByKey(type.Name, keywords, type.Name.Length)})";
                             return result;
                         }
                         bool searchTempDesc(ItemTemplate template, out string content)
                         {
                             content = null;
-                            bool result = template.Description.Contains(keyword);
-                            if (result) content = $"{template.Name}\n({Tr("默认描述")}: {ZetanUtility.Editor.HighlightContentByKey(template.Description, keyword, 30)})";
+                            bool result = template.Description.Contains(keywords);
+                            if (result) content = $"{template.Name}\n({Tr("默认描述")}: {ZetanUtility.Editor.HighlightContentByKey(template.Description, keywords, 30)})";
                             return result;
                         }
                         bool searchTempMod(ItemTemplate template, out string content)
                         {
                             content = null;
-                            bool result = template.Modules.Any(x => x.GetName().Contains(keyword));
+                            bool result = template.Modules.Any(x => x.GetName().Contains(keywords));
                             if (result)
                             {
-                                content = template.Modules.FirstOrDefault(x => x.GetName().Contains(keyword)).GetName();
-                                content = $"{template.Name}\n({Tr("模块")}: {ZetanUtility.Editor.HighlightContentByKey(content, keyword, content.Length)})";
+                                content = template.Modules.FirstOrDefault(x => x.GetName().Contains(keywords)).GetName();
+                                content = $"{template.Name}\n({Tr("模块")}: {ZetanUtility.Editor.HighlightContentByKey(content, keywords, content.Length)})";
                             }
                             return result;
                         }

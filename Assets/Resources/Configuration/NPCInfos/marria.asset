@@ -34,3 +34,6 @@ MonoBehaviour:
   giftDialogues: []
   affectiveItems: []
   canMarry: 0
+  references:
+    version: 2
+    RefIds: []

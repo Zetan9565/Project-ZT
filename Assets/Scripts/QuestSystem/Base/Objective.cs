@@ -224,7 +224,7 @@ public class TalkObjective : Objective
     }
 
     [field: SerializeField]
-    public NewDialogue Dialogue { get; private set; }
+    public Dialogue Dialogue { get; private set; }
 
     public TalkObjective()
     {
@@ -253,7 +253,7 @@ public class MoveObjective : Objective
     [SerializeField]
     public new CheckPointInformation AuxiliaryPos => auxiliaryPos as CheckPointInformation;
 
-    [SerializeField]
+    [SerializeField, ItemFilter(typeof(ZetanStudio.ItemSystem.Module.TriggerModule))]
     private Item itemToUseHere;
     public Item ItemToUseHere => itemToUseHere;
 
