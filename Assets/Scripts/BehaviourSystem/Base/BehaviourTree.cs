@@ -133,7 +133,7 @@ namespace ZetanStudio.BehaviourTree
                 Traverse(entry, n =>
                 {
                     Type type = n.GetType();
-                    foreach (var field in type.GetFields(ZetanUtility.CommonBindingFlags))
+                    foreach (var field in type.GetFields(Utility.CommonBindingFlags))
                     {
                         if (field.FieldType.Equals(typeof(SharedVariable<T>)))
                         {

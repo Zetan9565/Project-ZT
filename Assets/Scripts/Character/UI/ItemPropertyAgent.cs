@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using ZetanStudio.ItemSystem;
 using ZetanStudio;
-using ZetanStudio.Character;
+using ZetanStudio.CharacterSystem;
 
 public class ItemPropertyAgent : MonoBehaviour
 {

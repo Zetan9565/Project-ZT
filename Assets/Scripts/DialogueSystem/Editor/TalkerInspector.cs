@@ -1,18 +1,19 @@
 using UnityEngine;
 using UnityEditor;
+using ZetanStudio.CharacterSystem;
 
 [CustomEditor(typeof(Talker), true)]
 public class TalkerInspector : Editor
 {
     Talker talker;
 
-    SerializedProperty data;
+    //SerializedProperty data;
     SerializedProperty questFlagOffset;
 
     private void OnEnable()
     {
         talker = target as Talker;
-        data = serializedObject.FindProperty("data");
+        //data = serializedObject.FindProperty("data");
         questFlagOffset = serializedObject.FindProperty("questFlagOffset");
     }
 
@@ -24,7 +25,7 @@ public class TalkerInspector : Editor
             EditorGUILayout.LabelField("NPC识别码：" + talker.TalkerID);
             EditorGUILayout.LabelField("NPC名字：" + talker.TalkerName);
             EditorGUILayout.LabelField("状态机：" + talker.MachineState.GetType().Name);
-            EditorGUILayout.PropertyField(data);
+            //EditorGUILayout.PropertyField(data);
             EditorGUILayout.EndVertical();
         }
         serializedObject.UpdateIfRequiredOrScript();

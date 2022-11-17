@@ -1,23 +1,27 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.UI;
 
-public class WarehouseAgent : ListItem<WarehouseAgent, IWarehouseKeeper>
+namespace ZetanStudio.InventorySystem.UI
 {
-    [SerializeField]
-    private Toggle toggle;
-    [SerializeField]
-    private Image icon;
-    [SerializeField]
-    private Text _name;
-
-    public override void Refresh()
+    public class WarehouseAgent : ListItem<WarehouseAgent, IWarehouseKeeper>
     {
-        _name.text = Data.WarehouseName;
-        icon.overrideSprite = null;
-    }
+        [SerializeField]
+        private Toggle toggle;
+        [SerializeField]
+        private Image icon;
+        [SerializeField]
+        private Text _name;
 
-    protected override void RefreshSelected()
-    {
-        toggle.SetIsOnWithoutNotify(IsSelected);
+        public override void Refresh()
+        {
+            _name.text = Data.WarehouseName;
+            icon.overrideSprite = null;
+        }
+
+        protected override void RefreshSelected()
+        {
+            toggle.SetIsOnWithoutNotify(IsSelected);
+        }
     }
 }

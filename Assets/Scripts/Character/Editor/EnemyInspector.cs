@@ -1,38 +1,41 @@
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
-[CustomEditor(typeof(Enemy))]
-public class EnemyInspector : Editor
+namespace ZetanStudio.CharacterSystem.Editor
 {
-    Enemy enemy;
-
-    SerializedProperty info;
-
-    private void OnEnable()
+    [CustomEditor(typeof(Enemy))]
+    public class EnemyInspector : UnityEditor.Editor
     {
-        enemy = target as Enemy;
-        info = serializedObject.FindProperty("info");
-    }
+        Enemy enemy;
 
-    public override void OnInspectorGUI()
-    {
-        if (enemy.Info)
+        SerializedProperty info;
+
+        private void OnEnable()
         {
-            EditorGUILayout.BeginVertical("Box");
-            EditorGUILayout.LabelField("敌人名称：" + enemy.Info.Name);
-            EditorGUILayout.LabelField("敌人识别码：" + enemy.Info.ID);
-            if (enemy.Info.DropItems)
-                EditorGUILayout.LabelField("掉落物品数量：" + enemy.Info.DropItems.Products.Count);
-            EditorGUILayout.EndVertical();
+            enemy = target as Enemy;
+            info = serializedObject.FindProperty("info");
         }
-        else
+
+        public override void OnInspectorGUI()
         {
-            EditorGUILayout.HelpBox("敌人信息为空！", MessageType.Warning);
+            if (enemy.Info)
+            {
+                EditorGUILayout.BeginVertical("Box");
+                EditorGUILayout.LabelField("敌人名称：" + enemy.Info.Name);
+                EditorGUILayout.LabelField("敌人识别码：" + enemy.Info.ID);
+                if (enemy.Info.DropItems)
+                    EditorGUILayout.LabelField("掉落物品数量：" + enemy.Info.DropItems.Products.Count);
+                EditorGUILayout.EndVertical();
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("敌人信息为空！", MessageType.Warning);
+            }
+            serializedObject.UpdateIfRequiredOrScript();
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(info, new GUIContent("信息"));
+            if (EditorGUI.EndChangeCheck())
+                serializedObject.ApplyModifiedProperties();
         }
-        serializedObject.UpdateIfRequiredOrScript();
-        EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(info, new GUIContent("信息"));
-        if (EditorGUI.EndChangeCheck())
-            serializedObject.ApplyModifiedProperties();
     }
 }

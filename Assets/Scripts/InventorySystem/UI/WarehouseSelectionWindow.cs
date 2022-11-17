@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio;
+using ZetanStudio.CharacterSystem;
+using ZetanStudio.InventorySystem.UI;
 
 public class WarehouseSelectionWindow : Window
 {

@@ -52,6 +52,7 @@ namespace ZetanStudio
             {
                 var oldLW = EditorGUIUtility.labelWidth;
                 EditorGUIUtility.labelWidth = 0;
+                EditorGUIUtility.labelWidth -= EditorGUI.indentLevel * 15f;
                 if (fieldInfo.FieldType.HasElementType) elementType = fieldInfo.FieldType.GetElementType();
                 else if (typeof(List<>).IsAssignableFrom(fieldInfo.FieldType.GetGenericTypeDefinition())) elementType = fieldInfo.FieldType.GetGenericArguments()[0];
                 if (property.managedReferenceValue == null)

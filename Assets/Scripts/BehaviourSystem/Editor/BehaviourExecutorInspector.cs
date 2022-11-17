@@ -89,7 +89,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             {
                 if (GUILayout.Button("新建"))
                 {
-                    BehaviourTree tree = ZetanUtility.Editor.SaveFilePanel(CreateInstance<BehaviourTree>, "new behaviour tree");
+                    BehaviourTree tree = Utility.Editor.SaveFilePanel(CreateInstance<BehaviourTree>, "new behaviour tree");
                     if (tree)
                     {
                         behaviour.objectReferenceValue = tree;
@@ -118,7 +118,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 if (EditorGUILayout.BeginFadeGroup(showList.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
-                if (target is not ScenedBehaviourTreeExecutor && !Application.isPlaying && !ZetanUtility.IsPrefab((target as BehaviourTreeExecutor).gameObject))
+                if (target is not ScenedBehaviourTreeExecutor && !Application.isPlaying && !Utility.IsPrefab((target as BehaviourTreeExecutor).gameObject))
                 {
 
                     showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, "变量预设列表", true);

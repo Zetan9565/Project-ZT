@@ -1,3 +1,7 @@
-﻿using ZetanStudio.ItemSystem;
+﻿namespace ZetanStudio.FarmingSystem.UI
+{
+    using ItemSystem;
+    using ZetanStudio.UI;
 
-public class SeedList : ScrollListView<SeedAgent, Item> { }
+    public class SeedList : ScrollListView<SeedAgent, Item> { }
+}

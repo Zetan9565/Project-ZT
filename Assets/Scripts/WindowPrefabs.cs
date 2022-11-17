@@ -3,15 +3,18 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu]
-public class WindowPrefabs : SingletonScriptableObject<WindowPrefabs>
+namespace ZetanStudio.UI
 {
-    [SerializeField]
-    private Window[] windows;
-    public ReadOnlyCollection<Window> Windows => new ReadOnlyCollection<Window>(windows);
-
-    public Window GetWindowPrefab(Type type)
+    [CreateAssetMenu]
+    public class WindowPrefabs : SingletonScriptableObject<WindowPrefabs>
     {
-        return windows.FirstOrDefault(x => x && x.GetType() == type);
+        [SerializeField]
+        private Window[] windows = { };
+        public ReadOnlyCollection<Window> Windows => new ReadOnlyCollection<Window>(windows);
+
+        public Window GetWindowPrefab(Type type)
+        {
+            return windows?.FirstOrDefault(x => x && x.GetType() == type);
+        }
     }
 }

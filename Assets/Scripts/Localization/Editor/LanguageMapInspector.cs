@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace ZetanStudio
+namespace ZetanStudio.Editor
 {
     [CustomEditor(typeof(LanguageMap), true)]
     public class LanguageMapInspector : UnityEditor.Editor

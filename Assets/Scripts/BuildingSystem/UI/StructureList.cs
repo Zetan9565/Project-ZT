@@ -1,7 +1,9 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using ZetanStudio.UI;
 
-public class StructureList : ScrollListView<StructureAgent, StructureData>
+namespace ZetanStudio.StructureSystem.UI
 {
+    public class StructureList : ScrollListView<StructureAgent, StructureData>
+    {
 
+    }
 }

@@ -9,19 +9,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7acdddb4b8bb2e43b8726f03388fea8, type: 3}
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
   m_Name: dialogue 10
   m_EditorClassIdentifier: 
-  _ID: DIALG000013
-  storyDialogue: 0
-  useUnifiedNPC: 0
-  useCurrentTalkerInfo: 0
-  unifiedNPC: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-  words:
-  - talkerType: 0
-    talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    content: "\u600E\u4E48\u5FC3\u91CC\u8FD8\u662F\u89C9\u5F97\u6709\u4E9B\u62C5\u5FC3\u5462\uFF1F"
-    indexOfCorrectOption: 0
-    wrongChoiceWords: 
-    options: []
+  contents:
+  - rid: 9026091320329896211
+  exit:
+    <ID>k__BackingField: CON-b9213cfe64e04905a58d688bf8047acc
     events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 360, y: 0}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091320329896211
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: DLGfe30052af01a4ddea7d367225e0cb09b
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 1
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u600E\u4E48\u5FC3\u91CC\u8FD8\u662F\u89C9\u5F97\u6709\u4E9B\u62C5\u5FC3\u5462\uFF1F"

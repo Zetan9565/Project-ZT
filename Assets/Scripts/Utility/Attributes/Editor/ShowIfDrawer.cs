@@ -1,9 +1,10 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using ZetanStudio;
 using ZetanStudio.Extension.Editor;
 
 [CustomPropertyDrawer(typeof(ShowIfAttribute))]
-public class ShowIfDrawer : EnhancedAttributeDrawer
+public class ShowIfDrawer : EnhancedPropertyDrawer
 {
     private bool shouldShow;
 

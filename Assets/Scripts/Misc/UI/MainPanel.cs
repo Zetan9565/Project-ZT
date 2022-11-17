@@ -1,4 +1,5 @@
 using UnityEngine;
+using ZetanStudio;
 
 public sealed class MainPanel : SingletonWindow<MainPanel>, IHideable
 {

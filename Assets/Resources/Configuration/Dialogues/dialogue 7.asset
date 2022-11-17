@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: dialogue 7
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091320329896225
+  exit:
+    <ID>k__BackingField: CON-e8a2a67b9ecc43dd9f867983c3f121a5
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 360, y: 0}
+    lastExitHere: 0
+  description: 
+  groups: []
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091320329896225
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: DLGd65f676012444465b82bf18bb6dc9122
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 1
+        _position: {x: 0, y: 0}
+        lastExitHere: 1
+        <Talker>k__BackingField: '{[NPC]}'
+        <Text>k__BackingField: "\u8FD9\u4E2A\u6211\u633A\u559C\u6B22\u7684\uFF0C\u8C22\u8C22\u4E86\u3002"
+        <UtterInterval>k__BackingField:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4

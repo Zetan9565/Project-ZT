@@ -1,0 +1,188 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: dialogue 5
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091320329896217
+  - rid: 9026091320329896218
+  - rid: 9026091320329896219
+  - rid: 867010388353089551
+  exit:
+    <ID>k__BackingField: CON-801d9c35c5a74bbcbf352e914aaaa3f2
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 1135.9146, y: 0.000002861023}
+    lastExitHere: 0
+  description: 
+  groups: []
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 867010388353089551
+      type: {class: NormalCondition, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-0ec60d4896e7478b934b4cce804b9f81
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091320329896218
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 423, y: 0}
+        lastExitHere: 0
+        <Condition>k__BackingField:
+          relational: '!0'
+          conditions:
+          - rid: 867010388353089552
+    - rid: 867010388353089552
+      type: {class: HaveItem, ns: ZetanStudio.ConditionSystem, asm: Assembly-CSharp}
+      data:
+        <Item>k__BackingField: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
+          type: 2}
+    - rid: 9026091320329896217
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: DLG39b71af7f9894fae93a52967797c86de
+        events: []
+        options:
+        - <Title>k__BackingField: "\u9886\u53D6\u7834\u65E7\u7684\u5251"
+          <Content>k__BackingField:
+            rid: 867010388353089551
+          <IsMain>k__BackingField: 0
+        - <Title>k__BackingField: "\u5251\u6362\u5200"
+          <Content>k__BackingField:
+            rid: 9026091320329896219
+          <IsMain>k__BackingField: 0
+        <ExitHere>k__BackingField: 0
+        _position: {x: -1, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC002}'
+        <Text>k__BackingField: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
+        <UtterInterval>k__BackingField:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+    - rid: 9026091320329896218
+      type: {class: GetItemContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-df6597ed6bb4474d896a6f3a88b066fb
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 1
+        _position: {x: 775.9145, y: 0.000002861023}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC002}'
+        <Text>k__BackingField: "\u7ED9\u4F60\u7834\u65E7\u7684\u5251\uFF0C\u62FF\u597D\u54AF\u3002"
+        <UtterInterval>k__BackingField:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        itemsCanGet:
+        - item: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
+            type: 2}
+          amount: 1
+    - rid: 9026091320329896219
+      type: {class: SubmitAndGetItemContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-52171a6274554449be3881550e750e04
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 1
+        _position: {x: 776, y: 120}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC002}'
+        <Text>k__BackingField: "\u7ED9\u4F60\u7834\u65E7\u7684\u5200\uFF0C\u62FF\u597D\u54AF\u3002"
+        <UtterInterval>k__BackingField:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        itemsToSubmit:
+        - item: {fileID: -2055064270847519081, guid: 11d254d59d262564aa42d1df5009d201,
+            type: 2}
+          amount: 1
+        itemsCanGet:
+        - item: {fileID: 2294737969574299077, guid: 11d254d59d262564aa42d1df5009d201,
+            type: 2}
+          amount: 1

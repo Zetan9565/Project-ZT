@@ -13,7 +13,7 @@ namespace ZetanStudio.ItemSystem.Module
         protected override bool Use(ItemData item)
         {
             if (!item.TryGetModule<TriggerModule>(out var module)) return false;
-            TriggerManager.SetTrigger(module.Name, module.State);
+            TriggerSystem.TriggerManager.SetTrigger(module.Name, module.State);
             return true;
         }
     }

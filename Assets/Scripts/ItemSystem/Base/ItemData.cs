@@ -11,10 +11,10 @@ namespace ZetanStudio.ItemSystem
         public readonly string ID;
 
         public string ModelID => Model ? Model.ID : string.Empty;
-        public string Name => Model ? Model.Name : string.Empty;
-        public string ColorName => Model ? ZetanUtility.ColorText(LM.Tr(typeof(Item).Name, Model.Name), Quality.Color) : string.Empty;
+        public string Name => ItemFactory.GetName(Model);
+        public string ColorName => ItemFactory.GetColorName(Model);
         public Sprite Icon => Model ? Model.Icon : null;
-        public string Description => Model ? Model.Description : string.Empty;
+        public string Description => ItemFactory.GetDescription(Model);
         public ItemType Type => Model ? Model.Type : new ItemType();
         public ItemQuality Quality => Model ? Model.Quality : new ItemQuality();
         public bool Discardable => Model ? Model.Discardable : false;
@@ -88,7 +88,7 @@ namespace ZetanStudio.ItemSystem
                     }
                 }
         }
-        public ItemData(SaveDataItem data)
+        public ItemData(GenericData data)
         {
             if (data.TryReadString("modelID", out var modelID)) Model = ItemFactory.GetModel(modelID);
             else throw new KeyNotFoundException("modelID");
@@ -114,16 +114,17 @@ namespace ZetanStudio.ItemSystem
             return self != null;
         }
 
-        public SaveDataItem GetSaveData()
+        public GenericData GetSaveData()
         {
-            var data = new SaveDataItem();
+            var data = new GenericData();
             data["ID"] = ID;
             data["modelID"] = ModelID;
-            var modules = new SaveDataItem();
+            var modules = new GenericData();
             data["modules"] = modules;
             foreach (var module in moduleData)
             {
-                modules[module.GetType().FullName] = module.GetSaveData();
+                var md = module.GetSaveData();
+                if (md != null) modules[module.GetType().FullName] = md;
             }
             return data;
         }

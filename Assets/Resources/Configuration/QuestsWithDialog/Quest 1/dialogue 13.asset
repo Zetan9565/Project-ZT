@@ -1,0 +1,148 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
+  m_Name: dialogue 13
+  m_EditorClassIdentifier: 
+  contents:
+  - rid: 9026091320329896230
+  - rid: 9026091320329896231
+  - rid: 9026091320329896232
+  exit:
+    <ID>k__BackingField: CON-3a2842e82444419c892caa1609917e86
+    events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 1080, y: 0}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091320329896230
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: DLGb668d195958c4b61ae426e1b8ac106cf
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091320329896231
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[PLAYER]}'
+        <Text>k__BackingField: "\u6211\u5DF2\u7ECF\u628A\u90A3\u4E9B\u602A\u7269\u6559\u8BAD\u4E86\uFF0C\u73B0\u5728\u4F60\u53EF\u4EE5\u653E\u5FC3\u5927\u80C6\u5730\u5916\u51FA\u4E86\u3002"
+        <UtterInterval>k__BackingField:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+    - rid: 9026091320329896231
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-0f37603605c3482086e057b24fe35633
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: 9026091320329896232
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 0
+        _position: {x: 360, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u771F\u7684\u54A9\uFF0C\u592A\u8C22\u8C22\u4F60\u4E86\uFF01"
+        <UtterInterval>k__BackingField:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+    - rid: 9026091320329896232
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-7290ca37d85a4b99a61440b488a2d614
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 1
+        _position: {x: 720, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[PLAYER]}'
+        <Text>k__BackingField: "\u54E6\u3002"
+        <UtterInterval>k__BackingField:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4

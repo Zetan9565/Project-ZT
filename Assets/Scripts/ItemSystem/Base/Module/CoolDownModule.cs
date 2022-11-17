@@ -38,15 +38,17 @@ namespace ZetanStudio.ItemSystem.Module
 
         public CoolDownData(ItemData item, CoolDownModule module) : base(item, module)
         {
+            item.GetModuleData<UsableData>().canUse += module.Cooler.Handle;
+            item.GetModuleData<UsableData>().canUseWithMsg += i => Available ? "" : module.Message;
         }
 
-        public override SaveDataItem GetSaveData()
+        public override GenericData GetSaveData()
         {
-            var data = new SaveDataItem();
+            var data = new GenericData();
             data["time"] = Time;
             return data;
         }
-        public override void LoadSaveData(SaveDataItem data)
+        public override void LoadSaveData(GenericData data)
         {
             Module.Cooler.SetTime(Item, data.ReadFloat("time"));
         }

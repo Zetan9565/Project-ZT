@@ -13,7 +13,7 @@ namespace ZetanStudio.ItemSystem.Editor
 
         public ProductBlock(SerializedProperty property, ItemModule module) : base(property, module)
         {
-            productInfo = property.FindAutoPropertyRelative("ProductInfo");
+            productInfo = property.FindAutoProperty("ProductInfo");
             product = property.FindPropertyRelative("product");
         }
 

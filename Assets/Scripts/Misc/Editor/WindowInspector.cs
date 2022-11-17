@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using ZetanStudio;
 
 [CustomEditor(typeof(Window), true)]
 public class WindowInspector : Editor

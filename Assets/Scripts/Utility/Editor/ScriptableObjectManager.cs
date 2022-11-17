@@ -8,10 +8,8 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace ZetanStudio
+namespace ZetanStudio.Editor
 {
-    using ListView = UnityEngine.UIElements.ListView;
-
     public class ScriptableObjectManager : EditorWindow
     {
         private ScriptableObjectManagerSettings settings;
@@ -153,12 +151,12 @@ namespace ZetanStudio
             {
                 selected = objects.Single();
                 UnityEditor.Editor editor = UnityEditor.Editor.CreateEditor(selected);
-                foreach (var field in editor.GetType().GetFields(ZetanUtility.CommonBindingFlags))
+                foreach (var field in editor.GetType().GetFields(Utility.CommonBindingFlags))
                 {
                     if (isAnima(field.FieldType))
                     {
                         var anima = field.GetValue(editor);
-                        var onValueChanged = anima.GetType().GetField("valueChanged", ZetanUtility.CommonBindingFlags).GetValue(anima) as UnityEngine.Events.UnityEvent;
+                        var onValueChanged = anima.GetType().GetField("valueChanged", Utility.CommonBindingFlags).GetValue(anima) as UnityEngine.Events.UnityEvent;
                         onValueChanged.RemoveListener(Repaint);
                         onValueChanged.AddListener(Repaint);
                     }
@@ -188,7 +186,7 @@ namespace ZetanStudio
 
         private void RefreshList()
         {
-            allObjects = ZetanUtility.Editor.LoadAssets<ScriptableObject>("Assets");
+            allObjects = Utility.Editor.LoadAssets<ScriptableObject>("Assets");
             objects = allObjects.FindAll(x => x.GetType() == currentType);
             objects.Sort((x, y) =>
             {
@@ -200,7 +198,7 @@ namespace ZetanStudio
 
         private void Create()
         {
-            ScriptableObject so = ZetanUtility.Editor.SaveFilePanel(() => CreateInstance(currentType), "New " + ObjectNames.NicifyVariableName(currentType.Name));
+            ScriptableObject so = Utility.Editor.SaveFilePanel(() => CreateInstance(currentType), "New " + ObjectNames.NicifyVariableName(currentType.Name));
             if (so)
             {
                 RefreshList();
@@ -229,9 +227,9 @@ namespace ZetanStudio
 
         void NewScript()
         {
-            ZetanUtility.Editor.SaveFolderPanel(path =>
+            Utility.Editor.SaveFolderPanel(path =>
             {
-                ZetanUtility.Editor.Script.CreateNewScript("NewScriptableObject.cs", path, settings.scriptTemplate);
+                Utility.Editor.Script.CreateNewScript("NewScriptableObject.cs", path, settings.scriptTemplate);
             }, settings.newScriptFolder);
         }
 

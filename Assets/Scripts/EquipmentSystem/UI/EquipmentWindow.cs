@@ -1,9 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.InventorySystem;
+using ZetanStudio.InventorySystem.UI;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.ItemSystem.Module;
+using ZetanStudio.ItemSystem.UI;
+using ZetanStudio.UI;
 
 namespace ZetanStudio
 {

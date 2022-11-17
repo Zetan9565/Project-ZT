@@ -44,7 +44,7 @@ namespace ZetanStudio.ItemSystem.Module
                         foreach (var mType in attr.modules)
                         {
                             if (mType.GetCustomAttribute<RequireAttribute>() is RequireAttribute mAttr && mAttr.modules.Contains(type))
-                                ZetanUtility.LogWarning($"模块 {type.Name} 和 {mType.Name} 存在相互依赖，是否是有意为之?");
+                                Utility.LogWarning($"模块 {type.Name} 和 {mType.Name} 存在相互依赖，是否是有意为之?");
                         }
                 }
             }
@@ -62,10 +62,10 @@ namespace ZetanStudio.ItemSystem.Module
                     foreach (var r in requires)
                     {
                         if (Item.Editor.AddModule(item, r))
-                            ZetanUtility.LogWarning($"补充了道具 {item.Name} 缺失的模块: {GetName(r)}");
+                            Utility.LogWarning($"补充了道具 {item.Name} 缺失的模块: {GetName(r)}");
                     }
                 }
-                foreach (var temp in ZetanUtility.Editor.LoadAssets<ItemTemplate>())
+                foreach (var temp in Utility.Editor.LoadAssets<ItemTemplate>())
                 {
                     List<Type> requires = new List<Type>();
                     foreach (var module in temp.Modules)
@@ -76,7 +76,7 @@ namespace ZetanStudio.ItemSystem.Module
                     foreach (var r in requires)
                     {
                         if (ItemTemplate.Editor.AddModule(temp, r))
-                            ZetanUtility.LogWarning($"补充了模板 {temp.Name} 缺失的模块: {GetName(r)}");
+                            Utility.LogWarning($"补充了模板 {temp.Name} 缺失的模块: {GetName(r)}");
                     }
                 }
             }
@@ -163,8 +163,8 @@ namespace ZetanStudio.ItemSystem.Module
             return self != null;
         }
 
-        public abstract SaveDataItem GetSaveData();
-        public abstract void LoadSaveData(SaveDataItem data);
+        public abstract GenericData GetSaveData();
+        public abstract void LoadSaveData(GenericData data);
     }
 
     public abstract class ItemModuleData<T> : ItemModuleData where T : ItemModule

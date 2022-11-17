@@ -66,11 +66,11 @@ namespace ZetanStudio.BehaviourTree
 
             void InsertNewVariable(Type type)
             {
-                if (ZetanUtility.Editor.TryGetValue(serializedVariables, out var value) && value is List<SharedVariable> list)
+                if (Utility.Editor.TryGetValue(serializedVariables, out var value) && value is List<SharedVariable> list)
                 {
                     SharedVariable variable = (SharedVariable)Activator.CreateInstance(type);
                     string newName = $"{char.ToLower(type.Name[0])}{type.Name.Substring(1)}_{serializedVariables.arraySize}";
-                    variable.GetType().GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(variable, newName);
+                    variable.GetType().GetField("_name", Utility.CommonBindingFlags).SetValue(variable, newName);
                     variable.isShared = isShared;
                     variable.isGlobal = !isShared;
                     list.Add(variable);
@@ -197,7 +197,7 @@ namespace ZetanStudio.BehaviourTree
                             menu.AddItem(new GUIContent($"自定义/{type.Name}"), false, () => { InsertNewVariable(type, false); });
                         }
                     }
-                    if (ZetanUtility.Editor.TryGetValue(presetVariables, out var value))
+                    if (Utility.Editor.TryGetValue(presetVariables, out var value))
                     {
                         List<SharedVariable> variables = value as List<SharedVariable>;
                         foreach (var variable in variableHandler.Variables)
@@ -231,10 +231,10 @@ namespace ZetanStudio.BehaviourTree
 
             void InsertNewVariable(Type type, bool select, string name = "")
             {
-                if (ZetanUtility.Editor.TryGetValue(presetVariables, out var value) && value is List<SharedVariable> list)
+                if (Utility.Editor.TryGetValue(presetVariables, out var value) && value is List<SharedVariable> list)
                 {
                     SharedVariable variable = (SharedVariable)Activator.CreateInstance(type);
-                    variable.GetType().GetField("_name", ZetanUtility.CommonBindingFlags).SetValue(variable, name);
+                    variable.GetType().GetField("_name", Utility.CommonBindingFlags).SetValue(variable, name);
                     variable.isShared = select;
                     list.Add(variable);
                     presetVariableList.Select(presetVariables.arraySize);

@@ -4,7 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using ZetanStudio.ItemSystem;
+using ZetanStudio;
+using ZetanStudio.CharacterSystem;
+using ZetanStudio.FarmingSystem;
+using ZetanStudio.PlayerSystem;
+using ZetanStudio.TriggerSystem;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("Zetan Studio/管理器/游戏管理器")]
@@ -122,7 +126,7 @@ public sealed class InitAttribute : Attribute
 
     public static void InitAll()
     {
-        var types = new List<Type>(ZetanUtility.GetTypesWithAttribute<InitAttribute>());
+        var types = new List<Type>(Utility.GetTypesWithAttribute<InitAttribute>());
         types.Sort((x, y) =>
         {
             var attrx = x.GetCustomAttribute<InitAttribute>();
@@ -156,7 +160,7 @@ public class InitMethodAttribute : Attribute
 
     public static void InitAll()
     {
-        var methods = new List<MethodInfo>(ZetanUtility.GetMethodsWithAttribute<InitMethodAttribute>());
+        var methods = new List<MethodInfo>(Utility.GetMethodsWithAttribute<InitMethodAttribute>());
         methods.Sort((x, y) =>
         {
             var attrx = x.GetCustomAttribute<InitMethodAttribute>();
@@ -190,7 +194,7 @@ public sealed class QuitAttribute : Attribute
 
     public static void QuitAll()
     {
-        foreach (var type in ZetanUtility.GetTypesWithAttribute<QuitAttribute>())
+        foreach (var type in Utility.GetTypesWithAttribute<QuitAttribute>())
         {
             try
             {
@@ -213,7 +217,7 @@ public class QuitMethodAttribute : Attribute
 
     public static void QuitAll()
     {
-        var methods = new List<MethodInfo>(ZetanUtility.GetMethodsWithAttribute<QuitMethodAttribute>());
+        var methods = new List<MethodInfo>(Utility.GetMethodsWithAttribute<QuitMethodAttribute>());
         methods.Sort((x, y) =>
         {
             var attrx = x.GetCustomAttribute<QuitMethodAttribute>();

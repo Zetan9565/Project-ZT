@@ -1,15 +1,18 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(RectTransform), typeof(CanvasRenderer))]
-public class EmptyGraphic : Graphic
+namespace ZetanStudio.UI
 {
-    public override void SetMaterialDirty()
+    [RequireComponent(typeof(RectTransform), typeof(CanvasRenderer))]
+    public class EmptyGraphic : Graphic
     {
-        return;
-    }
-    public override void SetVerticesDirty()
-    {
-        return;
+        public override void SetMaterialDirty()
+        {
+            return;
+        }
+        public override void SetVerticesDirty()
+        {
+            return;
+        }
     }
 }

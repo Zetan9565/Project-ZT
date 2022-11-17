@@ -4,7 +4,7 @@ using UnityEngine;
 namespace ZetanStudio
 {
     [CustomPropertyDrawer(typeof(FolderAttribute))]
-    public class FolderDrawer : EnhancedAttributeDrawer
+    public class FolderDrawer : EnhancedPropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -24,14 +24,14 @@ namespace ZetanStudio
                         path = EditorUtility.SaveFolderPanel(label.text, path, null);
                         if (!attr.external)
                         {
-                            if (!string.IsNullOrEmpty(path) && !ZetanUtility.Editor.IsValidFolder(path))
+                            if (!string.IsNullOrEmpty(path) && !Utility.Editor.IsValidFolder(path))
                                 if (!EditorUtility.DisplayDialog("路径错误", $"请选择Assets范围内的路径", "确定", "取消"))
                                 {
                                     GUIUtility.ExitGUI();
                                     return;
                                 }
                                 else continue;
-                            path = ZetanUtility.Editor.ConvertToAssetsPath(path);
+                            path = Utility.Editor.ConvertToAssetsPath(path);
                             if (!string.IsNullOrEmpty(attr.root) && !string.IsNullOrEmpty(path) && !path.StartsWith($"Assets/{attr.root}"))
                                 if (!EditorUtility.DisplayDialog("路径错误", $"请选择Assets/{attr.root}范围内的路径", "确定", "取消"))
                                 {

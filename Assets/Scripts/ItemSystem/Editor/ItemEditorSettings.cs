@@ -18,7 +18,7 @@ namespace ZetanStudio.ItemSystem
 
         private static ItemEditorSettings Find()
         {
-            var settings = ZetanUtility.Editor.LoadAssets<ItemEditorSettings>();
+            var settings = Utility.Editor.LoadAssets<ItemEditorSettings>();
             if (settings.Count > 1) Debug.LogWarning(L.Tr(settings[0].language, "找到多个道具编辑器配置，将使用第一个"));
             if (settings.Count > 0) return settings[0];
             return null;

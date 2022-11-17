@@ -20,11 +20,11 @@ namespace ZetanStudio.ItemSystem.Editor
         {
             SerializedProperty item = property.FindPropertyRelative("item");
             SerializedProperty amount = property.FindPropertyRelative("Amount");
-            SerializedProperty range = amount.FindAutoPropertyRelative("Range");
+            SerializedProperty range = amount.FindAutoProperty("Range");
             string amountStr = range.vector2IntValue.x == range.vector2IntValue.y ? $"{range.vector2IntValue.x}" : $"[{range.vector2IntValue.x}~{range.vector2IntValue.y}]";
             SerializedProperty onlyDropForQuest = property.FindPropertyRelative("onlyDropForQuest");
             EditorGUI.PropertyField(new Rect(position.x, position.y, position.width / 2f - 1, lineHeight), property,
-                new GUIContent($"{(item.objectReferenceValue as Item).Name} ×{amountStr}"), false);
+                new GUIContent(item.objectReferenceValue is Item item1 ? $"{item1.Name} ×{amountStr}" : "(空)"), false);
             EditorGUI.PropertyField(new Rect(position.x + position.width / 2f + 1, position.y, position.width / 2f - 1, lineHeight), item, new GUIContent(string.Empty));
             if (property.isExpanded)
             {

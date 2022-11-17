@@ -5,78 +5,81 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(TypeSelectorAttribute))]
-public class TypeSelectorDrawer : PropertyDrawer
+namespace ZetanStudio.Editor
 {
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(TypeSelectorAttribute))]
+    public class TypeSelectorDrawer : PropertyDrawer
     {
-        return EditorGUI.GetPropertyHeight(property, label);
-    }
-
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-    {
-        if (property.propertyType == SerializedPropertyType.ManagedReference && typeof(TypeReference).IsAssignableFrom(fieldInfo.FieldType))
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if (property.managedReferenceValue is not TypeReference value)
-            {
-                value = new TypeReference();
-                property.managedReferenceValue = value;
-            }
-            drawDropdown(value.typeName, onTypeSelect);
-
-            void onTypeSelect(Type type)
-            {
-                value.typeName = $"{(string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace}.")}{type.Name}";
-            }
+            return EditorGUI.GetPropertyHeight(property, label);
         }
-        else if (property.propertyType == SerializedPropertyType.Generic && ZetanUtility.Editor.TryGetValue(property, out var value, out var field)
-            && typeof(TypeReference).IsAssignableFrom(field.FieldType))
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (value == null)
+            if (property.propertyType == SerializedPropertyType.ManagedReference && typeof(TypeReference).IsAssignableFrom(fieldInfo.FieldType))
             {
-                value = new TypeReference();
-                ZetanUtility.Editor.TrySetValue(property, value);
-            }
-            drawDropdown((value as TypeReference).typeName, onTypeSelect);
+                if (property.managedReferenceValue is not TypeReference value)
+                {
+                    value = new TypeReference();
+                    property.managedReferenceValue = value;
+                }
+                drawDropdown(value.typeName, onTypeSelect);
 
-            void onTypeSelect(Type type)
-            {
-                (value as TypeReference).typeName = $"{(string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace}.")}{type.Name}";
+                void onTypeSelect(Type type)
+                {
+                    value.typeName = $"{(string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace}.")}{type.Name}";
+                }
             }
-        }
-        else if (property.propertyType == SerializedPropertyType.String)
-        {
-            drawDropdown(property.stringValue, onTypeSelect);
-
-            void onTypeSelect(Type type)
+            else if (property.propertyType == SerializedPropertyType.Generic && Utility.Editor.TryGetValue(property, out var value, out var field)
+                && typeof(TypeReference).IsAssignableFrom(field.FieldType))
             {
-                property.stringValue = $"{(string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace}.")}{type.Name}";
-                property.serializedObject.ApplyModifiedProperties();
+                if (value == null)
+                {
+                    value = new TypeReference();
+                    Utility.Editor.TrySetValue(property, value);
+                }
+                drawDropdown((value as TypeReference).typeName, onTypeSelect);
+
+                void onTypeSelect(Type type)
+                {
+                    (value as TypeReference).typeName = $"{(string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace}.")}{type.Name}";
+                }
             }
-        }
-        else EditorGUI.PropertyField(position, property, label);
-
-        void drawDropdown(string name, Action<Type> onTypeSelect)
-        {
-            TypeSelectorAttribute dropDown = (TypeSelectorAttribute)attribute;
-            Type baseType = dropDown.baseType;
-            Assembly assembly = property.serializedObject.targetObject.GetType().Assembly;
-            IEnumerable<Type> types = assembly.GetTypes();
-            if (!dropDown.includeAbstract) types = types.Where(x => !x.IsAbstract);
-            if (baseType != null) types = types.Where(type => baseType.IsAssignableFrom(type));
-            label = EditorGUI.BeginProperty(position, label, property);
-            EditorGUI.LabelField(new Rect(position.x, position.y, EditorGUIUtility.labelWidth, position.height), label);
-            var rect = new Rect(position.x + EditorGUIUtility.labelWidth + 2, position.y, position.width - EditorGUIUtility.labelWidth - 2, position.height);
-            if (GUI.Button(rect, string.IsNullOrEmpty(name) ? "未选择" : name, EditorStyles.popup))
+            else if (property.propertyType == SerializedPropertyType.String)
             {
-                var dropdown = new AdvancedDropdown<Type>(types, onTypeSelect, t => t.Name, dropDown.groupByNamespace ? groupGetter : null, title: baseType?.Name ?? "类型");
-                dropdown.Show(rect);
+                drawDropdown(property.stringValue, onTypeSelect);
+
+                void onTypeSelect(Type type)
+                {
+                    property.stringValue = $"{(string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace}.")}{type.Name}";
+                    property.serializedObject.ApplyModifiedProperties();
+                }
             }
-            EditorGUI.EndProperty();
+            else EditorGUI.PropertyField(position, property, label);
 
-            static string groupGetter(Type type)
+            void drawDropdown(string name, Action<Type> onTypeSelect)
             {
-                return string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace.Replace('.', '/')}";
+                TypeSelectorAttribute dropDown = (TypeSelectorAttribute)attribute;
+                Type baseType = dropDown.baseType;
+                Assembly assembly = property.serializedObject.targetObject.GetType().Assembly;
+                IEnumerable<Type> types = assembly.GetTypes();
+                if (!dropDown.includeAbstract) types = types.Where(x => !x.IsAbstract);
+                if (baseType != null) types = types.Where(type => baseType.IsAssignableFrom(type));
+                label = EditorGUI.BeginProperty(position, label, property);
+                EditorGUI.LabelField(new Rect(position.x, position.y, EditorGUIUtility.labelWidth, position.height), label);
+                var rect = new Rect(position.x + EditorGUIUtility.labelWidth + 2, position.y, position.width - EditorGUIUtility.labelWidth - 2, position.height);
+                if (GUI.Button(rect, string.IsNullOrEmpty(name) ? "未选择" : name, EditorStyles.popup))
+                {
+                    var dropdown = new AdvancedDropdown<Type>(types, onTypeSelect, t => t.Name, dropDown.groupByNamespace ? groupGetter : null, title: baseType?.Name ?? "类型");
+                    dropdown.Show(rect);
+                }
+                EditorGUI.EndProperty();
+
+                static string groupGetter(Type type)
+                {
+                    return string.IsNullOrEmpty(type.Namespace) ? string.Empty : $"{type.Namespace.Replace('.', '/')}";
+                }
             }
         }
     }

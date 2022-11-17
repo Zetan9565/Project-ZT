@@ -17,7 +17,7 @@ namespace ZetanStudio.ItemSystem
     ///做成<see cref="LockableModule"/>，用相应的<see cref="LockableData"/>去记录状态。
     /// </summary>
     [KeywordsGroup("道具")]
-    public sealed class Item : ScriptableObject, IKeywords
+    public sealed class Item : ScriptableObject, IKeyword
     {
         private const bool useDatabase = true;
         public static bool UseDatabase => useDatabase;
@@ -27,10 +27,10 @@ namespace ZetanStudio.ItemSystem
         [field: SerializeField]
         public string ID { get; private set; }
 
-        string IKeywords.IDPrefix => "ITEM";
+        string IKeyword.IDPrefix => "ITEM";
 
         [field: SerializeField, Label("名称")]
-        public string Name { get; private set; } = "未命名道具";   
+        public string Name { get; private set; } = "未命名道具";
 
         [field: SerializeField, Label("图标"), SpriteSelector]
         public Sprite Icon { get; private set; }
@@ -61,9 +61,9 @@ namespace ZetanStudio.ItemSystem
         private List<ItemModule> modules = new List<ItemModule>();
         public ReadOnlyCollection<ItemModule> Modules => modules.AsReadOnly();
 
-        string IKeywords.Group => Type.Name;
+        string IKeyword.Group => Type.Name;
 
-        Color IKeywords.Color => Quality.Color;
+        Color IKeyword.Color => Quality.Color;
 
         public T GetModule<T>() where T : ItemModule
         {
@@ -112,6 +112,7 @@ namespace ZetanStudio.ItemSystem
             if (UseDatabase) return ItemDatabase.GetItemsWhere(predicate);
             else return new List<Item>(Resources.LoadAll<Item>(assetsFolder.Remove(0, "Assets/Resources".Length)).Where(x => predicate(x)));
         }
+
 #if UNITY_EDITOR
         #region Editor相关
         public static class Editor
@@ -124,14 +125,14 @@ namespace ZetanStudio.ItemSystem
             {
                 if (template)
                     if (UseDatabase) return ItemDatabase.Editor.GetItems(template);
-                    else return ZetanUtility.Editor.LoadMainAssetsWhere<Item>(x => MatchTemplate(x, template), assetsFolder);
+                    else return Utility.Editor.LoadMainAssetsWhere<Item>(x => MatchTemplate(x, template), assetsFolder);
                 if (UseDatabase) return ItemDatabase.Editor.GetItems();
-                else return ZetanUtility.Editor.LoadMainAssets<Item>(assetsFolder);
+                else return Utility.Editor.LoadMainAssets<Item>(assetsFolder);
             }
             public static List<Item> GetItemsWhere(Predicate<Item> predicate)
             {
                 if (UseDatabase) return ItemDatabase.Editor.GetItemsWhere(predicate);
-                else return ZetanUtility.Editor.LoadMainAssetsWhere<Item>(predicate, assetsFolder);
+                else return Utility.Editor.LoadMainAssetsWhere<Item>(predicate, assetsFolder);
             }
             public static void SetAutoID(Item item, IEnumerable<Item> items, string IDPrefix = null)
             {
@@ -144,7 +145,7 @@ namespace ZetanStudio.ItemSystem
                     i++;
                 }
                 item.ID = id;
-                ZetanUtility.Editor.SaveChange(item);
+                Utility.Editor.SaveChange(item);
 
                 bool ExistID(string id)
                 {
@@ -186,7 +187,7 @@ namespace ZetanStudio.ItemSystem
                         var copy = module.Copy();
                         item.modules.Add(copy);
                     }
-                    ZetanUtility.Editor.SaveChange(item);
+                    Utility.Editor.SaveChange(item);
                 }
             }
             public static void ApplyFilter(Item item, ItemFilterAttribute itemFilter)
@@ -230,12 +231,12 @@ namespace ZetanStudio.ItemSystem
                                 if (!revers) item.Description = value;
                             }
                             else if (f.StartsWith("m:") || f.StartsWith("module:"))
-                                if (!revers) AddModule(item, ZetanUtility.GetTypeWithoutAssembly(value));
+                                if (!revers) AddModule(item, Utility.GetTypeWithoutAssembly(value));
                         }
                         else if (filter is Type type)
                             AddModule(item, type);
                     }
-                    ZetanUtility.Editor.SaveChange(item);
+                    Utility.Editor.SaveChange(item);
                 }
             }
             public static bool MatchTemplate(Item item, ItemTemplate template)
@@ -283,20 +284,20 @@ namespace ZetanStudio.ItemSystem
                 ItemModule module = Activator.CreateInstance(type) as ItemModule;
                 if (index < 0) item.modules.Add(module);
                 else item.modules.Insert(index, module);
-                ZetanUtility.Editor.SaveChange(item);
+                Utility.Editor.SaveChange(item);
                 return module;
             }
             public static bool RemoveModule(Item item, ItemModule module)
             {
                 if (!item || module == null) return false;
                 item.modules.Remove(module);
-                ZetanUtility.Editor.SaveChange(item);
+                Utility.Editor.SaveChange(item);
                 return true;
             }
             public static bool ClearInvalidModule(Item item)
             {
                 int count = item.modules.RemoveAll(x => !x);
-                if (count > 0 && UseDatabase) ZetanUtility.Editor.SaveChange(ItemDatabase.Instance);
+                if (count > 0 && UseDatabase) Utility.Editor.SaveChange(ItemDatabase.Instance);
                 return count > 0;
             }
         }

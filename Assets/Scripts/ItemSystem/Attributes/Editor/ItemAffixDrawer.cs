@@ -25,7 +25,7 @@ namespace ZetanStudio.ItemSystem.Editor
             {
                 EditorGUI.indentLevel++;
                 int lineCount = 1;
-                SerializedProperty upperLimit = property.FindAutoPropertyRelative("UpperLimit");
+                SerializedProperty upperLimit = property.FindAutoProperty("UpperLimit");
                 SerializedProperty affixCountRange = property.FindPropertyRelative("affixCountRange");
                 SerializedProperty affixCountDistrib = property.FindPropertyRelative("affixCountDistrib");
                 SerializedProperty affixIndexDistrib = property.FindPropertyRelative("affixIndexDistrib");
@@ -36,7 +36,7 @@ namespace ZetanStudio.ItemSystem.Editor
                 float upper = Mathf.Min(affixes.arraySize, upperLimit.intValue);
                 float maxValue = Mathf.Min(affixCountRange.vector2IntValue.y, upper);
                 EditorGUI.BeginProperty(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), GUIContent.none, affixCountRange);
-                ZetanUtility.Editor.MinMaxSlider(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), new GUIContent(Tr("词缀数量范围")),
+                Utility.Editor.MinMaxSlider(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), new GUIContent(Tr("词缀数量范围")),
                                                  ref minValue, ref maxValue, 0, upper);
                 EditorGUI.EndProperty();
                 lineCount++;

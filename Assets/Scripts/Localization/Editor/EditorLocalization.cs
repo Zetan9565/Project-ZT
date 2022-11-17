@@ -8,12 +8,8 @@ namespace ZetanStudio
         [InitializeOnLoadMethod]
         private static void GetOrCreateInstance()
         {
-            if (!instance) instance = ZetanUtility.Editor.LoadAsset<EditorLocalization>();
-            if (!instance)
-            {
-                instance = CreateInstance<EditorLocalization>();
-                AssetDatabase.CreateAsset(instance, AssetDatabase.GenerateUniqueAssetPath($"Assets/Scripts/Localization/Editor/Resources/New {ObjectNames.NicifyVariableName(typeof(EditorLocalization).Name)}.asset"));
-            }
+            if (!Instance)
+                AssetDatabase.CreateAsset(CreateInstance<EditorLocalization>(), AssetDatabase.GenerateUniqueAssetPath($"Assets/Scripts/Localization/Editor/Resources/New {ObjectNames.NicifyVariableName(typeof(EditorLocalization).Name)}.asset"));
         }
 
         [SerializeField]
@@ -21,14 +17,14 @@ namespace ZetanStudio
 
         public static string Tr(string text)
         {
-            if (!instance) return text;
-            return L.Tr(instance.language, text);
+            if (!Instance) return text;
+            return L.Tr(Instance.language, text);
         }
 
         public static string Tr(string text, params object[] args)
         {
-            if (!instance) return string.Format(text, args);
-            return L.Tr(instance.language, text, args);
+            if (!Instance) return string.Format(text, args);
+            return L.Tr(Instance.language, text, args);
         }
     }
 

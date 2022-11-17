@@ -21,7 +21,7 @@ namespace ZetanStudio.Math
             if (minInclusive == maxInclusive) return minInclusive;
             float range = Mathf.Abs(maxInclusive - minInclusive);
             float position = random();
-            while (range > 0 && !ZetanUtility.Probability(distribution.Evaluate(position)))
+            while (range > 0 && !Utility.Probability(distribution.Evaluate(position)))
             {
                 position = random();
             }

@@ -1,7 +1,10 @@
 ﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio;
 using ZetanStudio.DialogueSystem.UI;
+using ZetanStudio.InventorySystem;
+using ZetanStudio.InventorySystem.UI;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.ItemSystem.Module;
 using ZetanStudio.ItemSystem.UI;
@@ -58,10 +61,10 @@ public class ShopWindow : Window
         long maxAmount = goods.Info.EmptyAble ? goods.LeftAmount : (goods.Info.Price > 0 ? BackpackManager.Instance.Inventory.Money / goods.Info.Price : 999);
         if (goods.LeftAmount == 1 && goods.Info.EmptyAble)
         {
-            ConfirmWindow.StartConfirm(string.Format("确定购买1个 [{0}] 吗？", goods.Item.Name), delegate
+            ConfirmWindow.StartConfirm(string.Format("确定购买1个 [{0}] 吗？", ItemFactory.GetColorName(goods.Item)), delegate
             {
                 if (OnSell(goods))
-                    MessageManager.Instance.New(string.Format("购买了1个 [{0}]", goods.Item.Name));
+                    MessageManager.Instance.New(string.Format("购买了1个 [{0}]", ItemFactory.GetColorName(goods.Item)));
             });
         }
         else if (goods.IsEmpty) ConfirmWindow.StartConfirm("该商品暂时缺货");
@@ -74,12 +77,12 @@ public class ShopWindow : Window
             }
             AmountWindow.StartInput(delegate (long amount)
             {
-                ConfirmWindow.StartConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)amount, goods.Item.Name), delegate
+                ConfirmWindow.StartConfirm(string.Format("确定购买{0}个 [{1}] 吗？", (int)amount, ItemFactory.GetColorName(goods.Item)), delegate
                 {
                     if (OnSell(goods, (int)amount))
-                        MessageManager.Instance.New(string.Format("购买了{0}个 [{1}]", (int)amount, goods.Item.Name));
+                        MessageManager.Instance.New(string.Format("购买了{0}个 [{1}]", (int)amount, ItemFactory.GetColorName(goods.Item)));
                 });
-            }, maxAmount, "购买数量", ZetanUtility.ScreenCenter, Vector2.zero);
+            }, maxAmount, "购买数量", Utility.ScreenCenter, Vector2.zero);
         }
     }
 
@@ -115,10 +118,10 @@ public class ShopWindow : Window
         int maxAmount = goods.Info.EmptyAble ? (goods.LeftAmount > backpackAmount ? backpackAmount : goods.LeftAmount) : backpackAmount;
         if (goods.LeftAmount == 1 && goods.Info.EmptyAble)
         {
-            ConfirmWindow.StartConfirm(string.Format("确定出售1个 [{0}] 吗？", goods.Item.Name), delegate
+            ConfirmWindow.StartConfirm(string.Format("确定出售1个 [{0}] 吗？", ItemFactory.GetColorName(goods.Item)), delegate
             {
                 if (OnPurchase(goods, 1))
-                    MessageManager.Instance.New(string.Format("出售了1个 [{1}]", 1, goods.Item.Name));
+                    MessageManager.Instance.New(string.Format("出售了1个 [{1}]", 1, ItemFactory.GetColorName(goods.Item)));
             });
         }
         else if (goods.IsEmpty)
@@ -127,7 +130,7 @@ public class ShopWindow : Window
             {
                 if (BackpackManager.Instance.GetItemData(goods.Item, out var item, out var amount))
                     PurchaseItem(item, amount, true);
-                else MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{goods.Item.Name}");
+                else MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{ItemFactory.GetColorName(goods.Item)}");
             });
         }
         else
@@ -139,12 +142,12 @@ public class ShopWindow : Window
             }
             AmountWindow.StartInput(delegate (long amount)
             {
-                ConfirmWindow.StartConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, goods.Item.Name), delegate
+                ConfirmWindow.StartConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, ItemFactory.GetColorName(goods.Item)), delegate
                 {
                     if (OnPurchase(goods, (int)amount))
-                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, goods.Item.Name));
+                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, ItemFactory.GetColorName(goods.Item)));
                 });
-            }, maxAmount, "出售数量", ZetanUtility.ScreenCenter, Vector2.zero);
+            }, maxAmount, "出售数量", Utility.ScreenCenter, Vector2.zero);
         }
     }
     bool OnPurchase(GoodsData data, int amount = 1)
@@ -153,18 +156,18 @@ public class ShopWindow : Window
         if (!MShop.Acquisitions.Contains(data)) return false;
         if (BackpackManager.Instance.Inventory.TryGetDatas(data.Item, out var items))
         {
-            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{data.Item.Name}");
+            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{ItemFactory.GetColorName(data.Item)}");
             return false;
         }
         if (items.Sum(x => x.amount) < amount)
         {
-            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有这么多的{data.Item.Name}");
+            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有这么多的{ItemFactory.GetColorName(data.Item)}");
             return false;
         }
         if (data.Info.EmptyAble && amount > data.LeftAmount)
         {
-            if (!data.IsEmpty) MessageManager.Instance.New($"不收够这么多的{data.Item.Name}");
-            else MessageManager.Instance.New($"无{data.Item.Name}收购需求");
+            if (!data.IsEmpty) MessageManager.Instance.New($"不收够这么多的{ItemFactory.GetColorName(data.Item)}");
+            else MessageManager.Instance.New($"无{ItemFactory.GetColorName(data.Item)}收购需求");
             return false;
         }
         Item item = items[0].source.Model;
@@ -210,22 +213,22 @@ public class ShopWindow : Window
         }
         if (have == 1)
         {
-            ConfirmWindow.StartConfirm(string.Format("确定出售1个 [{0}] 吗？", item.Model.Name), delegate
+            ConfirmWindow.StartConfirm(string.Format("确定出售1个 [{0}] 吗？", item.Name), delegate
             {
                 if (OnPurchase(item, have))
-                    MessageManager.Instance.New(string.Format("出售了1个 [{0}]", item.Model.Name));
+                    MessageManager.Instance.New(string.Format("出售了1个 [{0}]", item.Name));
             });
         }
         else
         {
             AmountWindow.StartInput(delegate (long amount)
             {
-                ConfirmWindow.StartConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, item.Model.Name), delegate
+                ConfirmWindow.StartConfirm(string.Format("确定出售{0}个 [{1}] 吗？", (int)amount, item.Name), delegate
                 {
                     if (OnPurchase(item, have, (int)amount))
-                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, item.Model.Name));
+                        MessageManager.Instance.New(string.Format("出售了{0}个 [{1}]", (int)amount, item.Name));
                 });
-            }, have, "出售数量", ZetanUtility.ScreenCenter, Vector2.zero);
+            }, have, "出售数量", Utility.ScreenCenter, Vector2.zero);
         }
     }
     bool OnPurchase(ItemData item, int have, int amount = 1)
@@ -239,12 +242,12 @@ public class ShopWindow : Window
         }
         if (have < 1)
         {
-            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{item.Model.Name}");
+            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有{item.Name}");
             return false;
         }
         if (amount > have)
         {
-            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有这么多的{item.Model.Name}");
+            MessageManager.Instance.New($"{BackpackManager.Instance.Name}中没有这么多的{item.Name}");
             return false;
         }
         if (!BackpackManager.Instance.CanLose(item, amount)) return false;

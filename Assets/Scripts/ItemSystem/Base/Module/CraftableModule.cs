@@ -1,11 +1,12 @@
-﻿using System.Linq;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
 using UnityEngine;
-using ZetanStudio.ItemSystem.Craft;
-using ZetanStudio.Math;
 
 namespace ZetanStudio.ItemSystem.Module
 {
+    using CraftSystem;
+    using Math;
+
     [Name("可制作")]
     public class CraftableModule : ItemModule
     {

@@ -9,64 +9,101 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7acdddb4b8bb2e43b8726f03388fea8, type: 3}
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
   m_Name: dialogue 2
   m_EditorClassIdentifier: 
-  _ID: DIALG000016
-  storyDialogue: 0
-  useUnifiedNPC: 1
-  useCurrentTalkerInfo: 0
-  unifiedNPC: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-  words:
-  - talkerType: 2
-    talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    content: "\u4ECA\u5E74\u7684\u6536\u6210\u6BD4\u53BB\u5E74\u597D\u5462\u3002"
-    indexOfCorrectOption: 0
-    wrongChoiceWords: 
-    options:
-    - title: "\u60F3\u4E86\u89E3\u4F60\u7684\u5E74\u9F84"
-      optionType: 0
-      hasWordsToSay: 0
-      talkerType: 0
-      words: "\u6211\u4ECA\u5E7420\u5C81\u4E86\u3002"
-      dialogue: {fileID: 0}
-      specifyIndex: 0
-      goBack: 0
-      indexToGoBack: 1
-      itemToSubmit:
-        item: {fileID: 0}
-        amount: 1
-      itemCanGet:
-        item: {fileID: 0}
-        amount: 1
-      showOnlyWhenNotHave: 0
-      onlyForQuest: 0
-      bindedQuest: {fileID: 0}
-      deleteWhenCmplt: 1
-    - title: "\u60F3\u4E86\u89E3\u4F60\u7684\u559C\u597D"
-      optionType: 0
-      hasWordsToSay: 0
-      talkerType: 0
-      words: "\u6211\u559C\u6B22\u52B3\u52A8\uFF0C\u52B3\u52A8\u6700\u5149\u8363\u3002"
-      dialogue: {fileID: 0}
-      specifyIndex: 0
-      goBack: 1
-      indexToGoBack: -1
-      itemToSubmit:
-        item: {fileID: 0}
-        amount: 1
-      itemCanGet:
-        item: {fileID: 0}
-        amount: 1
-      showOnlyWhenNotHave: 0
-      onlyForQuest: 0
-      bindedQuest: {fileID: 0}
-      deleteWhenCmplt: 1
+  contents:
+  - rid: 9026091320329896201
+  - rid: 910209861650743396
+  exit:
+    <ID>k__BackingField: CON-54cab85657fe454db70b6531496be33f
     events: []
-  - talkerType: 2
-    talkerInfo: {fileID: 11400000, guid: 2422b1425859ab648a124962b450f731, type: 2}
-    content: "\u6BCF\u5929\u90FD\u5FD9\u5F97\u4E0D\u53EF\u5F00\u4EA4\u3002"
-    indexOfCorrectOption: 0
-    wrongChoiceWords: 
     options: []
-    events: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 360, y: 0}
+    lastExitHere: 0
+  description: 
+  groups: []
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 910209861650743396
+      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: CON-9231e8fff76449abb013048387d3ca33
+        events: []
+        options:
+        - <Title>k__BackingField: "\u65B0\u9009\u9879"
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 0
+        <ExitHere>k__BackingField: 0
+        _position: {x: 238.05002, y: 189.75002}
+        lastExitHere: 0
+        <Talker>k__BackingField: 
+        <Text>k__BackingField: 
+        <UtterInterval>k__BackingField:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+    - rid: 9026091320329896201
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: DLGe385d07905dd48edbf7deedc76a3c15c
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 1
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]NPC001}'
+        <Text>k__BackingField: "\u6211\u4E0D\u9700\u8981\u8FD9\u4E2A\uFF0C\u4F46\u8FD8\u662F\u8C22\u8C22\u4E86\u3002"
+        <UtterInterval>k__BackingField:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4

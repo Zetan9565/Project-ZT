@@ -18,7 +18,6 @@ GameObject:
   - component: {fileID: 3705333815110089141}
   - component: {fileID: 9072205245951749521}
   - component: {fileID: 6339310852600690735}
-  - component: {fileID: 7100300894034540839}
   m_Layer: 7
   m_Name: TalkerTest2
   m_TagString: NPC
@@ -234,29 +233,6 @@ MonoBehaviour:
   raycastLayer:
     serializedVersion: 2
     m_Bits: 0
---- !u!114 &7100300894034540839
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1429737066326795183}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7872916f14d6d544c99d2f77f2c9c6fc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  behaviour: {fileID: 11400000, guid: c5ec8c6ef09bcfc4bbd513d3b902651f, type: 2}
-  frequency: 0
-  interval: 0.02
-  startOnStart: 1
-  restartOnComplete: 0
-  resetOnRestart: 0
-  gizmos: 1
-  presetVariables: []
-  references:
-    version: 2
-    RefIds: []
 --- !u!1 &2071858054320287229
 GameObject:
   m_ObjectHideFlags: 0

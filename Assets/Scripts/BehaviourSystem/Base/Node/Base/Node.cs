@@ -87,7 +87,7 @@ namespace ZetanStudio.BehaviourTree.Nodes
                 return;
             }
             Tree = tree;
-            foreach (var field in GetType().GetFields(ZetanUtility.CommonBindingFlags).Where(field => field.FieldType.IsSubclassOf(typeof(SharedVariable))))
+            foreach (var field in GetType().GetFields(Utility.CommonBindingFlags).Where(field => field.FieldType.IsSubclassOf(typeof(SharedVariable))))
             {
                 ICheckValueAttribute attr = field.GetCustomAttribute<HideIfAttribute>();
                 if (attr != null && ICheckValueAttribute.Check(this, attr)) continue;

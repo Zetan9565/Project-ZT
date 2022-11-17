@@ -1,4 +1,7 @@
-﻿public class PlayerCraftingState : CharacterBusyState
+﻿using ZetanStudio;
+using ZetanStudio.CraftSystem.UI;
+
+public class PlayerCraftingState : CharacterBusyState
 {
     public PlayerCraftingState(CharacterStateMachine stateMachine) : base(stateMachine)
     {

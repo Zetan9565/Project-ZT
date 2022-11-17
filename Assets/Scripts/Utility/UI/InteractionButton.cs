@@ -1,54 +1,57 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Button))]
-public class InteractionButton : MonoBehaviour
+namespace ZetanStudio.InteractionSystem.UI
 {
-    [SerializeField]
-    private Image buttonIcon;
-    [SerializeField]
-    private Text buttonText;
-    [SerializeField]
-    private GameObject selectMark;
-
-    private Button button;
-
-    private IInteractive interactive;
-
-    private void Awake()
+    [RequireComponent(typeof(Button))]
+    public class InteractionButton : MonoBehaviour
     {
-        button = GetComponent<Button>();
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(Interact);
-    }
+        [SerializeField]
+        private Image buttonIcon;
+        [SerializeField]
+        private Text buttonText;
+        [SerializeField]
+        private GameObject selectMark;
 
-    public void Init(IInteractive interactive)
-    {
-        this.interactive = interactive;
-        buttonText.text = interactive.Name;
-        buttonIcon.overrideSprite = interactive.Icon;
-        SetSelected(false);
-    }
+        private Button button;
 
-    private void Interact()
-    {
-        if (interactive?.DoInteract() ?? false)
+        private IInteractive interactive;
+
+        private void Awake()
         {
-            InteractionPanel.Instance.Remove(interactive);
+            button = GetComponent<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(Interact);
         }
-    }
 
-    public void Clear(bool recycle = false)
-    {
-        interactive = null;
-        SetSelected(false);
-        buttonText.text = string.Empty;
-        buttonIcon.overrideSprite = null;
-        if (recycle) ObjectPool.Put(gameObject);
-    }
+        public void Init(IInteractive interactive)
+        {
+            this.interactive = interactive;
+            buttonText.text = interactive.Name;
+            buttonIcon.overrideSprite = interactive.Icon;
+            SetSelected(false);
+        }
 
-    public void SetSelected(bool value)
-    {
-        ZetanUtility.SetActive(selectMark, value);
+        private void Interact()
+        {
+            if (interactive?.DoInteract() ?? false)
+            {
+                InteractionPanel.Instance.Remove(interactive);
+            }
+        }
+
+        public void Clear(bool recycle = false)
+        {
+            interactive = null;
+            SetSelected(false);
+            buttonText.text = string.Empty;
+            buttonIcon.overrideSprite = null;
+            if (recycle) ObjectPool.Put(gameObject);
+        }
+
+        public void SetSelected(bool value)
+        {
+            Utility.SetActive(selectMark, value);
+        }
     }
 }

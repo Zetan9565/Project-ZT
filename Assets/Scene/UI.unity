@@ -2981,6 +2981,7 @@ MonoBehaviour:
     type: 3}
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
 --- !u!114 &373359972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4608,7 +4609,7 @@ MonoBehaviour:
   UI: {fileID: 965726384}
   multiples: 180
   timeline: 8
-  timeSystem: 1
+  clockSystem: 1
 --- !u!1 &522088602
 GameObject:
   m_ObjectHideFlags: 0
@@ -11146,7 +11147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7206738f1492f3d4dbad276046eab6c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: BackpackWindow
+  type: ZetanStudio.InventorySystem.UI.BackpackWindow
   openClose: 1
 --- !u!1 &1307453870
 GameObject:
@@ -12301,7 +12302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7206738f1492f3d4dbad276046eab6c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: QuestWindow
+  type: ZetanStudio.QuestSystem.UI.QuestWindow
   openClose: 1
 --- !u!1 &1456098357
 GameObject:
@@ -24343,11 +24344,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7100300894034540839, guid: c129bba4cb2b9c549bda4aef1c16b7ab,
-        type: 3}
-      propertyPath: managedReferences[28978064716988470].isShared
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c129bba4cb2b9c549bda4aef1c16b7ab, type: 3}

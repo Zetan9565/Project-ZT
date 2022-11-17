@@ -1,17 +1,23 @@
 using System;
-using ZetanStudio.ItemSystem;
 
-public class CraftList : ScrollListView<CraftAgent, Item>, IFiltableItemContainer
+namespace ZetanStudio.CraftSystem.UI
 {
-    private Predicate<Item> filter;
+    using ItemSystem;
+    using ItemSystem.UI;
+    using ZetanStudio.UI;
 
-    public void DoFilter(Predicate<Item> filter)
+    public class CraftList : ScrollListView<CraftAgent, Item>, IFiltableItemContainer
     {
-        this.filter = filter;
-        AddItemFilter(DoFilter, true);
-    }
-    private bool DoFilter(CraftAgent i)
-    {
-        return filter?.Invoke(i.Data) ?? true;
+        private Predicate<Item> filter;
+
+        public void DoFilter(Predicate<Item> filter)
+        {
+            this.filter = filter;
+            AddItemFilter(DoFilter, true);
+        }
+        private bool DoFilter(CraftAgent i)
+        {
+            return filter?.Invoke(i.Data) ?? true;
+        }
     }
 }

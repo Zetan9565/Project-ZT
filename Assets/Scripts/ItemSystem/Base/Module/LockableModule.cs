@@ -18,13 +18,13 @@
         public LockableData(ItemData item, LockableModule module) : base(item, module)
         {
         }
-        public override SaveDataItem GetSaveData()
+        public override GenericData GetSaveData()
         {
-            var data = new SaveDataItem();
+            var data = new GenericData();
             data["locked"] = isLocked;
             return data;
         }
-        public override void LoadSaveData(SaveDataItem data)
+        public override void LoadSaveData(GenericData data)
         {
             isLocked = data.ReadBool("locked");
         }

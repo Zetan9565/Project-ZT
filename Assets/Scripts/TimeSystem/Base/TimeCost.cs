@@ -1,4 +1,5 @@
 using UnityEngine;
+using ZetanStudio.TimeSystem;
 
 public class TimeCost
 {

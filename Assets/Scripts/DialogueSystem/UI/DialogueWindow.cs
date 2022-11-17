@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,13 @@ namespace ZetanStudio.DialogueSystem.UI
     using Extension;
     using ItemSystem;
     using ItemSystem.UI;
+    using ZetanStudio;
+    using ZetanStudio.CharacterSystem;
+    using ZetanStudio.InteractionSystem.UI;
+    using ZetanStudio.InventorySystem;
+    using ZetanStudio.InventorySystem.UI;
+    using ZetanStudio.PlayerSystem;
+    using ZetanStudio.QuestSystem;
     using ZetanStudio.UI;
 
     public class DialogueWindow : InteractionWindow<Talker>, IHideable
@@ -20,7 +28,9 @@ namespace ZetanStudio.DialogueSystem.UI
         [SerializeField]
         private Text nameText;
         [SerializeField]
-        private Text wordsText;
+        private Text textText;
+        [SerializeField]
+        private Button textButton;
 
         [SerializeField]
         private Transform buttonArea;
@@ -62,6 +72,8 @@ namespace ZetanStudio.DialogueSystem.UI
         private Text descriptionText;
         [SerializeField]
         private ItemGrid rewardList;
+        [SerializeField]
+        private float skipDelay = 0.5f;
         #endregion
 
         #region 运行时声明
@@ -76,12 +88,18 @@ namespace ZetanStudio.DialogueSystem.UI
         private DialogueContent currentContent;
         private readonly Stack<DialogueContent> continueContent = new Stack<DialogueContent>();
 
-        public DialogueContentData CurrentEntryData => DialogueManager.GetOrCreateData(CurrentEntry) ?? null;
-        private DialogueContentData CurrentData => CurrentEntryData && currentContent ? CurrentEntryData[currentContent] : null;
+        public DialogueData CurrentEntryData => DialogueManager.GetOrCreateData(CurrentEntry) ?? null;
+        private DialogueData CurrentData => CurrentEntryData && currentContent ? CurrentEntryData[currentContent] : null;
 
         private Action next;
         private readonly List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
+
+        #region 逐字相关
+        private string targetText;
         private Coroutine coroutine;
+        private float playTime;
+        public bool IsPlaying => coroutine != null;
+        #endregion
 
         #region 任务相关声明
         private QuestData currentQuest;
@@ -114,6 +132,8 @@ namespace ZetanStudio.DialogueSystem.UI
         #region 内容刷新相关
         private void HandleContent(DialogueContent content)
         {
+            content = HandleSpecial(content);
+            if (!content || !content.OnEnter()) return;
             if (content == root && currentTalker)
             {
                 var info = currentTalker.GetData<TalkerData>().GetInfo<TalkerInformation>();
@@ -122,25 +142,52 @@ namespace ZetanStudio.DialogueSystem.UI
             }
             else ShowButtons(false, false, false, false, false);
             ResetInteraction();
+            currentContent = content;
+            CurrentData?.Access();
+            if (content is TextContent text)
+            {
+                nameText.text = ConvertPlayerOrNPC(Keyword.HandleKeywords(Tr(text.Talker)));
+                if (coroutine != null) StopCoroutine(coroutine);
+                coroutine = StartCoroutine(Write(text));
+            }
+            else if (content is BlockerContent) DoOption(content[0]);
+            currentContent?.Events.ForEach(e =>
+            {
+                if (e != null && CurrentData.EventStates.TryGetValue(e.ID, out var state) && !state && e.Invoke())
+                    CurrentData.AccessEvent(e.ID);
+            });
+        }
+
+        private DialogueContent HandleSpecial(DialogueContent content)
+        {
             while (content is DecoratorContent)
             {
                 CurrentEntryData[content]?.Access();
                 content = content[0]?.Content;
             }
-            if (!content.Enter()) return;
-            currentContent = content;
-            CurrentData?.Access();
-            if (content is TextContent text)
+            while (content is ConditionContent)
             {
-                if (text.Talker.ToUpper() == "[NPC]") nameText.text = currentTalker ? currentTalker.TalkerName : Tr("神秘人");
-                else if (text.Talker.ToUpper() == "[PLAYER]") nameText.text = PlayerManager.Instance.PlayerInfo.Name;
-                else nameText.text = Keywords.HandleKeyWords(text.Talker);
-                if (coroutine != null) StopCoroutine(coroutine);
-                coroutine = StartCoroutine(Play(text));
-                HandleInteraction();
+                CurrentEntryData[content]?.Access();
+                content = content[0]?.Content;
             }
-            currentContent?.Events.ForEach(e => e?.Invoke());
+            while (content is BranchContent branch)
+            {
+                CurrentEntryData[content]?.Access();
+                content = branch.GetBranch(CurrentEntryData);
+            }
+
+            return content;
         }
+
+        private string ConvertPlayerOrNPC(string text)
+        {
+            if (Regex.IsMatch(text, @"{\[NPC\]}", RegexOptions.IgnoreCase))
+                text = Regex.Replace(text, @"{\[NPC\]}", currentTalker ? currentTalker.TalkerName : Tr("神秘人"), RegexOptions.IgnoreCase);
+            if (Regex.IsMatch(text, @"{\[NPC\]}", RegexOptions.IgnoreCase))
+                text = Regex.Replace(text, @"{\[PLAYER\]}", PlayerManager.Instance.PlayerInfo.Name, RegexOptions.IgnoreCase);
+            return text;
+        }
+
         private void HandleLast()
         {
             if (currentQuest) HandleLastQuest();
@@ -161,95 +208,148 @@ namespace ZetanStudio.DialogueSystem.UI
             }
             else
             {
-                if (currentContent.Options.Count == 1 && currentContent.Options[0].IsMain)
-                    SetNextClick(Tr("继续"), () => DoOption(currentContent.Options[0]));
-                else foreach (var option in currentContent.Options)
+                if (currentContent.Options.Count == 1 && currentContent[0].IsMain && currentContent[0].Content is not ExternalOptionsContent)
+                    SetNextClick(Tr("继续"), () => DoOption(currentContent[0]));
+                else
+                {
+                    IList<DialogueOption> options = null;
+                    if (currentContent[0]?.Content is ExternalOptionsContent sorter)
                     {
-                        string title = option.Title;
-                        bool skip = false;
-                        if (option.Content is DecoratorContent)
+                        options = sorter.GetOptions(CurrentEntryData, currentContent);
+                        CurrentEntryData[sorter]?.Access();
+                    }
+                    else options = currentContent.Options;
+                    //是否所有可使对话结束的选项(以下简称"结束选项")都被剔除了
+                    bool needReserve = options.Count > 0 && options
+                        .Where(opt => opt.Content && opt.Content.Exitable).All(opt =>
                         {
+                            return opt.Content is ConditionContent condition&& !condition.Check(CurrentData);
+                        });
+                    bool reserved = false;//是否已经保留了一个结束选项
+                    foreach (var option in options)
+                    {
+                        bool culled = false;
+                        if (option.Content is ConditionContent condition)
+                        {
+                            if ((!condition.Exitable || !needReserve) && !condition.Check(CurrentData))
+                                culled = true;//如果不在此选项结束对话或无需保留，则按需标记剔除
+                            else if (needReserve && reserved && condition.Exitable)
+                                culled = true;//如果需要保留且已经保留了一个结束选项，然后这个也是结束选项，也剔除掉
+                            if (!reserved) reserved = needReserve && condition.Exitable;
+                        }
+                        if (!culled)
+                        {
+                            string title = Keyword.HandleKeywords(Tr(option.Title));
                             var temp = option.Content;
                             while (temp is DecoratorContent decorator)
                             {
-                                if (!decorator.Decorate(CurrentData, currentContent, option, ref title))
-                                {
-                                    skip = true;
-                                    break;
-                                }
+                                decorator.Decorate(CurrentEntryData, ref title);
                                 temp = temp[0]?.Content;
                             }
+                            buttonDatas.Add(new ButtonWithTextData(Tr(title), () => DoOption(option)));
                         }
-                        if (!skip) buttonDatas.Add(new ButtonWithTextData(Tr(title), () => DoOption(option)));
                     }
+                }
                 RefreshOptions(Tr("互动"));
             }
         }
         private void ResetInteraction()
         {
-            ZetanUtility.SetActive(optionArea, false);
-            ZetanUtility.SetActive(nextButton, false);
-            ZetanUtility.SetActive(rejectButton, false);
+            Utility.SetActive(optionArea, false);
+            Utility.SetActive(nextButton, false);
+            Utility.SetActive(rejectButton, false);
             next = null;
         }
-        private IEnumerator Play(TextContent content)
+        private IEnumerator Write(TextContent content)
         {
-            var text = Keywords.HandleKeyWords(content.Text, true);
-            if (!string.IsNullOrEmpty(text))
+            targetText = ConvertPlayerOrNPC(Keyword.HandleKeywords(Tr(content.Text), true));
+            if (!string.IsNullOrEmpty(targetText))
             {
                 Stack<string> ends = new Stack<string>();
-                string temp = string.Empty;
-                for (int i = 0; i < text.Length; i++)
+                string suffix = string.Empty;
+                float interval = 0;
+                for (int i = 0; i < targetText.Length; i++)
                 {
                     string end = ends.Count > 0 ? ends.Peek() : string.Empty;
-                    if (checkColor(i))
+                    if (Regex.Match(safeString(i, 20),
+                                    @"^(<color=?>|<color=""\w+"">|<color='\w+'>|<color=#*[a-fA-F\d]{6}>|<color=#*[a-fA-F\d]{8}>)",
+                                    RegexOptions.IgnoreCase) is Match match && match.Success)
                     {
                         ends.Push("</color>");
-                        temp = temp.Insert(0, "</color>");
-                        while (text[i] != '>' && i < text.Length) i++;
+                        suffix = suffix.Insert(0, "</color>");
+                        i += match.Value.Length - 1;
                     }
-                    else if (checkSize(i))
+                    else if (Regex.Match(safeString(i, 10), @"^(<size>|<size=\d*>)", RegexOptions.IgnoreCase) is Match match2 && match2.Success)
                     {
                         ends.Push("</size>");
-                        temp = temp.Insert(0, "</size>");
-                        while (text[i] != '>' && i < text.Length) i++;
+                        suffix = suffix.Insert(0, "</size>");
+                        i += match2.Value.Length - 1;
                     }
-                    else if (checkItalic(i))
+                    else if (Regex.Match(safeString(i, 3), @"^(<i>)", RegexOptions.IgnoreCase) is Match match3 && match3.Success)
                     {
                         ends.Push("</i>");
-                        temp = temp.Insert(0, "</i>");
-                        i += 2;
+                        suffix = suffix.Insert(0, "</i>");
+                        i += match3.Value.Length - 1;
                     }
-                    else if (checkBold(i))
+                    else if (Regex.Match(safeString(i, 3), @"^(<b>)", RegexOptions.IgnoreCase) is Match match4 && match4.Success)
                     {
                         ends.Push("</b>");
-                        temp = temp.Insert(0, "</b>");
-                        i += 2;
+                        suffix = suffix.Insert(0, "</b>");
+                        i += match4.Value.Length - 1;
                     }
-                    else if (ends.Count > 0 && i + end.Length < text.Length && text[i..(i + end.Length)] == end)
+                    else if (ends.Count > 0 && i + end.Length <= targetText.Length && targetText[i..(i + end.Length)] == end)
                     {
                         i += end.Length - 1;
-                        temp = temp[0..^ends.Pop().Length];
+                        suffix = suffix[ends.Pop().Length..^0];
                     }
                     else
                     {
-                        wordsText.text = text[0..(i + 1)] + temp;
-                        var interval = getNextUtterInterval(i);
-                        if (interval > 0 && !Mathf.Approximately(interval, 0)) yield return new WaitForSecondsRealtime(interval);
+                        playTime += interval;
+                        //前段正常显示，后段设置为透明，这样能在一定程度时保持每个字的位置
+                        var remainder = Regex.Replace(targetText[i..^0],
+                                                      @"<color=?>|<color=""\w+"">|<color='\w+'>|<color=#*[a-fA-F\d]{6}>|<color=#*[a-fA-F\d]{8}>|<\/color>|<b>|<\/b>|<i>|<\/i>",
+                                                      "", RegexOptions.IgnoreCase);
+                        var prefix = string.Empty;
+                        var ms = Regex.Matches(remainder, @"<size>|<size=\d{0,3}>|<\/size>", RegexOptions.IgnoreCase);
+                        var tags = new Queue<Match>(Regex.Matches(targetText[0..i], @"<size=?>|<size=\d{0,3}>", RegexOptions.IgnoreCase));
+                        for (int j = 0; j < ms.Count; j++)
+                        {
+                            if (tags.Count > 0 && Regex.IsMatch(ms[j].Value, @"</size>", RegexOptions.IgnoreCase) && (j == 0 || !Regex.IsMatch(ms[j - 1].Value, @"<size=?>|<size=\d{0,3}>", RegexOptions.IgnoreCase)))
+                                prefix += tags.Dequeue().Value;
+                        }
+                        remainder = prefix + remainder;
+                        var result = targetText[0..i] + suffix + (!string.IsNullOrEmpty(remainder) ? $"<color>{remainder}</color>" : string.Empty);
+                        textText.text = result;
+                        if (i < targetText.Length && !char.IsPunctuation(targetText[i]))//标点符号不进行逐字，直接跟随上一个字符出来
+                        {
+                            interval = getNextUtterInterval(i);
+                            if (interval > 0 && !Mathf.Approximately(interval, 0)) yield return new WaitForSecondsRealtime(interval);
+                        }
+                        else interval = 0;
                     }
                 }
 
-                bool checkColor(int i) => i + 6 < text.Length && text[i..(i + 6)].ToLower() == "<color";
-                bool checkSize(int i) => i + 5 < text.Length && text[i..(i + 5)].ToLower() == "<size";
-                bool checkBold(int i) => i + 3 < text.Length && text[i..(i + 3)].ToLower() == "<b>";
-                bool checkItalic(int i) => i + 3 < text.Length && text[i..(i + 3)].ToLower() == "<i>";
+                string safeString(int i, int length) => targetText[i..(i + length <= targetText.Length ? i + length : ^0)];
                 float getNextUtterInterval(int i)
                 {
-                    if (i < 0 || i > text.Length - 1 || content.UtterInterval == null || content.UtterInterval.keys.Length < 2) return 0;
-                    return content.UtterInterval.Evaluate((i + 1.0f) / text.Length);
+                    if (i < 0 || i > targetText.Length - 1 || (content.UtterInterval?.keys.Length ?? 0) < 2) return 0;
+                    return content.UtterInterval.Evaluate((i + 1.0f) / targetText.Length);
                 }
             }
-            wordsText.text = text;
+            textText.text = targetText;
+            HandleInteraction();
+            coroutine = null;
+            playTime = 0;
+        }
+        public void Skip()
+        {
+            if (IsPlaying && playTime >= skipDelay)
+            {
+                StopCoroutine(coroutine);
+                textText.text = targetText;
+                HandleInteraction();
+                coroutine = null;
+            }
         }
         #endregion
 
@@ -299,7 +399,7 @@ namespace ZetanStudio.DialogueSystem.UI
         public void ShowTalkerQuest()
         {
             if (!currentTalker) return;
-            ReturnToRoot();
+            GoBackImmediate();
             ResetInteraction();
             if (currentTalker.QuestInstances.Where(x => !x.IsSubmitted).Any())
             {
@@ -390,7 +490,7 @@ namespace ZetanStudio.DialogueSystem.UI
         public void ShowTalkerObjective()
         {
             if (!currentTalker) return;
-            ReturnToRoot();
+            GoBack();
             ResetInteraction();
             buttonDatas.Clear();
             foreach (TalkObjectiveData to in currentTalker.GetData<TalkerData>().objectivesTalkToThis.Where(o => !o.IsComplete))
@@ -422,7 +522,7 @@ namespace ZetanStudio.DialogueSystem.UI
                             {
                                 if (CountedItem.GetAmount(items, so.Model.ItemToSubmit) != so.Model.Amount)
                                 {
-                                    MessageManager.Instance.New("数量不正确");
+                                    MessageManager.Instance.New(Tr("数量不正确"));
                                     return false;
                                 }
                                 if (BackpackManager.Instance.Lose(items)) StartWith(so.Dialogue);
@@ -445,7 +545,7 @@ namespace ZetanStudio.DialogueSystem.UI
                             if (o is CollectObjectiveData co && co.Model.LoseItemAtSbmt && o.Model.InOrder && o.IsComplete)
                                 if (amount - so.Model.Amount < o.Model.Amount)
                                 {
-                                    MessageManager.Instance.New($"该物品为目标[{o.DisplayName}]所需");
+                                    MessageManager.Instance.New(Tr("该物品为目标[{0}]所需", o.DisplayName));
                                     return false;
                                 }
                     return BackpackManager.Instance.CanLose(so.Model.ItemToSubmit, so.Model.Amount);
@@ -463,7 +563,7 @@ namespace ZetanStudio.DialogueSystem.UI
         private void SetNextClick(string text, Action action)
         {
             nextBtnText.text = text;
-            ZetanUtility.SetActive(nextButton, true);
+            Utility.SetActive(nextButton, true);
             nextButton.onClick.RemoveAllListeners();
             nextButton.onClick.AddListener(() => action?.Invoke());
             next = action;
@@ -471,21 +571,21 @@ namespace ZetanStudio.DialogueSystem.UI
         private void SetRejectClick(string text, Action action)
         {
             rejectBtnText.text = text;
-            ZetanUtility.SetActive(rejectButton, true);
+            Utility.SetActive(rejectButton, true);
             rejectButton.onClick.RemoveAllListeners();
             rejectButton.onClick.AddListener(() => action?.Invoke());
         }
         public void Next()
         {
-            if (next != null) next.Invoke();
+            if (IsPlaying) Skip();
+            else if (next != null) next.Invoke();
             else if (optionList.Count > 0) optionList.Items[0].OnClick();
             else if (ShouldShowObjectives()) ShowTalkerObjective();
             else if (ShouldShowQuest()) ShowTalkerQuest();
         }
-        public void ReturnToRoot()
+        public void GoBack()
         {
             currentQuest = null;
-            currentTalkObj = null;
             currentSubmitObj = null;
             next = null;
             continueContent.Clear();
@@ -493,30 +593,45 @@ namespace ZetanStudio.DialogueSystem.UI
             HideQuestDescription();
             StartWith(root);
         }
+        private void GoBackImmediate()
+        {
+            GoBack();
+            if (IsPlaying)
+            {
+                StopCoroutine(coroutine);
+                textText.text = targetText;
+                coroutine = null;
+            }
+        }
+        private void OnTextClick()
+        {
+            if (IsPlaying) Skip();
+            else if (!rejectBtnText.isActiveAndEnabled) next?.Invoke();
+        }
         private void DoOption(DialogueOption option)
         {
-            if (!option.Content) return;
-            if (option.Content.IsManual()) option.Content.Manual(this);
+            if (!option || !option.Content) return;
+            if (option.Content.IsManual()) option.Content.DoManual(this);
             else HandleContent(option.Content);
         }
         private void RefreshOptions(string title = null)
         {
             optionTitle.text = title;
-            ZetanUtility.SetActive(optionTitleArea, title != null);
+            Utility.SetActive(optionTitleArea, title != null);
             optionList.Refresh(buttonDatas);
-            ZetanUtility.SetActive(optionArea, optionList.Count > 0);
+            Utility.SetActive(optionArea, optionList.Count > 0);
         }
         #endregion
 
         #region 功能按钮相关
         private void ShowButtons(bool gift = true, bool shop = true, bool warehouse = true, bool talk = true, bool quest = true, bool back = true)
         {
-            ZetanUtility.SetActive(giftButton.gameObject, gift);
-            ZetanUtility.SetActive(shopButton.gameObject, shop);
-            ZetanUtility.SetActive(warehouseButton.gameObject, warehouse);
-            ZetanUtility.SetActive(talkButton.gameObject, talk);
-            ZetanUtility.SetActive(questButton.gameObject, quest);
-            ZetanUtility.SetActive(backButton.gameObject, back);
+            Utility.SetActive(giftButton.gameObject, gift);
+            Utility.SetActive(shopButton.gameObject, shop);
+            Utility.SetActive(warehouseButton.gameObject, warehouse);
+            Utility.SetActive(talkButton.gameObject, talk);
+            Utility.SetActive(questButton.gameObject, quest);
+            Utility.SetActive(backButton.gameObject, back);
         }
         private void OpenTalkerWarehouse()
         {
@@ -570,13 +685,15 @@ namespace ZetanStudio.DialogueSystem.UI
             currentQuest = null;
             currentTalkObj = null;
             currentSubmitObj = null;
+            next = null;
             optionList.Clear();
             HideQuestDescription();
             currentType = DialogueType.Normal;
         }
         protected override void OnAwake()
         {
-            backButton.onClick.AddListener(ReturnToRoot);
+            textButton.onClick.AddListener(OnTextClick);
+            backButton.onClick.AddListener(GoBack);
             giftButton.onClick.AddListener(OpenGiftWindow);
             shopButton.onClick.AddListener(OpenTalkerShop);
             warehouseButton.onClick.AddListener(OpenTalkerWarehouse);

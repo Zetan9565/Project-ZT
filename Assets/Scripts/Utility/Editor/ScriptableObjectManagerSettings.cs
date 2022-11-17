@@ -3,7 +3,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace ZetanStudio
+namespace ZetanStudio.Editor
 {
     public class ScriptableObjectManagerSettings : ScriptableObject
     {
@@ -18,7 +18,7 @@ namespace ZetanStudio
 
         private static ScriptableObjectManagerSettings Find()
         {
-            var settings = ZetanUtility.Editor.LoadAssets<ScriptableObjectManagerSettings>();
+            var settings = Utility.Editor.LoadAssets<ScriptableObjectManagerSettings>();
             if (settings.Count > 1) Debug.LogWarning(L.Tr(settings[0].language, "找到多个ScriptableObject管理器配置，将使用第一个"));
             if (settings.Count > 0) return settings[0];
             return null;
@@ -30,9 +30,9 @@ namespace ZetanStudio
             if (settings == null)
             {
                 settings = CreateInstance<ScriptableObjectManagerSettings>();
-                settings.treeUxml = ZetanUtility.Editor.LoadAssetWhere<VisualTreeAsset>(x => x.name == typeof(ScriptableObjectManager).Name);
-                settings.treeUss = ZetanUtility.Editor.LoadAssetWhere<StyleSheet>(x => x.name == typeof(ScriptableObjectManager).Name);
-                settings.scriptTemplate = ZetanUtility.Editor.LoadAssetWhere<TextAsset>(x => x.name.Contains("NewScriptableObject.cs"), extension: "txt");
+                settings.treeUxml = Utility.Editor.LoadAssetWhere<VisualTreeAsset>(x => x.name == typeof(ScriptableObjectManager).Name);
+                settings.treeUss = Utility.Editor.LoadAssetWhere<StyleSheet>(x => x.name == typeof(ScriptableObjectManager).Name);
+                settings.scriptTemplate = Utility.Editor.LoadAssetWhere<TextAsset>(x => x.name.Contains("NewScriptableObject.cs"), extension: "txt");
                 AssetDatabase.CreateAsset(settings, AssetDatabase.GenerateUniqueAssetPath("Assets/Scripts/Utility/Editor/Resources/so manager settings.asset"));
             }
             return settings;

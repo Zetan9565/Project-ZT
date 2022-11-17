@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.TimeSystem;
+using ZetanStudio.TimeSystem.UI;
 
 public class CalendarWindow : Window
 {
@@ -37,7 +39,7 @@ public class CalendarWindow : Window
     private void RefreshMonth()
     {
         if (!TimeManager.Instance) return;
-        month.text = TimeManager.Instance.Date.GetMonthString(TimeManager.Instance.TimeSystem);
+        month.text = TimeManager.Instance.Date.GetMonthString(TimeManager.Instance.ClockSystem);
         int startIndex = (int)TimeManager.Instance.FirstWeekDayOfCurrentMonth;//本月第一天的星期
         for (int i = 1; i < 31; i++)
         {

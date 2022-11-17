@@ -1,14 +1,17 @@
-﻿using System.Collections;
-using UnityEngine.UI;
+﻿using UnityEngine.UI;
+using ZetanStudio.UI;
 
-public class QuestList : ScrollListView<QuestAgent, QuestAgentData>
+namespace ZetanStudio.QuestSystem.UI
 {
-    protected override void RefreshOverrideCellSize()
+    public class QuestList : ScrollListView<QuestAgent, QuestAgentData>
     {
-        var layoutGroup = this.layoutGroup as HorizontalOrVerticalLayoutGroup;
-        layoutGroup.childControlWidth = true;
-        layoutGroup.childControlHeight = true;
-        applyCellSize = cellSize;
-        ForEach(RefreshCellSize);
+        protected override void RefreshOverrideCellSize()
+        {
+            var layoutGroup = this.layoutGroup as HorizontalOrVerticalLayoutGroup;
+            layoutGroup.childControlWidth = true;
+            layoutGroup.childControlHeight = true;
+            applyCellSize = cellSize;
+            ForEach(RefreshCellSize);
+        }
     }
 }

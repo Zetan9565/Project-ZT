@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CustomPropertyDrawer(typeof(HideWhenPlayingAttribute))]
-public class HideWhenPlayingDrawer : EnhancedAttributeDrawer
+public class HideWhenPlayingDrawer : EnhancedPropertyDrawer
 {
     private bool shouldHide;
 

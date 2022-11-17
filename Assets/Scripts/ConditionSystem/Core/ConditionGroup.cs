@@ -9,24 +9,22 @@ namespace ZetanStudio.ConditionSystem
     [Serializable]
     public class ConditionGroup
     {
+        [SerializeField, HideIf("conditions.Length", 0)]
+        [Tooltip("1、操作数为条件的序号\n2、运算符可使用 \"(\"、\")\"、\"|\"(或)、\"&\"(且)、\"!\"(非)" +
+                    "\n3、未对非法输入进行处理，需规范填写\n4、例：(0 | 1) * !2 表示满足条件0或1且不满足条件2\n5、为空时默认进行相互的“且”运算")]
+        private string relational;
+        public string Relational => relational;
+
         [SerializeReference]
         private Condition[] conditions = { };
         public ReadOnlyCollection<Condition> Conditions => new ReadOnlyCollection<Condition>(conditions);
-
-        [SerializeField]
-        [Tooltip("1、操作数为条件的序号\n2、运算符可使用 \"(\"、\")\"、\"|\"(或)、\"&\"(且)、\"!\"(非)" +
-                            "\n3、未对非法输入进行处理，需规范填写\n4、例：(0 | 1) * !2 表示满足条件0或1且不满足条件2\n5、为空时默认进行相互的“且”运算")]
-        private string relational;
-        public string Relational => relational;
 
         public bool IsValid => conditions.All(x => x != null && x.IsValid);
 
         public bool IsMeet()
         {
-            bool calFailed = false;
             if (string.IsNullOrEmpty(Relational)) return conditions.All(x => x.IsMeet());
-            if (conditions.Length < 1) calFailed = true;
-            else
+            if (conditions.Length > 0)
             {
                 var cr = Relational.Replace(" ", "").ToCharArray();//删除所有空格才开始计算
                 List<string> RPN = new List<string>();//逆波兰表达式
@@ -42,18 +40,14 @@ namespace ZetanStudio.ConditionSystem
                         {
                             item = indexStr;
                             indexStr = string.Empty;
-                            GetRPNItem(item);
+                            getRPNItem(item);
                         }
                         if (c == '(' || c == ')' || c == '|' || c == '&' || c == '!')
                         {
                             item = c + "";
-                            GetRPNItem(item);
+                            getRPNItem(item);
                         }
-                        else
-                        {
-                            calFailed = true;
-                            break;
-                        }//既不是数字也不是运算符，直接放弃计算
+                        else break;//既不是数字也不是运算符，直接放弃计算
                     }
                     else
                     {
@@ -62,7 +56,7 @@ namespace ZetanStudio.ConditionSystem
                         {
                             item = indexStr;
                             indexStr = string.Empty;
-                            GetRPNItem(item);
+                            getRPNItem(item);
                         }
                     }
                 }
@@ -71,16 +65,13 @@ namespace ZetanStudio.ConditionSystem
                 Stack<bool> values = new Stack<bool>();
                 foreach (var item in RPN)
                 {
-                    //Debug.Log(item);
                     if (int.TryParse(item, out int index))
                     {
                         if (index >= 0 && index < conditions.Length)
-                            values.Push(conditions[index].IsMeet());
-                        else
                         {
-                            //Debug.Log("return 1");
-                            return true;
+                            values.Push(conditions[index].IsMeet());
                         }
+                        else  return true;
                     }
                     else if (values.Count > 0)
                     {
@@ -94,15 +85,10 @@ namespace ZetanStudio.ConditionSystem
                         }
                     }
                 }
-                if (values.Count == 1)
-                {
-                    //Debug.Log("return 2");
-                    return values.Pop();
-                }
+                if (values.Count == 1) return values.Pop();
 
-                void GetRPNItem(string item)
+                void getRPNItem(string item)
                 {
-                    //Debug.Log(item);
                     if (item == "!" || item == "&" || item == "|")//遇到运算符
                     {
                         char opt = item[0];
@@ -139,27 +125,11 @@ namespace ZetanStudio.ConditionSystem
                     else if (int.TryParse(item, out _)) RPN.Add(item);//遇到数字
                 }
             }
-            if (!calFailed)
-            {
-                //Debug.Log("return 3");
-                return true;
-            }
-            else
-            {
-                foreach (Condition con in conditions)
-                    if (!con.IsMeet())
-                    {
-                        //Debug.Log("return 4");
-                        return false;
-                    }
-                //Debug.Log("return 5");
-                return true;
-            }
+            foreach (Condition con in conditions)
+                if (!con.IsMeet()) return false;
+            return true;
         }
 
-        public static implicit operator bool(ConditionGroup self)
-        {
-            return self != null;
-        }
+        public static implicit operator bool(ConditionGroup self) => self != null;
     }
 }

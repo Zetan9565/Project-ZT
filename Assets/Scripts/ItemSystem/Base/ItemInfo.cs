@@ -6,6 +6,7 @@ using UnityEngine;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.ItemSystem.Module;
 using ZetanStudio.Math;
+using ZetanStudio.QuestSystem;
 
 #region 道具信息相关
 public interface IItemInfo

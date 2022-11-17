@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio;
+using ZetanStudio.FarmingSystem;
+using ZetanStudio.FarmingSystem.UI;
+using ZetanStudio.PlayerSystem;
 using ZetanStudio.StructureSystem;
 
 public class FieldWindow : Window, IHideable

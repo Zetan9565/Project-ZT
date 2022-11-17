@@ -6,8 +6,8 @@ namespace ZetanStudio
 
         public static string Tr(string text)
         {
-            if (!instance) return text;
-            return L.Tr(instance.language, text);
+            if (!Instance) return text;
+            return L.Tr(Instance.language, text);
         }
     }
 }

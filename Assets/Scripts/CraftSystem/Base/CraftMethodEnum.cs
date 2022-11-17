@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZetanStudio.ItemSystem.Craft
+namespace ZetanStudio.CraftSystem
 {
     [CreateAssetMenu(fileName = "making type", menuName = "Zetan Studio/道具/枚举/工艺类型")]
     public class CraftMethodEnum : ScriptableObjectEnum<CraftMethodEnum, CraftMethod>

@@ -54,21 +54,21 @@ namespace ZetanStudio.ItemSystem
                 if (index < 0) template.modules.Add(module);
                 else template.modules.Insert(index, module);
                 if (!CommonModule.IsCommon(type)) keyedModules.Add(type, module);
-                ZetanUtility.Editor.SaveChange(template);
+                Utility.Editor.SaveChange(template);
                 return module;
             }
             public static bool RemoveModule(ItemTemplate template, ItemModule module)
             {
                 if (!template || module == null) return false;
                 template.modules.Remove(module);
-                ZetanUtility.Editor.SaveChange(template);
+                Utility.Editor.SaveChange(template);
                 return true;
             }
 
             public static bool ClearInvalidModule(ItemTemplate template)
             {
                 int count = template.modules.RemoveAll(x => !x);
-                if (count > 0) ZetanUtility.Editor.SaveChange(template);
+                if (count > 0) Utility.Editor.SaveChange(template);
                 return count > 0;
             }
         }

@@ -24,7 +24,7 @@ namespace ZetanStudio.BehaviourTree
                 if (tree)
                 {
                     if (!global)
-                        if (!tree.IsInstance) global = ZetanUtility.Editor.LoadAsset<GlobalVariables>();
+                        if (!tree.IsInstance) global = Utility.Editor.LoadAsset<GlobalVariables>();
                         else global = BehaviourTreeManager.Instance.GlobalVariables;
                 }
                 SerializedProperty isShared = property.FindPropertyRelative("isShared");
@@ -94,7 +94,7 @@ namespace ZetanStudio.BehaviourTree
                     {
                         contents[i] = new GUIContent(varNames[i]);
                     }
-                    SharedVariable linked = type.GetField("linkedVariable", ZetanUtility.CommonBindingFlags).GetValue(shared) as SharedVariable;
+                    SharedVariable linked = type.GetField("linkedVariable", Utility.CommonBindingFlags).GetValue(shared) as SharedVariable;
                     SerializedProperty linkedVariable = property.FindPropertyRelative("linkedVariable");
                     SerializedProperty linkedSVName = property.FindPropertyRelative("linkedSVName");
                     SerializedProperty linkedGVName = property.FindPropertyRelative("linkedGVName");

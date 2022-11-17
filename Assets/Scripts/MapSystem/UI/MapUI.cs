@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio;
+using ZetanStudio.PlayerSystem;
 
 public class MapUI : MonoBehaviour
 {

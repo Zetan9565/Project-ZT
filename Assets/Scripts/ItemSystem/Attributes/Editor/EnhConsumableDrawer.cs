@@ -20,9 +20,9 @@ namespace ZetanStudio.ItemSystem.Editor
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var oldLW = EditorGUIUtility.labelWidth;
-            SerializedProperty item = property.FindAutoPropertyRelative("Item");
-            SerializedProperty amount = property.FindAutoPropertyRelative("Amount");
-            SerializedProperty rate = property.FindAutoPropertyRelative("SuccessRate");
+            SerializedProperty item = property.FindAutoProperty("Item");
+            SerializedProperty amount = property.FindAutoProperty("Amount");
+            SerializedProperty rate = property.FindAutoProperty("SuccessRate");
             var t = new GUIContent(L.Tr(settings.language, "道具"));
             EditorGUIUtility.labelWidth = GUI.skin.label.CalcSize(t).x;
             EditorGUI.PropertyField(new Rect(position.x, position.y, position.width / 3 - 1, lineHeight), item, t);

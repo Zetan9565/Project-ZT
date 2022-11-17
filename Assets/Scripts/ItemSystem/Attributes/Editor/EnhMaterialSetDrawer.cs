@@ -23,7 +23,7 @@ namespace ZetanStudio.ItemSystem.Editor
             if (typeof(IList).IsAssignableFrom(fieldInfo.FieldType))
             {
                 int index = property.GetArrayIndex();
-                SerializedProperty rate = property.FindAutoPropertyRelative("SuccessRate");
+                SerializedProperty rate = property.FindAutoProperty("SuccessRate");
                 SerializedProperty materials = property.FindPropertyRelative("materials");
                 EditorGUI.PropertyField(new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight), rate, new GUIContent(Tr("[{0}组] 成功率", index + 1)));
                 EditorGUI.PropertyField(new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing, position.width, EditorGUIUtility.singleLineHeight), materials, new GUIContent(Tr("材料")));

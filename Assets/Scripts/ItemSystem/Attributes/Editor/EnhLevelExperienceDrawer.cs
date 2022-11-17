@@ -18,9 +18,9 @@ namespace ZetanStudio.ItemSystem.Editor
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            EditorGUI.PropertyField(new Rect(position.x, position.y, position.width / 2 - 1, EditorGUIUtility.singleLineHeight), property.FindAutoPropertyRelative("Experience"), 
+            EditorGUI.PropertyField(new Rect(position.x, position.y, position.width / 2 - 1, EditorGUIUtility.singleLineHeight), property.FindAutoProperty("Experience"), 
                 new GUIContent(L.Tr(settings.language, "[{0}级] 经验值", property.GetArrayIndex()+1)));
-            SerializedProperty rate = property.FindAutoPropertyRelative("SuccessRate");
+            SerializedProperty rate = property.FindAutoProperty("SuccessRate");
             var oldLW = EditorGUIUtility.labelWidth;
             var sL = new GUIContent(Tr("成功率"));
             EditorGUIUtility.labelWidth = GUI.skin.label.CalcSize(sL).x;

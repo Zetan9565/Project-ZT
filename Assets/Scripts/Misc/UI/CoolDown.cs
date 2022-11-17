@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio;
 using ZetanStudio.Extension;
 
 [RequireComponent(typeof(Image))]
@@ -46,7 +47,7 @@ public class CoolDown : MonoBehaviour
     public void Enable()
     {
         active = true;
-        ZetanUtility.SetActive(this, true);
+        Utility.SetActive(this, true);
         if (coroutine != null) StopCoroutine(coroutine);
         coroutine = StartCoroutine(OnUpdate());
     }
@@ -55,7 +56,7 @@ public class CoolDown : MonoBehaviour
         active = false;
         mask.fillAmount = 0;
         text.text = string.Empty;
-        ZetanUtility.SetActive(this, false);
+        Utility.SetActive(this, false);
         if (coroutine != null) StopCoroutine(coroutine);
     }
 }

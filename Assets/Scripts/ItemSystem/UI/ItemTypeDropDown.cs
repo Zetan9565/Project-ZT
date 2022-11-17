@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
 
-namespace ZetanStudio.ItemSystem
+namespace ZetanStudio.ItemSystem.UI
 {
     [RequireComponent((typeof(Dropdown)))]
     public class ItemTypeDropDown : MonoBehaviour

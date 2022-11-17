@@ -1,9 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace ZetanStudio.GatheringSystem
 {
+    using InteractionSystem.UI;
+    using PlayerSystem;
+
     [DisallowMultipleComponent]
     [AddComponentMenu("Zetan Studio/管理器/采集理器")]
     public static class GatherManager

@@ -1,4 +1,5 @@
 using UnityEngine;
+using ZetanStudio;
 using ZetanStudio.BehaviourTree;
 using ZetanStudio.BehaviourTree.Nodes;
 
@@ -44,7 +45,7 @@ public class Seek : PathMovement
     }
     public override void OnDrawGizmosSelected()
     {
-        if (transform) ZetanUtility.DrawGizmosCircle(transform.position, radius);
+        if (transform) Utility.DrawGizmosCircle(transform.position, radius);
     }
 
     private Vector3 GetTarget()

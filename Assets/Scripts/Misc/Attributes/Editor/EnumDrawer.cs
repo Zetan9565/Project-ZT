@@ -2,56 +2,59 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(EnumAttribute))]
-public class EnumDrawer : PropertyDrawer
+namespace ZetanStudio.Editor
 {
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(EnumAttribute))]
+    public class EnumDrawer : PropertyDrawer
     {
-        if (property.propertyType == SerializedPropertyType.Integer)
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            var attr = (EnumAttribute)attribute;
-            foreach (var type in TypeCache.GetTypesDerivedFrom<ScriptableObjectEnum>())
+            if (property.propertyType == SerializedPropertyType.Integer)
             {
-                if (!type.IsAbstract && !type.IsGenericType)
+                var attr = (EnumAttribute)attribute;
+                foreach (var type in TypeCache.GetTypesDerivedFrom<ScriptableObjectEnum>())
                 {
-                    var generics = type.BaseType.GetGenericArguments();
-                    if (attr.type == generics[1])
+                    if (!type.IsAbstract && !type.IsGenericType)
                     {
-                        var instance = type.GetProperty("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.FlattenHierarchy);
-                        if (instance.GetValue(null) is ScriptableObjectEnum Enum)
+                        var generics = type.BaseType.GetGenericArguments();
+                        if (attr.type == generics[1])
                         {
-                            var types = Enum.GetEnum().Select(x => new GUIContent(x.Name));
-                            label = EditorGUI.BeginProperty(position, label, property);
-                            EditorApplication.contextualPropertyMenu += OnPropertyContextMenu;
-                            property.intValue = EditorGUI.Popup(position, label, property.intValue, types.ToArray());
-                            EditorGUI.EndProperty();
-                            EditorApplication.contextualPropertyMenu -= OnPropertyContextMenu;
-                            return;
-
-                            void OnPropertyContextMenu(GenericMenu menu, SerializedProperty property)
+                            var instance = type.GetProperty("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.FlattenHierarchy);
+                            if (instance.GetValue(null) is ScriptableObjectEnum Enum)
                             {
-                                if (property.propertyType != SerializedPropertyType.Integer)
-                                    return;
+                                var types = Enum.GetEnum().Select(x => new GUIContent(x.Name));
+                                label = EditorGUI.BeginProperty(position, label, property);
+                                EditorApplication.contextualPropertyMenu += OnPropertyContextMenu;
+                                property.intValue = EditorGUI.Popup(position, label, property.intValue, types.ToArray());
+                                EditorGUI.EndProperty();
+                                EditorApplication.contextualPropertyMenu -= OnPropertyContextMenu;
+                                return;
 
-                                menu.AddItem(EditorGUIUtility.TrTextContent("Location"), false, () =>
+                                void OnPropertyContextMenu(GenericMenu menu, SerializedProperty property)
                                 {
-                                    EditorGUIUtility.PingObject(Enum);
-                                });
-                                menu.AddItem(EditorGUIUtility.TrTextContent("Select"), false, () =>
-                                {
-                                    EditorGUIUtility.PingObject(Enum);
-                                    Selection.activeObject = Enum;
-                                });
-                                menu.AddItem(EditorGUIUtility.TrTextContent("Properties..."), false, () =>
-                                {
-                                    EditorUtility.OpenPropertyEditor(Enum);
-                                });
+                                    if (property.propertyType != SerializedPropertyType.Integer)
+                                        return;
+
+                                    menu.AddItem(EditorGUIUtility.TrTextContent("Location"), false, () =>
+                                    {
+                                        EditorGUIUtility.PingObject(Enum);
+                                    });
+                                    menu.AddItem(EditorGUIUtility.TrTextContent("Select"), false, () =>
+                                    {
+                                        EditorGUIUtility.PingObject(Enum);
+                                        Selection.activeObject = Enum;
+                                    });
+                                    menu.AddItem(EditorGUIUtility.TrTextContent("Properties..."), false, () =>
+                                    {
+                                        EditorUtility.OpenPropertyEditor(Enum);
+                                    });
+                                }
                             }
                         }
                     }
                 }
             }
+            else EditorGUI.PropertyField(position, property, label);
         }
-        else EditorGUI.PropertyField(position, property, label);
     }
 }

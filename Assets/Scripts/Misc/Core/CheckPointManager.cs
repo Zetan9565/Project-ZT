@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio;
 using ZetanStudio.Extension;
 
 public static class CheckPointManager
@@ -19,7 +20,7 @@ public static class CheckPointManager
 
     public static CheckPointData CreateCheckPoint(CheckPointInformation info, Action<CheckPointInformation> moveIntoAction, Action<CheckPointInformation> leaveAction = null)
     {
-        if (!info || !info.IsValid || info.Scene != ZetanUtility.ActiveScene.name) return null;
+        if (!info || !info.IsValid || info.Scene != Utility.GetActiveScene().name) return null;
         CheckPointData checkPointData = new CheckPointData(info);
         checkPointData.AddListener(moveIntoAction, leaveAction);
         foreach (var position in info.Positions)

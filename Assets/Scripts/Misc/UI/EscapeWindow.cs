@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio;
+using ZetanStudio.UI;
 
 public class EscapeWindow : Window
 {

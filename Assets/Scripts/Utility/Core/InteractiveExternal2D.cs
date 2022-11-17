@@ -1,4 +1,5 @@
 using UnityEngine;
+using ZetanStudio.InteractionSystem;
 
 public sealed class InteractiveExternal2D : InteractiveExternalBase
 {

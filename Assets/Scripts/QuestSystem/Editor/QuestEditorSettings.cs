@@ -3,63 +3,66 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class QuestEditorSettings : ScriptableObject
+namespace ZetanStudio.QuestSystem.Editor
 {
-    [Label("编辑器UXML")]
-    public VisualTreeAsset treeUxml;
-    [Label("编辑器USS")]
-    public StyleSheet treeUss;
-    [Label("编辑器最小尺寸")]
-    public Vector2 minWindowSize = new Vector2(800, 600);
-
-    private static QuestEditorSettings Find()
+    public class QuestEditorSettings : ScriptableObject
     {
-        var settings = ZetanUtility.Editor.LoadAssets<QuestEditorSettings>();
-        if (settings.Count > 1) Debug.LogWarning("找到多个任务编辑器配置，将使用第一个");
-        if (settings.Count > 0) return settings[0];
-        return null;
-    }
+        [Label("编辑器UXML")]
+        public VisualTreeAsset treeUxml;
+        [Label("编辑器USS")]
+        public StyleSheet treeUss;
+        [Label("编辑器最小尺寸")]
+        public Vector2 minWindowSize = new Vector2(800, 600);
 
-    public static QuestEditorSettings GetOrCreate()
-    {
-        var settings = Find();
-        if (settings == null)
+        private static QuestEditorSettings Find()
         {
-            settings = CreateInstance<QuestEditorSettings>();
-            AssetDatabase.CreateAsset(settings, "Assets/Scripts/QuestSystem/Editor/QuestEditorSettings.asset");
+            var settings = Utility.Editor.LoadAssets<QuestEditorSettings>();
+            if (settings.Count > 1) Debug.LogWarning("找到多个任务编辑器配置，将使用第一个");
+            if (settings.Count > 0) return settings[0];
+            return null;
         }
-        return settings;
-    }
-    private static class ZSQESettingsUIElementsRegister
-    {
-        [SettingsProvider]
-        public static SettingsProvider CreateZSQESettingsProvider()
+
+        public static QuestEditorSettings GetOrCreate()
         {
-            var provider = new SettingsProvider("Project/Zetan Studio/ZSQESettingsUIElementsSettings", SettingsScope.Project)
+            var settings = Find();
+            if (settings == null)
             {
-                label = "任务编辑器",
-                activateHandler = (searchContext, rootElement) =>
+                settings = CreateInstance<QuestEditorSettings>();
+                AssetDatabase.CreateAsset(settings, "Assets/Scripts/QuestSystem/Editor/QuestEditorSettings.asset");
+            }
+            return settings;
+        }
+        private static class ZSQESettingsUIElementsRegister
+        {
+            [SettingsProvider]
+            public static SettingsProvider CreateZSQESettingsProvider()
+            {
+                var provider = new SettingsProvider("Project/Zetan Studio/ZSQESettingsUIElementsSettings", SettingsScope.Project)
                 {
-                    SerializedObject serializedObject = new SerializedObject(GetOrCreate());
-
-                    Label title = new Label() { text = "任务编辑器设置" };
-                    title.AddToClassList("title");
-                    rootElement.Add(title);
-
-                    var properties = new VisualElement()
+                    label = "任务编辑器",
+                    activateHandler = (searchContext, rootElement) =>
                     {
-                        style = { flexDirection = FlexDirection.Column }
-                    };
-                    properties.AddToClassList("property-list");
-                    rootElement.Add(properties);
+                        SerializedObject serializedObject = new SerializedObject(GetOrCreate());
 
-                    properties.Add(new InspectorElement(serializedObject));
+                        Label title = new Label() { text = "任务编辑器设置" };
+                        title.AddToClassList("title");
+                        rootElement.Add(title);
 
-                    rootElement.Bind(serializedObject);
-                },
-            };
+                        var properties = new VisualElement()
+                        {
+                            style = { flexDirection = FlexDirection.Column }
+                        };
+                        properties.AddToClassList("property-list");
+                        rootElement.Add(properties);
 
-            return provider;
+                        properties.Add(new InspectorElement(serializedObject));
+
+                        rootElement.Bind(serializedObject);
+                    },
+                };
+
+                return provider;
+            }
         }
     }
 }

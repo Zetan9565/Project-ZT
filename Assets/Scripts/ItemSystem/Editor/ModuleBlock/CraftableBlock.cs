@@ -20,7 +20,7 @@ namespace ZetanStudio.ItemSystem.Editor
             canMakeByTry = property.FindPropertyRelative("canMakeByTry");
             formulation = property.FindPropertyRelative("formulation");
             materials = property.FindPropertyRelative("materials");
-            yield = property.FindAutoPropertyRelative("Yield");
+            yield = property.FindAutoProperty("Yield");
         }
 
         protected override void OnInspectorGUI()

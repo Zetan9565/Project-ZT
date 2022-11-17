@@ -26,7 +26,7 @@ namespace ZetanStudio.ItemSystem.Editor
             scriptTemplate = serializedObject.FindProperty("scriptTemplate");
             newScriptFolder = serializedObject.FindProperty("newScriptFolder");
             language = serializedObject.FindProperty("language");
-            path = ZetanUtility.Editor.GetAssetPathWhere<MonoScript>(x => x.GetClass() == typeof(Item));
+            path = Utility.Editor.GetAssetPathWhere<MonoScript>(x => x.GetClass() == typeof(Item));
         }
 
         public override void OnInspectorGUI()
@@ -53,7 +53,7 @@ namespace ZetanStudio.ItemSystem.Editor
                 while (true)
                 {
                     path = EditorUtility.SaveFolderPanel(Tr("选择道具相关资源的位置"), path, null);
-                    path = ZetanUtility.Editor.ConvertToAssetsPath(path);
+                    path = Utility.Editor.ConvertToAssetsPath(path);
                     if (!string.IsNullOrEmpty(path) && !path.StartsWith("Assets/Resources"))
                         if (!EditorUtility.DisplayDialog(Tr("路径错误"), Tr("请选择{0}范围内的路径", "Assets/Resources"), Tr("确定"), Tr("取消")))
                         {

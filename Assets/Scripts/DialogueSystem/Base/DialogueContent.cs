@@ -4,10 +4,17 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace ZetanStudio.DialogueSystem
 {
+    using ConditionSystem;
+    using InventorySystem;
+    using InventorySystem.UI;
     using ItemSystem;
+    using ItemSystem.UI;
     using UI;
 
     [Serializable]
@@ -31,18 +38,18 @@ namespace ZetanStudio.DialogueSystem
 
         public abstract bool IsValid { get; }
 
-        public DialogueOption this[int index] => index >= 0 && index < options.Length ? options[index] : null;
+        public DialogueOption this[int optionIndex] => optionIndex >= 0 && optionIndex < options.Length ? options[optionIndex] : null;
 
         public string GetName() => GetName(GetType());
 
-        public virtual bool Enter() => true;
+        public virtual bool OnEnter() => true;
 
         public virtual bool IsManual() => false;
 
-        public virtual void Manual(DialogueWindow window) { }
+        public virtual void DoManual(DialogueWindow window) { }
 
-        public static string GetGroup(Type type) => type.GetCustomAttribute<GroupAttribute>()?.group ?? string.Empty;
-        public static string GetName(Type type) => type.GetCustomAttribute<NameAttribute>()?.name ?? type.Name;
+        public static string GetGroup(Type type) => type.GetCustomAttribute<GroupAttribute>(true)?.group ?? string.Empty;
+        public static string GetName(Type type) => type.GetCustomAttribute<NameAttribute>(true)?.name ?? type.Name;
         public static bool IsNormal(DialogueContent content) => content is not null && content is not DecoratorContent && content is not SuffixContent;
 
         public static implicit operator bool(DialogueContent self) => self != null;
@@ -95,21 +102,54 @@ namespace ZetanStudio.DialogueSystem
         /// </summary>
         public virtual bool CanLinkFrom(DialogueContent from, DialogueOption option) => true;
 
+        /// <summary>
+        /// 用于在编辑器中复制结点，不应在游戏逻辑中使用
+        /// </summary>
+        public DialogueContent Copy()
+        {
+            var clone = MemberwiseClone() as DialogueContent;
+            if (clone)
+            {
+                clone.ID = "CON-" + Guid.NewGuid().ToString("N");
+                clone.options = new DialogueOption[options.Length];
+                clone.ExitHere = false;
+                for (int i = 0; i < options.Length; i++)
+                {
+                    clone.options[i] = new DialogueOption(options[i].IsMain, options[i].Title);
+                }
+                var copy = Activator.CreateInstance(GetType()) as DialogueContent;
+                EditorUtility.CopySerializedManagedFieldsOnly(clone, copy);
+                return copy;
+            }
+            else return null;
+        }
+
         public static class Editor
         {
             public static float GetWidth(Type type) => type.GetCustomAttribute<WidthAttribute>()?.width ?? 0f;
 
             public static DialogueOption AddOption(DialogueContent content, bool main, string title = null)
             {
-                if (main && content.options.Length > 1) return null;
                 DialogueOption option = new DialogueOption(main, title);
-                UnityEditor.ArrayUtility.Add(ref content.options, option);
+                ArrayUtility.Add(ref content.options, option);
                 return option;
             }
             public static void RemoveOption(DialogueContent content, DialogueOption option)
             {
-                UnityEditor.ArrayUtility.Remove(ref content.options, option);
+                ArrayUtility.Remove(ref content.options, option);
             }
+
+            public static void MoveOptionUpward(DialogueContent content, int index)
+            {
+                if (index < 1) return;
+                (content.options[index], content.options[index - 1]) = (content.options[index - 1], content.options[index]);
+            }
+            public static void MoveOptionDownward(DialogueContent content, int index)
+            {
+                if (index >= content.options.Length - 1) return;
+                (content.options[index], content.options[index - 1]) = (content.options[index - 1], content.options[index]);
+            }
+
             public static void SetAsExit(DialogueContent content, bool exit = true)
             {
                 if (content.options.Length > 1) return;
@@ -123,89 +163,98 @@ namespace ZetanStudio.DialogueSystem
     }
 
     #region 选项修饰器
-    [Serializable]
-    public abstract class DecoratorContent : DialogueContent, INonEvent
+    [Serializable, Group("选项修饰器")]
+    public abstract class DecoratorContent : DialogueContent, INonEvent, IMainOptionOnly
     {
         public DecoratorContent() => options = new DialogueOption[] { new DialogueOption(true, null) };
 
         public override bool IsValid => true;
 
         public sealed override bool IsManual() => false;
-        public sealed override void Manual(DialogueWindow window) { }
+        public sealed override void DoManual(DialogueWindow window) { }
 
-        /// <returns><i>false</i> 该选项会被剔除</returns>
-        public abstract bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, ref string title);
+        public abstract void Decorate(DialogueData data, ref string title);
 
 #if UNITY_EDITOR
         public override bool CanLinkFrom(DialogueContent from, DialogueOption option) => from is DecoratorContent || !option.IsMain;
 #endif
     }
 
-    [Serializable, Name("完成删除"), Group("选项修饰器"), Width(50f)]
-    public sealed class DeleteOnDoneDecorator : DecoratorContent
-    {
-        public override bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, ref string title)
-        {
-            if (owner[0] == option && owner.Options.Where(x => x != option).All(opt =>
-            {
-                var temp = opt.Content;
-                while (temp is DecoratorContent decorator)
-                {
-                    if (decorator is DeleteOnDoneDecorator delete)
-                    {
-                        if (findTarget(delete) is DialogueContent target && data[target].IsDone)
-                            return true;
-                    }
-                    else
-                    {
-                        string cache = null;
-                        if (!decorator.Decorate(data, owner, opt, ref cache)) return true;
-                    }
-                    temp = temp[0]?.Content;
-                }
-                return false;
-            })) return true;
-            if (findTarget(this) is not DialogueContent target) return true;
-            else return !data[target].IsDone;
-
-            static DialogueContent findTarget(DeleteOnDoneDecorator delete)
-            {
-                DialogueContent target = null;
-                DialogueContent temp = delete;
-                while (temp is DecoratorContent)
-                {
-                    temp = temp[0]?.Content;
-                    if (temp is not DecoratorContent)
-                        target = temp;
-                }
-                return target;
-            }
-        }
-    }
-    [Serializable, Name("条件显示"), Group("选项修饰器")]
-    public sealed class ConditionDecorator : DecoratorContent
-    {
-        public override bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, ref string title)
-        {
-            return true;
-        }
-    }
-    [Serializable, Name("染色"), Group("选项修饰器"), Width(50f)]
+    [Serializable, Name("染色"), Width(50f)]
     public sealed class ColorfulDecorator : DecoratorContent
     {
         [field: SerializeField]
         public Color Color { get; private set; } = Color.black;
 
-        public override bool Decorate(DialogueContentData data, DialogueContent owner, DialogueOption option, ref string title)
+        public override void Decorate(DialogueData data, ref string title)
         {
-            title = ZetanUtility.ColorText(option.Title, Color);
-            return true;
+            title = Utility.ColorText(title, Color);
+        }
+    }
+    [Serializable, Name("粗体")]
+    public sealed class BoldDecorator : DecoratorContent
+    {
+        public override void Decorate(DialogueData data, ref string title)
+        {
+            title = Utility.BoldText(title);
+        }
+    }
+    [Serializable, Name("斜体")]
+    public sealed class ItalicDecorator : DecoratorContent
+    {
+        public override void Decorate(DialogueData data, ref string title)
+        {
+            title = Utility.ItalicText(title);
         }
     }
     #endregion
 
+    #region 条件
+    public abstract class ConditionContent : DialogueContent, IMainOptionOnly
+    {
+        public sealed override bool OnEnter() => true;
+        public sealed override bool IsManual() => false;
+        public sealed override void DoManual(DialogueWindow window) { }
+
+        public ConditionContent() => options = new DialogueOption[] { new DialogueOption(true, null) };
+
+        public bool Check(DialogueData entryData)
+        {
+            DialogueContent temp = this;
+            while (temp is ConditionContent condition)
+            {
+                if (!condition.CheckCondition(entryData)) return false;
+                temp = temp[0]?.Content;
+            }
+            return true;
+        }
+        protected abstract bool CheckCondition(DialogueData entryData);
+
+#if UNITY_EDITOR
+        public override bool CanLinkFrom(DialogueContent from, DialogueOption option) => from is ConditionContent or BranchContent || !option.IsMain;
+#endif
+    }
+    [Serializable, Name("按条件显示"), Width(246f)]
+    public class NormalCondition : ConditionContent
+    {
+        [field: SerializeField]
+        public ConditionGroup Condition { get; private set; } = new ConditionGroup();
+
+        public override bool IsValid => Condition.IsValid;
+
+        protected override bool CheckCondition(DialogueData entryData) => Condition.IsMeet();
+    }
+    [Serializable, Name("完成前显示"), Width(50f)]
+    public class DeleteOnDoneCondition : ConditionContent
+    {
+        public override bool IsValid => true;
+
+        protected override bool CheckCondition(DialogueData entryData) => !entryData[ID].IsDone;
+    }
+    #endregion
+
     #region 文本
-    [Serializable]
+    [Serializable, Group("文本")]
     public abstract class TextContent : DialogueContent
     {
         [field: SerializeField]
@@ -221,6 +270,22 @@ namespace ZetanStudio.DialogueSystem
         public AnimationCurve UtterInterval { get; protected set; } = new AnimationCurve(new Keyframe(0, 0.02f), new Keyframe(1, 0.02f));
 
         public override bool IsValid => !string.IsNullOrEmpty(Talker) && !string.IsNullOrEmpty(Text);
+
+#if UNITY_EDITOR
+        public string Preview()
+        {
+            string result = string.Empty;
+            string talker = $"[{(string.IsNullOrEmpty(Talker) ? "(未定义)" : Keyword.Editor.HandleKeywords(Talker))}]说：";
+            talker = System.Text.RegularExpressions.Regex.Replace(talker, @"{\[NPC\]}", "(交互对象)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            talker = System.Text.RegularExpressions.Regex.Replace(talker, @"{\[PLAYER\]}", "(玩家)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            result += talker;
+            string text = $"{(string.IsNullOrEmpty(Text) ? "(无内容)" : Keyword.Editor.HandleKeywords(Text))}";
+            text = System.Text.RegularExpressions.Regex.Replace(text, @"{\[NPC\]}", "[交互对象]", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            text = System.Text.RegularExpressions.Regex.Replace(text, @"{\[PLAYER\]}", "[玩家]", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            result += text;
+            return Utility.RemoveTags(result);
+        }
+#endif
     }
 
     [Serializable, Name("开始")]
@@ -239,11 +304,9 @@ namespace ZetanStudio.DialogueSystem
             Text = content;
         }
 
-        public EntryContent(string id, string talker, string content) : this()
+        public EntryContent(string id, string talker, string content) : this(talker, content)
         {
             ID = id;
-            Talker = talker;
-            Text = content;
         }
 
 #if UNITY_EDITOR
@@ -251,7 +314,7 @@ namespace ZetanStudio.DialogueSystem
 #endif
     }
 
-    [Serializable, Name("语句"), Group("文本")]
+    [Serializable, Name("语句")]
     public sealed class WordsContent : TextContent
     {
         public WordsContent() { }
@@ -263,7 +326,7 @@ namespace ZetanStudio.DialogueSystem
         }
     }
 
-    [Serializable, Name("提交道具"), Group("文本")]
+    [Serializable, Name("提交道具")]
     public class SubmitItemContent : TextContent
     {
         [SerializeField]
@@ -283,7 +346,7 @@ namespace ZetanStudio.DialogueSystem
 
         public override bool IsManual() => true;
 
-        public override void Manual(DialogueWindow window)
+        public override void DoManual(DialogueWindow window)
         {
             if (InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, confirm, cancel: cancel, amountLimit: amount, selectCondition: condition))
                 WindowsManager.HideWindow(window, true);
@@ -308,7 +371,7 @@ namespace ZetanStudio.DialogueSystem
         }
     }
 
-    [Serializable, Name("交换道具"), Group("文本")]
+    [Serializable, Name("交换道具")]
     public sealed class SubmitAndGetItemContent : SubmitItemContent
     {
         [SerializeField]
@@ -326,7 +389,7 @@ namespace ZetanStudio.DialogueSystem
             this.itemsCanGet = itemsCanGet;
         }
 
-        public override void Manual(DialogueWindow window)
+        public override void DoManual(DialogueWindow window)
         {
             if (InventoryWindow.OpenSelectionWindow<BackpackWindow>(ItemSelectionType.SelectNum, confirm, cancel: cancel, amountLimit: amount, selectCondition: condition))
                 WindowsManager.HideWindow(window, true);
@@ -351,7 +414,7 @@ namespace ZetanStudio.DialogueSystem
         }
     }
 
-    [Serializable, Name("获得道具"), Group("文本")]
+    [Serializable, Name("获得道具")]
     public sealed class GetItemContent : TextContent
     {
         [SerializeField]
@@ -369,7 +432,7 @@ namespace ZetanStudio.DialogueSystem
             itemsCanGet = items;
         }
 
-        public override bool Enter()
+        public override bool OnEnter()
         {
             return BackpackManager.Instance.Get(itemsCanGet);
         }
@@ -378,7 +441,7 @@ namespace ZetanStudio.DialogueSystem
 
     #region 后缀
     [Serializable]
-    public abstract class SuffixContent : DialogueContent, INonOption, INonEvent
+    public abstract class SuffixContent : DialogueContent, INonEvent
     {
 
     }
@@ -419,7 +482,7 @@ namespace ZetanStudio.DialogueSystem
         }
 
         public override bool IsManual() => true;
-        public override void Manual(DialogueWindow window)
+        public override void DoManual(DialogueWindow window)
         {
             window.CurrentEntryData[this].Access();
             window.ContinueWith(FindRecursionPoint(window.CurrentEntry));
@@ -431,6 +494,47 @@ namespace ZetanStudio.DialogueSystem
             return from is not EntryContent;
         }
 #endif
+    }
+    #endregion
+
+    #region 拦截
+    [Serializable]
+    public abstract class BlockerContent : DialogueContent, IMainOptionOnly
+    {
+        public sealed override bool OnEnter()
+        {
+            var result = CheckCondition();
+            var notification = GetNotification(result);
+            if (!string.IsNullOrEmpty(notification)) MessageManager.Instance.New(notification);
+            return result;
+        }
+        protected abstract bool CheckCondition();
+        protected virtual string GetNotification(bool result) => string.Empty;
+
+        public sealed override bool IsManual() => false;
+        public sealed override void DoManual(DialogueWindow window) { }
+
+        public BlockerContent() => options = new DialogueOption[] { new DialogueOption(true, null) };
+    }
+    [Name("道具条件")]
+    public class ItemBlocker : BlockerContent
+    {
+        [field: SerializeField]
+        public Item Item { get; private set; }
+
+        [field: SerializeField]
+        public bool Have { get; private set; } = true;
+
+        public override bool IsValid => Item;
+
+        protected override bool CheckCondition() => !(BackpackManager.Instance.HasItem(Item) ^ Have);
+
+        protected override string GetNotification(bool result)
+        {
+            if (!result && Have) return $"未持有[{ItemFactory.GetColorName(Item)}]时无法继续";
+            else if (!result && !Have) return $"持有时[{ItemFactory.GetColorName(Item)}]无法继续";
+            else return string.Empty;
+        }
     }
     #endregion
 
@@ -446,36 +550,106 @@ namespace ZetanStudio.DialogueSystem
 
         public override bool IsValid => true;
 
-        public override bool CanLinkFrom(DialogueContent from, DialogueOption option) => option.IsMain && from.Options.Count == 1 && from is not DecoratorContent;
+        public override bool CanLinkFrom(DialogueContent from, DialogueOption option) => option.IsMain && from.Options.Count == 1 && from is not DecoratorContent && from is not BlockerContent;
     }
 #endif
 
-    [Serializable, Name("分支")]
+    [Serializable, Name("分支"), Width(60f)]
     public sealed class BranchContent : DialogueContent
+    {
+        public override bool IsValid => options.Length > 0 && options.All(x => x.IsMain);
+
+        public DialogueContent GetBranch(DialogueData entryData)
+        {
+            foreach (var option in options)
+            {
+                if (option?.Content is ConditionContent condition && condition.Check(entryData))
+                {
+                    var temp = condition.Options[0]?.Content;
+                    while (temp is ConditionContent)
+                    {
+                        temp = temp[0]?.Content;
+                    }
+                    return temp;
+                }
+            }
+            return null;
+        }
+    }
+    [Serializable, Name("其它对话")]
+    public sealed class OtherDialogueContent : DialogueContent
     {
         [field: SerializeField]
         public Dialogue Dialogue { get; private set; }
 
         public override bool IsValid => Dialogue;
 
-        public override bool Enter()
-        {
-            return Dialogue;
-        }
+        public override bool OnEnter() => Dialogue;
 
         public override bool IsManual() => true;
 
-        public override void Manual(DialogueWindow window)
+        public override void DoManual(DialogueWindow window)
         {
             window.CurrentEntryData[this].Access();
             window.PushContinuance(this);
             window.StartWith(Dialogue);
         }
     }
+
+    [Serializable, Group("外置选项")]
+    public abstract class ExternalOptionsContent : DialogueContent
+    {
+        public abstract ReadOnlyCollection<DialogueOption> GetOptions(DialogueData entryData, DialogueContent owner);
+
+#if UNITY_EDITOR
+        public override bool CanLinkFrom(DialogueContent from, DialogueOption option)
+        {
+            return from is not DecoratorContent and not ExternalOptionsContent && option.IsMain;
+        }
+#endif
+    }
+
+    [Serializable, Name("随机选项顺序"), Width(50f)]
+    public sealed class RandomOptions : ExternalOptionsContent
+    {
+        public override bool IsValid => true;
+
+        [field: SerializeField]
+        public bool Always { get; private set; }
+
+        public override ReadOnlyCollection<DialogueOption> GetOptions(DialogueData entryData, DialogueContent owner)
+        {
+            var order = getOptionOrder(entryData);
+            var options = new DialogueOption[order.Count];
+            for (int i = 0; i < order.Count; i++)
+            {
+                options[i] = this.options[order[i]];
+            }
+            return new ReadOnlyCollection<DialogueOption>(options);
+
+            IList<int> getOptionOrder(DialogueData entryData)
+            {
+                if (Always) return Utility.RandomOrder(getIndices());
+                var data = entryData[this];
+                if (!data.Accessed) return data.AdditionalData.Write("order", new GenericData()).WriteAll(Utility.RandomOrder(getIndices()));
+                else return data.AdditionalData?.ReadData("order")?.ReadIntList() as IList<int> ?? getIndices();
+
+                int[] getIndices()
+                {
+                    int[] indices = new int[this.options.Length];
+                    for (int i = 0; i < this.options.Length; i++)
+                    {
+                        indices[i] = i;
+                    }
+                    return indices;
+                }
+            }
+        }
+    }
     #endregion
 
     #region 接口
-    public interface INonOption { }
+    public interface IMainOptionOnly { }
     public interface INonEvent { }
     #endregion
 
@@ -499,12 +673,14 @@ namespace ZetanStudio.DialogueSystem
             Title = title;
         }
 
+        public static implicit operator bool(DialogueOption self) => self != null;
+
 #if UNITY_EDITOR
         public static class Editor
         {
             public static void SetContent(DialogueOption option, DialogueContent content)
             {
-                if (content is EntryContent || content is ExitContent) return;
+                if (content is EntryContent or ExitContent) return;
                 option.Content = content;
             }
 
@@ -513,40 +689,22 @@ namespace ZetanStudio.DialogueSystem
 #endif
     }
 
+#if UNITY_EDITOR
+    /// <summary>
+    /// 用于在编辑器中设置分组，不应在游戏逻辑中使用
+    /// </summary>
     [Serializable]
-    public abstract class DialogueEvent
+    public sealed class DialogueContentGroup
     {
-        public abstract void Invoke();
+        public string name;
+        public List<string> contents = new List<string>();
+        public Vector2 position;
 
-        [AttributeUsage(AttributeTargets.Class)]
-        protected sealed class NameAttribute : Attribute
+        public DialogueContentGroup(string name, Vector2 position)
         {
-            public readonly string name;
-
-            public NameAttribute(string name)
-            {
-                this.name = name;
-            }
-        }
-
-        public static string GetName(Type type)
-        {
-            return type.GetCustomAttribute<NameAttribute>()?.name ?? type.Name;
+            this.name = name;
+            this.position = position;
         }
     }
-
-    [Serializable, Name("设置触发器")]
-    public sealed class SetTriggerEvent : DialogueEvent
-    {
-        [field: SerializeField]
-        public string TriggerName { get; private set; }
-
-        [field: SerializeField]
-        public bool State { get; private set; }
-
-        public override void Invoke()
-        {
-            TriggerManager.SetTrigger(TriggerName, State);
-        }
-    }
+#endif
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio.UI;
 
 namespace ZetanStudio.ItemSystem.UI
 {

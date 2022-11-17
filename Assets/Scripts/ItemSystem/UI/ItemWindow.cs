@@ -2,6 +2,8 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.UI;
+using ZetanStudio.InventorySystem;
 #if UNITY_STANDALONE
 using UnityEngine.UI;
 #endif
@@ -33,8 +35,8 @@ namespace ZetanStudio.ItemSystem.UI
 
         protected override void OnAwake()
         {
-            realPrefab = ZetanUtility.IsPrefab(displayerPrefab.gameObject) ? displayerPrefab : Instantiate(displayerPrefab);
-            ZetanUtility.SetActive(realPrefab, false);
+            realPrefab = Utility.IsPrefab(displayerPrefab.gameObject) ? displayerPrefab : Instantiate(displayerPrefab);
+            Utility.SetActive(realPrefab, false);
         }
 
         protected override void RegisterNotify()
@@ -53,7 +55,7 @@ namespace ZetanStudio.ItemSystem.UI
             if (displayers.Count < count)
             {
                 if (displayers.Count < 1)
-                    InitDisplayer(ZetanUtility.IsPrefab(displayerPrefab.gameObject) ? ObjectPool.Get(displayerPrefab, displayerParent) : displayerPrefab);
+                    InitDisplayer(Utility.IsPrefab(displayerPrefab.gameObject) ? ObjectPool.Get(displayerPrefab, displayerParent) : displayerPrefab);
                 else
                     while (displayers.Count < count)
                     {
@@ -78,10 +80,10 @@ namespace ZetanStudio.ItemSystem.UI
 
             if (data) displayers[0].ShowItem(data);
             if (itemSlot) LeftOrRight(itemSlot.transform.position);
-            else LeftOrRight(position ?? ZetanUtility.ScreenCenter);
+            else LeftOrRight(position ?? Utility.ScreenCenter);
 
 #if UNITY_ANDROID
-            ZetanUtility.SetActive(buttonArea, true);
+            Utility.SetActive(buttonArea, true);
             buttonList.Refresh(buttonDatas);
 #elif UNITY_STANDALONE
         ZetanUtility.SetActive(buttonArea, false);
@@ -154,19 +156,19 @@ namespace ZetanStudio.ItemSystem.UI
 
         private void LeftOrRight(Vector2 position)
         {
-            Rect slotRect = itemSlot ? ZetanUtility.GetScreenSpaceRect(itemSlot.GetComponent<RectTransform>()) : Rect.zero;
+            Rect slotRect = itemSlot ? Utility.GetScreenSpaceRect(itemSlot.GetComponent<RectTransform>()) : Rect.zero;
             float winWidth = 0;
             for (int i = 0; i < displayers.Count; i++)
             {
                 var window = displayers[i];
                 if (window.gameObject.activeSelf)
                 {
-                    Rect rectWin = ZetanUtility.GetScreenSpaceRect(displayerPrefab.GetComponent<RectTransform>());
+                    Rect rectWin = Utility.GetScreenSpaceRect(displayerPrefab.GetComponent<RectTransform>());
                     winWidth += rectWin.width;
                 }
             }
 #if UNITY_ANDROID
-            Rect buttonRect = ZetanUtility.GetScreenSpaceRect(buttonArea.GetComponent<RectTransform>());
+            Rect buttonRect = Utility.GetScreenSpaceRect(buttonArea.GetComponent<RectTransform>());
 #elif UNITY_STANDALONE
         Rect buttonRect = Rect.zero;
 #endif
@@ -195,7 +197,7 @@ namespace ZetanStudio.ItemSystem.UI
         private IEnumerator KeepInScreen()
         {
             yield return new WaitForEndOfFrame();
-            ZetanUtility.KeepInsideScreen(content.GetComponent<RectTransform>(), bottom: false);
+            Utility.KeepInsideScreen(content.GetComponent<RectTransform>(), bottom: false);
         }
 
         protected override bool OnOpen(params object[] args)

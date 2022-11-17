@@ -1,10 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ZetanStudio.InventorySystem;
+using ZetanStudio.UI;
 
 namespace ZetanStudio.StructureSystem
 {
+    using SavingSystem;
+
     public static class StructureManager
     {
         private static Transform structureRoot;
@@ -47,7 +50,7 @@ namespace ZetanStudio.StructureSystem
         [SaveMethod]
         public static void SaveData(SaveData saveData)
         {
-            var structData = new SaveDataItem();
+            var structData = new GenericData();
             saveData["structure"] = structData;
             structData.WriteAll(StructuresLearned.Select(x => x.ID));
             foreach (var dict in structures)
@@ -162,9 +165,9 @@ namespace ZetanStudio.StructureSystem
                         Vector3 max = colliders[0].bounds.max;
                         for (int i = 1; i < colliders.Length; i++)
                         {
-                            if (ZetanUtility.Vector3LessThan(colliders[i].bounds.min, min))
+                            if (Utility.Vector3LessThan(colliders[i].bounds.min, min))
                                 min = colliders[i].bounds.min;
-                            if (ZetanUtility.Vector3LargeThan(colliders[i].bounds.max, max))
+                            if (Utility.Vector3LargeThan(colliders[i].bounds.max, max))
                                 max = colliders[i].bounds.max;
                         }
                         AStarManager.Instance.UpdateGraphs(min, max);
@@ -178,9 +181,9 @@ namespace ZetanStudio.StructureSystem
                             Vector3 max = collider2Ds[0].bounds.max;
                             for (int i = 1; i < collider2Ds.Length; i++)
                             {
-                                if (ZetanUtility.Vector3LessThan(collider2Ds[i].bounds.min, min))
+                                if (Utility.Vector3LessThan(collider2Ds[i].bounds.min, min))
                                     min = collider2Ds[i].bounds.min;
-                                if (ZetanUtility.Vector3LargeThan(collider2Ds[i].bounds.max, max))
+                                if (Utility.Vector3LargeThan(collider2Ds[i].bounds.max, max))
                                     max = collider2Ds[i].bounds.max;
                             }
                             AStarManager.Instance.UpdateGraphs(min, max);
@@ -219,9 +222,9 @@ namespace ZetanStudio.StructureSystem
                                 Vector3 max = collider2Ds[0].bounds.max;
                                 for (int i = 1; i < collider2Ds.Length; i++)
                                 {
-                                    if (ZetanUtility.Vector3LessThan(collider2Ds[i].bounds.min, min))
+                                    if (Utility.Vector3LessThan(collider2Ds[i].bounds.min, min))
                                         min = collider2Ds[i].bounds.min;
-                                    if (ZetanUtility.Vector3LargeThan(collider2Ds[i].bounds.max, max))
+                                    if (Utility.Vector3LargeThan(collider2Ds[i].bounds.max, max))
                                         max = collider2Ds[i].bounds.max;
                                 }
                                 AStarManager.Instance.UpdateGraphs(min, max);
@@ -235,8 +238,8 @@ namespace ZetanStudio.StructureSystem
                                     Vector3 max = colliders[0].bounds.max;
                                     for (int i = 1; i < colliders.Length; i++)
                                     {
-                                        if (ZetanUtility.Vector3LessThan(colliders[i].bounds.min, min)) min = colliders[i].bounds.min;
-                                        if (ZetanUtility.Vector3LargeThan(colliders[i].bounds.max, max)) max = colliders[i].bounds.max;
+                                        if (Utility.Vector3LessThan(colliders[i].bounds.min, min)) min = colliders[i].bounds.min;
+                                        if (Utility.Vector3LargeThan(colliders[i].bounds.max, max)) max = colliders[i].bounds.max;
                                     }
                                     AStarManager.Instance.UpdateGraphs(min, max);
                                 }

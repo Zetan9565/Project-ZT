@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ZetanStudio.ItemSystem.Module
 {
-    using Character;
+    using CharacterSystem;
     using Extension.Editor;
 
     [CustomPropertyDrawer(typeof(RandomAffix))]

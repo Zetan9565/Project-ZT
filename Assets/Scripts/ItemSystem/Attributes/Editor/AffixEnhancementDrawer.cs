@@ -33,7 +33,7 @@ namespace ZetanStudio.ItemSystem.Editor
                 float minValue = Mathf.Max(0, affixCountRange.vector2IntValue.x);
                 float maxValue = Mathf.Min(affixCountRange.vector2IntValue.y, affixes.arraySize);
                 EditorGUI.BeginProperty(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), GUIContent.none, affixCountRange);
-                ZetanUtility.Editor.MinMaxSlider(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), new GUIContent(Tr("词缀数量范围")),
+                Utility.Editor.MinMaxSlider(new Rect(position.x, position.y + lineHeightSpace * lineCount, position.width, lineHeight), new GUIContent(Tr("词缀数量范围")),
                                                  ref minValue, ref maxValue, 0, affixes.arraySize);
                 EditorGUI.EndProperty();
                 lineCount++;

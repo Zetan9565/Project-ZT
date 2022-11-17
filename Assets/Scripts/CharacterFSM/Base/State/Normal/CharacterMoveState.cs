@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using ZetanStudio.CharacterSystem;
 
 public class CharacterMoveState : CharacterNormalState
 {

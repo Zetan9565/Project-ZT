@@ -1,14 +1,17 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class DurabilityAgent : MonoBehaviour
+namespace ZetanStudio.ItemSystem.UI
 {
-    public Image fill;
-
-    public Text value;
-
-    public void UnShow()
+    public class DurabilityAgent : MonoBehaviour
     {
-        ZetanUtility.SetActive(gameObject, false);
+        public Image fill;
+
+        public Text value;
+
+        public void UnShow()
+        {
+            Utility.SetActive(gameObject, false);
+        }
     }
 }

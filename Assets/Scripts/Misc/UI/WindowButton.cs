@@ -1,23 +1,26 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Button))]
-public class WindowButton : MonoBehaviour
+namespace ZetanStudio.UI
 {
-    [TypeSelector(typeof(Window))]
-    public string type;
-
-    public bool openClose = true;
-
-
-    private void Awake()
+    [RequireComponent(typeof(Button))]
+    public class WindowButton : MonoBehaviour
     {
-        GetComponent<Button>().onClick.AddListener(OpenClose);
-    }
+        [TypeSelector(typeof(Window))]
+        public string type;
 
-    private void OpenClose()
-    {
-        if (!openClose) WindowsManager.OpenWindow(ZetanUtility.GetTypeByFullName(type));
-        else WindowsManager.OpenClose(ZetanUtility.GetTypeByFullName(type));
+        public bool openClose = true;
+
+
+        private void Awake()
+        {
+            GetComponent<Button>().onClick.AddListener(OpenClose);
+        }
+
+        private void OpenClose()
+        {
+            if (!openClose) WindowsManager.OpenWindow(Utility.GetTypeByFullName(type));
+            else WindowsManager.OpenClose(Utility.GetTypeByFullName(type));
+        }
     }
 }

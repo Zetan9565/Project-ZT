@@ -122,7 +122,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         {
             GlobalVariables global;
             if (Application.isPlaying && (!tree || tree.IsInstance)) global = BehaviourTreeManager.Instance.GlobalVariables;
-            else global = ZetanUtility.Editor.LoadAsset<GlobalVariables>();
+            else global = Utility.Editor.LoadAsset<GlobalVariables>();
             return global;
         }
 
@@ -130,7 +130,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         {
             if (assetsMenu == null) return;
             settings = settings ? settings : BehaviourTreeEditorSettings.GetOrCreate();
-            var behaviourTrees = ZetanUtility.Editor.LoadAssets<BehaviourTree>();
+            var behaviourTrees = Utility.Editor.LoadAssets<BehaviourTree>();
             for (int i = assetsMenu.menu.MenuItems().Count - 1; i > 0; i--)
             {
                 assetsMenu.menu.RemoveItemAt(i);
@@ -142,7 +142,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             {
                 if (tree)
                 {
-                    assetsMenu.menu.AppendAction($"{Tr("本地")}/[{counter}] {tree.name} ({ZetanUtility.Editor.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
+                    assetsMenu.menu.AppendAction($"{Tr("本地")}/[{counter}] {tree.name} ({Utility.Editor.GetDirectoryName(tree).Replace("\\", "/").Replace("Assets/", "").Replace("/", "\u2215")})", (a) =>
                     {
                         EditorApplication.delayCall += () =>
                         {
@@ -178,7 +178,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                     if (tree.ScenceOnly)
                     {
                         tree = null;
-                        treeView.Vocate();
+                        treeView.Vacate();
                     }
                     else if (exes.Length > 0) ChangeTreeBySelection();
                     else if (!treeView.tree) treeView.DrawTreeView(tree);
@@ -223,7 +223,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                         {
                             if (exe.Behaviour == tree)
                             {
-                                treeName.text = $"{Tr("行为树视图")}\t{Tr("当前")}：{tree.Name} ({exe.gameObject.GetPath()} <{exe.GetType().Name}.{ZetanUtility.GetMemberName(() => exe.Behaviour)}>)";
+                                treeName.text = $"{Tr("行为树视图")}\t{Tr("当前")}：{tree.Name} ({exe.gameObject.GetPath()} <{exe.GetType().Name}.{Utility.GetMemberName(() => exe.Behaviour)}>)";
                                 return;
                             }
                         }
@@ -235,7 +235,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         private void UpdateUndoVisible()
         {
             if (undo == null || redo == null) return;
-            bool isLocal = ZetanUtility.Editor.IsLocalAssets(tree);
+            bool isLocal = Utility.Editor.IsLocalAssets(tree);
             undo.visible = treeView != null && tree && !isLocal;
             redo.visible = treeView != null && tree && !isLocal;
         }
@@ -418,7 +418,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 root.Q<Label>("variable-title").text = Tr("变量");
                 variableTaber = root.Q<TabbedBar>("variable-tab");
                 variableTaber.Refresh(L.TrM(settings.language, "共享变量", "全局变量").ToArray(), OnVariableTab, 4);
-                serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourTreeManager.Instance ? BehaviourTreeManager.Instance.GlobalVariables : ZetanUtility.Editor.LoadAsset<GlobalVariables>());
+                serializedGlobal = new SerializedObject(Application.isPlaying && BehaviourTreeManager.Instance ? BehaviourTreeManager.Instance.GlobalVariables : Utility.Editor.LoadAsset<GlobalVariables>());
 
                 undo = root.Q<ToolbarButton>("undo");
                 undo.clicked += OnUndoClick;
@@ -526,7 +526,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         #region 新建相关
         private void CreateNewTree(string assetName)
         {
-            BehaviourTree tree = ZetanUtility.Editor.SaveFilePanel(CreateInstance<BehaviourTree>, assetName, folder: settings.newAssetFolder, ping: true, select: true);
+            BehaviourTree tree = Utility.Editor.SaveFilePanel(CreateInstance<BehaviourTree>, assetName, folder: settings.newAssetFolder, ping: true, select: true);
             if (tree)
             {
                 serializedTree = new SerializedObject(tree);
@@ -539,7 +539,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         private void CreateGlobalVariables(string assetName)
         {
             if (serializedGlobal != null && serializedGlobal.targetObject != null) return;
-            GlobalVariables global = ZetanUtility.Editor.SaveFilePanel(CreateInstance<GlobalVariables>, assetName, folder: settings.newAssetFolder);
+            GlobalVariables global = Utility.Editor.SaveFilePanel(CreateInstance<GlobalVariables>, assetName, folder: settings.newAssetFolder);
             if (global)
             {
                 serializedGlobal = new SerializedObject(global);
@@ -556,7 +556,7 @@ namespace ZetanStudio.BehaviourTree.Editor
             }
             if (EditorUtility.DisplayDialog(Tr("保存到本地"), Tr("保存到本地的行为树将失去对场景对象的引用，是否继续？"), Tr("继续"), Tr("取消")))
             {
-                ZetanUtility.Editor.SaveFilePanel(() => BehaviourTree.PrepareLocalization(tree), assetName, ping: true);
+                Utility.Editor.SaveFilePanel(() => BehaviourTree.PrepareLocalization(tree), assetName, ping: true);
             }
         }
         #endregion

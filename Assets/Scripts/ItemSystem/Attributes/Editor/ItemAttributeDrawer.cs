@@ -2,7 +2,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using ZetanStudio.Character;
+using ZetanStudio.CharacterSystem;
 using ZetanStudio.Extension.Editor;
 
 namespace ZetanStudio.ItemSystem.Editor

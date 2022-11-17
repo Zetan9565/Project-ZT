@@ -3,83 +3,86 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(SubStateAttribute))]
-public class SubStateDrawer : PropertyDrawer
+namespace ZetanStudio.CharacterSystem.Editor
 {
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(SubStateAttribute))]
+    public class SubStateDrawer : PropertyDrawer
     {
-        SubStateAttribute attr = attribute as SubStateAttribute;
-        SerializedProperty main = property.serializedObject.FindProperty(attr.mainField);
-        string[] paths = property.propertyPath.Split('.');
-        object value = property.serializedObject.targetObject;
-        for (int i = 0; i < paths.Length - 1; i++)
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
+            SubStateAttribute attr = attribute as SubStateAttribute;
+            SerializedProperty main = property.serializedObject.FindProperty(attr.mainField);
+            string[] paths = property.propertyPath.Split('.');
+            object value = property.serializedObject.targetObject;
+            for (int i = 0; i < paths.Length - 1; i++)
             {
-                if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
+                if (i + 1 < paths.Length - 1 && i + 2 < paths.Length)
                 {
-                    if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
+                    if (paths[i + 1] == "Array" && paths[i + 2].StartsWith("data"))
                     {
-                        if (GetValue(paths[i], value) is IList list)
+                        if (int.TryParse(paths[i + 2].Replace("data[", "").Replace("]", ""), out var index))
                         {
-                            value = list[index];
-                            i += 2;
+                            if (GetValue(paths[i], value) is IList list)
+                            {
+                                value = list[index];
+                                i += 2;
+                            }
                         }
                     }
                 }
-            }
-            else
-            {
-                value = GetValue(paths[i], value);
-            }
+                else
+                {
+                    value = GetValue(paths[i], value);
+                }
 
-            static object GetValue(string path, object target)
-            {
-                return target.GetType().GetField(path, ZetanUtility.CommonBindingFlags).GetValue(target);
+                static object GetValue(string path, object target)
+                {
+                    return target.GetType().GetField(path, Utility.CommonBindingFlags).GetValue(target);
+                }
             }
-        }
-        value = value.GetType().GetField(attr.mainField, ZetanUtility.CommonBindingFlags).GetValue(value);
-        if (value != null)
-        {
-            List<GUIContent> names = new List<GUIContent>();
-            switch ((CharacterStates)value)
+            value = value.GetType().GetField(attr.mainField, Utility.CommonBindingFlags).GetValue(value);
+            if (value != null)
             {
-                case CharacterStates.Normal:
-                    foreach (var name in ZetanUtility.GetInspectorNames(typeof(CharacterNormalStates)))
-                    {
-                        names.Add(new GUIContent(name));
-                    }
-                    break;
-                case CharacterStates.Abnormal:
-                    foreach (var name in ZetanUtility.GetInspectorNames(typeof(CharacterAbnormalStates)))
-                    {
-                        names.Add(new GUIContent(name));
-                    }
-                    break;
-                case CharacterStates.Gather:
-                    foreach (var name in ZetanUtility.GetInspectorNames(typeof(CharacterGatherStates)))
-                    {
-                        names.Add(new GUIContent(name));
-                    }
-                    break;
-                case CharacterStates.Attack:
-                    foreach (var name in ZetanUtility.GetInspectorNames(typeof(CharacterAttackStates)))
-                    {
-                        names.Add(new GUIContent(name));
-                    }
-                    break;
-                case CharacterStates.Busy:
-                    foreach (var name in ZetanUtility.GetInspectorNames(typeof(CharacterBusyStates)))
-                    {
-                        names.Add(new GUIContent(name));
-                    }
-                    break;
-                default:
-                    EditorGUI.PropertyField(position, property, label);
-                    return;
+                List<GUIContent> names = new List<GUIContent>();
+                switch ((CharacterStates)value)
+                {
+                    case CharacterStates.Normal:
+                        foreach (var name in Utility.GetInspectorNames(typeof(CharacterNormalStates)))
+                        {
+                            names.Add(new GUIContent(name));
+                        }
+                        break;
+                    case CharacterStates.Abnormal:
+                        foreach (var name in Utility.GetInspectorNames(typeof(CharacterAbnormalStates)))
+                        {
+                            names.Add(new GUIContent(name));
+                        }
+                        break;
+                    case CharacterStates.Gather:
+                        foreach (var name in Utility.GetInspectorNames(typeof(CharacterGatherStates)))
+                        {
+                            names.Add(new GUIContent(name));
+                        }
+                        break;
+                    case CharacterStates.Attack:
+                        foreach (var name in Utility.GetInspectorNames(typeof(CharacterAttackStates)))
+                        {
+                            names.Add(new GUIContent(name));
+                        }
+                        break;
+                    case CharacterStates.Busy:
+                        foreach (var name in Utility.GetInspectorNames(typeof(CharacterBusyStates)))
+                        {
+                            names.Add(new GUIContent(name));
+                        }
+                        break;
+                    default:
+                        EditorGUI.PropertyField(position, property, label);
+                        return;
+                }
+                property.intValue = EditorGUI.Popup(position, label, property.intValue, names.ToArray());
             }
-            property.intValue = EditorGUI.Popup(position, label, property.intValue, names.ToArray());
+            else EditorGUI.PropertyField(position, property, label);
         }
-        else EditorGUI.PropertyField(position, property, label);
     }
 }

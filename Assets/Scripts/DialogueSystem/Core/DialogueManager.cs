@@ -1,94 +1,80 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using ZetanStudio.DialogueSystem;
-using ZetanStudio.Extension;
 
-public delegate void DialogueListner();
-public static class DialogueManager
+namespace ZetanStudio.DialogueSystem
 {
-    private static Transform talkerRoot;
+    using CharacterSystem;
+    using Extension;
+    using SavingSystem;
 
-    private static readonly Dictionary<string, DialogueData> dialogueDatas = new Dictionary<string, DialogueData>();
-
-    private static readonly Dictionary<string, DialogueContentData> data = new Dictionary<string, DialogueContentData>();
-
-    public static Dictionary<string, TalkerData> Talkers { get; } = new Dictionary<string, TalkerData>();
-    private readonly static Dictionary<string, List<TalkerData>> scenedTalkers = new Dictionary<string, List<TalkerData>>();
-
-    [InitMethod(-1)]
-    public static void Init()
+    public static class DialogueManager
     {
-        if (!talkerRoot || !talkerRoot.gameObject)
-            talkerRoot = new GameObject("Talkers").transform;
-        Talkers.Clear();
-        scenedTalkers.Clear();
-        foreach (var ti in Resources.LoadAll<TalkerInformation>("Configuration").Where(x => x.IsValid && x.Enable))
+        private static Transform talkerRoot;
+
+        private static readonly Dictionary<string, DialogueData> data = new Dictionary<string, DialogueData>();
+
+        public static Dictionary<string, TalkerData> Talkers { get; } = new Dictionary<string, TalkerData>();
+        private readonly static Dictionary<string, List<TalkerData>> scenedTalkers = new Dictionary<string, List<TalkerData>>();
+
+        [InitMethod(-1)]
+        public static void Init()
         {
-            TalkerData data = new TalkerData(ti);
-            if (ti.Scene == ZetanUtility.ActiveScene.name)
+            if (!talkerRoot || !talkerRoot.gameObject)
+                talkerRoot = new GameObject("Talkers").transform;
+            Talkers.Clear();
+            scenedTalkers.Clear();
+            foreach (var ti in Resources.LoadAll<TalkerInformation>("Configuration").Where(x => x.IsValid && x.Enable))
             {
-                Talker talker = ti.Prefab.Instantiate(talkerRoot).GetComponent<Talker>();
-                talker.Init(data);
+                TalkerData data = new TalkerData(ti);
+                if (ti.Scene == Utility.GetActiveScene().name)
+                {
+                    Talker talker = ti.Prefab.Instantiate(talkerRoot).GetComponent<Talker>();
+                    talker.Init(data);
+                }
+                Talkers.Add(ti.ID, data);
+                if (scenedTalkers.TryGetValue(ti.Scene, out var talkers))
+                    talkers.Add(data);
+                else scenedTalkers.Add(ti.Scene, new List<TalkerData>() { data });
             }
-            Talkers.Add(ti.ID, data);
-            if (scenedTalkers.TryGetValue(ti.Scene, out var talkers))
-                talkers.Add(data);
-            else scenedTalkers.Add(ti.Scene, new List<TalkerData>() { data });
         }
-    }
 
-    public static DialogueData GetOrCreateDialogueData(OldDialogue dialogue)
-    {
-        if (!dialogueDatas.TryGetValue(dialogue.ID, out var find))
+        public static DialogueData GetOrCreateData(EntryContent entry)
         {
-            find = new DialogueData(dialogue);
-            dialogueDatas.Add(dialogue.ID, find);
+            if (!entry) return null;
+            if (!data.TryGetValue(entry.ID, out var find))
+                data.Add(entry.ID, find = new DialogueData(entry));
+            else find.Refresh(entry);
+            return find;
         }
-        return find;
-    }
 
-    public static DialogueContentData GetOrCreateData(EntryContent entry)
-    {
-        if (!entry) return null;
-        if (!data.TryGetValue(entry.ID, out var find))
-            data.Add(entry.ID, find = new DialogueContentData(entry));
-        else find.Refresh(entry);
-        return find;
-    }
-
-    public static void RemoveDialogueData(OldDialogue dialogue)
-    {
-        if (!dialogue) return;
-        dialogueDatas.Remove(dialogue.ID);
-    }
-
-    public static void RemoveData(EntryContent entry)
-    {
-        if (!entry) return;
-        data.Remove(entry.ID);
-    }
-
-    [SaveMethod]
-    public static void SaveData(SaveData saveData)
-    {
-
-        var dialog = new SaveDataItem();
-        saveData["dialogueData"] = dialog;
-        foreach (var d in data.Values)
+        public static void RemoveData(EntryContent entry)
         {
-            dialog[d.ID] = d.GetSaveData();
+            if (!entry) return;
+            data.Remove(entry.ID);
         }
-    }
 
-    [LoadMethod]
-    public static void LoadData(SaveData saveData)
-    {
-        data.Clear();
-        if(saveData.TryReadData("dialogueData", out var dialog))
-            foreach (var kvp in dialog.ReadDataDict())
+        [SaveMethod]
+        public static void SaveData(SaveData saveData)
+        {
+
+            var dialog = new GenericData();
+            saveData["dialogueData"] = dialog;
+            foreach (var d in data.Values)
             {
-                data[kvp.Key] = new DialogueContentData(kvp.Value);
+                dialog[d.ID] = d.GetSaveData();
             }
+        }
+
+        [LoadMethod]
+        public static void LoadData(SaveData saveData)
+        {
+            data.Clear();
+            if (saveData.TryReadData("dialogueData", out var dialog))
+                foreach (var kvp in dialog.ReadDataDict())
+                {
+                    data[kvp.Key] = new DialogueData(kvp.Value);
+                }
+        }
     }
 }

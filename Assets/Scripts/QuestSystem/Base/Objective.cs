@@ -2,6 +2,8 @@ using UnityEngine;
 using System;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.DialogueSystem;
+using ZetanStudio.QuestSystem;
+using ZetanStudio.CharacterSystem;
 
 /// <summary>
 /// 任务目标
@@ -312,12 +314,12 @@ public class SubmitObjective : Objective
     }
 
     [SerializeField]
-    private TalkerType talkerType;
-    public TalkerType TalkerType
+    private string talker;
+    public string Talker
     {
         get
         {
-            return talkerType;
+            return talker;
         }
     }
 

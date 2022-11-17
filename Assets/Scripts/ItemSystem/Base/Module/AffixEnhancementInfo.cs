@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ZetanStudio.ItemSystem.Module
 {
-    using Character;
+    using CharacterSystem;
     using ZetanStudio.Math;
 
     [CreateAssetMenu(fileName = "affix enhancement info", menuName = "Zetan Studio/道具/词缀强化信息")]

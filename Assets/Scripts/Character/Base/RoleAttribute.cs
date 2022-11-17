@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-namespace ZetanStudio.Character
+namespace ZetanStudio.CharacterSystem
 {
     public interface IRoleValue
     {
@@ -23,9 +23,9 @@ namespace ZetanStudio.Character
 
         public RoleValueType ValueType { get; }
 
-        public SaveDataItem GetSaveData()
+        public GenericData GetSaveData()
         {
-            var data = new SaveDataItem();
+            var data = new GenericData();
             data["ID"] = ID;
             data["value"] = Value;
             return data;
@@ -264,7 +264,7 @@ namespace ZetanStudio.Character
     }
 }
 
-namespace ZetanStudio.Character
+namespace ZetanStudio.CharacterSystem
 {
     [Serializable]
     public class RoleProperty : IRoleValue<RolePropertyType>

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using ZetanStudio.StructureSystem;
 
 [CustomEditor(typeof(Structure2D), true)]
 public class BuildingInspector : Editor

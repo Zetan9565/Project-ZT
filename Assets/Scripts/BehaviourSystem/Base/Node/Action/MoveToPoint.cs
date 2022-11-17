@@ -1,6 +1,7 @@
 using UnityEngine;
 using ZetanStudio.BehaviourTree;
 using ZetanStudio.BehaviourTree.Nodes;
+using ZetanStudio.CharacterSystem;
 
 [Group("Movement")]
 public class MoveToPoint : Action

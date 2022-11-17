@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using ZetanStudio.Character;
+using ZetanStudio.CharacterSystem;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.ItemSystem.Module;
 using ZetanStudio;
 using ZetanStudio.ItemSystem.UI;
+using ZetanStudio.UI;
+using ZetanStudio.InventorySystem;
 
 public class ItemInfoDisplayer : MonoBehaviour
 {
@@ -110,17 +112,17 @@ public class ItemInfoDisplayer : MonoBehaviour
         Clear();
         this.item = item;
         icon.overrideSprite = item.Icon;
-        ZetanUtility.SetActive(contrastMark, item != window.Item);
+        Utility.SetActive(contrastMark, item != window.Item);
         nameText.text = item.Name;
         nameText.color = item.Quality.Color;
         typeText.text = item.Type.Name;
         if (item.TryGetModule<SellableModule>(out var sellAble))
         {
-            ZetanUtility.SetActive(priceTitle, true);
+            Utility.SetActive(priceTitle, true);
             priceText.text = sellAble.Price + Tr(MiscSettings.Instance.CoinName);
         }
-        else ZetanUtility.SetActive(priceTitle, false);
-        ZetanUtility.SetActive(weightTitle, item.Weight > 0);
+        else Utility.SetActive(priceTitle, false);
+        Utility.SetActive(weightTitle, item.Weight > 0);
         weightText.text = item.Weight.ToString("F2");
         if (item.TryGetModuleData<AttributeData>(out var attribute))
         {
@@ -148,9 +150,9 @@ public class ItemInfoDisplayer : MonoBehaviour
             if (module is IItemWindowModifier modifier)
                 modifier.ModifyItemWindow(this);
         }
-        ZetanUtility.SetActive(durability, item.GetModule<DurabilityModule>());
+        Utility.SetActive(durability, item.GetModule<DurabilityModule>());
 #if DEBUG
-        ZetanUtility.SetActive(debugIDText, true);
+        Utility.SetActive(debugIDText, true);
         debugIDText.text = item.ID;
 #else
         ZetanUtility.SetActive(debugIDText, false);
@@ -309,12 +311,12 @@ public class ItemInfoDisplayer : MonoBehaviour
 
     public void Show()
     {
-        ZetanUtility.SetActive(gameObject, true);
+        Utility.SetActive(gameObject, true);
     }
     public void Hide()
     {
         Clear();
-        ZetanUtility.SetActive(gameObject, false);
+        Utility.SetActive(gameObject, false);
     }
 
     private void Awake()

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace ZetanStudio.Character
+namespace ZetanStudio.CharacterSystem
 {
     [CreateAssetMenu(menuName = "Zetan Studio/角色/枚举/属性枚举")]
     public sealed class RolePropertyEnum : ScriptableObjectEnum<RolePropertyEnum, RolePropertyType>

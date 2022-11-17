@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using ZetanStudio.UI;
 
 [CustomEditor(typeof(Clickable))]
 public class ClickableInspector : Editor

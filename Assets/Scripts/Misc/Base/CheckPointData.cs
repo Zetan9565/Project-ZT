@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ZetanStudio;
 
 public class CheckPointData
 {
@@ -45,7 +46,7 @@ public class CheckPointData
         {
             foreach (var entity in Entities)
             {
-                ZetanUtility.SetActive(entity.gameObject, true);
+                Utility.SetActive(entity.gameObject, true);
             }
         }
     }
@@ -58,7 +59,7 @@ public class CheckPointData
         {
             foreach (var entity in Entities)
             {
-                ZetanUtility.SetActive(entity.gameObject, false);
+                Utility.SetActive(entity.gameObject, false);
             }
         }
     }

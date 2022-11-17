@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace ZetanStudio.Character
+namespace ZetanStudio.CharacterSystem
 {
     //[CustomEditor(typeof(RoleAttributeEnum))]
     public class RoleAttributeEnumInspector : UnityEditor.Editor
@@ -16,7 +16,7 @@ namespace ZetanStudio.Character
 
         private void OnEnable()
         {
-            if (ZetanUtility.TryGetValue("attributeTypes", target, out var value, out _))
+            if (Utility.TryGetValue("attributeTypes", target, out var value, out _))
                 dict = value as Dictionary<string, RoleValueType>;
             names = serializedObject.FindProperty("names");
             types = serializedObject.FindProperty("types");

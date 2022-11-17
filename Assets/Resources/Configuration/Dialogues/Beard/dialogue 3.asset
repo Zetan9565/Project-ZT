@@ -9,18 +9,60 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7acdddb4b8bb2e43b8726f03388fea8, type: 3}
+  m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
   m_Name: dialogue 3
   m_EditorClassIdentifier: 
-  _ID: DIALG000017
-  useUnifiedNPC: 1
-  useCurrentTalkerInfo: 0
-  unifiedNPC: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-  words:
-  - talkerType: 2
-    talkerInfo: {fileID: 11400000, guid: 0e269882c03e5554f99176df2a4abbe0, type: 2}
-    content: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
-    indexOfCorrectOption: 0
-    wordsWhenChusWB: "\u8FD9\u90FD\u80FD\u9009\u9519\uFF0C\u592A\u83DC\u4E86"
-    branches: []
+  contents:
+  - rid: 9026091320329896202
+  exit:
+    <ID>k__BackingField: CON-50725c7eba1c45d984bb224091c7f7e5
     events: []
+    options: []
+    <ExitHere>k__BackingField: 0
+    _position: {x: 360, y: 0}
+    lastExitHere: 0
+  description: 
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 9026091320329896202
+      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      data:
+        <ID>k__BackingField: DLG8551a452b77e4534bf34466524cf0b69
+        events: []
+        options:
+        - <Title>k__BackingField: 
+          <Content>k__BackingField:
+            rid: -2
+          <IsMain>k__BackingField: 1
+        <ExitHere>k__BackingField: 1
+        _position: {x: 0, y: 0}
+        lastExitHere: 0
+        <Talker>k__BackingField: '{[NPC]}'
+        <Text>k__BackingField: "\u4F60\u597D\u50CF\u6709\u79CD\u5B50\u554A\uFF0C\u4E0D\u8BD5\u7740\u79CD\u4E00\u4E0B\u5417\uFF1F"
+        <UtterInterval>k__BackingField:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          - serializedVersion: 3
+            time: 1
+            value: 0.02
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4

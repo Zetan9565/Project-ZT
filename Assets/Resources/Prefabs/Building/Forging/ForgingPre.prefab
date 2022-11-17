@@ -57,7 +57,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   centerOffset: 1
-  buildingFlagOffset: {x: 0, y: 0, z: 0}
+  structureFlagOffset: {x: 0, y: 0, z: 0}
   flag: {fileID: 0}
 --- !u!50 &2889081294302849595
 Rigidbody2D:

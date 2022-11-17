@@ -1,4 +1,8 @@
 ﻿using UnityEngine;
+using ZetanStudio;
+using ZetanStudio.InventorySystem;
+using ZetanStudio.InventorySystem.UI;
+using ZetanStudio.StructureSystem;
 
 [DisallowMultipleComponent]
 public class Warehouse : Structure2D

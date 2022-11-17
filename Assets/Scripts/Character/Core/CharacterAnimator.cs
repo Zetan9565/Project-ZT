@@ -1,4 +1,5 @@
 using UnityEngine;
+using ZetanStudio.CharacterSystem;
 
 [AddComponentMenu("Zetan Studio/角色动画代理")]
 [RequireComponent(typeof(Animator))]

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio;
 
 public class CharacterStateMachine
 {
@@ -42,7 +43,7 @@ public class CharacterStateMachine
         if (CurrentState != null && !CurrentState.CanTransitTo<T>(transition))
         {
 #if DEBUG
-            Debug.Log($"{Character} 无法从 {CurrentState.GetType().Name} 状态进入 {type.Name} 状态，过渡条件：{ZetanUtility.SerializeObject(transition, false)}");
+            Debug.Log($"{Character} 无法从 {CurrentState.GetType().Name} 状态进入 {type.Name} 状态，过渡条件：{Utility.SerializeObject(transition, false)}");
 #endif
             return false;
         }

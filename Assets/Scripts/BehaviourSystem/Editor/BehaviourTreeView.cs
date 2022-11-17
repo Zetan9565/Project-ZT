@@ -1,17 +1,17 @@
 using System;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
-using ZetanStudio.BehaviourTree.Nodes;
-using Node = ZetanStudio.BehaviourTree.Nodes.Node;
-using Action = ZetanStudio.BehaviourTree.Nodes.Action;
 
 namespace ZetanStudio.BehaviourTree.Editor
 {
+    using Nodes;
+    using ZetanStudio.Editor;
+
     public class BehaviourTreeView : GraphView
     {
         public new class UxmlFactory : UxmlFactory<BehaviourTreeView, UxmlTraits> { }
@@ -299,7 +299,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         #endregion
 
         #region 树相关
-        public void Vocate()
+        public void Vacate()
         {
             graphViewChanged -= OnGraphViewChanged;
             DeleteElements(graphElements.ToList());
@@ -310,14 +310,14 @@ namespace ZetanStudio.BehaviourTree.Editor
             if (newTree)
             {
                 if (treeBef != newTree)
-                    if (ZetanUtility.Editor.IsLocalAssets(treeBef)) Undo.ClearUndo(treeBef);
+                    if (Utility.Editor.IsLocalAssets(treeBef)) Undo.ClearUndo(treeBef);
                     else runtimeUndo.Clear();
                 tree = newTree;
             }
             if (tree != null) treeBef = tree;
-            Vocate();
+            Vacate();
             if (!tree) return;
-            isLocal = ZetanUtility.Editor.IsLocalAssets(tree);
+            isLocal = Utility.Editor.IsLocalAssets(tree);
             if (string.IsNullOrEmpty(tree.Entry.guid)) tree.Entry.guid = GUID.Generate().ToString();
             tree.Nodes.ForEach(n => CreateNode(n));
             tree.Nodes.ForEach(n => CreateEdges(n));

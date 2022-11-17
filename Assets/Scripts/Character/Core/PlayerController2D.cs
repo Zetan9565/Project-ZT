@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using ZetanStudio;
 
 [RequireComponent(typeof(Character))]
 public class PlayerController2D : CharacterController2D
@@ -21,11 +22,11 @@ public class PlayerController2D : CharacterController2D
     protected override void Awake()
     {
         base.Awake();
-        Input.Control.Player.Movement.performed += GetMovementInput;
-        Input.Control.Player.Movement.canceled += GetMovementInput;
-        Input.Control.Player.Flash.started += Flash;
-        Input.Control.Player.Roll.started += Roll;
-        Input.Control.Player.Action_1.started += Attack;
+        InputManager.Control.Player.Movement.performed += GetMovementInput;
+        InputManager.Control.Player.Movement.canceled += GetMovementInput;
+        InputManager.Control.Player.Flash.started += Flash;
+        InputManager.Control.Player.Roll.started += Roll;
+        InputManager.Control.Player.Action_1.started += Attack;
     }
 
     private bool canAttack;

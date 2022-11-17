@@ -7,7 +7,6 @@ using UnityEditor;
 
 namespace ZetanStudio.ItemSystem
 {
-    [CreateAssetMenu(fileName = "item database", menuName = "Zetan Studio/道具/数据库")]
     public sealed class ItemDatabase : SingletonScriptableObject<ItemDatabase>
     {
         [SerializeField]
@@ -37,6 +36,15 @@ namespace ZetanStudio.ItemSystem
 #if UNITY_EDITOR
         public static class Editor
         {
+            [MenuItem("Assets/Create/Zetan Studio/道具/数据库")]
+            private static void Create()
+            {
+                CreateSingleton();
+            }
+
+            [MenuItem("Assets/Create/Zetan Studio/道具/数据库", true)]
+            private static bool CheckCreate() => !Utility.Editor.LoadAsset<ItemDatabase>();
+
             public static List<Item> GetItems()
             {
                 return GetOrCreate().items;
@@ -77,10 +85,10 @@ namespace ZetanStudio.ItemSystem
                 Item.Editor.ApplyTemplate(item, template);
                 Item.Editor.SetAutoID(item, instance.items, template ? template.IDPrefix : null);
                 item.name = item.ID;
-                ZetanUtility.Editor.SaveChange(item);
+                Utility.Editor.SaveChange(item);
                 instance.items.Add(item);
                 AssetDatabase.AddObjectToAsset(item, instance);
-                ZetanUtility.Editor.SaveChange(instance);
+                Utility.Editor.SaveChange(instance);
                 return item;
             }
             public static Item MakeItem(ItemFilterAttribute itemFilter)
@@ -90,18 +98,18 @@ namespace ZetanStudio.ItemSystem
                 Item.Editor.ApplyFilter(item, itemFilter);
                 if (string.IsNullOrEmpty(item.ID)) Item.Editor.SetAutoID(item, instance.items);
                 item.name = item.ID;
-                ZetanUtility.Editor.SaveChange(item);
+                Utility.Editor.SaveChange(item);
                 instance.items.Add(item);
                 AssetDatabase.AddObjectToAsset(item, instance);
-                ZetanUtility.Editor.SaveChange(instance);
+                Utility.Editor.SaveChange(instance);
                 return item;
             }
             public static bool DeleteItem(Item item)
             {
-                if (!item || !instance) return false;
+                if (!item || !Instance) return false;
                 if (!Instance.items.Remove(item)) return false;
                 AssetDatabase.RemoveObjectFromAsset(item);
-                ZetanUtility.Editor.SaveChange(instance);
+                Utility.Editor.SaveChange(Instance);
                 DestroyImmediate(item);
                 return true;
             }

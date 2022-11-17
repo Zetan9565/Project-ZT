@@ -1,10 +1,16 @@
 using System;
 using System.Reflection;
 using UnityEngine;
-using ZetanStudio.ItemSystem;
 
 namespace ZetanStudio.ConditionSystem
 {
+    using InventorySystem;
+    using ItemSystem;
+    using PlayerSystem;
+    using QuestSystem;
+    using TimeSystem;
+    using TriggerSystem;
+
     [Serializable]
     public abstract class Condition
     {

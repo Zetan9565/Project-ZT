@@ -440,3 +440,16 @@ Update Mode: updateDependencies
 The following packages were 已更新:
   com.unity.render-pipelines.core 从版本 12.1.6 到 12.1.7
   com.unity.render-pipelines.universal 从版本 12.1.6 到 12.1.7
+
+=== Thu Nov 17 12:21:03 2022
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were 已更新:
+  com.unity.2d.animation 从版本 7.0.6 到 7.0.8
+  com.unity.2d.psdimporter 从版本 6.0.4 到 6.0.6
+  com.unity.collab-proxy 从版本 1.15.18 到 1.17.6
+  com.unity.inputsystem 从版本 1.3.0 到 1.4.3
+  com.unity.purchasing 从版本 4.2.0-pre.2 到 4.4.1
+  com.unity.xr.legacyinputhelpers 从版本 2.1.9 到 2.1.10

@@ -1,4 +1,5 @@
 using UnityEngine;
+using ZetanStudio;
 using ZetanStudio.BehaviourTree;
 using ZetanStudio.BehaviourTree.Nodes;
 
@@ -57,7 +58,7 @@ public class RandomPatrol : PathMovement
         if (useRange && transform) Gizmos.DrawWireSphere(transform.position, range);
         else
         {
-            Gizmos.DrawWireCube(ZetanUtility.CenterBetween(boundMin, boundMax), ZetanUtility.SizeBetween(boundMin, boundMax));
+            Gizmos.DrawWireCube(Utility.CenterBetween(boundMin, boundMax), Utility.SizeBetween(boundMin, boundMax));
         }
     }
 }

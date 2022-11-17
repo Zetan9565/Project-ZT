@@ -1,21 +1,24 @@
 using UnityEngine;
 
-public abstract class Interactive2D : InteractiveBase
+namespace ZetanStudio.InteractionSystem
 {
-    #region MonoBehaviour
-    protected virtual void OnTriggerEnter2D(Collider2D collision)
+    public abstract class Interactive2D : InteractiveBase
     {
-        if (activated && collision.CompareTag("Player")) Insert();
-    }
+        #region MonoBehaviour
+        protected virtual void OnTriggerEnter2D(Collider2D collision)
+        {
+            if (activated && collision.CompareTag("Player")) Insert();
+        }
 
-    protected virtual void OnTriggerStay2D(Collider2D collision)
-    {
-        if (activated && collision.CompareTag("Player")) Insert();
-    }
+        protected virtual void OnTriggerStay2D(Collider2D collision)
+        {
+            if (activated && collision.CompareTag("Player")) Insert();
+        }
 
-    protected virtual void OnTriggerExit2D(Collider2D collision)
-    {
-        if (activated && collision.CompareTag("Player")) Remove();
+        protected virtual void OnTriggerExit2D(Collider2D collision)
+        {
+            if (activated && collision.CompareTag("Player")) Remove();
+        }
+        #endregion
     }
-    #endregion
 }

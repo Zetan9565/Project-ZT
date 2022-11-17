@@ -1,37 +1,42 @@
 ﻿using UnityEngine;
-using ZetanStudio.ItemSystem.Craft;
+using ZetanStudio.CraftSystem.UI;
+using ZetanStudio.InventorySystem;
+using ZetanStudio.StructureSystem;
 
-[DisallowMultipleComponent]
-public class CraftTool : Structure2D
+namespace ZetanStudio.CraftSystem
 {
-    public CraftToolInformation ToolInfo { get; private set; }
-
-    public override bool IsInteractive
+    [DisallowMultipleComponent]
+    public class CraftTool : Structure2D
     {
-        get
+        public CraftToolInformation ToolInfo { get; private set; }
+
+        public override bool IsInteractive
         {
-            return base.IsInteractive && ToolInfo && !WindowsManager.IsWindowOpen<CraftWindow>();
+            get
+            {
+                return base.IsInteractive && ToolInfo && !WindowsManager.IsWindowOpen<CraftWindow>();
+            }
         }
-    }
 
-    protected override void OnNotInteractable()
-    {
-        if (WindowsManager.IsWindowOpen<CraftWindow>(out var making) && making.CurrentTool == this)
-            making.Interrupt();
-        base.OnNotInteractable();
-    }
-
-    public override bool DoManage()
-    {
-        return WindowsManager.OpenWindowBy<CraftWindow>(this, BackpackManager.Instance);
-    }
-
-    protected override void OnInit()
-    {
-        if (Info.Addendas.Count > 0)
+        protected override void OnNotInteractable()
         {
-            if (Info.Addendas[0] is CraftToolInformation info)
-                ToolInfo = info;
+            if (WindowsManager.IsWindowOpen<CraftWindow>(out var making) && making.CurrentTool == this)
+                making.Interrupt();
+            base.OnNotInteractable();
+        }
+
+        public override bool DoManage()
+        {
+            return WindowsManager.OpenWindowBy<CraftWindow>(this, BackpackManager.Instance);
+        }
+
+        protected override void OnInit()
+        {
+            if (Info.Addendas.Count > 0)
+            {
+                if (Info.Addendas[0] is CraftToolInformation info)
+                    ToolInfo = info;
+            }
         }
     }
 }

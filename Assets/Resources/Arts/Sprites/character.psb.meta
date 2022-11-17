@@ -47,6 +47,7 @@ ScriptedImporter:
     flipbookRows: 0
     flipbookColumns: 0
     ignorePngGamma: 0
+    cookieMode: 0
     filterMode: 1
     aniso: 1
     mipBias: 0
@@ -89,6 +90,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 0, y: 0}
+    spritePosition: {x: 0, y: 0}
   mosaicSpriteImportData: []
   rigSpriteImportData:
   - name: RightHand
@@ -416,7 +418,8 @@ ScriptedImporter:
     - {x: 0, y: 25}
     tessellationDetail: 0
     parentGroupIndex: -1
-    uvTransform: {x: -780, y: -187}
+    uvTransform: {x: 2, y: 321}
+    spritePosition: {x: 782, y: 508}
   - name: Spear
     originalName: 
     pivot: {x: 0.41850027, y: 0.40722576}
@@ -437,7 +440,8 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     parentGroupIndex: -1
-    uvTransform: {x: -448, y: -195}
+    uvTransform: {x: 321, y: 258}
+    spritePosition: {x: 769, y: 453}
   - name: Sword
     originalName: 
     pivot: {x: 0.13330165, y: 0.2960388}
@@ -589,7 +593,8 @@ ScriptedImporter:
     - {x: 3, y: 9}
     tessellationDetail: 0
     parentGroupIndex: -1
-    uvTransform: {x: -171, y: -507}
+    uvTransform: {x: 597, y: 3}
+    spritePosition: {x: 768, y: 510}
   - name: Eyes
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -973,7 +978,8 @@ ScriptedImporter:
     - {x: 32, y: 21}
     tessellationDetail: 0
     parentGroupIndex: -1
-    uvTransform: {x: -728, y: -561}
+    uvTransform: {x: 178, y: 321}
+    spritePosition: {x: 906, y: 882}
   - name: Head
     originalName: 
     pivot: {x: 0.5, y: 0.05109435}
@@ -1310,7 +1316,8 @@ ScriptedImporter:
     - {x: 0, y: 26}
     tessellationDetail: 0
     parentGroupIndex: -1
-    uvTransform: {x: -780, y: -753}
+    uvTransform: {x: 2, y: 3}
+    spritePosition: {x: 782, y: 756}
   - name: Body
     originalName: 
     pivot: {x: 0.508308, y: 0.04707924}
@@ -1668,7 +1675,8 @@ ScriptedImporter:
     - {x: 0, y: 27}
     tessellationDetail: 0
     parentGroupIndex: -1
-    uvTransform: {x: -482, y: -453}
+    uvTransform: {x: 302, y: -111}
+    spritePosition: {x: 784, y: 342}
   - name: LeftHand
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -1994,7 +2002,8 @@ ScriptedImporter:
     - {x: 0, y: 25}
     tessellationDetail: 0
     parentGroupIndex: -1
-    uvTransform: {x: -940, y: -204}
+    uvTransform: {x: 90, y: 321}
+    spritePosition: {x: 1030, y: 525}
   characterData:
     bones:
     - name: bone_1

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using ZetanStudio.InventorySystem;
 
 namespace ZetanStudio.ItemSystem.Module
 {

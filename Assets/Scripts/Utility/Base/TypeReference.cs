@@ -1,41 +1,44 @@
 ﻿using System;
 using UnityEngine;
 
-[Serializable]
-public sealed class TypeReference : ISerializationCallbackReceiver
+namespace ZetanStudio
 {
-    public string typeName;
-
-    public Type value;
-
-    public TypeReference() { }
-
-    public TypeReference(string typeName)
+    [Serializable]
+    public sealed class TypeReference : ISerializationCallbackReceiver
     {
-        this.typeName = typeName;
-    }
+        public string typeName;
 
-    public TypeReference(Type type)
-    {
-        value = type;
-        OnAfterDeserialize();
-    }
+        public Type value;
 
-    public void OnAfterDeserialize()
-    {
-        if (value != null)
+        public TypeReference() { }
+
+        public TypeReference(string typeName)
         {
-            typeName = $"{(string.IsNullOrEmpty(value.Namespace) ? string.Empty : $"{value.Namespace}.")}{value.Name}";
+            this.typeName = typeName;
         }
-    }
 
-    public void OnBeforeSerialize()
-    {
-        value = ZetanUtility.GetTypeWithoutAssembly(typeName);
-    }
+        public TypeReference(Type type)
+        {
+            value = type;
+            OnAfterDeserialize();
+        }
 
-    public static implicit operator Type(TypeReference self)
-    {
-        return self.value;
+        public void OnAfterDeserialize()
+        {
+            if (value != null)
+            {
+                typeName = $"{(string.IsNullOrEmpty(value.Namespace) ? string.Empty : $"{value.Namespace}.")}{value.Name}";
+            }
+        }
+
+        public void OnBeforeSerialize()
+        {
+            value = Utility.GetTypeWithoutAssembly(typeName);
+        }
+
+        public static implicit operator Type(TypeReference self)
+        {
+            return self.value;
+        }
     }
 }

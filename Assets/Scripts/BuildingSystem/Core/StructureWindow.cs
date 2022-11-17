@@ -2,7 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio;
+using ZetanStudio.InventorySystem;
+using ZetanStudio.PlayerSystem;
 using ZetanStudio.StructureSystem;
+using ZetanStudio.StructureSystem.UI;
+using ZetanStudio.UI;
+using InputManager = ZetanStudio.InputManager;
 
 public class StructureWindow : Window, IHideable
 {
@@ -57,10 +63,10 @@ public class StructureWindow : Window, IHideable
         if (!preview) return;
 
         isDraging = false;
-        ZetanUtility.SetActive(buildButton, true);
-        ZetanUtility.SetActive(backButton, true);
+        Utility.SetActive(buildButton, true);
+        Utility.SetActive(backButton, true);
 #if UNITY_ANDROID
-        ZetanUtility.SetActive(joyStick, true);
+        Utility.SetActive(joyStick, true);
 #endif
         CameraMovement2D.Instance.MoveTo(preview.transform.position);
 
@@ -87,9 +93,9 @@ public class StructureWindow : Window, IHideable
         preview = null;
         currentInfo = null;
         IsPreviewing = false;
-        ZetanUtility.SetActive(buildButton, false);
-        ZetanUtility.SetActive(backButton, false);
-        ZetanUtility.SetActive(joyStick, false);
+        Utility.SetActive(buildButton, false);
+        Utility.SetActive(backButton, false);
+        Utility.SetActive(joyStick, false);
         WindowsManager.HideAll(false);
         if (PlayerManager.Instance.Player.GetState(out var main, out var sub) && main == CharacterStates.Busy && sub == CharacterBusyStates.UI)
             PlayerManager.Instance.SetPlayerState(CharacterStates.Normal, CharacterNormalStates.Idle);
@@ -99,7 +105,7 @@ public class StructureWindow : Window, IHideable
     public void ShowAndMovePreview()
     {
         if (!preview || !isDraging) return;
-        preview.transform.position = ZetanUtility.PositionToGrid(GetMovePosition(), gridSize, preview.CenterOffset);
+        preview.transform.position = Utility.PositionToGrid(GetMovePosition(), gridSize, preview.CenterOffset);
 #if UNITY_STANDALONE
         if (ZetanUtility.IsMouseInsideScreen)
         {
@@ -116,22 +122,22 @@ public class StructureWindow : Window, IHideable
     }
     private Vector2 GetMovePosition()
     {
-        if (ZetanUtility.IsMouseInsideScreen) return Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        if (Utility.IsMouseInsideScreen()) return Camera.main.ScreenToWorldPoint(InputManager.mousePosition);
         else return preview.transform.position;
     }
 
     public void MovePreview()
     {
         if (isDraging) return;
-        var horizontal = Input.GetAsix("Horizontal");
-        var vertical = Input.GetAsix("Vertical");
+        var horizontal = InputManager.GetAsix("Horizontal");
+        var vertical = InputManager.GetAsix("Vertical");
         var input = new Vector2(horizontal, vertical).normalized;
         if (input.sqrMagnitude > 0.25)
             moveTime += Time.deltaTime;
         if (moveTime >= 0.1f)
         {
             moveTime = 0;
-            preview.transform.position = ZetanUtility.PositionToGrid((Vector2)preview.transform.position + input, gridSize, preview.CenterOffset);
+            preview.transform.position = Utility.PositionToGrid((Vector2)preview.transform.position + input, gridSize, preview.CenterOffset);
             CameraMovement2D.Instance.MoveTo(preview.transform.position);
         }
     }
@@ -141,9 +147,9 @@ public class StructureWindow : Window, IHideable
     protected override bool OnOpen(params object[] args)
     {
         Refresh();
-        ZetanUtility.SetActive(buildButton, false);
-        ZetanUtility.SetActive(backButton, false);
-        ZetanUtility.SetActive(joyStick, false);
+        Utility.SetActive(buildButton, false);
+        Utility.SetActive(backButton, false);
+        Utility.SetActive(joyStick, false);
         return true;
     }
     protected override bool OnClose(params object[] args)
@@ -151,7 +157,7 @@ public class StructureWindow : Window, IHideable
         FinishPreview();
         HideDescription();
         HideBuiltList();
-        ZetanUtility.SetActive(backButton, false);
+        Utility.SetActive(backButton, false);
         WindowsManager.CloseWindow<FloatTipsPanel>();
         return true;
     }
@@ -231,7 +237,7 @@ public class StructureWindow : Window, IHideable
     public void LocateStructure(StructureData structure)
     {
         if (!structure || !structure.entity && !structure.preview) return;
-        ZetanUtility.SetActive(backButton, true);
+        Utility.SetActive(backButton, true);
         if (structure.entity) CameraMovement2D.Instance.MoveTo(structure.entity.transform.position);
         else if (structure.preview) CameraMovement2D.Instance.MoveTo(structure.preview.transform.position);
         WindowsManager.HideAll(true);
@@ -240,7 +246,7 @@ public class StructureWindow : Window, IHideable
     }
     private void FinishLocation()
     {
-        ZetanUtility.SetActive(backButton, false);
+        Utility.SetActive(backButton, false);
         CameraMovement2D.Instance.Stop();
         WindowsManager.HideAll(false);
         IsLocating = false;

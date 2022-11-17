@@ -2,6 +2,8 @@
 
 namespace ZetanStudio.ItemSystem.Module
 {
+    using FarmingSystem;
+
     [Name("种子")]
     public sealed class SeedModule : ItemModule
     {

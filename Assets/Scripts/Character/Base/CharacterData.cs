@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using ZetanStudio;
 
 [Serializable]
 public class CharacterData
@@ -53,7 +54,7 @@ public class CharacterData
     public CharacterData(CharacterInformation info)
     {
         this.info = info;
-        currentScene = ZetanUtility.ActiveScene.name;
+        currentScene = Utility.GetActiveScene().name;
     }
 
     public static implicit operator bool(CharacterData self)

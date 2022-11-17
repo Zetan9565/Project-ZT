@@ -18,7 +18,7 @@ namespace ZetanStudio
         public void Replace()
         {
             List<string> names = new List<string>();
-            foreach (var field in GetType().GetFields(ZetanUtility.CommonBindingFlags))
+            foreach (var field in GetType().GetFields(Utility.CommonBindingFlags))
             {
                 if (field.FieldType == typeof(Text))
                     names.Add(field.Name);

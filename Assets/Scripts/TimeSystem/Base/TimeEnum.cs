@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public enum TimeSystem
+public enum ClockSystem
 {
     [InspectorName("12小时制")]
     System12,

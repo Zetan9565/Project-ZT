@@ -59,9 +59,9 @@ namespace ZetanStudio.BehaviourTree.Editor
             var globalBef = globalVariables.objectReferenceValue;
             if (shouldDisable) EditorGUILayout.PropertyField(globalVariables, new GUIContent(Tr("全局变量")));
             else globalDrawer.DoLayoutDraw();
-            if (!globalVariables.objectReferenceValue && ZetanUtility.Editor.LoadAsset<GlobalVariables>() == null)
+            if (!globalVariables.objectReferenceValue && Utility.Editor.LoadAsset<GlobalVariables>() == null)
                 if (GUILayout.Button(Tr("新建")))
-                    globalVariables.objectReferenceValue = ZetanUtility.Editor.SaveFilePanel(CreateInstance<GlobalVariables>, "global variables");
+                    globalVariables.objectReferenceValue = Utility.Editor.SaveFilePanel(CreateInstance<GlobalVariables>, "global variables");
             EditorGUI.EndDisabledGroup();
             if (globalVariables.objectReferenceValue != globalBef) InitGlobal();
             if (EditorGUI.EndChangeCheck()) serializedObject.ApplyModifiedProperties();
@@ -73,7 +73,7 @@ namespace ZetanStudio.BehaviourTree.Editor
                 if (EditorGUILayout.BeginFadeGroup(showGlobal.faded))
                     variableList.DoLayoutList();
                 EditorGUILayout.EndFadeGroup();
-                if (!Application.isPlaying && !ZetanUtility.IsPrefab((target as BehaviourTreeManager).gameObject))
+                if (!Application.isPlaying && !Utility.IsPrefab((target as BehaviourTreeManager).gameObject))
                 {
                     showPreset.target = EditorGUILayout.Foldout(presetVariables.isExpanded, Tr("变量预设列表"), true);
                     if (EditorGUILayout.BeginFadeGroup(showPreset.faded))

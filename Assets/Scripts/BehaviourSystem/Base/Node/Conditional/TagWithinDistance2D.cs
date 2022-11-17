@@ -56,7 +56,7 @@ namespace ZetanStudio.BehaviourTree.Nodes
 
         public override void OnDrawGizmosSelected()
         {
-            if (transform) ZetanUtility.DrawGizmosCircle(transform.position, distance);
+            if (transform) Utility.DrawGizmosCircle(transform.position, distance);
         }
     }
 }

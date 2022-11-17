@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-using ZetanStudio.Character;
+using ZetanStudio.CharacterSystem;
 
 namespace ZetanStudio.ItemSystem
 {

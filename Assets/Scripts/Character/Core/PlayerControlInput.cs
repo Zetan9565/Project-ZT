@@ -1,17 +1,19 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using ZetanStudio;
+using ZetanStudio.CharacterSystem;
 
 public class PlayerControlInput : CharacterControlInput
 {
     protected override void OnAwake()
     {
-        Input.Control.Player.Movement.performed += GetMovementInput;
-        Input.Control.Player.Movement.canceled += GetMovementInput;
-        Input.Control.Player.Flash.started += Flash;
-        Input.Control.Player.Roll.started += Roll;
-        Input.Control.Player.Action_1.started += Attack;
-        Input.Control.Player.Action_1.canceled += Attack;
+        InputManager.Control.Player.Movement.performed += GetMovementInput;
+        InputManager.Control.Player.Movement.canceled += GetMovementInput;
+        InputManager.Control.Player.Flash.started += Flash;
+        InputManager.Control.Player.Roll.started += Roll;
+        InputManager.Control.Player.Action_1.started += Attack;
+        InputManager.Control.Player.Action_1.canceled += Attack;
     }
     private float atkHoldTime;
     private Coroutine atkHoldCouroutine;
@@ -41,19 +43,19 @@ public class PlayerControlInput : CharacterControlInput
     }
     private void Roll(InputAction.CallbackContext context)
     {
-        if (Input.IsTyping) return;
+        if (InputManager.IsTyping) return;
         SetTrigger(CharacterInputNames.Instance.Roll);
     }
 
     private void Flash(InputAction.CallbackContext context)
     {
-        if (Input.IsTyping) return;
+        if (InputManager.IsTyping) return;
         SetTrigger(CharacterInputNames.Instance.Flash);
     }
 
     public void GetMovementInput(InputAction.CallbackContext context)
     {
-        if (Input.IsTyping)
+        if (InputManager.IsTyping)
         {
             SetValue(CharacterInputNames.Instance.Move, Vector2.zero);
             return;

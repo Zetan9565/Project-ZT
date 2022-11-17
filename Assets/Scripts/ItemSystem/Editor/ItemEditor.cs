@@ -23,8 +23,8 @@ namespace ZetanStudio.ItemSystem.Editor
         private ToolbarSearchField searchField;
         private DropdownField templateSelector;
         private Label listLabel;
-        private UnityEngine.UIElements.ListView itemList;
-        private UnityEngine.UIElements.ListView templateList;
+        private ListView itemList;
+        private ListView templateList;
         private ScrollView rightPanel;
         private TabbedBar funcTab;
         private Item selectedItem;
@@ -39,7 +39,7 @@ namespace ZetanStudio.ItemSystem.Editor
         private List<string> templateNames;
         private Button deleteButton;
         private Button cloneButton;
-        private UnityEngine.UIElements.ListView searchDropdown;
+        private ListView searchDropdown;
         private DropdownField searchSelector;
         private SearchKeyType keyType;
         private List<string> itemSearchType;
@@ -153,7 +153,7 @@ namespace ZetanStudio.ItemSystem.Editor
                 {
                     DoSearchDropdown(evt.newValue);
                 });
-                searchDropdown = root.Q<UnityEngine.UIElements.ListView>("search-dropdown");
+                searchDropdown = root.Q<ListView>("search-dropdown");
                 searchDropdown.makeItem = () => new Label() { enableRichText = true };
                 searchDropdown.onSelectionChange += OnSearchListSelected;
                 root.RegisterCallback<PointerDownEvent>(evt =>
@@ -190,7 +190,7 @@ namespace ZetanStudio.ItemSystem.Editor
                 templateSelector.RegisterValueChangedCallback(OnTemplateSelected);
                 RefreshTemplateSelector();
 
-                itemList = root.Q<UnityEngine.UIElements.ListView>("item-list");
+                itemList = root.Q<ListView>("item-list");
                 itemList.selectionType = SelectionType.Multiple;
                 itemList.makeItem = () =>
                 {
@@ -213,7 +213,7 @@ namespace ZetanStudio.ItemSystem.Editor
                 itemList.onSelectionChange += (os) => OnListItemSelected(os.Select(x => x as Item));
                 RefreshItems();
 
-                templateList = root.Q<UnityEngine.UIElements.ListView>("template-list");
+                templateList = root.Q<ListView>("template-list");
                 templateList.selectionType = SelectionType.Multiple;
                 templateList.makeItem = () =>
                 {
@@ -348,28 +348,28 @@ namespace ZetanStudio.ItemSystem.Editor
                         {
                             content = null;
                             bool result = item.ID.Contains(keywords);
-                            if (result) content = $"{item.Name}\n({Tr("ID")}: {ZetanUtility.Editor.HighlightContentByKey(item.ID, keywords, item.ID.Length)})";
+                            if (result) content = $"{item.Name}\n({Tr("ID")}: {Utility.Editor.HighlightKeyword(item.ID, keywords, item.ID.Length)})";
                             return result;
                         }
                         bool searchItemName(Item item, out string content)
                         {
                             content = null;
                             bool result = item.Name.Contains(keywords);
-                            if (result) content = $"{ZetanUtility.Editor.HighlightContentByKey(item.Name, keywords, item.Name.Length)}";
+                            if (result) content = $"{Utility.Editor.HighlightKeyword(item.Name, keywords, item.Name.Length)}";
                             return result;
                         }
                         bool searchItemType(Item item, out string content)
                         {
                             content = null;
                             bool result = item.Type.Name.Contains(keywords);
-                            if (result) content = $"{item.Name}\n({Tr("类型")}: {ZetanUtility.Editor.HighlightContentByKey(item.Type.Name, keywords, item.Type.Name.Length)})";
+                            if (result) content = $"{item.Name}\n({Tr("类型")}: {Utility.Editor.HighlightKeyword(item.Type.Name, keywords, item.Type.Name.Length)})";
                             return result;
                         }
                         bool searchItemDesc(Item item, out string content)
                         {
                             content = null;
                             bool result = item.Description.Contains(keywords);
-                            if (result) content = $"{item.Name}\n({Tr("描述")}: {ZetanUtility.Editor.HighlightContentByKey(item.Description, keywords, 30)})";
+                            if (result) content = $"{item.Name}\n({Tr("描述")}: {Utility.Editor.HighlightKeyword(item.Description, keywords, 30)})";
                             return result;
                         }
                         bool searchItemMod(Item item, out string content)
@@ -379,7 +379,7 @@ namespace ZetanStudio.ItemSystem.Editor
                             if (result)
                             {
                                 content = item.Modules.FirstOrDefault(x => x.GetName().Contains(keywords)).GetName();
-                                content = $"{item.Name}\n({Tr("模块")}: {ZetanUtility.Editor.HighlightContentByKey(content, keywords, content.Length)})";
+                                content = $"{item.Name}\n({Tr("模块")}: {Utility.Editor.HighlightKeyword(content, keywords, content.Length)})";
                             }
                             return result;
                         }
@@ -454,14 +454,14 @@ namespace ZetanStudio.ItemSystem.Editor
                         {
                             content = null;
                             bool result = template.IDPrefix.Contains(keywords);
-                            if (result) content = $"{template.Name}\n({Tr("ID前缀")}: {ZetanUtility.Editor.HighlightContentByKey(template.IDPrefix, keywords, template.IDPrefix.Length)})";
+                            if (result) content = $"{template.Name}\n({Tr("ID前缀")}: {Utility.Editor.HighlightKeyword(template.IDPrefix, keywords, template.IDPrefix.Length)})";
                             return result;
                         }
                         bool searchTempName(ItemTemplate template, out string content)
                         {
                             content = null;
                             bool result = template.Name.Contains(keywords);
-                            if (result) content = $"{ZetanUtility.Editor.HighlightContentByKey(template.Name, keywords, template.Name.Length)}";
+                            if (result) content = $"{Utility.Editor.HighlightKeyword(template.Name, keywords, template.Name.Length)}";
                             return result;
                         }
                         bool searchTempType(ItemTemplate template, out string content)
@@ -469,14 +469,14 @@ namespace ZetanStudio.ItemSystem.Editor
                             content = null;
                             var type = ItemTypeEnum.Instance[template.Type];
                             bool result = type.Name.Contains(keywords);
-                            if (result) content = $"{template.Name}\n({Tr("默认类型")}: {ZetanUtility.Editor.HighlightContentByKey(type.Name, keywords, type.Name.Length)})";
+                            if (result) content = $"{template.Name}\n({Tr("默认类型")}: {Utility.Editor.HighlightKeyword(type.Name, keywords, type.Name.Length)})";
                             return result;
                         }
                         bool searchTempDesc(ItemTemplate template, out string content)
                         {
                             content = null;
                             bool result = template.Description.Contains(keywords);
-                            if (result) content = $"{template.Name}\n({Tr("默认描述")}: {ZetanUtility.Editor.HighlightContentByKey(template.Description, keywords, 30)})";
+                            if (result) content = $"{template.Name}\n({Tr("默认描述")}: {Utility.Editor.HighlightKeyword(template.Description, keywords, 30)})";
                             return result;
                         }
                         bool searchTempMod(ItemTemplate template, out string content)
@@ -486,7 +486,7 @@ namespace ZetanStudio.ItemSystem.Editor
                             if (result)
                             {
                                 content = template.Modules.FirstOrDefault(x => x.GetName().Contains(keywords)).GetName();
-                                content = $"{template.Name}\n({Tr("模块")}: {ZetanUtility.Editor.HighlightContentByKey(content, keywords, content.Length)})";
+                                content = $"{template.Name}\n({Tr("模块")}: {Utility.Editor.HighlightKeyword(content, keywords, content.Length)})";
                             }
                             return result;
                         }
@@ -635,7 +635,7 @@ namespace ZetanStudio.ItemSystem.Editor
         {
             if (block != null)
             {
-                var script = ZetanUtility.Editor.LoadAssets<MonoScript>().Find(x => x.GetClass() == block.GetType());
+                var script = Utility.Editor.LoadAssets<MonoScript>().Find(x => x.GetClass() == block.GetType());
                 if (script) AssetDatabase.OpenAsset(script);
             }
         }
@@ -643,7 +643,7 @@ namespace ZetanStudio.ItemSystem.Editor
         {
             if (module != null)
             {
-                var script = ZetanUtility.Editor.LoadAssets<MonoScript>().Find(x => x.GetClass() == module.GetType());
+                var script = Utility.Editor.LoadAssets<MonoScript>().Find(x => x.GetClass() == module.GetType());
                 if (script) AssetDatabase.OpenAsset(script);
             }
         }
@@ -721,7 +721,7 @@ namespace ZetanStudio.ItemSystem.Editor
 
                 void newScript()
                 {
-                    ZetanUtility.Editor.Script.CreateNewScript("NewModule.cs", settings.newScriptFolder, settings.scriptTemplate);
+                    Utility.Editor.Script.CreateNewScript("NewModule.cs", settings.newScriptFolder, settings.scriptTemplate);
                 }
             };
             button.style.width = 230;
@@ -967,7 +967,7 @@ namespace ZetanStudio.ItemSystem.Editor
         }
         private void RefreshTemplates()
         {
-            templates = ZetanUtility.Editor.LoadAssets<ItemTemplate>();
+            templates = Utility.Editor.LoadAssets<ItemTemplate>();
             if (templateList != null)
             {
                 templateList.itemsSource = templates;
@@ -978,7 +978,7 @@ namespace ZetanStudio.ItemSystem.Editor
         }
         private void RefreshTemplateSelector()
         {
-            var templates = ZetanUtility.Editor.LoadAssets<ItemTemplate>();
+            var templates = Utility.Editor.LoadAssets<ItemTemplate>();
             templateNames = new List<string>() { "不指定模板" };
             HashSet<string> existNames = new HashSet<string>();
             foreach (var template in templates)
@@ -1081,7 +1081,7 @@ namespace ZetanStudio.ItemSystem.Editor
         {
             if (!selectedItem) return;
             Item item;
-            if (!Item.UseDatabase) item = ZetanUtility.Editor.SaveFilePanel(() => Instantiate(selectedItem), folder: Item.assetsFolder, root: "Resources");
+            if (!Item.UseDatabase) item = Utility.Editor.SaveFilePanel(() => Instantiate(selectedItem), folder: Item.assetsFolder, root: "Resources");
             else item = ItemDatabase.Editor.CloneItem(selectedItem);
             if (item)
             {
@@ -1119,12 +1119,12 @@ namespace ZetanStudio.ItemSystem.Editor
             Item item;
             if (!Item.UseDatabase)
             {
-                item = ZetanUtility.Editor.SaveFilePanel(CreateInstance<Item>, folder: Item.assetsFolder, root: "Resources");
+                item = Utility.Editor.SaveFilePanel(CreateInstance<Item>, folder: Item.assetsFolder, root: "Resources");
                 if (item)
                 {
                     Item.Editor.ApplyTemplate(item, currentTemplate);
-                    Item.Editor.SetAutoID(item, ZetanUtility.Editor.LoadAssets<Item>(), currentTemplate ? currentTemplate.IDPrefix : null);
-                    ZetanUtility.Editor.SaveChange(item);
+                    Item.Editor.SetAutoID(item, Utility.Editor.LoadAssets<Item>(), currentTemplate ? currentTemplate.IDPrefix : null);
+                    Utility.Editor.SaveChange(item);
                 }
             }
             else item = ItemDatabase.Editor.MakeItem(currentTemplate);
@@ -1147,13 +1147,13 @@ namespace ZetanStudio.ItemSystem.Editor
             Item item;
             if (!Item.UseDatabase)
             {
-                item = ZetanUtility.Editor.SaveFilePanel(CreateInstance<Item>, folder: Item.assetsFolder, root: "Resources");
+                item = Utility.Editor.SaveFilePanel(CreateInstance<Item>, folder: Item.assetsFolder, root: "Resources");
                 if (item)
                 {
                     Item.Editor.ApplyFilter(item, itemFilter);
                     if (string.IsNullOrEmpty(item.ID))
-                        Item.Editor.SetAutoID(item, ZetanUtility.Editor.LoadAssets<Item>(), currentTemplate ? currentTemplate.IDPrefix : null);
-                    ZetanUtility.Editor.SaveChange(item);
+                        Item.Editor.SetAutoID(item, Utility.Editor.LoadAssets<Item>(), currentTemplate ? currentTemplate.IDPrefix : null);
+                    Utility.Editor.SaveChange(item);
                 }
             }
             else item = ItemDatabase.Editor.MakeItem(itemFilter);
@@ -1173,7 +1173,7 @@ namespace ZetanStudio.ItemSystem.Editor
         }
         private void NewTemplate()
         {
-            ItemTemplate template = ZetanUtility.Editor.SaveFilePanel(CreateInstance<ItemTemplate>);
+            ItemTemplate template = Utility.Editor.SaveFilePanel(CreateInstance<ItemTemplate>);
             if (template)
             {
                 templates.Add(template);

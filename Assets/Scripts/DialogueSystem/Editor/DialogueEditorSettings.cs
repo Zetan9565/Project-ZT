@@ -14,7 +14,7 @@ namespace ZetanStudio.DialogueSystem.Editor
 
         private static DialogueEditorSettings Find()
         {
-            var settings = ZetanUtility.Editor.LoadAssets<DialogueEditorSettings>();
+            var settings = Utility.Editor.LoadAssets<DialogueEditorSettings>();
             if (settings.Count > 1) Debug.LogWarning(L.Tr(settings[0].language, "找到多个对话编辑器配置，将使用第一个"));
             if (settings.Count > 0) return settings[0];
             return null;

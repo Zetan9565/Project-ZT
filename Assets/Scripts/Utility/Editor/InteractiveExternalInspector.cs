@@ -1,6 +1,7 @@
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using ZetanStudio.InteractionSystem;
 
 [CustomEditor(typeof(InteractiveExternalBase), true), CanEditMultipleObjects]
 public class InteractiveExternalInspector : Editor

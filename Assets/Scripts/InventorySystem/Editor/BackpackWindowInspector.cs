@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using ZetanStudio.InventorySystem.UI;
 
 [CustomEditor(typeof(BackpackWindow))]
 public class BackpackWindowInspector : WindowInspector

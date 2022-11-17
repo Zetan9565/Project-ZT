@@ -48,7 +48,7 @@ namespace ZetanStudio.BehaviourTree.Nodes
         public override void OnDrawGizmosSelected()
         {
 #if UNITY_EDITOR
-            if (transform) ZetanUtility.DrawGizmosSector(Eyes(), direction, distance, fieldOfView);
+            if (transform) Utility.DrawGizmosSector(Eyes(), direction, distance, fieldOfView);
 #endif
         }
     }

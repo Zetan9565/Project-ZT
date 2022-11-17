@@ -14,7 +14,7 @@ namespace ZetanStudio
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            var range = property.FindAutoPropertyRelative("Range");
+            var range = property.FindAutoProperty("Range");
             if (range.propertyType == SerializedPropertyType.Vector2Int)
                 if (range.vector2IntValue.x != range.vector2IntValue.y) return lineHeightSpace * 2;
                 else return lineHeightSpace;
@@ -27,10 +27,10 @@ namespace ZetanStudio
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             DistributedValueRangeAttribute attr = fieldInfo.GetCustomAttribute<DistributedValueRangeAttribute>();
-            var range = property.FindAutoPropertyRelative("Range");
+            var range = property.FindAutoProperty("Range");
             if (range.propertyType == SerializedPropertyType.Vector2 || range.propertyType == SerializedPropertyType.Vector2Int)
             {
-                var distrib = property.FindAutoPropertyRelative("Distribution");
+                var distrib = property.FindAutoProperty("Distribution");
                 EditorGUI.LabelField(new Rect(position.x, position.y, position.width, lineHeight), new GUIContent(EDL.Tr("{0}范围", label.text)));
                 if (range.propertyType == SerializedPropertyType.Vector2Int)
                 {

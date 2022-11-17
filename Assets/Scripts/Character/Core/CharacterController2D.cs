@@ -1,4 +1,5 @@
 using UnityEngine;
+using ZetanStudio.CharacterSystem;
 
 [RequireComponent(typeof(Character))]
 public class CharacterController2D : MonoBehaviour

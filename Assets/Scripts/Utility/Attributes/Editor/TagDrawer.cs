@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CustomPropertyDrawer(typeof(TagAttribute))]
-public class TagDrawer : EnhancedAttributeDrawer
+public class TagDrawer : EnhancedPropertyDrawer
 {
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {

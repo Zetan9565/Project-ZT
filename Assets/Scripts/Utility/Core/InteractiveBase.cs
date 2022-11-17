@@ -1,72 +1,83 @@
 ﻿using UnityEngine;
 
-public abstract class InteractiveBase : MonoBehaviour, IInteractive
+namespace ZetanStudio.InteractionSystem
 {
-    public bool activated = true;
+    using UI;
 
-    [SerializeField]
-    private string defaultName = "可交互对象";
-    public virtual string Name
+    public abstract class InteractiveBase : MonoBehaviour, IInteractive
     {
-        get
+        public bool activated = true;
+
+        [SerializeField]
+        private string defaultName = "可交互对象";
+        public virtual string Name
         {
-            return defaultName;
+            get
+            {
+                return defaultName;
+            }
         }
-    }
 
-    [SerializeField, SpriteSelector]
-    private Sprite defaultIcon;
-    public virtual Sprite Icon => defaultIcon;
+        [SerializeField, SpriteSelector]
+        private Sprite defaultIcon;
+        public virtual Sprite Icon => defaultIcon;
 
-    /// <summary>
-    /// 可否交互
-    /// </summary>
-    public abstract bool IsInteractive { get; }
+        /// <summary>
+        /// 可否交互
+        /// </summary>
+        public abstract bool IsInteractive { get; }
 
-    /// <summary>
-    /// 是否处于可交互状态
-    /// </summary>
-    private bool interactable;
+        /// <summary>
+        /// 是否处于可交互状态
+        /// </summary>
+        private bool interactable;
 
-    public abstract bool DoInteract();
+        public abstract bool DoInteract();
 
-    public void EndInteraction()
-    {
-        interactable = false;
-        OnEndInteraction();
-    }
-
-    protected virtual void OnDestroy()
-    {
-        if (InteractionPanel.Instance) InteractionPanel.Instance.Remove(this);
-    }
-
-    protected void Insert()
-    {
-        if (activated && !interactable && IsInteractive)
+        public void EndInteraction()
         {
-            InteractionPanel.Instance.Insert(this);
-            interactable = true;
-            OnInteractable();
+            interactable = false;
+            OnEndInteraction();
         }
+
+        protected void OnDestroy()
+        {
+            if (InteractionPanel.Instance) InteractionPanel.Instance.Remove(this);
+            OnDestroy_();
+        }
+
+        protected virtual void OnDestroy_()
+        {
+            if (InteractionPanel.Instance) InteractionPanel.Instance.Remove(this);
+        }
+
+        protected void Insert()
+        {
+            if (activated && !interactable && IsInteractive)
+            {
+                InteractionPanel.Instance.Insert(this);
+                interactable = true;
+                OnInteractable();
+            }
+        }
+        protected void Remove()
+        {
+            InteractionPanel.Instance.Remove(this);
+            interactable = false;
+            OnNotInteractable();
+        }
+
+        protected virtual void OnEndInteraction() { }
+        protected virtual void OnNotInteractable() { }
+        protected virtual void OnInteractable() { }
     }
-    protected void Remove()
+    public interface IInteractive
     {
-        InteractionPanel.Instance.Remove(this);
-        interactable = false;
-        OnNotInteractable();
+        string Name { get; }
+        Sprite Icon { get; }
+        bool IsInteractive { get; }
+
+        bool DoInteract();
+        void EndInteraction();
     }
-
-    protected virtual void OnEndInteraction() { }
-    protected virtual void OnNotInteractable() { }
-    protected virtual void OnInteractable() { }
-}
-public interface IInteractive
-{
-    string Name { get; }
-    Sprite Icon { get; }
-    bool IsInteractive { get; }
-
-    bool DoInteract();
-    void EndInteraction();
 }

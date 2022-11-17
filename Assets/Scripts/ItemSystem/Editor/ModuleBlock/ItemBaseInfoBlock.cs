@@ -153,7 +153,7 @@ namespace ZetanStudio.ItemSystem
         }
         public void RefreshCache()
         {
-            if (!Item.UseDatabase) items = ZetanUtility.Editor.LoadAssets<Item>();
+            if (!Item.UseDatabase) items = Utility.Editor.LoadAssets<Item>();
             else items = ItemDatabase.Editor.GetItems();
             ids = items.Where(x => x != serializedObject.targetObject).Select(x => x.ID).ToHashSet();
         }

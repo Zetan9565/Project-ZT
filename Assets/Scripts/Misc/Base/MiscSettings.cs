@@ -1,34 +1,40 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "misc settings", menuName = "Zetan Studio/杂项设置")]
-public class MiscSettings : SingletonScriptableObject<MiscSettings>
+namespace ZetanStudio
 {
-    [SerializeField]
-    private string coinName = "铜币";
+    using QuestSystem.UI;
+    using ZetanStudio.LootSystem;
 
-    [SerializeField]
-    private float lootInvaildDistance;
-    public float LootInvaildDistance => lootInvaildDistance;
+    [CreateAssetMenu(fileName = "misc settings", menuName = "Zetan Studio/杂项设置")]
+    public class MiscSettings : SingletonScriptableObject<MiscSettings>
+    {
+        [SerializeField]
+        private string coinName = "铜币";
 
-    public string CoinName => ZetanStudio.LM.Tr(GetType().Name, coinName);
+        [SerializeField]
+        private float lootInvaildDistance;
+        public float LootInvaildDistance => lootInvaildDistance;
 
-    [field: Header("任务相关"), SerializeField, SpriteSelector]
-    public Sprite QuestIcon { get; private set; }
-    [field: SerializeField]
-    public QuestFlag QuestFlagsPrefab { get; private set; }
+        public string CoinName => ZetanStudio.LM.Tr(GetType().Name, coinName);
 
-    [field: Header("关键字颜色"), SerializeField]
-    public List<Color> KeywordColors { get; private set; } = new List<Color>()
+        [field: Header("任务相关"), SerializeField, SpriteSelector]
+        public Sprite QuestIcon { get; private set; }
+        [field: SerializeField]
+        public QuestFlag QuestFlagsPrefab { get; private set; }
+
+        [field: Header("关键字颜色"), SerializeField]
+        public List<Color> KeywordColors { get; private set; } = new List<Color>()
     {
         Color.cyan,
         Color.yellow,
         Color.red
     };
 
-    [field: SerializeField]
-    public LootAgent DefaultLootPrefab { get; private set; }
+        [field: SerializeField]
+        public LootAgent DefaultLootPrefab { get; private set; }
 
-    [field: SerializeField]
-    public StructureFlag StructureFlagPrefab { get; private set; }
+        [field: SerializeField]
+        public StructureFlag StructureFlagPrefab { get; private set; }
+    }
 }

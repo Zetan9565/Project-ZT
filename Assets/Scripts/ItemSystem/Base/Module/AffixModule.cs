@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using ZetanStudio.Character;
+using ZetanStudio.CharacterSystem;
 
 namespace ZetanStudio.ItemSystem.Module
 {
@@ -39,10 +39,10 @@ namespace ZetanStudio.ItemSystem.Module
             affixes = new List<ItemProperty>(module.GenerateAffixes());
         }
 
-        public override SaveDataItem GetSaveData()
+        public override GenericData GetSaveData()
         {
-            var data = new SaveDataItem();
-            var ad = new SaveDataItem();
+            var data = new GenericData();
+            var ad = new GenericData();
             data["affixes"] = ad;
             foreach (var prop in affixes)
             {
@@ -51,7 +51,7 @@ namespace ZetanStudio.ItemSystem.Module
             }
             return data;
         }
-        public override void LoadSaveData(SaveDataItem data)
+        public override void LoadSaveData(GenericData data)
         {
             if (data.TryReadData("affixes", out var ad))
             {

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.DialogueSystem;
 
 [CreateAssetMenu(fileName = "story", menuName = "Zetan Studio/剧情/剧情")]
 public class Story : ScriptableObject
@@ -56,8 +57,8 @@ public class PlotAction
     }
 
     [SerializeField]
-    private OldDialogue dialogue;
-    public OldDialogue Dialogue
+    private Dialogue dialogue;
+    public Dialogue Dialogue
     {
         get
         {

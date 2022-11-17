@@ -15,37 +15,29 @@ namespace ZetanStudio.DialogueSystem.Editor
         public new class UxmlFactory : UxmlFactory<DialogueView, UxmlTraits> { }
 
         #region 声明
-        private readonly DialogueEditorSettings settings;
-        private Dialogue dialogueBef;
-        private SerializedObject serializedDialog;
+        public readonly DialogueEditorSettings settings;
         public Action<DialogueNode> nodeSelectedCallback;
         public Action<DialogueNode> nodeUnselectedCallback;
         private readonly MiniMap miniMap;
+        private DialogueNode entry;
         private DialogueNode exit;
+        private DialogueGroup invalid;
         private Dialogue dialogue;
         private readonly VisualElement errors;
+        public SerializedObject serializedDialog;
+
+        private List<DialogueContentGroup> copiedGroups;
+        private List<DialogueContent> copiedContents;
+        private GenericData copiedData;
+        private Vector2 localMousePosition;
+        private Vector2 copiedPosition;
         #endregion
 
         #region 属性
-        #region 属性重写
-        protected override bool canCopySelection => false;
-        protected override bool canDuplicateSelection => false;
-        protected override bool canPaste => false;
-        protected override bool canCutSelection => false;
-        protected override bool canDeleteSelection
-        {
-            get
-            {
-                int index = selection.FindIndex(x => x is DialogueNode node && node.content is EntryContent);
-                if (index > 0) RemoveFromSelection(selection[index]);
-                RemoveFromSelection(exit);
-                return base.canDeleteSelection;
-            }
-        }
-        #endregion
-
-        public Dialogue Dialogue { get => dialogue; set => DrawDialgoueView(value); }
+        public Dialogue Dialogue { get => dialogue; set => ViewDialgoue(value); }
         public SerializedProperty SerializedContents { get; private set; }
+        public SerializedProperty SerializedGroups { get; private set; }
+        protected override bool canPaste => copiedContents != null && copiedData != null;
         #endregion
 
         public DialogueView()
@@ -82,6 +74,19 @@ namespace ZetanStudio.DialogueSystem.Editor
                 miniMap.style.height = miniMap.maxHeight = evt.newRect.height / 4;
             });
             Undo.undoRedoPerformed += OnUndoPerformed;
+            RegisterCallback<MouseEnterEvent>(evt =>
+            {
+                localMousePosition = evt.localMousePosition;
+            });
+            RegisterCallback<MouseMoveEvent>(evt =>
+            {
+                localMousePosition = evt.localMousePosition;
+            });
+
+            serializeGraphElements = OnSerializeGraphElements;
+            unserializeAndPaste = OnUnserializeAndPaste;
+            elementsAddedToGroup = OnElementsAddedToGroup;
+            elementsRemovedFromGroup = OnElementsRemovedFromGroup;
         }
 
         #region 重写
@@ -90,21 +95,74 @@ namespace ZetanStudio.DialogueSystem.Editor
             if (!Dialogue) return;
             if (evt.target == this)
             {
-                Vector2 nodePosition = this.ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
+                Vector2 position = this.ChangeCoordinatesTo(contentViewContainer, evt.localMousePosition);
+                evt.menu.AppendAction(Tr("分组"), a =>
+                {
+                    CreateGroup(position);
+                });
+                if (canPaste) evt.menu.AppendAction(Tr("粘贴"), a => PasteCallback());
+                evt.menu.AppendSeparator();
                 foreach (var type in TypeCache.GetTypesDerivedFrom<DialogueContent>())
                 {
                     if (!type.IsAbstract && type != typeof(EntryContent) && type != typeof(ExitContent))
-                        evt.menu.AppendAction($"{GetMenuGroup(type)}{DialogueContent.GetName(type)}", a => CreateContent(type, nodePosition));
+                        evt.menu.AppendAction($"{GetMenuGroup(type)}{DialogueContent.GetName(type)}", a => CreateContent(type, position));
                 }
             }
             else if (evt.target is DialogueNode node)
             {
-                if (node.content is not EntryContent && node != exit)
-                    evt.menu.AppendAction(Tr("删除"), a =>
+                if (node.Content is not EntryContent && node != exit)
+                {
+                    evt.menu.AppendAction(Tr("删除"), a => DeleteSelection());
+                    evt.menu.AppendAction(Tr("复制"), a => CopySelectionCallback());
+                }
+                IEnumerable<Node> dnodes = selection.FindAll(s => s is DialogueNode).Cast<Node>();
+                if (node.GetContainingScope() is DialogueGroup group && dnodes.All(s => (s as DialogueNode)!.GetContainingScope() == group))
+                {
+                    evt.menu.AppendAction(Tr("移出本组"), a =>
                     {
-                        DeleteSelection();
+                        var nodes = dnodes.Where(s => s is DialogueNode n && n.GetContainingScope() == group);
+                        OnBeforeModify();
+                        foreach (var n in nodes)
+                        {
+                            group.Group.contents.Remove(n.viewDataKey);
+                            n.SetPosition(new Rect(n.layout.position + new Vector2(-10, 10), n.layout.size));
+                        }
+                        group.RemoveElementsWithoutNotification(nodes);
                     });
-                if (node.content is RecursionSuffix recursion && Dialogue.Reachable(recursion))
+                }
+                if (dnodes.All(s => (s as DialogueNode)!.GetContainingScope() is null))
+                {
+                    evt.menu.AppendAction(Tr("添加到") + '/' + Tr("新建分组"), a =>
+                    {
+                        OnBeforeModify();
+                        List<Vector2> positions = new List<Vector2>();
+                        foreach (var s in selection)
+                        {
+                            if (s is Node n)
+                                positions.Add(n.layout.center);
+                        }
+                        var group = CreateGroup(GetCenter(positions));
+                        group.AddElements(dnodes);
+                    });
+                    List<DialogueGroup> groups = new List<DialogueGroup>(graphElements.Where(g => g is DialogueGroup).Cast<DialogueGroup>());
+                    if (groups.Count > 0)
+                    {
+                        OnBeforeModify();
+                        evt.menu.AppendSeparator("添加到/");
+                        Dictionary<string, int> d = new Dictionary<string, int>();
+                        foreach (var g in groups)
+                        {
+                            var count = 0;
+                            if (d.ContainsKey(g.title)) count = d[g.title] + 1;
+                            d[g.title] = count;
+                            evt.menu.AppendAction(Tr("添加到") + '/' + g.title + (count > 0 ? $" (重名 {count})" : string.Empty), a =>
+                            {
+                                g.AddElements(dnodes);
+                            });
+                        }
+                    }
+                }
+                if (node.Content is RecursionSuffix recursion && Dialogue.Reachable(recursion))
                     evt.menu.AppendAction(Tr("选中递归点"), a =>
                     {
                         if (recursion.FindRecursionPoint(Dialogue.Entry) is DialogueContent find)
@@ -127,6 +185,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                 if (endPort.node == startPort.node) return false;
                 if (startPort.direction == Direction.Input) (startPort, endPort) = (endPort, startPort);
                 if (Dialogue.Reachable(content(endPort), content(startPort))) return false;
+                if (content(startPort) is BranchContent && content(endPort) is not ConditionContent) return false;
                 return content(endPort).CanLinkFrom(content(startPort), startPort.userData as DialogueOption);
 
                 static DialogueContent content(Port port)
@@ -135,12 +194,29 @@ namespace ZetanStudio.DialogueSystem.Editor
                 }
             }
         }
+        public override EventPropagation DeleteSelection()
+        {
+            RemoveFromSelection(entry);
+            RemoveFromSelection(exit);
+            selection.ForEach(s =>
+            {
+                if (s is DialogueGroup group)
+                {
+                    try
+                    {
+                        group.RemoveElementsWithoutNotification(new GraphElement[] { entry, exit });
+                    }
+                    catch { }
+                }
+            });
+            return base.DeleteSelection();
+        }
         #endregion
 
         #region 创建相关
         private void CreateContent(Type type, Vector2 position, Action<DialogueNode> callback = null)
         {
-            Undo.RecordObject(Dialogue, Tr("修改{0}", Dialogue.name));
+            OnBeforeModify();
             var content = Dialogue.Editor.AddContent(Dialogue, type);
             if (content != null)
             {
@@ -148,48 +224,70 @@ namespace ZetanStudio.DialogueSystem.Editor
                 serializedDialog.Update();
                 var node = CreateNode(content);
                 callback?.Invoke(node);
+                ClearSelection();
+                AddToSelection(node);
             }
         }
+        private DialogueGroup CreateGroup(Vector2 position)
+        {
+            var group = new DialogueContentGroup(Tr("新分组"), position);
+            OnBeforeModify();
+            dialogue.groups.Add(group);
+            var g = CreateGroup(group);
+            g.FocusTitleTextField();
+            return g;
+        }
+
         private DialogueNode CreateNode(DialogueContent content)
         {
-            var node = new DialogueNode(this, content, nodeSelectedCallback, nodeUnselectedCallback, OnNodePositionChanged, OnDeleteOutput, settings);
+            var node = new DialogueNode(this, content, OnBeforeModify, nodeSelectedCallback, nodeUnselectedCallback, OnDeleteOutput);
             AddElement(node);
+            if (content is EntryContent) entry = node;
             return node;
         }
         private void CreateEdges(DialogueContent content)
         {
+            if (!content) return;
             DialogueNode parent = GetNodeByGuid(content.ID) as DialogueNode;
-            if (content.ExitHere && content is not SuffixContent) AddElement(parent.outputs[0].ConnectTo(exit.input));
+            if (content.ExitHere && content is not SuffixContent) AddElement(parent.Outputs[0].ConnectTo(exit.Input));
             else
             {
-                if (content is not INonOption)
+                if (content is not SuffixContent)
                     for (int i = 0; i < content.Options.Count; i++)
                     {
                         var o = content.Options[i];
                         if (o.Content != null)
                         {
                             DialogueNode child = GetNodeByGuid(o.Content.ID) as DialogueNode;
-                            AddElement(parent.outputs[i].ConnectTo(child?.input));
+                            AddElement(parent.Outputs[i].ConnectTo(child?.Input));
                         }
                     }
             }
+        }
+        private DialogueGroup CreateGroup(DialogueContentGroup g)
+        {
+            var contents = new HashSet<string>(g.contents);
+            DialogueGroup group = new DialogueGroup(nodes.Where(n => contents.Contains(n.viewDataKey)), g, OnGroupRightClick, OnBeforeModify);
+            AddElement(group);
+            return group;
         }
         #endregion
 
         #region 操作回调
         public void OnEdgeDropOutside(DialogueOutput output, Vector2 nodePosition)
         {
-            if (output.node.userData is RecursionSuffix || nodes.Any(x => x.ContainsPoint(x.WorldToLocal(nodePosition)))) return;
+            DialogueNode from = output.node;
+            if (from.userData is RecursionSuffix || nodes.Any(x => x.ContainsPoint(x.WorldToLocal(nodePosition)))) return;
             var option = output.userData as DialogueOption;
             nodePosition = contentViewContainer.WorldToLocal(nodePosition);
-            var exitHere = output.node.content.ExitHere;
+            var exitHere = from.Content.ExitHere;
             GenericMenu menu = new GenericMenu();
-            if (output.node.outputs.Count == 1 && output.Option.IsMain && !exitHere && output.node.content is not DecoratorContent)
+            if (from.Outputs.Count == 1 && output.Option.IsMain && !exitHere && from.Content is not IMainOptionOnly and not BranchContent)
             {
                 menu.AddItem(new GUIContent(DialogueContent.GetName(typeof(ExitContent))), false, () =>
                 {
-                    Undo.RecordObject(Dialogue, Tr("修改{0}", Dialogue.name));
-                    DialogueContent.Editor.SetAsExit(output.node.content);
+                    OnBeforeModify();
+                    DialogueContent.Editor.SetAsExit(from.Content);
                     serializedDialog.Update();
                     if (output.connections is not null)
                     {
@@ -200,24 +298,25 @@ namespace ZetanStudio.DialogueSystem.Editor
                         }
                         output.DisconnectAll();
                     }
-                    AddElement(output.ConnectTo(exit.input));
-                    output.node.RefreshOptionButton();
+                    AddElement(output.ConnectTo(exit.Input));
+                    from.RefreshOptionButton();
                 });
                 menu.AddSeparator("");
             }
             foreach (var type in TypeCache.GetTypesDerivedFrom<DialogueContent>())
             {
-                if (type.IsAbstract || output.Option.IsMain && typeof(DecoratorContent).IsAssignableFrom(type) || type == typeof(EntryContent) ||
-                    type == typeof(ExitContent) || output.node.content is DecoratorContent decorator && decorator.GetType() == type ||
-                    output.node.content is EntryContent && typeof(SuffixContent).IsAssignableFrom(type)) continue;
+                if (type.IsAbstract || type.IsGenericType || type.IsGenericTypeDefinition || typeof(EntryContent) == type || typeof(ExitContent) == type
+                    || from.Content is BranchContent && !typeof(ConditionContent).IsAssignableFrom(type)) continue;
+                var temp = Activator.CreateInstance(type) as DialogueContent;
+                if (!temp.CanLinkFrom(from.userData as DialogueContent, output.Option)) continue;
                 menu.AddItem(new GUIContent($"{GetMenuGroup(type)}{DialogueContent.GetName(type)}"), false, () => CreateContent(type, nodePosition, followUp));
             }
             menu.ShowAsContext();
 
-            void followUp(DialogueNode node)
+            void followUp(DialogueNode child)
             {
-                DialogueOption.Editor.SetContent(option, node.content);
-                if (exitHere) SetAsExit(node);
+                DialogueOption.Editor.SetContent(option, child.Content);
+                if (exitHere) SetAsExit(child);
                 serializedDialog.Update();
                 if (output.connections is not null)
                 {
@@ -228,10 +327,10 @@ namespace ZetanStudio.DialogueSystem.Editor
                     }
                     output.DisconnectAll();
                 }
-                AddElement(output.ConnectTo(node.input));
+                AddElement(output.ConnectTo(child.Input));
                 if (exitHere)
                 {
-                    DialogueContent.Editor.SetAsExit(output.node.content, false);
+                    DialogueContent.Editor.SetAsExit(from.Content, false);
                     serializedDialog.Update();
                 }
             }
@@ -243,21 +342,89 @@ namespace ZetanStudio.DialogueSystem.Editor
             {
                 if (item is Node node) selectedNodes.Add(node.viewDataKey);
             }
-            DrawDialgoueView(Dialogue);
+            ViewDialgoue(Dialogue);
             foreach (var id in selectedNodes)
             {
                 if (GetNodeByGuid(id) is Node node)
                     AddToSelection(node);
             }
         }
-        private void OnNodePositionChanged(DialogueNode editor, Vector2 oldPos)
-        {
-            Undo.RegisterCompleteObjectUndo(Dialogue, Tr("修改{0}", Dialogue.name));
-        }
         private void OnDeleteOutput(DialogueOutput output)
         {
             DeleteElements(output.connections);
         }
+        private void OnGroupRightClick(DialogueGroup group, ContextualMenuPopulateEvent evt)
+        {
+            if (selection.Count == 1)
+            {
+                evt.menu.AppendAction(Tr("全选"), a =>
+                {
+                    ClearSelection();
+                    foreach (var e in group.containedElements)
+                    {
+                        AddToSelection(e);
+                    }
+                });
+                if (invalid != group)
+                {
+                    if (group.containedElements.Any(c => c.userData is DialogueContent content && content is not EntryContent and not ExitContent))
+                    {
+                        evt.menu.AppendAction(Tr("复制"), a => CopySelectionCallback());
+                        evt.menu.AppendAction(Tr("清空"), a => clear(group));
+                        evt.menu.AppendAction(Tr("全部删除"), a => DeleteSelection());
+                    }
+                    evt.menu.AppendAction(Tr("仅删除组"), a =>
+                    {
+                        clear(group);
+                        dialogue.groups.Remove(group.Group);
+                        RemoveElement(group);
+                    });
+                }
+                else evt.menu.AppendAction(Tr("全部删除"), a => DeleteSelection());
+            }
+
+            void clear(DialogueGroup group)
+            {
+                OnBeforeModify();
+                group.Group.contents.Clear();
+                group.RemoveElementsWithoutNotification(new List<GraphElement>(group.containedElements));
+            }
+        }
+        private void OnElementsAddedToGroup(Group group, IEnumerable<GraphElement> elements)
+        {
+            if (elements.Any())
+            {
+                OnBeforeModify();
+                HashSet<string> exist = new HashSet<string>((group.userData as DialogueContentGroup).contents);
+                foreach (var e in elements)
+                {
+                    if (!exist.Contains(e.viewDataKey))
+                    {
+                        (group.userData as DialogueContentGroup).contents.Add(e.viewDataKey);
+                    }
+                }
+            }
+        }
+        private void OnElementsRemovedFromGroup(Group group, IEnumerable<GraphElement> elements)
+        {
+            if (elements.Any())
+            {
+                OnBeforeModify();
+                foreach (var e in elements)
+                {
+                    (group.userData as DialogueContentGroup).contents.Remove(e.viewDataKey);
+                }
+                if (group == invalid && group.containedElements.None())
+                {
+                    RemoveElement(group);
+                    invalid = null;
+                    ViewDialgoue(dialogue);
+                }
+            }
+        }
+
+        private void OnBeforeModify() => Undo.RecordObject(Dialogue, Tr("修改 {0}", Dialogue.name));
+
         private GraphViewChange OnGraphViewChanged(GraphViewChange graphViewChange)
         {
             if (graphViewChange.elementsToRemove != null)
@@ -267,37 +434,41 @@ namespace ZetanStudio.DialogueSystem.Editor
                 {
                     if (elem is DialogueNode node)
                     {
-                        Undo.RecordObject(Dialogue, Tr("修改{0}", Dialogue.name));
-                        Dialogue.Editor.RemoveContent(Dialogue, node.content);
+                        OnBeforeModify();
+                        Dialogue.Editor.RemoveContent(Dialogue, node.Content);
                         removedNodes.Add(node);
                     }
                 });
                 if (removedNodes.Count > 0)
                     nodes.ForEach(n =>
                     {
-                        if (!removedNodes.Contains(n))
-                            (n as DialogueNode).RefreshProperty();
+                        if (!removedNodes.Contains(n)) (n as DialogueNode).RefreshProperty();
                     });
                 graphViewChange.elementsToRemove.ForEach(elem =>
                 {
                     if (elem is Edge edge)
                     {
                         DialogueNode parent = edge.output.node as DialogueNode;
-                        parent.content.lastExitHere = parent.content.ExitHere;
-                        if (parent.content.ExitHere)
+                        parent.Content.lastExitHere = parent.Content.ExitHere;
+                        if (parent.Content.ExitHere)
                         {
-                            Undo.RecordObject(Dialogue, Tr("修改{0}", Dialogue.name));
-                            DialogueContent.Editor.SetAsExit(parent.content, false);
+                            OnBeforeModify();
+                            DialogueContent.Editor.SetAsExit(parent.Content, false);
                             parent.RefreshOptionButton();
                         }
                         else
                         {
                             DialogueNode child = edge.input.node as DialogueNode;
-                            Undo.RecordObject(Dialogue, Tr("修改{0}", Dialogue.name));
-                            var index = parent.outputs.IndexOf(edge.output as DialogueOutput);
-                            if (index >= 0 && index < parent.content.Options.Count)
-                                DialogueOption.Editor.SetContent(parent.content.Options[index], null);
+                            OnBeforeModify();
+                            var index = parent.Outputs.IndexOf(edge.output as DialogueOutput);
+                            if (index >= 0 && index < parent.Content.Options.Count)
+                                DialogueOption.Editor.SetContent(parent.Content.Options[index], null);
                         }
+                    }
+                    if (elem is DialogueGroup group)
+                    {
+                        OnBeforeModify();
+                        Dialogue.groups.Remove(group.Group);
                     }
                 });
             }
@@ -305,25 +476,25 @@ namespace ZetanStudio.DialogueSystem.Editor
             {
                 graphViewChange.edgesToCreate.ForEach(edge =>
                 {
-                    Undo.RecordObject(Dialogue, Tr("修改{0}", Dialogue.name));
+                    OnBeforeModify();
                     DialogueNode parent = edge.output.node as DialogueNode;
                     if (edge.input.node.userData is ExitContent)
                     {
-                        DialogueContent.Editor.SetAsExit(parent.content);
-                        parent.content.lastExitHere = false;
+                        DialogueContent.Editor.SetAsExit(parent.Content);
+                        parent.Content.lastExitHere = false;
                         parent.RefreshOptionButton();
                     }
                     else
                     {
-                        var exitHere = parent.content.lastExitHere;
-                        parent.content.lastExitHere = false;
-                        DialogueContent.Editor.SetAsExit(parent.content, false);
+                        var exitHere = parent.Content.lastExitHere;
+                        parent.Content.lastExitHere = false;
+                        DialogueContent.Editor.SetAsExit(parent.Content, false);
                         DialogueNode child = edge.input.node as DialogueNode;
                         if (edge.output is DialogueOutput parentOutput)
                         {
-                            if (exitHere && (child.content.Options.Count < 1 || child.content.Options[0].IsMain && !child.content.Options[0].Content))
+                            if (exitHere && (child.Content.Options.Count < 1 || child.Content.Options[0].IsMain && !child.Content.Options[0].Content))
                                 SetAsExit(child);
-                            DialogueOption.Editor.SetContent(parentOutput.Option, child.content);
+                            DialogueOption.Editor.SetContent(parentOutput.Option, child.Content);
                         }
                     }
                 });
@@ -337,6 +508,94 @@ namespace ZetanStudio.DialogueSystem.Editor
 
             return graphViewChange;
         }
+
+        private string OnSerializeGraphElements(IEnumerable<GraphElement> elements)
+        {
+            copiedGroups = new List<DialogueContentGroup>();
+            copiedContents = new List<DialogueContent>();
+            copiedData = new GenericData();
+            List<Vector2> positions = new List<Vector2>();
+            foreach (var element in elements)
+            {
+                if (element is DialogueNode node && node.Content is not EntryContent and not ExitContent)
+                {
+                    var nd = new GenericData();
+                    var copy = node.Content.Copy();
+                    nd["ID"] = copy.ID;
+                    copiedContents.Add(copy);
+                    nd.WriteAll(node.Content.Options.Where(o => o.Content).Select(o => o.Content.ID));
+                    copiedData.Write(node.viewDataKey, nd);
+                    positions.Add(node.layout.center);
+                }
+                else if (element is DialogueGroup group)
+                    copiedGroups.Add(new DialogueContentGroup(group.Group.name, group.Group.position));
+            }
+            if (positions.Count > 0) copiedPosition = GetCenter(positions);
+            else
+            {
+                copiedContents = null;
+                copiedData = null;
+            }
+            if (copiedGroups.Count < 1) copiedGroups = null;
+            return "Copy";//无实际意义
+        }
+        private void OnUnserializeAndPaste(string operationName, string data)
+        {
+            if (copiedContents != null && copiedData != null && copiedContents.Count > 0)
+            {
+                OnBeforeModify();
+                var offset = copiedPosition - this.ChangeCoordinatesTo(contentViewContainer, localMousePosition);
+                var nodes = new List<DialogueNode>();
+                foreach (var copy in copiedContents)
+                {
+                    Dialogue.Editor.PasteContent(dialogue, copy);
+                    copy._position -= offset;
+                    nodes.Add(CreateNode(copy));
+                }
+                foreach (var nd in copiedData.ReadDataDict().Values)
+                {
+                    var node = GetNodeByGuid(nd.ReadString("ID"));
+                    if (node is DialogueNode n)
+                    {
+                        var cds = nd.ReadStringList();
+                        for (int i = 0; i < cds.Count; i++)
+                        {
+                            try
+                            {
+                                var child = GetNodeByGuid(realID(cds[i]));
+                                if (child is DialogueNode c) DialogueOption.Editor.SetContent(n.Content[i], c.Content);
+                            }
+                            catch { }
+                        }
+                    }
+                }
+                copiedContents.ForEach(c => CreateEdges(c));
+                if (copiedGroups != null)
+                {
+                    ClearSelection();
+                    foreach (var group in copiedGroups)
+                    {
+                        group.position -= offset;
+                        group.contents = group.contents.ConvertAll(c => realID(c));
+                        dialogue.groups.Add(group);
+                        AddToSelection(CreateGroup(group));
+                    }
+                }
+                else
+                {
+                    ClearSelection();
+                    foreach (var node in nodes)
+                    {
+                        AddToSelection(node);
+                    }
+                }
+            }
+            copiedGroups = null;
+            copiedContents = null;
+            copiedData = null;
+
+            string realID(string oldID) => copiedData.ReadData(oldID).ReadString("ID");
+        }
         #endregion
 
         #region 其它
@@ -344,31 +603,51 @@ namespace ZetanStudio.DialogueSystem.Editor
         {
             if (miniMap != null) miniMap.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
         }
-        public void DrawDialgoueView(Dialogue newDialogue)
+        public void ViewDialgoue(Dialogue newDialogue)
         {
-            if (newDialogue && dialogueBef != newDialogue) Undo.ClearUndo(dialogueBef);
-            Vocate();
+            Vacate();
             dialogue = newDialogue;
             if (dialogue)
             {
-                dialogueBef = dialogue;
                 serializedDialog = new SerializedObject(Dialogue);
                 SerializedContents = serializedDialog.FindProperty("contents");
+                SerializedGroups = serializedDialog.FindProperty("groups");
                 exit = CreateNode(Dialogue.exit);
-                dialogue.Contents.ForEach(c => CreateNode(c));
-                dialogue.Contents.ForEach(c => CreateEdges(c));
+                List<DialogueContent> invalid = new List<DialogueContent>(dialogue.Contents.Where(x => x is null));
+                if (invalid.Count > 0)
+                {
+                    AddElement(this.invalid = new DialogueGroup(null, null, OnGroupRightClick, OnBeforeModify));
+                    this.invalid.title = "无效的结点";
+                    var row = -1;
+                    for (int i = 0; i < invalid.Count; i++)
+                    {
+                        if (i % 5 == 0) row++;
+                        var n = CreateNode(invalid[i]);
+                        n.SetPosition(new Rect(new Vector2(i % 5 * 235f, row * 40f), Vector2.zero));
+                        this.invalid.AddElement(n);
+                    }
+                }
+                else
+                {
+                    dialogue.Contents.ForEach(c => CreateNode(c));
+                    dialogue.Contents.ForEach(c => CreateEdges(c));
+                    dialogue.groups.ForEach(g => CreateGroup(g));
+                }
             }
             else
             {
+                entry = null;
+                exit = null;
+                invalid = null;
                 serializedDialog = null;
                 SerializedContents = null;
+                SerializedGroups = null;
             }
         }
-        private void Vocate()
+        private void Vacate()
         {
             graphViewChanged -= OnGraphViewChanged;
-            DeleteElements(nodes.ToList());
-            DeleteElements(edges.ToList());
+            DeleteElements(graphElements);
             graphViewChanged += OnGraphViewChanged;
         }
         public void CheckErrors()
@@ -379,7 +658,7 @@ namespace ZetanStudio.DialogueSystem.Editor
 
                 if (!Dialogue.Exitable)
                 {
-                    var label = new Label(ZetanUtility.ColorText($"{Tr("错误")}: {Tr("对话无结束点")}", Color.red)) { enableRichText = true };
+                    var label = new Label(Utility.ColorText($"{Tr("错误")}: {Tr("对话无结束点")}", Color.red)) { enableRichText = true };
                     label.RegisterCallback<PointerDownEvent>(evt =>
                     {
                         EditorApplication.delayCall += () =>
@@ -391,36 +670,52 @@ namespace ZetanStudio.DialogueSystem.Editor
                     });
                     errors.Add(label);
                 }
+                if (Dialogue.Traverse(dialogue.Entry, c => c.Options.Count > 0 && c.Options.All(x => x.Content is DecoratorContent && x.Content.Exitable)))
+                    errors.Add(new Label(Utility.ColorText($"{Tr("警告")}: {Tr("对话可能无结束点")}", Color.yellow)) { enableRichText = true });
                 for (int i = 0; i < dialogue.Contents.Count; i++)
                 {
                     var content = dialogue.Contents[i];
-                    if (!content.IsValid && dialogue.Reachable(content))
+                    if (dialogue.Reachable(content))
                     {
-                        var label = new Label(ZetanUtility.ColorText($"{Tr("错误")}: {Tr("第{0}个内容填写错误", i)}", Color.red)) { enableRichText = true };
-                        label.RegisterCallback<PointerDownEvent>(evt =>
+                        if (!content.IsValid)
                         {
-                            EditorApplication.delayCall += () =>
+                            var label = new Label(Utility.ColorText($"{Tr("错误")}: {Tr("第{0}个内容填写错误", i)}", Color.red)) { enableRichText = true };
+                            label.RegisterCallback<PointerDownEvent>(evt =>
                             {
-                                ClearSelection();
-                                AddToSelection(GetNodeByGuid(content.ID));
-                                FrameSelection();
-                            };
-                        });
-                        errors.Add(label);
+                                EditorApplication.delayCall += () =>
+                                {
+                                    ClearSelection();
+                                    AddToSelection(GetNodeByGuid(content.ID));
+                                    FrameSelection();
+                                };
+                            });
+                            errors.Add(label);
+                        }
+                        if (!content.ExitHere && content.Options.Any(x => x.Content is null))
+                        {
+                            var label = new Label(Utility.ColorText($"{Tr("错误")}: {Tr("第{0}个内容存在无效选项", i)}", Color.red)) { enableRichText = true };
+                            label.RegisterCallback<PointerDownEvent>(evt =>
+                            {
+                                EditorApplication.delayCall += () =>
+                                {
+                                    ClearSelection();
+                                    AddToSelection(GetNodeByGuid(content.ID));
+                                    FrameSelection();
+                                };
+                            });
+                            errors.Add(label);
+                        }
                     }
                 }
             }
         }
         private void SetAsExit(DialogueNode node)
         {
-            if (node.content is SuffixContent) return;
-            DialogueContent.Editor.SetAsExit(node.content);
+            if (node.Content is SuffixContent || node.Content is ExternalOptionsContent) return;
+            DialogueContent.Editor.SetAsExit(node.Content);
             serializedDialog.UpdateIfRequiredOrScript();
-            DialogueOutput output;
-            if (node.outputs.Count < 1)
-                output = node.InsertOutput(node.content.Options[0], true);
-            else output = node.outputs[0];
-            AddElement(output.ConnectTo(exit.input));
+            DialogueOutput output = node.Outputs.Count < 1 ? node.InsertOutput(node.Content.Options[0]) : node.Outputs[0];
+            AddElement(output.ConnectTo(exit.Input));
             node.RefreshOptionButton();
         }
         private static string GetMenuGroup(Type type)
@@ -428,6 +723,12 @@ namespace ZetanStudio.DialogueSystem.Editor
             string group = DialogueContent.GetGroup(type);
             if (string.IsNullOrEmpty(group)) return group;
             else return group.EndsWith("/") ? group : (group + "/");
+        }
+        private Vector2 GetCenter(IEnumerable<Vector2> positions)
+        {
+            Vector2 min = new Vector2(positions.Min(p => p.x), positions.Min(p => p.y));
+            Vector2 max = new Vector2(positions.Max(p => p.x), positions.Max(p => p.y));
+            return Utility.CenterBetween(min, max);
         }
         #endregion
 

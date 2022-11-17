@@ -5,7 +5,7 @@ using UnityEngine;
 using ZetanStudio;
 
 [CustomPropertyDrawer(typeof(LabelAttribute))]
-public class LabelDrawer : EnhancedAttributeDrawer
+public class LabelDrawer : EnhancedPropertyDrawer
 {
     [MenuItem("Zetan Studio/编辑器工具/收集Label标签")]
     private static void Collect()
@@ -13,7 +13,7 @@ public class LabelDrawer : EnhancedAttributeDrawer
         if (EditorUtility.DisplayDialog(Tr("提示"), Tr("将会在本地创建一个语言映射表并使用，是否继续？"), Tr("继续"), Tr("取消")))
         {
             var language = ScriptableObject.CreateInstance<LanguageMap>();
-            var items = typeof(LanguageMap).GetField("items", ZetanUtility.CommonBindingFlags).GetValue(language) as IList;
+            var items = typeof(LanguageMap).GetField("items", Utility.CommonBindingFlags).GetValue(language) as IList;
             items.Clear();
             foreach (var field in TypeCache.GetFieldsWithAttribute<LabelAttribute>())
             {
@@ -24,7 +24,7 @@ public class LabelDrawer : EnhancedAttributeDrawer
             EditorGUIUtility.PingObject(language);
             var singleton = LabelLocalization.GetOrCreate();
             singleton.language = language;
-            ZetanUtility.Editor.SaveChange(singleton);
+            Utility.Editor.SaveChange(singleton);
         }
     }
 

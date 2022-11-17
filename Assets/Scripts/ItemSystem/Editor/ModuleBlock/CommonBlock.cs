@@ -16,8 +16,8 @@ namespace ZetanStudio.ItemSystem.Editor
 
         public CommonBlock(SerializedProperty property, ItemModule module) : base(property, module)
         {
-            Name = property.FindAutoPropertyRelative("Name");
-            Parameter = property.FindAutoPropertyRelative("Parameter");
+            Name = property.FindAutoProperty("Name");
+            Parameter = property.FindAutoProperty("Parameter");
             item = property.serializedObject.targetObject as Item;
             template = property.serializedObject.targetObject as ItemTemplate;
         }

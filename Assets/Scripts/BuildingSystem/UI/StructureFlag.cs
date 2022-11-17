@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using ZetanStudio;
+using ZetanStudio.StructureSystem;
 
 public class StructureFlag : MonoBehaviour
 {

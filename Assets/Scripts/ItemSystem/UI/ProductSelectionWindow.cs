@@ -5,6 +5,7 @@ using UnityEngine.UI;
 namespace ZetanStudio.ItemSystem.UI
 {
     using Module;
+    using ZetanStudio.InventorySystem;
 
     public class ProductSelectionWindow : Window
     {

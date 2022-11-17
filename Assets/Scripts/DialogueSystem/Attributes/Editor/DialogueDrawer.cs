@@ -3,9 +3,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace ZetanStudio
+namespace ZetanStudio.DialogueSystem.Editor
 {
-    using DialogueSystem;
+    using ZetanStudio.Editor;
 
     [CustomPropertyDrawer(typeof(Dialogue))]
     public class DialogueDrawer : PropertyDrawer
@@ -14,7 +14,7 @@ namespace ZetanStudio
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            dialogues ??= ZetanUtility.Editor.LoadAssets<Dialogue>();
+            dialogues ??= Utility.Editor.LoadAssets<Dialogue>();
             Draw(position, property, label, dialogues);
         }
 
@@ -30,7 +30,7 @@ namespace ZetanStudio
             label = EditorGUI.BeginProperty(buttonRect, label, property);
             if (property.objectReferenceValue) EditorApplication.contextualPropertyMenu += OnPropertyContextMenu;
             var name = property.objectReferenceValue is Dialogue dialog ? dialog.name : $"{L10n.Tr("None")} ({typeof(Dialogue).Name})";
-            if (EditorGUI.DropdownButton(buttonRect, new GUIContent(name, tooltip(property.objectReferenceValue as Dialogue)) { image = ZetanUtility.Editor.GetIconForObject(property.objectReferenceValue) }, FocusType.Keyboard))
+            if (EditorGUI.DropdownButton(buttonRect, new GUIContent(name, tooltip(property.objectReferenceValue as Dialogue)) { image = Utility.Editor.GetIconForObject(property.objectReferenceValue) }, FocusType.Keyboard))
             {
                 var dropdown = new AdvancedDropdown<Dialogue>(dialogues, selectCallback: i =>
                                                 {
@@ -49,7 +49,7 @@ namespace ZetanStudio
                 }
                 static void AddCallback(SerializedProperty property)
                 {
-                    var obj = ZetanUtility.Editor.SaveFilePanel(ScriptableObject.CreateInstance<Dialogue>, ping: true);
+                    var obj = Utility.Editor.SaveFilePanel(ScriptableObject.CreateInstance<Dialogue>, ping: true);
                     if (obj)
                     {
                         property.objectReferenceValue = obj;

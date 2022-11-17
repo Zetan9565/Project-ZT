@@ -27,7 +27,7 @@ public class GemAgent : MonoBehaviour
         }
         gemstone = gem;
         icon.overrideSprite = gemstone.Icon;
-        nameText.text = gemstone.Name;
+        nameText.text = ItemFactory.GetColorName(gemstone);
         if (gem.TryGetModule<AttributeModule>(out var attribute) && attribute.Attributes.Count > 0)
         {
             StringBuilder sb = new StringBuilder(attribute.Attributes[0].ToString());

@@ -7,6 +7,8 @@ namespace ZetanStudio
     using UnityEngine.EventSystems;
     using Extension;
     using ZetanStudio.ItemSystem.UI;
+    using ZetanStudio.InventorySystem;
+    using ZetanStudio.UI;
 
     public class MaterialAgent : ListItem<MaterialAgent, MaterialInfo>, IPointerClickHandler
     {
@@ -42,7 +44,7 @@ namespace ZetanStudio
                     break;
             }
             int have = handler?.GetMaterialsAmount(Data) ?? 0;
-            amountText.text = $"{ZetanUtility.ColorText(have.ToString(), have < Data.Amount ? lackColor : enoughColor)}/{Data.Amount}";
+            amountText.text = $"{Utility.ColorText(have.ToString(), have < Data.Amount ? lackColor : enoughColor)}/{Data.Amount}";
         }
 
         public override void Clear()

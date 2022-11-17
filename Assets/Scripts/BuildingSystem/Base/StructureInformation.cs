@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.StructureSystem;
 
 [CreateAssetMenu(fileName = "structure info", menuName = "Zetan Studio/设施信息")]
 public class StructureInformation : ScriptableObject

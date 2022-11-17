@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.CharacterSystem;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.ShopSystem;
 

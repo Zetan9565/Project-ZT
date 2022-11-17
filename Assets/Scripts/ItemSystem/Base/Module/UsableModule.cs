@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace ZetanStudio.ItemSystem.Module
 {
@@ -15,5 +16,27 @@ namespace ZetanStudio.ItemSystem.Module
         public ItemUsage Usage { get; protected set; }
 
         public override bool IsValid => Usage;
+
+        public override ItemModuleData CreateData(ItemData item)
+        {
+            return new UsableData(item, this);
+        }
+    }
+
+    public class UsableData : ItemModuleData<UsableModule>
+    {
+        public event Func<ItemData, bool> canUse;
+        public event Func<ItemData, string> canUseWithMsg;
+
+        public UsableData(ItemData item, UsableModule module) : base(item, module)
+        {
+        }
+
+        public bool CanUse(ItemData item) => canUse?.Invoke(item) ?? true;
+        public string CanUseWithMsg(ItemData item) => canUseWithMsg?.Invoke(item) ?? string.Empty;
+
+        public override GenericData GetSaveData() => null;
+
+        public override void LoadSaveData(GenericData data) { }
     }
 }

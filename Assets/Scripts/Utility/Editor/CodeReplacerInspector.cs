@@ -24,12 +24,13 @@ namespace ZetanStudio
         //private AnimationCurve curve = new AnimationCurve();
         private string format;
         private string value;
+        private string replace;
 
         private MemoryStream stream;
         [System.NonSerialized]
         private SaveData saveData;
         [System.NonSerialized]
-        private SaveDataItem items;
+        private GenericData items;
 
         [System.Serializable]
         public class Container
@@ -63,12 +64,17 @@ namespace ZetanStudio
             //formula = EditorGUILayout.TextField(formula);
             //IntRange = EditorGUILayout.Vector2IntField("范围", IntRange);
             //curve = EditorGUILayout.CurveField(curve);
-            format = EditorGUILayout.TextField(format);
             value = EditorGUILayout.TextField(value);
+            format = EditorGUILayout.TextField(format);
+            replace = EditorGUILayout.TextField(replace);
             if (GUILayout.Button("测试"))
             {
-                var match = Regex.Match(value, @format);
-                if (match.Success) Debug.Log(value.Replace(@match.Value, "Replace"));
+                //var match = Regex.Match(value, @format);
+                //if (match.Success) Debug.Log(match.Value);
+                Debug.Log(Regex.Replace(value, format, m =>
+                {
+                    return m.Groups[1].Value + replace + m.Groups[3].Value;
+                }));
             }
         }
     }

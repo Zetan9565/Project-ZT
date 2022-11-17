@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
-using ZetanStudio.Character;
+using ZetanStudio.CharacterSystem;
 
 namespace ZetanStudio.ItemSystem.Module
 {
@@ -35,10 +35,10 @@ namespace ZetanStudio.ItemSystem.Module
             }
         }
 
-        public override SaveDataItem GetSaveData()
+        public override GenericData GetSaveData()
         {
-            var data = new SaveDataItem();
-            var ad = new SaveDataItem();
+            var data = new GenericData();
+            var ad = new GenericData();
             data["properties"] = ad;
             foreach (var prop in properties)
             {
@@ -47,7 +47,7 @@ namespace ZetanStudio.ItemSystem.Module
             }
             return data;
         }
-        public override void LoadSaveData(SaveDataItem data)
+        public override void LoadSaveData(GenericData data)
         {
             if (data.TryReadData("properties", out var ad))
             {

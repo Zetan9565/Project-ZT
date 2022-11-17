@@ -27,14 +27,14 @@ namespace ZetanStudio.ItemSystem.Module
             currentDurability = maxDurability;
         }
 
-        public override SaveDataItem GetSaveData()
+        public override GenericData GetSaveData()
         {
-            var data = new SaveDataItem();
+            var data = new GenericData();
             data["currentDurability"] = currentDurability;
             data["maxDurability"] = maxDurability;
             return data;
         }
-        public override void LoadSaveData(SaveDataItem data)
+        public override void LoadSaveData(GenericData data)
         {
             currentDurability = data.ReadInt("currentDurability");
             maxDurability = data.ReadInt("maxDurability");

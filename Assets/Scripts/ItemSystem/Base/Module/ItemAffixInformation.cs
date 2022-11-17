@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using ZetanStudio.Character;
+using ZetanStudio.CharacterSystem;
 using ZetanStudio.Math;
 
 namespace ZetanStudio.ItemSystem.Module

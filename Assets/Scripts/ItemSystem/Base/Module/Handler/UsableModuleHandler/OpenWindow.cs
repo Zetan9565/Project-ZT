@@ -13,7 +13,7 @@ namespace ZetanStudio.ItemSystem.Module
         protected override bool Use(ItemData item)
         {
             if (!item.TryGetModule<WindowModule>(out var window)) return false;
-            else return WindowsManager.OpenWindow(ZetanUtility.GetTypeByFullName(window.WindowType));
+            else return WindowsManager.OpenWindow(Utility.GetTypeByFullName(window.WindowType));
         }
 
         protected override bool Prepare(ItemData item, int cost)

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using ZetanStudio.InventorySystem;
 
 namespace ZetanStudio.ItemSystem.Module
 {
@@ -36,16 +37,16 @@ namespace ZetanStudio.ItemSystem.Module
         public GemSlotData(ItemData item, GemSlotModule module) : base(item, module)
         {
         }
-        public override SaveDataItem GetSaveData()
+        public override GenericData GetSaveData()
         {
-            var data = new SaveDataItem();
+            var data = new GenericData();
             foreach (var gem in gems)
             {
                 data[gem] = gem;
             }
             return data;
         }
-        public override void LoadSaveData(SaveDataItem data)
+        public override void LoadSaveData(GenericData data)
         {
             foreach (var kvp in data.ReadStringDict())
             {

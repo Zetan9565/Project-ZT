@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ZetanStudio.InventorySystem;
 using ZetanStudio.ItemSystem;
 using ZetanStudio.ItemSystem.Module;
 using ZetanStudio.StructureSystem;
+using ZetanStudio.StructureSystem.UI;
 
 public class StructureData : SceneObjectData<Structure2D>
 {
@@ -39,7 +41,7 @@ public class StructureData : SceneObjectData<Structure2D>
         this.position = position;
         scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
     }
-    public StructureData(StructureInformation info, SaveDataItem data)
+    public StructureData(StructureInformation info, GenericData data)
     {
         Info = info;
         if (data.TryReadFloat("leftBuildTime", out var leftBuildTime)) this.leftBuildTime = leftBuildTime;
@@ -238,9 +240,9 @@ public class StructureData : SceneObjectData<Structure2D>
         return info;
     }
 
-    public SaveDataItem GetSaveData()
+    public GenericData GetSaveData()
     {
-        var data = new SaveDataItem();
+        var data = new GenericData();
         data["modelID"] = Info.ID;
         data["ID"] = ID;
         data["scene"] = scene;

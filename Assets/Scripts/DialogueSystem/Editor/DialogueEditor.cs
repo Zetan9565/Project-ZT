@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -10,7 +11,6 @@ using UnityEngine.UIElements;
 namespace ZetanStudio.DialogueSystem.Editor
 {
     using Extension.Editor;
-    using System.Collections;
 
     public class DialogueEditor : EditorWindow
     {
@@ -50,8 +50,8 @@ namespace ZetanStudio.DialogueSystem.Editor
         private Button delete;
         private ToolbarSearchField searchField;
         private DialogueView dialogueView;
-        private UnityEngine.UIElements.ListView list;
-        private UnityEngine.UIElements.ListView searchList;
+        private ListView list;
+        private ListView searchList;
         private List<Dialogue> dialogues;
         private Dialogue selectedDialogue;
         private IMGUIContainer inspector;
@@ -83,9 +83,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                     dialogueView?.ShowHideMiniMap(evt.newValue);
                 });
                 toggle.SetValueWithoutNotify(true);
-                var copy = new ToolbarButton(CopyOlds) { text = "一件导入旧版" };
-                root.Q<Toolbar>().Add(copy);
-                searchList = root.Q<UnityEngine.UIElements.ListView>("search-list");
+                searchList = root.Q<ListView>("search-list");
                 searchList.selectionType = SelectionType.Single;
                 searchList.makeItem = () => new Label() { enableRichText = true };
                 searchList.onSelectionChange += OnSearchListSelected;
@@ -95,7 +93,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                 DosearchList();
                 root.RegisterCallback<PointerDownEvent>(evt =>
                 {
-                    if (!string.IsNullOrEmpty(searchField.value) && !searchList.Contains(evt.target as VisualElement))
+                    if (!string.IsNullOrEmpty(searchField.value) && !searchList.Contains(evt.target as VisualElement) && !searchField.Contains(evt.target as VisualElement))
                         searchField.value = string.Empty;
                 });
 
@@ -105,7 +103,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                 root.Q("right-container").Insert(0, dialogueView);
                 dialogueView.StretchToParentSize();
 
-                list = root.Q<UnityEngine.UIElements.ListView>("dialogue-list");
+                list = root.Q<ListView>("dialogue-list");
                 list.selectionType = SelectionType.Multiple;
                 list.makeItem = () =>
                 {
@@ -123,18 +121,18 @@ namespace ZetanStudio.DialogueSystem.Editor
                                             selectedDialogue = null;
                                             list.ClearSelection();
                                             InspectDialogue();
-                                            dialogueView?.DrawDialgoueView(null);
+                                            dialogueView?.ViewDialgoue(null);
                                         }
                                     }
                             });
                     }));
+                    label.RegisterTooltipCallback(() => Dialogue.Editor.Preview(label.userData as Dialogue));
                     return label;
                 };
                 list.bindItem = (e, i) =>
                 {
                     (e as Label).text = dialogues[i].name;
                     e.userData = dialogues[i];
-                    e.tooltip = Dialogue.Editor.Preview(dialogues[i]);
                 };
                 list.onSelectionChange += (os) =>
                 {
@@ -166,6 +164,10 @@ namespace ZetanStudio.DialogueSystem.Editor
         private void OnProjectChange()
         {
             RefreshDialogues();
+        }
+        private void OnDestroy()
+        {
+            AssetDatabase.SaveAssets();
         }
         #endregion
 
@@ -221,7 +223,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                     bool result = dialogue.ID.Contains(keywords);
                     if (result)
                     {
-                        content = $"{dialogue.name}\n({Tr("ID")}: {ZetanUtility.Editor.HighlightContentByKey(dialogue.ID, keywords, dialogue.ID.Length)})";
+                        content = $"{dialogue.name}\n({Tr("ID")}: {Utility.Editor.HighlightKeyword(dialogue.ID, keywords, dialogue.ID.Length)})";
                         tooltip = $"{dialogue.name}\n({Tr("ID")}: {dialogue.ID})";
                     }
                     return result;
@@ -233,7 +235,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                     bool result = dialogue.name.Contains(keywords);
                     if (result)
                     {
-                        content = $"{ZetanUtility.Editor.HighlightContentByKey(dialogue.name, keywords, dialogue.name.Length)}";
+                        content = $"{Utility.Editor.HighlightKeyword(dialogue.name, keywords, dialogue.name.Length)}";
                         tooltip = dialogue.name;
                     }
                     return result;
@@ -245,7 +247,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                     bool result = dialogue.description.Contains(keywords);
                     if (result)
                     {
-                        content = $"{dialogue.name}\n({Tr("描述")}: {ZetanUtility.Editor.HighlightContentByKey(dialogue.description, keywords, 30)})";
+                        content = $"{dialogue.name}\n({Tr("描述")}: {Utility.Editor.HighlightKeyword(dialogue.description, keywords, 30)})";
                         tooltip = $"{dialogue.name}\n({Tr("描述")}: {dialogue.description})";
                     }
                     return result;
@@ -259,37 +261,37 @@ namespace ZetanStudio.DialogueSystem.Editor
                         if (con is TextContent textCon)
                             if (textCon.Talker.Contains(keywords))
                             {
-                                content = $"{dialogue.name}\n({Tr("内容讲述人")}: {ZetanUtility.Editor.HighlightContentByKey(textCon.Talker, keywords, 30)})";
+                                content = $"{dialogue.name}\n({Tr("内容讲述人")}: {Utility.Editor.HighlightKeyword(textCon.Talker, keywords, 30)})";
                                 tooltip = $"{dialogue.name}\n({Tr("内容讲述人")}: {textCon.Talker})";
                                 return true;
                             }
-                            else if (Keywords.Editor.HandleKeyWords(textCon.Talker).Contains(keywords))
+                            else if (Keyword.Editor.HandleKeywords(textCon.Talker).Contains(keywords))
                             {
                                 var talker = textCon.Talker;
-                                var kvps = Keywords.Editor.ExtractKeyWords(talker);
+                                var kvps = Keyword.Editor.ExtractKeyWords(talker);
                                 foreach (var kvp in kvps)
                                 {
                                     talker = talker.Replace(kvp.Key, $"{kvp.Key}({kvp.Value})");
                                 }
-                                content = $"{dialogue.name}\n({Tr("内容讲述人")}: {ZetanUtility.Editor.HighlightContentByKey(talker, keywords, 30)})";
+                                content = $"{dialogue.name}\n({Tr("内容讲述人")}: {Utility.Editor.HighlightKeyword(talker, keywords, 30)})";
                                 tooltip = $"{dialogue.name}\n({Tr("内容讲述人")}: {talker})";
                                 return true;
                             }
                             else if (textCon.Text.Contains(keywords))
                             {
-                                content = $"{dialogue.name}\n({Tr("内容文字")}: {ZetanUtility.Editor.HighlightContentByKey(textCon.Text, keywords, 30)})";
+                                content = $"{dialogue.name}\n({Tr("内容文字")}: {Utility.Editor.HighlightKeyword(textCon.Text, keywords, 30)})";
                                 tooltip = $"{dialogue.name}\n({Tr("内容文字")}: {textCon.Text})";
                                 return true;
                             }
-                            else if (Keywords.Editor.HandleKeyWords(textCon.Text).Contains(keywords))
+                            else if (Keyword.Editor.HandleKeywords(textCon.Text).Contains(keywords))
                             {
                                 var text = textCon.Text;
-                                var kvps = Keywords.Editor.ExtractKeyWords(text);
+                                var kvps = Keyword.Editor.ExtractKeyWords(text);
                                 foreach (var kvp in kvps)
                                 {
                                     text = text.Replace(kvp.Key, $"{kvp.Key}({kvp.Value})");
                                 }
-                                content = $"{dialogue.name}\n({Tr("内容文字")}: {ZetanUtility.Editor.HighlightContentByKey(text, keywords, 30)})";
+                                content = $"{dialogue.name}\n({Tr("内容文字")}: {Utility.Editor.HighlightKeyword(text, keywords, 30)})";
                                 tooltip = $"{dialogue.name}\n({Tr("内容文字")}: {text})";
                                 return true;
                             }
@@ -316,7 +318,7 @@ namespace ZetanStudio.DialogueSystem.Editor
         {
             if (dialogues.Count() == 1) selectedDialogue = dialogues?.FirstOrDefault();
             else selectedDialogue = null;
-            dialogueView?.DrawDialgoueView(selectedDialogue);
+            dialogueView?.ViewDialgoue(selectedDialogue);
             InspectDialogue();
         }
         private void OnNodeSelected(DialogueNode node)
@@ -337,11 +339,11 @@ namespace ZetanStudio.DialogueSystem.Editor
                     {
                         enter = false;
                         if (!copy.IsName("options") && !copy.IsName("events") && !copy.IsName("ExitHere")
-                            && (node.content is TextContent || !copy.IsName("Text") && !copy.IsName("Talker")))
+                            && (node.Content is TextContent || !copy.IsName("Text") && !copy.IsName("Talker")))
                             EditorGUILayout.PropertyField(copy, true);
                     }
                     if (EditorGUI.EndChangeCheck()) node.SerializedContent.serializedObject.ApplyModifiedProperties();
-                    if (node.content is not INonEvent)
+                    if (node.Content is not INonEvent)
                         if (GUILayout.Button(Tr("查看事件"))) InspectEvents(node.SerializedContent.FindPropertyRelative("events"));
                 }
             };
@@ -353,12 +355,13 @@ namespace ZetanStudio.DialogueSystem.Editor
         }
         private void ClickNew()
         {
-            Dialogue dialogue = ZetanUtility.Editor.SaveFilePanel(CreateInstance<Dialogue>);
+            Dialogue dialogue = Utility.Editor.SaveFilePanel(CreateInstance<Dialogue>);
             if (dialogue)
             {
                 Selection.activeObject = dialogue;
                 EditorGUIUtility.PingObject(dialogue);
-                dialogueView?.DrawDialgoueView(dialogue);
+                list.SetSelection(dialogues.IndexOf(dialogue));
+                list.ScrollToItem(dialogues.IndexOf(dialogue));
             }
         }
         private void ClickDelete()
@@ -369,7 +372,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                     selectedDialogue = null;
                     list.ClearSelection();
                     InspectDialogue();
-                    dialogueView?.DrawDialgoueView(null);
+                    dialogueView?.ViewDialgoue(null);
                 }
         }
         private void ClickEvents()
@@ -380,19 +383,6 @@ namespace ZetanStudio.DialogueSystem.Editor
         #endregion
 
         #region 其它
-        private void CopyOlds()
-        {
-            var olds = ZetanUtility.Editor.LoadAssets<OldDialogue>();
-            olds.Sort((x, y) => string.Compare(x.name, y.name));
-            foreach (var old in olds)
-            {
-                var dialog = CreateInstance<Dialogue>();
-                Dialogue.Editor.CopyFromOld(dialog, old);
-                AssetDatabase.CreateAsset(dialog, AssetDatabase.GenerateUniqueAssetPath("Assets/" + old.name + ".asset"));
-            }
-            AssetDatabase.SaveAssets();
-        }
-
         private void InspectDialogue()
         {
             if (inspector == null) return;
@@ -411,7 +401,8 @@ namespace ZetanStudio.DialogueSystem.Editor
 
         private void RefreshDialogues()
         {
-            dialogues = ZetanUtility.Editor.LoadAssets<Dialogue>();
+            dialogues = Utility.Editor.LoadAssets<Dialogue>();
+            dialogues.Sort((x, y) => Utility.CompareStringNumbericSuffix(x.name, y.name));
             list.itemsSource = dialogues;
             list.Rebuild();
         }

@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
+using ZetanStudio.UI;
 
-public class DateGrid : GridView<DateAgent, (int, Color)>
+namespace ZetanStudio.TimeSystem.UI
 {
+    public class DateGrid : GridView<DateAgent, (int, Color)>
+    {
+    }
 }

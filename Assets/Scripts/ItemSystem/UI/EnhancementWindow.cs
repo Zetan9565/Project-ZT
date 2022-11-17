@@ -6,8 +6,10 @@ using UnityEngine.UI;
 namespace ZetanStudio.ItemSystem.UI
 {
     using Extension;
+    using InventorySystem;
+    using InventorySystem.UI;
     using Module;
-    using System;
+    using ZetanStudio.UI;
 
     public class EnhancementWindow : Window
     {
@@ -74,7 +76,7 @@ namespace ZetanStudio.ItemSystem.UI
                         MessageManager.Instance.New(Tr("材料不足"));
                         return;
                     }
-                    success = ZetanUtility.Probability(consumable.SuccessRate);
+                    success = Utility.Probability(consumable.SuccessRate);
                     loseItems = new CountedItem[] { new CountedItem(cost, consumable.Amount) };
                     break;
                 case EnhanceMethod.Materials:
@@ -83,7 +85,7 @@ namespace ZetanStudio.ItemSystem.UI
                         MessageManager.Instance.New(Tr("材料不足"));
                         return;
                     }
-                    success = ZetanUtility.Probability(materialSet.SuccessRate);
+                    success = Utility.Probability(materialSet.SuccessRate);
                     loseItems = BackpackManager.Instance.GetMaterials(matList.Datas);
                     break;
                 case EnhanceMethod.Experience:
@@ -183,9 +185,9 @@ namespace ZetanStudio.ItemSystem.UI
             enhance.interactable = false;
             if (!data.IsMax)
             {
-                ZetanUtility.SetActive(consumableContainer, module.Method == EnhanceMethod.SingleItem);
-                ZetanUtility.SetActive(materialsContainer, module.Method == EnhanceMethod.Materials);
-                ZetanUtility.SetActive(experience, module.Method == EnhanceMethod.Experience);
+                Utility.SetActive(consumableContainer, module.Method == EnhanceMethod.SingleItem);
+                Utility.SetActive(materialsContainer, module.Method == EnhanceMethod.Materials);
+                Utility.SetActive(experience, module.Method == EnhanceMethod.Experience);
                 switch (module.Method)
                 {
                     case EnhanceMethod.SingleItem:
@@ -227,9 +229,9 @@ namespace ZetanStudio.ItemSystem.UI
             costIcon.Vacate();
             matList.Clear();
             setSelector.SetValueWithoutNotify(0);
-            ZetanUtility.SetActive(consumableContainer, false);
-            ZetanUtility.SetActive(materialsContainer, false);
-            ZetanUtility.SetActive(experience, false);
+            Utility.SetActive(consumableContainer, false);
+            Utility.SetActive(materialsContainer, false);
+            Utility.SetActive(experience, false);
             slotContainer.DarkIf(x => !x.IsEmpty && !EnhancementModule.IsEnhanceable(x.Item));
         }
 

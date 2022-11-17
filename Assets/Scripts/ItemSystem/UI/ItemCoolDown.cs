@@ -1,53 +1,57 @@
 using System;
-using ZetanStudio.ItemSystem;
-using ZetanStudio.ItemSystem.Module;
 
-public class ItemCoolDown : CoolDown
+namespace ZetanStudio.ItemSystem.UI
 {
-    private ItemData item;
+    using Module;
+    using ZetanStudio.InventorySystem;
 
-    public void Init(ItemData item)
+    public class ItemCoolDown : CoolDown
     {
-        this.item = item;
-        ZetanUtility.SetActive(this, item);
-        if (!item) Disable();
-        else Enable();
-    }
+        private ItemData item;
 
-    protected override void OnAwake()
-    {
-        NotifyCenter.AddListener(BackpackManager.BackpackUseItem, OnUseItem, this);
-    }
-
-    private void OnUseItem(object[] msg)
-    {
-        if (msg[0] is ItemData item && item == this.item)
-            Enable();
-    }
-
-    private void OnDestroy()
-    {
-        NotifyCenter.RemoveListener(this);
-    }
-
-    private CoolDownData CD => item.GetModuleData<CoolDownData>();
-
-    protected override bool Active => item && CD && !CD.Available;
-
-
-    public override Func<float> GetTime
-    {
-        get => () =>
+        public void Init(ItemData item)
         {
-            return (CD is CoolDownData cool) ? cool.Time : 1;
-        };
-    }
+            this.item = item;
+            Utility.SetActive(this, item);
+            if (!item) Disable();
+            else Enable();
+        }
 
-    public override Func<float> GetTotal
-    {
-        get => () =>
+        protected override void OnAwake()
         {
-            return (CD is CoolDownData cool) ? cool.Module.Time : 1;
-        };
+            NotifyCenter.AddListener(BackpackManager.BackpackUseItem, OnUseItem, this);
+        }
+
+        private void OnUseItem(object[] msg)
+        {
+            if (msg[0] is ItemData item && item == this.item)
+                Enable();
+        }
+
+        private void OnDestroy()
+        {
+            NotifyCenter.RemoveListener(this);
+        }
+
+        private CoolDownData CD => item.GetModuleData<CoolDownData>();
+
+        protected override bool Active => item && CD && !CD.Available;
+
+
+        public override Func<float> GetTime
+        {
+            get => () =>
+            {
+                return CD is CoolDownData cool ? cool.Time : 1;
+            };
+        }
+
+        public override Func<float> GetTotal
+        {
+            get => () =>
+            {
+                return CD is CoolDownData cool ? cool.Module.Time : 1;
+            };
+        }
     }
 }

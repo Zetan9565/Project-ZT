@@ -1,21 +1,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using ZetanStudio.ItemSystem;
+using ZetanStudio.InventorySystem.UI;
+using ZetanStudio.UI;
 
-public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+namespace ZetanStudio.ItemSystem.UI
 {
-    private InventoryWindow window;
-
-    public void SetWindow(InventoryWindow window)
+    public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
-        this.window = window;
-    }
+        private InventoryWindow window;
 
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        public void SetWindow(InventoryWindow window)
         {
+            this.window = window;
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData.button == PointerEventData.InputButton.Left)
+            {
 #if UNITY_STANDALONE
             if (DragableManager.Instance.IsDraging)
             {
@@ -31,39 +34,40 @@ public class DiscardButton : MonoBehaviour, IPointerClickHandler, IPointerEnterH
                 OpenDiscardWindow();
             }
 #elif UNITY_ANDROID
-            OpenDiscardWindow();
-            FloatTipsPanel.ShowText(transform.position, "将物品拖拽到此按钮丢弃，或者点击该按钮进行多选。", 3);
+                OpenDiscardWindow();
+                FloatTipsPanel.ShowText(transform.position, "将物品拖拽到此按钮丢弃，或者点击该按钮进行多选。", 3);
 #endif
+            }
         }
-    }
 
-    public void OnPointerEnter(PointerEventData eventData)
-    {
+        public void OnPointerEnter(PointerEventData eventData)
+        {
 #if UNITY_STANDALONE
         if (!DragableManager.Instance.IsDraging)
             FloatTipsPanel.ShowText(transform.position, "将物品放置到此按钮丢弃，或者点击该按钮进行多选。", 3);
 #endif
-    }
+        }
 
-    public void OnPointerExit(PointerEventData eventData)
-    {
+        public void OnPointerExit(PointerEventData eventData)
+        {
 #if UNITY_STANDALONE
         WindowsManager.CloseWindow<FloatTipsPanel>();
 #endif
-    }
+        }
 
-    private void OpenDiscardWindow()
-    {
-        static bool canSelect(ItemData item)
+        private void OpenDiscardWindow()
         {
-            return item?.Model.Discardable ?? false;
+            static bool canSelect(ItemData item)
+            {
+                return item?.Model.Discardable ?? false;
+            }
+            void discardItems(IEnumerable<CountedItem> items)
+            {
+                if (items == null) return;
+                foreach (var item in items)
+                    window.Handler.Lose(item.source, item.amount);
+            }
+            ItemSelectionWindow.StartSelection(ItemSelectionType.SelectAll, window.Grid as ISlotContainer, window.Handler, discardItems, "丢弃", "确定要丢掉这些道具吗？", selectCondition: canSelect);
         }
-        void discardItems(IEnumerable<CountedItem> items)
-        {
-            if (items == null) return;
-            foreach (var item in items)
-                window.Handler.Lose(item.source, item.amount);
-        }
-        ItemSelectionWindow.StartSelection(ItemSelectionType.SelectAll, window.Grid as ISlotContainer, window.Handler, discardItems, "丢弃", "确定要丢掉这些道具吗？", selectCondition: canSelect);
     }
 }

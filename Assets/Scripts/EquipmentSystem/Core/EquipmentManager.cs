@@ -4,9 +4,10 @@ using UnityEngine;
 
 namespace ZetanStudio
 {
-    using Character;
+    using CharacterSystem;
     using ItemSystem;
     using ItemSystem.Module;
+    using ZetanStudio.InventorySystem;
 
     public static class EquipmentManager
     {

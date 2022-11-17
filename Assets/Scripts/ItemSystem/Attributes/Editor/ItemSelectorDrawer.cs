@@ -7,6 +7,8 @@ using UnityEngine;
 
 namespace ZetanStudio.ItemSystem.Editor
 {
+    using ZetanStudio.Editor;
+
     [CustomPropertyDrawer(typeof(Item))]
     public class ItemSelectorDrawer : PropertyDrawer
     {

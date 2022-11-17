@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using ZetanStudio;
 
 public class CameraMovement2D : SingletonMonoBehaviour<CameraMovement2D>
 {

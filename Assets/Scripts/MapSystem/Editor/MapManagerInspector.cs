@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using ZetanStudio;
 
 [CustomEditor(typeof(MapManager))]
 public class MapManagerInspector : SingletonMonoBehaviourInspector

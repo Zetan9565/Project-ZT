@@ -86,13 +86,13 @@ namespace ZetanStudio.ItemSystem.Module
         {
         }
 
-        public override SaveDataItem GetSaveData()
+        public override GenericData GetSaveData()
         {
-            var data = new SaveDataItem();
+            var data = new GenericData();
             data["level"] = level;
             return data;
         }
-        public override void LoadSaveData(SaveDataItem data)
+        public override void LoadSaveData(GenericData data)
         {
             level = data.ReadInt("level");
         }

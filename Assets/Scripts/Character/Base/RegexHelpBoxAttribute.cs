@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace ZetanStudio.Character
+namespace ZetanStudio.CharacterSystem
 {
     internal class RegexHelpBoxAttribute : PropertyAttribute
     {

@@ -1,23 +1,22 @@
-﻿namespace ZetanStudio.ItemSystem.Module
+﻿using ZetanStudio.InventorySystem;
+
+namespace ZetanStudio.ItemSystem.Module
 {
     public abstract class ItemUsage : ItemHandler
     {
         protected sealed override bool DoHandle(ItemData item)
         {
             if (!item.TryGetModule<UsableModule>(out var usable)) return false;
-            if (item.TryGetModuleData<CoolDownData>(out var data))
+            UsableData data = item.GetModuleData<UsableData>();
+            string msg = data.CanUseWithMsg(item) ?? null;
+            if (!string.IsNullOrEmpty(msg))
             {
-                if (!data.Available)
-                {
-                    MessageManager.Instance.New(data.Module.Message);
-                    return false;
-                }
+                MessageManager.Instance.New(msg);
+                return false;
             }
             if (Prepare(item, usable.Cost) && Use(item))
             {
-                bool result;
-                if (item.TryGetModule<CoolDownModule>(out var cool)) result = cool.Cooler.Handle(item) && Complete(item, usable.Cost);
-                else result = Complete(item, usable.Cost);
+                bool result = data.CanUse(item) && Complete(item, usable.Cost);
                 if (result) Nodify(item);
                 return result;
             }

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using ZetanStudio.CharacterSystem;
 
 public class KillTestButton : MonoBehaviour
 {

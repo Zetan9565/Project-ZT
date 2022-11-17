@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using ZetanStudio.Extension;
+using ZetanStudio;
+using ZetanStudio.UI;
 
 [RequireComponent(typeof(RectTransform))]
 public class MapIcon : MonoBehaviour, IPointerClickHandler,
@@ -64,8 +66,8 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
         iconType = holder.iconType;
         holder.iconInstance = this;
         this.holder = holder;
-        if (holder.showRange) ZetanUtility.SetActive(iconRange, true);
-        else ZetanUtility.SetActive(iconRange, false);
+        if (holder.showRange) Utility.SetActive(iconRange, true);
+        else Utility.SetActive(iconRange, false);
     }
 
     public void Init(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap,
@@ -75,7 +77,7 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
         rectTransform.sizeDelta = size;
         iconImage.overrideSprite = iconSprite;
         this.iconType = iconType;
-        ZetanUtility.SetActive(iconRange.gameObject, false);
+        Utility.SetActive(iconRange.gameObject, false);
         position = worldPosition;
         this.keepOnMap = keepOnMap;
         this.removeAble = removeAble;
@@ -91,10 +93,10 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
         this.iconType = iconType;
         if (rangeSize > 0)
         {
-            ZetanUtility.SetActive(iconRange.gameObject, true);
+            Utility.SetActive(iconRange.gameObject, true);
             iconRange.rectTransform.sizeDelta = new Vector2(rangeSize, rangeSize);
         }
-        else ZetanUtility.SetActive(iconRange.gameObject, false);
+        else Utility.SetActive(iconRange.gameObject, false);
         position = worldPosition;
         this.keepOnMap = keepOnMap;
         this.removeAble = removeAble;
@@ -104,13 +106,13 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
     public void Show(bool showRange = false)
     {
         if (ForceHided) return;
-        ZetanUtility.SetActive(iconImage.gameObject, true);
-        ZetanUtility.SetActive(iconRange.gameObject, showRange);
+        Utility.SetActive(iconImage.gameObject, true);
+        Utility.SetActive(iconRange.gameObject, showRange);
     }
     public void Hide()
     {
-        ZetanUtility.SetActive(iconImage.gameObject, false);
-        if (iconRange) ZetanUtility.SetActive(iconRange.gameObject, false);
+        Utility.SetActive(iconImage.gameObject, false);
+        if (iconRange) Utility.SetActive(iconRange.gameObject, false);
     }
 
     public void Recycle()

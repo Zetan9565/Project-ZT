@@ -1,1 +1,6 @@
-﻿public class CropList : ScrollListView<CropAgent, Crop> { }
+﻿using ZetanStudio.UI;
+
+namespace ZetanStudio.FarmingSystem.UI
+{
+    public class CropList : ScrollListView<CropAgent, Crop> { }
+}

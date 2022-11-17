@@ -1,34 +1,41 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Button))]
-public class CraftAgent : ListItem<CraftAgent, ZetanStudio.ItemSystem.Item>
+namespace ZetanStudio.CraftSystem.UI
 {
-    [SerializeField]
-    private ItemSlot icon;
+    using ItemSystem;
+    using ItemSystem.UI;
+    using ZetanStudio.UI;
 
-    [SerializeField]
-    private Text nameText;
-
-    [SerializeField]
-    private GameObject selected;
-
-    public override void Refresh()
+    [RequireComponent(typeof(Button))]
+    public class CraftAgent : ListItem<CraftAgent, Item>
     {
-        icon.SetItem(Data);
-        nameText.text = Data.Name;
-    }
+        [SerializeField]
+        private ItemSlot icon;
 
-    protected override void RefreshSelected()
-    {
-        ZetanUtility.SetActive(selected, isSelected);
-    }
+        [SerializeField]
+        private Text nameText;
 
-    public override void Clear()
-    {
-        base.Clear();
-        nameText.text = string.Empty;
-        Data = null;
-        icon.Vacate();
+        [SerializeField]
+        private GameObject selected;
+
+        public override void Refresh()
+        {
+            icon.SetItem(Data);
+            nameText.text = ItemFactory.GetColorName(Data);
+        }
+
+        protected override void RefreshSelected()
+        {
+            Utility.SetActive(selected, isSelected);
+        }
+
+        public override void Clear()
+        {
+            base.Clear();
+            nameText.text = string.Empty;
+            Data = null;
+            icon.Vacate();
+        }
     }
 }

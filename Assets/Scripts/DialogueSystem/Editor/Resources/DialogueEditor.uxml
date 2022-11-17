@@ -23,7 +23,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="right-container" style="min-width: 400px; margin-right: 0; margin-left: 0; margin-top: 0; margin-bottom: 0; padding-left: 3px; padding-right: 3px;" />
     </SplitView>
-    <ui:VisualElement name="events-view" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.25); align-items: center; justify-content: center; display: none;">
+    <ui:VisualElement name="events-view" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.25); align-items: center; justify-content: center; display: none;">
         <ui:VisualElement style="width: 300px; height: 300px; background-color: rgb(56, 56, 56); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(89, 89, 89); border-right-color: rgb(89, 89, 89); border-top-color: rgb(89, 89, 89); border-bottom-color: rgb(89, 89, 89);">
             <ui:Label text="对话事件" display-tooltip-when-elided="true" style="-unity-text-align: middle-center; background-color: rgb(40, 40, 40); border-top-left-radius: 5px; border-top-right-radius: 5px; height: 20px;" />
             <ui:ScrollView style="flex-grow: 1; padding-left: 3px; padding-right: 3px; padding-top: 3px; padding-bottom: 3px;">

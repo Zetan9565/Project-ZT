@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace ZetanStudio.ItemSystem
 {
+    using SavingSystem;
+
     public static class ItemFactory
     {
         public readonly static Dictionary<string, Item> models = new Dictionary<string, Item>();
@@ -30,7 +32,9 @@ namespace ZetanStudio.ItemSystem
             return null;
         }
 
-        public static string GetColorName(Item model) => LM.Tr(typeof(Item).Name, model.Name);
+        public static string GetName(Item model) => model ? LM.Tr(typeof(Item).Name, model.Name) : string.Empty;
+        public static string GetColorName(Item model) => model ? Utility.ColorText(LM.Tr(typeof(Item).Name, model.Name), model.Quality.Color) : string.Empty;
+        public static string GetDescription(Item model) => model ? LM.Tr(typeof(Item).Name, model.Description) : string.Empty;
 
         public static ItemData MakeItem(Item model)
         {
@@ -66,7 +70,7 @@ namespace ZetanStudio.ItemSystem
         [SaveMethod(999)]
         public static void SaveData(SaveData saveData)
         {
-            var items = new SaveDataItem();
+            var items = new GenericData();
             foreach (var item in ItemFactory.items)
             {
                 items[item.Key] = item.Value.GetSaveData();
@@ -88,7 +92,6 @@ namespace ZetanStudio.ItemSystem
                             if (item.Model.StackAble) stackableItems[item.ModelID] = item;
                         }
                 }
-            ZetanUtility.Log(ZetanUtility.SerializeObject(ItemFactory.items, false));
         }
     }
 }

@@ -25,12 +25,12 @@ namespace ZetanStudio.ItemSystem.Editor
         {
             enhancementInfo = property.FindPropertyRelative("enhancementInfo");
             enhancement = property.FindPropertyRelative("enhancement");
-            method = property.FindAutoPropertyRelative("Method");
+            method = property.FindAutoProperty("Method");
             costs = property.FindPropertyRelative("costs");
             materials = property.FindPropertyRelative("materials");
             expTypes = property.FindPropertyRelative("expTypes");
             experienceTable = property.FindPropertyRelative("experienceTable");
-            failure = property.FindAutoPropertyRelative("Failure");
+            failure = property.FindAutoProperty("Failure");
         }
 
         protected override void OnInspectorGUI()
@@ -51,11 +51,11 @@ namespace ZetanStudio.ItemSystem.Editor
             if (property.TryGetOwnerValue(out var value) && value is IList<ItemModule> modules && modules.Any(x => x is AffixEnhancementModule ae && ae.IsValid))
             {
                 names = new string[3];
-                names[0] = Tr(ZetanUtility.GetInspectorName(EnhanceFailure.None));
-                names[1] = Tr(ZetanUtility.GetInspectorName(EnhanceFailure.Broken));
-                names[2] = Tr(ZetanUtility.GetInspectorName(EnhanceFailure.Dsiappear));
+                names[0] = Tr(Utility.GetInspectorName(EnhanceFailure.None));
+                names[1] = Tr(Utility.GetInspectorName(EnhanceFailure.Broken));
+                names[2] = Tr(Utility.GetInspectorName(EnhanceFailure.Dsiappear));
             }
-            else names = L.TrM(settings.language, ZetanUtility.GetInspectorNames(typeof(EnhanceFailure)));
+            else names = L.TrM(settings.language, Utility.GetInspectorNames(typeof(EnhanceFailure)));
             var rect = EditorGUILayout.GetControlRect();
             EditorGUI.BeginProperty(rect, GUIContent.none, failure);
             failure.enumValueIndex = EditorGUI.IntPopup(rect, Tr("失败方式"), failure.enumValueIndex, names, new int[] { (int)EnhanceFailure.None, (int)EnhanceFailure.Broken, (int)EnhanceFailure.Dsiappear });
