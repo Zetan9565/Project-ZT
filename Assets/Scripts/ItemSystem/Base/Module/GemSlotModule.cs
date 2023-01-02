@@ -37,7 +37,7 @@ namespace ZetanStudio.ItemSystem.Module
         public GemSlotData(ItemData item, GemSlotModule module) : base(item, module)
         {
         }
-        public override GenericData GetSaveData()
+        public override GenericData GenerateSaveData()
         {
             var data = new GenericData();
             foreach (var gem in gems)

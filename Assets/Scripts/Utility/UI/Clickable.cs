@@ -74,8 +74,6 @@ namespace ZetanStudio.UI
                     pressTimer = Timer.Create(() =>
                     {
                         onLongPress?.Invoke();
-                        clickTimer?.Stop();
-                        clickCount = 0;
                     }, longPressTime, true);
                 else pressTimer.Restart();
             }

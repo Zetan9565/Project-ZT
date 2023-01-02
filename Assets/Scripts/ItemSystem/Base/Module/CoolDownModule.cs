@@ -24,7 +24,7 @@ namespace ZetanStudio.ItemSystem.Module
 
         public void ModifyItemWindow(ItemInfoDisplayer displayer)
         {
-            displayer.AddTitledContent($"-{LM.Tr(typeof(Item).Name, "冷却时间")}: ", LM.Tr(typeof(Item).Name, "{0}秒", MiscFuntion.SecondsToSortTime(Time)));
+            displayer.AddTitledContent($"-{L.Tr(typeof(Item).Name, "冷却时间")}: ", L.Tr(typeof(Item).Name, "{0}秒", MiscFuntion.SecondsToSortTime(Time)));
         }
     }
 
@@ -42,7 +42,7 @@ namespace ZetanStudio.ItemSystem.Module
             item.GetModuleData<UsableData>().canUseWithMsg += i => Available ? "" : module.Message;
         }
 
-        public override GenericData GetSaveData()
+        public override GenericData GenerateSaveData()
         {
             var data = new GenericData();
             data["time"] = Time;

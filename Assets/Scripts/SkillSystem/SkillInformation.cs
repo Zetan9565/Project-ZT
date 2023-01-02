@@ -159,8 +159,8 @@ public class SkillAction
         }
     }
 
-    public static implicit operator bool(SkillAction self)
+    public static implicit operator bool(SkillAction obj)
     {
-        return self != null;
+        return obj != null;
     }
 }

@@ -1029,12 +1029,12 @@ namespace ZetanStudio.InventorySystem
         }
         #endregion
 
-        public static implicit operator bool(Inventory self)
+        public static implicit operator bool(Inventory obj)
         {
-            return self != null;
+            return obj != null;
         }
 
-        public GenericData GetSaveData()
+        public GenericData GenerateSaveData()
         {
             var save = new GenericData();
             save["money"] = Money.ToString();

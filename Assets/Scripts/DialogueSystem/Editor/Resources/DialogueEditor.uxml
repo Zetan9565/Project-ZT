@@ -2,9 +2,10 @@
     <uie:Toolbar>
         <uie:ToolbarButton text="新建" display-tooltip-when-elided="true" name="create" />
         <uie:ToolbarButton text="删除" display-tooltip-when-elided="true" name="delete" />
-        <ui:Label text="导航图" display-tooltip-when-elided="true" name="minimap-label" style="flex-direction: row; -unity-text-align: middle-left;" />
+        <ui:Label text="导航图" display-tooltip-when-elided="true" name="minimap-label" style="flex-direction: row; -unity-text-align: middle-left; padding-top: 0; padding-bottom: 2px;" />
         <ui:Toggle name="minimap-toggle" style="width: 17px; transform-origin: center; margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; border-right-width: 1px; border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5); padding-right: 0;" />
         <uie:ToolbarSearchField focusable="true" />
+        <ui:Button text="刷新视图" display-tooltip-when-elided="true" name="refresh-graph" />
     </uie:Toolbar>
     <SplitView fixed-pane-initial-dimension="250" style="min-width: auto;">
         <ui:VisualElement name="left-container" style="min-width: 200px; min-height: auto;">

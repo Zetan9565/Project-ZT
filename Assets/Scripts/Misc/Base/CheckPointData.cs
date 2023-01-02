@@ -64,8 +64,8 @@ public class CheckPointData
         }
     }
 
-    public static implicit operator bool(CheckPointData self)
+    public static implicit operator bool(CheckPointData obj)
     {
-        return self != null;
+        return obj != null;
     }
 }

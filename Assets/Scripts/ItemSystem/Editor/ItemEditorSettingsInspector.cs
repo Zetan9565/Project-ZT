@@ -107,11 +107,11 @@ namespace ZetanStudio.ItemSystem.Editor
 
         private string Tr(string text)
         {
-            return L.Tr(language.objectReferenceValue as LanguageMap, text);
+            return L.Tr(language.objectReferenceValue as LanguageSet, text);
         }
         private string Tr(string text, params object[] args)
         {
-            return L.Tr(language.objectReferenceValue as LanguageMap, text, args);
+            return L.Tr(language.objectReferenceValue as LanguageSet, text, args);
         }
     }
 }

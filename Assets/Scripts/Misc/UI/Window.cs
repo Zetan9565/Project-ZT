@@ -179,15 +179,15 @@ public abstract class Window : MonoBehaviour, IFadeAble<Window>
 
     public string Tr(string text)
     {
-        return LM.Tr(LangSelector, text);
+        return L.Tr(LangSelector, text);
     }
     public string Tr(string text, params object[] args)
     {
-        return LM.Tr(LangSelector, text, args);
+        return L.Tr(LangSelector, text, args);
     }
     public IEnumerable<string> TrM(string text, params string[] texts)
     {
-        return LM.TrM(LangSelector, text, texts);
+        return L.TrM(LangSelector, text, texts);
     }
 
     public static bool IsName<T>(string name) where T : Window

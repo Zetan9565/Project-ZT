@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
   m_Name: dialogue 4
   m_EditorClassIdentifier: 
-  contents:
+  nodes:
   - rid: 9026091320329896203
   - rid: 9026091320329896204
   - rid: 9026091320329896206
@@ -34,17 +34,17 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 9026091320329896203
-      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: EntryNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: DLGf56138024fc64305bffc1064cbdc3004
         events: []
         options:
         - <Title>k__BackingField: "\u6B63\u786E\u9009\u9879"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091320329896204
           <IsMain>k__BackingField: 0
         - <Title>k__BackingField: "\u9519\u8BEF\u9009\u9879"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091320329896206
           <IsMain>k__BackingField: 0
         <ExitHere>k__BackingField: 0
@@ -77,13 +77,13 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
     - rid: 9026091320329896204
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-c8862341ecfb461d9791889ef446da05
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091320329896208
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -116,13 +116,13 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
     - rid: 9026091320329896206
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-f707e4857e2542afa9e0576e78eb3b43
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091320329896207
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -165,17 +165,17 @@ MonoBehaviour:
         lastExitHere: 0
         <Depth>k__BackingField: 3
     - rid: 9026091320329896208
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-8829edcde40845219f7ea9970fcdc129
         events: []
         options:
         - <Title>k__BackingField: "\u5206\u652F\u4E00"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091320329896209
           <IsMain>k__BackingField: 0
         - <Title>k__BackingField: "\u5206\u652F\u4E8C"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091320329896210
           <IsMain>k__BackingField: 0
         <ExitHere>k__BackingField: 0
@@ -208,13 +208,13 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
     - rid: 9026091320329896209
-      type: {class: BranchContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: BranchNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-4f7efb47441348749987c6b5c485d2c1
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1
@@ -223,13 +223,13 @@ MonoBehaviour:
         <Dialogue>k__BackingField: {fileID: 11400000, guid: e5402b883f863fe4fb8ad37ecd5bc5d7,
           type: 2}
     - rid: 9026091320329896210
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-1dd5197058cd4cdf973b5f95f3e28ee1
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1

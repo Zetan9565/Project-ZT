@@ -72,9 +72,9 @@ public abstract class Objective
         }
     }
 
-    public static implicit operator bool(Objective self)
+    public static implicit operator bool(Objective obj)
     {
-        return self != null;
+        return obj != null;
     }
 
     public sealed class NameAttribute : Attribute

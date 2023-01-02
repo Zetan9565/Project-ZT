@@ -128,9 +128,9 @@ namespace ZetanStudio.CharacterSystem
             quest.currentQuestHolder = this;
         }
 
-        public static implicit operator bool(TalkerData self)
+        public static implicit operator bool(TalkerData obj)
         {
-            return self != null;
+            return obj != null;
         }
     }
 }

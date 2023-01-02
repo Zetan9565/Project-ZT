@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,9 +32,9 @@ namespace ZetanStudio.ItemSystem.UI
         public void Confirm()
         {
             if (list.SelectedIndices.Count < 1)
-                MessageManager.Instance.New(Tr("Î´Ñ¡ÔñÈÎºÎµÀ¾ß"));
+                MessageManager.Instance.New(Tr("æœªé€‰æ‹©ä»»ä½•é“å…·"));
             else if (list.SelectedIndices.Count < module.Amount)
-                MessageManager.Instance.New(Tr("Î´Ñ¡Ôñ×ã¹»µÄµÀ¾ß"));
+                MessageManager.Instance.New(Tr("æœªé€‰æ‹©è¶³å¤Ÿçš„é“å…·"));
             else
             {
                 if (BackpackManager.Instance.Get(list.SelectedDatas, new CountedItem(item, cost)))
@@ -53,7 +53,7 @@ namespace ZetanStudio.ItemSystem.UI
             cost = usable.Cost;
             list.Refresh(module.Product);
             list.SelectionLimit = module.Amount;
-            title.text = Tr("Ñ¡Ôñ{0}ÖÖµÀ¾ß", module.Amount);
+            title.text = Tr("é€‰æ‹©{0}ç§é“å…·", module.Amount);
             confirmButton.interactable = false;
             return true;
         }

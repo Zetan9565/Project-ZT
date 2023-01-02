@@ -14,7 +14,7 @@ namespace ZetanStudio.ItemSystem
         public TextAsset scriptTemplate;
         [Folder]
         public string newScriptFolder = "Assets/Scripts/ItemSystem/Base/Module";
-        public LanguageMap language;
+        public LanguageSet language;
 
         private static ItemEditorSettings Find()
         {

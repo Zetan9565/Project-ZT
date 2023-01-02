@@ -32,7 +32,7 @@ namespace ZetanStudio
 
         public MapIconType iconType;
 
-        public MapIcon iconInstance;
+        public MapIconData iconInstance;
 
         public bool gizmos = true;
 
@@ -52,7 +52,7 @@ namespace ZetanStudio
         {
             if (MapManager.Instance)
             {
-                if (iconInstance && iconInstance.gameObject)
+                if (iconInstance)
                 {
                     //Debug.Log(gameObject.name + " remove");
                     MapManager.Instance.RemoveMapIcon(this, true);
@@ -62,24 +62,6 @@ namespace ZetanStudio
             }
         }
 
-        public void ShowIcon(float zoom)
-        {
-            if (forceHided) return;
-            if (iconInstance)
-            {
-                iconInstance.Show(showRange);
-                if (iconInstance.iconRange)
-                    if (showRange)
-                    {
-                        if (iconInstance.iconRange)
-                        {
-                            if (iconInstance.iconRange.Color != rangeColor) iconInstance.iconRange.Color = rangeColor;
-                            iconInstance.iconRange.rectTransform.sizeDelta = new Vector2(rangeSize * 2, rangeSize * 2) * zoom;
-                        }
-                    }
-                    else Utility.SetActive(iconInstance.iconRange.gameObject, false);
-            }
-        }
         public void HideIcon()
         {
             if (iconInstance) iconInstance.Hide();
@@ -92,8 +74,8 @@ namespace ZetanStudio
             {
                 if (iconInstance)
                 {
-                    if (iconInstance.iconImage.overrideSprite != icon) iconInstance.iconImage.overrideSprite = icon;
-                    if (iconInstance.rectTransform.rect.size != iconSize) iconInstance.rectTransform.sizeDelta = iconSize;
+                    iconInstance.UpdateIcon(icon);
+                    iconInstance.UpdateSize(iconSize);
                     iconInstance.iconType = iconType;
                     yield return WaitForSeconds;
                 }
@@ -115,16 +97,7 @@ namespace ZetanStudio
         private void OnDrawGizmosSelected()
         {
             if (gizmos && MapManager.Instance && !Application.isPlaying)
-            {
-                if (MapManager.Instance.MapMaskRect)
-                {
-                    var rect = Utility.GetScreenSpaceRect(MapManager.Instance.MapMaskRect);
-                    Gizmos.DrawCube(MapManager.Instance.MapMaskRect.position, iconSize * rect.width / MapManager.Instance.MapMaskRect.rect.width);
-                    if (showRange)
-                        Utility.DrawGizmosCircle(MapManager.Instance.MapMaskRect.position, rangeSize * rect.width / MapManager.Instance.MapMaskRect.rect.width,
-                            Vector3.forward, rangeColor);
-                }
-            }
+                MapManager.Instance.DrawIconGizmos(this);
         }
 
         private void OnDestroy()

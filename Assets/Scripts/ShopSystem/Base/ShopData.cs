@@ -48,9 +48,9 @@ public class ShopData
             }
     }
 
-    public static implicit operator bool(ShopData self)
+    public static implicit operator bool(ShopData obj)
     {
-        return self != null;
+        return obj != null;
     }
 }
 

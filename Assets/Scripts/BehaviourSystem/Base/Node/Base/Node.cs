@@ -364,9 +364,9 @@ namespace ZetanStudio.BehaviourTree.Nodes
             return priority < other.priority;
         }
 
-        public static implicit operator bool(Node self)
+        public static implicit operator bool(Node obj)
         {
-            return self != null;
+            return obj != null;
         }
 
         public class Comparer : IComparer<Node>
@@ -476,9 +476,9 @@ namespace ZetanStudio.BehaviourTree.Nodes
             rigidbody2D = executor.GetComponent<Rigidbody2D>();
         }
 
-        public static implicit operator bool(NodeShortcut self)
+        public static implicit operator bool(NodeShortcut obj)
         {
-            return self != null;
+            return obj != null;
         }
     }
 

@@ -39,7 +39,7 @@ namespace ZetanStudio.DialogueSystem
             }
         }
 
-        public static DialogueData GetOrCreateData(EntryContent entry)
+        public static DialogueData GetOrCreateData(EntryNode entry)
         {
             if (!entry) return null;
             if (!data.TryGetValue(entry.ID, out var find))
@@ -48,7 +48,7 @@ namespace ZetanStudio.DialogueSystem
             return find;
         }
 
-        public static void RemoveData(EntryContent entry)
+        public static void RemoveData(EntryNode entry)
         {
             if (!entry) return;
             data.Remove(entry.ID);
@@ -62,7 +62,7 @@ namespace ZetanStudio.DialogueSystem
             saveData["dialogueData"] = dialog;
             foreach (var d in data.Values)
             {
-                dialog[d.ID] = d.GetSaveData();
+                dialog[d.ID] = d.GenerateSaveData();
             }
         }
 

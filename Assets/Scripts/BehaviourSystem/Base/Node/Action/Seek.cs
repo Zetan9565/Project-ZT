@@ -45,7 +45,7 @@ public class Seek : PathMovement
     }
     public override void OnDrawGizmosSelected()
     {
-        if (transform) Utility.DrawGizmosCircle(transform.position, radius);
+        if (transform) Utility.Editor.DrawGizmosCircle(transform.position, radius);
     }
 
     private Vector3 GetTarget()

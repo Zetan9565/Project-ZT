@@ -18,7 +18,7 @@ namespace ZetanStudio.ItemSystem.Module
 
         public void ModifyItemWindow(ItemInfoDisplayer displayer)
         {
-            displayer.AddTitle(LM.Tr(typeof(ItemModule).Name, "以下道具选择{0}种:", Amount));
+            displayer.AddTitle(L.Tr(typeof(ItemModule).Name, "以下道具选择{0}种:", Amount));
             displayer.AddContent(ItemInfo.GetItemInfoString(Product));
         }
     }

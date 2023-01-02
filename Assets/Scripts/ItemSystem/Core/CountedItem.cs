@@ -39,9 +39,9 @@ public sealed class CountedItem
         else return items.Count(x => x.source.Model == model);
     }
 
-    public static implicit operator bool(CountedItem self)
+    public static implicit operator bool(CountedItem obj)
     {
-        return self != null;
+        return obj != null;
     }
 
     public static explicit operator CountedItem(ItemInfo info)

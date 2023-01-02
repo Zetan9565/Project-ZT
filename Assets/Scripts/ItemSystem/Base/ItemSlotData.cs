@@ -138,9 +138,9 @@ public class ItemSlotData
         OnSlotSwap?.Invoke(this, slot);
     }
 
-    public static implicit operator bool(ItemSlotData self)
+    public static implicit operator bool(ItemSlotData obj)
     {
-        return self != null;
+        return obj != null;
     }
 
     public static List<ItemSlotData> Convert(IEnumerable<ItemInfo> infos, int? fixedSlotCount = null)

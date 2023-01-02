@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.ObjectModel;
 using System.Text;
 using UnityEngine;
@@ -11,23 +11,23 @@ namespace ZetanStudio.DialogueSystem
 {
     using ConditionSystem;
 
-    [CreateAssetMenu(fileName = "dialogue", menuName = "Zetan Studio/¾çÇé/¶Ô»°")]
+    [CreateAssetMenu(fileName = "dialogue", menuName = "Zetan Studio/å‰§æƒ…/å¯¹è¯")]
     public sealed class Dialogue : ScriptableObject
     {
         public string ID => Entry?.ID ?? string.Empty;
 
         [SerializeReference]
-        private DialogueContent[] contents = { };
-        public ReadOnlyCollection<DialogueContent> Contents => new ReadOnlyCollection<DialogueContent>(contents);
+        private DialogueNode[] nodes = { };
+        public ReadOnlyCollection<DialogueNode> Nodes => new ReadOnlyCollection<DialogueNode>(nodes);
 
-        public EntryContent Entry => contents[0] as EntryContent;
+        public EntryNode Entry => nodes[0] as EntryNode;
 
         public bool Exitable => Traverse(Entry, n => n.ExitHere);
 
-        public Dialogue() => contents = new DialogueContent[] { new EntryContent() };
+        public Dialogue() => nodes = new DialogueNode[] { new EntryNode() };
 
-        public bool Reachable(DialogueContent content) => Reachable(Entry, content);
-        public static bool Reachable(DialogueContent from, DialogueContent to)
+        public bool Reachable(DialogueNode node) => Reachable(Entry, node);
+        public static bool Reachable(DialogueNode from, DialogueNode to)
         {
             if (!to) return false;
             bool reachable = false;
@@ -39,29 +39,29 @@ namespace ZetanStudio.DialogueSystem
             return reachable;
         }
 
-        public static void Traverse(DialogueContent content, Action<DialogueContent> onAccess, bool normalOnly = false)
+        public static void Traverse(DialogueNode node, Action<DialogueNode> onAccess, bool normalOnly = false)
         {
-            if (content)
+            if (node)
             {
-                if (!normalOnly || DialogueContent.IsNormal(content)) onAccess?.Invoke(content);
-                foreach (var option in content.Options)
+                if (!normalOnly || DialogueNode.IsNormal(node)) onAccess?.Invoke(node);
+                foreach (var option in node.Options)
                 {
-                    Traverse(option.Content, onAccess, normalOnly);
+                    Traverse(option.Next, onAccess, normalOnly);
                 }
             }
         }
 
-        ///<param name="onAccess">´øÖĞÖ¹Ìõ¼şµÄ·ÃÎÊÆ÷£¬·µ»Ø <i>true</i> Ê±½«ÖĞÖ¹±éÀú</param>
-        /// <returns>ÊÇ·ñÔÚ±éÀúÊ±²úÉúÖĞÖ¹</returns>
-        public static bool Traverse(DialogueContent content, Func<DialogueContent, bool> onAccess, bool normalOnly = false)
+        ///<param name="onAccess">å¸¦ä¸­æ­¢æ¡ä»¶çš„è®¿é—®å™¨ï¼Œè¿”å› <i>true</i> æ—¶å°†ä¸­æ­¢éå†</param>
+        /// <returns>æ˜¯å¦åœ¨éå†æ—¶äº§ç”Ÿä¸­æ­¢</returns>
+        public static bool Traverse(DialogueNode node, Func<DialogueNode, bool> onAccess, bool normalOnly = false)
         {
-            if (onAccess != null && content)
+            if (onAccess != null && node)
             {
-                if (!normalOnly || DialogueContent.IsNormal(content))
-                    if (onAccess(content)) return true;
-                foreach (var option in content.Options)
+                if (!normalOnly || DialogueNode.IsNormal(node))
+                    if (onAccess(node)) return true;
+                foreach (var option in node.Options)
                 {
-                    if (Traverse(option.Content, onAccess, normalOnly))
+                    if (Traverse(option.Next, onAccess, normalOnly))
                         return true;
                 }
             }
@@ -70,50 +70,50 @@ namespace ZetanStudio.DialogueSystem
 
 #if UNITY_EDITOR
         /// <summary>
-        /// ÓÃÓÚÔÚ±à¼­Æ÷ÖĞ¼ÇÂ¼²Ù×÷ÍË³öµã£¬²»Ó¦ÔÚÓÎÏ·Âß¼­ÖĞÊ¹ÓÃ
+        /// ç”¨äºåœ¨ç¼–è¾‘å™¨ä¸­è®°å½•æ“ä½œé€€å‡ºç‚¹ï¼Œä¸åº”åœ¨æ¸¸æˆé€»è¾‘ä¸­ä½¿ç”¨
         /// </summary>
-        public ExitContent exit = new ExitContent();
+        public ExitNode exit = new ExitNode();
         /// <summary>
-        /// ÓÃÓÚÔÚ±à¼­Æ÷ÖĞ±¸×¢±¾¶Î¶Ô»°µÄÓÃÍ¾£¬²»Ó¦ÔÚÓÎÏ·Âß¼­ÖĞÊ¹ÓÃ
+        /// ç”¨äºåœ¨ç¼–è¾‘å™¨ä¸­å¤‡æ³¨æœ¬æ®µå¯¹è¯çš„ç”¨é€”ï¼Œä¸åº”åœ¨æ¸¸æˆé€»è¾‘ä¸­ä½¿ç”¨
         /// </summary>
         [TextArea]
         public string description;
 
         /// <summary>
-        /// ÓÃÓÚÔÚ±à¼­Æ÷ÖĞÉèÖÃ·Ö×é£¬²»Ó¦ÔÚÓÎÏ·Âß¼­ÖĞÊ¹ÓÃ
+        /// ç”¨äºåœ¨ç¼–è¾‘å™¨ä¸­è®¾ç½®åˆ†ç»„ï¼Œä¸åº”åœ¨æ¸¸æˆé€»è¾‘ä¸­ä½¿ç”¨
         /// </summary>
-        public List<DialogueContentGroup> groups = new();
+        public List<DialogueGroupData> groups = new();
 
         public static class Editor
         {
-            public static DialogueContent AddContent(Dialogue dialogue, Type type)
+            public static DialogueNode AddNode(Dialogue dialogue, Type type)
             {
-                if (!typeof(DialogueContent).IsAssignableFrom(type)) return null;
-                var content = Activator.CreateInstance(type) as DialogueContent;
-                ArrayUtility.Add(ref dialogue.contents, content);
-                return content;
+                if (!typeof(DialogueNode).IsAssignableFrom(type)) return null;
+                var node = Activator.CreateInstance(type) as DialogueNode;
+                ArrayUtility.Add(ref dialogue.nodes, node);
+                return node;
             }
-            public static void PasteContent(Dialogue dialogue, DialogueContent content)
+            public static void AddNode(Dialogue dialogue, DialogueNode node)
             {
-                ArrayUtility.Add(ref dialogue.contents, content);
+                ArrayUtility.Add(ref dialogue.nodes, node);
             }
-            public static void RemoveContent(Dialogue dialogue, DialogueContent content)
+            public static void RemoveNode(Dialogue dialogue, DialogueNode node)
             {
-                ArrayUtility.Remove(ref dialogue.contents, content);
+                ArrayUtility.Remove(ref dialogue.nodes, node);
             }
 
             public static string Preview(Dialogue dialogue)
             {
                 if (!dialogue) return null;
                 StringBuilder sb = new StringBuilder();
-                foreach (var content in dialogue.contents)
+                foreach (var node in dialogue.nodes)
                 {
-                    if (content is TextContent text)
+                    if (node is SentenceNode sentence)
                     {
-                        sb.Append(text.Preview());
+                        sb.Append(sentence.Preview());
                         sb.Append('\n');
                     }
-                    else if (content is OtherDialogueContent other && other.Dialogue)
+                    else if (node is OtherDialogueNode other && other.Dialogue)
                     {
                         sb.Append(other.Dialogue.Entry.Preview());
                         sb.Append('\n');

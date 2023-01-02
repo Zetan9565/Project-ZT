@@ -178,9 +178,9 @@ namespace ZetanStudio.ItemSystem
             }
         }
 
-        public static implicit operator bool(ItemProperty self)
+        public static implicit operator bool(ItemProperty obj)
         {
-            return self != null;
+            return obj != null;
         }
     }
 }

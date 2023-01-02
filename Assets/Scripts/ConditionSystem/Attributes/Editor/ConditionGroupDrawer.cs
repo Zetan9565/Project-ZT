@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -68,7 +68,7 @@ namespace ZetanStudio.ConditionSystem.Editor
                     {
                         if (conditions.GetArrayElementAtIndex(i).managedReferenceValue is not Condition condition || !condition.IsValid) notCmpltCount++;
                     }
-                    EditorGUI.LabelField(rect, EDL.Tr("Ìõ¼þ¼¯\tÊýÁ¿: ") + conditions.arraySize + (notCmpltCount > 0 ? EDL.Tr("\tÎ´²¹È«: ") + notCmpltCount : string.Empty));
+                    EditorGUI.LabelField(rect, EDL.Tr("æ¡ä»¶é›†\tæ•°é‡: ") + conditions.arraySize + (notCmpltCount > 0 ? EDL.Tr("\tæœªè¡¥å…¨: ") + notCmpltCount : string.Empty));
                 },
             };
             if (property.isExpanded) return lineHeightSpace + list.GetHeight() + (conditions.arraySize < 1 ? 0 : EditorGUIUtility.singleLineHeight);
@@ -83,7 +83,7 @@ namespace ZetanStudio.ConditionSystem.Editor
                 if (conditions.arraySize > 0)
                 {
                     EditorGUI.PropertyField(new Rect(position.x, position.y + lineCount * lineHeightSpace, position.width, lineHeight),
-                        property.FindPropertyRelative("relational"), new GUIContent(EDL.Tr("¹ØÏµ")));
+                        property.FindPropertyRelative("relational"), new GUIContent(EDL.Tr("å…³ç³»")));
                     lineCount++;
                 }
                 list?.DoList(new Rect(position.x, position.y + lineCount * lineHeightSpace, position.width, list.GetHeight()));

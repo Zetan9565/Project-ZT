@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
   m_Name: dialogue 16
   m_EditorClassIdentifier: 
-  contents:
+  nodes:
   - rid: 9026091320329896241
   - rid: 9026091320329896242
   exit:
@@ -29,13 +29,13 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 9026091320329896241
-      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: EntryNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: DLG92fe3c9176d848549c53706d35d1a1b1
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091320329896242
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -68,13 +68,13 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
     - rid: 9026091320329896242
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-ce5be462f61e4bd1b90ab711c7ec74cf
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1

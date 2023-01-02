@@ -29,7 +29,7 @@ public class ItemPropertyAgent : MonoBehaviour
             }
             else
             {
-                leftName.text = (!left.BoolValue ? LM.Tr(GetType().Name, "消除") : string.Empty) + left.Name;
+                leftName.text = (!left.BoolValue ? L.Tr(GetType().Name, "消除") : string.Empty) + left.Name;
             }
         }
     }

@@ -32,9 +32,9 @@ namespace ZetanStudio.ItemSystem
             return null;
         }
 
-        public static string GetName(Item model) => model ? LM.Tr(typeof(Item).Name, model.Name) : string.Empty;
-        public static string GetColorName(Item model) => model ? Utility.ColorText(LM.Tr(typeof(Item).Name, model.Name), model.Quality.Color) : string.Empty;
-        public static string GetDescription(Item model) => model ? LM.Tr(typeof(Item).Name, model.Description) : string.Empty;
+        public static string GetName(Item model) => model ? L.Tr(typeof(Item).Name, model.Name) : string.Empty;
+        public static string GetColorName(Item model) => model ? Utility.ColorText(L.Tr(typeof(Item).Name, model.Name), model.Quality.Color) : string.Empty;
+        public static string GetDescription(Item model) => model ? L.Tr(typeof(Item).Name, model.Description) : string.Empty;
 
         public static ItemData MakeItem(Item model)
         {
@@ -73,7 +73,7 @@ namespace ZetanStudio.ItemSystem
             var items = new GenericData();
             foreach (var item in ItemFactory.items)
             {
-                items[item.Key] = item.Value.GetSaveData();
+                items[item.Key] = item.Value.GenerateSaveData();
             }
             saveData["items"] = items;
         }

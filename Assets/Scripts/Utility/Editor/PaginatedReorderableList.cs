@@ -11,6 +11,7 @@ namespace ZetanStudio.Editor
     public class PaginatedReorderableList : IDisposable
     {
         private IList list;
+        private bool isArray;
         private Type eType;
         private SerializedProperty property;
         private SerializedObject serializedObject;
@@ -24,7 +25,7 @@ namespace ZetanStudio.Editor
 
         private bool m_DisplaySearch;
         private bool searching;
-        private string keyWords;
+        private string keywords;
         private int pageBef;
 
         private readonly float lineHeight;
@@ -97,16 +98,9 @@ namespace ZetanStudio.Editor
             get
             {
                 if (property != null)
-                {
-                    if (property.minArraySize > serializedObject.maxArraySizeForMultiEditing && serializedObject.isEditingMultipleObjects)
-                    {
-                        return 0;
-                    }
-
-                    return property.minArraySize;
-                }
-
-                return list.Count;
+                    if (property.minArraySize > serializedObject.maxArraySizeForMultiEditing && serializedObject.isEditingMultipleObjects) return 0;
+                    else return property.minArraySize;
+                else return list.Count;
             }
         }
         public IEnumerable<int> selectedIndices => orderList.selectedIndices.Select(x => ToRealIndex(x));
@@ -143,22 +137,13 @@ namespace ZetanStudio.Editor
             get => property;
             set
             {
-                if (!SerializedProperty.EqualContents(value, property))
-                    InitList(value, m_PageSize);
+                if (!SerializedProperty.EqualContents(value, property)) InitList(value, m_PageSize);
             }
         }
 #pragma warning restore IDE1006 // 命名样式
 
-        private int ToRealIndex(int index)
-        {
-            if (index < 0 || index > pagedList.Count - 1) return -1;
-            return list.IndexOf(pagedList[index]);
-        }
-        private int ToLocalIndex(int index)
-        {
-            if (index < 0 || index > list.Count - 1) return -1;
-            return pagedList.IndexOf(list[index]);
-        }
+        private int ToRealIndex(int index) => index < 0 || index > pagedList.Count - 1 ? -1 : list.IndexOf(pagedList[index]);
+        private int ToLocalIndex(int index) => index < 0 || index > list.Count - 1 ? -1 : pagedList.IndexOf(list[index]);
         public void Select(int index)
         {
             TurnPageToIndex(index);
@@ -213,22 +198,24 @@ namespace ZetanStudio.Editor
             if (!Utility.Editor.TryGetValue(property, out var value, out var field))
                 throw new ArgumentException($"路径 {property.propertyPath} 不存在");
 
-            var type = field.FieldType;
-            if (!typeof(IList).IsAssignableFrom(type))
+            if (!property.isArray)
                 throw new ArgumentException($"路径 {property.propertyPath} 不是数组或列表");
 
             this.property = property;
             serializedObject = property.serializedObject;
+
+            var type = field.FieldType;
+            isArray = type.IsArray;
+            eType = isArray ? type.GetElementType() : type.GetGenericArguments()[0];
             if (value is null)
             {
-                value = Activator.CreateInstance(type);
+                value = isArray ? Array.CreateInstance(eType, 0) : Activator.CreateInstance(type);
                 Utility.Editor.TrySetValue(property, value);
                 serializedObject.UpdateIfRequiredOrScript();
             }
             list = value as IList;
-            eType = type.GetGenericArguments()[0];
-            resultList = Utility.CreateListInstance(eType);
-            pagedList = Utility.CreateListInstance(eType);
+            resultList = Activator.CreateInstance(typeof(List<>).MakeGenericType(eType)) as IList;
+            pagedList = Activator.CreateInstance(typeof(List<>).MakeGenericType(eType)) as IList;
             Page = 1;
             m_PageSize = pageSize > 0 ? pageSize : 10;
             Refresh();
@@ -239,11 +226,16 @@ namespace ZetanStudio.Editor
             try
             {
                 serializedObject.UpdateIfRequiredOrScript();
+                if (isArray)
+                {
+                    Utility.Editor.TryGetValue(property, out var value);
+                    list = value as IList;
+                }
                 oldCount = property.arraySize;
                 resultList.Clear();
                 for (int i = 0; i < list.Count; i++)
                 {
-                    if (string.IsNullOrEmpty(keyWords) || searchFilter != null && searchFilter(keyWords, property.GetArrayElementAtIndex(i).Copy()) || searchFilter == null && property.GetArrayElementAtIndex(i).displayName.Contains(keyWords))
+                    if (string.IsNullOrEmpty(keywords) || searchFilter != null && searchFilter(keywords, property.GetArrayElementAtIndex(i).Copy()) || searchFilter == null && property.GetArrayElementAtIndex(i).displayName.Contains(keywords))
                         resultList.Add(list[i]);
                 }
                 MaxPage = Mathf.CeilToInt(resultList.Count * 1.0f / m_PageSize);
@@ -254,6 +246,13 @@ namespace ZetanStudio.Editor
                 RefreshList();
             }
             catch { }
+        }
+
+        public void Search(string keywords)
+        {
+            this.keywords = keywords;
+            GUI.FocusControl(null);
+            Search();
         }
 
         private void Search()
@@ -389,10 +388,11 @@ namespace ZetanStudio.Editor
                         headerRect.y += 20f;
                         GUI.Box(headerRect, string.Empty);
                         GUI.SetNextControlName("keyWords");
-                        string oldKeyWords = keyWords;
-                        keyWords = EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace + 2.5f, rect.width - 52, lineHeight), keyWords, EditorStyles.toolbarSearchField);
-                        if (string.IsNullOrEmpty(keyWords)) searching = false;
-                        if (!string.IsNullOrEmpty(oldKeyWords) && string.IsNullOrEmpty(keyWords))
+                        string oldKeyWords = keywords;
+                        GUI.SetNextControlName("PaginatedList Search");
+                        keywords = EditorGUI.TextField(new Rect(rect.x, rect.y + lineHeightSpace + 2.5f, rect.width - 52, lineHeight), keywords, EditorStyles.toolbarSearchField);
+                        if (string.IsNullOrEmpty(keywords)) searching = false;
+                        if (!string.IsNullOrEmpty(oldKeyWords) && string.IsNullOrEmpty(keywords))
                         {
                             searching = false;
                             Page = pageBef;
@@ -400,8 +400,9 @@ namespace ZetanStudio.Editor
                         }
                         if (!searching)
                         {
-                            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(keyWords));
-                            if (GUI.Button(new Rect(rect.x + rect.width - 50, rect.y + lineHeightSpace + 2f, 50, lineHeight), L10n.Tr("Search")))
+                            EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(keywords));
+                            if (GUI.Button(new Rect(rect.x + rect.width - 50, rect.y + lineHeightSpace + 2f, 50, lineHeight), L10n.Tr("Search"))
+                               || GUI.GetNameOfFocusedControl() == "PaginatedList Search" && (Event.current.keyCode == KeyCode.KeypadEnter || Event.current.keyCode == KeyCode.Return))
                             {
                                 GUI.FocusControl(null);
                                 Search();
@@ -411,7 +412,7 @@ namespace ZetanStudio.Editor
                         else if (GUI.Button(new Rect(rect.x + rect.width - 50, rect.y + lineHeightSpace + 2f, 50, lineHeight), L10n.Tr("Clear")))
                         {
                             GUI.FocusControl(null);
-                            keyWords = string.Empty;
+                            keywords = string.Empty;
                             searching = false;
                             Page = pageBef;
                             Refresh();

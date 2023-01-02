@@ -1,10 +1,13 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using ZetanStudio.Extension;
 using ZetanStudio;
 using ZetanStudio.UI;
+using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
+using System;
 
 [RequireComponent(typeof(RectTransform))]
 public class MapIcon : MonoBehaviour, IPointerClickHandler,
@@ -15,123 +18,46 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
 
     public Image iconImage;
 
-    public MapIconRange iconRange;
-
     public CanvasGroup ImageCanvas { get; private set; }
-
-    [HideInInspector]
-    public MapIconType iconType;
-
-#pragma warning disable IDE0044 // Ìí¼ÓÖ»¶ÁÐÞÊÎ·û
-    private bool forceHided;
-#pragma warning restore IDE0044 // Ìí¼ÓÖ»¶ÁÐÞÊÎ·û
-    public bool ForceHided => holder ? holder.forceHided : forceHided;
-
-    private bool removeAble;
-    public bool RemoveAble
-    {
-        get
-        {
-            return holder ? holder.removeAble : removeAble;
-        }
-    }
-
-    private string textToDisplay;
-    public string TextToDisplay
-    {
-        get
-        {
-            return holder ? holder.textToDisplay : textToDisplay;
-        }
-    }
-
-    [HideInInspector]
-    public MapIconHolder holder;
-
-    private Vector3 position;
-    public Vector3 Position => holder ? holder.transform.position : position;
-
-    private bool keepOnMap;
-    public bool KeepOnMap => holder ? holder.keepOnMap : keepOnMap;
 
     public RectTransform rectTransform { get; private set; }
 
     private FloatTipsPanel tips;
+    private MapIconData data;
 
     public void Init(MapIconHolder holder)
     {
-        rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = holder.iconSize;
-        iconImage.overrideSprite = holder.icon;
-        iconType = holder.iconType;
-        holder.iconInstance = this;
-        this.holder = holder;
-        if (holder.showRange) Utility.SetActive(iconRange, true);
-        else Utility.SetActive(iconRange, false);
+        Init(holder.iconInstance, holder.icon, holder.iconSize);
     }
 
-    public void Init(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap,
-        MapIconType iconType, bool removeAble, string textToDisplay = null)
+    public void Init(MapIconData data, Sprite iconSprite, Vector2 size)
     {
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
         rectTransform.sizeDelta = size;
         iconImage.overrideSprite = iconSprite;
-        this.iconType = iconType;
-        Utility.SetActive(iconRange.gameObject, false);
-        position = worldPosition;
-        this.keepOnMap = keepOnMap;
-        this.removeAble = removeAble;
-        this.textToDisplay = textToDisplay;
+        this.data = data;
     }
 
-    public void Init(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap, float rangeSize,
-        MapIconType iconType, bool removeAble, string textToDisplay = null)
+    public void Show()
     {
-        rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = size;
-        iconImage.overrideSprite = iconSprite;
-        this.iconType = iconType;
-        if (rangeSize > 0)
-        {
-            Utility.SetActive(iconRange.gameObject, true);
-            iconRange.rectTransform.sizeDelta = new Vector2(rangeSize, rangeSize);
-        }
-        else Utility.SetActive(iconRange.gameObject, false);
-        position = worldPosition;
-        this.keepOnMap = keepOnMap;
-        this.removeAble = removeAble;
-        this.textToDisplay = textToDisplay;
-    }
-
-    public void Show(bool showRange = false)
-    {
-        if (ForceHided) return;
-        Utility.SetActive(iconImage.gameObject, true);
-        Utility.SetActive(iconRange.gameObject, showRange);
+        if (data.active) Utility.SetActive(iconImage.gameObject, true);
     }
     public void Hide()
     {
         Utility.SetActive(iconImage.gameObject, false);
-        if (iconRange) Utility.SetActive(iconRange.gameObject, false);
     }
 
     public void Recycle()
     {
-        if (holder)
-        {
-            holder.iconInstance = null;
-            holder = null;
-        }
         iconImage.raycastTarget = true;
-        removeAble = true;
-        if (!string.IsNullOrEmpty(TextToDisplay) && tips && tips.openBy is MapIcon icon && icon == this) tips.Close();
-        textToDisplay = string.Empty;
+        if (!string.IsNullOrEmpty(data.TextToDisplay) && tips && tips.openBy is MapIcon icon && icon == this) tips.Close();
+        data = null;
         ObjectPool.Put(gameObject);
     }
 
     private void OnRightClick()
     {
-        if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(this, false);
+        if (MapManager.Instance) MapManager.Instance.RemoveMapIcon(data, false);
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -141,10 +67,10 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
 #if UNITY_STANDALONE
             if (holder) holder.OnMouseClick?.Invoke();
 #elif UNITY_ANDROID
-            if (holder) holder.OnFingerClick?.Invoke();
-            if (!string.IsNullOrEmpty(TextToDisplay))
+            if (data.holder) data.holder.OnFingerClick?.Invoke();
+            if (!string.IsNullOrEmpty(data.TextToDisplay))
             {
-                tips = WindowsManager.OpenWindowBy<FloatTipsPanel>(transform.position, TextToDisplay, 2, false);
+                tips = WindowsManager.OpenWindowBy<FloatTipsPanel>(transform.position, data.TextToDisplay, 2, false);
                 if (tips) tips.onClose += () => tips = null;
             }
 #endif
@@ -197,11 +123,6 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
         transform = base.transform;
     }
 
-    public void UpdatePosition(Vector3 worldPosition)
-    {
-        position = worldPosition;
-    }
-
 #if UNITY_ANDROID
     readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
     Coroutine pressCoroutine;
@@ -223,6 +144,211 @@ public class MapIcon : MonoBehaviour, IPointerClickHandler,
     }
 #endif
 }
+
+public class MapIconData
+{
+    public bool active = true;
+
+    public MapIconType iconType;
+
+#pragma warning disable IDE0044 // æ·»åŠ åªè¯»ä¿®é¥°ç¬¦
+    private bool forceHided;
+#pragma warning restore IDE0044 // æ·»åŠ åªè¯»ä¿®é¥°ç¬¦
+    public bool ForceHided => holder ? holder.forceHided : forceHided;
+
+    private bool removeAble;
+    public bool RemoveAble
+    {
+        get
+        {
+            return holder ? holder.removeAble : removeAble;
+        }
+    }
+
+    private string textToDisplay;
+    public string TextToDisplay
+    {
+        get
+        {
+            return holder ? holder.textToDisplay : textToDisplay;
+        }
+    }
+
+    public MapIconHolder holder;
+
+    private Vector3 position;
+    private readonly Sprite icon;
+    private readonly Vector2 size;
+
+    public Vector3 Position => holder ? holder.transform.position : position;
+
+    private bool keepOnMap;
+    public bool KeepOnMap => holder ? holder.keepOnMap : keepOnMap;
+
+    private float rangeSize;
+    private readonly Color? rangeColor;
+
+    public float RangeSize => holder ? holder.rangeSize : rangeSize;
+
+    public Dictionary<IMapUI, MapIconRange> ranges = new Dictionary<IMapUI, MapIconRange>();
+    public Dictionary<IMapUI, MapIcon> entities = new Dictionary<IMapUI, MapIcon>();
+
+    public void CollectRange(IMapUI UI, MapIconRange range)
+    {
+        if (UI == null || !range) return;
+        ranges[UI] = range;
+    }
+    public MapIconRange GetRange(IMapUI UI)
+    {
+        if (ranges.TryGetValue(UI, out var range)) return range;
+        return null;
+    }
+    public void CollectEntity(IMapUI UI, MapIcon entity)
+    {
+        if (UI == null || !entity) return;
+        entities[UI] = entity;
+    }
+
+    public void UpdateAlpha(float alpha)
+    {
+        entities.ForEach(x => x.Value.ImageCanvas.alpha = alpha);
+    }
+    public void UpdateIcon(Sprite icon)
+    {
+        entities.ForEach(x => x.Value.iconImage.overrideSprite = icon);
+    }
+    public void UpdateRange(float radius, Color color)
+    {
+        Vector2 size = new Vector2(radius * 2, radius * 2);
+        ranges.ForEach(x =>
+        {
+            if (x.Value)
+            {
+                x.Value.Color = color;
+                if (x.Value.rectTransform.sizeDelta != size)
+                    x.Value.rectTransform.sizeDelta = size;
+            }
+        });
+    }
+    public void UpdateRange(float radius)
+    {
+        Vector2 size = new Vector2(radius * 2, radius * 2);
+        ranges.ForEach(x => { if (x.Value.rectTransform.sizeDelta != size) x.Value.rectTransform.sizeDelta = size; });
+    }
+    public void UpdateRange(Color color)
+    {
+        ranges.ForEach(x => x.Value.Color = color);
+    }
+    public void UpdateSize(Vector2 size)
+    {
+        entities.ForEach(x => { if (x.Value.rectTransform.sizeDelta != size) x.Value.rectTransform.sizeDelta = size; });
+    }
+    public void UpdatePosition(Vector3 worldPosition)
+    {
+        position = worldPosition;
+    }
+
+    public void SetClickable(bool enable)
+    {
+        entities.ForEach(x => x.Value.iconImage.raycastTarget = enable);
+    }
+
+    public void ShowRange(bool value)
+    {
+        if (value) ranges.ForEach(x => x.Value.Show(RangeSize));
+        else ranges.ForEach(x => x.Value.Hide());
+    }
+
+    public void Show(bool showRange = false)
+    {
+        if (ForceHided) return;
+        entities.ForEach(x => x.Value.Show());
+        if (showRange) ranges.ForEach(x => x.Value.Show(RangeSize));
+        else ranges.ForEach(x => x.Value.Hide());
+    }
+    public void Hide()
+    {
+        entities.ForEach(x => x.Value.Hide());
+    }
+    public void SetActive(bool active)
+    {
+        this.active = active;
+        if (!active) Hide();
+    }
+
+    public MapIconData(MapIconHolder holder)
+    {
+        iconType = holder.iconType;
+        holder.iconInstance = this;
+        this.holder = holder;
+    }
+
+    public MapIconData(Vector3 worldPosition, Sprite icon, Vector2 size, bool keepOnMap, MapIconType iconType, bool removeAble, string textToDisplay = null)
+    {
+        this.iconType = iconType;
+        position = worldPosition;
+        this.icon = icon;
+        this.size = size;
+        this.keepOnMap = keepOnMap;
+        this.removeAble = removeAble;
+        this.textToDisplay = textToDisplay;
+    }
+    public MapIconData(Vector3 worldPosition, Sprite icon, Vector2 size, bool keepOnMap, MapIconType iconType, bool removeAble, float rangeSize, Color? rangeColor, string textToDisplay = null)
+    {
+        this.iconType = iconType;
+        position = worldPosition;
+        this.icon = icon;
+        this.size = size;
+        this.keepOnMap = keepOnMap;
+        this.removeAble = removeAble;
+        this.rangeSize = rangeSize;
+        this.rangeColor = rangeColor;
+        this.textToDisplay = textToDisplay;
+    }
+    public MapIconData(Vector3 worldPosition, bool keepOnMap, MapIconType iconType, bool removeAble, string textToDisplay = null)
+    {
+        this.iconType = iconType;
+        position = worldPosition;
+        this.keepOnMap = keepOnMap;
+        this.removeAble = removeAble;
+        this.textToDisplay = textToDisplay;
+    }
+    public MapIconData(Vector3 worldPosition, bool keepOnMap, MapIconType iconType, bool removeAble, float rangeSize, string textToDisplay = null)
+    {
+        this.iconType = iconType;
+        position = worldPosition;
+        this.keepOnMap = keepOnMap;
+        this.removeAble = removeAble;
+        this.rangeSize = rangeSize;
+        this.textToDisplay = textToDisplay;
+    }
+
+    public void Recycle()
+    {
+        if (holder)
+        {
+            holder.iconInstance = null;
+            holder = null;
+        }
+        removeAble = true;
+        textToDisplay = string.Empty;
+        entities.ForEach(x => { if (x.Value) x.Value.Recycle(); });
+        ranges.ForEach(x => { if (x.Value) x.Value.Recycle(); });
+        entities.Clear();
+        ranges.Clear();
+    }
+
+    public void Destroy()
+    {
+        entities.ForEach(x => UnityEngine.Object.Destroy(x.Value));
+        ranges.ForEach(x => UnityEngine.Object.Destroy(x.Value));
+        entities.Clear();
+        ranges.Clear();
+    }
+
+    public static implicit operator bool(MapIconData obj) => obj != null;
+}
+
 public enum MapIconType
 {
     Normal,

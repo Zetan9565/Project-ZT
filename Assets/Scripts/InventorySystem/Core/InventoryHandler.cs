@@ -635,9 +635,9 @@ namespace ZetanStudio.InventorySystem
         }
         #endregion
 
-        public static implicit operator bool(InventoryHandler self)
+        public static implicit operator bool(InventoryHandler obj)
         {
-            return self != null;
+            return obj != null;
         }
     }
 }

@@ -107,7 +107,7 @@ namespace ZetanStudio.BehaviourTree
             Value = value;
         }
 
-        public static implicit operator T(SharedVariable<T> self) => self.Value;
+        public static implicit operator T(SharedVariable<T> obj) => obj.Value;
 
         public override bool Equals(object obj)
         {

@@ -18,17 +18,17 @@ namespace ZetanStudio.CraftSystem
             if (!item) return false;
             if (!item.TryGetModule<CraftableModule>(out var craft) || !craft.IsValid)
             {
-                MessageManager.Instance.New(LM.Tr("CraftSystem", "无法制作的道具"));
+                MessageManager.Instance.New(L.Tr("CraftSystem", "无法制作的道具"));
                 return false;
             }
             if (IsLearned(item))
             {
-                ConfirmWindow.StartConfirm(LM.Tr("CraftSystem", "已经学会制作 [{0}]，无需再学习。", ItemFactory.GetColorName(item)));
+                ConfirmWindow.StartConfirm(L.Tr("CraftSystem", "已经学会制作 [{0}]，无需再学习。", ItemFactory.GetColorName(item)));
                 return false;
             }
             learnedItems.Add(item);
             //MessageManager.Instance.NewMessage(string.Format("学会了 [{0}] 的制作方法!", item.name));
-            ConfirmWindow.StartConfirm(LM.Tr("CraftSystem", "学会了 [{0}] 的制作方法!", ItemFactory.GetColorName(item)));
+            ConfirmWindow.StartConfirm(L.Tr("CraftSystem", "学会了 [{0}] 的制作方法!", ItemFactory.GetColorName(item)));
             NotifyCenter.PostNotify(LearnedCraftableItem, item);
             return true;
         }

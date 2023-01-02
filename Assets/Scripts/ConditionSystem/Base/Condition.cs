@@ -18,9 +18,9 @@ namespace ZetanStudio.ConditionSystem
 
         public abstract bool IsMeet();
 
-        public static implicit operator bool(Condition self)
+        public static implicit operator bool(Condition obj)
         {
-            return self != null;
+            return obj != null;
         }
 
         protected sealed class GroupAttribute : Attribute

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 #if UNITY_EDITOR
 using System.Collections.Generic;
 #endif
@@ -48,8 +49,8 @@ namespace ZetanStudio.ItemSystem.Module
                         }
                 }
             }
-            [UnityEditor.InitializeOnLoadMethod]
-            private static void CheckMissing()
+            [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+            private static void CheckItems()
             {
                 foreach (var item in Item.Editor.GetItems())
                 {
@@ -65,6 +66,10 @@ namespace ZetanStudio.ItemSystem.Module
                             Utility.LogWarning($"补充了道具 {item.Name} 缺失的模块: {GetName(r)}");
                     }
                 }
+            }
+            [UnityEditor.InitializeOnLoadMethod]
+            private static void CheckTemplates()
+            {
                 foreach (var temp in Utility.Editor.LoadAssets<ItemTemplate>())
                 {
                     List<Type> requires = new List<Type>();
@@ -146,9 +151,9 @@ namespace ZetanStudio.ItemSystem.Module
             }
         }
 
-        public static implicit operator bool(ItemModule self)
+        public static implicit operator bool(ItemModule obj)
         {
-            return self != null;
+            return obj != null;
         }
     }
 
@@ -158,12 +163,12 @@ namespace ZetanStudio.ItemSystem.Module
 
         public abstract ItemModule GetModule();
 
-        public static implicit operator bool(ItemModuleData self)
+        public static implicit operator bool(ItemModuleData obj)
         {
-            return self != null;
+            return obj != null;
         }
 
-        public abstract GenericData GetSaveData();
+        public abstract GenericData GenerateSaveData();
         public abstract void LoadSaveData(GenericData data);
     }
 

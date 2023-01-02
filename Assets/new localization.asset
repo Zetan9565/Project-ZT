@@ -12,13 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92507e5f55e8e974c945d81acf7ebe7d, type: 3}
   m_Name: new localization
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: "\u7B80\u4F53\u4E2D\u6587"
-  data:
-  - remark: "\u4EFB\u52A1\u7CFB\u7EDF"
-    language: {fileID: 11400000, guid: 9e0abf549717ab64faeb012090554866, type: 2}
-    selectors:
-    - QuestWindow
-    - QuestAgent
-    - QuestBoard
-    - QuestManager
-    - Quest
+  datas:
+  - remark: 
+    <Language>k__BackingField: {fileID: 0}
+    selectors: []

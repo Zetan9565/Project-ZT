@@ -23,7 +23,7 @@ namespace ZetanStudio.CharacterSystem
 
         public RoleValueType ValueType { get; }
 
-        public GenericData GetSaveData()
+        public GenericData GenerateSaveData()
         {
             var data = new GenericData();
             data["ID"] = ID;
@@ -245,9 +245,9 @@ namespace ZetanStudio.CharacterSystem
             return $"{Name}\t{ValueString}";
         }
 
-        public static implicit operator bool(RoleAttribute self)
+        public static implicit operator bool(RoleAttribute obj)
         {
-            return self != null;
+            return obj != null;
         }
 
         public class Comparer : IComparer<RoleAttribute>
@@ -601,9 +601,9 @@ namespace ZetanStudio.CharacterSystem
             return $"{Name}\t{ValueString}";
         }
 
-        public static implicit operator bool(RoleProperty self)
+        public static implicit operator bool(RoleProperty obj)
         {
-            return self != null;
+            return obj != null;
         }
 
         public class Comparer : IComparer<RoleProperty>

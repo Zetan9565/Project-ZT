@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
   m_Name: dialogue 7
   m_EditorClassIdentifier: 
-  contents:
+  nodes:
   - rid: 9026091320329896225
   exit:
     <ID>k__BackingField: CON-e8a2a67b9ecc43dd9f867983c3f121a5
@@ -29,13 +29,13 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 9026091320329896225
-      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: EntryNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: DLGd65f676012444465b82bf18bb6dc9122
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1

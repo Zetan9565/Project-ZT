@@ -1,4 +1,4 @@
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace ZetanStudio.DialogueSystem.Editor
@@ -18,7 +18,7 @@ namespace ZetanStudio.DialogueSystem.Editor
             serializedObject.UpdateIfRequiredOrScript();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(description);
-            EditorGUILayout.LabelField("Ԥ��");
+            EditorGUILayout.LabelField("预览");
             var style = new GUIStyle(EditorStyles.textArea);
             style.wordWrap = true;
             EditorGUI.BeginDisabledGroup(true);

@@ -57,7 +57,7 @@ namespace ZetanStudio.GatheringSystem
             }
         }
 
-        [SerializeField, NonReorderable]
+        [SerializeField]
         protected List<DropItemInfo> productItems = new List<DropItemInfo>();
         public List<DropItemInfo> ProductItems
         {

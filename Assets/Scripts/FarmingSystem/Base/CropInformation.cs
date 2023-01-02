@@ -198,9 +198,9 @@ namespace ZetanStudio.FarmingSystem
             this.stage = stage;
         }
 
-        public static implicit operator bool(CropStage self)
+        public static implicit operator bool(CropStage obj)
         {
-            return self != null;
+            return obj != null;
         }
 
         public static string CropStageName(CropStageType stage)

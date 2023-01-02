@@ -1,0 +1,97 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2079462325931619813
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2079462325931619814}
+  - component: {fileID: 2079462325931619815}
+  m_Layer: 0
+  m_Name: MapManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2079462325931619814
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2079462325931619813}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2079462325931619815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2079462325931619813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ccd8d1d0cb164d4d8eb5db9859229ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UI: {fileID: 0}
+  updateMode: 1
+  player: {fileID: 0}
+  offset: {x: 0, y: 0}
+  playerIcon: {fileID: 21300004, guid: 8d2c64be8281ba844a6d5ebca74c7499, type: 3}
+  playerIconSize: {x: 64, y: 64}
+  defaultMarkIcon: {fileID: -4410644074717748096, guid: 9ecd6643c2fbb764d9524a3689dc0f12,
+    type: 3}
+  defaultMarkSize: {x: 48, y: 48}
+  cameraPrefab: {fileID: 6945534715675716515, guid: 2d19c2a8948b1654cb555c68e9b3e8b9,
+    type: 3}
+  mapCamera: {fileID: 0}
+  targetTexture: {fileID: 8400000, guid: 9379398e1983da54086ed47945c463a7, type: 2}
+  textureSize: {x: 1024, y: 1024}
+  textureFormat: 0
+  mapRenderMask:
+    serializedVersion: 2
+    m_Bits: 1024
+  use2D: 1
+  rotateMap: 0
+  circle: 0
+  edgeSize: 0.125
+  radius: 0.9
+  worldEdgeSize: 0.08
+  isViewingWorldMap: 0
+  dragSensitivity: 0.135
+  animationSpeed: 5
+  miniModeInfo:
+    defaultSizeOfCam: 13
+    currentSizeOfCam: 13
+    minZoomOfCam: 5
+    maxZoomOfCam: 30
+    windowAnchoreMin: {x: 0, y: 1}
+    windowAnchoreMax: {x: 0, y: 1}
+    mapAnchoreMin: {x: 0.5, y: 0.5}
+    mapAnchoreMax: {x: 0.5, y: 0.5}
+    anchoredPosition: {x: 243.71997, y: -300.94}
+    sizeOfWindow: {x: 434.14, y: 434.14}
+    sizeOfMap: {x: 430.63998, y: 430.59998}
+  worldModeInfo:
+    defaultSizeOfCam: 30
+    currentSizeOfCam: 30
+    minZoomOfCam: 13
+    maxZoomOfCam: 60
+    windowAnchoreMin: {x: 0, y: 1}
+    windowAnchoreMax: {x: 0, y: 1}
+    mapAnchoreMin: {x: 0.5, y: 0.5}
+    mapAnchoreMax: {x: 0.5, y: 0.5}
+    anchoredPosition: {x: 907, y: -540}
+    sizeOfWindow: {x: 900, y: 900}
+    sizeOfMap: {x: 900, y: 900}

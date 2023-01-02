@@ -419,7 +419,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 2, y: 321}
-    spritePosition: {x: 782, y: 508}
+    spritePosition: {x: 784, y: 509}
   - name: Spear
     originalName: 
     pivot: {x: 0.41850027, y: 0.40722576}
@@ -441,7 +441,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 321, y: 258}
-    spritePosition: {x: 769, y: 453}
+    spritePosition: {x: 770, y: 529}
   - name: Sword
     originalName: 
     pivot: {x: 0.13330165, y: 0.2960388}
@@ -594,7 +594,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 597, y: 3}
-    spritePosition: {x: 768, y: 510}
+    spritePosition: {x: 769, y: 511}
   - name: Eyes
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -979,7 +979,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 178, y: 321}
-    spritePosition: {x: 906, y: 882}
+    spritePosition: {x: 908, y: 883}
   - name: Head
     originalName: 
     pivot: {x: 0.5, y: 0.05109435}
@@ -1317,7 +1317,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 2, y: 3}
-    spritePosition: {x: 782, y: 756}
+    spritePosition: {x: 784, y: 757}
   - name: Body
     originalName: 
     pivot: {x: 0.508308, y: 0.04707924}
@@ -1676,7 +1676,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 302, y: -111}
-    spritePosition: {x: 784, y: 342}
+    spritePosition: {x: 804, y: 457}
   - name: LeftHand
     originalName: 
     pivot: {x: 0.5, y: 0.5}
@@ -2003,7 +2003,7 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 90, y: 321}
-    spritePosition: {x: 1030, y: 525}
+    spritePosition: {x: 1032, y: 526}
   characterData:
     bones:
     - name: bone_1
@@ -2195,6 +2195,17 @@ ScriptedImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     androidETC2FallbackOverride: 0
+  - name: Server
+    overridden: 0
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    androidETC2FallbackOverride: 0
   mosaicLayers: 1
   characterMode: 1
   documentPivot: {x: 0.5, y: 0.35}
@@ -2303,7 +2314,7 @@ ScriptedImporter:
     isVisible: 1
   sharedRigPSDLayers: []
   pSDLayerImportSetting: []
-  generateGOHierarchy: 1
+  generateGOHierarchy: 0
   textureAssetName: character Texture
   prefabAssetName: character Prefab
   spriteLibAssetName: character Sprite Lib

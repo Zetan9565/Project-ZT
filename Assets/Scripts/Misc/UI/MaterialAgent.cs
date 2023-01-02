@@ -40,7 +40,7 @@ namespace ZetanStudio
                     break;
                 case MaterialCostType.SameType:
                     icon.overrideSprite = Data.MaterialType.Icon;
-                    nameText.text = $"[{LM.Tr(typeof(MaterialType).Name, Data.MaterialType.Name)}]";
+                    nameText.text = $"[{L.Tr(typeof(MaterialType).Name, Data.MaterialType.Name)}]";
                     break;
             }
             int have = handler?.GetMaterialsAmount(Data) ?? 0;

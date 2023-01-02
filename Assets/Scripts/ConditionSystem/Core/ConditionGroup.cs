@@ -130,6 +130,6 @@ namespace ZetanStudio.ConditionSystem
             return true;
         }
 
-        public static implicit operator bool(ConditionGroup self) => self != null;
+        public static implicit operator bool(ConditionGroup obj) => obj != null;
     }
 }

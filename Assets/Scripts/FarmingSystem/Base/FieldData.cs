@@ -68,8 +68,8 @@ public class FieldData
         dieCrops.Clear();
     }
 
-    public static implicit operator bool(FieldData self)
+    public static implicit operator bool(FieldData obj)
     {
-        return self != null;
+        return obj != null;
     }
 }

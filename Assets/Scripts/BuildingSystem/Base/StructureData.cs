@@ -240,7 +240,7 @@ public class StructureData : SceneObjectData<Structure2D>
         return info;
     }
 
-    public GenericData GetSaveData()
+    public GenericData GenerateSaveData()
     {
         var data = new GenericData();
         data["modelID"] = Info.ID;
@@ -254,8 +254,8 @@ public class StructureData : SceneObjectData<Structure2D>
         return data;
     }
 
-    public static implicit operator bool(StructureData self)
+    public static implicit operator bool(StructureData obj)
     {
-        return self != null;
+        return obj != null;
     }
 }

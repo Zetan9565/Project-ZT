@@ -50,14 +50,14 @@ namespace ZetanStudio.ItemSystem.UI
                 Close();
         }
 
-        private void MakeDisplayers(int count)
+        private void MakeDisplayers(int amount)
         {
-            if (displayers.Count < count)
+            if (displayers.Count < amount)
             {
                 if (displayers.Count < 1)
                     InitDisplayer(Utility.IsPrefab(displayerPrefab.gameObject) ? ObjectPool.Get(displayerPrefab, displayerParent) : displayerPrefab);
                 else
-                    while (displayers.Count < count)
+                    while (displayers.Count < amount)
                     {
                         InitDisplayer(ObjectPool.Get(realPrefab, displayerParent));
                     }
@@ -86,7 +86,7 @@ namespace ZetanStudio.ItemSystem.UI
             Utility.SetActive(buttonArea, true);
             buttonList.Refresh(buttonDatas);
 #elif UNITY_STANDALONE
-        ZetanUtility.SetActive(buttonArea, false);
+        Utility.SetActive(buttonArea, false);
         if (hangCoroutine != null) StopCoroutine(hangCoroutine);
         hangCoroutine = StartCoroutine(checkHangOn());
 
@@ -123,12 +123,12 @@ namespace ZetanStudio.ItemSystem.UI
                 rectTr.SetAsFirstSibling();
             }
             blocker.sortingOrder = WindowCanvas.sortingOrder;
-            ZetanUtility.SetActive(blocker, true);
+            Utility.SetActive(blocker, true);
         }
         void hangUp()
         {
             this.hangOn = false;
-            ZetanUtility.SetActive(blocker, false);
+            Utility.SetActive(blocker, false);
             Close();
         }
 #endif

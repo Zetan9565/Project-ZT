@@ -8,11 +8,11 @@ namespace ZetanStudio.DialogueSystem.Editor
 {
     public class DialogueGroup : Group
     {
-        public DialogueContentGroup Group { get; private set; }
+        public DialogueGroupData Group { get; private set; }
 
         private readonly Action onBeforeModify;
 
-        public DialogueGroup(IEnumerable<Node> nodes, DialogueContentGroup group, Action<DialogueGroup, ContextualMenuPopulateEvent> onRightClick, Action onBeforeModify)
+        public DialogueGroup(IEnumerable<Node> nodes, DialogueGroupData group, Action<DialogueGroup, ContextualMenuPopulateEvent> onRightClick, Action onBeforeModify)
         {
             this.Q("titleContainer").style.minHeight = 31f;
             var label = this.Q<Label>("titleLabel");

@@ -9,8 +9,8 @@ public abstract class SceneObjectData<TEntity> where TEntity : MonoBehaviour
 
     public abstract string Name { get; }
 
-    public static implicit operator bool(SceneObjectData<TEntity> self)
+    public static implicit operator bool(SceneObjectData<TEntity> obj)
     {
-        return self != null;
+        return obj != null;
     }
 }

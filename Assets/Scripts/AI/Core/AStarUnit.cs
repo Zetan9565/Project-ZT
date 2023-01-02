@@ -511,7 +511,7 @@ namespace ZetanStudio
                         if (i != path.Length - 1) Gizmos.color = pointColor;
                         else Gizmos.color = new Color(Color.green.r, Color.green.g, Color.green.b, pointColor.a);
                         if (AStarManager.Instance.ThreeD) Gizmos.DrawSphere(path[i], 0.25f);
-                        else Utility.DrawGizmosCircle(path[i], 0.25f, Vector3.forward, Gizmos.color);
+                        else Utility.Editor.DrawGizmosCircle(path[i], 0.25f, Vector3.forward, Gizmos.color);
 
                         Gizmos.color = lineColor;
                         if (i == targetWaypointIndex)

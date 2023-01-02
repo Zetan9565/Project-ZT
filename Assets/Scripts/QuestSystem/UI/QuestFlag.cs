@@ -23,7 +23,7 @@ namespace ZetanStudio.QuestSystem.UI
         private Sprite complete;
 
         private Talker questHolder;
-        private MapIcon mapIcon;
+        private MapIconData mapIcon;
 
         private readonly HashSet<string> triggerNames = new HashSet<string>();
 
@@ -34,8 +34,8 @@ namespace ZetanStudio.QuestSystem.UI
             {
                 if (mapIcon) MapManager.Instance.RemoveMapIcon(mapIcon, true);
                 mapIcon = MapManager.Instance.CreateMapIcon(notAccepted, Vector2.one * 48, questHolder.GetData<TalkerData>().currentPosition, false, MapIconType.Quest, false);
-                mapIcon.iconImage.raycastTarget = false;
-                mapIcon.Hide();
+                mapIcon.SetClickable(false);
+                mapIcon.SetActive(false);
             }
             triggerNames.Clear();
             foreach (var quest in questHolder.QuestInstances)
@@ -60,7 +60,7 @@ namespace ZetanStudio.QuestSystem.UI
             if (questHolder.QuestInstances.Count < 1 && !hasObjective)
             {
                 if (icon.enabled) icon.enabled = false;
-                mapIcon.Hide();
+                mapIcon.SetActive(false);
                 conditionShow = false;
                 return;
             }
@@ -68,7 +68,7 @@ namespace ZetanStudio.QuestSystem.UI
             if (hasObjective)//该NPC身上有未完成的任务目标
             {
                 icon.overrideSprite = accepted;
-                mapIcon.iconImage.overrideSprite = accepted;
+                mapIcon.UpdateIcon(accepted);
                 conditionShow = true;
                 return;
             }
@@ -77,14 +77,14 @@ namespace ZetanStudio.QuestSystem.UI
                 if (!quest.IsComplete && !quest.InProgress && quest.Model.AcceptCondition.IsMeet())//只要有一个没接取
                 {
                     icon.overrideSprite = notAccepted;
-                    mapIcon.iconImage.overrideSprite = notAccepted;
+                    mapIcon.UpdateIcon(notAccepted);
                     conditionShow = true;
                     return;
                 }
                 else if (quest.IsComplete && quest.InProgress)//只要有一个完成
                 {
                     icon.overrideSprite = complete;
-                    mapIcon.iconImage.overrideSprite = complete;
+                    mapIcon.UpdateIcon(complete);
                     conditionShow = true;
                     return;
                 }
@@ -159,9 +159,9 @@ namespace ZetanStudio.QuestSystem.UI
                 if (questHolder.isActiveAndEnabled && conditionShow)
                 {
                     mapIcon.UpdatePosition(questHolder.transform.position);
-                    mapIcon.Show();
+                    mapIcon.SetActive(true);
                 }
-                else mapIcon.Hide();
+                else mapIcon.SetActive(false);
             }
         }
 

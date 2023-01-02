@@ -16,7 +16,7 @@ namespace ZetanStudio
         private float lootInvaildDistance;
         public float LootInvaildDistance => lootInvaildDistance;
 
-        public string CoinName => ZetanStudio.LM.Tr(GetType().Name, coinName);
+        public string CoinName => ZetanStudio.L.Tr(GetType().Name, coinName);
 
         [field: Header("任务相关"), SerializeField, SpriteSelector]
         public Sprite QuestIcon { get; private set; }

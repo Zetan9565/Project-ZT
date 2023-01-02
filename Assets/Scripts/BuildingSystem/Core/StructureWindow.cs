@@ -107,7 +107,7 @@ public class StructureWindow : Window, IHideable
         if (!preview || !isDraging) return;
         preview.transform.position = Utility.PositionToGrid(GetMovePosition(), gridSize, preview.CenterOffset);
 #if UNITY_STANDALONE
-        if (ZetanUtility.IsMouseInsideScreen)
+        if (Utility.IsMouseInsideScreen())
         {
             if (InputManager.GetMouseButtonDown(0))
             {

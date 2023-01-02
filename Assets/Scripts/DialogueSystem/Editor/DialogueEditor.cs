@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,27 +14,27 @@ namespace ZetanStudio.DialogueSystem.Editor
 
     public class DialogueEditor : EditorWindow
     {
-        #region ¾²Ì¬·½·¨
-        [MenuItem("Window/Zetan Studio/¶Ô»°±à¼­Æ÷")]
+        #region é™æ€æ–¹æ³•
+        [MenuItem("Window/Zetan Studio/å¯¹è¯ç¼–è¾‘å™¨")]
         public static void CreateWindow()
         {
             var settings = DialogueEditorSettings.GetOrCreate();
-            DialogueEditor wnd = GetWindow<DialogueEditor>(L.Tr(settings.language, "¶Ô»°±à¼­Æ÷"));
+            DialogueEditor wnd = GetWindow<DialogueEditor>(L.Tr(settings.language, "å¯¹è¯ç¼–è¾‘å™¨"));
             wnd.minSize = settings.minWindowSize;
         }
         public static void CreateWindow(Dialogue dialogue)
         {
             var settings = DialogueEditorSettings.GetOrCreate();
-            DialogueEditor wnd = GetWindow<DialogueEditor>(L.Tr(settings.language, "¶Ô»°±à¼­Æ÷"));
+            DialogueEditor wnd = GetWindow<DialogueEditor>(L.Tr(settings.language, "å¯¹è¯ç¼–è¾‘å™¨"));
             wnd.minSize = settings.minWindowSize;
             wnd.list.SetSelection(wnd.dialogues.IndexOf(dialogue));
             EditorApplication.delayCall += () => wnd.list.ScrollToItem(wnd.dialogues.IndexOf(dialogue));
         }
 
         [OnOpenAsset]
-#pragma warning disable IDE0060 // É¾³ıÎ´Ê¹ÓÃµÄ²ÎÊı
+#pragma warning disable IDE0060 // åˆ é™¤æœªä½¿ç”¨çš„å‚æ•°
         public static bool OnOpenAsset(int instanceID, int line)
-#pragma warning restore IDE0060 // É¾³ıÎ´Ê¹ÓÃµÄ²ÎÊı
+#pragma warning restore IDE0060 // åˆ é™¤æœªä½¿ç”¨çš„å‚æ•°
         {
             if (EditorUtility.InstanceIDToObject(instanceID) is Dialogue tree)
             {
@@ -45,11 +45,11 @@ namespace ZetanStudio.DialogueSystem.Editor
         }
         #endregion
 
-        #region ±äÁ¿ÉùÃ÷
+        #region å˜é‡å£°æ˜
         private DialogueEditorSettings settings;
         private Button delete;
         private ToolbarSearchField searchField;
-        private DialogueView dialogueView;
+        private DialogueGraph dialogueGraph;
         private ListView list;
         private ListView searchList;
         private List<Dialogue> dialogues;
@@ -59,7 +59,7 @@ namespace ZetanStudio.DialogueSystem.Editor
         private IMGUIContainer eventsInspector;
         #endregion
 
-        #region Unity»Øµ÷
+        #region Unityå›è°ƒ
         public void CreateGUI()
         {
             try
@@ -68,10 +68,10 @@ namespace ZetanStudio.DialogueSystem.Editor
 
                 VisualElement root = rootVisualElement;
 
-                var visualTree = settings.treeUxml;
+                var visualTree = settings.editorUxml;
                 visualTree.CloneTree(root);
 
-                var styleSheet = settings.treeUss;
+                var styleSheet = settings.editorUss;
                 root.styleSheets.Add(styleSheet);
 
                 root.Q<Button>("create").clicked += ClickNew;
@@ -80,7 +80,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                 Toggle toggle = root.Q<Toggle>("minimap-toggle");
                 toggle.RegisterValueChangedCallback(evt =>
                 {
-                    dialogueView?.ShowHideMiniMap(evt.newValue);
+                    dialogueGraph?.ShowHideMiniMap(evt.newValue);
                 });
                 toggle.SetValueWithoutNotify(true);
                 searchList = root.Q<ListView>("search-list");
@@ -96,12 +96,13 @@ namespace ZetanStudio.DialogueSystem.Editor
                     if (!string.IsNullOrEmpty(searchField.value) && !searchList.Contains(evt.target as VisualElement) && !searchField.Contains(evt.target as VisualElement))
                         searchField.value = string.Empty;
                 });
+                root.Q<Button>("refresh-graph").clicked += () => dialogueGraph?.ViewDialogue(selectedDialogue);
 
-                dialogueView = new DialogueView();
-                dialogueView.nodeSelectedCallback = OnNodeSelected;
-                dialogueView.nodeUnselectedCallback = OnNodeUnselected;
-                root.Q("right-container").Insert(0, dialogueView);
-                dialogueView.StretchToParentSize();
+                dialogueGraph = new DialogueGraph();
+                dialogueGraph.nodeSelectedCallback = OnNodeSelected;
+                dialogueGraph.nodeUnselectedCallback = OnNodeUnselected;
+                root.Q("right-container").Insert(0, dialogueGraph);
+                dialogueGraph.StretchToParentSize();
 
                 list = root.Q<ListView>("dialogue-list");
                 list.selectionType = SelectionType.Multiple;
@@ -111,9 +112,9 @@ namespace ZetanStudio.DialogueSystem.Editor
                     label.AddManipulator(new ContextualMenuManipulator(evt =>
                     {
                         if (label.userData is Dialogue dialogue)
-                            evt.menu.AppendAction(Tr("É¾³ı"), a =>
+                            evt.menu.AppendAction(Tr("åˆ é™¤"), a =>
                             {
-                                if (EditorUtility.DisplayDialog(Tr("É¾³ı"), Tr("È·¶¨Òª¸Ã¶Ô»°ÒÆÖÁ»ØÊÕÕ¾Âğ?"), Tr("È·¶¨"), Tr("È¡Ïû")))
+                                if (EditorUtility.DisplayDialog(Tr("åˆ é™¤"), Tr("ç¡®å®šè¦è¯¥å¯¹è¯ç§»è‡³å›æ”¶ç«™å—?"), Tr("ç¡®å®š"), Tr("å–æ¶ˆ")))
                                     if (AssetDatabase.MoveAssetToTrash(AssetDatabase.GetAssetPath(dialogue)))
                                     {
                                         if (dialogue == selectedDialogue)
@@ -121,7 +122,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                                             selectedDialogue = null;
                                             list.ClearSelection();
                                             InspectDialogue();
-                                            dialogueView?.ViewDialgoue(null);
+                                            dialogueGraph?.ViewDialogue(null);
                                         }
                                     }
                             });
@@ -159,7 +160,7 @@ namespace ZetanStudio.DialogueSystem.Editor
         }
         private void OnInspectorUpdate()
         {
-            dialogueView?.CheckErrors();
+            dialogueGraph?.CheckErrors();
         }
         private void OnProjectChange()
         {
@@ -171,7 +172,7 @@ namespace ZetanStudio.DialogueSystem.Editor
         }
         #endregion
 
-        #region ¸÷ÖÖ»Øµ÷
+        #region å„ç§å›è°ƒ
         private void DosearchList(string keywords = null)
         {
             IList itemsSource = new List<object>();
@@ -215,7 +216,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                     e.tooltip = tooltips[i];
                 };
 
-                #region ¼ìË÷
+                #region æ£€ç´¢
                 bool searchID(Dialogue dialogue, out string content, out string tooltip)
                 {
                     content = null;
@@ -247,8 +248,8 @@ namespace ZetanStudio.DialogueSystem.Editor
                     bool result = dialogue.description.Contains(keywords);
                     if (result)
                     {
-                        content = $"{dialogue.name}\n({Tr("ÃèÊö")}: {Utility.Editor.HighlightKeyword(dialogue.description, keywords, 30)})";
-                        tooltip = $"{dialogue.name}\n({Tr("ÃèÊö")}: {dialogue.description})";
+                        content = $"{dialogue.name}\n({Tr("æè¿°")}: {Utility.Editor.HighlightKeyword(dialogue.description, keywords, 30)})";
+                        tooltip = $"{dialogue.name}\n({Tr("æè¿°")}: {dialogue.description})";
                     }
                     return result;
                 }
@@ -256,43 +257,43 @@ namespace ZetanStudio.DialogueSystem.Editor
                 {
                     content = null;
                     tooltip = null;
-                    foreach (var con in dialogue.Contents)
+                    foreach (var con in dialogue.Nodes)
                     {
-                        if (con is TextContent textCon)
-                            if (textCon.Talker.Contains(keywords))
+                        if (con is SentenceNode sentence)
+                            if (sentence.Talker.Contains(keywords))
                             {
-                                content = $"{dialogue.name}\n({Tr("ÄÚÈİ½²ÊöÈË")}: {Utility.Editor.HighlightKeyword(textCon.Talker, keywords, 30)})";
-                                tooltip = $"{dialogue.name}\n({Tr("ÄÚÈİ½²ÊöÈË")}: {textCon.Talker})";
+                                content = $"{dialogue.name}\n({Tr("å†…å®¹è®²è¿°äºº")}: {Utility.Editor.HighlightKeyword(sentence.Talker, keywords, 30)})";
+                                tooltip = $"{dialogue.name}\n({Tr("å†…å®¹è®²è¿°äºº")}: {sentence.Talker})";
                                 return true;
                             }
-                            else if (Keyword.Editor.HandleKeywords(textCon.Talker).Contains(keywords))
+                            else if (Keyword.Editor.HandleKeywords(sentence.Talker).Contains(keywords))
                             {
-                                var talker = textCon.Talker;
+                                var talker = sentence.Talker;
                                 var kvps = Keyword.Editor.ExtractKeyWords(talker);
                                 foreach (var kvp in kvps)
                                 {
                                     talker = talker.Replace(kvp.Key, $"{kvp.Key}({kvp.Value})");
                                 }
-                                content = $"{dialogue.name}\n({Tr("ÄÚÈİ½²ÊöÈË")}: {Utility.Editor.HighlightKeyword(talker, keywords, 30)})";
-                                tooltip = $"{dialogue.name}\n({Tr("ÄÚÈİ½²ÊöÈË")}: {talker})";
+                                content = $"{dialogue.name}\n({Tr("å†…å®¹è®²è¿°äºº")}: {Utility.Editor.HighlightKeyword(talker, keywords, 30)})";
+                                tooltip = $"{dialogue.name}\n({Tr("å†…å®¹è®²è¿°äºº")}: {talker})";
                                 return true;
                             }
-                            else if (textCon.Text.Contains(keywords))
+                            else if (sentence.Text.Contains(keywords))
                             {
-                                content = $"{dialogue.name}\n({Tr("ÄÚÈİÎÄ×Ö")}: {Utility.Editor.HighlightKeyword(textCon.Text, keywords, 30)})";
-                                tooltip = $"{dialogue.name}\n({Tr("ÄÚÈİÎÄ×Ö")}: {textCon.Text})";
+                                content = $"{dialogue.name}\n({Tr("å†…å®¹æ–‡å­—")}: {Utility.Editor.HighlightKeyword(sentence.Text, keywords, 30)})";
+                                tooltip = $"{dialogue.name}\n({Tr("å†…å®¹æ–‡å­—")}: {sentence.Text})";
                                 return true;
                             }
-                            else if (Keyword.Editor.HandleKeywords(textCon.Text).Contains(keywords))
+                            else if (Keyword.Editor.HandleKeywords(sentence.Text).Contains(keywords))
                             {
-                                var text = textCon.Text;
+                                var text = sentence.Text;
                                 var kvps = Keyword.Editor.ExtractKeyWords(text);
                                 foreach (var kvp in kvps)
                                 {
                                     text = text.Replace(kvp.Key, $"{kvp.Key}({kvp.Value})");
                                 }
-                                content = $"{dialogue.name}\n({Tr("ÄÚÈİÎÄ×Ö")}: {Utility.Editor.HighlightKeyword(text, keywords, 30)})";
-                                tooltip = $"{dialogue.name}\n({Tr("ÄÚÈİÎÄ×Ö")}: {text})";
+                                content = $"{dialogue.name}\n({Tr("å†…å®¹æ–‡å­—")}: {Utility.Editor.HighlightKeyword(text, keywords, 30)})";
+                                tooltip = $"{dialogue.name}\n({Tr("å†…å®¹æ–‡å­—")}: {text})";
                                 return true;
                             }
                     }
@@ -318,39 +319,39 @@ namespace ZetanStudio.DialogueSystem.Editor
         {
             if (dialogues.Count() == 1) selectedDialogue = dialogues?.FirstOrDefault();
             else selectedDialogue = null;
-            dialogueView?.ViewDialgoue(selectedDialogue);
+            dialogueGraph?.ViewDialogue(selectedDialogue);
             InspectDialogue();
         }
-        private void OnNodeSelected(DialogueNode node)
+        private void OnNodeSelected(DialogueGraphNode node)
         {
             inspector.onGUIHandler = null;
             inspector.Clear();
-            if (node == null || dialogueView.nodes.Count(x => x.selected) > 1) return;
+            if (node == null || dialogueGraph.nodes.Count(x => x.selected) > 1) return;
             inspector.onGUIHandler = () =>
             {
-                if (node.SerializedContent?.serializedObject?.targetObject)
+                if (node.SerializedNode?.serializedObject?.targetObject)
                 {
-                    node.SerializedContent.serializedObject.UpdateIfRequiredOrScript();
+                    node.SerializedNode.serializedObject.UpdateIfRequiredOrScript();
                     EditorGUI.BeginChangeCheck();
-                    using var copy = node.SerializedContent.Copy();
+                    using var copy = node.SerializedNode.Copy();
                     SerializedProperty end = copy.GetEndProperty();
                     bool enter = true;
                     while (copy.NextVisible(enter) && !SerializedProperty.EqualContents(copy, end))
                     {
                         enter = false;
-                        if (!copy.IsName("options") && !copy.IsName("events") && !copy.IsName("ExitHere")
-                            && (node.Content is TextContent || !copy.IsName("Text") && !copy.IsName("Talker")))
+                        if (!copy.IsRawName("options") && !copy.IsRawName("events") && !copy.IsRawName("ExitHere")
+                            && (node.Target is SentenceNode || !copy.IsRawName("Text") && !copy.IsRawName("Talker")))
                             EditorGUILayout.PropertyField(copy, true);
                     }
-                    if (EditorGUI.EndChangeCheck()) node.SerializedContent.serializedObject.ApplyModifiedProperties();
-                    if (node.Content is not INonEvent)
-                        if (GUILayout.Button(Tr("²é¿´ÊÂ¼ş"))) InspectEvents(node.SerializedContent.FindPropertyRelative("events"));
+                    if (EditorGUI.EndChangeCheck()) node.SerializedNode.serializedObject.ApplyModifiedProperties();
+                    if (node.Target is IEventNode)
+                        if (GUILayout.Button(Tr("æŸ¥çœ‹äº‹ä»¶"))) InspectEvents(node.SerializedNode.FindPropertyRelative("events"));
                 }
             };
         }
-        private void OnNodeUnselected(DialogueNode node)
+        private void OnNodeUnselected(DialogueGraphNode node)
         {
-            if (dialogueView.nodes.Count(x => x.selected) < 1)
+            if (dialogueGraph.nodes.Count(x => x.selected) < 1)
                 InspectDialogue();
         }
         private void ClickNew()
@@ -366,13 +367,13 @@ namespace ZetanStudio.DialogueSystem.Editor
         }
         private void ClickDelete()
         {
-            if (EditorUtility.DisplayDialog(Tr("É¾³ı"), Tr("È·¶¨Òª½«Ñ¡ÖĞµÄ¶Ô»°ÒÆÖÁ»ØÊÕÕ¾Âğ?"), Tr("È·¶¨"), Tr("È¡Ïû")))
+            if (EditorUtility.DisplayDialog(Tr("åˆ é™¤"), Tr("ç¡®å®šè¦å°†é€‰ä¸­çš„å¯¹è¯ç§»è‡³å›æ”¶ç«™å—?"), Tr("ç¡®å®š"), Tr("å–æ¶ˆ")))
                 if (AssetDatabase.MoveAssetsToTrash(list.selectedItems.Select(x => AssetDatabase.GetAssetPath(x as Dialogue)).ToArray(), new List<string>()))
                 {
                     selectedDialogue = null;
                     list.ClearSelection();
                     InspectDialogue();
-                    dialogueView?.ViewDialgoue(null);
+                    dialogueGraph?.ViewDialogue(null);
                 }
         }
         private void ClickEvents()
@@ -382,7 +383,7 @@ namespace ZetanStudio.DialogueSystem.Editor
         }
         #endregion
 
-        #region ÆäËü
+        #region å…¶å®ƒ
         private void InspectDialogue()
         {
             if (inspector == null) return;
@@ -403,8 +404,11 @@ namespace ZetanStudio.DialogueSystem.Editor
         {
             dialogues = Utility.Editor.LoadAssets<Dialogue>();
             dialogues.Sort((x, y) => Utility.CompareStringNumbericSuffix(x.name, y.name));
-            list.itemsSource = dialogues;
-            list.Rebuild();
+            if (list != null)
+            {
+                list.itemsSource = dialogues;
+                list.Rebuild();
+            }
         }
 
         public void InspectEvents(SerializedProperty events)
@@ -416,7 +420,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                 {
                     events.serializedObject.UpdateIfRequiredOrScript();
                     EditorGUI.BeginChangeCheck();
-                    EditorGUILayout.PropertyField(events, new GUIContent(Tr("¶Ô»°ÊÂ¼ş")));
+                    EditorGUILayout.PropertyField(events, new GUIContent(Tr("å¯¹è¯äº‹ä»¶")));
                     if (EditorGUI.EndChangeCheck()) events.serializedObject.ApplyModifiedProperties();
                 };
             }

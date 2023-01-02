@@ -5,15 +5,20 @@ using UnityEngine;
 namespace ZetanStudio
 {
     using SavingSystem;
+    using ZetanStudio.Extension;
 
     [DisallowMultipleComponent]
     [AddComponentMenu("Zetan Studio/管理器/地图管理器")]
     public class MapManager : SingletonMonoBehaviour<MapManager>
     {
         [SerializeField]
-        private MapUI UI;
+        private MapMiniUI miniUI;
+        [SerializeField]
+        private MapWorldUI worldUI;
 
-        public RectTransform MapMaskRect => UI ? UI.mapMaskRect : null;
+        //private IMapUI UI;
+
+        //public RectTransform MapMaskRect => UI?.MapMaskRect;
 
         [SerializeField]
         private UpdateMode updateMode;
@@ -26,11 +31,15 @@ namespace ZetanStudio
         private Sprite playerIcon;
         [SerializeField]
         private Vector2 playerIconSize = new Vector2(64, 64);
-        private MapIcon playerIconInstance;
         [SerializeField]
         private Sprite defaultMarkIcon;
         [SerializeField]
         private Vector2 defaultMarkSize = new Vector2(64, 64);
+
+        [SerializeField]
+        private MapIcon iconPrefab;
+        [SerializeField]
+        private MapIconRange iconRangePrefab;
 
         [SerializeField]
         private MapCamera cameraPrefab;
@@ -67,8 +76,12 @@ namespace ZetanStudio
         [SerializeField, Tooltip("此值为地图遮罩Rect宽度、高度两者中较小值的倍数。"), Range(0.5f, 1)]
         private float radius = 1;
 
+        [SerializeField]
+        private bool worldCircle;
         [SerializeField, Tooltip("此值为地图遮罩Rect宽度、高度两者中较小值的倍数。"), Range(0, 0.5f)]
         private float worldEdgeSize;
+        [SerializeField, Tooltip("此值为地图遮罩Rect宽度、高度两者中较小值的倍数。"), Range(0.5f, 1)]
+        private float worldRadius = 1;
         [SerializeField]
         private bool isViewingWorldMap;
         public bool IsViewingWorldMap => isViewingWorldMap;
@@ -102,65 +115,92 @@ namespace ZetanStudio
         [SerializeField]
         private MapModeInfo worldModeInfo = new MapModeInfo();
 
-        private readonly Dictionary<MapIconHolder, MapIcon> iconsWithHolder = new Dictionary<MapIconHolder, MapIcon>();
-        public List<MapIcon> NormalIcons { get; private set; } = new List<MapIcon>();
+        private readonly Dictionary<IMapUI, MapIcon> playerIconInstances = new Dictionary<IMapUI, MapIcon>();
+        private readonly Dictionary<MapIconHolder, MapIconData> iconsWithHolder = new Dictionary<MapIconHolder, MapIconData>();
+        public List<MapIconData> NormalIcons { get; private set; } = new List<MapIconData>();
 
         private bool isInit;
 
         #region 地图图标相关
+        #region 创建
         public void CreateMapIcon(MapIconHolder holder)
         {
-            if (!UI || !UI.gameObject || !holder.icon) return;
-            MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(holder.iconType)).GetComponent<MapIcon>();
-            icon.Init(holder);
-            iconsWithHolder.TryGetValue(holder, out MapIcon iconFound);
-            //Icons.Add(icon);
-            if (iconFound != null)
+            var data = new MapIconData(holder);
+            iconsWithHolder[holder] = data;
+            data.CollectEntity(miniUI, CreateMapIcon(holder, miniUI));
+            data.CollectEntity(worldUI, CreateMapIcon(holder, worldUI));
+            if (holder.showRange)
             {
-                holder.iconInstance = icon;
-                iconsWithHolder[holder] = icon;
+                data.CollectRange(miniUI, CreateMapIconRange(miniUI, holder.rangeSize, holder.rangeColor));
+                data.CollectRange(worldUI, CreateMapIconRange(worldUI, holder.rangeSize, holder.rangeColor));
             }
-            else iconsWithHolder.Add(holder, icon);
-            return;
         }
-        public MapIcon CreateMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap,
-            MapIconType iconType, bool removeAble, string textToDisplay = null)
+        private MapIconRange CreateMapIconRange(IMapUI UI, float radius, Color? color = null)
         {
-            if (!UI || !UI.gameObject || !iconSprite) return null;
-            MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(iconType)).GetComponent<MapIcon>();
-            icon.Init(iconSprite, size, worldPosition, keepOnMap, iconType, removeAble, textToDisplay);
-            NormalIcons.Add(icon);
+            if (UI == null || !UI.gameObject) return null;
+            MapIconRange icon = ObjectPool.Get(iconRangePrefab.gameObject, UI.RangeParent).GetComponent<MapIconRange>();
+            icon.Init(radius, color);
             return icon;
         }
-        public MapIcon CreateMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap, float rangeSize,
+        private MapIcon CreateMapIcon(MapIconHolder holder, IMapUI UI)
+        {
+            if (UI == null || !UI.gameObject || !holder.icon) return null;
+            MapIcon icon = ObjectPool.Get(iconPrefab.gameObject, SelectParent(UI, holder.iconType)).GetComponent<MapIcon>();
+            icon.Init(holder);
+            return icon;
+        }
+        public MapIconData CreateMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap,
             MapIconType iconType, bool removeAble, string textToDisplay = null)
         {
-            if (!UI || !UI.gameObject || !iconSprite) return null;
-            MapIcon icon = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(iconType)).GetComponent<MapIcon>();
-            icon.Init(iconSprite, size, worldPosition, keepOnMap, rangeSize, iconType, removeAble, textToDisplay);
-            NormalIcons.Add(icon);
+            var data = new MapIconData(worldPosition, keepOnMap, iconType, removeAble, textToDisplay);
+            NormalIcons.Add(data);
+            data.CollectEntity(miniUI, CreateMapIcon(data, miniUI, iconSprite, size));
+            data.CollectEntity(worldUI, CreateMapIcon(data, worldUI, iconSprite, size));
+            return data;
+        }
+        public MapIconData CreateMapIcon(Sprite iconSprite, Vector2 size, Vector3 worldPosition, bool keepOnMap, float rangeSize,
+            MapIconType iconType, bool removeAble, string textToDisplay = null)
+        {
+            var data = new MapIconData(worldPosition, keepOnMap, iconType, removeAble, textToDisplay);
+            NormalIcons.Add(data);
+            data.CollectEntity(miniUI, CreateMapIcon(data, miniUI, iconSprite, size));
+            data.CollectEntity(worldUI, CreateMapIcon(data, worldUI, iconSprite, size));
+            if (rangeSize > 0)
+            {
+                data.CollectRange(miniUI, CreateMapIconRange(miniUI, rangeSize));
+                data.CollectRange(worldUI, CreateMapIconRange(worldUI, rangeSize));
+            }
+            return data;
+        }
+        private MapIcon CreateMapIcon(MapIconData data, IMapUI UI, Sprite iconSprite, Vector2 size)
+        {
+            if (UI == null || !UI.gameObject || !iconSprite) return null;
+            MapIcon icon = ObjectPool.Get(iconPrefab.gameObject, SelectParent(UI, data.iconType)).GetComponent<MapIcon>();
+            icon.Init(data, iconSprite, size);
             return icon;
         }
 
-        public MapIcon CreateDefaultMark(Vector3 worldPosition, bool keepOnMap, bool removeAble, string textToDisplay = null)
+        public MapIconData CreateDefaultMark(Vector3 worldPosition, bool keepOnMap, bool removeAble, string textToDisplay = null)
         {
             return CreateMapIcon(defaultMarkIcon, defaultMarkSize, worldPosition, keepOnMap, MapIconType.Mark, removeAble, textToDisplay);
         }
-        public MapIcon CreateDefaultMarkAtMousePos(Vector3 mousePosition)
+        public MapIconData CreateDefaultMarkAtMapPoint(Vector3 mapPoint)
         {
-            return CreateDefaultMark(MapPointToWorldPoint(mousePosition), true, true);
+            return CreateDefaultMark(MapPointToWorldPoint(mapPoint), true, true);
         }
+        #endregion
 
+        #region 移除
         public void RemoveMapIcon(MapIconHolder holder, bool force = false)
         {
             if (!holder || !holder.removeAble && !force) { Debug.Log("return1" + holder); return; }
             //Debug.Log("remove");
-            iconsWithHolder.TryGetValue(holder, out MapIcon iconFound);
+            iconsWithHolder.TryGetValue(holder, out MapIconData iconFound);
             if (!iconFound && holder.iconInstance) iconFound = holder.iconInstance;
             if (iconFound) iconFound.Recycle();
             iconsWithHolder.Remove(holder);
         }
-        public void RemoveMapIcon(MapIcon icon, bool force = false)
+        public void RemoveMapIcon(MapIconData icon, bool force = false)
         {
             if (!icon || !icon.RemoveAble && !force) return;
             if (icon.holder) RemoveMapIcon(icon.holder, force);
@@ -170,7 +210,7 @@ namespace ZetanStudio
                 icon.Recycle();
             }
         }
-        public void DestroyMapIcon(MapIcon icon)
+        public void DestroyMapIcon(MapIconData icon)
         {
             if (!icon) return;
             if (icon.holder)
@@ -182,12 +222,13 @@ namespace ZetanStudio
                 if (!icon.holder) NormalIcons.Remove(icon);
                 else iconsWithHolder.Remove(icon.holder);
             }
-            Destroy(icon);
+            icon.Destroy();
         }
+        #endregion
 
-        private void DrawMapIcons()
+        private void DrawMapIcons(IMapUI UI)
         {
-            if (!UI || !UI.gameObject) return;
+            if (UI == null || !UI.gameObject || !player) return;
             if (!MapCamera.orthographic) MapCamera.orthographic = true;
             if (MapCamera.cullingMask != mapRenderMask) MapCamera.cullingMask = mapRenderMask;
             foreach (var iconKvp in iconsWithHolder)
@@ -197,43 +238,58 @@ namespace ZetanStudio
                 if (iconKvp.Key.isActiveAndEnabled && !iconKvp.Value.ForceHided && (isViewingWorldMap && holder.drawOnWorldMap || !isViewingWorldMap && (!holder.AutoHide
                    || holder.AutoHide && holder.maxValidDistance >= distance)))
                 {
-                    holder.ShowIcon(CameraZoom);
-                    DrawMapIcon(holder.transform.position + new Vector3(holder.offset.x, use2D ? holder.offset.y : 0, use2D ? 0 : holder.offset.y), iconKvp.Value, holder.keepOnMap);
+                    var screenPos = TargetScreenPos(UI, holder.transform.position + new Vector3(holder.offset.x, use2D ? holder.offset.y : 0, use2D ? 0 : holder.offset.y));
+                    if (screenPos == null) continue;
+                    MapIcon mapIcon = iconKvp.Value.entities[UI];
+                    if (!Inside(UI, screenPos.Value))
+                    {
+                        if (!holder.keepOnMap)
+                        {
+                            mapIcon.Hide();
+                            continue;
+                        }
+                    }
+                    mapIcon.Show();
+                    iconKvp.Value.ShowRange(holder.showRange);
+                    iconKvp.Value.UpdateRange(holder.rangeSize * CameraZoom, holder.rangeColor);
+                    DrawMapIcon(UI, screenPos.Value, mapIcon, iconKvp.Value.GetRange(UI), holder.keepOnMap);
                     if (!IsViewingWorldMap && distance > holder.maxValidDistance * 0.9f && distance < holder.maxValidDistance)
-                        iconKvp.Value.ImageCanvas.alpha = (holder.maxValidDistance - distance) / (holder.maxValidDistance * 0.1f);
-                    else iconKvp.Value.ImageCanvas.alpha = 1;
+                        iconKvp.Value.UpdateAlpha((holder.maxValidDistance - distance) / (holder.maxValidDistance * 0.1f));
+                    else iconKvp.Value.UpdateAlpha(1);
                 }
                 else holder.HideIcon();
             }
             foreach (var icon in NormalIcons)
-                DrawMapIcon(icon.Position, icon, icon.KeepOnMap);
+            {
+                var screenPos = TargetScreenPos(UI, icon.Position);
+                if (screenPos != null)
+                {
+                    if (Inside(UI, screenPos.Value))
+                    {
+                        icon.entities[UI].Show();
+                        DrawMapIcon(UI, screenPos.Value, icon.entities[UI], icon.GetRange(UI), icon.KeepOnMap);
+                    }
+                    else icon.entities[UI].Hide();
+                }
+            }
         }
-        private void DrawMapIcon(Vector3 worldPosition, MapIcon icon, bool keepOnMap)
+        private void DrawMapIcon(IMapUI UI, Vector2 screenPos, MapIcon icon, MapIconRange range, bool keepOnMap)
         {
-            if (!icon || !UI || !UI.gameObject) return;
-            //把相机视野内的世界坐标归一化为一个裁剪正方体中的坐标，其边长为1，就是说所有视野内的坐标都变成了x、z、y分量都在(0,1)以内的裁剪坐标
-            Vector3 viewportPoint = MapCamera.WorldToViewportPoint(worldPosition);
-            //这一步用于修正UI因设备分辨率不一样，在进行缩放后实际Rect信息变了而产生的问题
-            Rect screenSpaceRect = Utility.GetScreenSpaceRect(UI.mapRect);
-            //获取四个顶点的位置，顶点序号
-            //  1 ┏━┓ 2
-            //  0 ┗━┛ 3
-            Vector3[] corners = new Vector3[4];
-            UI.mapRect.GetWorldCorners(corners);
-            //根据归一化的裁剪坐标，转化为相对于地图的坐标
-            Vector3 screenPos = new Vector3(viewportPoint.x * screenSpaceRect.width + corners[0].x, viewportPoint.y * screenSpaceRect.height + corners[0].y, 0);
+            if (!icon || UI == null || !UI.gameObject) return;
             Vector3 rangePos = screenPos;
             if (keepOnMap)
             {
                 //以遮罩的Rect为范围基准而不是地图的
-                screenSpaceRect = Utility.GetScreenSpaceRect(MapMaskRect);
+                Rect screenSpaceRect = Utility.GetScreenSpaceRect(UI.MapMaskRect);
                 float size = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) * 0.5f;//地图的一半尺寸
-                UI.mapWindowRect.GetWorldCorners(corners);
-                if (circle && !isViewingWorldMap)
+                Vector3[] corners = new Vector3[4];
+                UI.MapWindowRect.GetWorldCorners(corners);
+                if (circle && !isViewingWorldMap || worldCircle && isViewingWorldMap)
                 {
                     //以下不使用UI.mapMaskRect.position，是因为该position值会受轴心(UI.mapMaskRect.pivot)位置的影响而使得最后的结果出现偏移
                     Vector3 realCenter = Utility.CenterBetween(corners[0], corners[2]);
-                    Vector3 positionOffset = Vector3.ClampMagnitude(screenPos - realCenter, radius * size);
+                    float radius = (isViewingWorldMap ? worldRadius : this.radius) * size;
+                    Vector3 positionOffset = Vector3.ClampMagnitude((Vector3)screenPos - realCenter, radius);
                     screenPos = realCenter + positionOffset;
                 }
                 else
@@ -244,15 +300,51 @@ namespace ZetanStudio
                 }
             }
             icon.transform.position = screenPos;
-            if (icon.iconRange) icon.iconRange.transform.position = rangePos;
+            if (range) range.transform.position = rangePos;
         }
 
-        private void InitPlayerIcon()
+        private Vector2? TargetScreenPos(IMapUI UI, Vector3 worldPosition)
         {
-            if (!playerIconInstance) playerIconInstance = ObjectPool.Get(UI.iconPrefab.gameObject, SelectParent(MapIconType.Main)).GetComponent<MapIcon>();
+            if (UI == null || !UI.gameObject) return null;
+            //把相机视野内的世界坐标归一化为一个裁剪正方体中的坐标，其边长为1，就是说所有视野内的坐标都变成了x、z、y分量都在(0,1)以内的裁剪坐标
+            Vector3 viewportPoint = MapCamera.WorldToViewportPoint(worldPosition);
+            //这一步用于修正UI因设备分辨率不一样，在进行缩放后实际Rect信息变了而产生的问题
+            Rect screenSpaceRect = Utility.GetScreenSpaceRect(UI.MapRect);
+            //获取四个顶点的位置，顶点序号
+            //  1 ┏━┓ 2
+            //  0 ┗━┛ 3
+            Vector3[] corners = new Vector3[4];
+            UI.MapRect.GetWorldCorners(corners);
+            //根据归一化的裁剪坐标，转化为相对于地图的坐标
+            return new Vector2(viewportPoint.x * screenSpaceRect.width + corners[0].x, viewportPoint.y * screenSpaceRect.height + corners[0].y);
+        }
+        private bool Inside(IMapUI UI, Vector2 screenPos)
+        {
+            Rect screenSpaceRect = Utility.GetScreenSpaceRect(UI.MapMaskRect);
+            float size = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) * 0.5f;//地图的一半尺寸
+            Vector3[] corners = new Vector3[4];
+            UI.MapWindowRect.GetWorldCorners(corners);
+            if (circle && !isViewingWorldMap || worldCircle && isViewingWorldMap)
+            {
+                //以下不使用UI.mapMaskRect.position，是因为该position值会受轴心(UI.mapMaskRect.pivot)位置的影响而使得最后的结果出现偏移
+                Vector3 realCenter = Utility.CenterBetween(corners[0], corners[2]);
+                float radius = (isViewingWorldMap ? worldRadius : this.radius) * size;
+                return Vector3.Magnitude((Vector3)screenPos - realCenter) <= radius;
+            }
+            else
+            {
+                float edgeSize = (isViewingWorldMap ? worldEdgeSize : this.edgeSize) * size;
+                return screenPos.x >= corners[0].x + edgeSize && screenPos.x <= corners[2].x - edgeSize
+                    && screenPos.y >= corners[0].y + edgeSize && screenPos.y <= corners[1].y - edgeSize;
+            }
+        }
+        private void InitPlayerIcon(IMapUI UI)
+        {
+            if (UI == null || !UI.gameObject) return;
+            playerIconInstances.TryGetValue(UI, out var playerIconInstance);
+            if (!playerIconInstance) playerIconInstances[UI] = playerIconInstance = ObjectPool.Get(iconPrefab.gameObject, SelectParent(UI, MapIconType.Main)).GetComponent<MapIcon>();
             playerIconInstance.iconImage.overrideSprite = playerIcon;
             playerIconInstance.rectTransform.sizeDelta = playerIconSize;
-            playerIconInstance.iconType = MapIconType.Main;
             playerIconInstance.iconImage.raycastTarget = false;
         }
         #endregion
@@ -260,46 +352,68 @@ namespace ZetanStudio
         #region 地图切换相关
         public void SwitchMapMode()
         {
-            if (!UI || !UI.gameObject) return;
-            isViewingWorldMap = !isViewingWorldMap;
-            isMovingCamera = false;
-            if (!isViewingWorldMap)//从大向小切换
+            if (worldUI)
             {
-                if (animationSpeed > 0)
+                if (!isViewingWorldMap)
                 {
-                    UI.mapWindowRect.anchorMin = miniModeInfo.windowAnchoreMin;
-                    UI.mapWindowRect.anchorMax = miniModeInfo.windowAnchoreMax;
-                    UI.mapRect.anchorMin = miniModeInfo.mapAnchoreMin;
-                    UI.mapRect.anchorMax = miniModeInfo.mapAnchoreMax;
+                    MapCamera.targetTexture = worldUI.MapImage.texture as RenderTexture;
+                    worldUI.Open();
+                    ApplyCamera(worldModeInfo);
+                    worldUI.onClose += () =>
+                    {
+                        MapCamera.targetTexture = miniUI.MapImage.texture as RenderTexture;
+                        isViewingWorldMap = false;
+                        ApplyCamera(miniModeInfo);
+                    };
                 }
-                else ToMiniMap();
+                else worldUI.Close();
+                isViewingWorldMap = !isViewingWorldMap;
             }
             else
             {
+                var UI = miniUI;
+                if (UI == null || !UI.gameObject) return;
+                isViewingWorldMap = !isViewingWorldMap;
+                isMovingCamera = false;
+                if (!isViewingWorldMap)//从大向小切换
+                {
+                    if (animationSpeed > 0)
+                    {
+                        UI.MapWindowRect.anchorMin = miniModeInfo.windowAnchoreMin;
+                        UI.MapWindowRect.anchorMax = miniModeInfo.windowAnchoreMax;
+                        UI.MapRect.anchorMin = miniModeInfo.mapAnchoreMin;
+                        UI.MapRect.anchorMax = miniModeInfo.mapAnchoreMax;
+                    }
+                    else ToMiniMap();
+                }
+                else
+                {
+                    if (animationSpeed > 0)
+                    {
+                        UI.MapWindowRect.anchorMin = worldModeInfo.windowAnchoreMin;
+                        UI.MapWindowRect.anchorMax = worldModeInfo.windowAnchoreMax;
+                        UI.MapRect.anchorMin = worldModeInfo.mapAnchoreMin;
+                        UI.MapRect.anchorMax = worldModeInfo.mapAnchoreMax;
+                    }
+                    else ToWorldMap();
+                }
                 if (animationSpeed > 0)
                 {
-                    UI.mapWindowRect.anchorMin = worldModeInfo.windowAnchoreMin;
-                    UI.mapWindowRect.anchorMax = worldModeInfo.windowAnchoreMax;
-                    UI.mapRect.anchorMin = worldModeInfo.mapAnchoreMin;
-                    UI.mapRect.anchorMax = worldModeInfo.mapAnchoreMax;
+                    isSwitching = true;
+                    switchTime = 0;
+                    startSizeOfCamForMap = MapCamera.orthographicSize;
+                    startPosOfCamForMap = MapCamera.transform.position;
+                    startPositionOfMap = UI.MapWindowRect.anchoredPosition;
+                    startSizeOfMapWindow = UI.MapWindowRect.rect.size;
+                    startSizeOfMap = UI.MapRect.rect.size;
                 }
-                else ToWorldMap();
-            }
-            if (animationSpeed > 0)
-            {
-                isSwitching = true;
-                switchTime = 0;
-                startSizeOfCamForMap = MapCamera.orthographicSize;
-                startPosOfCamForMap = MapCamera.transform.position;
-                startPositionOfMap = UI.mapWindowRect.anchoredPosition;
-                startSizeOfMapWindow = UI.mapWindowRect.rect.size;
-                startSizeOfMap = UI.mapRect.rect.size;
             }
         }
 
         private void AnimateSwitching()
         {
-            if (!UI || !UI.gameObject || !AnimateAble) return;
+            var UI = miniUI;
+            if (UI == null || !UI.gameObject || !AnimateAble) return;
             switchTime += Time.deltaTime * animationSpeed;
             if (isViewingWorldMap)//从小向大切换
             {
@@ -322,16 +436,18 @@ namespace ZetanStudio
         }
         private void AnimateTo(MapModeInfo modeInfo)
         {
-            if (!UI || !UI.gameObject) return;
+            var UI = miniUI;
+            if (UI == null || !UI.gameObject) return;
             MapCamera.orthographicSize = Mathf.Lerp(startSizeOfCamForMap, modeInfo.currentSizeOfCam, switchTime);
-            UI.mapWindowRect.anchoredPosition = Vector3.Lerp(startPositionOfMap, modeInfo.anchoredPosition, switchTime);
-            UI.mapRect.sizeDelta = Vector2.Lerp(startSizeOfMap, modeInfo.sizeOfMap, switchTime);
-            UI.mapWindowRect.sizeDelta = Vector2.Lerp(startSizeOfMapWindow, modeInfo.sizeOfWindow, switchTime);
+            UI.MapWindowRect.anchoredPosition = Vector3.Lerp(startPositionOfMap, modeInfo.anchoredPosition, switchTime);
+            UI.MapRect.sizeDelta = Vector2.Lerp(startSizeOfMap, modeInfo.sizeOfMap, switchTime);
+            UI.MapWindowRect.sizeDelta = Vector2.Lerp(startSizeOfMapWindow, modeInfo.sizeOfWindow, switchTime);
         }
         private bool IsAnimaComplete(bool toWorldMode)
         {
-            if (toWorldMode) return UI.mapRect.sizeDelta.x >= worldModeInfo.sizeOfMap.x && UI.mapRect.sizeDelta.y >= worldModeInfo.sizeOfMap.y;
-            else return UI.mapRect.sizeDelta.x <= miniModeInfo.sizeOfMap.x && UI.mapRect.sizeDelta.y <= miniModeInfo.sizeOfMap.y;
+            var UI = miniUI;
+            if (toWorldMode) return UI.MapRect.sizeDelta.x >= worldModeInfo.sizeOfMap.x && UI.MapRect.sizeDelta.y >= worldModeInfo.sizeOfMap.y;
+            else return UI.MapRect.sizeDelta.x <= miniModeInfo.sizeOfMap.x && UI.MapRect.sizeDelta.y <= miniModeInfo.sizeOfMap.y;
         }
 
         public void ToMiniMap()
@@ -354,22 +470,29 @@ namespace ZetanStudio
         }
         private void SetInfoFrom(MapModeInfo modeInfo)
         {
-            if (!UI || !UI.gameObject) return;
+            var UI = miniUI;
+            if (UI == null || !UI.gameObject) return;
+            ApplyCamera(modeInfo);
+            UI.MapWindowRect.anchorMin = modeInfo.windowAnchoreMin;
+            UI.MapWindowRect.anchorMax = modeInfo.windowAnchoreMax;
+            UI.MapRect.anchorMin = modeInfo.mapAnchoreMin;
+            UI.MapRect.anchorMax = modeInfo.mapAnchoreMax;
+            UI.MapWindowRect.anchoredPosition = modeInfo.anchoredPosition;
+            UI.MapRect.sizeDelta = modeInfo.sizeOfMap;
+            UI.MapWindowRect.sizeDelta = modeInfo.sizeOfWindow;
+        }
+
+        private void ApplyCamera(MapModeInfo modeInfo)
+        {
             MapCamera.orthographicSize = modeInfo.currentSizeOfCam;
             zoomLimit.x = modeInfo.minZoomOfCam;
             zoomLimit.y = modeInfo.maxZoomOfCam;
-            UI.mapWindowRect.anchorMin = modeInfo.windowAnchoreMin;
-            UI.mapWindowRect.anchorMax = modeInfo.windowAnchoreMax;
-            UI.mapRect.anchorMin = modeInfo.mapAnchoreMin;
-            UI.mapRect.anchorMax = modeInfo.mapAnchoreMax;
-            UI.mapWindowRect.anchoredPosition = modeInfo.anchoredPosition;
-            UI.mapRect.sizeDelta = modeInfo.sizeOfMap;
-            UI.mapWindowRect.sizeDelta = modeInfo.sizeOfWindow;
         }
 
         public void SetCurrentAsMiniMap()
         {
-            if (!UI || !UI.gameObject || isViewingWorldMap) return;
+            var UI = miniUI;
+            if (UI == null || !UI.gameObject || isViewingWorldMap) return;
             if (MapCamera)
             {
                 miniModeInfo.defaultSizeOfCam = MapCamera.orthographicSize;
@@ -387,7 +510,8 @@ namespace ZetanStudio
         }
         public void SetCurrentAsWorldMap()
         {
-            if (!UI || !UI.gameObject || !isViewingWorldMap) return;
+            var UI = miniUI;
+            if (UI == null || !UI.gameObject || !isViewingWorldMap) return;
             if (MapCamera)
             {
                 worldModeInfo.defaultSizeOfCam = MapCamera.orthographicSize;
@@ -405,14 +529,15 @@ namespace ZetanStudio
         }
         private void CopyInfoTo(MapModeInfo modeInfo)
         {
-            if (!UI || !UI.gameObject) return;
-            modeInfo.windowAnchoreMin = UI.mapWindowRect.anchorMin;
-            modeInfo.windowAnchoreMax = UI.mapWindowRect.anchorMax;
-            modeInfo.mapAnchoreMin = UI.mapRect.anchorMin;
-            modeInfo.mapAnchoreMax = UI.mapRect.anchorMax;
-            modeInfo.anchoredPosition = UI.mapWindowRect.anchoredPosition;
-            modeInfo.sizeOfWindow = UI.mapWindowRect.sizeDelta;
-            modeInfo.sizeOfMap = UI.mapRect.sizeDelta;
+            var UI = miniUI;
+            if (UI == null || !UI.gameObject) return;
+            modeInfo.windowAnchoreMin = UI.MapWindowRect.anchorMin;
+            modeInfo.windowAnchoreMax = UI.MapWindowRect.anchorMax;
+            modeInfo.mapAnchoreMin = UI.MapRect.anchorMin;
+            modeInfo.mapAnchoreMax = UI.MapRect.anchorMax;
+            modeInfo.anchoredPosition = UI.MapWindowRect.anchoredPosition;
+            modeInfo.sizeOfWindow = UI.MapWindowRect.sizeDelta;
+            modeInfo.sizeOfMap = UI.MapRect.sizeDelta;
         }
         #endregion
 
@@ -429,10 +554,10 @@ namespace ZetanStudio
             mapCamera.Camera.targetTexture = targetTexture;
             //DontDestroyOnLoad(mapCamera);
         }
-        private void FollowPlayer()
+        private void FollowPlayer(IMapUI UI, MapIcon playerIconInstance)
         {
             if (!player || !playerIconInstance) return;
-            DrawMapIcon(isViewingWorldMap ? player.position : MapCamera.transform.position, playerIconInstance, true);
+            DrawMapIcon(UI, TargetScreenPos(UI, isViewingWorldMap ? player.position : MapCamera.transform.position).Value, playerIconInstance, null, true);
             playerIconInstance.transform.SetSiblingIndex(playerIconInstance.transform.childCount - 1);
             if (!rotateMap)
             {
@@ -485,12 +610,8 @@ namespace ZetanStudio
             cameraMovingTime = 0;
         }
 
-        public Vector3 MapPointToWorldPoint(Vector3 mousePosition)
+        public Vector3 MapPointToWorldPoint(Vector3 mapViewportPoint)
         {
-            Rect screenSpaceRect = Utility.GetScreenSpaceRect(UI.mapRect);
-            Vector3[] corners = new Vector3[4];
-            UI.mapRect.GetWorldCorners(corners);
-            Vector2 mapViewportPoint = new Vector2((mousePosition.x - corners[0].x) / screenSpaceRect.width, (mousePosition.y - corners[0].y) / screenSpaceRect.height);
             Vector3 worldPosition = MapCamera.ViewportToWorldPoint(mapViewportPoint);
             return use2D ? new Vector3(worldPosition.x, worldPosition.y) : worldPosition;
         }
@@ -503,16 +624,15 @@ namespace ZetanStudio
             cameraMovingTime = 0;
             float mag = new Vector2(Screen.width, Screen.height).magnitude;
             direction = new Vector2(direction.x * 1000 / mag, direction.y * 1000 / mag) * (MapCamera.orthographicSize / worldModeInfo.currentSizeOfCam);
-            MapCamera.transform.Translate(new Vector3(direction.x, use2D ? direction.y : 0, use2D ? 0 : direction.y) * dragSensitivity / CameraZoom);
+            MapCamera.transform.Translate(new Vector3(direction.x, use2D ? direction.y : 0, use2D ? 0 : direction.y) * dragSensitivity / CameraZoom, Space.World);
         }
 
         public void Zoom(float value)
         {
-            Debug.Log(value);
-            //if (isSwitching || value == 0) return;
-            //MapCamera.orthographicSize = Mathf.Clamp(MapCamera.orthographicSize - value, zoomLimit.x, zoomLimit.y);
-            //if (IsViewingWorldMap) worldModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
-            //else miniModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
+            if (isSwitching || value == 0) return;
+            MapCamera.orthographicSize = Mathf.Clamp(MapCamera.orthographicSize - value, zoomLimit.x, zoomLimit.y);
+            if (IsViewingWorldMap) worldModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
+            else miniModeInfo.currentSizeOfCam = MapCamera.orthographicSize;
         }
 
         public float CameraZoom => IsViewingWorldMap ? worldModeInfo.defaultSizeOfCam / MapCamera.orthographicSize : miniModeInfo.defaultSizeOfCam / MapCamera.orthographicSize;
@@ -527,7 +647,11 @@ namespace ZetanStudio
         private void Update()
         {
             if (!isInit) return;
-            if (updateMode == UpdateMode.Update) DrawMapIcons();
+            if (updateMode == UpdateMode.Update)
+            {
+                DrawMapIcons(miniUI);
+                DrawMapIcons(worldUI);
+            }
             if (isSwitching) AnimateSwitching();
             if (isMovingCamera)
             {
@@ -544,26 +668,34 @@ namespace ZetanStudio
         private void LateUpdate()
         {
             if (!isInit) return;
-            if (updateMode == UpdateMode.LateUpdate) DrawMapIcons();
+            if (updateMode == UpdateMode.LateUpdate)
+            {
+                DrawMapIcons(miniUI);
+                DrawMapIcons(worldUI);
+            }
         }
         private void FixedUpdate()
         {
             if (!isInit) return;
-            if (updateMode == UpdateMode.FixedUpdate) DrawMapIcons();
-            FollowPlayer();//放在FixedUpdate()可以有效防止主图标抖动
+            if (updateMode == UpdateMode.FixedUpdate)
+            {
+                DrawMapIcons(miniUI);
+                DrawMapIcons(worldUI);
+            }
+            playerIconInstances.ForEach(x => FollowPlayer(x.Key, x.Value)); //放在FixedUpdate()可以有效防止主图标抖动
         }
 
         private void OnDrawGizmos()
         {
-            if (!UI || !UI.gameObject || !MapMaskRect) return;
-            Rect screenSpaceRect = Utility.GetScreenSpaceRect(MapMaskRect);
+            var UI = miniUI;
+            if (UI == null || !UI.gameObject || !UI.MapMaskRect) return;
+            Rect screenSpaceRect = Utility.GetScreenSpaceRect(UI.MapMaskRect);
             Vector3[] corners = new Vector3[4];
-            MapMaskRect.GetWorldCorners(corners);
+            UI.MapMaskRect.GetWorldCorners(corners);
             if (circle && !isViewingWorldMap)
             {
                 float radius = (screenSpaceRect.width < screenSpaceRect.height ? screenSpaceRect.width : screenSpaceRect.height) * 0.5f * this.radius;
-                //ZetanUtility.DrawGizmosCircle(ZetanUtility.CenterBetween(corners[0], corners[2]), radius, radius / 1000, Color.white, false);
-                Utility.DrawGizmosCircle(Utility.CenterBetween(corners[0], corners[2]), radius);
+                Utility.Editor.DrawGizmosCircle(Utility.CenterBetween(corners[0], corners[2]), radius);
             }
             else
             {
@@ -578,7 +710,8 @@ namespace ZetanStudio
         #region 其它
         public void Init()
         {
-            InitPlayerIcon();
+            InitPlayerIcon(miniUI);
+            InitPlayerIcon(worldUI);
             //foreach (var icon in iconsWithHolder)
             //    icon.Value.Recycle();
             //iconsWithHolder.Clear();
@@ -592,13 +725,20 @@ namespace ZetanStudio
             };
             MapCamera.targetTexture = targetTexture;
             if (!MapCamera.CompareTag("MapCamera")) MapCamera.tag = "MapCamera";
-            UI.mapImage.texture = targetTexture;
+            miniUI.MapImage.texture = targetTexture;
+            if (worldUI)
+            {
+                var worldTexture = new RenderTexture(Mathf.Abs((int)worldUI.MapRect.rect.x), Mathf.Abs((int)worldUI.MapRect.rect.y), 24, textureFormat)
+                {
+                    name = "MapWorldTexture"
+                };
+                worldUI.MapImage.texture = worldTexture;
+            }
             miniModeInfo.currentSizeOfCam = miniModeInfo.defaultSizeOfCam;
             worldModeInfo.currentSizeOfCam = worldModeInfo.defaultSizeOfCam;
             ToMiniMap();
             isInit = true;
         }
-
         private void ClearMarks()
         {
             var marks = NormalIcons.FindAll(x => x.iconType == MapIconType.Mark);
@@ -606,20 +746,34 @@ namespace ZetanStudio
                 RemoveMapIcon(iconWoH, true);
         }
 
-        private RectTransform SelectParent(MapIconType iconType)
+        public void DrawIconGizmos(MapIconHolder holder)
+        {
+            DrawIconGizmos(miniUI, holder);
+            DrawIconGizmos(worldUI, holder);
+        }
+        private void DrawIconGizmos(IMapUI UI, MapIconHolder holder)
+        {
+            if (UI == null || !UI.gameObject || !UI.MapMaskRect) return;
+            var rect = Utility.GetScreenSpaceRect(UI.MapMaskRect);
+            Gizmos.DrawCube(UI.MapMaskRect.position, holder.iconSize * rect.width / UI.MapMaskRect.rect.width);
+            if (holder.showRange)
+                Utility.Editor.DrawGizmosCircle(UI.MapMaskRect.position, holder.rangeSize * rect.width / UI.MapMaskRect.rect.width, Vector3.forward, holder.rangeColor);
+        }
+
+        private RectTransform SelectParent(IMapUI UI, MapIconType iconType)
         {
             switch (iconType)
             {
                 case MapIconType.Normal:
-                    return UI.iconsParent;
+                    return UI.IconsParent;
                 case MapIconType.Main:
-                    return UI.mainParent;
+                    return UI.MainParent;
                 case MapIconType.Mark:
-                    return UI.marksParent;
+                    return UI.MarksParent;
                 case MapIconType.Quest:
-                    return UI.questsParent;
+                    return UI.QuestsParent;
                 case MapIconType.Objective:
-                    return UI.objectivesParent;
+                    return UI.ObjectivesParent;
                 default:
                     return null;
             }

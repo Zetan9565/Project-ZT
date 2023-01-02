@@ -35,14 +35,14 @@ namespace ZetanStudio.ItemSystem.Module
             }
         }
 
-        public override GenericData GetSaveData()
+        public override GenericData GenerateSaveData()
         {
             var data = new GenericData();
             var ad = new GenericData();
             data["properties"] = ad;
             foreach (var prop in properties)
             {
-                var pd = (properties as IRoleValue).GetSaveData();
+                var pd = (properties as IRoleValue).GenerateSaveData();
                 ad[prop.ID] = pd;
             }
             return data;
@@ -148,9 +148,9 @@ namespace ZetanStudio.ItemSystem
             }
         }
 
-        public static implicit operator bool(ItemAttribute self)
+        public static implicit operator bool(ItemAttribute obj)
         {
-            return self != null;
+            return obj != null;
         }
         public override string ToString()
         {

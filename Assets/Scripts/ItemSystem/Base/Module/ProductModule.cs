@@ -16,8 +16,8 @@ namespace ZetanStudio.ItemSystem.Module
 
         public void ModifyItemWindow(ItemInfoDisplayer displayer)
         {
-            if (Product.Any(x => !x.Definite)) displayer.AddTitle(LM.Tr(typeof(ItemModule).Name, "可能获得:"));
-            else displayer.AddTitle(LM.Tr(typeof(ItemModule).Name, "可获得:"));
+            if (Product.Any(x => !x.Definite)) displayer.AddTitle(L.Tr(typeof(ItemModule).Name, "可能获得:"));
+            else displayer.AddTitle(L.Tr(typeof(ItemModule).Name, "可获得:"));
             displayer.AddContent(DropItemInfo.GetDropInfoString(Product));
         }
 

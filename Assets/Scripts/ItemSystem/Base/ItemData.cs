@@ -109,12 +109,12 @@ namespace ZetanStudio.ItemSystem
                 }
             }
         }
-        public static implicit operator bool(ItemData self)
+        public static implicit operator bool(ItemData obj)
         {
-            return self != null;
+            return obj != null;
         }
 
-        public GenericData GetSaveData()
+        public GenericData GenerateSaveData()
         {
             var data = new GenericData();
             data["ID"] = ID;
@@ -123,7 +123,7 @@ namespace ZetanStudio.ItemSystem
             data["modules"] = modules;
             foreach (var module in moduleData)
             {
-                var md = module.GetSaveData();
+                var md = module.GenerateSaveData();
                 if (md != null) modules[module.GetType().FullName] = md;
             }
             return data;

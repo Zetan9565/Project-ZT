@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73402b0326e54ac4e8faf201b5be2958, type: 3}
+  m_Name: New Language Set
+  m_EditorClassIdentifier: 
+  _name: "\u5BF9\u8BDD\u7F16\u8F91\u5668-English"
+  maps:
+  - <Key>k__BackingField: "\u7F16\u8F91\u5668UXML"
+    values:
+    - Editor UXML
+  - <Key>k__BackingField: "\u7F16\u8F91\u5668USS"
+    values:
+    - Editor USS
+  - <Key>k__BackingField: "\u7F16\u8F91\u5668\u6700\u5C0F\u5C3A\u5BF8"
+    values:
+    - Editor Minimum Window Size
+  - <Key>k__BackingField: "\u7F16\u8F91\u5668\u8BED\u8A00\u5305"
+    values:
+    - Editor Language
+  - <Key>k__BackingField: "\u542F\u7528\u5BF9\u8BDD\u8096\u50CF"
+    values:
+    - Enable Portrait

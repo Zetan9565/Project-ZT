@@ -188,6 +188,7 @@ namespace ZetanStudio
         {
             if (axisName == "Horizontal") return movement.x;
             else if (axisName == "Vertical") return movement.y;
+            else if (axisName == "Mouse ScrollWheel") return control.Player.MouseWheel.ReadValue<float>();
             else return 0;
         }
     }

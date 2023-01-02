@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+锘縰sing System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -50,8 +50,8 @@ namespace ZetanStudio.ItemSystem.UI
             enhance.onClick.AddListener(Enhance);
             matList.SetItemModifier(x => x.handler = BackpackManager.Instance);
             setSelector.onValueChanged.AddListener(SetMaterials);
-            icon.SetCallbacks(s => new ButtonWithTextData[] { new ButtonWithTextData(Tr("取出"), ResetItem) }, s => ResetItem(), OnIconDragPut);
-            costIcon.SetCallbacks(s => new ButtonWithTextData[] { new ButtonWithTextData(Tr("取出"), () => SetConsumable(null)) }, s => SetConsumable(null), OnCostIconDragPut);
+            icon.SetCallbacks(s => new ButtonWithTextData[] { new ButtonWithTextData(Tr("鍙栧嚭"), ResetItem) }, s => ResetItem(), OnIconDragPut);
+            costIcon.SetCallbacks(s => new ButtonWithTextData[] { new ButtonWithTextData(Tr("鍙栧嚭"), () => SetConsumable(null)) }, s => SetConsumable(null), OnCostIconDragPut);
         }
         private void OnCostIconDragPut(GameObject go, ItemSlotEx slot)
         {
@@ -73,7 +73,7 @@ namespace ZetanStudio.ItemSystem.UI
                 case EnhanceMethod.SingleItem:
                     if (BackpackManager.Instance.GetAmount(cost) < consumable.Amount)
                     {
-                        MessageManager.Instance.New(Tr("材料不足"));
+                        MessageManager.Instance.New(Tr("鏉愭枡涓嶈冻"));
                         return;
                     }
                     success = Utility.Probability(consumable.SuccessRate);
@@ -82,7 +82,7 @@ namespace ZetanStudio.ItemSystem.UI
                 case EnhanceMethod.Materials:
                     if (!BackpackManager.Instance.IsMaterialsEnough(matList.Datas))
                     {
-                        MessageManager.Instance.New(Tr("材料不足"));
+                        MessageManager.Instance.New(Tr("鏉愭枡涓嶈冻"));
                         return;
                     }
                     success = Utility.Probability(materialSet.SuccessRate);
@@ -99,9 +99,9 @@ namespace ZetanStudio.ItemSystem.UI
                 EnhanceAttributes();
                 EnhanceAffix();
                 data.level++;
-                MessageManager.Instance.New(Tr("强化成功"));
+                MessageManager.Instance.New(Tr("寮哄寲鎴愬姛"));
             }
-            else MessageManager.Instance.New(Tr("强化失败"));
+            else MessageManager.Instance.New(Tr("寮哄寲澶辫触"));
             BackpackManager.Instance.Lose(loseItems);
             Refresh();
         }
@@ -211,7 +211,7 @@ namespace ZetanStudio.ItemSystem.UI
             setSelector.ClearOptions();
             for (int i = 0; i < materials.Materials.Count; i++)
             {
-                setSelector.options.Add(new Dropdown.OptionData("材料一"));
+                setSelector.options.Add(new Dropdown.OptionData("鏉愭枡涓�"));
             }
             setSelector.RefreshShownValue();
             SetMaterials(setSelector.value);
@@ -254,6 +254,7 @@ namespace ZetanStudio.ItemSystem.UI
         protected override bool OnOpen(params object[] args)
         {
             backpack = WindowsManager.UnhideOrOpenWindow<BackpackWindow>();
+            backpack.onClose += () => Close();
             slotContainer = backpack.Grid as ISlotContainer;
             if (args.Length > 0 && args[0] is ItemData item) SetItem(item);
             else ResetItem();

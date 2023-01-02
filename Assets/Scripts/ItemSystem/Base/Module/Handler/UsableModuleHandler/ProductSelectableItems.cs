@@ -1,13 +1,13 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 namespace ZetanStudio.ItemSystem.Module
 {
-    [CreateAssetMenu(fileName = "product selectable items", menuName = "Zetan Studio/µÀ¾ß/ÓÃÍ¾/Ñ¡ÔñĞÔ²ú³ö")]
+    [CreateAssetMenu(fileName = "product selectable items", menuName = "Zetan Studio/é“å…·/ç”¨é€”/é€‰æ‹©æ€§äº§å‡º")]
     public class ProductSelectableItems : ItemUsage
     {
         public ProductSelectableItems()
         {
-            _name = "Ñ¡ÔñĞÔ²ú³öµÀ¾ß";
+            _name = "é€‰æ‹©æ€§äº§å‡ºé“å…·";
         }
 
         protected override bool Use(ItemData item)

@@ -57,9 +57,9 @@ public class CharacterData
         currentScene = Utility.GetActiveScene().name;
     }
 
-    public static implicit operator bool(CharacterData self)
+    public static implicit operator bool(CharacterData obj)
     {
-        return self != null;
+        return obj != null;
     }
 }
 

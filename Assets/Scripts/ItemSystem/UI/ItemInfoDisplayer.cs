@@ -340,7 +340,7 @@ public class ItemInfoDisplayer : MonoBehaviour
 
     private string Tr(string text)
     {
-        return LM.Tr(GetType().Name, text);
+        return L.Tr(GetType().Name, text);
     }
 
 #if DEBUG

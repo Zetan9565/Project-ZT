@@ -100,9 +100,9 @@ public class ItemInfo : IItemInfo
         return sb.ToString();
     }
 
-    public static implicit operator bool(ItemInfo self)
+    public static implicit operator bool(ItemInfo obj)
     {
-        return self != null;
+        return obj != null;
     }
 }
 
@@ -219,9 +219,9 @@ public class DropItemInfo
         return sb.ToString();
     }
 
-    public static implicit operator bool(DropItemInfo self)
+    public static implicit operator bool(DropItemInfo obj)
     {
-        return self != null;
+        return obj != null;
     }
 }
 namespace ZetanStudio.ItemSystem
@@ -330,9 +330,9 @@ public class MaterialInfo : IItemInfo
         return true;
     }
 
-    public static implicit operator bool(MaterialInfo self)
+    public static implicit operator bool(MaterialInfo obj)
     {
-        return self != null;
+        return obj != null;
     }
 }
 #endregion
@@ -355,9 +355,9 @@ public class AffectiveItemInfo
     private int intimacyValue;
     public int IntimacyValue => intimacyValue;
 
-    public static implicit operator bool(AffectiveItemInfo self)
+    public static implicit operator bool(AffectiveItemInfo obj)
     {
-        return self != null;
+        return obj != null;
     }
 }
 

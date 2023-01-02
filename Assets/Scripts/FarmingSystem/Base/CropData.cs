@@ -133,9 +133,9 @@ namespace ZetanStudio.FarmingSystem
 
         }
 
-        public static implicit operator bool(CropData self)
+        public static implicit operator bool(CropData obj)
         {
-            return self != null;
+            return obj != null;
         }
     }
 }

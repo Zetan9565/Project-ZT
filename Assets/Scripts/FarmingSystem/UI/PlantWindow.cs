@@ -120,7 +120,7 @@ namespace ZetanStudio.FarmingSystem.UI
                 if (preview.SpriteRenderer) preview.SpriteRenderer.color = Color.white;
             }
 #if UNITY_STANDALONE
-        if (ZetanUtility.IsMouseInsideScreen)
+        if (Utility.IsMouseInsideScreen())
         {
             if (InputManager.GetMouseButtonDown(0))
             {

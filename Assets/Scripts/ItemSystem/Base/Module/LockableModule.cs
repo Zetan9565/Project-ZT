@@ -18,7 +18,7 @@
         public LockableData(ItemData item, LockableModule module) : base(item, module)
         {
         }
-        public override GenericData GetSaveData()
+        public override GenericData GenerateSaveData()
         {
             var data = new GenericData();
             data["locked"] = isLocked;

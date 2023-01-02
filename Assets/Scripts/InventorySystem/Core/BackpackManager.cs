@@ -112,7 +112,7 @@ namespace ZetanStudio.InventorySystem
         [SaveMethod]
         public static void SaveData(SaveData saveData)
         {
-            saveData["backpackData"] = Instance.Inventory.GetSaveData();
+            saveData["backpackData"] = Instance.Inventory.GenerateSaveData();
         }
         [LoadMethod]
         public static void LoadData(SaveData saveData)

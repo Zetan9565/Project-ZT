@@ -15,7 +15,7 @@ namespace ZetanStudio.ItemSystem.Editor
         private SerializedProperty affixCountDistrib;
         private SerializedProperty affixIndexDistrib;
         private SerializedProperty affixes;
-        private LanguageMap language;
+        private LanguageSet language;
 
         private void OnEnable()
         {

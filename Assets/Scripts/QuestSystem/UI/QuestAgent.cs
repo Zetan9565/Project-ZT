@@ -37,8 +37,8 @@ namespace ZetanStudio.QuestSystem.UI
                 {
                     Utility.SetActive(questContent, true);
                     var quest = Data.quests[0];
-                    questText.text = quest.IsSubmitted ? quest.Title : (quest.IsComplete ? $"{LM.Tr(GetType().Name, "[已完成]")}{quest.Title}" :
-                        (quest.InProgress ? quest.Title : $"{LM.Tr(GetType().Name, "[未接取]")}{quest.Title}"));
+                    questText.text = quest.IsSubmitted ? quest.Title : (quest.IsComplete ? $"{L.Tr(GetType().Name, "[已完成]")}{quest.Title}" :
+                        (quest.InProgress ? quest.Title : $"{L.Tr(GetType().Name, "[未接取]")}{quest.Title}"));
                 }
                 questList.Clear();
             }

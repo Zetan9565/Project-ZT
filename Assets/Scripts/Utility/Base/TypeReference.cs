@@ -36,9 +36,9 @@ namespace ZetanStudio
             value = Utility.GetTypeWithoutAssembly(typeName);
         }
 
-        public static implicit operator Type(TypeReference self)
+        public static implicit operator Type(TypeReference obj)
         {
-            return self.value;
+            return obj.value;
         }
     }
 }

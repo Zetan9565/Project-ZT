@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
   m_Name: dialogue 9
   m_EditorClassIdentifier: 
-  contents:
+  nodes:
   - rid: 9026091320329896227
   - rid: 9026091320329896228
   - rid: 9026091320329896229
@@ -31,13 +31,13 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 9026091320329896227
-      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: EntryNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: DLG980c1e8c9b90474dab2b237dc41fe1d8
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091320329896228
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -70,13 +70,13 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
     - rid: 9026091320329896228
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-5a35d7beebc74a08a2a85c06b6424a48
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091320329896229
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -109,13 +109,13 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
     - rid: 9026091320329896229
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-28d879ab07fe4b2a88a55bfd15a32a0e
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1

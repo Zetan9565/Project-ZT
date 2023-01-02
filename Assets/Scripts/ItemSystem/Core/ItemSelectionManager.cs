@@ -331,9 +331,9 @@
 //    //        windowCanvas.sortingLayerID = SortingLayer.NameToID("UI");
 //    //    }
 
-//    //    public static implicit operator bool(ItemSelectionUI self)
+//    //    public static implicit operator bool(ItemSelectionUI obj)
 //    //    {
-//    //        return self != null;
+//    //        return obj != null;
 //    //    }
 //    //}
 //}
@@ -350,8 +350,8 @@ public class ItemSelectionData
         this.amount = amount;
     }
 
-    public static implicit operator bool(ItemSelectionData self)
+    public static implicit operator bool(ItemSelectionData obj)
     {
-        return self != null;
+        return obj != null;
     }
 }

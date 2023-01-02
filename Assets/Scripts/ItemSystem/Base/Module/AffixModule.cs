@@ -39,14 +39,14 @@ namespace ZetanStudio.ItemSystem.Module
             affixes = new List<ItemProperty>(module.GenerateAffixes());
         }
 
-        public override GenericData GetSaveData()
+        public override GenericData GenerateSaveData()
         {
             var data = new GenericData();
             var ad = new GenericData();
             data["affixes"] = ad;
             foreach (var prop in affixes)
             {
-                var pd = (affixes as IRoleValue).GetSaveData();
+                var pd = (affixes as IRoleValue).GenerateSaveData();
                 ad[prop.ID] = pd;
             }
             return data;

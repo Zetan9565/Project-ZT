@@ -7,7 +7,7 @@ namespace ZetanStudio.DialogueSystem
 {
     public sealed class DialogueData
     {
-        public DialogueData this[DialogueContent content] => family.TryGetValue(content.ID, out var find) ? find : null;
+        public DialogueData this[DialogueNode nodde] => family.TryGetValue(nodde.ID, out var find) ? find : null;
         public DialogueData this[string id] => family.TryGetValue(id, out var find) ? find : null;
 
         public readonly string ID;
@@ -36,27 +36,30 @@ namespace ZetanStudio.DialogueSystem
             if (eventStates.ContainsKey(eventID)) eventStates[eventID] = true;
         }
 
-        public void Refresh(EntryContent entry)
+        public void Refresh(EntryNode entry)
         {
             if (entry?.ID != ID) return;
-            Dialogue.Traverse(entry, c =>
+            Dialogue.Traverse(entry, n =>
             {
                 DialogueData data = null;
-                if (!family.ContainsKey(c.ID)) data = family[c.ID] = new DialogueData(c, family);
-                else data = family[c.ID];
-                data.exitHere = c.ExitHere;
-                data.recursive = Dialogue.Traverse(c, c => c.Options.All(x => x.Content is RecursionSuffix));
-                var keys = data.eventStates.Keys.Cast<string>();
-                var IDs = c.Events.Select(x => x.ID).ToHashSet();
-                foreach (var key in keys)
+                if (!family.ContainsKey(n.ID)) data = family[n.ID] = new DialogueData(n, family);
+                else data = family[n.ID];
+                data.exitHere = n.ExitHere;
+                data.recursive = Dialogue.Traverse(n, n => n.Options.All(x => x.Next is RecursionSuffix));
+                if (n is SentenceNode sentence)
                 {
-                    if (!IDs.Contains(key)) data.eventStates.Remove(key);
-                }
-                foreach (var evt in c.Events)
-                {
-                    if (evt != null && !string.IsNullOrEmpty(evt.ID))
-                        if (!data.eventStates.ContainsKey(evt.ID))
-                            data.eventStates[evt.ID] = false;
+                    var keys = data.eventStates.Keys.Cast<string>();
+                    var IDs = sentence.Events.Select(x => x.ID).ToHashSet();
+                    foreach (var key in keys)
+                    {
+                        if (!IDs.Contains(key)) data.eventStates.Remove(key);
+                    }
+                    foreach (var evt in sentence.Events)
+                    {
+                        if (evt != null && !string.IsNullOrEmpty(evt.ID))
+                            if (!data.eventStates.ContainsKey(evt.ID))
+                                data.eventStates[evt.ID] = false;
+                    }
                 }
             });
             var invalid = family.Keys.Where(k => !Dialogue.Traverse(entry, n => n.ID == k)).Cast<string>();
@@ -104,11 +107,11 @@ namespace ZetanStudio.DialogueSystem
             family[ID] = this;
             AdditionalData = data.ReadData("additional") ?? new GenericData();
 
-            void loadChild(DialogueData content, GenericData cd)
+            void loadChild(DialogueData node, GenericData cd)
             {
                 if (family.TryGetValue(cd.ReadString("ID"), out var find))
                 {
-                    content.children.Add(find);
+                    node.children.Add(find);
                     if (cd.TryReadData("children", out var children))
                         foreach (var c in children.ReadDataList())
                         {
@@ -117,28 +120,28 @@ namespace ZetanStudio.DialogueSystem
                 }
             }
         }
-        public DialogueData(EntryContent entry) : this(entry, new Dictionary<string, DialogueData>()) { }
+        public DialogueData(EntryNode entry) : this(entry, new Dictionary<string, DialogueData>()) { }
         private DialogueData(string ID, Dictionary<string, DialogueData> family)
         {
             this.ID = ID;
             this.family = family;
         }
 
-        private DialogueData(DialogueContent content, Dictionary<string, DialogueData> family)
+        private DialogueData(DialogueNode node, Dictionary<string, DialogueData> family)
         {
-            ID = content.ID;
-            exitHere = content.ExitHere;
-            recursive = Dialogue.Traverse(content, c => c.Options.All(x => x.Content is RecursionSuffix));
+            ID = node.ID;
+            exitHere = node.ExitHere;
+            recursive = Dialogue.Traverse(node, n => n.Options.All(x => x.Next is RecursionSuffix));
             if (!exitHere)
-                foreach (var option in content.Options)
+                foreach (var option in node.Options)
                 {
-                    if (option.Content)
-                        if (!family.TryGetValue(option.Content.ID, out var find))
-                            children.Add(family[option.Content.ID] = new DialogueData(option.Content, family));
+                    if (option.Next)
+                        if (!family.TryGetValue(option.Next.ID, out var find))
+                            children.Add(family[option.Next.ID] = new DialogueData(option.Next, family));
                         else children.Add(find);
                 }
-            if (content is not INonEvent)
-                foreach (var evt in content.Events)
+            if (node is IEventNode en)
+                foreach (var evt in en.Events)
                 {
                     if (evt != null && !string.IsNullOrEmpty(evt.ID))
                         eventStates[evt.ID] = false;
@@ -174,7 +177,7 @@ namespace ZetanStudio.DialogueSystem
 
         public static implicit operator bool(DialogueData data) => data != null;
 
-        public GenericData GetSaveData()
+        public GenericData GenerateSaveData()
         {
             var data = new GenericData();
             data["ID"] = ID;

@@ -28,7 +28,7 @@ namespace ZetanStudio.BehaviourTree.Editor
         [Folder]
         public string newAssetFolder = "Assets/Resources/Configuration/AI";
         public bool changeOnSelected;
-        public LanguageMap language;
+        public LanguageSet language;
 
         private static BehaviourTreeEditorSettings Find()
         {

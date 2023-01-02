@@ -14,7 +14,7 @@ namespace ZetanStudio.Editor
         public TextAsset scriptTemplate;
         [Folder]
         public string newScriptFolder = "Assets/Scripts";
-        public LanguageMap language;
+        public LanguageSet language;
 
         private static ScriptableObjectManagerSettings Find()
         {

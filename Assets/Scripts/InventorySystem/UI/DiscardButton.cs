@@ -20,19 +20,26 @@ namespace ZetanStudio.ItemSystem.UI
             if (eventData.button == PointerEventData.InputButton.Left)
             {
 #if UNITY_STANDALONE
-            if (DragableManager.Instance.IsDraging)
-            {
-                ItemSlot source = DragableManager.Instance.Current as ItemSlot;
-                if (source)
+                if (DragableManager.Instance.IsDraging)
                 {
-                    InventoryUtility.DiscardItem(window.Handler, source.Item);
-                    source.FinishDrag();
+                    ItemSlotEx source = DragableManager.Instance.Current as ItemSlotEx;
+                    if (source)
+                    {
+                        if (source.Item && source.Item.Discardable)
+                            AmountWindow.StartInput(discard, window.Handler.GetAmount(source.Item));
+                        source.FinishDrag();
+
+                        void discard(long count)
+                        {
+                            if (window.Handler.CanLose(source.Item, (int)count))
+                                window.Handler.Lose(source.Item, (int)count);
+                        }
+                    }
                 }
-            }
-            else
-            {
-                OpenDiscardWindow();
-            }
+                else
+                {
+                    OpenDiscardWindow();
+                }
 #elif UNITY_ANDROID
                 OpenDiscardWindow();
                 FloatTipsPanel.ShowText(transform.position, "将物品拖拽到此按钮丢弃，或者点击该按钮进行多选。", 3);
@@ -43,15 +50,15 @@ namespace ZetanStudio.ItemSystem.UI
         public void OnPointerEnter(PointerEventData eventData)
         {
 #if UNITY_STANDALONE
-        if (!DragableManager.Instance.IsDraging)
-            FloatTipsPanel.ShowText(transform.position, "将物品放置到此按钮丢弃，或者点击该按钮进行多选。", 3);
+            if (!DragableManager.Instance.IsDraging)
+                FloatTipsPanel.ShowText(transform.position, "将物品放置到此按钮丢弃，或者点击该按钮进行多选。", 3);
 #endif
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
 #if UNITY_STANDALONE
-        WindowsManager.CloseWindow<FloatTipsPanel>();
+            WindowsManager.CloseWindow<FloatTipsPanel>();
 #endif
         }
 

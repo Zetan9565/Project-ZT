@@ -60,8 +60,8 @@ public class GoodsInfo
 
     public bool IsValid => Item;
 
-    public static implicit operator bool(GoodsInfo self)
+    public static implicit operator bool(GoodsInfo obj)
     {
-        return self != null;
+        return obj != null;
     }
 }

@@ -199,14 +199,14 @@ namespace ZetanStudio.QuestSystem
             }
         }
 
-        public static implicit operator bool(QuestData self)
+        public static implicit operator bool(QuestData obj)
         {
-            return self != null;
+            return obj != null;
         }
 
         public string Tr(string text)
         {
-            return LM.Tr(GetType().Name, text);
+            return L.Tr(GetType().Name, text);
         }
     }
 }

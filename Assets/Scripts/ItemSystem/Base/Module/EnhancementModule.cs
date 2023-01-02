@@ -86,7 +86,7 @@ namespace ZetanStudio.ItemSystem.Module
         {
         }
 
-        public override GenericData GetSaveData()
+        public override GenericData GenerateSaveData()
         {
             var data = new GenericData();
             data["level"] = level;

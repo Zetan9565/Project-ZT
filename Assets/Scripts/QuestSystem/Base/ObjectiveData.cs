@@ -152,9 +152,9 @@ namespace ZetanStudio.QuestSystem
         }
         protected abstract void OnAbandon();
 
-        public static implicit operator bool(ObjectiveData self)
+        public static implicit operator bool(ObjectiveData obj)
         {
-            return self != null;
+            return obj != null;
         }
 
         public override string ToString()
@@ -339,7 +339,7 @@ namespace ZetanStudio.QuestSystem
 
     public class SubmitObjectiveData : ObjectiveData<SubmitObjective>
     {
-        public EntryContent Dialogue { get; private set; }
+        public EntryNode Dialogue { get; private set; }
 
         public SubmitObjectiveData(SubmitObjective objective) : base(objective)
         {
@@ -352,7 +352,7 @@ namespace ZetanStudio.QuestSystem
                 var talker = DialogueManager.Talkers[Model.NPCToSubmit.ID];
                 talker.objectivesSubmitToThis.Add(this);
                 OnStateChanged += talker.TryRemoveObjective;
-                Dialogue = new EntryContent(ID, Model.Talker, Model.WordsWhenSubmit);
+                Dialogue = new EntryNode(ID, Model.Talker, Model.WordsWhenSubmit);
             }
         }
         protected override void OnSubmit()

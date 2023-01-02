@@ -31,14 +31,15 @@ namespace ZetanStudio
 
         private void OnGUI()
         {
-            if (error(oldTypeName) || error(newTypeName))
-                EditorGUILayout.HelpBox("类名格式不正确，应为：\"类名, 命名空间(如果有), 程序集\")", MessageType.Error);
+            bool errors = error(oldTypeName) || error(newTypeName);
+            if (errors) EditorGUILayout.HelpBox("类名格式不正确，应为：\"类名, 命名空间(如果有), 程序集\")", MessageType.Error);
             else EditorGUILayout.HelpBox("无错误", MessageType.Info);
             searchTypeName = EditorGUILayout.TextField("检索类名", searchTypeName);
             EditorGUILayout.LabelField("把");
-            oldTypeName = EditorGUILayout.TextField(oldTypeName);
+            oldTypeName = EditorGUILayout.TextArea(oldTypeName);
             EditorGUILayout.LabelField("重命名为");
-            newTypeName = EditorGUILayout.TextField(newTypeName);
+            newTypeName = EditorGUILayout.TextArea(newTypeName);
+            EditorGUI.BeginDisabledGroup(errors);
             if (GUILayout.Button("修复"))
             {
                 var temp = oldTypeName.Replace(" ", "").Split(',');
@@ -74,6 +75,7 @@ namespace ZetanStudio
                 Debug.Log($"共替换了 {count} 个资源");
                 FinishCallback?.Invoke(count);
             }
+            EditorGUI.EndDisabledGroup();
 
             static bool error(string typeName)
             {

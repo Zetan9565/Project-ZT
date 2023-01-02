@@ -7,10 +7,10 @@ namespace ZetanStudio.DialogueSystem.Editor
 {
     public class DialogueEditorSettings : ScriptableObject
     {
-        public VisualTreeAsset treeUxml;
-        public StyleSheet treeUss;
+        public VisualTreeAsset editorUxml;
+        public StyleSheet editorUss;
         public Vector2 minWindowSize = new Vector2(1280, 600);
-        public LanguageMap language;
+        public LanguageSet language;
 
         private static DialogueEditorSettings Find()
         {

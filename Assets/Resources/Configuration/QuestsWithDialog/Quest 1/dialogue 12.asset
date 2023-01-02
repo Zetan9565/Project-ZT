@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
   m_Name: dialogue 12
   m_EditorClassIdentifier: 
-  contents:
+  nodes:
   - rid: 9026091320329896215
   - rid: 9026091320329896216
   exit:
@@ -29,13 +29,13 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 9026091320329896215
-      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: EntryNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: DLG430698807e3546fd8fafc96d5825052c
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091320329896216
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -44,13 +44,13 @@ MonoBehaviour:
         <Talker>k__BackingField: '{[NPC]NPC002}'
         <Text>k__BackingField: "\u770B\u6765\u771F\u7684\u6709\u602A\u7269\u554A\uFF0C\u90A3\u5C31\u518D\u53BB\u6740\u51E0\u53EA\uFF01"
     - rid: 9026091320329896216
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-f30b293a120d4cd8b10e4847991b8733
         events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1

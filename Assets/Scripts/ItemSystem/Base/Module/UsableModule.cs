@@ -35,7 +35,7 @@ namespace ZetanStudio.ItemSystem.Module
         public bool CanUse(ItemData item) => canUse?.Invoke(item) ?? true;
         public string CanUseWithMsg(ItemData item) => canUseWithMsg?.Invoke(item) ?? string.Empty;
 
-        public override GenericData GetSaveData() => null;
+        public override GenericData GenerateSaveData() => null;
 
         public override void LoadSaveData(GenericData data) { }
     }

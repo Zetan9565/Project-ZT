@@ -943,9 +943,9 @@
 //            gridNodes.Dispose();
 //        }
 
-//        public static implicit operator bool(AStar self)
+//        public static implicit operator bool(AStar obj)
 //        {
-//            return self != null;
+//            return obj != null;
 //        }
 //    }
 
@@ -983,19 +983,19 @@
 //            return connectionLabel > 0 && connectionLabel == other.connectionLabel;
 //        }
 
-//        public static implicit operator Vector3(AStarNode self)
+//        public static implicit operator Vector3(AStarNode obj)
 //        {
-//            return self.worldPosition;
+//            return obj.worldPosition;
 //        }
 
-//        public static implicit operator Vector2(AStarNode self)
+//        public static implicit operator Vector2(AStarNode obj)
 //        {
-//            return self.worldPosition;
+//            return obj.worldPosition;
 //        }
 
-//        public static implicit operator bool(AStarNode self)
+//        public static implicit operator bool(AStarNode obj)
 //        {
-//            return self != null;
+//            return obj != null;
 //        }
 //    }
 

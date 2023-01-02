@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 455d18b99c9aab3428198fe3412f0db8, type: 3}
   m_Name: dialogue 8
   m_EditorClassIdentifier: 
-  contents:
+  nodes:
   - rid: 9026091320329896226
   - rid: 9026091732818460676
   - rid: 9026091732818460677
@@ -26,7 +26,6 @@ MonoBehaviour:
   - rid: 867010388353089605
   exit:
     <ID>k__BackingField: CON-6d55c84afd3347f9af83ff08339827a3
-    events: []
     options: []
     <ExitHere>k__BackingField: 0
     _position: {x: 950.96, y: 0}
@@ -39,21 +38,20 @@ MonoBehaviour:
     - rid: -2
       type: {class: , ns: , asm: }
     - rid: 867010388353089557
-      type: {class: BranchContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: BranchNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-878d1ce7b05d4a338bef9391589b467b
-        events: []
         options:
         - <Title>k__BackingField: "\u7EE7\u7EED"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 867010388353089558
           <IsMain>k__BackingField: 1
         - <Title>k__BackingField: "\u7EE7\u7EED"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 867010388353089599
           <IsMain>k__BackingField: 1
         - <Title>k__BackingField: "\u7EE7\u7EED"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 867010388353089602
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -63,10 +61,9 @@ MonoBehaviour:
       type: {class: NormalCondition, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-9ea05daa509346fd95347c411c7982fa
-        events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091732818460679
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -85,10 +82,9 @@ MonoBehaviour:
       type: {class: NormalCondition, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-b8b5ce0a87b14b9a8677e12f07587d38
-        events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 867010388353089600
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -99,13 +95,12 @@ MonoBehaviour:
           conditions:
           - rid: 867010388353089601
     - rid: 867010388353089600
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-64b7ec99353e4356bcff7d8a1e2b6b26
-        events: []
         options:
         - <Title>k__BackingField: "\u7EE7\u7EED"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1
@@ -113,7 +108,10 @@ MonoBehaviour:
         lastExitHere: 0
         <Talker>k__BackingField: '{[NPC]NPC002}'
         <Text>k__BackingField: "\u6301\u6709\u7834\u65E7\u7684\u5251"
-        <UtterInterval>k__BackingField:
+        <Portrait>k__BackingField: {fileID: 0}
+        <PortrSide>k__BackingField: 0
+        events: []
+        <SpeakInterval>k__BackingField:
           serializedVersion: 2
           m_Curve:
           - serializedVersion: 3
@@ -146,10 +144,9 @@ MonoBehaviour:
       type: {class: NormalCondition, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-74a4502f31554af8a369b1cf916bb825
-        events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 867010388353089605
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -171,13 +168,12 @@ MonoBehaviour:
         <Item>k__BackingField: {fileID: 2294737969574299077, guid: 11d254d59d262564aa42d1df5009d201,
           type: 2}
     - rid: 867010388353089605
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-9dfff31e216b4b5897c72eac80642d2d
-        events: []
         options:
         - <Title>k__BackingField: "\u7EE7\u7EED"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1
@@ -185,7 +181,10 @@ MonoBehaviour:
         lastExitHere: 0
         <Talker>k__BackingField: '{[NPC]NPC002}'
         <Text>k__BackingField: "\u4E24\u4E2A\u90FD\u6CA1\u6709"
-        <UtterInterval>k__BackingField:
+        <Portrait>k__BackingField: {fileID: 0}
+        <PortrSide>k__BackingField: 0
+        events: []
+        <SpeakInterval>k__BackingField:
           serializedVersion: 2
           m_Curve:
           - serializedVersion: 3
@@ -210,13 +209,12 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
     - rid: 9026091320329896226
-      type: {class: EntryContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: EntryNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: DLG93b255cc09df45258bb06496a9616f5b
-        events: []
         options:
         - <Title>k__BackingField: 
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091732818460676
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 0
@@ -224,7 +222,11 @@ MonoBehaviour:
         lastExitHere: 0
         <Talker>k__BackingField: '{[NPC]NPC002}'
         <Text>k__BackingField: "\u4ECA\u5929\u5929\u6C14\u771F\u4E0D\u9519\uFF01"
-        <UtterInterval>k__BackingField:
+        <Portrait>k__BackingField: {fileID: 21300042, guid: 56b94c01694ae5648824eb62a97f268a,
+          type: 3}
+        <PortrSide>k__BackingField: 1
+        events: []
+        <SpeakInterval>k__BackingField:
           serializedVersion: 2
           m_Curve:
           - serializedVersion: 3
@@ -252,18 +254,17 @@ MonoBehaviour:
       type: {class: RandomOptions, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-1cedf21aac684c748e41f471e7a1c7d2
-        events: []
         options:
         - <Title>k__BackingField: "\u539F\u7B2C\u4E00"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091732818460677
           <IsMain>k__BackingField: 0
         - <Title>k__BackingField: "\u539F\u7B2C\u4E8C"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 9026091732818460678
           <IsMain>k__BackingField: 0
         - <Title>k__BackingField: "\u539F\u7B2C\u4E09"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: 867010388353089557
           <IsMain>k__BackingField: 0
         <ExitHere>k__BackingField: 0
@@ -271,13 +272,12 @@ MonoBehaviour:
         lastExitHere: 0
         <Always>k__BackingField: 0
     - rid: 9026091732818460677
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-f9d558711b1243cf99b9245251fb983a
-        events: []
         options:
         - <Title>k__BackingField: "\u7EE7\u7EED"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1
@@ -285,7 +285,11 @@ MonoBehaviour:
         lastExitHere: 0
         <Talker>k__BackingField: '{[NPC]NPC002}'
         <Text>k__BackingField: "\u9009\u9879\u4E00\u5185\u5BB9"
-        <UtterInterval>k__BackingField:
+        <Portrait>k__BackingField: {fileID: 21300042, guid: 56b94c01694ae5648824eb62a97f268a,
+          type: 3}
+        <PortrSide>k__BackingField: 1
+        events: []
+        <SpeakInterval>k__BackingField:
           serializedVersion: 2
           m_Curve:
           - serializedVersion: 3
@@ -310,13 +314,12 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
     - rid: 9026091732818460678
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-a8044a878b224a95847c5c16ac16a33c
-        events: []
         options:
         - <Title>k__BackingField: "\u7EE7\u7EED"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1
@@ -324,7 +327,11 @@ MonoBehaviour:
         lastExitHere: 0
         <Talker>k__BackingField: '{[NPC]NPC002}'
         <Text>k__BackingField: "\u9009\u9879\u4E8C\u5185\u5BB9"
-        <UtterInterval>k__BackingField:
+        <Portrait>k__BackingField: {fileID: 21300042, guid: 56b94c01694ae5648824eb62a97f268a,
+          type: 3}
+        <PortrSide>k__BackingField: 1
+        events: []
+        <SpeakInterval>k__BackingField:
           serializedVersion: 2
           m_Curve:
           - serializedVersion: 3
@@ -349,13 +356,12 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
     - rid: 9026091732818460679
-      type: {class: WordsContent, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
+      type: {class: SentenceNode, ns: ZetanStudio.DialogueSystem, asm: Assembly-CSharp}
       data:
         <ID>k__BackingField: CON-90954efdafbc45609348295e53e710cb
-        events: []
         options:
         - <Title>k__BackingField: "\u7EE7\u7EED"
-          <Content>k__BackingField:
+          <Next>k__BackingField:
             rid: -2
           <IsMain>k__BackingField: 1
         <ExitHere>k__BackingField: 1
@@ -363,7 +369,10 @@ MonoBehaviour:
         lastExitHere: 0
         <Talker>k__BackingField: '{[NPC]NPC002}'
         <Text>k__BackingField: "\u6301\u6709\u7834\u65E7\u7684\u5200"
-        <UtterInterval>k__BackingField:
+        <Portrait>k__BackingField: {fileID: 0}
+        <PortrSide>k__BackingField: 0
+        events: []
+        <SpeakInterval>k__BackingField:
           serializedVersion: 2
           m_Curve:
           - serializedVersion: 3

@@ -3,6 +3,11 @@ using System.Collections;
 using UnityEngine;
 using ZetanStudio;
 
+public interface ICopiable
+{
+    public object Copy();
+}
+
 public interface IForEach<out T>
 {
     public void ForEach(Action<T> action);

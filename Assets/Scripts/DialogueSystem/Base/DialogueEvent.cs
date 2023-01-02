@@ -5,7 +5,7 @@ using UnityEngine;
 namespace ZetanStudio.DialogueSystem
 {
     [Serializable]
-    public abstract class DialogueEvent
+    public abstract class DialogueEvent : ICopiable
     {
         [field: SerializeField]
         public string ID { get; private set; } = "EVT-" + Guid.NewGuid().ToString("N");
@@ -26,6 +26,13 @@ namespace ZetanStudio.DialogueSystem
         public static string GetName(Type type)
         {
             return type.GetCustomAttribute<NameAttribute>()?.name ?? type.Name;
+        }
+
+        public virtual object Copy()
+        {
+            var evt = MemberwiseClone() as DialogueEvent;
+            evt.ID = "EVT-" + Guid.NewGuid().ToString("N");
+            return evt;
         }
     }
 

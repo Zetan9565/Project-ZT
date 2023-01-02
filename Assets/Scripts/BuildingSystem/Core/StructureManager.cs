@@ -57,7 +57,7 @@ namespace ZetanStudio.StructureSystem
             {
                 foreach (var str in dict.Value)
                 {
-                    structData.Write(str.GetSaveData());
+                    structData.Write(str.GenerateSaveData());
                 }
             }
         }

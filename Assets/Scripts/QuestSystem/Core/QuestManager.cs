@@ -16,7 +16,7 @@ namespace ZetanStudio.QuestSystem
 
     public static class QuestManager
     {
-        private static readonly Dictionary<ObjectiveData, List<MapIcon>> questIcons = new Dictionary<ObjectiveData, List<MapIcon>>();
+        private static readonly Dictionary<ObjectiveData, List<MapIconData>> questIcons = new Dictionary<ObjectiveData, List<MapIconData>>();
 
         private static readonly List<QuestData> questsInProgress = new List<QuestData>();
         public static ReadOnlyCollection<QuestData> QuestInProgress => questsInProgress.AsReadOnly();
@@ -226,13 +226,13 @@ namespace ZetanStudio.QuestSystem
                     MapManager.Instance.CreateMapIcon(MiscSettings.Instance.QuestIcon, new Vector2(48, 48), destination, true, 144f, MapIconType.Objective, false, objective.DisplayName) :
                     MapManager.Instance.CreateMapIcon(MiscSettings.Instance.QuestIcon, new Vector2(48, 48), destination, true, MapIconType.Objective, false, objective.DisplayName) :
                     MapManager.Instance.CreateDefaultMark(destination, true, false, objective.DisplayName);
-                if (icon)
+                if (icon != null)
                 {
                     if (questIcons.TryGetValue(objective, out var iconsExist))
                     {
                         iconsExist.Add(icon);
                     }
-                    else questIcons.Add(objective, new List<MapIcon>() { icon });
+                    else questIcons.Add(objective, new List<MapIconData>() { icon });
                 }
             }
         }
@@ -476,11 +476,11 @@ namespace ZetanStudio.QuestSystem
         #region 语言相关
         public static string Tr(string text)
         {
-            return LM.Tr(typeof(QuestManager).Name, text);
+            return L.Tr(typeof(QuestManager).Name, text);
         }
         public static string Tr(string text, params object[] args)
         {
-            return LM.Tr(typeof(QuestManager).Name, text, args);
+            return L.Tr(typeof(QuestManager).Name, text, args);
         }
         #endregion
     }
