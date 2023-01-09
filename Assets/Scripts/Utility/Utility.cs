@@ -122,6 +122,93 @@ namespace ZetanStudio
             return result;
         }
 
+        public static bool MoveElements<T>(IList<T> data, int[] indices, int insertAtIndex, out int[] newIndices)
+        {
+            newIndices = null;
+            if (data is not null)
+            {
+                while (insertAtIndex < 0)
+                {
+                    insertAtIndex++;
+                }
+                while (insertAtIndex > data.Count + 1)
+                {
+                    insertAtIndex--;
+                }
+                Array.Sort(indices);
+                var cache = new T[indices.Length];
+                var upperIndices = new HashSet<int>();
+                var belowIndices = new HashSet<int>();
+                for (int i = 0; i < indices.Length; i++)
+                {
+                    int index = indices[i];
+                    cache[i] = data[index];
+                    if (index < insertAtIndex) upperIndices.Add(index);
+                    else belowIndices.Add(index);
+                }
+
+                var remainder = new T[insertAtIndex - upperIndices.Count];
+                var remainderCount = 0;
+                int start, junction;
+                bool hasMoved = false;
+                if (upperIndices.Count > 0)
+                {
+                    newIndices ??= new int[indices.Length];
+
+                    for (int i = indices[0]; i < insertAtIndex; i++)
+                    {
+                        if (!upperIndices.Contains(i))
+                        {
+                            remainder[remainderCount] = data[i];
+                            remainderCount++;
+                        }
+                    }
+                    hasMoved = remainderCount > 0;
+                    start = indices[0];
+                    junction = start + remainderCount;
+                    for (int i = start; i < insertAtIndex; i++)
+                    {
+                        if (i < junction) data[i] = remainder[i - start];//放置被上移填充的项
+                        else
+                        {
+                            data[i] = cache[i - junction];//放置被插入的项
+                            newIndices[i - junction] = i;
+                        }
+                    }
+                }
+                if (belowIndices.Count > 0)
+                {
+                    newIndices ??= new int[indices.Length];
+
+                    remainder = new T[indices[^1] + 1 - insertAtIndex - belowIndices.Count];
+                    remainderCount = 0;
+                    for (int i = insertAtIndex; i < indices[^1]; i++)
+                    {
+                        if (!belowIndices.Contains(i))
+                        {
+                            remainder[remainderCount] = data[i];
+                            remainderCount++;
+                        }
+                    }
+                    hasMoved |= remainderCount > 0;
+                    start = insertAtIndex;
+                    junction = start + belowIndices.Count;
+                    for (int i = start; i <= indices[^1]; i++)
+                    {
+                        if (i < junction)
+                        {
+                            data[i] = cache[upperIndices.Count + (i - start)];//放置被插入的项
+                            newIndices[upperIndices.Count + (i - start)] = i;
+                        }
+                        else data[i] = remainder[i - junction];//放置被下移填充的项
+                    }
+                }
+
+                return hasMoved;
+            }
+            return false;
+        }
+
         public static Vector2 GetRealSize(RectTransform rectTransform)
         {
             var rect = GetScreenSpaceRect(rectTransform);
@@ -736,6 +823,17 @@ namespace ZetanStudio
         public static string GetFileName(string path)
         {
             return Path.GetFileName(path);
+        }
+        public static string GetFileDirectory(string path)
+        {
+            try
+            {
+                return Path.GetDirectoryName(path);
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
         public static string GetExtension(string path)
         {

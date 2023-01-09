@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -326,6 +327,59 @@ namespace ZetanStudio.Extension
                     return match.Groups[1].Value;
                 return source.name;
             }
+
+            //public static bool MoveArrayElements(this SerializedProperty source, int[] srcIndices, int dstIndex, out int[] newIndices)
+            //{
+            //    if (source is null)
+            //    {
+            //        throw new ArgumentNullException(nameof(source));
+            //    }
+            //    if (!source.isArray)
+            //    {
+            //        throw new ArgumentException(nameof(source) + "不是数组");
+            //    }
+            //    if (srcIndices is null)
+            //    {
+            //        throw new ArgumentNullException(nameof(srcIndices));
+            //    }
+            //    newIndices = new int[0];
+
+            //    if (srcIndices.Length < 1) return false;
+
+            //    bool hasMoved = false;
+            //    Array.Sort(srcIndices);
+            //    int upperCount = 0;
+            //    for (int i = 0; i < srcIndices.Length; i++)
+            //    {
+            //        if (!hasMoved && (srcIndices[i] != dstIndex - 1 || i > 1 && srcIndices[i] != srcIndices[i - 1] + 1))
+            //        {
+            //            newIndices = new int[srcIndices.Length];
+            //            hasMoved = true;
+            //        }
+            //        if (srcIndices[i] < dstIndex) upperCount++;
+            //    }
+            //    int tempDstIndex = dstIndex;
+            //    for (int i = 0; i < srcIndices.Length; i++)
+            //    {
+            //        var index = srcIndices[i];
+            //        if (index < dstIndex)
+            //        {
+            //            if (index == tempDstIndex - 1) continue;
+            //            Utility.Log(source.MoveArrayElement(index, tempDstIndex - 1), index, tempDstIndex - 1);
+            //            for (int j = i + 1; j < srcIndices.Length; j++)
+            //            {
+            //                if (srcIndices[j] < dstIndex) srcIndices[j]--;
+            //            }
+            //        }
+            //        else if (index > dstIndex)
+            //        {
+            //            Utility.Log(source.MoveArrayElement(index, tempDstIndex), index, tempDstIndex);
+            //            tempDstIndex++;
+            //        }
+            //        if (hasMoved) newIndices[i] = dstIndex - upperCount + i;
+            //    }
+            //    return hasMoved;
+            //}
         }
 
         public static class PropertyDrawerExtension

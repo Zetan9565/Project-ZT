@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -43,7 +42,6 @@ namespace ZetanStudio.DialogueSystem
         public static string GetGroup(Type type) => type.GetCustomAttribute<GroupAttribute>(true)?.group ?? string.Empty;
         public static string GetName(Type type) => type.GetCustomAttribute<NameAttribute>()?.name ?? type.Name;
         public static string GetDescription(Type type) => type.GetCustomAttribute<DescriptionAttribute>()?.desc ?? string.Empty;
-        public static bool IsNormal(DialogueNode node) => node is not null and not DecoratorNode and not SuffixNode and not ExternalOptionsNode and not BranchNode;
 
         public static implicit operator bool(DialogueNode obj) => obj != null;
 
@@ -228,72 +226,6 @@ namespace ZetanStudio.DialogueSystem
         }
 #endif
     }
-
-    #region 特殊
-#if UNITY_EDITOR
-    /// <summary>
-    /// 用于在编辑器中设置退出点，不应在游戏逻辑中使用
-    /// </summary>
-    [Serializable, Name("结束"), Width(100f)]
-    [Description("用于标识对话的结束位置，以确定对话窗口的关闭时机。")]
-    public sealed class ExitNode : SuffixNode
-    {
-        public ExitNode() => _position = new Vector2(360, 0);
-
-        public override bool IsValid => true;
-
-        public override bool CanLinkFrom(DialogueNode from, DialogueOption option) => option.IsMain && from.Options.Count == 1 && from is not DecoratorNode && from is not BlockerNode;
-    }
-#endif
-
-    /// <summary>
-    /// 以第一个满足显示条件的分支作为前一个结点的分支
-    /// </summary>
-    [Serializable, Group("特殊"), Name("分支"), Width(60f)]
-    [Description("以第一个满足条件的分支作为前一个结点的分支。")]
-    public sealed class BranchNode : DialogueNode
-    {
-        public override bool IsValid => options.Length > 0 && options.All(x => x.IsMain);
-
-        public DialogueNode GetBranch(DialogueData entryData)
-        {
-            foreach (var option in options)
-            {
-                if (option?.Next is ConditionNode condition && condition.Check(entryData))
-                {
-                    var temp = condition.Options[0]?.Next;
-                    while (temp is ConditionNode)
-                    {
-                        temp = temp[0]?.Next;
-                    }
-                    return temp;
-                }
-            }
-            return null;
-        }
-    }
-
-    [Serializable, Group("特殊"), Name("其它对话")]
-    [Description("开始一段新的对话。")]
-    public sealed class OtherDialogueNode : DialogueNode
-    {
-        [field: SerializeField]
-        public Dialogue Dialogue { get; private set; }
-
-        public override bool IsValid => Dialogue;
-
-        public override bool OnEnter() => Dialogue;
-
-        public override bool IsManual() => true;
-
-        public override void DoManual(DialogueWindow window)
-        {
-            window.CurrentEntryData[this].Access();
-            window.PushContinuance(this);
-            window.StartWith(Dialogue);
-        }
-    }
-    #endregion
 
     #region 接口
     public interface ISoloMainOption { }

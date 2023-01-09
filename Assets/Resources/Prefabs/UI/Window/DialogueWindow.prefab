@@ -201,14 +201,14 @@ MonoBehaviour:
   textText: {fileID: 744647686317825105}
   textButton: {fileID: 3670248292937419341}
   buttonArea: {fileID: 744647687965108057}
-  backButton: {fileID: 744647688031914046}
+  homeButton: {fileID: 744647688031914046}
   giftButton: {fileID: 744647686399373910}
   warehouseButton: {fileID: 744647686061337546}
   shopButton: {fileID: 744647686696892563}
   questButton: {fileID: 744647686264611326}
   talkButton: {fileID: 5310143842747022218}
   nextButton: {fileID: 6772084746629825795}
-  nextBtnText: {fileID: 3739922054517353196}
+  nextButtonText: {fileID: 3739922054517353196}
   optionArea: {fileID: 2357684124357856851}
   optionTitleArea: {fileID: 2068990175719325093}
   optionTitle: {fileID: 12413345415081267}
@@ -1548,7 +1548,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u8FD4\u56DE"
+  m_Text: "\u9996\u9875"
 --- !u!1 &744647687017864737
 GameObject:
   m_ObjectHideFlags: 0
@@ -3007,7 +3007,7 @@ GameObject:
   - component: {fileID: 744647688031914041}
   - component: {fileID: 744647688031914046}
   m_Layer: 5
-  m_Name: Back
+  m_Name: Home
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3351,7 +3351,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
   m_MinWidth: -1
-  m_MinHeight: 68
+  m_MinHeight: 67.66991
   m_PreferredWidth: -1
   m_PreferredHeight: -1
   m_FlexibleWidth: -1

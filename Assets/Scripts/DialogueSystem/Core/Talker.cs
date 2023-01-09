@@ -98,9 +98,10 @@ namespace ZetanStudio.CharacterSystem
 
         public bool DoInteract()
         {
-            if (DialogueWindow.TalkWith(this))
+            if (WindowsManager.OpenWindow<DialogueWindow>(this) is DialogueWindow window)
             {
                 SetMachineState<CharacterTalkingState>();
+                window.onClose += EndInteraction;
                 return true;
             }
             return false;

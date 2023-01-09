@@ -74,7 +74,7 @@ namespace ZetanStudio.DialogueSystem.Editor
                 return;
             }
 
-            title = node.GetName();
+            title = Tr(node.GetName());
             style.left = node._position.x;
             style.top = node._position.y;
             userData = node;
@@ -224,7 +224,7 @@ namespace ZetanStudio.DialogueSystem.Editor
             RefreshOptionButton();
 
             #region Tooltip
-            titleContainer.Q<Label>("title-label").tooltip = DialogueNode.GetDescription(node.GetType());
+            titleContainer.Q<Label>("title-label").tooltip = Tr(DialogueNode.GetDescription(node.GetType()));
             this.RegisterTooltipCallback(() =>
             {
                 if (node is SentenceNode sentence) return sentence.Preview();

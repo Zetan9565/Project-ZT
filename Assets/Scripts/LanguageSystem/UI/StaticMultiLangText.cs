@@ -20,6 +20,11 @@ namespace ZetanStudio
             Language.OnLanguageChanged += () => component.text = L.Tr(selector, original);
         }
 
+        public void SetText(string text)
+        {
+            original = text;
+            component.text = L.Tr(selector, original);
+        }
         public void SetSelector(string selector) => component.text = L.Tr(this.selector = selector, original);
     }
 }

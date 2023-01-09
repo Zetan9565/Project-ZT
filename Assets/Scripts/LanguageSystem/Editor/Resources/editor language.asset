@@ -13,4 +13,67 @@ MonoBehaviour:
   m_Name: editor language
   m_EditorClassIdentifier: 
   _name: "\u7F16\u8F91\u5668"
-  maps: []
+  maps:
+  - <Key>k__BackingField: "\u8BED\u8A00\u5305\u7F16\u8F91\u5668"
+    values:
+    - Language Set Editor
+  - <Key>k__BackingField: "\u8BED\u8A00\u5305"
+    values:
+    - Language Set
+  - <Key>k__BackingField: "\u8BED\u8A00\u5305\u540D\u79F0"
+    values:
+    - Set Name
+  - <Key>k__BackingField: "\u5168\u90E8"
+    values:
+    - All
+  - <Key>k__BackingField: "\u6CA1\u6709\u53EF\u7528\u7684\u68C0\u7D22\u65B9\u6CD5"
+    values:
+    - No searching method available
+  - <Key>k__BackingField: "\u68C0\u67E5\u5927\u5C0F\u5199"
+    values:
+    - Check case
+  - <Key>k__BackingField: "\u5E8F\u53F7"
+    values:
+    - NO.
+  - <Key>k__BackingField: "\u8868\u683C\u884C\u7ED3\u6784\u7684\u539F\u59CB\u5E8F\u53F7"
+    values:
+    - The raw number of table row
+  - <Key>k__BackingField: "\u63D2\u5165"
+    values:
+    - Insert
+  - <Key>k__BackingField: "\u5220\u9664"
+    values:
+    - Delete
+  - <Key>k__BackingField: "\u63D2\u5165\u672B\u5C3E"
+    values:
+    - Append
+  - <Key>k__BackingField: "\u66FF\u6362\u5168\u90E8"
+    values:
+    - Replace All
+  - <Key>k__BackingField: "\u66FF\u6362\u4E0B\u4E00\u4E2A"
+    values:
+    - Replace Next
+  - <Key>k__BackingField: "\u5B9A\u4F4D\u9519\u8BEF\u884C"
+    values:
+    - Locate Error
+  - <Key>k__BackingField: "\u8BED\u8A00"
+    values:
+    - Language
+  - <Key>k__BackingField: "\u8BED\u8A00{0}"
+    values:
+    - Language {0}
+  - <Key>k__BackingField: "\u7D22\u5F15"
+    values:
+    - Key
+  - <Key>k__BackingField: "\u5217\u53F7"
+    values:
+    - Column
+  - <Key>k__BackingField: "\u53EA\u6709\u6309\u5E8F\u53F7\u7684\u5347\u5E8F\u6392\u5E8F\u65F6\u624D\u80FD\u62D6\u62FD"
+    values:
+    - You can drag only when ordering by ascending row-number
+  - <Key>k__BackingField: "\u5220\u9664\u5217"
+    values:
+    - Delete Col.
+  - <Key>k__BackingField: "\u589E\u52A0\u5217"
+    values:
+    - Add Col.

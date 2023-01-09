@@ -39,29 +39,28 @@ namespace ZetanStudio.DialogueSystem
             return reachable;
         }
 
-        public static void Traverse(DialogueNode node, Action<DialogueNode> onAccess, bool normalOnly = false)
+        public static void Traverse(DialogueNode node, Action<DialogueNode> onAccess)
         {
             if (node)
             {
-                if (!normalOnly || DialogueNode.IsNormal(node)) onAccess?.Invoke(node);
+                onAccess?.Invoke(node);
                 foreach (var option in node.Options)
                 {
-                    Traverse(option.Next, onAccess, normalOnly);
+                    Traverse(option.Next, onAccess);
                 }
             }
         }
 
         ///<param name="onAccess">带中止条件的访问器，返回 <i>true</i> 时将中止遍历</param>
         /// <returns>是否在遍历时产生中止</returns>
-        public static bool Traverse(DialogueNode node, Func<DialogueNode, bool> onAccess, bool normalOnly = false)
+        public static bool Traverse(DialogueNode node, Func<DialogueNode, bool> onAccess)
         {
             if (onAccess != null && node)
             {
-                if (!normalOnly || DialogueNode.IsNormal(node))
-                    if (onAccess(node)) return true;
+                if (onAccess(node)) return true;
                 foreach (var option in node.Options)
                 {
-                    if (Traverse(option.Next, onAccess, normalOnly))
+                    if (Traverse(option.Next, onAccess))
                         return true;
                 }
             }

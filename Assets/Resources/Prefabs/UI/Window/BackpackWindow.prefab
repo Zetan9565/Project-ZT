@@ -167,6 +167,7 @@ GameObject:
   - component: {fileID: 4187457156594024303}
   - component: {fileID: 4187457156594024297}
   - component: {fileID: 4187457156594024302}
+  - component: {fileID: 9165058164444305226}
   m_Layer: 5
   m_Name: WindowTitle
   m_TagString: Untagged
@@ -236,6 +237,19 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u884C\u56CA"
+--- !u!114 &9165058164444305226
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4187457156594024300}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75ead0ea2c4ac564d9c39e4970c0f00f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selector: BackpackWindow
 --- !u!1 &4187457156594873694
 GameObject:
   m_ObjectHideFlags: 0
@@ -426,7 +440,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: a447eae5a43852040a0b86b59255e569, type: 3}
-    m_FontSize: 28
+    m_FontSize: 32
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 2
@@ -437,7 +451,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u6574\u7406"
+  m_Text: "\u21BA"
 --- !u!1 &4187457156743302519
 GameObject:
   m_ObjectHideFlags: 0
@@ -1570,9 +1584,9 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4187457157282626143}
   m_Enabled: 1
-  m_Alpha: 0
+  m_Alpha: 1
   m_Interactable: 1
-  m_BlocksRaycasts: 0
+  m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
 --- !u!1 &4187457157340283196
 GameObject:
@@ -1745,6 +1759,7 @@ GameObject:
   - component: {fileID: 4187457157393752066}
   - component: {fileID: 4187457157393752092}
   - component: {fileID: 4187457157393752093}
+  - component: {fileID: 496836897780302586}
   m_Layer: 5
   m_Name: Placeholder
   m_TagString: Untagged
@@ -1814,6 +1829,19 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u67E5\u627E\u9053\u5177"
+--- !u!114 &496836897780302586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4187457157393752067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75ead0ea2c4ac564d9c39e4970c0f00f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selector: BackpackWindow
 --- !u!1 &4187457157454803001
 GameObject:
   m_ObjectHideFlags: 0
@@ -2132,6 +2160,7 @@ GameObject:
   - component: {fileID: 4187457157826516929}
   - component: {fileID: 4187457157826516931}
   - component: {fileID: 4187457157826516928}
+  - component: {fileID: 4744544111223682747}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -2191,9 +2220,9 @@ MonoBehaviour:
     m_Font: {fileID: 12800000, guid: a447eae5a43852040a0b86b59255e569, type: 3}
     m_FontSize: 30
     m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 3
-    m_MaxSize: 40
+    m_BestFit: 1
+    m_MinSize: 14
+    m_MaxSize: 30
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -2201,6 +2230,19 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u653E\u5230\u6B64\u5904\u4E22\u5F03"
+--- !u!114 &4744544111223682747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4187457157826516934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75ead0ea2c4ac564d9c39e4970c0f00f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selector: BackpackWindow
 --- !u!1 &4187457157938658906
 GameObject:
   m_ObjectHideFlags: 0
@@ -3162,6 +3204,7 @@ GameObject:
   - component: {fileID: 4187457158399962059}
   - component: {fileID: 4187457158399962053}
   - component: {fileID: 4187457158399962058}
+  - component: {fileID: 8721117053940346092}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -3222,8 +3265,8 @@ MonoBehaviour:
     m_FontSize: 30
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 3
-    m_MaxSize: 40
+    m_MinSize: 14
+    m_MaxSize: 30
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -3231,6 +3274,19 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u624B\u5DE5\u5236\u4F5C"
+--- !u!114 &8721117053940346092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4187457158399962056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75ead0ea2c4ac564d9c39e4970c0f00f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selector: BackpackWindow
 --- !u!1 &4187457158442986149
 GameObject:
   m_ObjectHideFlags: 0

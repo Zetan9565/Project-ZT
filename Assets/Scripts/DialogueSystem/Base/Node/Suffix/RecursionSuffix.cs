@@ -32,7 +32,7 @@ namespace ZetanStudio.DialogueSystem
                     if (n.Options.Any(x => x.Next == temp))
                     {
                         temp = n;
-                        if (temp is not DecoratorNode) depth++;
+                        if (temp is SentenceNode) depth++;
                         return true;
                     }
                     return false;

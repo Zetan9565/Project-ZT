@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73402b0326e54ac4e8faf201b5be2958, type: 3}
+  m_Name: New Language Set
+  m_EditorClassIdentifier: 
+  _name: "\u516C\u5171"
+  maps:
+  - <Key>k__BackingField: "\u83DC\u5355"
+    values:
+    - Menu
+  - <Key>k__BackingField: "\u884C\u56CA"
+    values:
+    - Backpack
+  - <Key>k__BackingField: "\u8BBE\u65BD"
+    values:
+    - Structure
+  - <Key>k__BackingField: "\u4EFB\u52A1"
+    values:
+    - Quest
+  - <Key>k__BackingField: "\u8F93\u5165\u6570\u91CF"
+    values:
+    - Input Number
+  - <Key>k__BackingField: "\u6700\u5927\u6570\u91CF"
+    values:
+    - Maximum
+  - <Key>k__BackingField: "\u6E05\u9664"
+    values:
+    - Clear
+  - <Key>k__BackingField: "\u53D6\u6D88"
+    values:
+    - Cancel
+  - <Key>k__BackingField: "\u786E\u8BA4"
+    values:
+    - Confirm
+  - <Key>k__BackingField: "\u624B\u5DE5\u5236\u4F5C"
+    values:
+    - Handwork
+  - <Key>k__BackingField: "\u67E5\u627E\u9053\u5177"
+    values:
+    - Find items
+  - <Key>k__BackingField: "\u653E\u5230\u6B64\u5904\u4E22\u5F03"
+    values:
+    - Place to discard

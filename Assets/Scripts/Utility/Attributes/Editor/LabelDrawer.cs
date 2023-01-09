@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -14,7 +13,7 @@ public class LabelDrawer : EnhancedPropertyDrawer
         if (EditorUtility.DisplayDialog(Tr("提示"), Tr("将会在本地创建一个语言映射表并使用，是否继续？"), Tr("继续"), Tr("取消")))
         {
             var language = ScriptableObject.CreateInstance<LanguageSet>();
-            var maps = typeof(LanguageSet).GetField("maps", Utility.CommonBindingFlags).GetValue(language) as IList;
+            var maps = new List<LanguageMap>();;
             maps.Clear();
             var keys = new HashSet<string>();
             foreach (var field in TypeCache.GetFieldsWithAttribute<LabelAttribute>())
@@ -26,6 +25,7 @@ public class LabelDrawer : EnhancedPropertyDrawer
                     maps.Add(new LanguageMap(label, label));
                 }
             }
+            LanguageSet.Editor.SetMaps(language, maps.ToArray());
             AssetDatabase.CreateAsset(language, AssetDatabase.GenerateUniqueAssetPath($"Assets/new label language.asset"));
             EditorGUIUtility.PingObject(language);
             var singleton = LabelLocalization.GetOrCreate();

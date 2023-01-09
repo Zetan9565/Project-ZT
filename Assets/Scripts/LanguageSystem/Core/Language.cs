@@ -28,15 +28,15 @@ namespace ZetanStudio
     public static class Language
     {
         private static Dictionary<string, List<Dictionary<string, string>>> dictionaries = new Dictionary<string, List<Dictionary<string, string>>>();
-        private static int langIndex = -1;
-        public static int LangIndex
+        private static int languageIndex = 0;
+        public static int LanguageIndex
         {
-            get => langIndex;
+            get => languageIndex;
             set
             {
-                if (langIndex != value)
+                if (languageIndex != value)
                 {
-                    langIndex = value;
+                    languageIndex = value;
                     Init();
                     OnLanguageChanged?.Invoke();
                 }
@@ -45,10 +45,12 @@ namespace ZetanStudio
 
         public static event Action OnLanguageChanged;
 
+        private const int languageIndexOffset = 1;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         public static void Init()
         {
-            if (Localization.Instance) dictionaries = Localization.Instance.AsDictionary(LangIndex);
+            if (Localization.Instance) dictionaries = Localization.Instance.AsDictionary(LanguageIndex - languageIndexOffset);
             else dictionaries = new Dictionary<string, List<Dictionary<string, string>>>();
         }
 
@@ -59,7 +61,7 @@ namespace ZetanStudio
             {
                 if (Localization.Instance)
                 {
-                    var dicts = Localization.Instance.FindDictionaries(LangIndex, selector);
+                    var dicts = Localization.Instance.FindDictionaries(LanguageIndex - languageIndexOffset, selector);
                     if (dicts.Count > 0) dictionaries[selector] = list = dicts;
                 }
             }

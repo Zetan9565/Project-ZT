@@ -133,7 +133,7 @@ namespace ZetanStudio.Editor
 
             static void OnPropertyContextMenu(GenericMenu menu, SerializedProperty property)
             {
-                if (property.objectReferenceValue is null)
+                if (property.objectReferenceValue == null)
                     return;
 
                 menu.AddItem(EditorGUIUtility.TrTextContent("Location"), false, () =>

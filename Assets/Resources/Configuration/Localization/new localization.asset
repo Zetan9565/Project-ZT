@@ -12,7 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92507e5f55e8e974c945d81acf7ebe7d, type: 3}
   m_Name: new localization
   m_EditorClassIdentifier: 
+  languageNames:
+  - "\u7B80\u4F53\u4E2D\u6587"
+  - English
   datas:
   - remark: 
-    <Language>k__BackingField: {fileID: 0}
+    <Language>k__BackingField: {fileID: 11400000, guid: 9e0abf549717ab64faeb012090554866,
+      type: 2}
     selectors: []
+  - remark: 
+    <Language>k__BackingField: {fileID: 11400000, guid: 7d0a6e0a5f162c546883098efb9cf870,
+      type: 2}
+    selectors:
+    - Common
+    - BackpackWindow

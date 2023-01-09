@@ -12,7 +12,7 @@ namespace ZetanStudio
         private string _name;
 
         [SerializeField]
-        private List<LanguageMap> maps = new List<LanguageMap>();
+        private LanguageMap[] maps = { };
         public ReadOnlyCollection<LanguageMap> Maps => new ReadOnlyCollection<LanguageMap>(maps);
 
         public Dictionary<string, string> AsDictionary(int lang)
@@ -32,7 +32,7 @@ namespace ZetanStudio
         public string Tr(string text) => Tr(0, text);
         public string Tr(int lang, string text)
         {
-            var map = maps.Find(m => m.Key == text);
+            var map = Array.Find(maps, m => m.Key == text);
             try
             {
                 return map.Values[lang];
@@ -42,6 +42,20 @@ namespace ZetanStudio
                 return text;
             }
         }
+
+#if UNITY_EDITOR
+        public static class Editor
+        {
+            public static void SetName(LanguageSet language, string name)
+            {
+                if (language) language._name = name;
+            }
+            public static void SetMaps(LanguageSet language, LanguageMap[] maps)
+            {
+                if (language) language.maps = maps;
+            }
+        }
+#endif
     }
 
     [Serializable]

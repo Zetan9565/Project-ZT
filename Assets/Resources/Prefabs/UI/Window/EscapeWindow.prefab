@@ -1669,6 +1669,7 @@ MonoBehaviour:
   duration: 0.05
   content: {fileID: 6286325946060379300}
   closeButton: {fileID: 6286325945543045763}
+  language: {fileID: 3339866905349007101}
   exitButton: {fileID: 6286325946733870827}
 --- !u!1 &6286325946964148465
 GameObject:

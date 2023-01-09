@@ -27,7 +27,7 @@
         protected override bool OnClose(params object[] args)
         {
             if (hidePanelOnInteract) InteractionPanel.Instance.ShowOrHidePanelBy(Target, true);
-            if (Target != null) Target.EndInteraction();
+            Target?.EndInteraction();
             return true;
         }
     }

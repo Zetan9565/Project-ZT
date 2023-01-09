@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5381c6b2f794e3b40bb4dfc12e834e0c, type: 3}
   m_Name: label localization
   m_EditorClassIdentifier: 
-  language: {fileID: 11400000, guid: 8905b331a647cae45a65948d2b34db93, type: 2}
+  language: {fileID: 11400000, guid: a7c05db6868413641a3365418debac38, type: 2}

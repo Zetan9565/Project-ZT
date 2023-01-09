@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73402b0326e54ac4e8faf201b5be2958, type: 3}
+  m_Name: new language set
+  m_EditorClassIdentifier: 
+  _name: Sheet1
+  maps:
+  - <Key>k__BackingField: "\u4ECE\u5C0F\u5230\u5927"
+    values:
+    - "\u5148\u63D2\u5165\u6307\u5B9A\u4F4D\u7F6E"
+    - "\u7136\u540E\u540E\u9762\u7684\u4F9D\u6B21\u540E\u79FB\u4E00\u4F4D"
+  - <Key>k__BackingField: "\u4F60\u597D"
+    values:
+    - "\u4F60\u597D"
+    - Hello
+  - <Key>k__BackingField: "\u4F60\u597D\uFF0CUnity\uFF01"
+    values:
+    - "\u4F60\u597D\uFF0CUnity\uFF01"
+    - Hello,Unity!
+  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    values:
+    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    - Hello,World!
+  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    values:
+    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    - Hello,World!
+  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    values:
+    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    - Hello,World!
+  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    values:
+    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    - Hello,World!
+  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    values:
+    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    - Hello,World!

@@ -1,10 +1,14 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using UnityEngine.UI;
 using ZetanStudio;
 using ZetanStudio.UI;
 
 public class EscapeWindow : Window
 {
+    [SerializeField]
+    private Dropdown language;
+
     [SerializeField]
     private Button exitButton;
 
@@ -13,6 +17,15 @@ public class EscapeWindow : Window
     protected override void OnAwake()
     {
         exitButton.onClick.AddListener(Exit);
+        language.ClearOptions();
+        language.AddOptions(Localization.Instance.LanguageNames.ToList());
+        language.value = Language.LanguageIndex;
+        language.onValueChanged.AddListener(SetLanguage);
+    }
+
+    private void SetLanguage(int lang)
+    {
+        Language.LanguageIndex = lang;
     }
 
     protected override bool OnOpen(params object[] args)

@@ -524,6 +524,10 @@ namespace ZetanStudio
 
             public static T SaveFilePanel<T>(Func<T> creation, string assetName = null, string title = "选择保存位置", string extension = "asset", string folder = null, string root = null, bool ping = false, bool select = false) where T : Object
             {
+                return SaveFilePanel<T>(creation, null, assetName, title, extension, folder, root, ping, select);
+            }
+            public static T SaveFilePanel<T>(Func<T> creation, Action<T> afterCreation, string assetName = null, string title = "选择保存位置", string extension = "asset", string folder = null, string root = null, bool ping = false, bool select = false) where T : Object
+            {
                 while (true)
                 {
                     if (string.IsNullOrEmpty(assetName)) assetName = "new " + Regex.Replace(typeof(T).Name, "([a-z])([A-Z])", "$1 $2").ToLower();
@@ -536,6 +540,7 @@ namespace ZetanStudio
                         try
                         {
                             T obj = creation();
+                            afterCreation?.Invoke(obj);
                             AssetDatabase.CreateAsset(obj, ConvertToAssetsPath(path));
                             if (select) Selection.activeObject = obj;
                             if (ping) EditorGUIUtility.PingObject(obj);
@@ -553,6 +558,10 @@ namespace ZetanStudio
             public static Object SaveFilePanel(Func<Object> creation, string assetName = null, string title = "选择保存位置", string extension = "asset", string folder = null, string root = null, bool ping = false, bool select = false)
             {
                 return SaveFilePanel<Object>(creation, assetName, title, extension, folder, root, ping, select);
+            }
+            public static Object SaveFilePanel(Func<Object> creation, Action<Object> afterCreation, string assetName = null, string title = "选择保存位置", string extension = "asset", string folder = null, string root = null, bool ping = false, bool select = false)
+            {
+                return SaveFilePanel<Object>(creation, afterCreation, assetName, title, extension, folder, root, ping, select);
             }
             public static void SaveFolderPanel(Action<string> callback, string path = null)
             {

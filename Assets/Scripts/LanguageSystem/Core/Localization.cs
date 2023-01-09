@@ -9,6 +9,10 @@ namespace ZetanStudio
     public class Localization : SingletonScriptableObject<Localization>
     {
         [SerializeField]
+        private string[] languageNames = { "简体中文" };
+        public ReadOnlyCollection<string> LanguageNames => new ReadOnlyCollection<string>(languageNames);
+
+        [SerializeField]
         private LocalizationData[] datas = { };
         public ReadOnlyCollection<LocalizationData> Datas => new ReadOnlyCollection<LocalizationData>(datas);
 

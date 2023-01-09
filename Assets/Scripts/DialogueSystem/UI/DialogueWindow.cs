@@ -9,17 +9,16 @@ using UnityEngine.UI;
 
 namespace ZetanStudio.DialogueSystem.UI
 {
+    using CharacterSystem;
     using DialogueSystem;
     using Extension;
+    using InteractionSystem.UI;
+    using InventorySystem;
+    using InventorySystem.UI;
     using ItemSystem;
     using ItemSystem.UI;
-    using ZetanStudio;
-    using ZetanStudio.CharacterSystem;
-    using ZetanStudio.InteractionSystem.UI;
-    using ZetanStudio.InventorySystem;
-    using ZetanStudio.InventorySystem.UI;
-    using ZetanStudio.PlayerSystem;
-    using ZetanStudio.QuestSystem;
+    using PlayerSystem;
+    using QuestSystem;
     using ZetanStudio.UI;
 
     public class DialogueWindow : InteractionWindow<Talker>, IHideable
@@ -41,7 +40,7 @@ namespace ZetanStudio.DialogueSystem.UI
         [SerializeField]
         private Transform buttonArea;
         [SerializeField]
-        private Button backButton;
+        private Button homeButton;
         [SerializeField]
         private Button giftButton;
         [SerializeField]
@@ -55,7 +54,7 @@ namespace ZetanStudio.DialogueSystem.UI
         [SerializeField]
         private Button nextButton;
         [SerializeField]
-        private Text nextBtnText;
+        private Text nextButtonText;
 
         [SerializeField]
         private GameObject optionArea;
@@ -76,6 +75,8 @@ namespace ZetanStudio.DialogueSystem.UI
         private ItemGrid rewardList;
         [SerializeField]
         private float skipDelay = 0.5f;
+        [SerializeField]
+        private bool closeAtExit = true;
         #endregion
 
         #region 运行时声明
@@ -84,7 +85,7 @@ namespace ZetanStudio.DialogueSystem.UI
         public bool IsHidden { get; private set; }
         protected override string LangSelector => typeof(Dialogue).Name;
         private DialogueType currentType = DialogueType.Normal;
-        private EntryNode root;
+        private EntryNode home;
 
         public EntryNode CurrentEntry { get; private set; }
         private DialogueNode currentNode;
@@ -94,7 +95,6 @@ namespace ZetanStudio.DialogueSystem.UI
         private DialogueData CurrentData => CurrentEntryData && currentNode ? CurrentEntryData[currentNode] : null;
 
         private Action next;
-        //private readonly List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
 
         #region 逐字相关
         private string targetText;
@@ -116,7 +116,7 @@ namespace ZetanStudio.DialogueSystem.UI
         public void StartWith(EntryNode entry)
         {
             if (!entry) return;
-            root ??= entry;
+            home ??= entry;
             CurrentEntry = entry;
             HandleNode(entry);
         }
@@ -136,7 +136,7 @@ namespace ZetanStudio.DialogueSystem.UI
         {
             HandleSpecial(ref node);
             if (!node || !node.OnEnter()) return;
-            if (node == root && currentTalker)
+            if (node == home && currentTalker)
             {
                 var info = currentTalker.GetData<TalkerData>().GetInfo<TalkerInformation>();
                 ShowButtons(info.CanDEV_RLAT, info.IsVendor, info.IsWarehouseAgent, TalkerHasObjectives(),
@@ -191,11 +191,12 @@ namespace ZetanStudio.DialogueSystem.UI
             return text;
         }
 
-        private void HandleLast()
+        private void HandleLastSentence()
         {
             if (currentQuest) HandleLastQuest();
             else if (currentTalkObj) HandleLastTalkObj();
             else if (currentSubmitObj) HandleLastSubmitObj();
+            else if (closeAtExit) SetNextClick(Tr("结束"), () => Close());
         }
         private void HandleInteraction()
         {
@@ -207,7 +208,7 @@ namespace ZetanStudio.DialogueSystem.UI
                     currentNode = node;
                     HandleInteraction();
                 }
-                else HandleLast();
+                else HandleLastSentence();
             }
             else
             {
@@ -360,15 +361,6 @@ namespace ZetanStudio.DialogueSystem.UI
             if (portrait)
                 switch (side)
                 {
-                    case PortraitSide.Right:
-                        Utility.SetActive(leftPortrait, false);
-                        if (rightPortrait)
-                        {
-                            rightPortrait.overrideSprite = portrait;
-                            rightPortrait.SetNativeSize();
-                        }
-                        Utility.SetActive(rightPortrait, true);
-                        break;
                     case PortraitSide.Left:
                         if (leftPortrait)
                         {
@@ -377,6 +369,15 @@ namespace ZetanStudio.DialogueSystem.UI
                         }
                         Utility.SetActive(leftPortrait, true);
                         Utility.SetActive(rightPortrait, false);
+                        break;
+                    case PortraitSide.Right:
+                        Utility.SetActive(leftPortrait, false);
+                        if (rightPortrait)
+                        {
+                            rightPortrait.overrideSprite = portrait;
+                            rightPortrait.SetNativeSize();
+                        }
+                        Utility.SetActive(rightPortrait, true);
                         break;
                 }
             else
@@ -396,18 +397,33 @@ namespace ZetanStudio.DialogueSystem.UI
         {
             if (!currentQuest.InProgress || currentQuest.IsComplete) ShowQuestDescription(currentQuest);
             List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
-            if (!currentQuest.IsComplete && !currentQuest.InProgress)
-            {
-                buttonDatas.Add(new ButtonWithTextData(Tr("接受"), delegate
+            if (!currentQuest.IsComplete)
+                if (!currentQuest.InProgress)
                 {
-                    if (QuestManager.AcceptQuest(currentQuest))
+                    buttonDatas.Add(new ButtonWithTextData(Tr("接受"), delegate
+                    {
+                        if (QuestManager.AcceptQuest(currentQuest))
+                        {
+                            currentType = DialogueType.Normal;
+                            ShowTalkerQuest();
+                        }
+                    }));
+                    buttonDatas.Add(new ButtonWithTextData(Tr("拒绝"), delegate
                     {
                         currentType = DialogueType.Normal;
                         ShowTalkerQuest();
-                    }
-                }));
-            }
-            else if (currentQuest.IsComplete && currentQuest.InProgress)
+                    }));
+                    RefreshOptions(buttonDatas, Tr("任务"));
+                }
+                else
+                {
+                    SetNextClick(Tr("返回"), delegate
+                    {
+                        currentType = DialogueType.Normal;
+                        ShowTalkerQuest();
+                    });
+                }
+            else if (currentQuest.InProgress)
             {
                 buttonDatas.Add(new ButtonWithTextData(Tr("完成"), delegate
                 {
@@ -418,28 +434,11 @@ namespace ZetanStudio.DialogueSystem.UI
                     }
                 }));
             }
-            if (!currentQuest.IsComplete && currentQuest.InProgress)
-            {
-                buttonDatas.Add(new ButtonWithTextData(Tr("返回"), delegate
-                {
-                    currentType = DialogueType.Normal;
-                    ShowTalkerQuest();
-                }));
-            }
-            else
-            {
-                buttonDatas.Add(new ButtonWithTextData(currentQuest.InProgress ? Tr("返回") : Tr("拒绝"), delegate
-                {
-                    currentType = DialogueType.Normal;
-                    ShowTalkerQuest();
-                }));
-            }
-            RefreshOptions(buttonDatas, Tr("任务"));
         }
         public void ShowTalkerQuest()
         {
             if (!currentTalker) return;
-            GoBackImmediate();
+            BackHomeImmediate();
             ResetInteraction();
             if (currentTalker.QuestInstances.Where(x => !x.IsSubmitted).Any())
             {
@@ -473,7 +472,7 @@ namespace ZetanStudio.DialogueSystem.UI
                 RefreshOptions(buttonDatas, Tr("任务"));
             }
         }
-        public bool ShouldShowQuest() => currentType == DialogueType.Normal && (CurrentData?.IsDone ?? false) && TalkerHasQuests();
+        public bool ShouldShowQuest() => currentNode.ExitHere && currentType == DialogueType.Normal && (CurrentData?.IsDone ?? false) && TalkerHasQuests();
         private bool TalkerHasQuests() => currentTalker && (currentTalker.QuestInstances.Exists(x => x.IsComplete) ||
             currentTalker.QuestInstances.Exists(x => x.Model.AcceptCondition.IsMeet() && !x.InProgress));
         public void ShowQuestDescription(QuestData quest)
@@ -530,7 +529,7 @@ namespace ZetanStudio.DialogueSystem.UI
         public void ShowTalkerObjective()
         {
             if (!currentTalker) return;
-            GoBack();
+            BackHomeImmediate();
             ResetInteraction();
             List<ButtonWithTextData> buttonDatas = new List<ButtonWithTextData>();
             foreach (TalkObjectiveData to in currentTalker.GetData<TalkerData>().objectivesTalkToThis.Where(o => !o.IsComplete))
@@ -602,7 +601,7 @@ namespace ZetanStudio.DialogueSystem.UI
         #region 操作相关
         private void SetNextClick(string text, Action action)
         {
-            nextBtnText.text = text;
+            nextButtonText.text = text;
             Utility.SetActive(nextButton, true);
             nextButton.onClick.RemoveAllListeners();
             nextButton.onClick.AddListener(() => action?.Invoke());
@@ -616,7 +615,7 @@ namespace ZetanStudio.DialogueSystem.UI
             else if (ShouldShowObjectives()) ShowTalkerObjective();
             else if (ShouldShowQuest()) ShowTalkerQuest();
         }
-        public void GoBack()
+        public void BackHome()
         {
             currentQuest = null;
             currentSubmitObj = null;
@@ -624,11 +623,11 @@ namespace ZetanStudio.DialogueSystem.UI
             continueNodes.Clear();
             currentType = DialogueType.Normal;
             HideQuestDescription();
-            StartWith(root);
+            StartWith(home);
         }
-        private void GoBackImmediate()
+        private void BackHomeImmediate()
         {
-            GoBack();
+            BackHome();
             if (IsPlaying)
             {
                 StopCoroutine(coroutine);
@@ -664,7 +663,7 @@ namespace ZetanStudio.DialogueSystem.UI
             Utility.SetActive(warehouseButton.gameObject, warehouse);
             Utility.SetActive(talkButton.gameObject, talk);
             Utility.SetActive(questButton.gameObject, quest);
-            Utility.SetActive(backButton.gameObject, back);
+            Utility.SetActive(homeButton.gameObject, back);
         }
         private void OpenTalkerWarehouse()
         {
@@ -713,7 +712,7 @@ namespace ZetanStudio.DialogueSystem.UI
         #region 其它
         private void Clear()
         {
-            root = null;
+            home = null;
             currentTalker = null;
             currentQuest = null;
             currentTalkObj = null;
@@ -726,7 +725,7 @@ namespace ZetanStudio.DialogueSystem.UI
         protected override void OnAwake()
         {
             textButton.onClick.AddListener(OnTextClick);
-            backButton.onClick.AddListener(GoBack);
+            homeButton.onClick.AddListener(BackHome);
             giftButton.onClick.AddListener(OpenGiftWindow);
             shopButton.onClick.AddListener(OpenTalkerShop);
             warehouseButton.onClick.AddListener(OpenTalkerWarehouse);
@@ -740,27 +739,21 @@ namespace ZetanStudio.DialogueSystem.UI
         #endregion
 
         #region 窗口显示相关
-        public static bool TalkWith(Talker talker)
-        {
-            if (!talker) return false;
-            if (PlayerManager.Instance.CheckIsNormalWithAlert())
-            {
-                WindowsManager.OpenWindow<DialogueWindow>(talker);
-                return true;
-            }
-            return false;
-        }
         protected override bool OnOpen(params object[] args)
         {
             if (args.Length < 1) return false;
             Clear();
             if (args[0] is Talker talker)
             {
-                currentTalker = talker;
-                StartWith(currentTalker.GetData().GetInfo<TalkerInformation>().DefaultDialogue);
-                if (currentTalker.GetData<TalkerData>().Info.IsWarehouseAgent)
-                    if (WindowsManager.IsWindowOpen<WarehouseWindow>(out var warehouse) && warehouse.Handler.Inventory == currentTalker.GetData<TalkerData>().Inventory)
-                        warehouse.Close(); ;
+                if (PlayerManager.Instance.CheckIsNormalWithAlert())
+                {
+                    currentTalker = talker;
+                    StartWith(currentTalker.GetData().GetInfo<TalkerInformation>().DefaultDialogue);
+                    if (currentTalker.GetData<TalkerData>().Info.IsWarehouseAgent)
+                        if (WindowsManager.IsWindowOpen<WarehouseWindow>(out var warehouse) && warehouse.Handler.Inventory == currentTalker.GetData<TalkerData>().Inventory)
+                            warehouse.Close();
+                }
+                else return false;
             }
             else if (args[0] is EntryNode entry) StartWith(entry);
             else if (args[0] is string talker2 && args[1] is string content) StartWith(talker2, content);
