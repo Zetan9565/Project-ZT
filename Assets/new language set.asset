@@ -14,35 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _name: Sheet1
   maps:
-  - <Key>k__BackingField: "\u4ECE\u5C0F\u5230\u5927"
-    values:
-    - "\u5148\u63D2\u5165\u6307\u5B9A\u4F4D\u7F6E"
-    - "\u7136\u540E\u540E\u9762\u7684\u4F9D\u6B21\u540E\u79FB\u4E00\u4F4D"
   - <Key>k__BackingField: "\u4F60\u597D"
     values:
     - "\u4F60\u597D"
     - Hello
+  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    values:
+    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+    - Hello,World!
   - <Key>k__BackingField: "\u4F60\u597D\uFF0CUnity\uFF01"
     values:
     - "\u4F60\u597D\uFF0CUnity\uFF01"
     - Hello,Unity!
-  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
+  - <Key>k__BackingField: "\u4ECE\u5C0F\u5230\u5927"
     values:
-    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
-    - Hello,World!
-  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
-    values:
-    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
-    - Hello,World!
-  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
-    values:
-    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
-    - Hello,World!
-  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
-    values:
-    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
-    - Hello,World!
-  - <Key>k__BackingField: "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
-    values:
-    - "\u4F60\u597D\uFF0C\u4E16\u754C\uFF01"
-    - Hello,World!
+    - "\u5148\u63D2\u5165\u6307\u5B9A\u4F4D\u7F6E"
+    - "\u7136\u540E\u540E\u9762\u7684\u4F9D\u6B21\u540E\u79FB\u4E00\u4F4D"

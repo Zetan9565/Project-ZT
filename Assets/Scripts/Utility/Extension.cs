@@ -1,5 +1,4 @@
-﻿using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -328,58 +327,78 @@ namespace ZetanStudio.Extension
                 return source.name;
             }
 
-            //public static bool MoveArrayElements(this SerializedProperty source, int[] srcIndices, int dstIndex, out int[] newIndices)
-            //{
-            //    if (source is null)
-            //    {
-            //        throw new ArgumentNullException(nameof(source));
-            //    }
-            //    if (!source.isArray)
-            //    {
-            //        throw new ArgumentException(nameof(source) + "不是数组");
-            //    }
-            //    if (srcIndices is null)
-            //    {
-            //        throw new ArgumentNullException(nameof(srcIndices));
-            //    }
-            //    newIndices = new int[0];
+            public static bool MoveArrayElements(this SerializedProperty source, int[] srcIndices, int dstIndex, out int[] newIndices)
+            {
+                if (source is null) throw new ArgumentNullException(nameof(source));
+                if (!source.isArray) throw new ArgumentException(nameof(source) + "不是数组");
+                if (srcIndices is null) throw new ArgumentNullException(nameof(srcIndices));
 
-            //    if (srcIndices.Length < 1) return false;
+                newIndices = new int[0];
+                if (srcIndices.Length < 1) return false;
 
-            //    bool hasMoved = false;
-            //    Array.Sort(srcIndices);
-            //    int upperCount = 0;
-            //    for (int i = 0; i < srcIndices.Length; i++)
-            //    {
-            //        if (!hasMoved && (srcIndices[i] != dstIndex - 1 || i > 1 && srcIndices[i] != srcIndices[i - 1] + 1))
-            //        {
-            //            newIndices = new int[srcIndices.Length];
-            //            hasMoved = true;
-            //        }
-            //        if (srcIndices[i] < dstIndex) upperCount++;
-            //    }
-            //    int tempDstIndex = dstIndex;
-            //    for (int i = 0; i < srcIndices.Length; i++)
-            //    {
-            //        var index = srcIndices[i];
-            //        if (index < dstIndex)
-            //        {
-            //            if (index == tempDstIndex - 1) continue;
-            //            Utility.Log(source.MoveArrayElement(index, tempDstIndex - 1), index, tempDstIndex - 1);
-            //            for (int j = i + 1; j < srcIndices.Length; j++)
-            //            {
-            //                if (srcIndices[j] < dstIndex) srcIndices[j]--;
-            //            }
-            //        }
-            //        else if (index > dstIndex)
-            //        {
-            //            Utility.Log(source.MoveArrayElement(index, tempDstIndex), index, tempDstIndex);
-            //            tempDstIndex++;
-            //        }
-            //        if (hasMoved) newIndices[i] = dstIndex - upperCount + i;
-            //    }
-            //    return hasMoved;
-            //}
+                var position = new Dictionary<int, int>();
+                for (int i = 0; i < srcIndices.Length; i++)
+                {
+                    position[srcIndices[i]] = i;
+                }
+
+                Array.Sort(srcIndices);
+                var operands = new int[srcIndices.Length];
+                srcIndices.CopyTo(operands, 0);
+
+                if (dstIndex < -1) dstIndex = -1;
+
+                bool hasMoved = false;
+                var upperIndices = new HashSet<int>();
+                for (int i = 0; i < operands.Length; i++)
+                {
+                    if (operands[i] <= dstIndex) upperIndices.Add(operands[i]);
+                }
+                if (upperIndices.Count > 0)
+                {
+                    for (int i = operands[0]; i <= dstIndex; i++)
+                    {
+                        if (!upperIndices.Contains(i)) hasMoved |= true;
+                    }
+                    if (hasMoved)
+                        for (int i = 0; i < upperIndices.Count; i++)
+                        {
+                            source.MoveArrayElement(operands[i], dstIndex);
+                            for (int j = i + 1; j < upperIndices.Count; j++)
+                            {
+                                operands[j]--;
+                            }
+                        }
+                }
+                var belowIndices = new HashSet<int>();
+                for (int i = 0; i < operands.Length; i++)
+                {
+                    if (operands[i] > dstIndex + 1) belowIndices.Add(operands[i]);
+                }
+                if (belowIndices.Count > 0)
+                {
+                    var remainderCount = 0;
+                    for (int i = dstIndex + 1; i < operands[^1]; i++)
+                    {
+                        if (!belowIndices.Contains(i)) remainderCount++;
+                    }
+                    if (hasMoved |= remainderCount > 0)
+                        for (int i = upperIndices.Count; i < operands.Length; i++)
+                        {
+                            source.MoveArrayElement(operands[i], dstIndex + 1 + i - upperIndices.Count);
+                        }
+                }
+                if (hasMoved)
+                {
+                    newIndices = new int[srcIndices.Length];
+                    for (int i = 0; i < srcIndices.Length; i++)
+                    {
+                        newIndices[position[srcIndices[i]]] = dstIndex - upperIndices.Count + 1 + i;
+                    }
+                }
+
+                return hasMoved;
+            }
         }
 
         public static class PropertyDrawerExtension

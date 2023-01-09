@@ -255,19 +255,9 @@ namespace ZetanStudio.LanguageSystem.Editor
         }
         private bool DropRows(int[] indices, int insert, out int[] newIndices)
         {
-            var maps = language.Maps.ToArray();
-            if (Utility.MoveElements(maps, indices, insert, out newIndices) && newIndices.Length > 0)
-            {
-                Undo.RecordObject(language, EDL.Tr("移动行至下标 {0} 处", insert));
-                LanguageSet.Editor.SetMaps(language, maps);
-                EditorUtility.SetDirty(language);
-                serializedObject.UpdateIfRequiredOrScript();
-                return true;
-            }
-            else return false;
-            //bool result= serializedMaps.MoveArrayElements(indices, insert, out newIndices);
-            //serializedObject.ApplyModifiedProperties();
-            //return result;
+            bool result = serializedMaps.MoveArrayElements(indices, insert - 1, out newIndices);
+            if (result) serializedObject.ApplyModifiedProperties();
+            return result;
         }
 
         #region 表格按钮点击回调

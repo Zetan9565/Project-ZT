@@ -122,6 +122,14 @@ namespace ZetanStudio
             return result;
         }
 
+        /// <summary>
+        /// 将下标处的数据移动到指定下标，若数据位于上方，则插入下标位置上方，否则，插入下方。
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="indices"></param>
+        /// <param name="insertAtIndex"></param>
+        /// <param name="newIndices"></param>
+        /// <returns>是否发生了移动</returns>
         public static bool MoveElements<T>(IList<T> data, int[] indices, int insertAtIndex, out int[] newIndices)
         {
             newIndices = null;
@@ -135,6 +143,11 @@ namespace ZetanStudio
                 {
                     insertAtIndex--;
                 }
+                var position = new Dictionary<int, int>();
+                for (int i = 0; i < indices.Length; i++)
+                {
+                    position[indices[i]] = i;
+                }
                 Array.Sort(indices);
                 var cache = new T[indices.Length];
                 var upperIndices = new HashSet<int>();
@@ -147,8 +160,7 @@ namespace ZetanStudio
                     else belowIndices.Add(index);
                 }
 
-                var remainder = new T[insertAtIndex - upperIndices.Count];
-                var remainderCount = 0;
+                var remainder = new List<T>(insertAtIndex - upperIndices.Count);
                 int start, junction;
                 bool hasMoved = false;
                 if (upperIndices.Count > 0)
@@ -159,20 +171,19 @@ namespace ZetanStudio
                     {
                         if (!upperIndices.Contains(i))
                         {
-                            remainder[remainderCount] = data[i];
-                            remainderCount++;
+                            remainder.Add(data[i]);
                         }
                     }
-                    hasMoved = remainderCount > 0;
+                    hasMoved = remainder.Count > 0;
                     start = indices[0];
-                    junction = start + remainderCount;
+                    junction = start + remainder.Count;
                     for (int i = start; i < insertAtIndex; i++)
                     {
                         if (i < junction) data[i] = remainder[i - start];//放置被上移填充的项
                         else
                         {
                             data[i] = cache[i - junction];//放置被插入的项
-                            newIndices[i - junction] = i;
+                            newIndices[position[indices[i - junction]]] = i;
                         }
                     }
                 }
@@ -180,17 +191,15 @@ namespace ZetanStudio
                 {
                     newIndices ??= new int[indices.Length];
 
-                    remainder = new T[indices[^1] + 1 - insertAtIndex - belowIndices.Count];
-                    remainderCount = 0;
+                    remainder = new List<T>(indices[^1] + 1 - insertAtIndex - belowIndices.Count);
                     for (int i = insertAtIndex; i < indices[^1]; i++)
                     {
                         if (!belowIndices.Contains(i))
                         {
-                            remainder[remainderCount] = data[i];
-                            remainderCount++;
+                            remainder.Add(data[i]);
                         }
                     }
-                    hasMoved |= remainderCount > 0;
+                    hasMoved |= remainder.Count > 0;
                     start = insertAtIndex;
                     junction = start + belowIndices.Count;
                     for (int i = start; i <= indices[^1]; i++)
@@ -198,7 +207,7 @@ namespace ZetanStudio
                         if (i < junction)
                         {
                             data[i] = cache[upperIndices.Count + (i - start)];//放置被插入的项
-                            newIndices[upperIndices.Count + (i - start)] = i;
+                            newIndices[position[indices[upperIndices.Count + (i - start)]]] = i;
                         }
                         else data[i] = remainder[i - junction];//放置被下移填充的项
                     }
